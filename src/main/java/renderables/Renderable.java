@@ -6,7 +6,7 @@ import rendering_api.Window;
 
 import java.util.ArrayList;
 
-public abstract class Renderable {
+public class Renderable {
 
     public Renderable(Vector2f sizeToParent, Vector2f offsetToParent) {
         this.sizeToParent = sizeToParent;
@@ -22,15 +22,6 @@ public abstract class Renderable {
         position.add(dx, dy);
     }
 
-
-    protected abstract void renderSelf(Vector2f position, Vector2f size);
-
-    protected abstract void resizeSelfTo(int width, int height);
-
-
-    public void setOnTop() {
-
-    }
 
     public void setAllowFocusScaling(boolean allowScaling) {
         this.allowFocusScaling = allowScaling;
@@ -50,6 +41,11 @@ public abstract class Renderable {
         Vector2f thisSize = new Vector2f(parentSize).mul(sizeToParent);
         resizeSelfTo((int) (size.x * thisSize.x), (int) (size.y * thisSize.y));
         for (Renderable child : children) child.resize(size, thisSize);
+    }
+
+    public final void delete() {
+        deleteSelf();
+        for (Renderable renderable : children) renderable.delete();
     }
 
     public void addRenderable(Renderable renderable) {
@@ -85,6 +81,28 @@ public abstract class Renderable {
         return position.x <= pixelCoordinate.x && position.x + size.x >= pixelCoordinate.x
                 && position.y <= pixelCoordinate.y && position.y + size.y >= pixelCoordinate.y;
     }
+
+
+    // Override if needed
+    protected void renderSelf(Vector2f position, Vector2f size) {
+
+    }
+
+    // Override if needed
+    protected void resizeSelfTo(int width, int height) {
+
+    }
+
+    // Override if needed
+    protected void deleteSelf() {
+
+    }
+
+    // Override if needed
+    public void setOnTop() {
+
+    }
+
 
     public void setVisible(boolean visible) {
         this.isVisible = visible;

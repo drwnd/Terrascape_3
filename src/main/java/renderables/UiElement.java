@@ -26,11 +26,6 @@ public class UiElement extends Renderable {
         else shader.drawQuadNoGuiScale(position, size, background);
     }
 
-    @Override
-    protected void resizeSelfTo(int width, int height) {
-
-    }
-
     private final TextureIdentifier texture;
     private boolean scaleWithGuiSize = true;
 }

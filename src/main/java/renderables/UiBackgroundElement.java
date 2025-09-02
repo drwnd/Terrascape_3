@@ -23,9 +23,4 @@ public class UiBackgroundElement extends Renderable {
         shader.setUniform("aspectRatio", Window.getAspectRatio());
         shader.drawQuad(position, size, background);
     }
-
-    @Override
-    protected void resizeSelfTo(int width, int height) {
-
-    }
 }

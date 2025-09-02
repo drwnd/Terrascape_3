@@ -65,7 +65,7 @@ public final class MainMenu extends UiBackgroundElement {
 
     @Override
     public void setOnTop() {
-        // IDK why but sometimes it doesn't fine MainMenuInput without the package declaration
+        // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
         input = new menus.MainMenuInput(this);
         Window.setInput(input);
         createWorldButtons();
@@ -144,7 +144,5 @@ public final class MainMenu extends UiBackgroundElement {
 
     private final ArrayList<UiButton> worldButtons = new ArrayList<>();
     private final UiButton playWorldButton, deleteWorldButton;
-    private menus.MainMenuInput input;  // IDK why but sometimes it doesn't fine MainMenuInput without the package declaration
-
-
+    private menus.MainMenuInput input;  // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
 }

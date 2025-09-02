@@ -25,31 +25,31 @@ public final class SettingsMenu extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.05f, 0.5f);
 
-        UiButton everythingSectionButton = new UiButton(sizeToParent, new Vector2f(0.35f, 0.85f), getSelectSectionButtonAction(createEverythingSection()));
+        UiButton everythingSectionButton = new UiButton(sizeToParent, new Vector2f(0.35f, 0.85f), sectionButtonAction(this::createEverythingSection));
         text = new TextElement(offsetToParent, "Everything");
         everythingSectionButton.addRenderable(text);
 
-        UiButton controlsSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.7f), getSelectSectionButtonAction(createControlsSection()));
+        UiButton controlsSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.7f), sectionButtonAction(this::createControlsSection));
         text = new TextElement(offsetToParent, "Controls");
         controlsSection.addRenderable(text);
 
-        UiButton renderingSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.55f), getSelectSectionButtonAction(createRenderingSection()));
+        UiButton renderingSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.55f), sectionButtonAction(this::createRenderingSection));
         text = new TextElement(offsetToParent, "Rendering");
         renderingSection.addRenderable(text);
 
-        UiButton uiSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.4f), getSelectSectionButtonAction(createUiSection()));
+        UiButton uiSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.4f), sectionButtonAction(this::createUiSection));
         text = new TextElement(offsetToParent, "Ui Customization");
         uiSection.addRenderable(text);
 
-        UiButton soundSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.25f), getSelectSectionButtonAction(createSoundSection()));
+        UiButton soundSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.25f), sectionButtonAction(this::createSoundSection));
         text = new TextElement(offsetToParent, "Sound");
         soundSection.addRenderable(text);
 
-        UiButton debugSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.1f), getSelectSectionButtonAction(createDebugSection()));
+        UiButton debugSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.1f), sectionButtonAction(this::createDebugSection));
         text = new TextElement(offsetToParent, "Debug");
         debugSection.addRenderable(text);
 
-        UiButton debugScreenSection = new UiButton(sizeToParent, new Vector2f(0.35f, -0.05f), getSelectSectionButtonAction(createDebugScreenSection()));
+        UiButton debugScreenSection = new UiButton(sizeToParent, new Vector2f(0.35f, -0.05f), sectionButtonAction(this::createDebugScreenSection));
         text = new TextElement(offsetToParent, "Debug Screen");
         debugScreenSection.addRenderable(text);
 
@@ -206,13 +206,17 @@ public final class SettingsMenu extends UiBackgroundElement {
         };
     }
 
-    private Clickable getSelectSectionButtonAction(SettingsRenderable section) {
+    private Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i pixelCoordinate, int button, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
-            Window.pushRenderable(section);
+            Window.pushRenderable(sectionCreator.getSection());
         };
     }
 
     private SettingsMenuInput input;
     private final ArrayList<UiButton> sectionButtons = new ArrayList<>();
+
+    private interface SectionCreator {
+        SettingsRenderable getSection();
+    }
 }

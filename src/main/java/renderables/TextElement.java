@@ -52,11 +52,6 @@ public class TextElement extends Renderable {
         textShader.drawText(position, text.substring(0, maxLength), Color.WHITE, false, true);
     }
 
-    @Override
-    protected void resizeSelfTo(int width, int height) {
-
-    }
-
     public void setText(String text) {
         this.text = text;
     }

@@ -132,7 +132,7 @@ public final class Window {
     }
 
     public static void popRenderable() {
-        renderablesStack.removeLast();
+        renderablesStack.removeLast().delete();
         if (renderablesStack.isEmpty()) GLFW.glfwSetWindowShouldClose(window, true);
         else renderablesStack.getLast().setOnTop();
     }

@@ -191,11 +191,6 @@ public final class Renderer extends Renderable {
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
-    @Override
-    protected void resizeSelfTo(int width, int height) {
-
-    }
-
     private boolean debugScreenOpen = false;
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
