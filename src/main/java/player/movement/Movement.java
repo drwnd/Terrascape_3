@@ -1,6 +1,7 @@
 package player.movement;
 
 import org.joml.Vector3f;
+import server.Game;
 import utils.Position;
 
 public final class Movement {
@@ -11,8 +12,11 @@ public final class Movement {
 
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
-        position.add(velocity.x, velocity.y, velocity.z);
-        state.computeNextGameTickVelocity(rotation, lastPosition, velocity);
+        move(position);
+
+        Vector3f acceleration = Game.getPlayer().canMove() ? state.computeNextGameTickAcceleration(rotation, lastPosition) : new Vector3f(0.0f);
+        state.changeVelocity(velocity, acceleration, lastPosition, rotation);
+
         state = state.next;
         return position;
     }
@@ -29,6 +33,10 @@ public final class Movement {
 
     public void handleInput(int button, int action) {
         state.handleInput(button, action);
+    }
+
+    private void move(Position position) {
+        position.add(velocity.x, velocity.y, velocity.z);
     }
 
     private MovementState state = new FlyingState();

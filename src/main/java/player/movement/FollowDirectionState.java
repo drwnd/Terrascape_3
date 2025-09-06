@@ -8,8 +8,13 @@ import utils.Utils;
 
 public final class FollowDirectionState extends MovementState {
     @Override
-    protected void computeNextGameTickVelocity(Vector3f playerRotation, Position lastPositon, Vector3f inOutVelocity) {
-        inOutVelocity.set(Utils.getDirection(playerRotation));
+    protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPositon) {
+        return new Vector3f();
+    }
+
+    @Override
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
+        velocity.set(Utils.getDirection(playerRotation));
     }
 
 

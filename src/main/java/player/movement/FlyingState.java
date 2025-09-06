@@ -9,7 +9,7 @@ import utils.Utils;
 
 public final class FlyingState extends MovementState {
     @Override
-    protected void computeNextGameTickVelocity(Vector3f playerRotation, Position lastPositon, Vector3f inOutVelocity) {
+    protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPositon) {
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
@@ -34,7 +34,12 @@ public final class FlyingState extends MovementState {
         if (Input.isKeyPressed(KeySetting.FLY_FAST)) velocityChange.mul(FLY_FAST_SPEED_MODIFIER);
         Movement.normalizeToMaxComponent(velocityChange);
 
-        inOutVelocity.add(velocityChange).mul(FLY_DRAG);
+        return velocityChange;
+    }
+
+    @Override
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
+        velocity.add(acceleration).mul(FLY_DRAG);
     }
 
     @Override

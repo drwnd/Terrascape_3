@@ -173,7 +173,6 @@ public final class Renderer extends Renderable {
         }
     }
 
-
     private void renderDebugInfo() {
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);

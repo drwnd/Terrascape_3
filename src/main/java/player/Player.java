@@ -22,8 +22,10 @@ public final class Player {
         renderer = new Renderer();
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
+        inventory = new Inventory();
 
         renderer.addRenderable(hotbar);
+        renderer.addRenderable(inventory);
         this.position = position;
         Window.pushRenderable(renderer);
         setInput();
@@ -53,11 +55,25 @@ public final class Player {
         interactionHandler.updateGameTick();
     }
 
-    public void handleInput(int button, int action) {
+    /**
+     * Intended for actions that should not be taken when a menu is displayed.
+     * For example movement, block interactions etc.
+     */
+    public void handleActiveInput(int button, int action) {
         movement.handleInput(button, action);
         interactionHandler.handleInput(button, action);
         hotbar.handleInput(button, action);
+    }
+
+    /**
+     * Intended for actions that could always be taken.
+     * For example Closing a menu or toggling the debug screen.
+     */
+    public void handleInactiveInput(int button, int action) {
+        inventory.handleInput(button, action);
+
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
+        if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
     }
 
 
@@ -87,8 +103,17 @@ public final class Player {
         Window.setInput(input);
     }
 
+    public boolean canMove() {
+        return !inventory.isVisible();
+    }
+
     public void cleanUp() {
 
+    }
+
+    void toggleInventory() {
+        inventory.setVisible(!inventory.isVisible());
+        Window.setInput(inventory.isVisible() ? new InventoryInput(inventory) : input);
     }
 
     private final MeshCollector meshCollector;
@@ -98,6 +123,7 @@ public final class Player {
     private final Renderer renderer;
     private final InteractionHandler interactionHandler;
     private final Hotbar hotbar;
+    private final Inventory inventory;
 
     private Position position;
 }
