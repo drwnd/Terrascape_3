@@ -3,6 +3,7 @@ package server;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import player.Player;
+import server.generation.WorldGeneration;
 import utils.Position;
 import utils.Utils;
 

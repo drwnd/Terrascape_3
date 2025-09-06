@@ -1,10 +1,10 @@
 package server.biomes;
 
-import server.GenerationData;
-import server.OpenSimplex2S;
+import server.generation.GenerationData;
+import server.generation.OpenSimplex2S;
 
 import static utils.Constants.*;
-import static server.WorldGeneration.SEED;
+import static server.generation.WorldGeneration.SEED;
 
 public final class CorrodedMesa extends Biome {
     @Override

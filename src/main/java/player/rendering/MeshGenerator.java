@@ -3,38 +3,54 @@ package player.rendering;
 import server.Chunk;
 import server.Game;
 import server.Material;
+import server.generation.Structure;
 import utils.IntArrayList;
 
 import static utils.Constants.*;
 
 public final class MeshGenerator {
 
-    public void setChunk(Chunk chunk) {
-        this.chunk = chunk;
-    }
-
-    public void generateMesh() {
+    public void generateMesh(Chunk chunk) {
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
 //        chunk.generateSurroundingChunks(); TODO
-        waterVerticesList.clear();
-        glassVerticesList.clear();
-        for (IntArrayList list : opaqueVerticesLists) list.clear();
+        clear();
 
         chunk.getMaterials().fillUncompressedMaterialsInto(materials);
 
-        addNorthSouthFaces();
-        addTopBottomFaces();
-        addWestEastFaces();
+        addNorthSouthFaces(chunk);
+        addTopBottomFaces(chunk);
+        addWestEastFaces(chunk);
 
+        Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
+        Game.getPlayer().getMeshCollector().queueMesh(mesh);
+    }
+
+    public Mesh generateMesh(Structure structure) {
+        clear();
+
+        structure.fillMaterialsInto(materials);
+
+        addNorthSouthFaces(structure);
+        addTopBottomFaces(structure);
+        addWestEastFaces(structure);
+
+        return loadMesh(0, 0, 0, 0);
+    }
+
+
+    private void clear() {
+        waterVerticesList.clear();
+        glassVerticesList.clear();
+        for (IntArrayList list : opaqueVerticesLists) list.clear();
+    }
+
+    private Mesh loadMesh(int chunkX, int chunkY, int chunkZ, int lod) {
         int[] vertexCounts = new int[opaqueVerticesLists.length];
         int[] opaqueVertices = loadOpaqueVertices(vertexCounts);
         int[] transparentVertices = loadTransparentVertices();
 
-        Mesh mesh = new Mesh(opaqueVertices, vertexCounts, transparentVertices, waterVerticesList.size(), glassVerticesList.size(), chunk.X, chunk.Y, chunk.Z, chunk.LOD);
-
-        Game.getPlayer().getMeshCollector().queueMesh(mesh);
+        return new Mesh(opaqueVertices, vertexCounts, transparentVertices, waterVerticesList.size(), glassVerticesList.size(), chunkX, chunkY, chunkZ, lod);
     }
-
 
     private int[] loadTransparentVertices() {
         int[] transparentVertices = new int[waterVerticesList.size() + glassVerticesList.size()];
@@ -57,13 +73,14 @@ public final class MeshGenerator {
         return opaqueVertices;
     }
 
-    private void addNorthSouthFaces() {
+
+    private void addNorthSouthFaces(Chunk chunk) {
         // Copy materials
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2, lower, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
 
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
-            copyMaterialsNorthSouth(materialZ);
+            copyMaterialsNorthSouth(chunk, materialZ);
             addNorthSouthLayer(NORTH, materialZ, lower, upper);
             addNorthSouthLayer(SOUTH, materialZ, upper, lower);
 
@@ -73,13 +90,138 @@ public final class MeshGenerator {
         }
     }
 
-    private void copyMaterialsNorthSouth(int materialZ) {
+    private void copyMaterialsNorthSouth(Chunk chunk, int materialZ) {
         if (materialZ == CHUNK_SIZE - 1) for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
                 upper[materialX << CHUNK_SIZE_BITS | materialY] = chunk.getMaterial(materialX, materialY, CHUNK_SIZE);
         else for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2 | materialZ + 1 << CHUNK_SIZE_BITS, upper, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
     }
+
+    private void addTopBottomFaces(Chunk chunk) {
+        // Copy materials
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+                lower[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS];
+
+        for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
+            copyMaterialsTopBottom(chunk, materialY);
+            addTopBottomLayer(TOP, materialY, lower, upper);
+            addTopBottomLayer(BOTTOM, materialY, upper, lower);
+
+            byte[] temp = lower;
+            lower = upper;
+            upper = temp;
+        }
+    }
+
+    private void copyMaterialsTopBottom(Chunk chunk, int materialY) {
+        if (materialY == CHUNK_SIZE - 1) for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+                upper[materialX << CHUNK_SIZE_BITS | materialZ] = chunk.getMaterial(materialX, CHUNK_SIZE, materialZ);
+        else for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+                upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
+    }
+
+    private void addWestEastFaces(Chunk chunk) {
+        // Copy materials
+        for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+            System.arraycopy(materials, materialZ << CHUNK_SIZE_BITS, lower, materialZ << CHUNK_SIZE_BITS, CHUNK_SIZE);
+
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
+            copyMaterialWestEast(chunk, materialX);
+            addWestEastLayer(WEST, materialX, lower, upper);
+            addWestEastLayer(EAST, materialX, upper, lower);
+
+            byte[] temp = lower;
+            lower = upper;
+            upper = temp;
+        }
+    }
+
+    private void copyMaterialWestEast(Chunk chunk, int materialX) {
+        if (materialX == CHUNK_SIZE - 1) for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
+                upper[materialZ << CHUNK_SIZE_BITS | materialY] = chunk.getMaterial(CHUNK_SIZE, materialY, materialZ);
+        else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
+    }
+
+
+    private void addNorthSouthFaces(Structure structure) {
+        // Copy materials
+        for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2, lower, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
+
+        for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++) {
+            copyMaterialsNorthSouth(structure, materialZ);
+            addNorthSouthLayer(NORTH, materialZ, lower, upper);
+            addNorthSouthLayer(SOUTH, materialZ, upper, lower);
+
+            byte[] temp = lower;
+            lower = upper;
+            upper = temp;
+        }
+    }
+
+    private void copyMaterialsNorthSouth(Structure structure, int materialZ) {
+        if (materialZ == structure.sizeZ()) for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            for (int materialY = 0; materialY < structure.sizeY(); materialY++)
+                upper[materialX << CHUNK_SIZE_BITS | materialY] = AIR;
+        else for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2 | materialZ + 1 << CHUNK_SIZE_BITS, upper, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
+
+    }
+
+    private void addTopBottomFaces(Structure structure) {
+        // Copy materials
+        for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
+                lower[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS];
+
+        for (int materialY = 0; materialY < structure.sizeY(); materialY++) {
+            copyMaterialsTopBottom(structure, materialY);
+            addTopBottomLayer(TOP, materialY, lower, upper);
+            addTopBottomLayer(BOTTOM, materialY, upper, lower);
+
+            byte[] temp = lower;
+            lower = upper;
+            upper = temp;
+        }
+    }
+
+    private void copyMaterialsTopBottom(Structure structure, int materialY) {
+        if (materialY == structure.sizeY()) for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
+                upper[materialX << CHUNK_SIZE_BITS | materialZ] = AIR;
+        else for (int materialX = 0; materialX < structure.sizeX(); materialX++)
+            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
+                upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
+    }
+
+    private void addWestEastFaces(Structure structure) {
+        // Copy materials
+        for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
+            System.arraycopy(materials, materialZ << CHUNK_SIZE_BITS, lower, materialZ << CHUNK_SIZE_BITS, CHUNK_SIZE);
+
+        for (int materialX = 0; materialX < structure.sizeX(); materialX++) {
+            copyMaterialsWestEast(structure, materialX);
+            addWestEastLayer(WEST, materialX, lower, upper);
+            addWestEastLayer(EAST, materialX, upper, lower);
+
+            byte[] temp = lower;
+            lower = upper;
+            upper = temp;
+        }
+    }
+
+    private void copyMaterialsWestEast(Structure structure, int materialX) {
+        if (materialX == structure.sizeX()) for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
+            for (int materialY = 0; materialY < structure.sizeY(); materialY++)
+                upper[materialZ << CHUNK_SIZE_BITS | materialY] = AIR;
+        else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
+    }
+
 
     private void addNorthSouthLayer(int side, int materialZ, byte[] toMesh, byte[] occluding) {
         fillToMeshFacesMap(toMesh, occluding);
@@ -99,33 +241,6 @@ public final class MeshGenerator {
             }
     }
 
-
-    private void addTopBottomFaces() {
-        // Copy materials
-        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                lower[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS];
-
-        for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
-            copyMaterialTopBottom(materialY);
-            addTopBottomLayer(TOP, materialY, lower, upper);
-            addTopBottomLayer(BOTTOM, materialY, upper, lower);
-
-            byte[] temp = lower;
-            lower = upper;
-            upper = temp;
-        }
-    }
-
-    private void copyMaterialTopBottom(int materialY) {
-        if (materialY == CHUNK_SIZE - 1) for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                upper[materialX << CHUNK_SIZE_BITS | materialZ] = chunk.getMaterial(materialX, CHUNK_SIZE, materialZ);
-        else for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
-    }
-
     private void addTopBottomLayer(int side, int materialY, byte[] toMesh, byte[] occluding) {
         fillToMeshFacesMap(toMesh, occluding);
 
@@ -142,30 +257,6 @@ public final class MeshGenerator {
                 removeFromBitMap(mask, materialX, faceEndX);
                 addFace(side, materialX, materialY, materialZ, material, faceEndX - materialX, faceEndZ - materialZ);
             }
-    }
-
-
-    private void addWestEastFaces() {
-        // Copy materials
-        for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-            System.arraycopy(materials, materialZ << CHUNK_SIZE_BITS, lower, materialZ << CHUNK_SIZE_BITS, CHUNK_SIZE);
-
-        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
-            copyMaterialWestEast(materialX);
-            addWestEastLayer(WEST, materialX, lower, upper);
-            addWestEastLayer(EAST, materialX, upper, lower);
-
-            byte[] temp = lower;
-            lower = upper;
-            upper = temp;
-        }
-    }
-
-    private void copyMaterialWestEast(int materialX) {
-        if (materialX == CHUNK_SIZE - 1) for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
-                upper[materialZ << CHUNK_SIZE_BITS | materialY] = chunk.getMaterial(CHUNK_SIZE, materialY, materialZ);
-        else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
     }
 
     private void addWestEastLayer(int side, int materialX, byte[] toMesh, byte[] occluding) {
@@ -248,7 +339,6 @@ public final class MeshGenerator {
 
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
 
-    private Chunk chunk;
     private final long[] toMeshFacesMap = new long[CHUNK_SIZE];
     private byte[] upper = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private byte[] lower = new byte[CHUNK_SIZE * CHUNK_SIZE];

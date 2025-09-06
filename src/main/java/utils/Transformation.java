@@ -29,6 +29,16 @@ public final class Transformation {
         return matrix;
     }
 
+    public static Matrix4f getStructureDisplayMatrix(int x, int y, int z) {
+        float centerX = x * 0.5f, centerY = y * 0.5f, centerZ = z * 0.5f;
+        Matrix4f matrix = new Matrix4f();
+
+        matrix.ortho(-x - z >> 1, x + z >> 1, -y, y, 50, 500);
+        matrix.lookAt(centerX + 200, centerY + 200, centerZ + 200, centerX, centerY, centerZ, Y_AXIS.x, Y_AXIS.y, Y_AXIS.z);
+
+        return matrix;
+    }
+
     private Transformation() {
     }
 

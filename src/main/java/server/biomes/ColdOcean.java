@@ -1,10 +1,10 @@
 package server.biomes;
 
-import server.GenerationData;
-import server.OpenSimplex2S;
+import server.generation.GenerationData;
+import server.generation.OpenSimplex2S;
 import utils.Utils;
 
-import static server.WorldGeneration.*;
+import static server.generation.WorldGeneration.*;
 import static utils.Constants.SAND;
 
 public final class ColdOcean extends Biome {

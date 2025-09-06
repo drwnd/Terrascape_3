@@ -1,8 +1,8 @@
 package server.biomes;
 
-import server.GenerationData;
+import server.generation.GenerationData;
 
-import static server.WorldGeneration.WATER_LEVEL;
+import static server.generation.WorldGeneration.WATER_LEVEL;
 import static utils.Constants.SAND;
 
 public final class WarmOcean extends Biome {

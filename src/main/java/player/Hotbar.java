@@ -1,27 +1,41 @@
 package player;
 
+import assets.identifiers.TextureIdentifier;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
+import player.interaction.Target;
+import renderables.StructureDisplay;
+import renderables.UiElement;
+import rendering_api.Window;
+import server.generation.Structure;
+import settings.FloatSetting;
 import settings.KeySetting;
 
 import static utils.Constants.*;
 
-public final class Hotbar {
+public final class Hotbar extends UiElement {
 
     public static final int LENGTH = 9;
 
-    public final byte[] contents = new byte[LENGTH];
-
-
     public Hotbar() {
-        contents[0] = WATER;
-        contents[1] = LAVA;
-        contents[2] = GRASS;
-        contents[3] = DIRT;
-        contents[4] = STONE;
-        contents[5] = COBBLESTONE;
-        contents[6] = SAND;
-        contents[7] = GLASS;
-        contents[8] = GRAVEL;
+        super(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR);
+        setScaleWithGuiSize(false);
+        setAllowFocusScaling(false);
+
+        hotBarSelectionIndicator = new UiElement(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR_SELECTION_INDICATOR);
+        hotBarSelectionIndicator.setScaleWithGuiSize(false);
+        hotBarSelectionIndicator.setAllowFocusScaling(false);
+        addRenderable(hotBarSelectionIndicator);
+
+        setContent(0, WATER);
+        setContent(1, LAVA);
+        setContent(2, GRASS);
+        setContent(3, DIRT);
+        setContent(4, STONE);
+        setContent(5, COBBLESTONE);
+        setContent(6, SAND);
+        setContent(7, GLASS);
+        setContent(8, GRAVEL);
     }
 
 
@@ -38,19 +52,79 @@ public final class Hotbar {
         if (button == KeySetting.HOT_BAR_SLOT_8.value()) setSelectedSlot(7);
         if (button == KeySetting.HOT_BAR_SLOT_9.value()) setSelectedSlot(8);
 
-        if (button == KeySetting.DROP.value()) contents[selectedSlot] = AIR;
+        if (button == KeySetting.DROP.value()) setContent(selectedSlot, AIR);
+        if (button == KeySetting.PICK_BLOCK.value()) handlePickBlock();
     }
 
-    public int getSelectedSlot() {
+    public byte getSelectedMaterial() {
+        return contents[selectedSlot];
+    }
+
+    public void setContent(int slotIndex, byte material) {
+        slotIndex = clampSlot(slotIndex);
+        contents[slotIndex] = material;
+
+        if (displays[slotIndex] != null) displays[slotIndex].delete();
+        getChildren().remove(displays[slotIndex]);
+
+        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), new Structure(material));
+        addRenderable(displays[slotIndex]);
+    }
+
+
+    @Override
+    public void renderSelf(Vector2f position, Vector2f size) {
+        float hotbarSize = FloatSetting.HOTBAR_SIZE.value();
+        setOffsetToParent(new Vector2f(0.5f - hotbarSize * Hotbar.LENGTH * 0.5f, 0));
+        setSizeToParent(new Vector2f(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio()));
+        super.renderSelf(getPosition(), getSize());
+
+        float hotbarIndicatorScaler = FloatSetting.HOTBAR_INDICATOR_SCALER.value();
+        float scalingOffset = (1.0f - hotbarIndicatorScaler) * 0.5f;
+        hotBarSelectionIndicator.setOffsetToParent(new Vector2f((selectedSlot + scalingOffset) / LENGTH, scalingOffset));
+        hotBarSelectionIndicator.setSizeToParent(new Vector2f(hotbarIndicatorScaler / LENGTH, hotbarIndicatorScaler));
+    }
+
+
+    private int clampSlot(int slot) {
+        slot %= LENGTH;
+        if (slot < 0) slot *= LENGTH;
+        return slot;
+    }
+
+    private void setSelectedSlot(int selectedSlot) {
+        this.selectedSlot = clampSlot(selectedSlot);
+    }
+
+    private int nextFreeSlot() {
+        for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
+            if (contents[slot % LENGTH] == AIR) return slot % LENGTH;
         return selectedSlot;
     }
 
-    public void setSelectedSlot(int selectedSlot) {
-        selectedSlot %= LENGTH;
-        if (selectedSlot < 0) selectedSlot += LENGTH;
-        this.selectedSlot = selectedSlot;
+    private int indexOf(byte material) {
+        for (int slot = 0; slot < LENGTH; slot++)
+            if (contents[slot] == material) return slot;
+        return -1;
     }
 
+    private void handlePickBlock() {
+        Target target = Target.getPlayerTarget();
+        if (target == null) return;
+
+        int slot = indexOf(target.material());
+        if (slot != -1) {
+            setSelectedSlot(slot);
+            return;
+        }
+
+        slot = nextFreeSlot();
+        setContent(slot, target.material());
+        setSelectedSlot(slot);
+    }
 
     private int selectedSlot = 0;
+    private final UiElement hotBarSelectionIndicator;
+    private final byte[] contents = new byte[LENGTH];
+    private final StructureDisplay[] displays = new StructureDisplay[LENGTH];
 }

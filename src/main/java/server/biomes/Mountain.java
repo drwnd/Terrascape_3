@@ -1,9 +1,9 @@
 package server.biomes;
 
-import server.GenerationData;
+import server.generation.GenerationData;
 import utils.Utils;
 
-import static server.WorldGeneration.WATER_LEVEL;
+import static server.generation.WorldGeneration.WATER_LEVEL;
 import static utils.Constants.*;
 
 public final class Mountain extends Biome {

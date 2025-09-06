@@ -10,7 +10,7 @@ import renderables.TextElement;
 import rendering_api.shaders.TextShader;
 import server.Chunk;
 import server.Game;
-import server.WorldGeneration;
+import server.generation.WorldGeneration;
 import settings.FloatSetting;
 import settings.OptionSetting;
 import settings.optionSettings.ColorOption;
@@ -41,10 +41,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
-            long currentTime = System.nanoTime();
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
-            frameTimes.removeIf(frameTime -> currentTime - frameTime > 1_000_000_000L);
-            frameTimes.add(currentTime);
             return "FPS: %s".formatted(frameTimes.size());
         }, "FPS"));
 

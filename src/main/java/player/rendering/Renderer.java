@@ -8,7 +8,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46;
-import player.Hotbar;
 import player.Player;
 import renderables.Renderable;
 import renderables.UiElement;
@@ -35,17 +34,7 @@ public final class Renderer extends Renderable {
         crosshair.setScaleWithGuiSize(false);
         crosshair.setAllowFocusScaling(false);
 
-        hotbar = new UiElement(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR);
-        hotbar.setScaleWithGuiSize(false);
-        hotbar.setAllowFocusScaling(false);
-
-        hotBarSelectionIndicator = new UiElement(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR_SELECTION_INDICATOR);
-        hotBarSelectionIndicator.setScaleWithGuiSize(false);
-        hotBarSelectionIndicator.setAllowFocusScaling(false);
-
         addRenderable(crosshair);
-        addRenderable(hotbar);                      // Order important here
-        addRenderable(hotBarSelectionIndicator);    // Order important here
     }
 
     public void toggleDebugScreen() {
@@ -55,6 +44,41 @@ public final class Renderer extends Renderable {
     public ArrayList<Long> getFrameTimes() {
         return frameTimes;
     }
+
+
+    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
+        shader.bind();
+        shader.setUniform("projectionViewMatrix", matrix);
+        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("textureAtlas", 0);
+        shader.setUniform("propertiesTexture", 1);
+
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
+        GL46.glEnable(GL46.GL_DEPTH_TEST);
+        GL46.glEnable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_BLEND);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
+        GL46.glActiveTexture(GL46.GL_TEXTURE1);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.PROPERTIES).getID());
+    }
+
+    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
+        shader.bind();
+        shader.setUniform("projectionViewMatrix", matrix);
+        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("textureAtlas", 0);
+        shader.setUniform("time", 1.0f);
+
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
+        GL46.glEnable(GL46.GL_DEPTH_TEST);
+        GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glEnable(GL46.GL_BLEND);
+        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
+    }
+
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
@@ -70,9 +94,14 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, player);
         renderWater(cameraPosition, projectionViewMatrix, player);
         renderDebugInfo();
+        GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
     }
 
     private void setupRenderState() {
+        long currentTime = System.nanoTime();
+        frameTimes.removeIf(frameTime -> currentTime - frameTime > 1_000_000_000L);
+        frameTimes.add(currentTime);
+
         Game.getPlayer().getCamera().updateProjectionMatrix();
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL46.GL_LINE : GL46.GL_FILL);
         GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
@@ -80,16 +109,6 @@ public final class Renderer extends Renderable {
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(new Vector2f(0.5f - crosshairSize * 0.5f, 0.5f - crosshairSize * 0.5f * Window.getAspectRatio()));
         crosshair.setSizeToParent(new Vector2f(crosshairSize, crosshairSize * Window.getAspectRatio()));
-
-        float hotbarSize = FloatSetting.HOTBAR_SIZE.value();
-        hotbar.setOffsetToParent(new Vector2f(0.5f - hotbarSize * Hotbar.LENGTH * 0.5f, 0));
-        hotbar.setSizeToParent(new Vector2f(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio()));
-
-        float hotbarIndicatorScaler = FloatSetting.HOTBAR_INDICATOR_SCALER.value();
-        float scalingOffset = -(hotbarSize * hotbarIndicatorScaler - hotbarSize) * 0.5f;
-        hotBarSelectionIndicator.setOffsetToParent(new Vector2f(
-                0.5f + hotbarSize * (Game.getPlayer().getHotbar().getSelectedSlot() - Hotbar.LENGTH * 0.5f) + scalingOffset, scalingOffset * Window.getAspectRatio()));
-        hotBarSelectionIndicator.setSizeToParent(new Vector2f(hotbarSize * hotbarIndicatorScaler, hotbarSize * hotbarIndicatorScaler * Window.getAspectRatio()));
     }
 
     private static void renderSkybox(Camera camera) {
@@ -126,23 +145,7 @@ public final class Renderer extends Renderable {
         int playerChunkZ = Utils.floor(playerPosition.intPosition().z) >> CHUNK_SIZE_BITS;
 
         Shader shader = AssetManager.getShader(ShaderIdentifier.OPAQUE);
-        shader.bind();
-        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("iCameraPosition",
-                playerPosition.intPosition().x & ~CHUNK_SIZE_MASK,
-                playerPosition.intPosition().y & ~CHUNK_SIZE_MASK,
-                playerPosition.intPosition().z & ~CHUNK_SIZE_MASK);
-        shader.setUniform("textureAtlas", 0);
-        shader.setUniform("propertiesTexture", 1);
-
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
-        GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glEnable(GL46.GL_CULL_FACE);
-        GL46.glDisable(GL46.GL_BLEND);
-        GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
-        GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.PROPERTIES).getID());
+        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
 
         for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(0)) {
             if (model == null || !model.containsGeometry()) continue;
@@ -157,23 +160,8 @@ public final class Renderer extends Renderable {
 
     private static void renderWater(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
         Shader shader = AssetManager.getShader(ShaderIdentifier.WATER);
-        shader.bind();
-        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("iCameraPosition",
-                playerPosition.intPosition().x & ~CHUNK_SIZE_MASK,
-                playerPosition.intPosition().y & ~CHUNK_SIZE_MASK,
-                playerPosition.intPosition().z & ~CHUNK_SIZE_MASK);
+        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
-        shader.setUniform("textureAtlas", 0);
-        shader.setUniform("time", 1.0f);
-
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
-        GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
-        GL46.glEnable(GL46.GL_BLEND);
-        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
-        GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
 
         for (TransparentModel model : player.getMeshCollector().getTransparentModels(0)) {
             if (model == null || !model.containsWater()) continue;
@@ -194,5 +182,5 @@ public final class Renderer extends Renderable {
     private boolean debugScreenOpen = false;
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
-    private final UiElement crosshair, hotbar, hotBarSelectionIndicator;
+    private final UiElement crosshair;
 }

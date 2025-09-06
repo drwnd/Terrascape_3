@@ -1,9 +1,10 @@
-package server;
+package server.generation;
 
 import org.joml.Vector3i;
 import player.Player;
 import player.rendering.MeshCollector;
 import player.rendering.MeshGenerator;
+import server.*;
 import utils.Utils;
 
 import java.util.concurrent.Executors;
@@ -196,7 +197,7 @@ public final class ChunkGenerator {
                         WorldGeneration.generate(chunk);
                     }
                     if (meshCollector.isMeshed(chunkIndex, lod)) continue;
-                    meshChunk(meshGenerator, chunk);
+                    meshGenerator.generateMesh(chunk);
 
                 } catch (Exception exception) {
                     System.err.println("Meshing:");
@@ -205,11 +206,6 @@ public final class ChunkGenerator {
                     System.err.println(chunkX + " " + chunkY + " " + chunkZ);
                 }
             }
-        }
-
-        private void meshChunk(MeshGenerator meshGenerator, Chunk chunk) {
-            meshGenerator.setChunk(chunk);
-            meshGenerator.generateMesh();
         }
     }
 }

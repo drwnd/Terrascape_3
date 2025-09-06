@@ -23,6 +23,7 @@ public final class Player {
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
 
+        renderer.addRenderable(hotbar);
         this.position = position;
         Window.pushRenderable(renderer);
         setInput();
@@ -61,7 +62,7 @@ public final class Player {
 
 
     public byte getHeldMaterial() {
-        return hotbar.contents[hotbar.getSelectedSlot()];
+        return hotbar.getSelectedMaterial();
     }
 
     public MeshCollector getMeshCollector() {
@@ -80,10 +81,6 @@ public final class Player {
         synchronized (this) {
             return new Position(position);
         }
-    }
-
-    public Hotbar getHotbar() {
-        return hotbar;
     }
 
     public void setInput() {

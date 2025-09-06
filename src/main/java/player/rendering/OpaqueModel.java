@@ -1,6 +1,7 @@
 package player.rendering;
 
 import org.joml.Vector3i;
+import org.lwjgl.opengl.GL46;
 
 import static utils.Constants.*;
 
@@ -31,10 +32,6 @@ public record OpaqueModel(int X, int Y, int Z, int LOD, int verticesBuffer, int[
         return toRenderVertexCounts;
     }
 
-    public int[] getAllVertexCounts() {
-        return vertexCounts;
-    }
-
     public int[] getIndices() {
         return indices;
     }
@@ -50,5 +47,9 @@ public record OpaqueModel(int X, int Y, int Z, int LOD, int verticesBuffer, int[
 
     public boolean containsGeometry() {
         return vertexCounts != null;
+    }
+
+    public void delete() {
+        GL46.glDeleteBuffers(verticesBuffer);
     }
 }

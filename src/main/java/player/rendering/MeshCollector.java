@@ -89,8 +89,8 @@ public final class MeshCollector {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
 
-        if (opaqueModel != null) GL46.glDeleteBuffers(opaqueModel.verticesBuffer());
-        if (transparentModel != null) GL46.glDeleteBuffers(transparentModel.verticesBuffer());
+        if (opaqueModel != null) opaqueModel.delete();
+        if (transparentModel != null) transparentModel.delete();
 
         setOpaqueModel(null, chunkIndex, lod);
         setTransparentModel(null, chunkIndex, lod);

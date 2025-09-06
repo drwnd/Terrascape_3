@@ -2,6 +2,7 @@ package server;
 
 import org.joml.Vector3i;
 import player.rendering.MeshCollector;
+import server.generation.ChunkGenerator;
 import utils.Position;
 import utils.Utils;
 
@@ -64,7 +65,7 @@ public final class Server {
         generator.cleanUp();
     }
 
-    void unloadDistantChunks(Vector3i playerChunkPosition) {
+    public void unloadDistantChunks(Vector3i playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {

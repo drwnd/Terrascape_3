@@ -1,6 +1,6 @@
 package server.biomes;
 
-import server.GenerationData;
+import server.generation.GenerationData;
 
 import static utils.Constants.SNOW;
 

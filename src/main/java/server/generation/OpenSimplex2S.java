@@ -1,4 +1,4 @@
-package server;
+package server.generation;
 
 /**
  * K.jpg's OpenSimplex 2, smooth variant ("SuperSimplex")

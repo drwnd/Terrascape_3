@@ -1,11 +1,13 @@
-package server;
+package server.generation;
 
+import server.Chunk;
+import server.MaterialsData;
 import server.biomes.Biome;
 import utils.Utils;
 
 import java.util.Arrays;
 
-import static server.WorldGeneration.SEED;
+import static server.generation.WorldGeneration.SEED;
 import static utils.Constants.*;
 
 public final class GenerationData {

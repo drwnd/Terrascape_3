@@ -1,5 +1,7 @@
-package server;
+package server.generation;
 
+import server.Chunk;
+import server.Game;
 import server.biomes.Biome;
 import server.biomes.*;
 import utils.Utils;
@@ -105,16 +107,6 @@ public final class WorldGeneration {
         else if (Math.abs(river) < RIVER_THRESHOLD)
             riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_LEVEL) * (1 - Utils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
         return riverModifier;
-    }
-
-    public static int getResultingHeight(int totalX, int totalZ) {
-        double height = GenerationData.heightMapValue(totalX, totalZ);
-        double erosion = GenerationData.erosionMapValue(totalX, totalZ);
-        double continental = GenerationData.continentalMapValue(totalX, totalZ);
-        double river = GenerationData.riverMapValue(totalX, totalZ);
-        double ridge = GenerationData.ridgeMapValue(totalX, totalZ);
-
-        return getResultingHeight(height, erosion, continental, river, ridge);
     }
 
     public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
