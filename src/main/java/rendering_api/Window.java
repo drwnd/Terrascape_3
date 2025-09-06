@@ -161,6 +161,24 @@ public final class Window {
         });
     }
 
+    public static void checkError(String lastAction) {
+        int error = GL46.glGetError();
+        System.out.println(lastAction + " : " + switch (error) {
+            case GL46.GL_NO_ERROR -> "No error";
+            case GL46.GL_INVALID_ENUM -> "Invalid Enum";
+            case GL46.GL_INVALID_VALUE -> "Invalid Value";
+            case GL46.GL_INVALID_OPERATION -> "Invalid Operation";
+            case GL46.GL_STACK_OVERFLOW -> "Stack Overflow";
+            case GL46.GL_STACK_UNDERFLOW -> "Stack Underflow";
+            case GL46.GL_OUT_OF_MEMORY -> "Out of Memory";
+            default -> "Unknown 0x" + Integer.toHexString(error).toUpperCase();
+        });
+    }
+
+    public static void clearOldErrors() {
+        while (GL46.glGetError() != GL46.GL_NO_ERROR) ;
+    }
+
     private static int width, height;
     private static long window;
     private static boolean maximized;

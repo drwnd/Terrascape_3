@@ -19,57 +19,17 @@ public final class SettingsMenu extends UiBackgroundElement {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
 
         UiButton backButton = new UiButton(new Vector2f(0.25f, 0.1f), new Vector2f(0.05f, 0.85f), getBackButtonAction());
-        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), "Back");
-        backButton.addRenderable(text);
-
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.05f, 0.5f);
-
-        UiButton everythingSectionButton = new UiButton(sizeToParent, new Vector2f(0.35f, 0.85f), sectionButtonAction(this::createEverythingSection));
-        text = new TextElement(offsetToParent, "Everything");
-        everythingSectionButton.addRenderable(text);
-
-        UiButton controlsSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.7f), sectionButtonAction(this::createControlsSection));
-        text = new TextElement(offsetToParent, "Controls");
-        controlsSection.addRenderable(text);
-
-        UiButton renderingSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.55f), sectionButtonAction(this::createRenderingSection));
-        text = new TextElement(offsetToParent, "Rendering");
-        renderingSection.addRenderable(text);
-
-        UiButton uiSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.4f), sectionButtonAction(this::createUiSection));
-        text = new TextElement(offsetToParent, "Ui Customization");
-        uiSection.addRenderable(text);
-
-        UiButton soundSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.25f), sectionButtonAction(this::createSoundSection));
-        text = new TextElement(offsetToParent, "Sound");
-        soundSection.addRenderable(text);
-
-        UiButton debugSection = new UiButton(sizeToParent, new Vector2f(0.35f, 0.1f), sectionButtonAction(this::createDebugSection));
-        text = new TextElement(offsetToParent, "Debug");
-        debugSection.addRenderable(text);
-
-        UiButton debugScreenSection = new UiButton(sizeToParent, new Vector2f(0.35f, -0.05f), sectionButtonAction(this::createDebugScreenSection));
-        text = new TextElement(offsetToParent, "Debug Screen");
-        debugScreenSection.addRenderable(text);
-
+        backButton.addRenderable(new TextElement(new Vector2f(0.15f, 0.5f), "Back"));
         addRenderable(backButton);
 
-        addRenderable(everythingSectionButton);
-        addRenderable(controlsSection);
-        addRenderable(renderingSection);
-        addRenderable(uiSection);
-        addRenderable(soundSection);
-        addRenderable(debugSection);
-        addRenderable(debugScreenSection);
-
-        sectionButtons.add(everythingSectionButton);
-        sectionButtons.add(controlsSection);
-        sectionButtons.add(renderingSection);
-        sectionButtons.add(uiSection);
-        sectionButtons.add(soundSection);
-        sectionButtons.add(debugSection);
-        sectionButtons.add(debugScreenSection);
+        int index = 0;
+        addSection(++index, this::createEverythingSection, "Everything");
+        addSection(++index, this::createControlsSection, "Controls");
+        addSection(++index, this::createRenderingSection, "Rendering");
+        addSection(++index, this::createUiSection, "Ui Customization");
+        addSection(++index, this::createSoundSection, "Sound");
+        addSection(++index, this::createDebugSection, "Debug");
+        addSection(++index, this::createDebugScreenSection, "Debug Screen");
     }
 
     public void scrollSectionButtons(float scroll) {
@@ -77,6 +37,15 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         for (Renderable renderable : sectionButtons) renderable.move(offset);
     }
+
+    @Override
+    public void setOnTop() {
+        float scroll = input == null ? 0.0f : input.getScroll();
+        input = new SettingsMenuInput(this);
+        input.setScroll(scroll);
+        Window.setInput(input);
+    }
+
 
     private SettingsRenderable createEverythingSection() {
         SettingsRenderable section = new SettingsRenderable();
@@ -147,6 +116,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.TEXT_SIZE);
         section.addSlider(FloatSetting.RIM_THICKNESS);
         section.addSlider(FloatSetting.HOTBAR_INDICATOR_SCALER);
+        section.addSlider(FloatSetting.PAUSE_MENU_BACKGROUND_BLUR);
 
         return section;
     }
@@ -191,19 +161,22 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    @Override
-    public void setOnTop() {
-        float scroll = input == null ? 0.0f : input.getScroll();
-        input = new SettingsMenuInput(this);
-        input.setScroll(scroll);
-        Window.setInput(input);
-    }
-
     private Clickable getBackButtonAction() {
         return (Vector2i pixelCoordinate, int button, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.popRenderable();
         };
+    }
+
+    private void addSection(int sectionNumber, SectionCreator sectionCreator, String name) {
+        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
+        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - sectionNumber * 0.15f);
+
+        UiButton sectionButton = new UiButton(sizeToParent, offsetToParent, sectionButtonAction(sectionCreator));
+        sectionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), name));
+
+        addRenderable(sectionButton);
+        sectionButtons.add(sectionButton);
     }
 
     private Clickable sectionButtonAction(SectionCreator sectionCreator) {

@@ -1,16 +1,22 @@
 package menus;
 
-import assets.identifiers.TextureIdentifier;
+import assets.AssetManager;
+import assets.Texture;
+import assets.identifiers.ShaderIdentifier;
 import org.joml.Vector2f;
+import org.lwjgl.opengl.GL46;
+import player.rendering.ObjectLoader;
+import renderables.Renderable;
 import renderables.TextElement;
 import renderables.UiButton;
-import renderables.UiElement;
 import rendering_api.Window;
+import rendering_api.shaders.GuiShader;
 import server.Game;
+import settings.FloatSetting;
 
-public final class PauseMenu extends UiElement {
+public final class PauseMenu extends Renderable {
     public PauseMenu() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), TextureIdentifier.INVENTORY_OVERLAY);
+        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
 
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
 
@@ -26,6 +32,26 @@ public final class PauseMenu extends UiElement {
         addRenderable(quitButton);
         addRenderable(settingsButton);
         addRenderable(playButton);
+
+        int backGroundWidth = Math.max(1, (int) (Window.getWidth() / (1.0f + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
+        int backGroundHeight = Math.max(1, (int) (Window.getHeight() / (1.0f + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
+
+        int backGround = ObjectLoader.createTexture2D(GL46.GL_RGB, backGroundWidth, backGroundHeight, GL46.GL_RGB, GL46.GL_UNSIGNED_BYTE, GL46.GL_LINEAR);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_R, GL46.GL_CLAMP_TO_EDGE);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_EDGE);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_EDGE);
+        int frameBuffer = GL46.glCreateFramebuffers();
+
+        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, frameBuffer);
+        GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT0, GL46.GL_TEXTURE_2D, backGround, 0);
+        if (GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER) != GL46.GL_FRAMEBUFFER_COMPLETE)
+            throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER)));
+
+        GL46.glBlitNamedFramebuffer(0, frameBuffer, 0, 0, Window.getWidth(), Window.getHeight(), 0, 0, backGroundWidth, backGroundHeight, GL46.GL_COLOR_BUFFER_BIT, GL46.GL_LINEAR);
+        this.backGround = new Texture(backGround);
+
+        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
+        GL46.glDeleteFramebuffers(frameBuffer);
     }
 
     @Override
@@ -33,6 +59,21 @@ public final class PauseMenu extends UiElement {
         Window.setInput(new PauseMenuInput(this));
         Game.getServer().pauseTicks();
     }
+
+    @Override
+    public void renderSelf(Vector2f position, Vector2f size) {
+        GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI);
+        shader.bind();
+
+        shader.flipNextDrawVertically();
+        shader.drawQuadNoGuiScale(position, size, backGround);
+    }
+
+    @Override
+    public void deleteSelf() {
+        backGround.delete();
+    }
+
 
     private static Runnable getQuitButtonAction() {
         return Game::quit;
@@ -49,4 +90,6 @@ public final class PauseMenu extends UiElement {
             Game.getPlayer().setInput();
         };
     }
+
+    private final Texture backGround;
 }

@@ -124,6 +124,15 @@ public final class ObjectLoader {
         return vao;
     }
 
+    public static int createTexture2D(int internalFormat, int width, int height, int format, int type, int sampling) {
+        int texture = GL46.glGenTextures();
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture);
+        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, 0);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MIN_FILTER, sampling);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MAG_FILTER, sampling);
+        return texture;
+    }
+
 
     private static int createVAO() {
         int vao = GL46.glGenVertexArrays();

@@ -11,6 +11,8 @@ import settings.ToggleSetting;
 public final class PlayerInput extends Input {
     @Override
     public void setInputMode() {
+        cursorPos.set(getCursorPos());
+        lastCursorPos.set(cursorPos);
         GLFW.glfwSetInputMode(Window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
         if (GLFW.glfwRawMouseMotionSupported()) {
             if (ToggleSetting.RAW_MOUSE_INPUT.value())

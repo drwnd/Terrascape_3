@@ -16,7 +16,8 @@ public enum FloatSetting {
     CROSSHAIR_SIZE(0.0f, 0.2f, 0.045454547f, 0.001f),
     HOTBAR_SIZE(0.0f, 0.2f, 0.05f, 0.001f),
     BREAK_PLACE_INTERVALL(0, 20, 5, 1),
-    HOTBAR_INDICATOR_SCALER(0.0f, 3.0f, 1.2f, 0.01f);
+    HOTBAR_INDICATOR_SCALER(0.0f, 3.0f, 1.2f, 0.01f),
+    PAUSE_MENU_BACKGROUND_BLUR(0.0f, 10.0f, 0.0f, 0.1f);
 
     public static void setIfPresent(String name, String value) {
         try {
