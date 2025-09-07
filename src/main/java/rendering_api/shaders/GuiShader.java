@@ -19,7 +19,7 @@ public class GuiShader extends Shader {
         GL46.glUseProgram(programID);
         GL46.glDisable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
-        GL46.glDisable(GL46.GL_BLEND);
+        GL46.glEnable(GL46.GL_BLEND);
     }
 
     public void flipNextDrawVertically() {

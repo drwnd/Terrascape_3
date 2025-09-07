@@ -17,7 +17,10 @@ public enum FloatSetting {
     HOTBAR_SIZE(0.0f, 0.2f, 0.05f, 0.001f),
     BREAK_PLACE_INTERVALL(0, 20, 5, 1),
     HOTBAR_INDICATOR_SCALER(0.0f, 3.0f, 1.2f, 0.01f),
-    PAUSE_MENU_BACKGROUND_BLUR(0.0f, 10.0f, 0.0f, 0.1f);
+    PAUSE_MENU_BACKGROUND_BLUR(0.0f, 10.0f, 0.0f, 0.1f),
+    INVENTORY_ITEM_SIZE(0.01f, 0.1f, 0.02f, 0.001f),
+    INVENTORY_ITEMS_PER_ROW(1, 64, 8, 1),
+    INVENTORY_ITEM_SCALING(1, 2, 1.2f, 0.01f);
 
     public static void setIfPresent(String name, String value) {
         try {

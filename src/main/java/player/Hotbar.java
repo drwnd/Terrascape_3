@@ -26,16 +26,6 @@ public final class Hotbar extends UiElement {
         hotBarSelectionIndicator.setScaleWithGuiSize(false);
         hotBarSelectionIndicator.setAllowFocusScaling(false);
         addRenderable(hotBarSelectionIndicator);
-
-        setContent(0, WATER);
-        setContent(1, LAVA);
-        setContent(2, GRASS);
-        setContent(3, DIRT);
-        setContent(4, STONE);
-        setContent(5, COBBLESTONE);
-        setContent(6, SAND);
-        setContent(7, GLASS);
-        setContent(8, GRAVEL);
     }
 
 

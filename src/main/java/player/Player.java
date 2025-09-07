@@ -52,7 +52,7 @@ public final class Player {
         synchronized (this) {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
         }
-        interactionHandler.updateGameTick();
+        if (canDoActiveActions()) interactionHandler.updateGameTick();
     }
 
     /**
@@ -70,8 +70,6 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveInput(int button, int action) {
-        inventory.handleInput(button, action);
-
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
     }
@@ -99,11 +97,15 @@ public final class Player {
         }
     }
 
+    public Hotbar getHotbar() {
+        return hotbar;
+    }
+
     public void setInput() {
         Window.setInput(input);
     }
 
-    public boolean canMove() {
+    public boolean canDoActiveActions() {
         return !inventory.isVisible();
     }
 
@@ -114,6 +116,7 @@ public final class Player {
     void toggleInventory() {
         inventory.setVisible(!inventory.isVisible());
         Window.setInput(inventory.isVisible() ? new InventoryInput(inventory) : input);
+        if (inventory.isVisible()) inventory.updateDisplayPositions();
     }
 
     private final MeshCollector meshCollector;

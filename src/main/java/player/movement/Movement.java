@@ -14,7 +14,7 @@ public final class Movement {
         Position position = new Position(lastPosition);
         move(position);
 
-        Vector3f acceleration = Game.getPlayer().canMove() ? state.computeNextGameTickAcceleration(rotation, lastPosition) : new Vector3f(0.0f);
+        Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, lastPosition) : new Vector3f(0.0f);
         state.changeVelocity(velocity, acceleration, lastPosition, rotation);
 
         state = state.next;

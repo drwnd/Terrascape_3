@@ -13,15 +13,13 @@ public class Renderable {
         this.offsetToParent = offsetToParent;
     }
 
-    public static void scaleForFocused(Vector2f position, Vector2f size) {
-        final float scalingFactor = 1.05f;
+    public void scaleForFocused(Vector2f position, Vector2f size) {
         float dx = (size.x - size.x * scalingFactor) * 0.5f;
         float dy = (size.y - size.y * scalingFactor) * 0.5f;
 
         size.mul(scalingFactor);
         position.add(dx, dy);
     }
-
 
     public final void render(Vector2f parentPosition, Vector2f parentSize) {
         if (!isVisible()) return;
@@ -163,6 +161,9 @@ public class Renderable {
         for (Renderable renderable : children) renderable.setFocused(false);
     }
 
+    public void setScalingFactor(float scalingFactor) {
+        this.scalingFactor = scalingFactor;
+    }
 
     private boolean isFlag(int flagMask) {
         return (flags & flagMask) == flagMask;
@@ -177,6 +178,7 @@ public class Renderable {
     private final Vector2f sizeToParent;
     private final Vector2f offsetToParent;
     private Renderable parent = DummyRenderable.dummy;
+    private float scalingFactor = 1.05f;
     private int flags = VISIBILITY_MASK | ALLOW_FOCUS_SCALING_MASK | SCALES_WITH_GUI_SIZE_MASK;
 
     private static final int VISIBILITY_MASK = 0x1;

@@ -2,6 +2,7 @@ package player.interaction;
 
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
+import rendering_api.Input;
 import server.Game;
 import settings.FloatSetting;
 import settings.KeySetting;
@@ -19,6 +20,9 @@ public final class InteractionHandler {
     }
 
     public void updateGameTick() {
+        if (!Input.isKeyPressed(KeySetting.DESTROY)) updateInfo(GLFW.GLFW_RELEASE, destroyInfo);
+        if (!Input.isKeyPressed(KeySetting.USE)) updateInfo(GLFW.GLFW_RELEASE, useInfo);
+
         handleDestroy();
         handleUse();
     }

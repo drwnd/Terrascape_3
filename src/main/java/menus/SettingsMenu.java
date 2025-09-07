@@ -117,6 +117,9 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.RIM_THICKNESS);
         section.addSlider(FloatSetting.HOTBAR_INDICATOR_SCALER);
         section.addSlider(FloatSetting.PAUSE_MENU_BACKGROUND_BLUR);
+        section.addSlider(FloatSetting.INVENTORY_ITEM_SIZE);
+        section.addSlider(FloatSetting.INVENTORY_ITEMS_PER_ROW);
+        section.addSlider(FloatSetting.INVENTORY_ITEM_SCALING);
 
         return section;
     }
