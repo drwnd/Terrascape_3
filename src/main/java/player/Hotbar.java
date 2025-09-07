@@ -68,6 +68,7 @@ public final class Hotbar extends UiElement {
         getChildren().remove(displays[slotIndex]);
 
         displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), new Structure(material));
+        displays[slotIndex].setScaleWithGuiSize(false);
         addRenderable(displays[slotIndex]);
     }
 

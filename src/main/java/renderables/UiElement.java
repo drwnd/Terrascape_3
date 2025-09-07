@@ -13,19 +13,14 @@ public class UiElement extends Renderable {
         this.texture = texture;
     }
 
-    public void setScaleWithGuiSize(boolean scaleWithGuiSize) {
-        this.scaleWithGuiSize = scaleWithGuiSize;
-    }
-
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
         GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI);
         Texture background = AssetManager.getTexture(texture);
         shader.bind();
-        if (scaleWithGuiSize) shader.drawQuad(position, size, background);
+        if (scalesWithGuiSize()) shader.drawQuad(position, size, background);
         else shader.drawQuadNoGuiScale(position, size, background);
     }
 
     private final TextureIdentifier texture;
-    private boolean scaleWithGuiSize = true;
 }

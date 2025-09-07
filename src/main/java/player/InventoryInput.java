@@ -1,5 +1,6 @@
 package player;
 
+import org.lwjgl.glfw.GLFW;
 import rendering_api.Input;
 import server.Game;
 
@@ -18,6 +19,7 @@ public final class InventoryInput extends Input {
     @Override
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
+        inventory.hoverOver(cursorPos);
     }
 
     @Override
@@ -33,6 +35,7 @@ public final class InventoryInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
+        if (key == GLFW.GLFW_KEY_ESCAPE) Game.getPlayer().toggleInventory();
         Game.getPlayer().handleInactiveInput(key, action);
     }
 

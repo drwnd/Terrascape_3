@@ -30,8 +30,8 @@ public class TextShader extends Shader {
         GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scaleWithUi) {
-        float guiSize = scaleWithUi ? FloatSetting.GUI_SIZE.value() : 1.0f;
+    public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
 
         setUniform("string", toIntFormat(text));
         setUniform("offsets", getOffsets(text));
@@ -49,11 +49,11 @@ public class TextShader extends Shader {
         GL46.glDrawElements(GL46.GL_TRIANGLES, 768, GL46.GL_UNSIGNED_INT, 0);
     }
 
-    public static int getMaxLength(String text, float maxAllowedLength, float charWidth) {
+    public static int getMaxLength(String text, float maxAllowedLength, float charWidth, boolean scalesWithGuiSize) {
         int[] offsets = getOffsets(text);
 
         float textSize = FloatSetting.TEXT_SIZE.value();
-        float guiSize = FloatSetting.GUI_SIZE.value();
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
         float factor = TextElement.DEFAULT_TEXT_SCALAR * textSize * charWidth / (Window.getWidth() * guiSize);
 
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)

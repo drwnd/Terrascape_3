@@ -23,15 +23,11 @@ public class Renderable {
     }
 
 
-    public void setAllowFocusScaling(boolean allowScaling) {
-        this.allowFocusScaling = allowScaling;
-    }
-
     public final void render(Vector2f parentPosition, Vector2f parentSize) {
-        if (!isVisible) return;
+        if (!isVisible()) return;
         Vector2f thisSize = new Vector2f(parentSize).mul(sizeToParent);
         Vector2f thisPosition = new Vector2f(parentPosition).add(new Vector2f(parentSize).mul(offsetToParent));
-        if (isFocused && allowFocusScaling) scaleForFocused(thisPosition, thisSize);
+        if (isFocused() && allowsFocusScaling()) scaleForFocused(thisPosition, thisSize);
 
         renderSelf(thisPosition, thisSize);
         for (Renderable child : children) child.render(thisPosition, thisSize);
@@ -55,15 +51,13 @@ public class Renderable {
 
     public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         for (Renderable renderable : children)
-            if (renderable.isVisible && renderable.containsPixelCoordinate(pixelCoordinate))
-                renderable.clickOn(pixelCoordinate, mouseButton, action);
+            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.clickOn(pixelCoordinate, mouseButton, action);
     }
 
     public void hoverOver(Vector2i pixelCoordinate) {
-        if (isFocused) return;
+        if (isFocused()) return;
         for (Renderable renderable : children)
-            if (renderable.isVisible)
-                renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
+            if (renderable.isVisible()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
     public void dragOver(Vector2i pixelCoordinate) {
@@ -78,8 +72,7 @@ public class Renderable {
         Vector2f position = Window.toPixelCoordinate(getPosition());
         Vector2f size = Window.toPixelSize(getSize());
 
-        return position.x <= pixelCoordinate.x && position.x + size.x >= pixelCoordinate.x
-                && position.y <= pixelCoordinate.y && position.y + size.y >= pixelCoordinate.y;
+        return position.x <= pixelCoordinate.x && position.x + size.x >= pixelCoordinate.x && position.y <= pixelCoordinate.y && position.y + size.y >= pixelCoordinate.y;
     }
 
 
@@ -101,18 +94,6 @@ public class Renderable {
     // Override if needed
     public void setOnTop() {
 
-    }
-
-
-    public void setVisible(boolean visible) {
-        this.isVisible = visible;
-    }
-
-    public void setFocused(boolean focused) {
-        isFocused = focused;
-
-        if (isFocused) return;
-        for (Renderable renderable : children) renderable.setFocused(false);
     }
 
     public Vector2f getPosition() {
@@ -148,12 +129,58 @@ public class Renderable {
     }
 
     public boolean isVisible() {
-        return isVisible;
+        return isFlag(VISIBILITY_MASK);
+    }
+
+    public boolean isFocused() {
+        return isFlag(FOCUSSED_MASK);
+    }
+
+    public boolean allowsFocusScaling() {
+        return isFlag(ALLOW_FOCUS_SCALING_MASK);
+    }
+
+    public boolean scalesWithGuiSize() {
+        return isFlag(SCALES_WITH_GUI_SIZE_MASK);
+    }
+
+    public void setScaleWithGuiSize(boolean scaleWithGuiSize) {
+        setFlag(scaleWithGuiSize, SCALES_WITH_GUI_SIZE_MASK);
+    }
+
+    public void setAllowFocusScaling(boolean allowScaling) {
+        setFlag(allowScaling, ALLOW_FOCUS_SCALING_MASK);
+    }
+
+    public void setVisible(boolean visible) {
+        setFlag(visible, VISIBILITY_MASK);
+    }
+
+    public void setFocused(boolean focused) {
+        setFlag(focused, FOCUSSED_MASK);
+
+        if (isFocused()) return;
+        for (Renderable renderable : children) renderable.setFocused(false);
+    }
+
+
+    private boolean isFlag(int flagMask) {
+        return (flags & flagMask) == flagMask;
+    }
+
+    private void setFlag(boolean value, int mask) {
+        if (value) flags |= mask;
+        else flags &= ~mask;
     }
 
     private final ArrayList<Renderable> children = new ArrayList<>();
-    private boolean isVisible = true, isFocused = false, allowFocusScaling = true;
     private final Vector2f sizeToParent;
     private final Vector2f offsetToParent;
     private Renderable parent = DummyRenderable.dummy;
+    private int flags = VISIBILITY_MASK | ALLOW_FOCUS_SCALING_MASK | SCALES_WITH_GUI_SIZE_MASK;
+
+    private static final int VISIBILITY_MASK = 0x1;
+    private static final int FOCUSSED_MASK = 0x2;
+    private static final int ALLOW_FOCUS_SCALING_MASK = 0x4;
+    private static final int SCALES_WITH_GUI_SIZE_MASK = 0x8;
 }

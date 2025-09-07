@@ -16,10 +16,12 @@ public class UiBackgroundElement extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
+        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
+
         GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI_BACKGROUND);
         Texture background = AssetManager.getTexture(TextureIdentifier.GUI_ELEMENT_BACKGROUND);
         shader.bind();
-        shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * FloatSetting.GUI_SIZE.value());
+        shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * guiSize);
         shader.setUniform("aspectRatio", Window.getAspectRatio());
         shader.drawQuad(position, size, background);
     }

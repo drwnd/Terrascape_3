@@ -9,12 +9,15 @@ import player.rendering.*;
 import rendering_api.Window;
 import rendering_api.shaders.Shader;
 import server.generation.Structure;
+import settings.FloatSetting;
 import utils.Transformation;
 
 public final class StructureDisplay extends Renderable {
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
         super(sizeToParent, offsetToParent);
-        this.structure = structure;
+        sizeX = structure.sizeX();
+        sizeY = structure.sizeY();
+        sizeZ = structure.sizeZ();
 
         Mesh mesh = new MeshGenerator().generateMesh(structure);
 
@@ -26,10 +29,13 @@ public final class StructureDisplay extends Renderable {
     public void renderSelf(Vector2f position, Vector2f size) {
         if (!opaqueModel.containsGeometry() && !transparentModel.containsWater() && !transparentModel.containsGlass()) return;
 
-        Matrix4f matrix = Transformation.getStructureDisplayMatrix(structure.sizeX(), structure.sizeY(), structure.sizeZ());
+        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ);
         GL46.glViewport(
-                (int) (position.x * Window.getWidth()), (int) (position.y * Window.getHeight()),
-                (int) (size.x * Window.getWidth()), (int) (size.y * Window.getHeight()));
+                (int) ((position.x + size.x * 0.5f * (1.0f - guiSize)) * Window.getWidth()),
+                (int) ((position.y + size.y * 0.5f * (1.0f - guiSize)) * Window.getHeight()),
+                (int) (size.x * guiSize * Window.getWidth()),
+                (int) (size.y * guiSize * Window.getHeight()));
 
         if (opaqueModel.containsGeometry()) {
             Shader shader = AssetManager.getShader(ShaderIdentifier.OPAQUE);
@@ -60,5 +66,5 @@ public final class StructureDisplay extends Renderable {
 
     private final OpaqueModel opaqueModel;
     private final TransparentModel transparentModel;
-    private final Structure structure;
+    private final int sizeX, sizeY, sizeZ;
 }
