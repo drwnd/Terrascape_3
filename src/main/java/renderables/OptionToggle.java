@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 import settings.OptionSetting;
+import settings.optionSettings.ColorOption;
 import settings.optionSettings.Option;
 
 public class OptionToggle extends UiButton {
@@ -39,6 +40,7 @@ public class OptionToggle extends UiButton {
     private void setValue(Option value) {
         this.value = value;
         textElement.setText(value.name());
+        if (value instanceof ColorOption) textElement.setColor(((ColorOption) value).getColor());
     }
 
     private Clickable getAction() {

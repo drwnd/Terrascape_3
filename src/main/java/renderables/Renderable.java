@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class Renderable {
 
     public Renderable(Vector2f sizeToParent, Vector2f offsetToParent) {
-        this.sizeToParent = sizeToParent;
-        this.offsetToParent = offsetToParent;
+        this.sizeToParent = new Vector2f(sizeToParent);
+        this.offsetToParent = new Vector2f(offsetToParent);
     }
 
     public void scaleForFocused(Vector2f position, Vector2f size) {
