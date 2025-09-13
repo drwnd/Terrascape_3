@@ -2,9 +2,7 @@ package server;
 
 import utils.ByteArrayList;
 
-import static utils.Constants.CHUNK_SIZE;
-import static utils.Constants.CHUNK_SIZE_BITS;
-
+import static utils.Constants.*;
 
 public final class MaterialsData {
 
@@ -17,12 +15,10 @@ public final class MaterialsData {
     }
 
 
-    public static MaterialsData loadFromDiscBytes(byte[] bytes, int startIndex) {
-        ByteArrayList data = new ByteArrayList(bytes.length);
-        getFromDiscBytes(data, bytes, startIndex);
-        byte[] dataArray = new byte[data.size()];
-        data.copyInto(dataArray, 0);
-        return new MaterialsData(dataArray);
+    public static MaterialsData loadFromDiscBytes(byte[] bytes, int startIndex, int length) {
+        byte[] data = new byte[length];
+        System.arraycopy(bytes, startIndex, data, 0, length);
+        return new MaterialsData(data);
     }
 
     public static MaterialsData getCompressedMaterials(byte[] uncompressedMaterials) {
@@ -39,8 +35,8 @@ public final class MaterialsData {
 
 
     public byte getMaterial(int inChunkX, int inChunkY, int inChunkZ) {
+        int index = 0, depth = CHUNK_SIZE_BITS - 1;
         synchronized (this) {
-            int index = 0, depth = CHUNK_SIZE_BITS - 1;
             while (true) { // Scary but should be fine
                 byte identifier = data[index];
 
@@ -89,20 +85,12 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
-    public int getRAMByteSize() {
+    public int getByteSize() {
         return data.length;
     }
 
-    public byte[] getBytesDiscFormat() {
-        ByteArrayList discDataList = new ByteArrayList(data.length);
-        synchronized (this) {
-            fillDiscData(discDataList, 0);
-        }
-
-        byte[] discData = new byte[discDataList.size()];
-        discDataList.copyInto(discData, 0);
-
-        return discData;
+    public byte[] getBytes() {
+        return data;
     }
 
 
@@ -115,33 +103,6 @@ public final class MaterialsData {
         synchronized (this) {
             data = dataArray;
         }
-    }
-
-    private void fillDiscData(ByteArrayList discData, int startIndex) {
-        byte identifier = data[startIndex];
-        discData.add(identifier);
-
-        if (identifier == HOMOGENOUS) {
-            discData.add(data[startIndex + 1]);
-            return;
-        }
-        if (identifier == DETAIL) {
-            // Weird shuffle for backwards compatibility
-            for (int x = 0; x < 4; x++)
-                for (int y = 0; y < 4; y++)
-                    for (int z = 0; z < 4; z++)
-                        discData.add(data[startIndex + getInDetailIndex(x, y, z)]);
-            return;
-        }
-//        if (identifier == SPLITTER)
-        fillDiscData(discData, startIndex + SPLITTER_BYTE_SIZE);
-        fillDiscData(discData, startIndex + getOffset(startIndex + 1));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 4));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 7));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 10));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 13));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 16));
-        fillDiscData(discData, startIndex + getOffset(startIndex + 19));
     }
 
     private void storeLowerLODChunk(Chunk chunk, byte[] uncompressedMaterials, int startX, int startY, int startZ) {
@@ -171,12 +132,14 @@ public final class MaterialsData {
             return;
         }
         if (identifier == DETAIL) {
-            for (int x = 0; x < 4; x++)
-                for (int z = 0; z < 4; z++)
-                    for (int y = 0; y < 4; y++) {
-                        byte material = data[startIndex + getInDetailIndex(x, y, z)];
-                        uncompressedMaterials[getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z)] = material;
-                    }
+            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = data[startIndex + 1];
+            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ)] = data[startIndex + 2];
+            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ + 1)] = data[startIndex + 3];
+            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ + 1)] = data[startIndex + 4];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ)] = data[startIndex + 5];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ)] = data[startIndex + 6];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ + 1)] = data[startIndex + 7];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 1)] = data[startIndex + 8];
             return;
         }
 //        if (identifier == SPLITTER)
@@ -209,51 +172,11 @@ public final class MaterialsData {
     }
 
     private static int getInDetailIndex(int inChunkX, int inChunkY, int inChunkZ) {
-        return ((inChunkX & 3) << 4 | (inChunkZ & 3) << 2 | (inChunkY & 3)) + 1;
+        return ((inChunkX & 1) << 2 | (inChunkZ & 1) << 1 | (inChunkY & 1)) + 1;
     }
 
     private static int getInSplitterIndex(int inChunkX, int inChunkY, int inChunkZ, int depth) {
         return 3 * ((inChunkX >> depth & 1) << 2 | (inChunkY >> depth & 1) << 1 | (inChunkZ >> depth & 1));
-    }
-
-    private static int getFromDiscBytes(ByteArrayList data, byte[] discBytes, int startIndex) {
-        byte identifier = discBytes[startIndex];
-        data.add(identifier);
-
-        if (identifier == HOMOGENOUS) {
-            data.add(discBytes[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-        if (identifier == DETAIL) {
-            // Weird shuffle for backwards compatibility
-            for (int x = 0; x < 4; x++)
-                for (int y = 0; y < 4; y++)
-                    for (int z = 0; z < 4; z++)
-                        data.add(discBytes[startIndex + getInDetailIndex(x, y, z)]);
-            return DETAIL_BYTE_SIZE;
-        }
-//        if (identifier == SPLITTER)
-        int currentIndex = data.size();
-        data.pad(SPLITTER_BYTE_SIZE - 1);
-        int discByteSize = 1;
-
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 3);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 6);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 9);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 12);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 15);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-        setOffset(data, data.size() - currentIndex + 1, currentIndex + 18);
-        discByteSize += getFromDiscBytes(data, discBytes, startIndex + discByteSize);
-
-        return discByteSize;
     }
 
     private static int compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int depth, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
@@ -262,12 +185,16 @@ public final class MaterialsData {
             data.add(uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)]);
             return HOMOGENOUS_BYTE_SIZE;
         }
-        if (depth < 2) {
+        if (depth < 1) {
             data.add(DETAIL);
-            for (int inDetailX = 0; inDetailX < 4; inDetailX++)
-                for (int inDetailZ = 0; inDetailZ < 4; inDetailZ++)
-                    for (int inDetailY = 0; inDetailY < 4; inDetailY++)
-                        data.add(uncompressedMaterials[getUncompressedIndex(inChunkX + inDetailX, inChunkY + inDetailY, inChunkZ + inDetailZ)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ + 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ + 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ + 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 1)]);
             return DETAIL_BYTE_SIZE;
         }
         int nextSize = 1 << depth;
@@ -304,12 +231,13 @@ public final class MaterialsData {
         return true;
     }
 
+
     private static final byte HOMOGENOUS = 0;
     private static final byte DETAIL = 1;
     private static final byte SPLITTER = 2;
 
     private static final byte HOMOGENOUS_BYTE_SIZE = 2;
-    private static final byte DETAIL_BYTE_SIZE = 65;
+    private static final byte DETAIL_BYTE_SIZE = 9;
     private static final byte SPLITTER_BYTE_SIZE = 22;
 
     private byte[] data;
