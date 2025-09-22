@@ -13,7 +13,7 @@ public final class Game {
 
         player = FileManager.loadPlayer();
         server = FileManager.loadServer();
-        world = new World();
+        world = new World(saveFile.getName());
 
         server.startTicks();
     }

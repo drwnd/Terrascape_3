@@ -39,6 +39,9 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
     public static ArrayList<DebugScreenLine> getDebugLines() {
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
+        
+        lines.add(new DebugScreenLine(OptionSetting.WORLD_NAME_VISIBILITY, OptionSetting.WORLD_NAME_COLOR,
+                () -> Game.getWorld().getName(), "World name"));
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();

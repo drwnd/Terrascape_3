@@ -6,7 +6,8 @@ import static utils.Constants.*;
 
 public final class World {
 
-    public World() {
+    public World(String name) {
+        this.name = name;
         chunks = new Chunk[RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     }
 
@@ -47,5 +48,10 @@ public final class World {
     }
 
 
+    public String getName() {
+        return name;
+    }
+
+    private final String name;
     private final Chunk[] chunks;
 }
