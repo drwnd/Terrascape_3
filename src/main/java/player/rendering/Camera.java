@@ -58,15 +58,21 @@ public final class Camera {
         }
     }
 
-    public void setPlayerPositon(Position playerPositon) {
+    public void setPlayerPosition(Position playerPosition) {
         synchronized (this) {
-            position = new Position(playerPositon);
+            position = new Position(playerPosition);
         }
     }
 
     public Vector3f getRotation() {
         synchronized (this) {
             return new Vector3f(rotation);
+        }
+    }
+
+    public void setRotation(Vector3f rotation) {
+        synchronized (this) {
+            this.rotation.set(rotation);
         }
     }
 

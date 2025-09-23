@@ -38,7 +38,7 @@ public final class InteractionHandler {
         handleUseDestroy(destroyInfo, AIR, false);
     }
 
-    private void handleUseDestroy(PlaceDestroyInfo info, byte material, boolean offsetPostion) {
+    private void handleUseDestroy(PlaceDestroyInfo info, byte material, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < FloatSetting.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
@@ -46,7 +46,7 @@ public final class InteractionHandler {
         Target target = Target.getPlayerTarget();
         if (target == null) return;
 
-        Vector3i position = offsetPostion ? target.offsetPosition() : target.position();
+        Vector3i position = offsetPosition ? target.offsetPosition() : target.position();
         if (Game.getServer().requestBreakPlaceInteraction(position, placeBreakSize, material)) info.lastAction = currentGameTick;
     }
 

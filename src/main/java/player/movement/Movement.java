@@ -21,10 +21,6 @@ public final class Movement {
         return position;
     }
 
-    public Vector3f getVelocity() {
-        return new Vector3f(velocity);
-    }
-
     public static void normalizeToMaxComponent(Vector3f velocity) {
         float max = Math.abs(velocity.get(velocity.maxComponent()));
         if (max < 1E-4) return;
@@ -35,9 +31,19 @@ public final class Movement {
         state.handleInput(button, action);
     }
 
+    public Vector3f getVelocity() {
+        return new Vector3f(velocity);
+    }
+
+    public void setVelocity(Vector3f velocity) {
+        this.velocity.set(velocity);
+    }
+
+
     private void move(Position position) {
         position.add(velocity.x, velocity.y, velocity.z);
     }
+
 
     private MovementState state = new FlyingState();
     private final Vector3f velocity;

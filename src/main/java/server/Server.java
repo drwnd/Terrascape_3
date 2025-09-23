@@ -14,7 +14,7 @@ import static utils.Constants.*;
 
 public final class Server {
 
-    public Server(int currentGameTick) {
+    public Server(long currentGameTick) {
         this.currentGameTick = currentGameTick;
     }
 

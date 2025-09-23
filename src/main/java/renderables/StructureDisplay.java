@@ -48,7 +48,7 @@ public final class StructureDisplay extends Renderable {
         }
         if (transparentModel.containsWater()) {
             Shader shader = AssetManager.getShader(ShaderIdentifier.WATER);
-            Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0);
+            Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0f);
             shader.setUniform("cameraPosition", 300.0f, 400.0f, 200.0f);
 
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, transparentModel.verticesBuffer());

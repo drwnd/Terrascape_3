@@ -16,8 +16,9 @@ public final class ByteArrayList {
     }
 
     public void add(byte[] values) {
-        growToMatch(size + data.length);
+        growToMatch(size + values.length);
         System.arraycopy(values, 0, data, size, values.length);
+        size += values.length;
     }
 
     public void copyInto(byte[] target, int startIndex) {

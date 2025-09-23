@@ -10,15 +10,8 @@ public final class MaterialsData {
         data = new byte[]{HOMOGENOUS, material};
     }
 
-    private MaterialsData(byte[] data) {
+    public MaterialsData(byte[] data) {
         this.data = data;
-    }
-
-
-    public static MaterialsData loadFromDiscBytes(byte[] bytes, int startIndex, int length) {
-        byte[] data = new byte[length];
-        System.arraycopy(bytes, startIndex, data, 0, length);
-        return new MaterialsData(data);
     }
 
     public static MaterialsData getCompressedMaterials(byte[] uncompressedMaterials) {

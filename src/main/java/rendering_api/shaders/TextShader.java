@@ -87,7 +87,7 @@ public class TextShader extends Shader {
     private static int getCharWidth(char character) {
         return switch (character) {
             case '!', '\'', ',', '.', ':', ';', 'i', '|' -> 1;
-            case '[', ']', '`', '´', 'j', 'l' -> 2;
+            case '[', ']', '`', 'j', 'l' -> 2;
             case '"', '(', ')', '*', '+', '-', 'I', '/', '1', '<', '=', '>', '\\', 'r', 't', '{', '}' -> 3;
             case '2', '4', '7', '?', 'C', 'E', 'F', 'J', 'K', 'L', '_', 'f', 'k' -> 4;
             case '@', 'Q' -> 6;

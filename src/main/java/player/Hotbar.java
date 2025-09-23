@@ -83,10 +83,6 @@ public final class Hotbar extends UiElement {
         return slot;
     }
 
-    private void setSelectedSlot(int selectedSlot) {
-        this.selectedSlot = clampSlot(selectedSlot);
-    }
-
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
             if (contents[slot % LENGTH] == AIR) return slot % LENGTH;
@@ -113,6 +109,23 @@ public final class Hotbar extends UiElement {
         setContent(slot, target.material());
         setSelectedSlot(slot);
     }
+
+    public byte[] getContents() {
+        return contents;
+    }
+
+    public void setContent(byte[] contents) {
+        for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);
+    }
+
+    public int getSelectedSlot() {
+        return selectedSlot;
+    }
+
+    public void setSelectedSlot(int selectedSlot) {
+        this.selectedSlot = clampSlot(selectedSlot);
+    }
+
 
     private int selectedSlot = 0;
     private final UiElement hotBarSelectionIndicator;

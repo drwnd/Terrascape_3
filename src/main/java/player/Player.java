@@ -44,7 +44,7 @@ public final class Player {
             Vector3f movementThisTick = movement.getVelocity().mul(fraction);
             Position toRenderPosition = new Position(position);
             toRenderPosition.add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
-            camera.setPlayerPositon(toRenderPosition);
+            camera.setPlayerPosition(toRenderPosition);
         }
     }
 
@@ -89,6 +89,10 @@ public final class Player {
 
     public Renderer getRenderer() {
         return renderer;
+    }
+
+    public Movement getMovement() {
+        return movement;
     }
 
     public Position getPosition() {

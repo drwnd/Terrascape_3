@@ -7,6 +7,7 @@ import settings.optionSettings.Visibility;
 public enum OptionSetting {
 
     WORLD_NAME_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
+    WORLD_TICK_AND_TIME_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     FPS_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     POSITION_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     CHUNK_POSITION_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
@@ -18,6 +19,7 @@ public enum OptionSetting {
     TARGET_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
 
     WORLD_NAME_COLOR(ColorOption.LIGHT_GRAY),
+    WORLD_TICK_AND_TIME_COLOR(ColorOption.LIGHT_GRAY),
     FPS_COLOR(ColorOption.RED),
     POSITION_COLOR(ColorOption.WHITE),
     CHUNK_POSITION_COLOR(ColorOption.WHITE),

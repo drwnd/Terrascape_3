@@ -2,6 +2,7 @@ package server.saving;
 
 import org.joml.*;
 import utils.ByteArrayList;
+import utils.Position;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,14 +35,13 @@ public abstract class Saver<T> {
 
     public final synchronized T load(String filepath) {
         File saveFile = new File(filepath);
-        if (!saveFile.exists()) return null;
+        if (!saveFile.exists()) return getDefault();
         try {
             FileInputStream reader = new FileInputStream(saveFile);
             readData = reader.readAllBytes();
             reader.close();
         } catch (IOException exception) {
-            exception.printStackTrace();
-            return null;
+            throw new RuntimeException(exception);
         }
         currentIndex = 0;
         return load();
@@ -51,6 +51,10 @@ public abstract class Saver<T> {
     abstract void save(T object);
 
     abstract T load();
+
+    T getDefault() {
+        return null;
+    }
 
 
     final void saveLong(long value) {
@@ -65,14 +69,14 @@ public abstract class Saver<T> {
     }
 
     final long loadLong() {
-        return (long) readData[currentIndex++] << 56
-                | (readData[currentIndex++] & 0xFFL) << 48
-                | (readData[currentIndex++] & 0xFFL) << 40
-                | (readData[currentIndex++] & 0xFFL) << 32
-                | (readData[currentIndex++] & 0xFFL) << 24
-                | (readData[currentIndex++] & 0xFFL) << 16
-                | (readData[currentIndex++] & 0xFFL) << 8
-                | readData[currentIndex++] & 0xFFL;
+        return (long) loadByte() << 56
+                | (loadByte() & 0xFFL) << 48
+                | (loadByte() & 0xFFL) << 40
+                | (loadByte() & 0xFFL) << 32
+                | (loadByte() & 0xFFL) << 24
+                | (loadByte() & 0xFFL) << 16
+                | (loadByte() & 0xFFL) << 8
+                | loadByte() & 0xFFL;
     }
 
     final void saveInt(int value) {
@@ -83,10 +87,10 @@ public abstract class Saver<T> {
     }
 
     final int loadInt() {
-        return readData[currentIndex++] << 24
-                | (readData[currentIndex++] & 0xFF) << 16
-                | (readData[currentIndex++] & 0xFF) << 8
-                | readData[currentIndex++] & 0xFF;
+        return loadByte() << 24
+                | (loadByte() & 0xFF) << 16
+                | (loadByte() & 0xFF) << 8
+                | loadByte() & 0xFF;
     }
 
     final void saveShort(short value) {
@@ -95,8 +99,8 @@ public abstract class Saver<T> {
     }
 
     final short loadShort() {
-        return (short) ((readData[currentIndex++] & 0xFF) << 8
-                | (readData[currentIndex++] & 0xFF));
+        return (short) ((loadByte() & 0xFF) << 8
+                | (loadByte() & 0xFF));
     }
 
     final void saveByte(byte value) {
@@ -104,6 +108,10 @@ public abstract class Saver<T> {
     }
 
     final byte loadByte() {
+        if (currentIndex >= readData.length) {
+            currentIndex++;
+            return (byte) 0;
+        }
         return readData[currentIndex++];
     }
 
@@ -112,7 +120,7 @@ public abstract class Saver<T> {
     }
 
     final boolean loadBoolean() {
-        return readData[currentIndex++] != 0;
+        return loadByte() != 0;
     }
 
     final void saveFloat(float value) {
@@ -131,7 +139,8 @@ public abstract class Saver<T> {
     final byte[] loadByteArray() {
         int length = loadInt();
         byte[] value = new byte[length];
-        System.arraycopy(readData, currentIndex, value, 0, length);
+        if (readData.length > currentIndex + length)
+            System.arraycopy(readData, currentIndex, value, 0, length);
         currentIndex += length;
         return value;
     }
@@ -194,6 +203,15 @@ public abstract class Saver<T> {
 
     final Vector4f loadVector4f() {
         return new Vector4f(loadFloat(), loadFloat(), loadFloat(), loadFloat());
+    }
+
+    final void savePosition(Position position) {
+        saveVector3i(position.intPosition());
+        saveVector3f(position.fractionPosition());
+    }
+
+    final Position loadPosition() {
+        return new Position(loadVector3i(), loadVector3f());
     }
 
 

@@ -1,0 +1,31 @@
+package server.saving;
+
+import server.World;
+import server.generation.WorldGeneration;
+
+public class WorldSaver extends Saver<World> {
+
+    public static String getSaveFileLocation(String worldName) {
+        return "saves/%s/worldData".formatted(worldName);
+    }
+
+    public WorldSaver() {
+        super(8);
+    }
+
+    @Override
+    void save(World world) {
+        saveLong(WorldGeneration.SEED);
+    }
+
+    @Override
+    World load() {
+        WorldGeneration.SEED = loadLong();
+        return new World();
+    }
+
+    @Override
+    World getDefault() {
+        return new World();
+    }
+}
