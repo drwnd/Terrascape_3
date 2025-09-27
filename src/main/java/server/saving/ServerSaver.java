@@ -2,7 +2,7 @@ package server.saving;
 
 import server.Server;
 
-public class ServerSaver extends Saver<Server> {
+public final class ServerSaver extends Saver<Server> {
 
     public static String getSaveFileLocation(String worldName) {
         return "saves/%s/serverData".formatted(worldName);

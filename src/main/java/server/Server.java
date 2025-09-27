@@ -3,6 +3,7 @@ package server;
 import org.joml.Vector3i;
 import player.rendering.MeshCollector;
 import server.generation.ChunkGenerator;
+import server.saving.ChunkSaver;
 import utils.Position;
 import utils.Utils;
 
@@ -40,7 +41,7 @@ public final class Server {
         y &= -breakPlaceSize & CHUNK_SIZE_MASK;
         z &= -breakPlaceSize & CHUNK_SIZE_MASK;
 
-        chunk.getMaterials().storeMaterial(x, y, z, material, breakPlaceSize);
+        chunk.storeMaterial(x, y, z, material, breakPlaceSize);
 
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
@@ -67,6 +68,7 @@ public final class Server {
 
     public void unloadDistantChunks(Vector3i playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+        ChunkSaver saver = new ChunkSaver();
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             int lodPlayerX = playerChunkPosition.x >> lod;
@@ -79,8 +81,10 @@ public final class Server {
                 if (Utils.outsideRenderKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z))
                     meshCollector.removeMesh(chunk.INDEX, chunk.LOD);
 
-                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z))
+                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z)) {
                     Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
+                    if (chunk.isModified()) saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
+                }
             }
         }
     }

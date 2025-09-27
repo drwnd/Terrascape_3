@@ -5,6 +5,7 @@ import player.Player;
 import player.rendering.MeshCollector;
 import player.rendering.MeshGenerator;
 import server.*;
+import server.saving.ChunkSaver;
 import utils.Utils;
 
 import java.util.concurrent.Executors;
@@ -138,37 +139,11 @@ public final class ChunkGenerator {
         public void run() {
 
             GenerationData generationData = new GenerationData(chunkX, chunkZ, lod);
-            World world = Game.getWorld();
+            ChunkSaver saver = new ChunkSaver();
 
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY < playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++) {
-                try {
-                    final long expectedId = Utils.getChunkId(chunkX, chunkY, chunkZ);
-                    Chunk chunk = world.getChunk(chunkX, chunkY, chunkZ, lod);
-
-                    if (chunk == null) {
-//                        chunk = FileManager.getChunk(expectedId, lod);
-//                        if (chunk == null)
-                        chunk = new Chunk(chunkX, chunkY, chunkZ, lod);
-
-                        world.storeChunk(chunk);
-                    } else if (chunk.ID != expectedId) {
-                        System.err.println("found chunk has wrong id found LOD:" + chunk.LOD + " expected:" + lod);
-                        System.err.printf("expected %s %s %s%n", chunkX, chunkY, chunkZ);
-                        System.err.printf("found    %s %s %s%n", chunk.X, chunk.Y, chunk.Z);
-
-//                        chunk = FileManager.getChunk(expectedId, lod);
-//                        if (chunk == null)
-                        chunk = new Chunk(chunkX, chunkY, chunkZ, lod);
-
-                        world.storeChunk(chunk);
-                    }
-                    if (!chunk.isGenerated()) WorldGeneration.generate(chunk, generationData);
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                    System.err.println("Generator:");
-                    System.err.println(exception.getClass());
-                    System.err.println(chunkX + " " + chunkY + " " + chunkZ);
-                }
+                Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
+                if (!chunk.isGenerated()) WorldGeneration.generate(chunk, generationData);
             }
         }
     }

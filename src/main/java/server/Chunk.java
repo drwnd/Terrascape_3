@@ -56,12 +56,13 @@ public final class Chunk {
         return getSaveMaterial(inChunkX, inChunkY, inChunkZ);
     }
 
-    public int getIndex() {
-        return INDEX;
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int size) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, size);
+        modified = true;
     }
 
-    public void cleanUp() {
-
+    public int getIndex() {
+        return INDEX;
     }
 
     public MaterialsData getMaterials() {
@@ -70,6 +71,10 @@ public final class Chunk {
 
     public void setMaterials(MaterialsData materials) {
         this.materials = materials;
+    }
+
+    public boolean isModified() {
+        return modified;
     }
 
     public boolean isGenerated() {
@@ -81,5 +86,5 @@ public final class Chunk {
     }
 
     private MaterialsData materials;
-    private boolean generated;
+    private boolean generated, modified;
 }

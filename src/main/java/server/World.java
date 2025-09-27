@@ -1,5 +1,6 @@
 package server;
 
+import server.saving.ChunkSaver;
 import utils.Utils;
 
 import static utils.Constants.*;
@@ -23,9 +24,6 @@ public final class World {
     }
 
     public void storeChunk(Chunk chunk) {
-        Chunk previousChunk = chunks[chunk.getIndex()];
-        if (previousChunk != null) previousChunk.cleanUp();
-
         chunks[chunk.getIndex()] = chunk;
     }
 
@@ -36,14 +34,15 @@ public final class World {
     }
 
     public void setNull(int chunkIndex, int lod) {
-        Chunk previousChunk = chunks[chunkIndex];
-        if (previousChunk != null) previousChunk.cleanUp();
-
         chunks[chunkIndex] = null;
     }
 
     public void cleanUp() {
-        for (Chunk chunk : chunks) if (chunk != null) chunk.cleanUp();
+        ChunkSaver saver = new ChunkSaver();
+        for (Chunk chunk : chunks) {
+            if (chunk == null || !chunk.isModified()) continue;
+            saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
+        }
     }
 
 

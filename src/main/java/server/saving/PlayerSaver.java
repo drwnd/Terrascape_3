@@ -5,7 +5,7 @@ import org.joml.Vector3i;
 import player.Player;
 import utils.Position;
 
-public class PlayerSaver extends Saver<Player> {
+public final class PlayerSaver extends Saver<Player> {
 
     public static String getSaveFileLocation(String worldName) {
         return "saves/%s/playerData".formatted(worldName);

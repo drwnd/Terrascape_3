@@ -24,7 +24,11 @@ public abstract class Saver<T> {
         save(object);
         File saveFile = new File(filepath);
         try {
-            if (!saveFile.exists()) saveFile.createNewFile();
+            if (!saveFile.exists()) {
+                File parent = saveFile.getParentFile();
+                if (!parent.exists()) parent.mkdirs();
+                saveFile.createNewFile();
+            }
             FileOutputStream writer = new FileOutputStream(saveFile);
             writer.write(toSaveData.toByteArray());
             writer.close();
@@ -41,6 +45,7 @@ public abstract class Saver<T> {
             readData = reader.readAllBytes();
             reader.close();
         } catch (IOException exception) {
+            exception.printStackTrace();
             throw new RuntimeException(exception);
         }
         currentIndex = 0;
@@ -52,9 +57,7 @@ public abstract class Saver<T> {
 
     abstract T load();
 
-    T getDefault() {
-        return null;
-    }
+    abstract T getDefault();
 
 
     final void saveLong(long value) {
@@ -139,7 +142,7 @@ public abstract class Saver<T> {
     final byte[] loadByteArray() {
         int length = loadInt();
         byte[] value = new byte[length];
-        if (readData.length > currentIndex + length)
+        if (readData.length >= currentIndex + length)
             System.arraycopy(readData, currentIndex, value, 0, length);
         currentIndex += length;
         return value;

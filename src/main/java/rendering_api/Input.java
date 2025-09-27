@@ -13,7 +13,7 @@ public abstract class Input {
     protected final Vector2i cursorPos = new Vector2i();
 
     public Input() {
-
+        // This needs to exist so subclasses don't have to call the other constructor
     }
 
     public Input(Renderable menu) {
@@ -22,6 +22,7 @@ public abstract class Input {
     }
 
     public static boolean isKeyPressed(int keycode) {
+        if (keycode == GLFW.GLFW_KEY_UNKNOWN) return false;
         if ((keycode & Input.IS_MOUSE_BUTTON) == 0)
             return GLFW.glfwGetKey(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW.GLFW_PRESS;
         else

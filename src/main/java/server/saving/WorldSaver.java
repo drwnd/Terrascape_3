@@ -3,7 +3,7 @@ package server.saving;
 import server.World;
 import server.generation.WorldGeneration;
 
-public class WorldSaver extends Saver<World> {
+public final class WorldSaver extends Saver<World> {
 
     public static String getSaveFileLocation(String worldName) {
         return "saves/%s/worldData".formatted(worldName);
