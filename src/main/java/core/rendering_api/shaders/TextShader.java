@@ -2,12 +2,10 @@ package core.rendering_api.shaders;
 
 import core.assets.AssetManager;
 import core.assets.identifiers.*;
-import core.renderables.TextElement;
-import core.rendering_api.Window;
 import core.settings.FloatSetting;
-
 import core.settings.OptionSetting;
 import core.settings.optionSettings.FontOption;
+
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL46;
 
@@ -54,7 +52,7 @@ public class TextShader extends Shader {
 
         float textSize = FloatSetting.TEXT_SIZE.value();
         float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
-        float factor = TextElement.DEFAULT_TEXT_SCALAR * textSize * charWidth / (Window.getWidth() * guiSize);
+        float factor = textSize * charWidth / (guiSize * 7);
 
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)
             if (offsets[index + 1] * factor > maxAllowedLength) return index;

@@ -3,10 +3,10 @@ package game.player.rendering;
 import core.assets.AssetManager;
 import core.assets.identifiers.ShaderIdentifier;
 import core.settings.OptionSetting;
-import core.renderables.TextElement;
 import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
 import core.settings.optionSettings.ColorOption;
+import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
 
 import game.player.interaction.Target;
@@ -29,10 +29,11 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
     }
 
     public void render(int textLine) {
+        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
         TextShader shader = (TextShader) AssetManager.getShader(ShaderIdentifier.TEXT);
         shader.bind();
 
-        float lineSeparation = TextElement.DEFAULT_TEXT_SIZE.y * FloatSetting.TEXT_SIZE.value();
+        float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
         Vector2f position = new Vector2f(0.0f, 1.0f - textLine * lineSeparation);
         Color color = ((ColorOption) this.color.value()).getColor();
 

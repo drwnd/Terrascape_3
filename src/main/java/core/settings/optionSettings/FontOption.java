@@ -3,6 +3,8 @@ package core.settings.optionSettings;
 import core.assets.identifiers.ITextureIdentifier;
 import core.utils.FileManager;
 
+import org.joml.Vector2f;
+
 import java.io.File;
 import java.util.Arrays;
 
@@ -16,14 +18,18 @@ public final class FontOption implements Option, ITextureIdentifier {
         this.fontFile = fontFile;
 
         String[] lines = FileManager.readAllLines(new File(fontFile.getPath() + "/settings"));
-        if (lines.length == 0) return;
-
-        String defaultLine = lines[0];
-        if (defaultLine.startsWith("default:")) Arrays.fill(charSizes, Byte.parseByte(defaultLine.substring(8)));
-
         for (String line : lines) {
-            if (line.startsWith("default:")) continue;
-
+            if (line.startsWith("default:")) {
+                Arrays.fill(charSizes, Byte.parseByte(line.substring(8)));
+                continue;
+            }
+            if (line.startsWith("pixelSize:")) {
+                int separatorIndex = line.indexOf('|');
+                int x = Integer.parseInt(line.substring(10, separatorIndex));
+                int y = Integer.parseInt(line.substring(separatorIndex + 1));
+                defaultTextSize.set(x, y).mul(5.2083336E-4f, 9.259259E-4f);
+                continue;
+            }
             int colonIndex = line.indexOf(':');
             byte size = Byte.parseByte(line.substring(0, colonIndex));
             char[] charsWithSize = line.substring(colonIndex + 1).toCharArray();
@@ -34,6 +40,10 @@ public final class FontOption implements Option, ITextureIdentifier {
 
     public byte[] getCharSizes() {
         return charSizes;
+    }
+
+    public Vector2f getDefaultTextSize() {
+        return defaultTextSize;
     }
 
 
@@ -83,5 +93,6 @@ public final class FontOption implements Option, ITextureIdentifier {
     }
 
     private final byte[] charSizes = new byte[256];
+    private final Vector2f defaultTextSize = new Vector2f();
     private final File fontFile;
 }
