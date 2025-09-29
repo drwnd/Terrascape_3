@@ -1,7 +1,7 @@
 package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.identifiers.ITextureIdentifier;
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -17,7 +17,7 @@ public final class AssetLoader {
     }
 
 
-    public static Texture loadTexture(TextureIdentifier identifier) {
+    public static Texture loadTexture(ITextureIdentifier identifier) {
         int width, height;
         ByteBuffer buffer;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -25,7 +25,7 @@ public final class AssetLoader {
             IntBuffer h = stack.mallocInt(1);
             IntBuffer c = stack.mallocInt(1);
 
-            String filepath = identifier.getFilepath();
+            String filepath = identifier.filepath();
             buffer = STBImage.stbi_load(filepath, w, h, c, 4);
             if (buffer == null) throw new RuntimeException("Image FIle " + filepath + " not loaded " + STBImage.stbi_failure_reason());
 

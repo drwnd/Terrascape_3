@@ -1,7 +1,8 @@
 package core.settings.optionSettings;
 
 /**
- * Must only be implemented by an Enum. Otherwise, override next(), previous(), value(...) and name().
+ * Must only be implemented by an Enum.
+ * Otherwise, override next(), previous(), value(...), name() and toString().
  */
 public interface Option {
 

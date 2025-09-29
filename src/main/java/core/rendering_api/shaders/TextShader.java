@@ -1,14 +1,13 @@
 package core.rendering_api.shaders;
 
 import core.assets.AssetManager;
-import core.assets.identifiers.BufferIdentifier;
-import core.assets.identifiers.ShaderIdentifier;
-import core.assets.identifiers.TextureIdentifier;
-import core.assets.identifiers.VertexArrayIdentifier;
+import core.assets.identifiers.*;
 import core.renderables.TextElement;
 import core.rendering_api.Window;
 import core.settings.FloatSetting;
 
+import core.settings.OptionSetting;
+import core.settings.optionSettings.FontOption;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL46;
 
@@ -42,7 +41,7 @@ public class TextShader extends Shader {
         setUniform("addTransparentBackground", addTransparentBackground);
 
         GL46.glActiveTexture(0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.TEXT).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture((ITextureIdentifier) OptionSetting.FONT.value()).getID());
         GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.TEXT_ROW).getID());
         GL46.glEnableVertexAttribArray(0);
         GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.getBuffer(BufferIdentifier.MODEL_INDEX).getID());
@@ -75,25 +74,20 @@ public class TextShader extends Shader {
     private static int[] getOffsets(String text) {
         int[] array = new int[MAX_TEXT_LENGTH + 1];
         char[] chars = text.toCharArray();
+        byte[] charSizes = ((FontOption) OptionSetting.FONT.value()).getCharSizes();
         array[0] = 0;
         int max = Math.min(text.length(), MAX_TEXT_LENGTH);
 
         for (int index = 0; index < max; index++)
-            array[index + 1] = array[index] + getCharWidth(chars[index]) + CHAR_PADDING;
+            array[index + 1] = array[index] + getCharWidth(chars[index], charSizes) + CHAR_PADDING;
         for (int index = max; index < MAX_TEXT_LENGTH; index++) array[index + 1] = array[index];
 
         return array;
     }
 
-    private static int getCharWidth(char character) {
-        return switch (character) {
-            case '!', '\'', ',', '.', ':', ';', 'i', '|' -> 1;
-            case '[', ']', '`', 'j', 'l' -> 2;
-            case '"', '(', ')', '*', '+', '-', 'I', '/', '1', '<', '=', '>', '\\', 'r', 't', '{', '}' -> 3;
-            case '2', '4', '7', '?', 'C', 'E', 'F', 'J', 'K', 'L', '_', 'f', 'k' -> 4;
-            case '@', 'Q' -> 6;
-            default -> 5;
-        };
+    private static int getCharWidth(char character, byte[] charSizes) {
+        if ((character & 0xFF) != character) return 0; // No ASCII char
+        return charSizes[character];
     }
 
     private static final int CHAR_PADDING = 1;

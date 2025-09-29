@@ -1,6 +1,6 @@
 package core.assets.identifiers;
 
-public enum TextureIdentifier implements AssetIdentifier {
+public enum TextureIdentifier implements ITextureIdentifier {
 
     MATERIALS("assets/textures/atlas256.png"),
     DAY_SKY("assets/textures/82984-skybox-blue-atmosphere-sky-space-hd-image-free-png.png"),
@@ -10,7 +10,6 @@ public enum TextureIdentifier implements AssetIdentifier {
     HOTBAR_SELECTION_INDICATOR("assets/textures/HotBarSelectionIndicator.png"),
     INVENTORY_OVERLAY("assets/textures/InventoryOverlay.png"),
     PROPERTIES("assets/textures/properties256.png"),
-    TEXT("assets/textures/textAtlas.png"),
     GUI_ELEMENT_BACKGROUND("assets/textures/GuiElementBackground.png"),
     TOGGLE_ACTIVATED("assets/textures/ToggleActivated.png"),
     TOGGLE_DEACTIVATED("assets/textures/ToggleDeactivated.png");
@@ -19,7 +18,8 @@ public enum TextureIdentifier implements AssetIdentifier {
         this.filepath = filepath;
     }
 
-    public String getFilepath() {
+    @Override
+    public String filepath() {
         return filepath;
     }
 

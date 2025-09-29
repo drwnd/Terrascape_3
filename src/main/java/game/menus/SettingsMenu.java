@@ -121,6 +121,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.INVENTORY_ITEMS_PER_ROW);
         section.addSlider(FloatSetting.INVENTORY_ITEM_SCALING);
 
+        section.addOption(OptionSetting.FONT);
+
         return section;
     }
 

@@ -12,7 +12,7 @@ public final class AssetManager {
     }
 
 
-    public static Texture getTexture(TextureIdentifier identifier) {
+    public static Texture getTexture(ITextureIdentifier identifier) {
         return (Texture) loadAsset(identifier, () -> AssetLoader.loadTexture(identifier));
     }
 
