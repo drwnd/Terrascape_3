@@ -4,7 +4,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 /saves/
-/assets/textData/Settings
+/core.assets/textData/Settings
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -23,7 +23,7 @@ out/
 .classpath
 .factorypath
 .project
-.settings
+.core.core.settings
 .springBeans
 .sts4-cache
 bin/

@@ -1,6 +1,6 @@
-import menus.MainMenu;
-import rendering_api.Window;
-import settings.Settings;
+import game.menus.MainMenu;
+import core.rendering_api.Window;
+import core.settings.Settings;
 
 public final class Launcher {
 
