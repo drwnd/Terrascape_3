@@ -2,12 +2,13 @@ package core.renderables;
 
 import core.assets.identifiers.TextureIdentifier;
 import core.rendering_api.Window;
+import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 
 public class TextField extends UiButton {
 
-    public TextField(Vector2f sizeToParent, Vector2f offsetToParent, String name) {
+    public TextField(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter name) {
         super(sizeToParent, offsetToParent);
         setAction(this::setOnTop);
 

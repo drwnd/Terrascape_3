@@ -8,6 +8,7 @@ import core.settings.FloatSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
+import core.utils.StringGetter;
 
 import game.player.interaction.Target;
 import game.server.Chunk;
@@ -102,12 +103,6 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         }, "Chunk Identifiers"));
 
         return lines;
-    }
-
-    interface StringGetter {
-
-        String get();
-
     }
 }
 

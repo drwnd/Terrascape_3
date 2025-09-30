@@ -9,6 +9,7 @@ import core.renderables.UiButton;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.FloatSetting;
+import core.languages.UiMessage;
 
 import game.server.Game;
 import game.player.rendering.ObjectLoader;
@@ -23,13 +24,13 @@ public final class PauseMenu extends Renderable {
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
 
         UiButton quitButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.3f), getQuitButtonAction());
-        quitButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Quit"));
+        quitButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.QUIT_WORLD));
 
         UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.45f), getSettingsButtonAction());
-        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Settings"));
+        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.SETTINGS));
 
         UiButton playButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.6f), getPlayButtonAction());
-        playButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Play"));
+        playButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.CONTINUE_PLAYING));
 
         addRenderable(quitButton);
         addRenderable(settingsButton);

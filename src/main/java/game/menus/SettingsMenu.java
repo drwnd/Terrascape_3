@@ -4,12 +4,16 @@ import core.settings.FloatSetting;
 import core.settings.KeySetting;
 import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
+import core.utils.StringGetter;
+import core.languages.UiMessage;
+import core.renderables.*;
+import core.rendering_api.Window;
+
+import game.player.rendering.DebugScreenLine;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
-import game.player.rendering.DebugScreenLine;
-import core.renderables.*;
-import core.rendering_api.Window;
 
 import java.util.ArrayList;
 
@@ -19,17 +23,17 @@ public final class SettingsMenu extends UiBackgroundElement {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
 
         UiButton backButton = new UiButton(new Vector2f(0.25f, 0.1f), new Vector2f(0.05f, 0.85f), getBackButtonAction());
-        backButton.addRenderable(new TextElement(new Vector2f(0.15f, 0.5f), "Back"));
+        backButton.addRenderable(new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.BACK));
         addRenderable(backButton);
 
         int index = 0;
-        addSection(++index, this::createEverythingSection, "Everything");
-        addSection(++index, this::createControlsSection, "Controls");
-        addSection(++index, this::createRenderingSection, "Rendering");
-        addSection(++index, this::createUiSection, "Ui Customization");
-        addSection(++index, this::createSoundSection, "Sound");
-        addSection(++index, this::createDebugSection, "Debug");
-        addSection(++index, this::createDebugScreenSection, "Debug Screen");
+        addSection(++index, this::createEverythingSection, UiMessage.EVERYTHING_SECTION);
+        addSection(++index, this::createControlsSection, UiMessage.CONTROLS_SECTION);
+        addSection(++index, this::createRenderingSection, UiMessage.RENDERING_SECTION);
+        addSection(++index, this::createUiSection, UiMessage.UI_CUSTOMIZATION_SECTION);
+        addSection(++index, this::createSoundSection, UiMessage.SOUND_SECTION);
+        addSection(++index, this::createDebugSection, UiMessage.DEBUG_SECTION);
+        addSection(++index, this::createDebugScreenSection, UiMessage.DEBUG_SCREEN_SECTION);
     }
 
     public void scrollSectionButtons(float scroll) {
@@ -112,6 +116,9 @@ public final class SettingsMenu extends UiBackgroundElement {
     private SettingsRenderable createUiSection() {
         SettingsRenderable section = new SettingsRenderable();
 
+        section.addOption(OptionSetting.LANGUAGE, UiMessage.LANGUAGE);
+        section.addOption(OptionSetting.FONT, UiMessage.FONT);
+
         section.addSlider(FloatSetting.GUI_SIZE);
         section.addSlider(FloatSetting.TEXT_SIZE);
         section.addSlider(FloatSetting.RIM_THICKNESS);
@@ -120,8 +127,6 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.INVENTORY_ITEM_SIZE);
         section.addSlider(FloatSetting.INVENTORY_ITEMS_PER_ROW);
         section.addSlider(FloatSetting.INVENTORY_ITEM_SCALING);
-
-        section.addOption(OptionSetting.FONT);
 
         return section;
     }
@@ -173,7 +178,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         };
     }
 
-    private void addSection(int sectionNumber, SectionCreator sectionCreator, String name) {
+    private void addSection(int sectionNumber, SectionCreator sectionCreator, StringGetter name) {
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - sectionNumber * 0.15f);
 

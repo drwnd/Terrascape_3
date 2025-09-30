@@ -6,6 +6,7 @@ import core.assets.identifiers.ShaderIdentifier;
 import core.assets.identifiers.TextureIdentifier;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.ToggleSetting;
+import core.utils.Message;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -19,7 +20,7 @@ public final class Toggle extends UiButton {
         this.setting = setting;
         matchSetting();
 
-        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), setting.name()));
+        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), new Message(setting.name())));
     }
 
     public void setToDefault() {

@@ -44,4 +44,18 @@ public final class FileManager {
         for (int index = 0; index < files.length; index++) if (file.equals(files[index])) return index;
         return -1;
     }
+
+    public static File[] getChildren(File file) {
+        if (!file.exists()) file.mkdir();
+        return file.listFiles();
+    }
+
+    public static void delete(File file) {
+        if (file == null) return;
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) for (File child : children) delete(child);
+        }
+        file.delete();
+    }
 }

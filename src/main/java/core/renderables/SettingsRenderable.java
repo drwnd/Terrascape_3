@@ -6,6 +6,9 @@ import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
 import core.rendering_api.Window;
 import core.settings.*;
+import core.utils.Message;
+import core.utils.StringGetter;
+import core.languages.UiMessage;
 
 import game.player.rendering.DebugScreenLine;
 
@@ -23,15 +26,15 @@ public final class SettingsRenderable extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.1f, 0.1f);
 
         UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), getBackButtonAction());
-        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), "Back");
+        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.BACK);
         backButton.addRenderable(text);
 
         UiButton applyChangesButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.7f), getApplyChangesButtonAction());
-        text = new TextElement(new Vector2f(0.15f, 0.5f), "Apply");
+        text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.APPLY_SETTINGS);
         applyChangesButton.addRenderable(text);
 
         UiButton resetButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.55f), getResetSettingsButtonAction());
-        text = new TextElement(new Vector2f(0.15f, 0.5f), "Reset All");
+        text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.RESET_ALL_SETTINGS);
         resetButton.addRenderable(text);
 
         addRenderable(backButton);
@@ -105,12 +108,12 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addOption(OptionSetting setting) {
+    public void addOption(OptionSetting setting, StringGetter prefix) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
 
-        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting);
+        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, prefix);
         addRenderable(option);
         options.add(option);
 
@@ -119,16 +122,20 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
+    public void addOption(OptionSetting setting) {
+        addOption(setting, null);
+    }
+
     public void addDebugLineSetting(DebugScreenLine debugLine) {
         settingsCount++;
 
         Vector2f sizeToParent = new Vector2f(0.15f, 0.1f);
         float yOffset = 1.0f - 0.15f * settingsCount;
 
-        TextElement nameDisplay = new TextElement(new Vector2f(0.225f, 0), new Vector2f(0.375f, yOffset + 0.05f), debugLine.name());
+        TextElement nameDisplay = new TextElement(new Vector2f(0.225f, 0), new Vector2f(0.375f, yOffset + 0.05f), new Message(debugLine.name()));
         nameDisplay.setAllowFocusScaling(false);
-        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6f, yOffset), debugLine.color());
-        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8f, yOffset), debugLine.visibility());
+        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6f, yOffset), debugLine.color(), null);
+        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8f, yOffset), debugLine.visibility(), null);
 
         addRenderable(nameDisplay);
         addRenderable(colorOption);
@@ -151,7 +158,7 @@ public final class SettingsRenderable extends UiBackgroundElement {
         Vector2f offsetToParent = new Vector2f(0.225f, 1.0f - 0.15f * counter);
         UiButton resetButton = new UiButton(sizeToParent, offsetToParent);
 
-        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), "Reset");
+        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.RESET_SETTING);
         resetButton.addRenderable(text);
 
         addRenderable(resetButton);

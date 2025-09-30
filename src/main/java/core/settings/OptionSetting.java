@@ -1,9 +1,7 @@
 package core.settings;
 
-import core.settings.optionSettings.ColorOption;
-import core.settings.optionSettings.FontOption;
-import core.settings.optionSettings.Option;
-import core.settings.optionSettings.Visibility;
+import core.settings.optionSettings.*;
+import core.languages.Language;
 
 public enum OptionSetting {
 
@@ -31,7 +29,8 @@ public enum OptionSetting {
     CHUNK_IDENTIFIERS_COLOR(ColorOption.GREEN),
     TARGET_COLOR(ColorOption.BLUE),
 
-    FONT(new FontOption("Default"));
+    FONT(new FontOption("Default")),
+    LANGUAGE(new Language("English"));
 
     public static void setIfPresent(String name, String value) {
         try {

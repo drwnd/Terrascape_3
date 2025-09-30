@@ -8,6 +8,9 @@ import core.settings.FloatSetting;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.FontOption;
 
+import core.utils.Message;
+import core.utils.StringGetter;
+
 import org.joml.Vector2f;
 
 import java.awt.*;
@@ -18,17 +21,17 @@ public class TextElement extends Renderable {
         super(new Vector2f(1.0f, 1.0f), offsetToParent);
     }
 
-    public TextElement(Vector2f offsetToParent, String text) {
+    public TextElement(Vector2f offsetToParent, StringGetter text) {
         super(new Vector2f(1.0f, 1.0f), offsetToParent);
         this.text = text;
     }
 
-    public TextElement(Vector2f sizeToParent, Vector2f offsetToParent, String text) {
+    public TextElement(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter text) {
         super(sizeToParent, offsetToParent);
         this.text = text;
     }
 
-    public TextElement(Vector2f offsetToParent, String text, Color color) {
+    public TextElement(Vector2f offsetToParent, StringGetter text, Color color) {
         super(new Vector2f(1.0f, 1.0f), offsetToParent);
         this.text = text;
         this.color = color;
@@ -38,6 +41,7 @@ public class TextElement extends Renderable {
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
         Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        String text = this.text.get();
 
         float textSize = FloatSetting.TEXT_SIZE.value();
         float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
@@ -55,8 +59,12 @@ public class TextElement extends Renderable {
         textShader.drawText(position, text.substring(0, maxLength), color, false, true);
     }
 
-    public void setText(String text) {
+    public void setText(StringGetter text) {
         this.text = text;
+    }
+
+    public void setText(String text) {
+        this.text = new Message(text);
     }
 
     public void setColor(Color color) {
@@ -64,5 +72,5 @@ public class TextElement extends Renderable {
     }
 
     private Color color = Color.WHITE;
-    private String text = "";
+    private StringGetter text;
 }

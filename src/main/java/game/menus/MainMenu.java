@@ -1,13 +1,18 @@
 package game.menus;
 
-import org.joml.Vector2f;
-import org.joml.Vector2i;
+import core.utils.FileManager;
+import core.languages.Language;
+import core.languages.UiMessage;
 import core.renderables.Renderable;
 import core.renderables.TextElement;
 import core.renderables.UiBackgroundElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
+
 import game.server.Game;
+
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import java.awt.*;
 import java.io.File;
@@ -20,15 +25,15 @@ public final class MainMenu extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.25f, 0.1f);
 
         UiButton closeApplicationButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), Window::popRenderable);
-        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), "Quit Game");
+        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.QUIT_GAME);
         closeApplicationButton.addRenderable(text);
 
         UiButton createNewWorldButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.725f), getCreateWorldRunnable());
-        text = new TextElement(new Vector2f(0.05f, 0.5f), "New World");
+        text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.NEW_WORLD);
         createNewWorldButton.addRenderable(text);
 
         UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.6f), getSettingsRunnable());
-        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Settings"));
+        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.SETTINGS));
 
         playWorldButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.475f));
         playWorldButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f)));
@@ -37,10 +42,10 @@ public final class MainMenu extends UiBackgroundElement {
         deleteWorldButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f)));
 
         confirmDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.3f));
-        confirmDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Delete world forever...  ;(", Color.RED));
+        confirmDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.CONFIRM_DELETE_WORLD, Color.RED));
 
         cancelDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.175f));
-        cancelDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), "Keep World!  :)", Color.GREEN));
+        cancelDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.KEEP_WORLD, Color.GREEN));
         cancelDeletionButton.setAction(this::hideWorldSpecificButtons);
 
         hideWorldSpecificButtons();
@@ -87,8 +92,8 @@ public final class MainMenu extends UiBackgroundElement {
         playWorldButton.setAction(getPlayWorldRunnable(saveFile));
         deleteWorldButton.setAction(getDeleteWorldRunnable(saveFile));
 
-        ((TextElement) playWorldButton.getChildren().getFirst()).setText("Play %s".formatted(saveFile.getName()));
-        ((TextElement) deleteWorldButton.getChildren().getFirst()).setText("Delete %s".formatted(saveFile.getName()));
+        ((TextElement) playWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.PLAY_WORLD).formatted(saveFile.getName()));
+        ((TextElement) deleteWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.DELETE_WORLD).formatted(saveFile.getName()));
 
         playWorldButton.setVisible(true);
         deleteWorldButton.setVisible(true);
@@ -102,9 +107,7 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
     public static File[] getSavedWorlds() {
-        File savesFile = new File("saves");
-        if (!savesFile.exists()) savesFile.mkdir();
-        return savesFile.listFiles();
+        return FileManager.getChildren(new File("saves"));
     }
 
     private void createWorldButtons() {
@@ -144,7 +147,7 @@ public final class MainMenu extends UiBackgroundElement {
 
     private Runnable getConfirmDeletionRunnable(File saveFile) {
         return () -> {
-            delete(saveFile);
+            FileManager.delete(saveFile);
             createWorldButtons();
             hideWorldSpecificButtons();
         };
@@ -162,16 +165,6 @@ public final class MainMenu extends UiBackgroundElement {
     private static Runnable getPlayWorldRunnable(File saveFile) {
         return () -> Game.play(saveFile);
     }
-
-    private static void delete(File file) {
-        if (file == null) return;
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            if (children != null) for (File child : children) delete(child);
-        }
-        file.delete();
-    }
-
 
     private final ArrayList<UiButton> worldButtons = new ArrayList<>();
     private final UiButton playWorldButton, deleteWorldButton, confirmDeletionButton, cancelDeletionButton;

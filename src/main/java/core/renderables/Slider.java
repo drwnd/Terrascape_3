@@ -3,6 +3,8 @@ package core.renderables;
 import core.rendering_api.Window;
 import core.settings.FloatSetting;
 
+import core.utils.Message;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
@@ -16,7 +18,7 @@ public final class Slider extends UiButton {
         this.setting = setting;
 
         slider = new UiBackgroundElement(new Vector2f(0.05f, 1.0f), new Vector2f(0.0f, 0.0f));
-        textElement = new TextElement(new Vector2f(0.05f, 0.5f), setting.name());
+        textElement = new TextElement(new Vector2f(0.05f, 0.5f), new Message(setting.name()));
 
         addRenderable(slider);
         addRenderable(textElement);

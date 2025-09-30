@@ -3,17 +3,19 @@ package core.renderables;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
+import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 public class OptionToggle extends UiButton {
-    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting) {
+    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter prefix) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
         this.setting = setting;
+        this.prefix = prefix;
 
         textElement = new TextElement(new Vector2f(0.05f, 0.5f));
         addRenderable(textElement);
@@ -40,7 +42,8 @@ public class OptionToggle extends UiButton {
 
     private void setValue(Option value) {
         this.value = value;
-        textElement.setText(value.name());
+        if (prefix != null) textElement.setText(prefix.get() + " : " + value.name());
+        else textElement.setText(value.name());
         if (value instanceof ColorOption) textElement.setColor(((ColorOption) value).getColor());
     }
 
@@ -52,6 +55,7 @@ public class OptionToggle extends UiButton {
         };
     }
 
+    private final StringGetter prefix;
     private Option value;
     private final OptionSetting setting;
     private final TextElement textElement;
