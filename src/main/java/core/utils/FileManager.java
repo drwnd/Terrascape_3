@@ -34,4 +34,14 @@ public final class FileManager {
 
         return array;
     }
+
+    public static File[] getSiblings(File file) {
+        File parent = file.getParentFile();
+        return parent.listFiles();
+    }
+
+    public static int indexOf(File file, File[] files) {
+        for (int index = 0; index < files.length; index++) if (file.equals(files[index])) return index;
+        return -1;
+    }
 }

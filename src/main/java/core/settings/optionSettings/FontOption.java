@@ -49,15 +49,15 @@ public final class FontOption implements Option, ITextureIdentifier {
 
     @Override
     public Option next() {
-        File[] fonts = getAvailableFonts();
-        int index = (getOwnIndex(fonts) + 1) % fonts.length;
+        File[] fonts = FileManager.getSiblings(fontFile);
+        int index = (FileManager.indexOf(fontFile, fonts) + 1) % fonts.length;
         return new FontOption(fonts[index]);
     }
 
     @Override
     public Option previous() {
-        File[] fonts = getAvailableFonts();
-        int index = (getOwnIndex(fonts) - 1 + fonts.length) % fonts.length;
+        File[] fonts = FileManager.getSiblings(fontFile);
+        int index = (FileManager.indexOf(fontFile, fonts) - 1 + fonts.length) % fonts.length;
         return new FontOption(fonts[index]);
     }
 
@@ -81,16 +81,6 @@ public final class FontOption implements Option, ITextureIdentifier {
         return name();
     }
 
-
-    private File[] getAvailableFonts() {
-        File parent = fontFile.getParentFile();
-        return parent.listFiles();
-    }
-
-    private int getOwnIndex(File[] fonts) {
-        for (int index = 0; index < fonts.length; index++) if (fontFile.equals(fonts[index])) return index;
-        return 0;
-    }
 
     private final byte[] charSizes = new byte[256];
     private final Vector2f defaultTextSize = new Vector2f();

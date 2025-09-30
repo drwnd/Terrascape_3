@@ -10,7 +10,6 @@ import org.joml.Vector2f;
 import org.lwjgl.opengl.GL46;
 
 import java.awt.*;
-import java.nio.charset.StandardCharsets;
 
 public class TextShader extends Shader {
     public static final int MAX_TEXT_LENGTH = 128;
@@ -61,10 +60,10 @@ public class TextShader extends Shader {
 
     private static int[] toIntFormat(String text) {
         int[] array = new int[MAX_TEXT_LENGTH];
-        byte[] stringBytes = text.getBytes(StandardCharsets.UTF_8);
+        char[] chars = text.toCharArray();
 
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)
-            array[index] = stringBytes[index];
+            array[index] = getCharIndex(chars[index]);
 
         return array;
     }
@@ -84,8 +83,11 @@ public class TextShader extends Shader {
     }
 
     private static int getCharWidth(char character, byte[] charSizes) {
-        if ((character & 0xFF) != character) return 0; // No ASCII char
-        return charSizes[character];
+        return charSizes[getCharIndex(character)];
+    }
+
+    private static int getCharIndex(char character) {
+        return (character & 0xFF) == character ? character : 0;
     }
 
     private static final int CHAR_PADDING = 1;
