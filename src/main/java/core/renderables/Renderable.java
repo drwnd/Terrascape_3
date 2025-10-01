@@ -23,18 +23,21 @@ public class Renderable {
 
     public final void render(Vector2f parentPosition, Vector2f parentSize) {
         if (!isVisible()) return;
-        Vector2f thisSize = new Vector2f(parentSize).mul(sizeToParent);
-        Vector2f thisPosition = new Vector2f(parentPosition).add(new Vector2f(parentSize).mul(offsetToParent));
+        Vector2f thisSize = new Vector2f(parentSize.x, parentSize.y).mul(sizeToParent);
+        Vector2f thisPosition = new Vector2f(
+                parentPosition.x + parentSize.x * offsetToParent.x,
+                parentPosition.y + parentSize.x * offsetToParent.y);
         if (isFocused() && allowsFocusScaling()) scaleForFocused(thisPosition, thisSize);
 
         renderSelf(thisPosition, thisSize);
         for (Renderable child : children) child.render(thisPosition, thisSize);
     }
 
-    public final void resize(Vector2i size, Vector2f parentSize) {
-        Vector2f thisSize = new Vector2f(parentSize).mul(sizeToParent);
-        resizeSelfTo((int) (size.x * thisSize.x), (int) (size.y * thisSize.y));
-        for (Renderable child : children) child.resize(size, thisSize);
+    public final void resize(Vector2i size, float parentSizeX, float parentSizeY) {
+        float sizeX = parentSizeX * sizeToParent.x;
+        float sizeY = parentSizeY * sizeToParent.y;
+        resizeSelfTo((int) (size.x * sizeX), (int) (size.y * sizeY));
+        for (Renderable child : children) child.resize(size, sizeX, sizeY);
     }
 
     public final void delete() {
@@ -118,12 +121,12 @@ public class Renderable {
         return parent;
     }
 
-    public void setOffsetToParent(Vector2f offsetToParent) {
-        this.offsetToParent.set(offsetToParent);
+    public void setOffsetToParent(float x, float y) {
+        this.offsetToParent.set(x, y);
     }
 
-    public void setSizeToParent(Vector2f sizeToParent) {
-        this.sizeToParent.set(sizeToParent);
+    public void setSizeToParent(float x, float y) {
+        this.sizeToParent.set(x, y);
     }
 
     public boolean isVisible() {

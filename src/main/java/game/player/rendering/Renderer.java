@@ -84,7 +84,7 @@ public final class Renderer extends Renderable {
     public float getTime() {
         return 1.0f;
     }
-    
+
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
@@ -113,8 +113,8 @@ public final class Renderer extends Renderable {
         GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
 
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
-        crosshair.setOffsetToParent(new Vector2f(0.5f - crosshairSize * 0.5f, 0.5f - crosshairSize * 0.5f * Window.getAspectRatio()));
-        crosshair.setSizeToParent(new Vector2f(crosshairSize, crosshairSize * Window.getAspectRatio()));
+        crosshair.setOffsetToParent(0.5f - crosshairSize * 0.5f, 0.5f - crosshairSize * 0.5f * Window.getAspectRatio());
+        crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
 
     private void renderSkybox(Camera camera) {

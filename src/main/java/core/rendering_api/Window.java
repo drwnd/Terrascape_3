@@ -66,10 +66,8 @@ public final class Window {
         GLFW.glfwSetFramebufferSizeCallback(window, (long window, int width, int height) -> {
             Window.width = width;
             Window.height = height;
-            if (!renderablesStack.isEmpty()) {
-                Renderable renderable = renderablesStack.getLast();
-                renderable.resize(new Vector2i(width, height), new Vector2f(1.0f, 1.0f));
-            }
+            Vector2i size = new Vector2i(width, height);
+            for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0f, 1.0f);
         });
 
         GLFW.glfwMakeContextCurrent(window);

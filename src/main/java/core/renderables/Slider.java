@@ -41,7 +41,7 @@ public final class Slider extends UiButton {
     public void setValue(float value) {
         this.value = value;
         textElement.setText("%s %s".formatted(settingName.get(), value));
-        slider.setOffsetToParent(new Vector2f(setting.fractionFromValue(value) - slider.getSizeToParent().x * 0.5f, 0.0f));
+        slider.setOffsetToParent(setting.fractionFromValue(value) - slider.getSizeToParent().x * 0.5f, 0.0f);
     }
 
     @Override

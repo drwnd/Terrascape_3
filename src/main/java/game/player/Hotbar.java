@@ -69,14 +69,14 @@ public final class Hotbar extends UiElement {
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float hotbarSize = FloatSetting.HOTBAR_SIZE.value();
-        setOffsetToParent(new Vector2f(0.5f - hotbarSize * Hotbar.LENGTH * 0.5f, 0));
-        setSizeToParent(new Vector2f(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio()));
+        setOffsetToParent(0.5f - hotbarSize * Hotbar.LENGTH * 0.5f, 0);
+        setSizeToParent(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio());
         super.renderSelf(getPosition(), getSize());
 
         float hotbarIndicatorScaler = FloatSetting.HOTBAR_INDICATOR_SCALER.value();
         float scalingOffset = (1.0f - hotbarIndicatorScaler) * 0.5f;
-        hotBarSelectionIndicator.setOffsetToParent(new Vector2f((selectedSlot + scalingOffset) / LENGTH, scalingOffset));
-        hotBarSelectionIndicator.setSizeToParent(new Vector2f(hotbarIndicatorScaler / LENGTH, hotbarIndicatorScaler));
+        hotBarSelectionIndicator.setOffsetToParent((selectedSlot + scalingOffset) / LENGTH, scalingOffset);
+        hotBarSelectionIndicator.setSizeToParent(hotbarIndicatorScaler / LENGTH, hotbarIndicatorScaler);
     }
 
 

@@ -71,8 +71,8 @@ public final class Inventory extends UiElement {
             float x = 1.0f - itemSize * (column + 1);
             float y = 1.0f - itemSize * 2 * (row + 1);
 
-            display.structureDisplay.setOffsetToParent(new Vector2f(x, y));
-            display.structureDisplay.setSizeToParent(sizeToParent);
+            display.structureDisplay.setOffsetToParent(x, y);
+            display.structureDisplay.setSizeToParent(sizeToParent.x, sizeToParent.y);
         }
     }
 
@@ -95,7 +95,9 @@ public final class Inventory extends UiElement {
 
         if (selectedDisplay != null) {
             itemNameDisplay.setText(Language.getMaterialName((byte) selectedDisplay.index));
-            itemNameDisplay.setOffsetToParent(new Vector2f(pixelCoordinate).div(Window.getWidth(), Window.getHeight()).sub(itemNameDisplay.getLength(), 0));
+            itemNameDisplay.setOffsetToParent(
+                    (float) pixelCoordinate.x / Window.getWidth() - itemNameDisplay.getLength(),
+                    (float) pixelCoordinate.y / Window.getHeight());
             itemNameDisplay.setVisible(true);
         }
     }
