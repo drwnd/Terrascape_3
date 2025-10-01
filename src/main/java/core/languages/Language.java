@@ -20,6 +20,10 @@ public final class Language implements Option {
         materialNames = new String[AMOUNT_OF_MATERIALS];
         uiMessages = new String[UiMessage.values().length];
 
+       load();
+    }
+
+    public void load() {
         String[] thisMaterialNames = FileManager.readAllLines(new File(languageFile.getPath() + "/materials"));
         String[] thisUiMessages = FileManager.readAllLines(new File(languageFile.getPath() + "/uiMessages"));
 

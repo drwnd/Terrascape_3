@@ -26,7 +26,7 @@ public class Renderable {
         Vector2f thisSize = new Vector2f(parentSize.x, parentSize.y).mul(sizeToParent);
         Vector2f thisPosition = new Vector2f(
                 parentPosition.x + parentSize.x * offsetToParent.x,
-                parentPosition.y + parentSize.x * offsetToParent.y);
+                parentPosition.y + parentSize.y * offsetToParent.y);
         if (isFocused() && allowsFocusScaling()) scaleForFocused(thisPosition, thisSize);
 
         renderSelf(thisPosition, thisSize);

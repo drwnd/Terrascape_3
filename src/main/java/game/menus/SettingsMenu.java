@@ -140,6 +140,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.RESIZE_WINDOW, UiMessage.RESIZE_WINDOW);
         section.addKeySelector(KeySetting.RELOAD_SETTINGS, UiMessage.RELOAD_SETTINGS);
         section.addKeySelector(KeySetting.RELOAD_ASSETS, UiMessage.RELOAD_ASSETS);
+        section.addKeySelector(KeySetting.RELOAD_LANGUAGE, UiMessage.RELOAD_LANGUAGE);
+        section.addKeySelector(KeySetting.RELOAD_FONT, UiMessage.RELOAD_FONT);
         section.addKeySelector(KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE, UiMessage.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE);
 
         section.addToggle(ToggleSetting.X_RAY, UiMessage.X_RAY);

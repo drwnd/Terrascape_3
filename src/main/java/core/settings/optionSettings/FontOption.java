@@ -16,7 +16,11 @@ public final class FontOption implements Option, ITextureIdentifier {
 
     private FontOption(File fontFile) {
         this.fontFile = fontFile;
+        load();
+    }
 
+
+    public void load() {
         String[] lines = FileManager.readAllLines(new File(fontFile.getPath() + "/settings"));
         for (String line : lines) {
             if (line.startsWith("default:")) {

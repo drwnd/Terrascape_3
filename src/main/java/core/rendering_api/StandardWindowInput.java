@@ -1,8 +1,11 @@
 package core.rendering_api;
 
 import core.assets.AssetManager;
+import core.languages.Language;
 import core.settings.KeySetting;
+import core.settings.OptionSetting;
 import core.settings.Settings;
+import core.settings.optionSettings.FontOption;
 
 public final class StandardWindowInput extends Input {
 
@@ -31,6 +34,8 @@ public final class StandardWindowInput extends Input {
         if (Input.isKeyPressed(KeySetting.RESIZE_WINDOW)) Window.toggleFullScreen();
         if (Input.isKeyPressed(KeySetting.RELOAD_ASSETS)) AssetManager.reload();
         if (Input.isKeyPressed(KeySetting.RELOAD_SETTINGS)) Settings.loadFromFile();
+        if (Input.isKeyPressed(KeySetting.RELOAD_LANGUAGE)) ((Language) OptionSetting.LANGUAGE.value()).load();
+        if (Input.isKeyPressed(KeySetting.RELOAD_FONT)) ((FontOption) OptionSetting.FONT.value()).load();
     }
 
     @Override

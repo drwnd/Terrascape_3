@@ -84,7 +84,9 @@ public enum UiMessage implements StringGetter {
     RAW_MOUSE_INPUT,
     DO_SHADOW_MAPPING,
     X_RAY,
-    V_SYNC;
+    V_SYNC,
+    RELOAD_LANGUAGE,
+    RELOAD_FONT;
 
     @Override
     public String get() {
