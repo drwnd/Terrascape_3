@@ -6,7 +6,7 @@ import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 
-public class TextField extends UiButton {
+public final class TextField extends UiButton {
 
     public TextField(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter name) {
         super(sizeToParent, offsetToParent);

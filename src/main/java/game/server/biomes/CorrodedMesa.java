@@ -1,7 +1,7 @@
 package game.server.biomes;
 
 import game.server.generation.GenerationData;
-import game.server.generation.OpenSimplex2S;
+import core.utils.OpenSimplex2S;
 
 import static game.utils.Constants.*;
 import static game.server.generation.WorldGeneration.SEED;

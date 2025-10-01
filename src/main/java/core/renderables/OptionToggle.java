@@ -9,7 +9,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-public class OptionToggle extends UiButton {
+public final class OptionToggle extends UiButton {
     public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());

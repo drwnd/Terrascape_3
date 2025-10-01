@@ -5,7 +5,7 @@ import core.rendering_api.Input;
 import core.rendering_api.Window;
 import game.server.Game;
 
-public class PauseMenuInput extends Input {
+public final class PauseMenuInput extends Input {
 
     public PauseMenuInput(PauseMenu menu) {
         super(menu);

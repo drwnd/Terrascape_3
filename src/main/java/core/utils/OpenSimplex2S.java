@@ -1,4 +1,4 @@
-package game.server.generation;
+package core.utils;
 
 /**
  * K.jpg's OpenSimplex 2, smooth variant ("SuperSimplex")

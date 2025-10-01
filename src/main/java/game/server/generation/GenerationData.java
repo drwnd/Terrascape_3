@@ -1,5 +1,6 @@
 package game.server.generation;
 
+import core.utils.OpenSimplex2S;
 import game.server.Chunk;
 import game.server.MaterialsData;
 import game.server.biomes.Biome;

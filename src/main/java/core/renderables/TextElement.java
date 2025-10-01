@@ -15,7 +15,7 @@ import org.joml.Vector2f;
 
 import java.awt.*;
 
-public class TextElement extends Renderable {
+public final class TextElement extends Renderable {
 
     public TextElement(Vector2f offsetToParent) {
         super(new Vector2f(1.0f, 1.0f), offsetToParent);
