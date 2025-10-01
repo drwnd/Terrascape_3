@@ -1,12 +1,14 @@
 package game.player;
 
 import core.assets.identifiers.TextureIdentifier;
+import core.languages.Language;
+import core.renderables.TextElement;
 import core.settings.FloatSetting;
 import core.settings.KeySetting;
-import game.player.rendering.StructureDisplay;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
 
+import game.player.rendering.StructureDisplay;
 import game.server.Game;
 import game.server.generation.Structure;
 
@@ -25,6 +27,7 @@ public final class Inventory extends UiElement {
         setVisible(false);
         setAllowFocusScaling(false);
         setScaleWithGuiSize(false);
+        itemNameDisplay.setAddTransparentBackground(true);
 
         for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {
             Vector2f sizeToParent = new Vector2f();
@@ -38,6 +41,7 @@ public final class Inventory extends UiElement {
             addRenderable(display);
         }
         updateDisplayPositions();
+        addRenderable(itemNameDisplay);
     }
 
     public void handleInput(int button, int action, Vector2i pixelCoordinate) {
@@ -73,6 +77,30 @@ public final class Inventory extends UiElement {
     }
 
 
+    @Override
+    public void hoverOver(Vector2i pixelCoordinate) {
+        if (isFocused()) return;
+
+        itemNameDisplay.setVisible(false);
+        Display selectedDisplay = null;
+
+        for (Display display : displays) {
+            StructureDisplay structureDisplay = display.structureDisplay;
+            structureDisplay.setFocused(false);
+            if (!structureDisplay.isVisible() || !structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
+
+            structureDisplay.setFocused(true);
+            selectedDisplay = display;
+        }
+
+        if (selectedDisplay != null) {
+            itemNameDisplay.setText(Language.getMaterialName((byte) selectedDisplay.index));
+            itemNameDisplay.setOffsetToParent(new Vector2f(pixelCoordinate).div(Window.getWidth(), Window.getHeight()).sub(itemNameDisplay.getLength(), 0));
+            itemNameDisplay.setVisible(true);
+        }
+    }
+
+
     private byte getHoveredOverMaterial(Vector2i pixelCoordinate) {
         for (Display display : displays)
             if (display.structureDisplay.containsPixelCoordinate(pixelCoordinate)) return (byte) display.index;
@@ -80,6 +108,7 @@ public final class Inventory extends UiElement {
     }
 
     private final ArrayList<Display> displays = new ArrayList<>();
+    private final TextElement itemNameDisplay = new TextElement(new Vector2f());
 
     private record Display(StructureDisplay structureDisplay, int index) {
 

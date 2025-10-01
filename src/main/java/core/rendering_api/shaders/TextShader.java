@@ -37,7 +37,7 @@ public class TextShader extends Shader {
         setUniform("textAtlas", 0);
         setUniform("addTransparentBackground", addTransparentBackground);
 
-        GL46.glActiveTexture(0);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture((ITextureIdentifier) OptionSetting.FONT.value()).getID());
         GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.TEXT_ROW).getID());
         GL46.glEnableVertexAttribArray(0);
@@ -56,6 +56,16 @@ public class TextShader extends Shader {
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)
             if (offsets[index + 1] * factor > maxAllowedLength) return index;
         return text.length();
+    }
+
+    public static float getTextLength(String text, float charWidth, boolean scalesWithGuiSize) {
+        int[] offsets = getOffsets(text);
+
+        float textSize = FloatSetting.TEXT_SIZE.value();
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float factor = textSize * charWidth / (guiSize * 7);
+
+        return offsets[text.length()] * factor;
     }
 
     private static int[] toIntFormat(String text) {

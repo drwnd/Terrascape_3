@@ -56,7 +56,12 @@ public class TextElement extends Renderable {
         textShader.bind();
         textShader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
         textShader.setUniform("charSize", charWidth, charHeight);
-        textShader.drawText(position, text.substring(0, maxLength), color, false, true);
+        textShader.drawText(position, text.substring(0, maxLength), color, addTransparentBackground, true);
+    }
+
+    public float getLength() {
+        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        return TextShader.getTextLength(text.get(), defaultTextSize.x, scalesWithGuiSize());
     }
 
     public void setText(StringGetter text) {
@@ -71,6 +76,11 @@ public class TextElement extends Renderable {
         this.color = color;
     }
 
+    public void setAddTransparentBackground(boolean addTransparentBackground) {
+        this.addTransparentBackground = addTransparentBackground;
+    }
+
+    private boolean addTransparentBackground = false;
     private Color color = Color.WHITE;
     private StringGetter text;
 }
