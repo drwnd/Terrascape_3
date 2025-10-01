@@ -10,12 +10,12 @@ import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 public class OptionToggle extends UiButton {
-    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter prefix) {
+    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
         this.setting = setting;
-        this.prefix = prefix;
+        this.settingName = settingName;
 
         textElement = new TextElement(new Vector2f(0.05f, 0.5f));
         addRenderable(textElement);
@@ -42,7 +42,7 @@ public class OptionToggle extends UiButton {
 
     private void setValue(Option value) {
         this.value = value;
-        if (prefix != null) textElement.setText(prefix.get() + " : " + value.name());
+        if (settingName != null) textElement.setText(settingName.get() + " " + value.name());
         else textElement.setText(value.name());
         if (value instanceof ColorOption) textElement.setColor(((ColorOption) value).getColor());
     }
@@ -55,7 +55,7 @@ public class OptionToggle extends UiButton {
         };
     }
 
-    private final StringGetter prefix;
+    private final StringGetter settingName;
     private Option value;
     private final OptionSetting setting;
     private final TextElement textElement;

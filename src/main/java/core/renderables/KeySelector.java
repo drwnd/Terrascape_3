@@ -6,13 +6,14 @@ import core.rendering_api.Window;
 import core.settings.KeySetting;
 import core.utils.Message;
 
+import core.utils.StringGetter;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 public final class KeySelector extends UiButton {
 
-    public KeySelector(Vector2f sizeToParent, Vector2f offsetToParent, KeySetting setting) {
+    public KeySelector(Vector2f sizeToParent, Vector2f offsetToParent, KeySetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
         this.setting = setting;
@@ -21,7 +22,7 @@ public final class KeySelector extends UiButton {
         display = new TextElement(new Vector2f(0.05f, 0.5f), new Message(getDisplayString(value)));
         blackBox.addRenderable(display);
 
-        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), new Message(setting.name())));
+        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), settingName));
         addRenderable(blackBox);
 
         matchSetting();

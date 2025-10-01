@@ -35,15 +35,15 @@ public final class Hotbar extends UiElement {
     public void handleInput(int button, int action) {
         if (action != GLFW.GLFW_PRESS) return;
 
-        if (button == KeySetting.HOT_BAR_SLOT_1.value()) setSelectedSlot(0);
-        if (button == KeySetting.HOT_BAR_SLOT_2.value()) setSelectedSlot(1);
-        if (button == KeySetting.HOT_BAR_SLOT_3.value()) setSelectedSlot(2);
-        if (button == KeySetting.HOT_BAR_SLOT_4.value()) setSelectedSlot(3);
-        if (button == KeySetting.HOT_BAR_SLOT_5.value()) setSelectedSlot(4);
-        if (button == KeySetting.HOT_BAR_SLOT_6.value()) setSelectedSlot(5);
-        if (button == KeySetting.HOT_BAR_SLOT_7.value()) setSelectedSlot(6);
-        if (button == KeySetting.HOT_BAR_SLOT_8.value()) setSelectedSlot(7);
-        if (button == KeySetting.HOT_BAR_SLOT_9.value()) setSelectedSlot(8);
+        if (button == KeySetting.HOTBAR_SLOT_1.value()) setSelectedSlot(0);
+        if (button == KeySetting.HOTBAR_SLOT_2.value()) setSelectedSlot(1);
+        if (button == KeySetting.HOTBAR_SLOT_3.value()) setSelectedSlot(2);
+        if (button == KeySetting.HOTBAR_SLOT_4.value()) setSelectedSlot(3);
+        if (button == KeySetting.HOTBAR_SLOT_5.value()) setSelectedSlot(4);
+        if (button == KeySetting.HOTBAR_SLOT_6.value()) setSelectedSlot(5);
+        if (button == KeySetting.HOTBAR_SLOT_7.value()) setSelectedSlot(6);
+        if (button == KeySetting.HOTBAR_SLOT_8.value()) setSelectedSlot(7);
+        if (button == KeySetting.HOTBAR_SLOT_9.value()) setSelectedSlot(8);
 
         if (button == KeySetting.DROP.value()) setContent(selectedSlot, AIR);
         if (button == KeySetting.PICK_BLOCK.value()) handlePickBlock();
@@ -82,7 +82,7 @@ public final class Hotbar extends UiElement {
 
     private int clampSlot(int slot) {
         slot %= LENGTH;
-        if (slot < 0) slot *= LENGTH;
+        if (slot < 0) slot += LENGTH;
         return slot;
     }
 

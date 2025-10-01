@@ -23,3 +23,60 @@ Reset All
 Reset
 Language
 Font
+Field Of View
+Gui Size
+Sensitivity
+Reach
+Text Size
+Master Audio
+Footsteps Audio
+Place Audio
+Dig Audio
+Inventory Audio
+Miscellaneous Audio
+Rim Thickness
+Crosshair Size
+Hotbar Size
+Break Place Intervall
+Hotbar Indicator Size
+Pause Menu Background Blur
+Inventory Item Size
+Inventory Items per Row
+Inventory Item Scaling
+Move Forward
+Move Back
+Move Right
+Move Left
+Jump
+Spring
+Sneak
+Crawl
+Fly Fast
+Hotbar Slot 1
+Hotbar Slot 2
+Hotbar Slot 3
+Hotbar Slot 4
+Hotbar Slot 5
+Hotbar Slot 6
+Hotbar Slot 7
+Hotbar Slot 8
+Hotbar Slot 9
+Destroy
+Use
+Pick Block
+Open Inventory
+Open Debug Menu
+Toggle No Clip
+Zoom
+Increase Break Place Size
+Decrease Break Place Size
+Drop Item
+Resize Window
+Reload Assets
+Reload Settings
+Toggle Flying-Following Movement State
+Scroll Hotbar
+Raw Mouse Input
+Use Shadow Mapping
+X-Ray
+V-Sync

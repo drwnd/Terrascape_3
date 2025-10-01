@@ -44,15 +44,15 @@ public final class Inventory extends UiElement {
         if (action != GLFW.GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
 
-        if (button == KeySetting.HOT_BAR_SLOT_1.value()) hotbar.setContent(0, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_2.value()) hotbar.setContent(1, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_3.value()) hotbar.setContent(2, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_4.value()) hotbar.setContent(3, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_5.value()) hotbar.setContent(4, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_6.value()) hotbar.setContent(5, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_7.value()) hotbar.setContent(6, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_8.value()) hotbar.setContent(7, getHoveredOverMaterial(pixelCoordinate));
-        if (button == KeySetting.HOT_BAR_SLOT_9.value()) hotbar.setContent(8, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_1.value()) hotbar.setContent(0, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_2.value()) hotbar.setContent(1, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_3.value()) hotbar.setContent(2, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_4.value()) hotbar.setContent(3, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_5.value()) hotbar.setContent(4, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_6.value()) hotbar.setContent(5, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_7.value()) hotbar.setContent(6, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_8.value()) hotbar.setContent(7, getHoveredOverMaterial(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_9.value()) hotbar.setContent(8, getHoveredOverMaterial(pixelCoordinate));
     }
 
 

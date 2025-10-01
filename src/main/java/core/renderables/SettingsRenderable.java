@@ -66,12 +66,12 @@ public final class SettingsRenderable extends UiBackgroundElement {
         Window.popRenderable();
     }
 
-    public void addSlider(FloatSetting setting) {
+    public void addSlider(FloatSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
 
-        Slider slider = new Slider(sizeToParent, offsetToParent, setting);
+        Slider slider = new Slider(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(slider);
         sliders.add(slider);
 
@@ -80,12 +80,12 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addKeySelector(KeySetting setting) {
+    public void addKeySelector(KeySetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
 
-        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting);
+        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(keySelector);
         keySelectors.add(keySelector);
 
@@ -94,12 +94,12 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addToggle(ToggleSetting setting) {
+    public void addToggle(ToggleSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
 
-        Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting);
+        Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(toggle);
         toggles.add(toggle);
 
@@ -108,22 +108,18 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addOption(OptionSetting setting, StringGetter prefix) {
+    public void addOption(OptionSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
 
-        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, prefix);
+        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(option);
         options.add(option);
 
         createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
             if (action == GLFW.GLFW_PRESS) option.setToDefault();
         });
-    }
-
-    public void addOption(OptionSetting setting) {
-        addOption(setting, null);
     }
 
     public void addDebugLineSetting(DebugScreenLine debugLine) {

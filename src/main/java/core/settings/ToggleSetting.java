@@ -1,7 +1,7 @@
 package core.settings;
 
 public enum ToggleSetting {
-    SCROLL_HOT_BAR(true),
+    SCROLL_HOTBAR(true),
     RAW_MOUSE_INPUT(true),
     DO_SHADOW_MAPPING(false),
     X_RAY(false),

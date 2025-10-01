@@ -37,7 +37,10 @@ public final class PlayerInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-
+        if (ToggleSetting.SCROLL_HOTBAR.value()) {
+            Hotbar hotbar = Game.getPlayer().getHotbar();
+            hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
+        }
     }
 
     @Override

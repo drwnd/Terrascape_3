@@ -2,8 +2,7 @@ package core.renderables;
 
 import core.rendering_api.Window;
 import core.settings.FloatSetting;
-
-import core.utils.Message;
+import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -11,14 +10,15 @@ import org.lwjgl.glfw.GLFW;
 
 public final class Slider extends UiButton {
 
-    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, FloatSetting setting) {
+    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, FloatSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(this::action);
         setAllowFocusScaling(false);
         this.setting = setting;
+        this.settingName = settingName;
 
         slider = new UiBackgroundElement(new Vector2f(0.05f, 1.0f), new Vector2f(0.0f, 0.0f));
-        textElement = new TextElement(new Vector2f(0.05f, 0.5f), new Message(setting.name()));
+        textElement = new TextElement(new Vector2f(0.05f, 0.5f), settingName);
 
         addRenderable(slider);
         addRenderable(textElement);
@@ -40,7 +40,7 @@ public final class Slider extends UiButton {
 
     public void setValue(float value) {
         this.value = value;
-        textElement.setText("%s %s".formatted(setting.name(), value));
+        textElement.setText("%s %s".formatted(settingName.get(), value));
         slider.setOffsetToParent(new Vector2f(setting.fractionFromValue(value) - slider.getSizeToParent().x * 0.5f, 0.0f));
     }
 
@@ -70,5 +70,6 @@ public final class Slider extends UiButton {
     private final FloatSetting setting;
     private final UiBackgroundElement slider;
     private final TextElement textElement;
+    private final StringGetter settingName;
     private float value;
 }

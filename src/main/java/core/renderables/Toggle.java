@@ -6,7 +6,7 @@ import core.assets.identifiers.ShaderIdentifier;
 import core.assets.identifiers.TextureIdentifier;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.ToggleSetting;
-import core.utils.Message;
+import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -14,13 +14,14 @@ import org.lwjgl.glfw.GLFW;
 
 public final class Toggle extends UiButton {
 
-    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting) {
+    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
-        this.setting = setting;
-        matchSetting();
 
-        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), new Message(setting.name())));
+        this.setting = setting;
+
+        matchSetting();
+        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), settingName));
     }
 
     public void setToDefault() {
