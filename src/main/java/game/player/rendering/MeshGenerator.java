@@ -325,7 +325,7 @@ public final class MeshGenerator {
 
     private static void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
         vertices.add(faceSize1 << 24 | faceSize2 << 18 | materialX << 12 | materialY << 6 | materialZ);
-        vertices.add(side << 8 | Material.getTextureIndex(material) & 0xFF);
+        vertices.add(side << 8 | material & 0xFF);
     }
 
     private static boolean occludes(byte toTestMaterial, byte occludingMaterial) {

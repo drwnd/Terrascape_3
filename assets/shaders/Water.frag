@@ -6,7 +6,7 @@ flat in int textureData;
 
 out vec4 fragColor;
 
-uniform sampler2D textureAtlas;
+uniform sampler2DArray textures;
 uniform int flags;
 uniform float time;
 uniform vec3 cameraPosition;
@@ -36,21 +36,19 @@ float getBlockLight() {
 
 vec2 getUVOffset(int side) {
     switch (side) {
-        case 0: return vec2(fract(totalPosition.x * 0.0625), 1 - fract(totalPosition.y * 0.0625)) * 0.0625;
-        case 1: return fract(totalPosition.xz * 0.0625) * 0.0625;
-        case 2: return 0.0625 - fract(totalPosition.zy * 0.0625) * 0.0625;
-        case 3: return 0.0625 - fract(totalPosition.xy * 0.0625) * 0.0625;
-        case 4: return fract(totalPosition.zx * 0.0625) * 0.0625;
-        case 5: return vec2(fract(totalPosition.z * 0.0625), 1 - fract(totalPosition.y * 0.0625)) * 0.0625;
+        case 0: return vec2(fract(totalPosition.x * 0.0625), 1 - fract(totalPosition.y * 0.0625));
+        case 1: return fract(totalPosition.xz * 0.0625);
+        case 2: return 1 - fract(totalPosition.zy * 0.0625);
+        case 3: return 1 - fract(totalPosition.xy * 0.0625);
+        case 4: return fract(totalPosition.xz * 0.0625);
+        case 5: return vec2(fract(totalPosition.z * 0.0625), 1 - fract(totalPosition.y * 0.0625));
     }
 
     return fract(totalPosition.zx);
 }
 
 void main() {
-    float u = (textureData & 15) * 0.0625;
-    float v = (textureData >> 4 & 15) * 0.0625;
-    vec4 color = texture(textureAtlas, vec2(u, v) + getUVOffset(textureData >> 8 & 7));
+    vec4 color = texture(textures, vec3(getUVOffset(textureData >> 8 & 7), textureData & 0xFF));
 
     float distance = length(cameraPosition - totalPosition);
     float angle = abs(dot((totalPosition - cameraPosition) / distance, normal));

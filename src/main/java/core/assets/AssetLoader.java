@@ -37,7 +37,7 @@ public final class AssetLoader {
         int id = GL46.glGenTextures();
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, id);
         GL46.glPixelStorei(GL46.GL_UNPACK_ALIGNMENT, 1);
-        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, GL46.GL_RGBA, width, height, 0, GL46.GL_RGBA, GL46.GL_UNSIGNED_BYTE, buffer);
+        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, GL46.GL_RGBA8, width, height, 0, GL46.GL_RGBA, GL46.GL_UNSIGNED_BYTE, buffer);
         GL46.glGenerateMipmap(GL46.GL_TEXTURE_2D);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MAG_FILTER, GL46.GL_NEAREST);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MIN_FILTER, GL46.GL_NEAREST);
@@ -45,7 +45,7 @@ public final class AssetLoader {
         return new Texture(id);
     }
 
-    public static core.assets.GuiElement loadGuiElement(GuiElementIdentifier identifier) {
+    public static GuiElement loadGuiElement(GuiElementIdentifier identifier) {
         int vao = createVAO();
         int vbo1 = storeDateInAttributeList(0, 2, identifier.vertices());
         int vbo2 = storeDateInAttributeList(1, 2, identifier.textureCoordinates());
@@ -56,7 +56,7 @@ public final class AssetLoader {
         GL46.glBindBuffer(GL46.GL_ARRAY_BUFFER, vbo2);
         GL46.glDeleteBuffers(vbo2);
 
-        return new core.assets.GuiElement(vao, identifier.vertices().length);
+        return new GuiElement(vao, identifier.vertices().length);
     }
 
     public static int createVAO() {

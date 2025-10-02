@@ -12,6 +12,10 @@ public final class AssetManager {
     }
 
 
+    public static TextureArray getTextureArray(TextureArrayIdentifier identifier) {
+        return (TextureArray) loadAsset(identifier, () -> new TextureArray(identifier.getGenerator()));
+    }
+
     public static Texture getTexture(TextureIdentifier identifier) {
         return (Texture) loadAsset(identifier, () -> AssetLoader.loadTexture2D(identifier));
     }

@@ -1,7 +1,10 @@
 package game.player.rendering;
 
 import core.assets.AssetLoader;
+import core.assets.Texture;
 import core.rendering_api.shaders.TextShader;
+
+import game.server.Material;
 
 import org.joml.Vector3i;
 import org.lwjgl.opengl.GL46;
@@ -73,6 +76,33 @@ public final class ObjectLoader {
         AssetLoader.storeDateInAttributeList(0, 3, SKY_BOX_VERTICES);
         AssetLoader.storeDateInAttributeList(1, 2, SKY_BOX_TEXTURE_COORDINATES);
         return vao;
+    }
+
+    public static int generateAtlasTextureArray(Texture atlas) {
+        final int textureSize = 16;
+        int atlasId = atlas.getID();
+
+        int textureArray = GL46.glGenTextures();
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, textureArray);
+        GL46.glTexStorage3D(GL46.GL_TEXTURE_2D_ARRAY, 4, GL46.GL_RGBA8, textureSize, textureSize, AMOUNT_OF_MATERIALS);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D_ARRAY, GL46.GL_TEXTURE_MIN_FILTER, GL46.GL_LINEAR);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D_ARRAY, GL46.GL_TEXTURE_MAG_FILTER, GL46.GL_NEAREST);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D_ARRAY, GL46.GL_TEXTURE_WRAP_R, GL46.GL_REPEAT);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D_ARRAY, GL46.GL_TEXTURE_WRAP_S, GL46.GL_REPEAT);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D_ARRAY, GL46.GL_TEXTURE_WRAP_T, GL46.GL_REPEAT);
+
+        for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
+            int textureCoordinate = Material.getTextureIndex((byte) material);
+            int u = (textureCoordinate & 0xF) * textureSize;
+            int v = (textureCoordinate >> 4 & 0xF) * textureSize;
+
+            GL46.glCopyImageSubData(
+                    atlasId, GL46.GL_TEXTURE_2D, 0, u, v, 0,
+                    textureArray, GL46.GL_TEXTURE_2D_ARRAY, 0, 0, 0, material,
+                    textureSize, textureSize, 1);
+        }
+
+        return textureArray;
     }
 
     public static int createTexture2D(int internalFormat, int width, int height, int format, int type, int sampling) {

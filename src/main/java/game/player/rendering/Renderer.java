@@ -2,6 +2,7 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import game.assets.Shaders;
+import game.assets.TextureArrays;
 import game.assets.Textures;
 import game.assets.VertexArrays;
 import core.settings.FloatSetting;
@@ -51,24 +52,24 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
-        shader.setUniform("textureAtlas", 0);
-        shader.setUniform("propertiesTexture", 1);
+        shader.setUniform("textures", 0);
+        shader.setUniform("propertiesTextures", 1);
 
         GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_CULL_FACE);
         GL46.glDisable(GL46.GL_BLEND);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.MATERIALS).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.PROPERTIES).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.PROPERTIES).getID());
     }
 
     public static void setUpWaterRendering(core.rendering_api.shaders.Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
-        shader.setUniform("textureAtlas", 0);
+        shader.setUniform("textures", 0);
         shader.setUniform("time", time);
 
         GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
@@ -77,7 +78,7 @@ public final class Renderer extends Renderable {
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.MATERIALS).getID());
     }
 
     public float getTime() {
