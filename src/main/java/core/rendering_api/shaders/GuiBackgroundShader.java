@@ -1,9 +1,9 @@
 package core.rendering_api.shaders;
 
-import core.assets.identifiers.ShaderIdentifier;
+import game.assets.Shaders;
 
 public class GuiBackgroundShader extends GuiShader {
-    public GuiBackgroundShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
+    public GuiBackgroundShader(String vertexShaderFilePath, String fragmentShaderFilePath, Shaders identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }
 }

@@ -1,15 +1,14 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import core.assets.identifiers.ShaderIdentifier;
-import core.assets.identifiers.TextureIdentifier;
-import core.assets.identifiers.VertexArrayIdentifier;
+import game.assets.Shaders;
+import game.assets.Textures;
+import game.assets.VertexArrays;
 import core.settings.FloatSetting;
 import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
-import core.rendering_api.shaders.Shader;
 
 import game.player.Player;
 import game.server.Game;
@@ -32,7 +31,7 @@ public final class Renderer extends Renderable {
         setAllowFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
-        crosshair = new UiElement(new Vector2f(), new Vector2f(), TextureIdentifier.CROSSHAIR);
+        crosshair = new UiElement(new Vector2f(), new Vector2f(), Textures.CROSSHAIR);
         crosshair.setScaleWithGuiSize(false);
         crosshair.setAllowFocusScaling(false);
 
@@ -48,37 +47,37 @@ public final class Renderer extends Renderable {
     }
 
 
-    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
+    public static void setupOpaqueRendering(core.rendering_api.shaders.Shader shader, Matrix4f matrix, int x, int y, int z) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
         shader.setUniform("textureAtlas", 0);
         shader.setUniform("propertiesTexture", 1);
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_CULL_FACE);
         GL46.glDisable(GL46.GL_BLEND);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.MATERIALS).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.PROPERTIES).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.PROPERTIES).getID());
     }
 
-    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+    public static void setUpWaterRendering(core.rendering_api.shaders.Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
         shader.setUniform("textureAtlas", 0);
         shader.setUniform("time", time);
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID()); // Just bind something IDK
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.MATERIALS).getID());
     }
 
     public float getTime() {
@@ -119,7 +118,7 @@ public final class Renderer extends Renderable {
 
     private void renderSkybox(Camera camera) {
         GL46.glDisable(GL46.GL_BLEND);
-        Shader shader = AssetManager.getShader(ShaderIdentifier.SKYBOX);
+        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.SKYBOX);
 
         shader.bind();
         shader.setUniform("textureAtlas1", 0);
@@ -127,14 +126,14 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", getTime());
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.SKYBOX).getID());
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID());
         GL46.glEnableVertexAttribArray(0);
         GL46.glEnableVertexAttribArray(1);
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.NIGHT_SKY).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.NIGHT_SKY).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(TextureIdentifier.DAY_SKY).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.DAY_SKY).getID());
 
         GL46.glDepthMask(false);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
@@ -150,7 +149,7 @@ public final class Renderer extends Renderable {
         int playerChunkY = Utils.floor(playerPosition.intPosition().y) >> CHUNK_SIZE_BITS;
         int playerChunkZ = Utils.floor(playerPosition.intPosition().z) >> CHUNK_SIZE_BITS;
 
-        Shader shader = AssetManager.getShader(ShaderIdentifier.OPAQUE);
+        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.OPAQUE);
         setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
 
         for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(0)) {
@@ -165,7 +164,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
-        Shader shader = AssetManager.getShader(ShaderIdentifier.WATER);
+        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.WATER);
         setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z, getTime());
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
 

@@ -1,10 +1,9 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import core.assets.identifiers.ShaderIdentifier;
+import game.assets.Shaders;
 import core.renderables.Renderable;
 import core.rendering_api.Window;
-import core.rendering_api.shaders.Shader;
 import core.settings.FloatSetting;
 
 import game.server.generation.Structure;
@@ -40,7 +39,7 @@ public final class StructureDisplay extends Renderable {
                 (int) (size.y * guiSize * Window.getHeight()));
 
         if (opaqueModel.containsGeometry()) {
-            Shader shader = AssetManager.getShader(ShaderIdentifier.OPAQUE);
+            core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.OPAQUE);
             Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0);
             int[] toRenderVertexCounts = opaqueModel.getVertexCounts(1, 1, 1);
 
@@ -49,7 +48,7 @@ public final class StructureDisplay extends Renderable {
             GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, opaqueModel.getIndices(), toRenderVertexCounts);
         }
         if (transparentModel.containsWater()) {
-            Shader shader = AssetManager.getShader(ShaderIdentifier.WATER);
+            core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.WATER);
             Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0f);
             shader.setUniform("cameraPosition", 300.0f, 400.0f, 200.0f);
 

@@ -6,6 +6,9 @@ import core.settings.FloatSetting;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.FontOption;
 
+import game.assets.Buffers;
+import game.assets.Shaders;
+import game.assets.VertexArrays;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL46;
 
@@ -14,7 +17,7 @@ import java.awt.*;
 public class TextShader extends Shader {
     public static final int MAX_TEXT_LENGTH = 128;
 
-    public TextShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
+    public TextShader(String vertexShaderFilePath, String fragmentShaderFilePath, Shaders identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }
 
@@ -38,10 +41,10 @@ public class TextShader extends Shader {
         setUniform("addTransparentBackground", addTransparentBackground);
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture((ITextureIdentifier) OptionSetting.FONT.value()).getID());
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrayIdentifier.TEXT_ROW).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture((TextureIdentifier) OptionSetting.FONT.value()).getID());
+        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.TEXT_ROW).getID());
         GL46.glEnableVertexAttribArray(0);
-        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.getBuffer(BufferIdentifier.MODEL_INDEX).getID());
+        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.getBuffer(Buffers.MODEL_INDEX).getID());
 
         GL46.glDrawElements(GL46.GL_TRIANGLES, 768, GL46.GL_UNSIGNED_INT, 0);
     }

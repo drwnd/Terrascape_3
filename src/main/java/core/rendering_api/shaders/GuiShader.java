@@ -2,16 +2,16 @@ package core.rendering_api.shaders;
 
 import core.assets.AssetManager;
 import core.assets.GuiElement;
-import core.assets.identifiers.GuiElementIdentifier;
+import game.assets.GuiElements;
 import core.assets.Texture;
-import core.assets.identifiers.ShaderIdentifier;
+import game.assets.Shaders;
 import core.settings.FloatSetting;
 
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL46;
 
-public class GuiShader extends Shader {
-    public GuiShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
+public class GuiShader extends core.rendering_api.shaders.Shader {
+    public GuiShader(String vertexShaderFilePath, String fragmentShaderFilePath, Shaders identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }
 
@@ -36,7 +36,7 @@ public class GuiShader extends Shader {
     }
 
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
-        GuiElement quad = AssetManager.getGuiElement(GuiElementIdentifier.QUAD);
+        GuiElement quad = AssetManager.getGuiElement(GuiElements.QUAD);
 
         GL46.glBindVertexArray(quad.getVao());
         GL46.glEnableVertexAttribArray(0);

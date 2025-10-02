@@ -1,7 +1,8 @@
 package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
-import core.assets.identifiers.ITextureIdentifier;
+import core.assets.identifiers.TextureIdentifier;
+
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
@@ -17,7 +18,7 @@ public final class AssetLoader {
     }
 
 
-    public static Texture loadTexture(ITextureIdentifier identifier) {
+    public static Texture loadTexture2D(TextureIdentifier identifier) {
         int width, height;
         ByteBuffer buffer;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -44,10 +45,10 @@ public final class AssetLoader {
         return new Texture(id);
     }
 
-    public static GuiElement loadGuiElement(GuiElementIdentifier identifier) {
+    public static core.assets.GuiElement loadGuiElement(GuiElementIdentifier identifier) {
         int vao = createVAO();
-        int vbo1 = storeDateInAttributeList(0, 2, identifier.vertices);
-        int vbo2 = storeDateInAttributeList(1, 2, identifier.textureCoordinates);
+        int vbo1 = storeDateInAttributeList(0, 2, identifier.vertices());
+        int vbo2 = storeDateInAttributeList(1, 2, identifier.textureCoordinates());
 
         GL46.glBindVertexArray(0);
         GL46.glBindBuffer(GL46.GL_ARRAY_BUFFER, vbo1);
@@ -55,7 +56,7 @@ public final class AssetLoader {
         GL46.glBindBuffer(GL46.GL_ARRAY_BUFFER, vbo2);
         GL46.glDeleteBuffers(vbo2);
 
-        return new GuiElement(vao, identifier.vertices.length);
+        return new core.assets.GuiElement(vao, identifier.vertices().length);
     }
 
     public static int createVAO() {

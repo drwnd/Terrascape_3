@@ -1,6 +1,6 @@
 package game.player;
 
-import core.assets.identifiers.TextureIdentifier;
+import game.assets.Textures;
 import core.languages.Language;
 import core.renderables.TextElement;
 import core.settings.FloatSetting;
@@ -23,7 +23,7 @@ import static game.utils.Constants.AMOUNT_OF_MATERIALS;
 
 public final class Inventory extends UiElement {
     public Inventory() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), TextureIdentifier.INVENTORY_OVERLAY);
+        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), Textures.INVENTORY_OVERLAY);
         setVisible(false);
         setAllowFocusScaling(false);
         setScaleWithGuiSize(false);

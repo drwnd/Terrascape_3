@@ -1,6 +1,6 @@
 package game.player;
 
-import core.assets.identifiers.TextureIdentifier;
+import game.assets.Textures;
 import core.settings.KeySetting;
 import game.player.rendering.StructureDisplay;
 import core.renderables.UiElement;
@@ -21,11 +21,11 @@ public final class Hotbar extends UiElement {
     public static final int LENGTH = 9;
 
     public Hotbar() {
-        super(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR);
+        super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
         setScaleWithGuiSize(false);
         setAllowFocusScaling(false);
 
-        hotBarSelectionIndicator = new UiElement(new Vector2f(), new Vector2f(), TextureIdentifier.HOTBAR_SELECTION_INDICATOR);
+        hotBarSelectionIndicator = new UiElement(new Vector2f(), new Vector2f(), Textures.HOTBAR_SELECTION_INDICATOR);
         hotBarSelectionIndicator.setScaleWithGuiSize(false);
         hotBarSelectionIndicator.setAllowFocusScaling(false);
         addRenderable(hotBarSelectionIndicator);

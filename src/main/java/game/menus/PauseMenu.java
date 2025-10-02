@@ -2,7 +2,7 @@ package game.menus;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
-import core.assets.identifiers.ShaderIdentifier;
+import game.assets.Shaders;
 import core.renderables.Renderable;
 import core.renderables.TextElement;
 import core.renderables.UiButton;
@@ -65,7 +65,7 @@ public final class PauseMenu extends Renderable {
 
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
-        GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI);
+        GuiShader shader = (GuiShader) AssetManager.getShader(Shaders.GUI);
         shader.bind();
 
         shader.flipNextDrawVertically();

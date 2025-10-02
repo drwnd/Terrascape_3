@@ -1,7 +1,7 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import core.assets.identifiers.ShaderIdentifier;
+import game.assets.Shaders;
 import core.settings.OptionSetting;
 import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
@@ -31,7 +31,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
     public void render(int textLine) {
         Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
-        TextShader shader = (TextShader) AssetManager.getShader(ShaderIdentifier.TEXT);
+        TextShader shader = (TextShader) AssetManager.getShader(Shaders.TEXT);
         shader.bind();
 
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();

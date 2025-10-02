@@ -1,15 +1,9 @@
 package core.assets.identifiers;
 
-import game.utils.Constants;
+public interface GuiElementIdentifier extends AssetIdentifier {
 
-public enum GuiElementIdentifier implements AssetIdentifier {
+    float[] vertices();
 
-    QUAD(Constants.QUAD_VERTICES, Constants.QUAD_TEXTURE_COORDINATES);
+    float[] textureCoordinates();
 
-    GuiElementIdentifier(float[] vertices, float[] textureCoordinates) {
-        this.vertices = vertices;
-        this.textureCoordinates = textureCoordinates;
-    }
-
-    public final float[] vertices, textureCoordinates;
 }

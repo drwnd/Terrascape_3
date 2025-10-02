@@ -2,8 +2,8 @@ package core.renderables;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
-import core.assets.identifiers.ShaderIdentifier;
-import core.assets.identifiers.TextureIdentifier;
+import game.assets.Shaders;
+import game.assets.Textures;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.ToggleSetting;
 import core.utils.StringGetter;
@@ -43,8 +43,8 @@ public final class Toggle extends UiButton {
         position = new Vector2f(position).add(0.785f * size.x, 0.15f * size.y);
         size = new Vector2f(size).mul(0.2f, 0.7f);
 
-        GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI);
-        Texture texture = AssetManager.getTexture(value ? TextureIdentifier.TOGGLE_ACTIVATED : TextureIdentifier.TOGGLE_DEACTIVATED);
+        GuiShader shader = (GuiShader) AssetManager.getShader(Shaders.GUI);
+        Texture texture = AssetManager.getTexture(value ? Textures.TOGGLE_ACTIVATED : Textures.TOGGLE_DEACTIVATED);
         shader.bind();
         shader.drawQuad(position, size, texture);
     }

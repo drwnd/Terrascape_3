@@ -2,26 +2,26 @@ package core.renderables;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
-import core.assets.identifiers.ShaderIdentifier;
-import core.assets.identifiers.TextureIdentifier;
+import game.assets.Shaders;
+import game.assets.Textures;
 import core.rendering_api.shaders.GuiShader;
 
 import org.joml.Vector2f;
 
 public class UiElement extends Renderable {
-    public UiElement(Vector2f sizeToParent, Vector2f offsetToParent, TextureIdentifier texture) {
+    public UiElement(Vector2f sizeToParent, Vector2f offsetToParent, Textures texture) {
         super(sizeToParent, offsetToParent);
         this.texture = texture;
     }
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        GuiShader shader = (GuiShader) AssetManager.getShader(ShaderIdentifier.GUI);
+        GuiShader shader = (GuiShader) AssetManager.getShader(Shaders.GUI);
         Texture background = AssetManager.getTexture(texture);
         shader.bind();
         if (scalesWithGuiSize()) shader.drawQuad(position, size, background);
         else shader.drawQuadNoGuiScale(position, size, background);
     }
 
-    private final TextureIdentifier texture;
+    private final Textures texture;
 }

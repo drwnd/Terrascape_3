@@ -1,6 +1,6 @@
 package core.renderables;
 
-import core.assets.identifiers.TextureIdentifier;
+import game.assets.Textures;
 import core.rendering_api.Window;
 import core.utils.StringGetter;
 
@@ -12,7 +12,7 @@ public final class TextField extends UiButton {
         super(sizeToParent, offsetToParent);
         setAction(this::setOnTop);
 
-        UiElement blackBox = new UiElement(new Vector2f(0.8f, 0.8f), new Vector2f(0.175f, 0.1f), TextureIdentifier.INVENTORY_OVERLAY);
+        UiElement blackBox = new UiElement(new Vector2f(0.8f, 0.8f), new Vector2f(0.175f, 0.1f), Textures.INVENTORY_OVERLAY);
         textElement = new TextElement(new Vector2f(0.05f, 0.5f));
         blackBox.addRenderable(textElement);
 

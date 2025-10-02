@@ -1,6 +1,6 @@
 package core.settings.optionSettings;
 
-import core.assets.identifiers.ITextureIdentifier;
+import core.assets.identifiers.TextureIdentifier;
 import core.utils.FileManager;
 
 import org.joml.Vector2f;
@@ -8,7 +8,7 @@ import org.joml.Vector2f;
 import java.io.File;
 import java.util.Arrays;
 
-public final class FontOption implements Option, ITextureIdentifier {
+public final class FontOption implements Option, TextureIdentifier {
 
     public FontOption(String fontName) {
         this(new File("assets/fonts/" + fontName));
