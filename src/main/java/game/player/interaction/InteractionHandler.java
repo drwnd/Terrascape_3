@@ -14,8 +14,8 @@ import static game.utils.Constants.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW.GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.min(CHUNK_SIZE, placeBreakSize << 1);
-        if (action == GLFW.GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.max(1, placeBreakSize >> 1);
+        if (action == GLFW.GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
+        if (action == GLFW.GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.max(0, placeBreakSize - 1);
 
         if (button == KeySetting.DESTROY.value()) updateInfo(action, destroyInfo);
         if (button == KeySetting.USE.value()) updateInfo(action, useInfo);
@@ -59,7 +59,7 @@ public final class InteractionHandler {
 
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
-    private int placeBreakSize = 16;
+    private int placeBreakSize = 4;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

@@ -19,6 +19,7 @@ public final class Game {
         world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
 
         world.setName(worldName);
+        world.init();
         server.startTicks();
     }
 

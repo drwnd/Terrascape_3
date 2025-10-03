@@ -5,20 +5,20 @@ import org.lwjgl.opengl.GL46;
 
 import static game.utils.Constants.*;
 
-public record OpaqueModel(int X, int Y, int Z, int LOD, int verticesBuffer, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
+public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verticesBuffer, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
     public static final int FACE_COUNT = 6;
 
     public OpaqueModel(Vector3i position, int[] vertexCounts, int verticesBuffer, int lod) {
-        this(position.x, position.y, position.z, lod, verticesBuffer, vertexCounts, new int[FACE_COUNT], getIndices(vertexCounts));
+        this(position.x << lod, position.y << lod, position.z << lod, lod, verticesBuffer, vertexCounts, new int[FACE_COUNT], getIndices(vertexCounts));
     }
 
     public int[] getVertexCounts(int playerChunkX, int playerChunkY, int playerChunkZ) {
         assert toRenderVertexCounts != null && vertexCounts != null;
 
-        int modelChunkX = X >> CHUNK_SIZE_BITS + LOD;
-        int modelChunkY = Y >> CHUNK_SIZE_BITS + LOD;
-        int modelChunkZ = Z >> CHUNK_SIZE_BITS + LOD;
+        int modelChunkX = chunkX();
+        int modelChunkY = chunkY();
+        int modelChunkZ = chunkZ();
         playerChunkX >>= LOD;
         playerChunkY >>= LOD;
         playerChunkZ >>= LOD;
@@ -51,5 +51,17 @@ public record OpaqueModel(int X, int Y, int Z, int LOD, int verticesBuffer, int[
 
     public void delete() {
         GL46.glDeleteBuffers(verticesBuffer);
+    }
+
+    public int chunkX() {
+        return totalX >> CHUNK_SIZE_BITS + LOD;
+    }
+
+    public int chunkY() {
+        return totalY >> CHUNK_SIZE_BITS + LOD;
+    }
+
+    public int chunkZ() {
+        return totalZ >> CHUNK_SIZE_BITS + LOD;
     }
 }

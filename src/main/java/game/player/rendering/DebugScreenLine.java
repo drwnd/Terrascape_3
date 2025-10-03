@@ -43,18 +43,23 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
     public static ArrayList<DebugScreenLine> getDebugLines() {
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
-        
+
         lines.add(new DebugScreenLine(OptionSetting.WORLD_NAME_VISIBILITY, OptionSetting.WORLD_NAME_COLOR,
                 () -> Game.getWorld().getName(), "World name"));
 
         lines.add(new DebugScreenLine(OptionSetting.WORLD_TICK_AND_TIME_VISIBILITY, OptionSetting.WORLD_TICK_AND_TIME_COLOR,
-                () ->"Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getTime()),
+                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getTime()),
                 "Gametick and time"));
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
             return "FPS: %s".formatted(frameTimes.size());
         }, "FPS"));
+
+        lines.add(new DebugScreenLine(OptionSetting.RENDERED_MODELS_VISIBILITY, OptionSetting.RENDERED_MODELS_COLOR, () -> {
+            Renderer renderer = Game.getPlayer().getRenderer();
+            return "Rendered Opaque Models:%s, Transparent Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedTransparentModels);
+        }, "Rendered Models Count"));
 
         lines.add(new DebugScreenLine(OptionSetting.POSITION_VISIBILITY, OptionSetting.POSITION_COLOR, () -> {
             Position playerPosition = Game.getPlayer().getPosition();

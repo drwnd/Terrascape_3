@@ -36,12 +36,12 @@ public final class Utils {
                 || Math.abs(chunkY - playerChunkY) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
     }
 
-    public static int mackEven(int value) {
-        return value - (value & 1);
+    public static int makeEven(int value) {
+        return value & 0xFFFFFFFE;
     }
 
     public static int makeOdd(int value) {
-        return value + 1 - (value & 1);
+        return value | 1;
     }
 
     public static int floor(float value) {

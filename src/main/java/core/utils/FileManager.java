@@ -50,6 +50,12 @@ public final class FileManager {
         return file.listFiles();
     }
 
+    public static File loadAndCreateDirectory(String filepath) {
+        File file = new File(filepath);
+        if (!file.exists()) file.mkdir();
+        return file;
+    }
+
     public static void delete(File file) {
         if (file == null) return;
         if (file.isDirectory()) {

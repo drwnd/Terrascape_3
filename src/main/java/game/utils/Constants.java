@@ -21,7 +21,7 @@ public final class Constants {
     public static final byte RENDERED_WORLD_WIDTH = RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2;
     public static final byte RENDERED_WORLD_HEIGHT = RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2;
 
-    public static final int LOD_COUNT = 1;
+    public static final int LOD_COUNT = 10;
 
     // Indices for the sides of blocks
     /**

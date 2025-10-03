@@ -1,16 +1,17 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import game.assets.Shaders;
-import game.assets.TextureArrays;
-import game.assets.Textures;
-import game.assets.VertexArrays;
+import core.rendering_api.shaders.Shader;
 import core.settings.FloatSetting;
 import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
 
+import game.assets.Shaders;
+import game.assets.TextureArrays;
+import game.assets.Textures;
+import game.assets.VertexArrays;
 import game.player.Player;
 import game.server.Game;
 import game.utils.Position;
@@ -27,6 +28,9 @@ import java.util.ArrayList;
 import static game.utils.Constants.*;
 
 public final class Renderer extends Renderable {
+
+    public int renderedOpaqueModels, renderedTransparentModels;
+
     public Renderer() {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
         setAllowFocusScaling(false);
@@ -48,7 +52,7 @@ public final class Renderer extends Renderable {
     }
 
 
-    public static void setupOpaqueRendering(core.rendering_api.shaders.Shader shader, Matrix4f matrix, int x, int y, int z) {
+    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -65,7 +69,7 @@ public final class Renderer extends Renderable {
         GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.PROPERTIES).getID());
     }
 
-    public static void setUpWaterRendering(core.rendering_api.shaders.Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -91,6 +95,7 @@ public final class Renderer extends Renderable {
         Player player = Game.getPlayer();
         Camera camera = player.getCamera();
         player.updateFrame();
+        RenderingOptimizer.computeVisibility(visibilityBits, player);
 
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
@@ -119,7 +124,7 @@ public final class Renderer extends Renderable {
 
     private void renderSkybox(Camera camera) {
         GL46.glDisable(GL46.GL_BLEND);
-        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.SKYBOX);
+        Shader shader = AssetManager.getShader(Shaders.SKYBOX);
 
         shader.bind();
         shader.setUniform("textureAtlas1", 0);
@@ -146,36 +151,50 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
+        renderedOpaqueModels = 0;
+
         int playerChunkX = Utils.floor(playerPosition.intPosition().x) >> CHUNK_SIZE_BITS;
         int playerChunkY = Utils.floor(playerPosition.intPosition().y) >> CHUNK_SIZE_BITS;
         int playerChunkZ = Utils.floor(playerPosition.intPosition().z) >> CHUNK_SIZE_BITS;
 
-        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.OPAQUE);
+        Shader shader = AssetManager.getShader(Shaders.OPAQUE);
         setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
 
-        for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(0)) {
-            if (model == null || !model.containsGeometry()) continue;
-            int[] toRenderVertexCounts = model.getVertexCounts(playerChunkX, playerChunkY, playerChunkZ);
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            long[] lodVisibilityBits = visibilityBits[lod];
 
-            GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-            shader.setUniform("worldPos", model.X(), model.Y(), model.Z(), 1 << model.LOD());
+            for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
+                if (model == null || !model.containsGeometry() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                int[] toRenderVertexCounts = model.getVertexCounts(playerChunkX, playerChunkY, playerChunkZ);
 
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), toRenderVertexCounts);
+                GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+                shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+
+                GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), toRenderVertexCounts);
+                renderedOpaqueModels++;
+            }
         }
     }
 
     private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
-        core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.WATER);
+        renderedTransparentModels = 0;
+
+        Shader shader = AssetManager.getShader(Shaders.WATER);
         setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z, getTime());
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
 
-        for (TransparentModel model : player.getMeshCollector().getTransparentModels(0)) {
-            if (model == null || !model.containsWater()) continue;
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            long[] lodVisibilityBits = visibilityBits[lod];
 
-            GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-            shader.setUniform("worldPos", model.X(), model.Y(), model.Z(), 1 << model.LOD());
+            for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
+                if (model == null || !model.containsWater() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
 
-            GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount() * (6 / 2));
+                GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+                shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+
+                GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount() * (6 / 2));
+                renderedTransparentModels++;
+            }
         }
     }
 
@@ -184,8 +203,14 @@ public final class Renderer extends Renderable {
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
+    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, long[] visibilityBits) {
+        int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
+        return (visibilityBits[index >> 6] & 1L << index) == 0;
+    }
+
     private boolean debugScreenOpen = false;
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
+    private final long[][] visibilityBits = new long[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64 + 1];
 }

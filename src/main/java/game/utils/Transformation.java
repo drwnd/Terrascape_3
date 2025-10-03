@@ -3,6 +3,7 @@ package game.utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import game.player.rendering.Camera;
+import org.joml.Vector3i;
 
 public final class Transformation {
 
@@ -35,6 +36,14 @@ public final class Transformation {
 
         matrix.ortho(-x - z >> 1, x + z >> 1, -y, y, 50, 500);
         matrix.lookAt(centerX + 200, centerY + 200, centerZ + 200, centerX, centerY, centerZ, Y_AXIS.x, Y_AXIS.y, Y_AXIS.z);
+
+        return matrix;
+    }
+
+    public static Matrix4f getFrustumCullingMatrix(Camera camera) {
+        Vector3i position = camera.getPosition().intPosition();
+        Matrix4f matrix = createProjectionRotationMatrix(camera);
+        matrix.translate(-position.x, -position.y, -position.z);
 
         return matrix;
     }

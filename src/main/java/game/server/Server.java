@@ -30,24 +30,36 @@ public final class Server {
 
 
     public boolean requestBreakPlaceInteraction(Vector3i position, int breakPlaceSize, byte material) {
-        int x = position.x;
-        int y = position.y;
-        int z = position.z;
+        ChunkSaver saver = new ChunkSaver();
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            int mask = -(1 << breakPlaceSize);
+            if (Integer.numberOfTrailingZeros(position.x & mask) < lod
+                    || Integer.numberOfTrailingZeros(position.y & mask) < lod
+                    || Integer.numberOfTrailingZeros(position.z & mask) < lod) break;
 
-        Chunk chunk = Game.getWorld().getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, 0);
-        if (chunk == null) return false;
+            int chunkX = position.x >> CHUNK_SIZE_BITS + lod;
+            int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
+            int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
 
-        x &= -breakPlaceSize & CHUNK_SIZE_MASK;
-        y &= -breakPlaceSize & CHUNK_SIZE_MASK;
-        z &= -breakPlaceSize & CHUNK_SIZE_MASK;
+            int inChunkX = position.x >> lod & CHUNK_SIZE_MASK;
+            int inChunkY = position.y >> lod & CHUNK_SIZE_MASK;
+            int inChunkZ = position.z >> lod & CHUNK_SIZE_MASK;
 
-        chunk.storeMaterial(x, y, z, material, breakPlaceSize);
+            int lodSize = Math.max(0, breakPlaceSize - lod);
+            mask = -(1 << lodSize);
+            inChunkX &= mask;
+            inChunkY &= mask;
+            inChunkZ &= mask;
 
-        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
-        meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
-        if (x == 0) meshCollector.setMeshed(false, chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD);
-        if (y == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD);
-        if (z == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD);
+            Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
+            chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, lodSize);
+
+            MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+            meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
+            if (inChunkX == 0) meshCollector.setMeshed(false, chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD);
+            if (inChunkY == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD);
+            if (inChunkZ == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD);
+        }
 
         generatorRestartScheduled = true;
         return true;

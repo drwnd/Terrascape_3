@@ -57,7 +57,7 @@ public final class Chunk {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int size) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, size);
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1 << size);
         modified = true;
     }
 
