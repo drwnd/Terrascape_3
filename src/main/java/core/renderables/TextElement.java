@@ -1,13 +1,12 @@
 package core.renderables;
 
 import core.assets.AssetManager;
-import game.assets.Shaders;
+import core.assets.CoreShaders;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.FontOption;
-
 import core.utils.Message;
 import core.utils.StringGetter;
 
@@ -52,7 +51,7 @@ public final class TextElement extends Renderable {
         int maxLength = TextShader.getMaxLength(text, maxAllowedLength, defaultTextSize.x, scalesWithGuiSize());
 
         position = new Vector2f(position.x, position.y - defaultTextSize.y * textSize / guiSize * 0.5f);
-        TextShader textShader = (TextShader) AssetManager.getShader(Shaders.TEXT);
+        TextShader textShader = (TextShader) AssetManager.getShader(CoreShaders.TEXT);
         textShader.bind();
         textShader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
         textShader.setUniform("charSize", charWidth, charHeight);

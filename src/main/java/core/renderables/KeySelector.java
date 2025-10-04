@@ -1,12 +1,12 @@
 package core.renderables;
 
-import game.assets.Textures;
+import core.assets.CoreTextures;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.settings.KeySetting;
 import core.utils.Message;
-
 import core.utils.StringGetter;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
@@ -18,7 +18,7 @@ public final class KeySelector extends UiButton {
         setAction(getAction());
         this.setting = setting;
 
-        UiElement blackBox = new UiElement(new Vector2f(0.5f, 0.6f), new Vector2f(0.45f, 0.2f), Textures.INVENTORY_OVERLAY);
+        UiElement blackBox = new UiElement(new Vector2f(0.5f, 0.6f), new Vector2f(0.45f, 0.2f), CoreTextures.OVERLAY);
         display = new TextElement(new Vector2f(0.05f, 0.5f), new Message(getDisplayString(value)));
         blackBox.addRenderable(display);
 

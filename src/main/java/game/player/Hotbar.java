@@ -1,12 +1,12 @@
 package game.player;
 
-import game.assets.Textures;
+import core.settings.FloatSetting;
 import core.settings.KeySetting;
-import game.player.rendering.StructureDisplay;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
-import core.settings.FloatSetting;
 
+import game.assets.Textures;
+import game.player.rendering.StructureDisplay;
 import game.player.interaction.Target;
 import game.server.generation.Structure;
 

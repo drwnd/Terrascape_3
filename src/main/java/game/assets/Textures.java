@@ -10,11 +10,7 @@ public enum Textures implements TextureIdentifier {
     CROSSHAIR("assets/textures/CrossHair.png"),
     HOTBAR("assets/textures/HotBar.png"),
     HOTBAR_SELECTION_INDICATOR("assets/textures/HotBarSelectionIndicator.png"),
-    INVENTORY_OVERLAY("assets/textures/InventoryOverlay.png"),
-    PROPERTIES("assets/textures/properties256.png"),
-    GUI_ELEMENT_BACKGROUND("assets/textures/GuiElementBackground.png"),
-    TOGGLE_ACTIVATED("assets/textures/ToggleActivated.png"),
-    TOGGLE_DEACTIVATED("assets/textures/ToggleDeactivated.png");
+    PROPERTIES("assets/textures/properties256.png");
 
     Textures(String filepath) {
         this.filepath = filepath;

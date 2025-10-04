@@ -1,11 +1,11 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import game.assets.Shaders;
 import core.renderables.Renderable;
 import core.rendering_api.Window;
 import core.settings.FloatSetting;
 
+import game.assets.Shaders;
 import game.server.generation.Structure;
 import game.utils.Transformation;
 

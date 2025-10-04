@@ -1,8 +1,9 @@
 package core.renderables;
 
+import core.rendering_api.Window;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import core.rendering_api.Window;
 
 import java.util.ArrayList;
 

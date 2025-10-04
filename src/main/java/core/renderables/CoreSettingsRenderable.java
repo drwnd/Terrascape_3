@@ -1,16 +1,9 @@
 package core.renderables;
 
-import core.settings.FloatSetting;
-import core.settings.KeySetting;
-import core.settings.OptionSetting;
-import core.settings.ToggleSetting;
 import core.rendering_api.Window;
 import core.settings.*;
-import core.utils.Message;
 import core.utils.StringGetter;
 import core.languages.UiMessage;
-
-import game.player.rendering.DebugScreenLine;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -18,9 +11,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
-public final class SettingsRenderable extends UiBackgroundElement {
+public class CoreSettingsRenderable extends UiBackgroundElement {
 
-    public SettingsRenderable() {
+    public CoreSettingsRenderable() {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
         input = new SettingsRenderableInput(this);
         Vector2f sizeToParent = new Vector2f(0.1f, 0.1f);
@@ -122,34 +115,8 @@ public final class SettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addDebugLineSetting(DebugScreenLine debugLine) {
-        settingsCount++;
 
-        Vector2f sizeToParent = new Vector2f(0.15f, 0.1f);
-        float yOffset = 1.0f - 0.15f * settingsCount;
-
-        TextElement nameDisplay = new TextElement(new Vector2f(0.225f, 0), new Vector2f(0.375f, yOffset + 0.05f), new Message(debugLine.name()));
-        nameDisplay.setAllowFocusScaling(false);
-        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6f, yOffset), debugLine.color(), null);
-        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8f, yOffset), debugLine.visibility(), null);
-
-        addRenderable(nameDisplay);
-        addRenderable(colorOption);
-        addRenderable(visibilityOption);
-
-        movingRenderables.add(nameDisplay);
-        options.add(colorOption);
-        options.add(visibilityOption);
-
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
-            colorOption.setToDefault();
-            visibilityOption.setToDefault();
-        });
-    }
-
-
-    private UiButton createResetButton(int counter) {
+    protected UiButton createResetButton(int counter) {
         Vector2f sizeToParent = new Vector2f(0.1f, 0.1f);
         Vector2f offsetToParent = new Vector2f(0.225f, 1.0f - 0.15f * counter);
         UiButton resetButton = new UiButton(sizeToParent, offsetToParent);
@@ -225,15 +192,15 @@ public final class SettingsRenderable extends UiBackgroundElement {
         };
     }
 
-    private int settingsCount = 0;
+    protected int settingsCount = 0;
     private Slider selectedSlider;
     private SettingsRenderableInput input;
 
-    private final ArrayList<Slider> sliders = new ArrayList<>();
-    private final ArrayList<KeySelector> keySelectors = new ArrayList<>();
-    private final ArrayList<Toggle> toggles = new ArrayList<>();
-    private final ArrayList<OptionToggle> options = new ArrayList<>();
+    protected final ArrayList<Slider> sliders = new ArrayList<>();
+    protected final ArrayList<KeySelector> keySelectors = new ArrayList<>();
+    protected final ArrayList<Toggle> toggles = new ArrayList<>();
+    protected final ArrayList<OptionToggle> options = new ArrayList<>();
 
     private final ArrayList<UiButton> resetButtons = new ArrayList<>();
-    private final ArrayList<Renderable> movingRenderables = new ArrayList<>();
+    protected final ArrayList<Renderable> movingRenderables = new ArrayList<>();
 }

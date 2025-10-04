@@ -1,13 +1,13 @@
-package game.assets;
+package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
-import game.utils.Constants;
 
-public enum GuiElements implements GuiElementIdentifier {
+public enum CoreGuiElements implements GuiElementIdentifier {
 
-    QUAD(Constants.QUAD_VERTICES, Constants.QUAD_TEXTURE_COORDINATES);
+    QUAD(new float[]{0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0}, new float[]{0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1});
 
-    GuiElements(float[] vertices, float[] textureCoordinates) {
+
+    CoreGuiElements(float[] vertices, float[] textureCoordinates) {
         this.vertices = vertices;
         this.textureCoordinates = textureCoordinates;
     }

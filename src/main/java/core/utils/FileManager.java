@@ -56,6 +56,16 @@ public final class FileManager {
         return file;
     }
 
+    public static File loadAndCreateFile(String filepath) {
+        File file = new File(filepath);
+        try {
+            if (!file.exists()) file.createNewFile();
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+        return file;
+    }
+
     public static void delete(File file) {
         if (file == null) return;
         if (file.isDirectory()) {

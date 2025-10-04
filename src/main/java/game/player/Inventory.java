@@ -1,6 +1,6 @@
 package game.player;
 
-import game.assets.Textures;
+import core.assets.CoreTextures;
 import core.languages.Language;
 import core.renderables.TextElement;
 import core.settings.FloatSetting;
@@ -18,12 +18,11 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 
-import static game.utils.Constants.AIR;
-import static game.utils.Constants.AMOUNT_OF_MATERIALS;
+import static game.utils.Constants.*;
 
 public final class Inventory extends UiElement {
     public Inventory() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), Textures.INVENTORY_OVERLAY);
+        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), CoreTextures.OVERLAY);
         setVisible(false);
         setAllowFocusScaling(false);
         setScaleWithGuiSize(false);

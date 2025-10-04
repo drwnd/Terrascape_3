@@ -14,7 +14,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.util.ArrayList;
 
-
 public final class Window {
 
     private Window() {

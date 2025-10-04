@@ -1,8 +1,8 @@
 package game.player.interaction;
 
+import core.rendering_api.Input;
 import core.settings.FloatSetting;
 import core.settings.KeySetting;
-import core.rendering_api.Input;
 
 import game.server.Game;
 

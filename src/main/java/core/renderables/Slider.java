@@ -63,8 +63,8 @@ public final class Slider extends UiButton {
         fraction = Math.clamp(fraction, 0.0f, 1.0f);
         setValue(setting.valueFronFraction(fraction));
 
-        if (getParent() instanceof SettingsRenderable)
-            ((SettingsRenderable) getParent()).setSelectedSlider(this);
+        if (getParent() instanceof CoreSettingsRenderable)
+            ((CoreSettingsRenderable) getParent()).setSelectedSlider(this);
     }
 
     private final FloatSetting setting;

@@ -40,10 +40,8 @@ public final class Settings {
     }
 
     public static void writeToFile() {
+        File file = FileManager.loadAndCreateFile(SETTINGS_FILE_LOCATION);
         try {
-            File file = new File(SETTINGS_FILE_LOCATION);
-            if (!file.exists()) file.createNewFile();
-
             BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()));
 
             for (FloatSetting setting : FloatSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));

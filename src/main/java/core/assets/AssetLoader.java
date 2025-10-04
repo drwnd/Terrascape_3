@@ -2,6 +2,7 @@ package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
 import core.assets.identifiers.TextureIdentifier;
+import core.rendering_api.shaders.TextShader;
 
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.stb.STBImage;
@@ -58,6 +59,48 @@ public final class AssetLoader {
 
         return new GuiElement(vao, identifier.vertices().length);
     }
+
+    public static int generateModelIndexBuffer() {
+        int[] indices = new int[393216];
+        int index = 0;
+        for (int i = 0; i < indices.length; i += 6) {
+            indices[i] = index;
+            indices[i + 1] = index + 1;
+            indices[i + 2] = index + 2;
+            indices[i + 3] = index + 3;
+            indices[i + 4] = index + 2;
+            indices[i + 5] = index + 1;
+            index += 4;
+        }
+        int id = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, id);
+        GL46.glBufferData(GL46.GL_ELEMENT_ARRAY_BUFFER, indices, GL46.GL_STATIC_DRAW);
+
+        return id;
+    }
+
+    public static int generateTextRowVertexArray() {
+        int vao = createVAO();
+
+        final int offsetX = 128;
+        final int offsetY = 256;
+
+        int[] textData = new int[TextShader.MAX_TEXT_LENGTH * 4];
+        for (int i = 0; i < textData.length; i += 4) {
+            textData[i] = i >> 2;
+            textData[i + 1] = i >> 2 | offsetX;
+            textData[i + 2] = i >> 2 | offsetY;
+            textData[i + 3] = i >> 2 | offsetX | offsetY;
+        }
+        int vbo = storeDateInAttributeList(textData);
+
+        GL46.glBindVertexArray(0);
+        GL46.glBindBuffer(GL46.GL_ARRAY_BUFFER, vbo);
+        GL46.glDeleteBuffers(vbo);
+
+        return vao;
+    }
+
 
     public static int createVAO() {
         int vao = GL46.glGenVertexArrays();

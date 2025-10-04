@@ -95,7 +95,7 @@ public final class Renderer extends Renderable {
         Player player = Game.getPlayer();
         Camera camera = player.getCamera();
         player.updateFrame();
-        RenderingOptimizer.computeVisibility(visibilityBits, player);
+        renderingOptimizer.computeVisibility(player);
 
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
@@ -161,7 +161,7 @@ public final class Renderer extends Renderable {
         setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            long[] lodVisibilityBits = visibilityBits[lod];
+            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
                 if (model == null || !model.containsGeometry() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
@@ -184,7 +184,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            long[] lodVisibilityBits = visibilityBits[lod];
+            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
                 if (model == null || !model.containsWater() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
@@ -212,5 +212,5 @@ public final class Renderer extends Renderable {
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
-    private final long[][] visibilityBits = new long[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64 + 1];
+    private final RenderingOptimizer renderingOptimizer = new RenderingOptimizer();
 }

@@ -1,11 +1,12 @@
 package core.renderables;
 
-import org.lwjgl.glfw.GLFW;
 import core.rendering_api.Input;
+
+import org.lwjgl.glfw.GLFW;
 
 public final class SettingsRenderableInput extends Input {
 
-    public SettingsRenderableInput(SettingsRenderable menu) {
+    public SettingsRenderableInput(CoreSettingsRenderable menu) {
         super(menu);
         this.menu = menu;
     }
@@ -55,6 +56,6 @@ public final class SettingsRenderableInput extends Input {
 
     }
 
-    private final SettingsRenderable menu;
+    private final CoreSettingsRenderable menu;
     private float scroll = 0;
 }
