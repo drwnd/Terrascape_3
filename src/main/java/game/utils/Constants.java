@@ -1,5 +1,7 @@
 package game.utils;
 
+import game.server.material.Properties;
+
 public final class Constants {
 
     public static final float Z_NEAR = 0.8208f; // Just barely can't xRay
@@ -49,14 +51,14 @@ public final class Constants {
      */
     public static final byte EAST = 5;
 
-    // BLOCK_PROPERTIES
-    public static final int NO_COLLISION = 1;
-    public static final int REPLACEABLE = 2;
-    public static final int BLAST_RESISTANT = 4;
-    public static final int HAS_GRAVITY = 8;
-    public static final int REQUIRES_BOTTOM_SUPPORT = 16;
-    public static final int TRANSPARENT = 32;
-    public static final int OCCLUDES_SELF_ONLY = 64 | TRANSPARENT;
+    // Block Properties. Used in performance critical situations, so they are pulled out of their wrapper classes
+    public static final int NO_COLLISION = Properties.NO_COLLISION.getValue();
+    public static final int REPLACEABLE = Properties.REPLACEABLE.getValue();
+    public static final int BLAST_RESISTANT = Properties.BLAST_RESISTANT.getValue();
+    public static final int HAS_GRAVITY = Properties.HAS_GRAVITY.getValue();
+    public static final int REQUIRES_BOTTOM_SUPPORT = Properties.REQUIRES_BOTTOM_SUPPORT.getValue();
+    public static final int TRANSPARENT = Properties.TRANSPARENT.getValue();
+    public static final int OCCLUDES_SELF_ONLY = Properties.OCCLUDES_SELF_ONLY.getValue();
 
     // All materials
     public static final byte AIR = 0;

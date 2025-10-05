@@ -45,6 +45,15 @@ public final class AssetManager {
         }
     }
 
+    public static void reload(AssetIdentifier identifier) {
+        synchronized (assets) {
+            if (!assets.containsKey(identifier)) return;
+            Asset asset = assets.get(identifier);
+            asset.delete();
+            assets.remove(identifier, asset);
+        }
+    }
+
 
     private static Asset loadAsset(AssetIdentifier identifier, AssetGenerator generator) {
         synchronized (assets) {

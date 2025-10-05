@@ -2,7 +2,7 @@ package game.player.rendering;
 
 import game.server.Chunk;
 import game.server.Game;
-import game.server.Material;
+import game.server.material.Material;
 import game.server.generation.Structure;
 import core.utils.IntArrayList;
 

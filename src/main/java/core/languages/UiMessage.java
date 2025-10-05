@@ -86,7 +86,8 @@ public enum UiMessage implements StringGetter {
     X_RAY,
     V_SYNC,
     RELOAD_LANGUAGE,
-    RELOAD_FONT;
+    RELOAD_FONT,
+    RELOAD_MATERIALS;
 
     @Override
     public String get() {

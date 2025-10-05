@@ -3,7 +3,7 @@ package game.player.interaction;
 import core.settings.FloatSetting;
 
 import game.server.Game;
-import game.server.Material;
+import game.server.material.Material;
 import game.utils.Position;
 import game.utils.Utils;
 

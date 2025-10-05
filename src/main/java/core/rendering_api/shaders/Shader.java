@@ -3,6 +3,7 @@ package core.rendering_api.shaders;
 import core.assets.Asset;
 import core.assets.identifiers.ShaderIdentifier;
 
+import core.utils.FileManager;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -11,22 +12,16 @@ import org.lwjgl.opengl.GL46;
 import org.lwjgl.system.MemoryStack;
 
 import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class Shader extends Asset {
 
     public Shader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
         uniforms = new HashMap<>();
 
+        String vertexShaderCode = FileManager.loadFileContents(vertexShaderFilePath);
+        String fragmentShaderCode = FileManager.loadFileContents(fragmentShaderFilePath);
         try {
-            String vertexShaderCode = loadShaderCode(vertexShaderFilePath);
-            String fragmentShaderCode = loadShaderCode(fragmentShaderFilePath);
-
             programID = createProgram();
             int vertexShaderID = createVertexShader(vertexShaderCode, programID);
             int fragmentShaderID = createFragmentShader(fragmentShaderCode, programID);
@@ -35,8 +30,8 @@ public class Shader extends Asset {
             System.out.printf("Creating uniforms for Shader %s%n", identifier);
             createUniforms(vertexShaderCode);
             createUniforms(fragmentShaderCode);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -151,16 +146,6 @@ public class Shader extends Asset {
         GL46.glAttachShader(programID, shaderID);
 
         return shaderID;
-    }
-
-    private static String loadShaderCode(String filePath) throws FileNotFoundException {
-        String result;
-
-        InputStream in = new FileInputStream(filePath);
-        Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
-        result = scanner.useDelimiter("\\A").next();
-
-        return result;
     }
 
     private void createUniforms(String shaderCode) {

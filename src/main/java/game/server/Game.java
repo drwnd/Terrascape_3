@@ -2,6 +2,7 @@ package game.server;
 
 import game.player.Player;
 import core.rendering_api.Window;
+import game.server.material.Material;
 import game.server.saving.PlayerSaver;
 import game.server.saving.ServerSaver;
 import game.server.saving.WorldSaver;
@@ -11,7 +12,7 @@ import java.io.File;
 public final class Game {
 
     public static void play(File saveFile) {
-        Material.init();
+        Material.loadMaterials();
         String worldName = saveFile.getName();
 
         player = new PlayerSaver().load(PlayerSaver.getSaveFileLocation(worldName));

@@ -3,7 +3,7 @@ package game.player.rendering;
 import core.assets.AssetLoader;
 import core.assets.Texture;
 
-import game.server.Material;
+import game.server.material.Material;
 
 import org.joml.Vector3i;
 import org.lwjgl.opengl.GL46;

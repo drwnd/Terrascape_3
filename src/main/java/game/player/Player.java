@@ -9,6 +9,7 @@ import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
 import game.player.rendering.Renderer;
 import game.server.Game;
+import game.server.material.Material;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -74,6 +75,7 @@ public final class Player {
     public void handleInactiveInput(int button, int action) {
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
+        if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
     }
 
 

@@ -1,10 +1,9 @@
 package core.utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public final class FileManager {
 
@@ -73,5 +72,20 @@ public final class FileManager {
             if (children != null) for (File child : children) delete(child);
         }
         file.delete();
+    }
+
+    public static String loadFileContents(String filePath) {
+        String result;
+
+        try {
+            InputStream in = new FileInputStream(filePath);
+            Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
+            result = scanner.useDelimiter("\\A").next();
+
+        } catch (FileNotFoundException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        return result;
     }
 }
