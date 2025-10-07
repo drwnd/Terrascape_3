@@ -22,6 +22,20 @@ public record Position(Vector3i intPosition, Vector3f fractionPosition) {
         fractionPosition.set(Utils.fraction(fractionPosition.x), Utils.fraction(fractionPosition.y), Utils.fraction(fractionPosition.z));
     }
 
+    public void addComponent(int component, float value) {
+        fractionPosition.setComponent(component, fractionPosition.get(component) + value);
+        intPosition.setComponent(component, intPosition.get(component) + Utils.floor(fractionPosition.get(component)));
+        fractionPosition.setComponent(component, Utils.fraction(fractionPosition.get(component)));
+    }
+
+    public Vector3f vectorFrom(Position position) {
+        return new Vector3f(
+                (intPosition.x - position.intPosition.x) + (fractionPosition.x - position.fractionPosition.x),
+                (intPosition.y - position.intPosition.y) + (fractionPosition.y - position.fractionPosition.y),
+                (intPosition.z - position.intPosition.z) + (fractionPosition.z - position.fractionPosition.z)
+        );
+    }
+
     public Vector3f getInChunkPosition() {
         return new Vector3f(intPosition.x & CHUNK_SIZE_MASK, intPosition.y & CHUNK_SIZE_MASK, intPosition.z & CHUNK_SIZE_MASK).add(fractionPosition);
     }

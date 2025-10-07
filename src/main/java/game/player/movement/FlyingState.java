@@ -7,6 +7,7 @@ import game.utils.Position;
 import game.utils.Utils;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 public final class FlyingState extends MovementState {
@@ -48,6 +49,15 @@ public final class FlyingState extends MovementState {
     protected void handleInput(int key, int action) {
         if (key == KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE.value() && action == GLFW.GLFW_PRESS)
             next = new FollowDirectionState();
+    }
+
+    @Override
+    public Vector3i getHitboxSize() {
+        return new Vector3i(7, 28, 7);
+    }
+    @Override
+    public float getCameraElevation() {
+        return 26;
     }
 
     private static final float VERTICAL_FLY_SPEED = 0.5f;

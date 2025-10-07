@@ -5,6 +5,7 @@ import game.server.Game;
 import game.server.material.Material;
 import game.server.generation.Structure;
 import core.utils.IntArrayList;
+import game.server.material.Properties;
 
 import static game.utils.Constants.*;
 
@@ -330,9 +331,9 @@ public final class MeshGenerator {
 
     private static boolean occludes(byte toTestMaterial, byte occludingMaterial) {
         if (occludingMaterial == AIR) return false;
-        if ((Material.getMaterialProperties(occludingMaterial) & TRANSPARENT) == 0) return true;
+        if (Properties.doesntHaveProperties(occludingMaterial, TRANSPARENT)) return true;
 
-        if ((Material.getMaterialProperties(toTestMaterial) & OCCLUDES_SELF_ONLY) != 0)
+        if (Properties.hasProperties(toTestMaterial, OCCLUDES_SELF_ONLY))
             return toTestMaterial == occludingMaterial;
         return false;
     }

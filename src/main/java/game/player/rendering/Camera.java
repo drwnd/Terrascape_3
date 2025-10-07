@@ -60,9 +60,9 @@ public final class Camera {
         }
     }
 
-    public void setPlayerPosition(Position playerPosition) {
+    public void setPosition(Position position) {
         synchronized (this) {
-            position = new Position(playerPosition);
+            this.position = new Position(position);
         }
     }
 

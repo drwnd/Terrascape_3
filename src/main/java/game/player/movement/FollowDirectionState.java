@@ -6,6 +6,7 @@ import game.utils.Position;
 import game.utils.Utils;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 public final class FollowDirectionState extends MovementState {
@@ -16,12 +17,21 @@ public final class FollowDirectionState extends MovementState {
 
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        velocity.set(Utils.getDirection(playerRotation));
+        velocity.set(Utils.getDirection(playerRotation)).mul(5);
     }
 
 
     @Override
     protected void handleInput(int key, int action) {
         if (key == KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE.value() && action == GLFW.GLFW_PRESS) next = new FlyingState();
+    }
+
+    @Override
+    public Vector3i getHitboxSize() {
+        return new Vector3i(7, 7, 7);
+    }
+    @Override
+    public float getCameraElevation() {
+        return 3.5f;
     }
 }

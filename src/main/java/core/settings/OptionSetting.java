@@ -17,6 +17,7 @@ public enum OptionSetting {
     CHUNK_IDENTIFIERS_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     TARGET_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     RENDERED_MODELS_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
+    VELOCITY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
 
     WORLD_NAME_COLOR(ColorOption.LIGHT_GRAY),
     WORLD_TICK_AND_TIME_COLOR(ColorOption.LIGHT_GRAY),
@@ -30,6 +31,7 @@ public enum OptionSetting {
     CHUNK_IDENTIFIERS_COLOR(ColorOption.GREEN),
     TARGET_COLOR(ColorOption.BLUE),
     RENDERED_MODELS_COLOR(ColorOption.RED),
+    VELOCITY_COLOR(ColorOption.WHITE),
 
     FONT(new FontOption("Default")),
     LANGUAGE(new Language("English"));

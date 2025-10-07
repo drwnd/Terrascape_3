@@ -3,7 +3,7 @@ package game.player.interaction;
 import core.settings.FloatSetting;
 
 import game.server.Game;
-import game.server.material.Material;
+import game.server.material.Properties;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -15,7 +15,7 @@ import static game.utils.Constants.*;
 public record Target(Vector3i position, int side, byte material) {
 
     public static Target getPlayerTarget() {
-        Position playerPosition = Game.getPlayer().getPosition();
+        Position playerPosition = Game.getPlayer().getCamera().getPosition();
         Vector3f playerDirection = Game.getPlayer().getCamera().getDirection();
         return Target.getTarget(playerPosition, playerDirection);
     }
@@ -53,7 +53,7 @@ public record Target(Vector3i position, int side, byte material) {
             byte material = Game.getWorld().getMaterial(x, y, z, 0);
             if (material == OUT_OF_WORLD) return null;
 
-            if ((Material.getMaterialProperties(material) & NO_COLLISION) == 0)
+            if (Properties.doesntHaveProperties(material, NO_COLLISION))
                 return new Target(new Vector3i(x, y, z), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {

@@ -21,7 +21,7 @@ public final class Player {
         meshCollector = new MeshCollector();
         camera = new Camera();
         input = new PlayerInput();
-        movement = new Movement(new Vector3f());
+        movement = new Movement();
         renderer = new Renderer();
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
@@ -44,10 +44,11 @@ public final class Player {
 
         synchronized (this) {
             camera.rotate(input.getCursorMovement());
-            Vector3f movementThisTick = movement.getVelocity().mul(fraction);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1);
             Position toRenderPosition = new Position(position);
             toRenderPosition.add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
-            camera.setPlayerPosition(toRenderPosition);
+            toRenderPosition.add(0, movement.getState().getCameraElevation(), 0);
+            camera.setPosition(toRenderPosition);
         }
     }
 
@@ -76,6 +77,7 @@ public final class Player {
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
+        if (button == KeySetting.NO_CLIP.value() && action == GLFW.GLFW_PRESS) noClip = !noClip;
     }
 
 
@@ -117,6 +119,10 @@ public final class Player {
         return !inventory.isVisible();
     }
 
+    public boolean isNoClip() {
+        return noClip;
+    }
+
     public void cleanUp() {
 
     }
@@ -136,5 +142,6 @@ public final class Player {
     private final Hotbar hotbar;
     private final Inventory inventory;
 
-    private Position position;
+    private boolean noClip = false;
+    private Position position; // Center of the players feet
 }

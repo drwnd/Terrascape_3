@@ -39,8 +39,17 @@ public enum Properties {
         return value;
     }
 
+    public static boolean hasProperties(byte material, int properties) {
+        return (Material.getMaterialProperties(material) & properties) == properties;
+    }
+
+    public static boolean doesntHaveProperties(byte material, int properties) {
+        return (Material.getMaterialProperties(material) & properties) == 0;
+    }
+
     /**
      * Use {@code Constants.PROPERTY_NAME} instead
+     *
      * @return The same value as {@code CONSTANTS.PROPERTY_NAME} just slower
      */
     public int getValue() {

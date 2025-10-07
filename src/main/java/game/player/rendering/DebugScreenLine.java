@@ -66,6 +66,11 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             return "Position %s, Fraction %s".formatted(playerPosition.intPositionToString(), playerPosition.fractionToString());
         }, "Player Position"));
 
+        lines.add(new DebugScreenLine(OptionSetting.VELOCITY_VISIBILITY, OptionSetting.VELOCITY_COLOR, () -> {
+            Vector3f velocity = Game.getPlayer().getMovement().getVelocity();
+            return "Velocity [X:%s, Y:%s, Z:%s]".formatted(velocity.x, velocity.y, velocity.z);
+        }, "Player Velocity"));
+
         lines.add(new DebugScreenLine(OptionSetting.CHUNK_POSITION_VISIBILITY, OptionSetting.CHUNK_POSITION_COLOR, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
             return "Chunk Position %s, In Chunk Position %s".formatted(playerPosition.chunkCoordinateToString(), playerPosition.inChunkPositionToString());
