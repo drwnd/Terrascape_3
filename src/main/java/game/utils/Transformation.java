@@ -42,8 +42,8 @@ public final class Transformation {
     public static Matrix4f getFrustumCullingMatrix(Camera camera) {
         Position cameraPosition = camera.getPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
-        matrix.translate(-cameraPosition.intPosition().x, -cameraPosition.intPosition().y, -cameraPosition.intPosition().z);
-        matrix.translate(-cameraPosition.fractionPosition().x, -cameraPosition.fractionPosition().y, -cameraPosition.fractionPosition().z);
+        matrix.translate(-cameraPosition.intX, -cameraPosition.intY, -cameraPosition.intZ);
+        matrix.translate(-cameraPosition.fractionX, -cameraPosition.fractionY, -cameraPosition.fractionZ);
 
         return matrix;
     }

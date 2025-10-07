@@ -51,6 +51,10 @@ public final class Constants {
      */
     public static final byte EAST = 5;
 
+    public static final int X_COMPONENT = 0;
+    public static final int Y_COMPONENT = 1;
+    public static final int Z_COMPONENT = 2;
+
     // Block Properties. Used in performance critical situations, so they are pulled out of their wrapper classes
     public static final int NO_COLLISION = Properties.NO_COLLISION.getValue();
     public static final int REPLACEABLE = Properties.REPLACEABLE.getValue();

@@ -153,12 +153,12 @@ public final class Renderer extends Renderable {
     private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
         renderedOpaqueModels = 0;
 
-        int playerChunkX = Utils.floor(playerPosition.intPosition().x) >> CHUNK_SIZE_BITS;
-        int playerChunkY = Utils.floor(playerPosition.intPosition().y) >> CHUNK_SIZE_BITS;
-        int playerChunkZ = Utils.floor(playerPosition.intPosition().z) >> CHUNK_SIZE_BITS;
+        int playerChunkX = Utils.floor(playerPosition.intX) >> CHUNK_SIZE_BITS;
+        int playerChunkY = Utils.floor(playerPosition.intY) >> CHUNK_SIZE_BITS;
+        int playerChunkZ = Utils.floor(playerPosition.intZ) >> CHUNK_SIZE_BITS;
 
         Shader shader = AssetManager.getShader(Shaders.OPAQUE);
-        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z);
+        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
@@ -180,7 +180,7 @@ public final class Renderer extends Renderable {
         renderedTransparentModels = 0;
 
         Shader shader = AssetManager.getShader(Shaders.WATER);
-        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intPosition().x, playerPosition.intPosition().y, playerPosition.intPosition().z, getTime());
+        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getTime());
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {

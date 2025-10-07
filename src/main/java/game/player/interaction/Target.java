@@ -22,9 +22,9 @@ public record Target(Vector3i position, int side, byte material) {
 
     public static Target getTarget(Position origin, Vector3f dir) {
 
-        int x = origin.intPosition().x;
-        int y = origin.intPosition().y;
-        int z = origin.intPosition().z;
+        int x = origin.intX;
+        int y = origin.intY;
+        int z = origin.intZ;
 
         int xDir = dir.x < 0 ? -1 : 1;
         int yDir = dir.y < 0 ? -1 : 1;
@@ -41,9 +41,9 @@ public record Target(Vector3i position, int side, byte material) {
         double yUnit = (float) Math.sqrt(1 + (dirXSquared + dirZSquared) / dirYSquared);
         double zUnit = (float) Math.sqrt(1 + (dirXSquared + dirYSquared) / dirZSquared);
 
-        double lengthX = xUnit * (dir.x < 0 ? origin.fractionPosition().x : 1 - origin.fractionPosition().x);
-        double lengthY = yUnit * (dir.y < 0 ? origin.fractionPosition().y : 1 - origin.fractionPosition().y);
-        double lengthZ = zUnit * (dir.z < 0 ? origin.fractionPosition().z : 1 - origin.fractionPosition().z);
+        double lengthX = xUnit * (dir.x < 0 ? origin.fractionX : 1 - origin.fractionX);
+        double lengthY = yUnit * (dir.y < 0 ? origin.fractionY : 1 - origin.fractionY);
+        double lengthZ = zUnit * (dir.z < 0 ? origin.fractionZ : 1 - origin.fractionZ);
         double length = 0;
 
         int intersectedSide = 0;

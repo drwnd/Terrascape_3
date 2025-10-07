@@ -145,7 +145,7 @@ public final class Movement {
 
     private Vector3f getCornerFractionPosition(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
-        Vector3f cornerFraction = new Vector3f(position.fractionPosition());
+        Vector3f cornerFraction = position.fractionPosition();
         return cornerFraction.set(
                 Utils.fraction(cornerFraction.x + (velocity.x > 0 ? hitboxSize.x * 0.5f : -hitboxSize.x * 0.5f)),
                 Utils.fraction(cornerFraction.y + (velocity.y > 0 ? hitboxSize.y : 0)),
@@ -155,25 +155,21 @@ public final class Movement {
 
     private int getStartX(Position position, Vector3i hitboxSize, int component) {
         float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5f : -hitboxSize.x * 0.5f;
-        return position.intPosition().x + Utils.floor(position.fractionPosition().x + offset);
+        return position.intX + Utils.floor(position.fractionX + offset);
     }
 
     private int getStartY(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Y_COMPONENT && velocity.y > 0 ? hitboxSize.y : 0;
-        return position.intPosition().y + Utils.floor(position.fractionPosition().y + offset);
+        return position.intY + Utils.floor(position.fractionY + offset);
     }
 
     private int getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5f : -hitboxSize.z * 0.5f;
-        return position.intPosition().z + Utils.floor(position.fractionPosition().z + offset);
+        return position.intZ + Utils.floor(position.fractionZ + offset);
     }
 
 
     private MovementState state = new FlyingState();
     private final Vector3f velocity = new Vector3f();
     private Vector3f renderVelocity = new Vector3f();
-
-    private static final int X_COMPONENT = 0;
-    private static final int Y_COMPONENT = 1;
-    private static final int Z_COMPONENT = 2;
 }

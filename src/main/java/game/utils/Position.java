@@ -5,64 +5,134 @@ import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
-public record Position(Vector3i intPosition, Vector3f fractionPosition) {
+public class Position {
+
+    public int intX, intY, intZ;
+    public float fractionX, fractionY, fractionZ;
+
+    public Position() {
+        this.intX = 0;
+        this.intY = 0;
+        this.intZ = 0;
+        this.fractionX = 0.0f;
+        this.fractionY = 0.0f;
+        this.fractionZ = 0.0f;
+    }
+
+    public Position(int intX, int intY, int intZ, float fractionX, float fractionY, float fractionZ) {
+        this.intX = intX;
+        this.intY = intY;
+        this.intZ = intZ;
+        this.fractionX = fractionX;
+        this.fractionY = fractionY;
+        this.fractionZ = fractionZ;
+    }
+
+    public Position(Vector3i intPosition, Vector3f fractionPosition) {
+        this.intX = intPosition.x;
+        this.intY = intPosition.y;
+        this.intZ = intPosition.z;
+        this.fractionX = fractionPosition.x;
+        this.fractionY = fractionPosition.y;
+        this.fractionZ = fractionPosition.z;
+    }
 
     public Position(Position position) {
-        this(new Vector3i(position.intPosition), new Vector3f(position.fractionPosition));
+        this.intX = position.intX;
+        this.intY = position.intY;
+        this.intZ = position.intZ;
+        this.fractionX = position.fractionX;
+        this.fractionY = position.fractionY;
+        this.fractionZ = position.fractionZ;
     }
 
     public void set(Position position) {
-        intPosition.set(position.intPosition);
-        fractionPosition.set(position.fractionPosition);
+        this.intX = position.intX;
+        this.intY = position.intY;
+        this.intZ = position.intZ;
+        this.fractionX = position.fractionX;
+        this.fractionY = position.fractionY;
+        this.fractionZ = position.fractionZ;
     }
 
     public void add(float x, float y, float z) {
-        fractionPosition.add(x, y, z);
-        intPosition.add(Utils.floor(fractionPosition.x), Utils.floor(fractionPosition.y), Utils.floor(fractionPosition.z));
-        fractionPosition.set(Utils.fraction(fractionPosition.x), Utils.fraction(fractionPosition.y), Utils.fraction(fractionPosition.z));
+        fractionX += x;
+        fractionY += y;
+        fractionZ += z;
+
+        intX += Utils.floor(fractionX);
+        intY += Utils.floor(fractionY);
+        intZ += Utils.floor(fractionZ);
+
+        fractionX = Utils.fraction(fractionX);
+        fractionY = Utils.fraction(fractionY);
+        fractionZ = Utils.fraction(fractionZ);
     }
 
     public void addComponent(int component, float value) {
-        fractionPosition.setComponent(component, fractionPosition.get(component) + value);
-        intPosition.setComponent(component, intPosition.get(component) + Utils.floor(fractionPosition.get(component)));
-        fractionPosition.setComponent(component, Utils.fraction(fractionPosition.get(component)));
+
+        switch (component) {
+            case X_COMPONENT -> {
+                fractionX += value;
+                intX += Utils.floor(fractionX);
+                fractionX = Utils.fraction(fractionX);
+            }
+            case Y_COMPONENT -> {
+                fractionY += value;
+                intY += Utils.floor(fractionY);
+                fractionY = Utils.fraction(fractionY);
+            }
+            case Z_COMPONENT -> {
+                fractionZ += value;
+                intZ += Utils.floor(fractionZ);
+                fractionZ = Utils.fraction(fractionZ);
+            }
+        }
     }
 
     public Vector3f vectorFrom(Position position) {
         return new Vector3f(
-                (intPosition.x - position.intPosition.x) + (fractionPosition.x - position.fractionPosition.x),
-                (intPosition.y - position.intPosition.y) + (fractionPosition.y - position.fractionPosition.y),
-                (intPosition.z - position.intPosition.z) + (fractionPosition.z - position.fractionPosition.z)
+                (intX - position.intX) + (fractionX - position.fractionX),
+                (intY - position.intY) + (fractionY - position.fractionY),
+                (intZ - position.intZ) + (fractionZ - position.fractionZ)
         );
     }
 
     public Vector3f getInChunkPosition() {
-        return new Vector3f(intPosition.x & CHUNK_SIZE_MASK, intPosition.y & CHUNK_SIZE_MASK, intPosition.z & CHUNK_SIZE_MASK).add(fractionPosition);
+        return new Vector3f(intX & CHUNK_SIZE_MASK, intY & CHUNK_SIZE_MASK, intZ & CHUNK_SIZE_MASK).add(fractionX, fractionY, fractionZ);
     }
 
     public Vector3i getChunkCoordinate() {
-        return new Vector3i(intPosition.x >> CHUNK_SIZE_BITS, intPosition.y >> CHUNK_SIZE_BITS, intPosition.z >> CHUNK_SIZE_BITS);
+        return new Vector3i(intX >> CHUNK_SIZE_BITS, intY >> CHUNK_SIZE_BITS, intZ >> CHUNK_SIZE_BITS);
+    }
+
+    public Vector3i intPosition() {
+        return new Vector3i(intX, intY, intZ);
+    }
+
+    public Vector3f fractionPosition() {
+        return new Vector3f(fractionX, fractionY, fractionZ);
     }
 
     public boolean sharesChunkWith(Position position) {
-        return intPosition.x >> CHUNK_SIZE_BITS == position.intPosition.x >> CHUNK_SIZE_BITS
-                && intPosition.y >> CHUNK_SIZE_BITS == position.intPosition.y >> CHUNK_SIZE_BITS
-                && intPosition.z >> CHUNK_SIZE_BITS == position.intPosition.z >> CHUNK_SIZE_BITS;
+        return intX >> CHUNK_SIZE_BITS == position.intX >> CHUNK_SIZE_BITS
+                && intY >> CHUNK_SIZE_BITS == position.intY >> CHUNK_SIZE_BITS
+                && intZ >> CHUNK_SIZE_BITS == position.intZ >> CHUNK_SIZE_BITS;
     }
 
     public String intPositionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(intPosition.x, intPosition.y, intPosition.z);
+        return "[X:%s, Y:%s, Z:%s]".formatted(intX, intY, intZ);
     }
 
     public String fractionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(fractionPosition.x, fractionPosition.y, fractionPosition.z);
+        return "[X:%s, Y:%s, Z:%s]".formatted(fractionX, fractionY, fractionZ);
     }
 
     public String chunkCoordinateToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(intPosition.x >> CHUNK_SIZE_BITS, intPosition.y >> CHUNK_SIZE_BITS, intPosition.z >> CHUNK_SIZE_BITS);
+        return "[X:%s, Y:%s, Z:%s]".formatted(intX >> CHUNK_SIZE_BITS, intY >> CHUNK_SIZE_BITS, intZ >> CHUNK_SIZE_BITS);
     }
 
     public String inChunkPositionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(intPosition.x & CHUNK_SIZE_MASK, intPosition.y & CHUNK_SIZE_MASK, intPosition.z & CHUNK_SIZE_MASK);
+        return "[X:%s, Y:%s, Z:%s]".formatted(intX & CHUNK_SIZE_MASK, intY & CHUNK_SIZE_MASK, intZ & CHUNK_SIZE_MASK);
     }
 }
