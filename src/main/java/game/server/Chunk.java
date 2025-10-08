@@ -1,5 +1,6 @@
 package game.server;
 
+import game.server.saving.ChunkSaver;
 import game.utils.Utils;
 
 import static game.utils.Constants.*;
@@ -18,6 +19,18 @@ public final class Chunk {
         INDEX = Utils.getChunkIndex(X, Y, Z);
         ID = Utils.getChunkId(X, Y, Z);
         LOD = lod;
+    }
+
+    public Chunk getNeighbor(int side) {
+        return switch (side) {
+            case NORTH -> Game.getWorld().getChunk(X, Y, Z + 1, LOD);
+            case TOP -> Game.getWorld().getChunk(X, Y + 1, Z, LOD);
+            case WEST -> Game.getWorld().getChunk(X + 1, Y, Z, LOD);
+            case SOUTH -> Game.getWorld().getChunk(X, Y, Z - 1, LOD);
+            case BOTTOM -> Game.getWorld().getChunk(X, Y - 1, Z, LOD);
+            case EAST -> Game.getWorld().getChunk(X - 1, Y, Z, LOD);
+            default -> throw new IllegalArgumentException("Side cannot be " + side);
+        };
     }
 
     public byte getSaveMaterial(int inChunkX, int inChunkY, int inChunkZ) {
@@ -56,6 +69,18 @@ public final class Chunk {
         return getSaveMaterial(inChunkX, inChunkY, inChunkZ);
     }
 
+    public void generateSurroundingChunks() {
+        World world = Game.getWorld();
+        ChunkSaver saver = new ChunkSaver();
+
+        world.loadAndGenerate(X, Y, Z - 1, LOD, saver);
+        world.loadAndGenerate(X, Y, Z + 1, LOD, saver);
+        world.loadAndGenerate(X, Y - 1, Z, LOD, saver);
+        world.loadAndGenerate(X, Y + 1, Z, LOD, saver);
+        world.loadAndGenerate(X - 1, Y, Z, LOD, saver);
+        world.loadAndGenerate(X + 1, Y, Z, LOD, saver);
+    }
+
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int size) {
         materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1 << size);
         modified = true;
@@ -86,5 +111,6 @@ public final class Chunk {
     }
 
     private MaterialsData materials;
+
     private boolean generated, modified;
 }

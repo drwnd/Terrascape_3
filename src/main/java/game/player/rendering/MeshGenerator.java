@@ -13,7 +13,7 @@ public final class MeshGenerator {
 
     public void generateMesh(Chunk chunk) {
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
-//        chunk.generateSurroundingChunks(); TODO
+        chunk.generateSurroundingChunks();
         clear();
 
         chunk.getMaterials().fillUncompressedMaterialsInto(materials);
@@ -92,9 +92,7 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialsNorthSouth(Chunk chunk, int materialZ) {
-        if (materialZ == CHUNK_SIZE - 1) for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
-                upper[materialX << CHUNK_SIZE_BITS | materialY] = chunk.getMaterial(materialX, materialY, CHUNK_SIZE);
+        if (materialZ == CHUNK_SIZE - 1) chunk.getNeighbor(NORTH).getMaterials().fillUncompressedSideLayerInto(upper, SOUTH);
         else for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2 | materialZ + 1 << CHUNK_SIZE_BITS, upper, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
     }
@@ -117,9 +115,7 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialsTopBottom(Chunk chunk, int materialY) {
-        if (materialY == CHUNK_SIZE - 1) for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                upper[materialX << CHUNK_SIZE_BITS | materialZ] = chunk.getMaterial(materialX, CHUNK_SIZE, materialZ);
+        if (materialY == CHUNK_SIZE - 1) chunk.getNeighbor(TOP).getMaterials().fillUncompressedSideLayerInto(upper, BOTTOM);
         else for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
                 upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
@@ -142,9 +138,7 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialWestEast(Chunk chunk, int materialX) {
-        if (materialX == CHUNK_SIZE - 1) for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
-                upper[materialZ << CHUNK_SIZE_BITS | materialY] = chunk.getMaterial(CHUNK_SIZE, materialY, materialZ);
+        if (materialX == CHUNK_SIZE - 1) chunk.getNeighbor(WEST).getMaterials().fillUncompressedSideLayerInto(upper, EAST);
         else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
     }
 

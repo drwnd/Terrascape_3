@@ -36,6 +36,11 @@ public final class World {
         chunks[chunk.LOD][chunk.getIndex()] = chunk;
     }
 
+    public void loadAndGenerate(int chunkX, int chunkY, int chunkZ, int lod, ChunkSaver saver) {
+        Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
+        if (!chunk.isGenerated()) WorldGeneration.generate(chunk);
+    }
+
     public byte getMaterial(int x, int y, int z, int lod) {
         Chunk chunk = getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, lod);
         if (chunk == null) return OUT_OF_WORLD;
