@@ -131,6 +131,12 @@ public final class Utils {
         return new Vector3f(x, 0, z);
     }
 
+    public static void normalizeToMaxComponent(Vector3f velocity) {
+        float max = Math.abs(velocity.get(velocity.maxComponent()));
+        if (max < 1E-4) return;
+        velocity.normalize(max);
+    }
+
     private Utils() {
     }
 }

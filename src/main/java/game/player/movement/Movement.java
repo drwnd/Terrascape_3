@@ -26,12 +26,6 @@ public final class Movement {
         return position;
     }
 
-    public static void normalizeToMaxComponent(Vector3f velocity) {
-        float max = Math.abs(velocity.get(velocity.maxComponent()));
-        if (max < 1E-4) return;
-        velocity.normalize(max);
-    }
-
     public void handleInput(int button, int action) {
         state.handleInput(button, action);
     }
@@ -113,7 +107,7 @@ public final class Movement {
         return collides(startX, startY, startZ, width, height, depth);
     }
 
-    private boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
+    private static boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
         World world = Game.getWorld();
 
         for (int x = startX; x < startX + width; x++)

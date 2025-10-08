@@ -22,6 +22,7 @@ public final class ShaderLoader {
             case Shaders.OPAQUE -> new Shader("assets/shaders/Material.vert", "assets/shaders/Opaque.frag", identifier);
             case Shaders.SKYBOX -> new Shader("assets/shaders/Skybox.vert", "assets/shaders/Skybox.frag", identifier);
             case Shaders.WATER -> new Shader("assets/shaders/Material.vert", "assets/shaders/Water.frag", identifier);
+            case Shaders.GLASS -> new Shader("assets/shaders/Material.vert", "assets/shaders/Glass.frag", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

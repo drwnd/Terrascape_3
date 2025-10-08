@@ -3,6 +3,7 @@ package game.player.rendering;
 import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.rendering_api.Window;
+import core.rendering_api.shaders.Shader;
 import core.settings.FloatSetting;
 
 import game.assets.Shaders;
@@ -39,22 +40,35 @@ public final class StructureDisplay extends Renderable {
                 (int) (size.y * guiSize * Window.getHeight()));
 
         if (opaqueModel.containsGeometry()) {
-            core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.OPAQUE);
-            Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0);
+            Shader shader = AssetManager.getShader(Shaders.OPAQUE);
+            Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0, 1);
             int[] toRenderVertexCounts = opaqueModel.getVertexCounts(1, 1, 1);
 
+            GL46.glDisable(GL46.GL_DEPTH_TEST);
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, opaqueModel.verticesBuffer());
             shader.setUniform("worldPos", 0, 0, 0, 1);
             GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, opaqueModel.getIndices(), toRenderVertexCounts);
         }
         if (transparentModel.containsWater()) {
-            core.rendering_api.shaders.Shader shader = AssetManager.getShader(Shaders.WATER);
+            Shader shader = AssetManager.getShader(Shaders.WATER);
             Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0f);
             shader.setUniform("cameraPosition", 300.0f, 400.0f, 200.0f);
 
+            GL46.glDisable(GL46.GL_DEPTH_TEST);
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, transparentModel.verticesBuffer());
             shader.setUniform("worldPos", 0, 0, 0, 1);
             GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, transparentModel.waterVertexCount() * (6 / 2));
+        }
+        if (transparentModel.containsGlass()) {
+            Shader shader = AssetManager.getShader(Shaders.GLASS);
+            Renderer.setUpGlassRendering(shader, matrix, 0, 0, 0);
+
+            GL46.glDisable(GL46.GL_DEPTH_TEST);
+            GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, transparentModel.verticesBuffer());
+            shader.setUniform("worldPos", 0, 0, 0, 1);
+            shader.setUniform("indexOffset", transparentModel.waterVertexCount() >> 1);
+            GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, transparentModel.glassVertexCount() * (6 / 2));
+            GL46.glDepthMask(true);
         }
         GL46.glViewport(0, 0, Window.getWidth(), Window.getHeight());
     }

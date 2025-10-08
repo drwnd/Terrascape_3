@@ -35,7 +35,7 @@ public final class FlyingState extends MovementState {
         if (Input.isKeyPressed(KeySetting.SNEAK)) velocityChange.y -= VERTICAL_FLY_SPEED;
 
         if (Input.isKeyPressed(KeySetting.FLY_FAST)) velocityChange.mul(FLY_FAST_SPEED_MODIFIER);
-        Movement.normalizeToMaxComponent(velocityChange);
+        Utils.normalizeToMaxComponent(velocityChange);
 
         return velocityChange;
     }

@@ -58,7 +58,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.RENDERED_MODELS_VISIBILITY, OptionSetting.RENDERED_MODELS_COLOR, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
-            return "Rendered Opaque Models:%s, Transparent Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedTransparentModels);
+            return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedWaterModels, renderer.renderedGlassModels);
         }, "Rendered Models Count"));
 
         lines.add(new DebugScreenLine(OptionSetting.POSITION_VISIBILITY, OptionSetting.POSITION_COLOR, () -> {
