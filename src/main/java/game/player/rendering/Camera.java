@@ -22,7 +22,7 @@ public final class Camera {
     }
 
     public void updateProjectionMatrix() {
-        projectionMatrix.setPerspective((float) Math.toRadians(FloatSetting.FOV.value()), Window.getAspectRatio(), Z_NEAR, Z_FAR);
+        projectionMatrix.setPerspective((float) Math.toRadians(FloatSetting.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_NEAR, Z_FAR);
     }
 
     public Vector3f getDirection() {
@@ -78,6 +78,22 @@ public final class Camera {
         }
     }
 
+    public void setZoomed(boolean zoomed) {
+        this.zoomed = zoomed;
+        if (zoomed) zoomFactor = 0.25f;
+        else zoomFactor = 1.0f;
+    }
+
+    public void changeZoom(float multiplier) {
+        zoomFactor *= multiplier;
+    }
+
+    public boolean isZoomed() {
+        return zoomed;
+    }
+
+    private boolean zoomed = false;
+    private float zoomFactor = 1.0f;
     private Position position;
     private final Vector3f rotation;
 

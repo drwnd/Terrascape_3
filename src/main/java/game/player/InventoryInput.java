@@ -25,7 +25,7 @@ public final class InventoryInput extends Input {
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         inventory.clickOn(cursorPos, button, action);
-        Game.getPlayer().handleInactiveInput(button | Input.IS_MOUSE_BUTTON, action);
+        Game.getPlayer().handleInactiveKeyInput(button | Input.IS_MOUSE_BUTTON, action);
         inventory.handleInput(button | Input.IS_MOUSE_BUTTON, action, cursorPos);
     }
 
@@ -37,7 +37,7 @@ public final class InventoryInput extends Input {
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW.GLFW_KEY_ESCAPE) Game.getPlayer().toggleInventory();
-        Game.getPlayer().handleInactiveInput(key, action);
+        Game.getPlayer().handleInactiveKeyInput(key, action);
         inventory.handleInput(key, action, cursorPos);
     }
 

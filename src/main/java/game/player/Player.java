@@ -3,6 +3,7 @@ package game.player;
 import core.rendering_api.Window;
 import core.settings.KeySetting;
 
+import core.settings.ToggleSetting;
 import game.player.interaction.InteractionHandler;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
@@ -63,7 +64,7 @@ public final class Player {
      * Intended for actions that should not be taken when a menu is displayed.
      * For example movement, block interactions etc.
      */
-    public void handleActiveInput(int button, int action) {
+    public void handleActiveButtonInput(int button, int action) {
         movement.handleInput(button, action);
         interactionHandler.handleInput(button, action);
         hotbar.handleInput(button, action);
@@ -73,11 +74,26 @@ public final class Player {
      * Intended for actions that could always be taken.
      * For example Closing a menu or toggling the debug screen.
      */
-    public void handleInactiveInput(int button, int action) {
-        if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
+    public void handleInactiveKeyInput(int button, int action) {
+        if (button == KeySetting.ZOOM.value() && action != GLFW.GLFW_REPEAT) camera.setZoomed(action == GLFW.GLFW_PRESS);
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
+
+        if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
         if (button == KeySetting.NO_CLIP.value() && action == GLFW.GLFW_PRESS) noClip = !noClip;
+    }
+
+    public void handleInactiveScrollInput(double xScroll, double yScroll) {
+        if (camera.isZoomed()) {
+            final float zoomFactorChange = 0.9f;
+            camera.changeZoom(yScroll > 0 ? zoomFactorChange : 1 / zoomFactorChange);
+            return;
+        }
+
+        if (ToggleSetting.SCROLL_HOTBAR.value()) {
+            Hotbar hotbar = Game.getPlayer().getHotbar();
+            hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
+        }
     }
 
 

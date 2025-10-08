@@ -31,23 +31,20 @@ public final class PlayerInput extends Input {
 
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
-        Game.getPlayer().handleActiveInput(button | Input.IS_MOUSE_BUTTON, action);
-        Game.getPlayer().handleInactiveInput(button | Input.IS_MOUSE_BUTTON, action);
+        Game.getPlayer().handleActiveButtonInput(button | Input.IS_MOUSE_BUTTON, action);
+        Game.getPlayer().handleInactiveKeyInput(button | Input.IS_MOUSE_BUTTON, action);
     }
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        if (ToggleSetting.SCROLL_HOTBAR.value()) {
-            Hotbar hotbar = Game.getPlayer().getHotbar();
-            hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
-        }
+        Game.getPlayer().handleInactiveScrollInput(xScroll, yScroll);
     }
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) Window.pushRenderable(new PauseMenu());
-        Game.getPlayer().handleActiveInput(key, action);
-        Game.getPlayer().handleInactiveInput(key, action);
+        Game.getPlayer().handleActiveButtonInput(key, action);
+        Game.getPlayer().handleInactiveKeyInput(key, action);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package core.settings;
 
 public enum FloatSetting {
-    FOV(10.0f, 175.0f, 90.0f, 1.0f),
+    FOV(1.0f, 175.0f, 90.0f, 1.0f),
     GUI_SIZE(0.25f, 1.0f, 1.0f, 0.01f),
     SENSITIVITY(0.0f, 1.0f, 0.14612676056338028f),
     REACH(0.0f, 500.0f, 5.0f, 1.0f),
@@ -15,7 +15,7 @@ public enum FloatSetting {
     RIM_THICKNESS(0.0f, 0.1f, 0.015625f),
     CROSSHAIR_SIZE(0.0f, 0.2f, 0.045454547f, 0.001f),
     HOTBAR_SIZE(0.0f, 0.2f, 0.05f, 0.001f),
-    BREAK_PLACE_INTERVALL(0, 20, 5, 1),
+    BREAK_PLACE_INTERVALL(1, 20, 5, 1),
     HOTBAR_INDICATOR_SCALER(0.0f, 3.0f, 1.2f, 0.01f),
     PAUSE_MENU_BACKGROUND_BLUR(0.0f, 10.0f, 0.0f, 0.1f),
     INVENTORY_ITEM_SIZE(0.01f, 0.1f, 0.02f, 0.001f),
