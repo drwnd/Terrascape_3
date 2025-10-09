@@ -41,6 +41,7 @@ public final class Renderer extends Renderable {
         crosshair.setAllowFocusScaling(false);
 
         addRenderable(crosshair);
+        addRenderable(new BreakPlaceOptionsDisplay());
     }
 
     public void toggleDebugScreen() {

@@ -22,8 +22,14 @@ public class UiBackgroundElement extends Renderable {
         GuiShader shader = (GuiShader) AssetManager.getShader(CoreShaders.GUI_BACKGROUND);
         Texture background = AssetManager.getTexture(CoreTextures.GUI_ELEMENT_BACKGROUND);
         shader.bind();
-        shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * guiSize);
+        shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * rimThicknessMultiplier * guiSize);
         shader.setUniform("aspectRatio", Window.getAspectRatio());
-        shader.drawQuad(position, size, background);
+        shader.drawQuadCustomScale(position, size, background, guiSize);
     }
+
+    public void setRimThicknessMultiplier(float rimThicknessMultiplier) {
+        this.rimThicknessMultiplier = rimThicknessMultiplier;
+    }
+
+    private float rimThicknessMultiplier = 1.0f;
 }

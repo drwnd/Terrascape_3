@@ -127,6 +127,10 @@ public final class Player {
         return hotbar;
     }
 
+    public InteractionHandler getInteractionHandler() {
+        return interactionHandler;
+    }
+
     public void setInput() {
         Window.setInput(input);
     }

@@ -29,6 +29,9 @@ public final class InteractionHandler {
         handleUse();
     }
 
+    public int getPlaceBreakSize() {
+        return placeBreakSize;
+    }
 
     private void handleUse() {
         byte material = Game.getPlayer().getHeldMaterial();

@@ -55,12 +55,16 @@ public final class TextElement extends Renderable {
         textShader.bind();
         textShader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
         textShader.setUniform("charSize", charWidth, charHeight);
-        textShader.drawText(position, text.substring(0, maxLength), color, addTransparentBackground, true);
+        textShader.drawText(position, text.substring(0, maxLength), color, addTransparentBackground, scalesWithGuiSize());
     }
 
     public float getLength() {
         Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
         return TextShader.getTextLength(text.get(), defaultTextSize.x, scalesWithGuiSize());
+    }
+
+    public String getText() {
+        return text.get();
     }
 
     public void setText(StringGetter text) {
