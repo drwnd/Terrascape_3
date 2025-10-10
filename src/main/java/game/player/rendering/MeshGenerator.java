@@ -7,6 +7,8 @@ import game.server.generation.Structure;
 import core.utils.IntArrayList;
 import game.server.material.Properties;
 
+import java.util.ArrayList;
+
 import static game.utils.Constants.*;
 
 public final class MeshGenerator {
@@ -26,16 +28,19 @@ public final class MeshGenerator {
         Game.getPlayer().getMeshCollector().queueMesh(mesh);
     }
 
-    public Mesh generateMesh(Structure structure) {
-        clear();
+    public ArrayList<Mesh> generateMesh(Structure structure) {
+        ArrayList<Mesh> meshes = new ArrayList<>();
 
-        structure.fillMaterialsInto(materials);
-
-        addNorthSouthFaces(structure);
-        addTopBottomFaces(structure);
-        addWestEastFaces(structure);
-
-        return loadMesh(0, 0, 0, 0);
+        for (int structureX = 0; structureX < structure.sizeX(); structureX += CHUNK_SIZE)
+            for (int structureY = 0; structureY < structure.sizeX(); structureY += CHUNK_SIZE)
+                for (int structureZ = 0; structureZ < structure.sizeX(); structureZ += CHUNK_SIZE) {
+                    clear();
+                    addNorthSouthFaces(structure, structureX, structureY, structureZ);
+                    addTopBottomFaces(structure, structureX, structureY, structureZ);
+                    addWestEastFaces(structure, structureX, structureY, structureZ);
+                    meshes.add(loadMesh(structureX >> CHUNK_SIZE_BITS, structureY >> CHUNK_SIZE_BITS, structureZ >> CHUNK_SIZE_BITS, 0));
+                }
+        return meshes;
     }
 
 
@@ -127,7 +132,7 @@ public final class MeshGenerator {
             System.arraycopy(materials, materialZ << CHUNK_SIZE_BITS, lower, materialZ << CHUNK_SIZE_BITS, CHUNK_SIZE);
 
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
-            copyMaterialWestEast(chunk, materialX);
+            copyMaterialsWestEast(chunk, materialX);
             addWestEastLayer(WEST, materialX, lower, upper);
             addWestEastLayer(EAST, materialX, upper, lower);
 
@@ -137,19 +142,17 @@ public final class MeshGenerator {
         }
     }
 
-    private void copyMaterialWestEast(Chunk chunk, int materialX) {
+    private void copyMaterialsWestEast(Chunk chunk, int materialX) {
         if (materialX == CHUNK_SIZE - 1) chunk.getNeighbor(WEST).getMaterials().fillUncompressedSideLayerInto(upper, EAST);
         else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
     }
 
 
-    private void addNorthSouthFaces(Structure structure) {
-        // Copy materials
-        for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2, lower, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
+    private void addNorthSouthFaces(Structure structure, int structureX, int structureY, int structureZ) {
+        copyMaterialsNorthSouth(structure, structureX, structureY, structureZ, lower);
 
-        for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++) {
-            copyMaterialsNorthSouth(structure, materialZ);
+        for (int materialZ = structureZ; materialZ < structureZ + CHUNK_SIZE; materialZ++) {
+            copyMaterialsNorthSouth(structure, structureX, structureY, materialZ + 1, upper);
             addNorthSouthLayer(NORTH, materialZ, lower, upper);
             addNorthSouthLayer(SOUTH, materialZ, upper, lower);
 
@@ -159,23 +162,17 @@ public final class MeshGenerator {
         }
     }
 
-    private void copyMaterialsNorthSouth(Structure structure, int materialZ) {
-        if (materialZ == structure.sizeZ()) for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            for (int materialY = 0; materialY < structure.sizeY(); materialY++)
-                upper[materialX << CHUNK_SIZE_BITS | materialY] = AIR;
-        else for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2 | materialZ + 1 << CHUNK_SIZE_BITS, upper, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
-
+    private void copyMaterialsNorthSouth(Structure structure, int structureX, int structureY, int structureZ, byte[] target) {
+        for (int x = 0; x < CHUNK_SIZE; x++)
+            for (int y = 0; y < CHUNK_SIZE; y++)
+                target[x << CHUNK_SIZE_BITS | y] = structure.getMaterial(structureX + x, structureY + y, structureZ);
     }
 
-    private void addTopBottomFaces(Structure structure) {
-        // Copy materials
-        for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
-                lower[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS];
+    private void addTopBottomFaces(Structure structure, int structureX, int structureY, int structureZ) {
+        copyMaterialsTopBottom(structure, structureX, structureY, structureZ, lower);
 
-        for (int materialY = 0; materialY < structure.sizeY(); materialY++) {
-            copyMaterialsTopBottom(structure, materialY);
+        for (int materialY = structureY; materialY < structureY + CHUNK_SIZE; materialY++) {
+            copyMaterialsTopBottom(structure, structureX, materialY + 1, structureZ, upper);
             addTopBottomLayer(TOP, materialY, lower, upper);
             addTopBottomLayer(BOTTOM, materialY, upper, lower);
 
@@ -185,22 +182,17 @@ public final class MeshGenerator {
         }
     }
 
-    private void copyMaterialsTopBottom(Structure structure, int materialY) {
-        if (materialY == structure.sizeY()) for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
-                upper[materialX << CHUNK_SIZE_BITS | materialZ] = AIR;
-        else for (int materialX = 0; materialX < structure.sizeX(); materialX++)
-            for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
-                upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
+    private void copyMaterialsTopBottom(Structure structure, int structureX, int structureY, int structureZ, byte[] target) {
+        for (int x = 0; x < CHUNK_SIZE; x++)
+            for (int z = 0; z < CHUNK_SIZE; z++)
+                target[x << CHUNK_SIZE_BITS | z] = structure.getMaterial(structureX + x, structureY, structureZ + z);
     }
 
-    private void addWestEastFaces(Structure structure) {
-        // Copy materials
-        for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
-            System.arraycopy(materials, materialZ << CHUNK_SIZE_BITS, lower, materialZ << CHUNK_SIZE_BITS, CHUNK_SIZE);
+    private void addWestEastFaces(Structure structure, int structureX, int structureY, int structureZ) {
+        copyMaterialsWestEast(structure, structureX, structureY, structureZ, lower);
 
-        for (int materialX = 0; materialX < structure.sizeX(); materialX++) {
-            copyMaterialsWestEast(structure, materialX);
+        for (int materialX = structureX; materialX < structureX + CHUNK_SIZE; materialX++) {
+            copyMaterialsWestEast(structure, materialX + 1, structureY, structureZ, upper);
             addWestEastLayer(WEST, materialX, lower, upper);
             addWestEastLayer(EAST, materialX, upper, lower);
 
@@ -210,11 +202,10 @@ public final class MeshGenerator {
         }
     }
 
-    private void copyMaterialsWestEast(Structure structure, int materialX) {
-        if (materialX == structure.sizeX()) for (int materialZ = 0; materialZ < structure.sizeZ(); materialZ++)
-            for (int materialY = 0; materialY < structure.sizeY(); materialY++)
-                upper[materialZ << CHUNK_SIZE_BITS | materialY] = AIR;
-        else System.arraycopy(materials, materialX + 1 << CHUNK_SIZE_BITS * 2, upper, 0, CHUNK_SIZE * CHUNK_SIZE);
+    private void copyMaterialsWestEast(Structure structure, int structureX, int structureY, int structureZ, byte[] target) {
+        for (int z = 0; z < CHUNK_SIZE; z++)
+            for (int y = 0; y < CHUNK_SIZE; y++)
+                target[z << CHUNK_SIZE_BITS | y] = structure.getMaterial(structureX, structureY + y, structureZ + z);
     }
 
 

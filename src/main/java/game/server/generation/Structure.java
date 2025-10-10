@@ -6,6 +6,10 @@ import static game.utils.Constants.*;
 
 public record Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
 
+//    public static final byte MIRROR_X = 1;
+//    public static final byte MIRROR_Z = 2;
+//    public static final byte ROTATE_90 = 4;
+
     public Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
@@ -13,26 +17,34 @@ public record Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
         this.materials = materials;
 
         if (materials.length != sizeX * sizeY * sizeZ)
-            throw new IllegalArgumentException("Materials has wrong dimensions. Should have %s but has %s".formatted(sizeX * sizeY * sizeZ, materials.length));
+            throw new IllegalArgumentException("Materials has wrong dimensions. Should have %s but has %s.".formatted(sizeX * sizeY * sizeZ, materials.length));
     }
 
     public Structure(byte material) {
         this(16, 16, 16, getFilledArray(material));
     }
 
-    public byte getMaterial(int x, int y, int z) {
-        if (!contains(x, y, z)) return AIR;
-        return materials[index(x, y, z)];
+    public byte getMaterial(int structureX, int structureY, int structureZ) {
+        if (!contains(structureX, structureY, structureZ)) return AIR;
+        return materials[index(structureX, structureY, structureZ)];
     }
 
-    public boolean contains(int x, int y, int z) {
-        return x >= 0 && x < sizeX && y >= 0 && y < sizeY && z >= 0 && z < sizeZ;
-    }
+//    public byte getMaterial(int structureX, int structureY, int structureZ, byte transform) {
+//        if ((transform & ROTATE_90) != 0) {
+//            int temp = sizeX - structureX - 1;
+//            structureX = structureZ;
+//            structureZ = temp;
+//        }
+//        if ((transform & MIRROR_X) != 0) structureX = sizeX - structureX - 1;
+//        if ((transform & MIRROR_Z) != 0) structureZ = sizeZ - structureZ - 1;
+//
+//        return materials[index(structureX, structureY, structureZ)];
+//    }
 
-    public void fillMaterialsInto(byte[] materials) {
-        for (int x = 0; x < sizeX; x++)
-            for (int z = 0; z < sizeZ; z++)
-                System.arraycopy(this.materials, index(x, 0, z), materials, x << CHUNK_SIZE_BITS * 2 | z << CHUNK_SIZE_BITS, sizeY);
+    public boolean contains(int structureX, int structureY, int structureZ) {
+        return structureX >= 0 && structureX < sizeX
+                && structureY >= 0 && structureY < sizeY
+                && structureZ >= 0 && structureZ < sizeZ;
     }
 
 
