@@ -1,7 +1,7 @@
 package core.utils;
 
 /**
- * <code> ArrayList</code> is nice and all but the performance sucks compared to this.
+ * {@code ArrayList<Integer>} is nice and all but the performance sucks compared to this.
  */
 public final class IntArrayList {
 

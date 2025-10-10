@@ -1,6 +1,7 @@
 package game.server.saving;
 
 import core.utils.ByteArrayList;
+import core.utils.FileManager;
 import game.utils.Position;
 import org.joml.*;
 
@@ -22,15 +23,10 @@ public abstract class Saver<T> {
     public final synchronized void save(T object, String filepath) {
         toSaveData.clear();
         save(object);
-        File saveFile = new File(filepath);
+        File saveFile = FileManager.loadAndCreateFile(filepath);
         try {
-            if (!saveFile.exists()) {
-                File parent = saveFile.getParentFile();
-                if (!parent.exists()) parent.mkdirs();
-                saveFile.createNewFile();
-            }
             FileOutputStream writer = new FileOutputStream(saveFile);
-            writer.write(toSaveData.toByteArray());
+            writer.write(toSaveData.getData(), 0, toSaveData.size());
             writer.close();
         } catch (IOException exception) {
             exception.printStackTrace();
@@ -53,8 +49,18 @@ public abstract class Saver<T> {
     }
 
 
+    /**
+     * This method is intended for internal use only. Use {@code save(T object, String filepath)} instead.
+     * <p>
+     * DO NOT CALL THIS METHOD!
+     */
     abstract void save(T object);
 
+    /**
+     * This method is intended for internal use only. Use {@code load(String filepath)} instead.
+     * <p>
+     * DO NOT CALL THIS METHOD!
+     */
     abstract T load();
 
     abstract T getDefault();

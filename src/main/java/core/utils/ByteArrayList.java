@@ -1,7 +1,7 @@
 package core.utils;
 
 /**
- * <code>ArrayList</code> is nice and all but the performance sucks compared to this.
+ * {@code ArrayList<Byte>} is nice and all but the performance sucks compared to this.
  */
 public final class ByteArrayList {
 
@@ -29,6 +29,10 @@ public final class ByteArrayList {
         return size;
     }
 
+    public byte[] getData() {
+        return data;
+    }
+
     public void set(byte value, int index) {
         data[index] = value;
     }
@@ -36,12 +40,6 @@ public final class ByteArrayList {
     public void pad(int length) {
         size += length;
         if (size >= data.length) grow();
-    }
-
-    public byte[] toByteArray() {
-        byte[] data = new byte[size];
-        System.arraycopy(this.data, 0, data, 0, size);
-        return data;
     }
 
     public void clear() {

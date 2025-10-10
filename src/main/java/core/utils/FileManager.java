@@ -13,9 +13,8 @@ public final class FileManager {
 
     public static String[] readAllLines(File file) {
         ArrayList<String> lines = new ArrayList<>();
+        file = loadAndCreateFile(file.getPath());
         try {
-            if (!file.exists()) file.createNewFile();
-
             BufferedReader reader = new BufferedReader(new FileReader(file.getPath()));
             while (true) {
                 String line = reader.readLine();
@@ -45,20 +44,24 @@ public final class FileManager {
     }
 
     public static File[] getChildren(File file) {
-        if (!file.exists()) file.mkdir();
+        file.mkdirs();
         return file.listFiles();
     }
 
     public static File loadAndCreateDirectory(String filepath) {
         File file = new File(filepath);
-        if (!file.exists()) file.mkdir();
+        file.mkdirs();
         return file;
     }
 
     public static File loadAndCreateFile(String filepath) {
         File file = new File(filepath);
         try {
-            if (!file.exists()) file.createNewFile();
+            if (!file.exists()) {
+                File parent = file.getParentFile();
+                parent.mkdirs();
+                file.createNewFile();
+            }
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }

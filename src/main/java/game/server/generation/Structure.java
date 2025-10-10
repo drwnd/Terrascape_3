@@ -1,32 +1,22 @@
 package game.server.generation;
 
-import java.util.Arrays;
+import game.server.MaterialsData;
 
 import static game.utils.Constants.*;
 
-public record Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
+public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials) {
 
 //    public static final byte MIRROR_X = 1;
 //    public static final byte MIRROR_Z = 2;
 //    public static final byte ROTATE_90 = 4;
 
-    public Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
-        this.sizeZ = sizeZ;
-        this.materials = materials;
-
-        if (materials.length != sizeX * sizeY * sizeZ)
-            throw new IllegalArgumentException("Materials has wrong dimensions. Should have %s but has %s.".formatted(sizeX * sizeY * sizeZ, materials.length));
-    }
-
     public Structure(byte material) {
-        this(16, 16, 16, getFilledArray(material));
+        this(16, 16, 16, new MaterialsData(4, material));
     }
 
     public byte getMaterial(int structureX, int structureY, int structureZ) {
         if (!contains(structureX, structureY, structureZ)) return AIR;
-        return materials[index(structureX, structureY, structureZ)];
+        return materials.getMaterial(structureX, structureY, structureZ);
     }
 
 //    public byte getMaterial(int structureX, int structureY, int structureZ, byte transform) {
@@ -45,16 +35,5 @@ public record Structure(int sizeX, int sizeY, int sizeZ, byte[] materials) {
         return structureX >= 0 && structureX < sizeX
                 && structureY >= 0 && structureY < sizeY
                 && structureZ >= 0 && structureZ < sizeZ;
-    }
-
-
-    private int index(int x, int y, int z) {
-        return (x * sizeZ + z) * sizeY + y;
-    }
-
-    private static byte[] getFilledArray(byte contents) {
-        byte[] array = new byte[4096];
-        Arrays.fill(array, contents);
-        return array;
     }
 }
