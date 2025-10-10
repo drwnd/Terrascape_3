@@ -168,11 +168,11 @@ public final class GenerationData {
     }
 
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
-        uncompressedMaterials[MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = material;
+        uncompressedMaterials[inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY] = material;
     }
 
     public MaterialsData getCompressedMaterials() {
-        return MaterialsData.getCompressedMaterials(uncompressedMaterials);
+        return MaterialsData.getCompressedMaterials(CHUNK_SIZE_BITS, uncompressedMaterials);
     }
 
 
