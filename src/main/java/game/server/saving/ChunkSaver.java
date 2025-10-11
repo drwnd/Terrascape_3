@@ -126,4 +126,9 @@ public final class ChunkSaver extends Saver<Chunk> {
     Chunk getDefault() {
         return null;
     }
+
+    @Override
+    int getVersionNumber() {
+        return 0;
+    }
 }

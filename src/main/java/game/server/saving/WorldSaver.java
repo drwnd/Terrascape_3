@@ -27,4 +27,9 @@ public final class WorldSaver extends Saver<World> {
     World getDefault() {
         return new World(0);
     }
+
+    @Override
+    int getVersionNumber() {
+        return 0;
+    }
 }

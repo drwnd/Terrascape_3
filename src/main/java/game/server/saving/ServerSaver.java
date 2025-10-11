@@ -27,4 +27,9 @@ public final class ServerSaver extends Saver<Server> {
     Server getDefault() {
         return new Server(0);
     }
+
+    @Override
+    int getVersionNumber() {
+        return 0;
+    }
 }

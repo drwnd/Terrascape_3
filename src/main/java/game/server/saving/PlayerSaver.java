@@ -45,4 +45,9 @@ public final class PlayerSaver extends Saver<Player> {
     Player getDefault() {
         return new Player(new Position(new Vector3i(), new Vector3f()));
     }
+
+    @Override
+    int getVersionNumber() {
+        return 0;
+    }
 }

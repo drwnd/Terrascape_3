@@ -22,6 +22,7 @@ public abstract class Saver<T> {
 
     public final synchronized void save(T object, String filepath) {
         toSaveData.clear();
+        saveInt(getVersionNumber());
         save(object);
         File saveFile = FileManager.loadAndCreateFile(filepath);
         try {
@@ -45,6 +46,8 @@ public abstract class Saver<T> {
             throw new RuntimeException(exception);
         }
         currentIndex = 0;
+        int saveVersionNumber = loadInt();
+        if (saveVersionNumber != getVersionNumber()) return loadOldVersion(saveVersionNumber);
         return load();
     }
 
@@ -64,6 +67,16 @@ public abstract class Saver<T> {
     abstract T load();
 
     abstract T getDefault();
+
+    abstract int getVersionNumber();
+
+    /**
+     * Override this method if you want to bother loading old files.
+     * @param versionNumber The version number of the savefile.
+     */
+    T loadOldVersion(int versionNumber) {
+        return getDefault();
+    }
 
 
     final void saveLong(long value) {

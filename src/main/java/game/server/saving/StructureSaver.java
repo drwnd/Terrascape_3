@@ -28,4 +28,9 @@ public final class StructureSaver extends Saver<Structure> {
     Structure getDefault() {
         return null;
     }
+
+    @Override
+    int getVersionNumber() {
+        return 0;
+    }
 }
