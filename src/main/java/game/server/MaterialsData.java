@@ -58,7 +58,7 @@ public final class MaterialsData {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength) {
-        byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+        byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
 
         for (int x = 0; x < sideLength; x++)

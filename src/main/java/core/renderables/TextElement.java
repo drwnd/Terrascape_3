@@ -51,7 +51,7 @@ public final class TextElement extends Renderable {
         int maxLength = TextShader.getMaxLength(text, maxAllowedLength, defaultTextSize.x, scalesWithGuiSize());
 
         position = new Vector2f(position.x, position.y - defaultTextSize.y * textSize / guiSize * 0.5f);
-        TextShader textShader = (TextShader) AssetManager.getShader(CoreShaders.TEXT);
+        TextShader textShader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         textShader.bind();
         textShader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
         textShader.setUniform("charSize", charWidth, charHeight);

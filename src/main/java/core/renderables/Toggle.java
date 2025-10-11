@@ -43,8 +43,8 @@ public final class Toggle extends UiButton {
         position = new Vector2f(position).add(0.785f * size.x, 0.15f * size.y);
         size = new Vector2f(size).mul(0.2f, 0.7f);
 
-        GuiShader shader = (GuiShader) AssetManager.getShader(CoreShaders.GUI);
-        Texture texture = AssetManager.getTexture(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED);
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+        Texture texture = AssetManager.get(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED);
         shader.bind();
         shader.drawQuad(position, size, texture);
     }

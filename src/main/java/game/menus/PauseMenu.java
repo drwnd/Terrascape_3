@@ -65,7 +65,7 @@ public final class PauseMenu extends Renderable {
 
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
-        GuiShader shader = (GuiShader) AssetManager.getShader(CoreShaders.GUI);
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
         shader.bind();
 
         shader.flipNextDrawVertically();

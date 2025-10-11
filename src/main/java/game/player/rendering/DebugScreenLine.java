@@ -31,7 +31,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
     public void render(int textLine) {
         Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
-        TextShader shader = (TextShader) AssetManager.getShader(CoreShaders.TEXT);
+        TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         shader.bind();
 
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();

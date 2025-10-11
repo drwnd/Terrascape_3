@@ -46,17 +46,17 @@ public final class StructureDisplay extends Renderable {
                 (int) (size.y * guiSize * Window.getHeight()));
 
 
-        Shader shader = AssetManager.getShader(Shaders.OPAQUE);
+        Shader shader = AssetManager.get(Shaders.OPAQUE);
         Renderer.setupOpaqueRendering(shader, matrix, 6400, 6400, 6400, 1);
         for (OpaqueModel opaqueModel : opaqueModels) renderOpaqueModel(opaqueModel, shader);
 
 
-        shader = AssetManager.getShader(Shaders.WATER);
+        shader = AssetManager.get(Shaders.WATER);
         Renderer.setUpWaterRendering(shader, matrix, 6400, 6400, 6400, 1.0f);
         for (TransparentModel transparentModel : transparentModels) renderWaterModel(transparentModel, shader);
 
 
-        shader = AssetManager.getShader(Shaders.GLASS);
+        shader = AssetManager.get(Shaders.GLASS);
         Renderer.setUpGlassRendering(shader, matrix, 6400, 6400, 6400);
         for (TransparentModel transparentModel : transparentModels) renderGlassModel(transparentModel, shader);
         GL46.glDepthMask(true);
@@ -70,33 +70,33 @@ public final class StructureDisplay extends Renderable {
         for (TransparentModel transparentModel : transparentModels) if (transparentModel != null) transparentModel.delete();
     }
 
-    private void renderOpaqueModel(OpaqueModel opaqueModel, Shader shader) {
-        if (!opaqueModel.containsGeometry()) return;
-        int[] toRenderVertexCounts = opaqueModel.getVertexCounts(100, 100, 100);
+    private void renderOpaqueModel(OpaqueModel model, Shader shader) {
+        if (!model.containsGeometry()) return;
+        int[] toRenderVertexCounts = model.getVertexCounts(100, 100, 100);
 
         GL46.glDisable(GL46.GL_DEPTH_TEST);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, opaqueModel.verticesBuffer());
-        shader.setUniform("worldPos", 0, 0, 0, 1);
-        GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, opaqueModel.getIndices(), toRenderVertexCounts);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+        GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), toRenderVertexCounts);
     }
 
-    private void renderWaterModel(TransparentModel transparentModel, Shader shader) {
-        if (!transparentModel.containsWater()) return;
+    private void renderWaterModel(TransparentModel model, Shader shader) {
+        if (!model.containsWater()) return;
         shader.setUniform("cameraPosition", 3000.0f, 4000.0f, 2000.0f);
 
         GL46.glDisable(GL46.GL_DEPTH_TEST);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, transparentModel.verticesBuffer());
-        shader.setUniform("worldPos", 0, 0, 0, 1);
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, transparentModel.waterVertexCount() * (6 / 2));
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount() * (6 / 2));
     }
 
-    private void renderGlassModel(TransparentModel transparentModel, Shader shader) {
-        if (!transparentModel.containsGlass()) return;
+    private void renderGlassModel(TransparentModel model, Shader shader) {
+        if (!model.containsGlass()) return;
         GL46.glDisable(GL46.GL_DEPTH_TEST);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, transparentModel.verticesBuffer());
-        shader.setUniform("worldPos", 0, 0, 0, 1);
-        shader.setUniform("indexOffset", transparentModel.waterVertexCount() >> 1);
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, transparentModel.glassVertexCount() * (6 / 2));
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+        shader.setUniform("indexOffset", model.waterVertexCount() >> 1);
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount() * (6 / 2));
     }
 
     private final OpaqueModel[] opaqueModels;

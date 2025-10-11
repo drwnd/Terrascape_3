@@ -1,7 +1,14 @@
 package core.assets.identifiers;
 
-public interface TextureIdentifier extends AssetIdentifier {
+import core.assets.AssetGenerator;
+import core.assets.AssetLoader;
+import core.assets.Texture;
+
+public interface TextureIdentifier extends AssetIdentifier<Texture> {
 
     String filepath();
 
+    default AssetGenerator<Texture> getAssetGenerator() {
+        return () -> AssetLoader.loadTexture2D(this);
+    }
 }

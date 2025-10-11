@@ -7,8 +7,8 @@ import game.player.rendering.ObjectLoader;
 
 public enum TextureArrays implements TextureArrayIdentifier {
 
-    MATERIALS(() -> ObjectLoader.generateAtlasTextureArray(AssetManager.getTexture(Textures.MATERIALS))),
-    PROPERTIES(() -> ObjectLoader.generateAtlasTextureArray(AssetManager.getTexture(Textures.PROPERTIES)));
+    MATERIALS(() -> ObjectLoader.generateAtlasTextureArray(AssetManager.get(Textures.MATERIALS))),
+    PROPERTIES(() -> ObjectLoader.generateAtlasTextureArray(AssetManager.get(Textures.PROPERTIES)));
 
     TextureArrays(ObjectGenerator generator) {
         this.generator = generator;

@@ -19,8 +19,8 @@ public class UiBackgroundElement extends Renderable {
     protected void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
 
-        GuiShader shader = (GuiShader) AssetManager.getShader(CoreShaders.GUI_BACKGROUND);
-        Texture background = AssetManager.getTexture(CoreTextures.GUI_ELEMENT_BACKGROUND);
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI_BACKGROUND);
+        Texture background = AssetManager.get(CoreTextures.GUI_ELEMENT_BACKGROUND);
         shader.bind();
         shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * rimThicknessMultiplier * guiSize);
         shader.setUniform("aspectRatio", Window.getAspectRatio());

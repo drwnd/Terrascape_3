@@ -61,15 +61,15 @@ public final class Renderer extends Renderable {
         shader.setUniform("propertiesTextures", 1);
 //        shader.setUniform("time", time);
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
+        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glDepthMask(true);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_CULL_FACE);
         GL46.glDisable(GL46.GL_BLEND);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.PROPERTIES).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.PROPERTIES).getID());
     }
 
     public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
@@ -79,14 +79,14 @@ public final class Renderer extends Renderable {
         shader.setUniform("textures", 0);
         shader.setUniform("time", time);
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
+        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glDepthMask(true);
         GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
     }
 
     public static void setUpGlassRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
@@ -95,14 +95,14 @@ public final class Renderer extends Renderable {
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
         shader.setUniform("textures", 0);
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID()); // Just bind something IDK
+        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glBlendFunc(GL46.GL_ZERO, GL46.GL_SRC_COLOR);
         GL46.glDepthMask(false);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.getTextureArray(TextureArrays.MATERIALS).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
     }
 
     public float getTime() {
@@ -145,7 +145,7 @@ public final class Renderer extends Renderable {
 
     private void renderSkybox(Camera camera) {
         GL46.glDisable(GL46.GL_BLEND);
-        Shader shader = AssetManager.getShader(Shaders.SKYBOX);
+        Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
         shader.setUniform("textureAtlas1", 0);
@@ -153,14 +153,14 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", getTime());
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
 
-        GL46.glBindVertexArray(AssetManager.getVertexArray(VertexArrays.SKYBOX).getID());
+        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID());
         GL46.glEnableVertexAttribArray(0);
         GL46.glEnableVertexAttribArray(1);
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.NIGHT_SKY).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.get(Textures.NIGHT_SKY).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture(Textures.DAY_SKY).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.get(Textures.DAY_SKY).getID());
 
         GL46.glDepthMask(false);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
@@ -178,7 +178,7 @@ public final class Renderer extends Renderable {
         int playerChunkY = Utils.floor(playerPosition.intY) >> CHUNK_SIZE_BITS;
         int playerChunkZ = Utils.floor(playerPosition.intZ) >> CHUNK_SIZE_BITS;
 
-        Shader shader = AssetManager.getShader(Shaders.OPAQUE);
+        Shader shader = AssetManager.get(Shaders.OPAQUE);
         setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getTime());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
@@ -200,7 +200,7 @@ public final class Renderer extends Renderable {
     private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
         renderedWaterModels = 0;
 
-        Shader shader = AssetManager.getShader(Shaders.WATER);
+        Shader shader = AssetManager.get(Shaders.WATER);
         setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getTime());
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
 
@@ -222,7 +222,7 @@ public final class Renderer extends Renderable {
     private void renderGlass(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
         renderedGlassModels = 0;
 
-        Shader shader = AssetManager.getShader(Shaders.GLASS);
+        Shader shader = AssetManager.get(Shaders.GLASS);
         setUpGlassRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {

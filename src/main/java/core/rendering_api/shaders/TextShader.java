@@ -40,10 +40,10 @@ public class TextShader extends Shader {
         setUniform("addTransparentBackground", addTransparentBackground);
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.getTexture((TextureIdentifier) OptionSetting.FONT.value()).getID());
-        GL46.glBindVertexArray(AssetManager.getVertexArray(CoreVertexArrays.TEXT_ROW).getID());
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.get((TextureIdentifier) OptionSetting.FONT.value()).getID());
+        GL46.glBindVertexArray(AssetManager.get(CoreVertexArrays.TEXT_ROW).getID());
         GL46.glEnableVertexAttribArray(0);
-        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.getBuffer(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
+        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
 
         GL46.glDrawElements(GL46.GL_TRIANGLES, 768, GL46.GL_UNSIGNED_INT, 0);
     }

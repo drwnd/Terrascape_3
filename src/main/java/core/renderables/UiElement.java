@@ -16,8 +16,8 @@ public class UiElement extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        GuiShader shader = (GuiShader) AssetManager.getShader(CoreShaders.GUI);
-        Texture background = AssetManager.getTexture(texture);
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+        Texture background = AssetManager.get(texture);
         shader.bind();
         if (scalesWithGuiSize()) shader.drawQuad(position, size, background);
         else shader.drawQuadNoGuiScale(position, size, background);

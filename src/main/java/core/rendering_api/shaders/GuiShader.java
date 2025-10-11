@@ -38,7 +38,7 @@ public class GuiShader extends Shader {
     }
 
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
-        GuiElement quad = AssetManager.getGuiElement(CoreGuiElements.QUAD);
+        GuiElement quad = AssetManager.get(CoreGuiElements.QUAD);
 
         GL46.glBindVertexArray(quad.getVao());
         GL46.glEnableVertexAttribArray(0);
