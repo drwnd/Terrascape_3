@@ -1,11 +1,12 @@
 package game.server.saving;
 
+import core.utils.Saver;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class StructureSaver extends Saver<Structure> {
     @Override
-    void save(Structure structure) {
+    protected void save(Structure structure) {
         saveInt(structure.sizeX());
         saveInt(structure.sizeY());
         saveInt(structure.sizeZ());
@@ -14,7 +15,7 @@ public final class StructureSaver extends Saver<Structure> {
     }
 
     @Override
-    Structure load() {
+    protected Structure load() {
         int sizeX = loadInt();
         int sizeY = loadInt();
         int sizeZ = loadInt();
@@ -25,12 +26,12 @@ public final class StructureSaver extends Saver<Structure> {
     }
 
     @Override
-    Structure getDefault() {
+    protected Structure getDefault() {
         return null;
     }
 
     @Override
-    int getVersionNumber() {
+    protected int getVersionNumber() {
         return 0;
     }
 }

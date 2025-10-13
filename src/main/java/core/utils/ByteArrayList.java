@@ -33,8 +33,17 @@ public final class ByteArrayList {
         return data;
     }
 
+    public void setData(byte[] data) {
+        this.data = data;
+        size = data.length;
+    }
+
     public void set(byte value, int index) {
         data[index] = value;
+    }
+
+    public byte get(int index) {
+        return data[index];
     }
 
     public void pad(int length) {

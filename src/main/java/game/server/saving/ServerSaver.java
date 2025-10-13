@@ -1,5 +1,6 @@
 package game.server.saving;
 
+import core.utils.Saver;
 import game.server.Server;
 
 public final class ServerSaver extends Saver<Server> {
@@ -13,23 +14,23 @@ public final class ServerSaver extends Saver<Server> {
     }
 
     @Override
-    void save(Server server) {
+    protected void save(Server server) {
         saveLong(server.getCurrentGameTick());
     }
 
     @Override
-    Server load() {
+    protected Server load() {
         long currentGameTick = loadLong();
         return new Server(currentGameTick);
     }
 
     @Override
-    Server getDefault() {
+    protected Server getDefault() {
         return new Server(0);
     }
 
     @Override
-    int getVersionNumber() {
+    protected int getVersionNumber() {
         return 0;
     }
 }

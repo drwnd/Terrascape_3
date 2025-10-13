@@ -29,7 +29,6 @@ public final class Window {
         createWindow(title);
         GL.createCapabilities();
 
-        GL46.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         GL46.glClearColor(0, 0, 0, 1);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDepthFunc(GL46.GL_LESS);

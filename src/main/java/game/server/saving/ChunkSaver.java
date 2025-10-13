@@ -1,6 +1,7 @@
 package game.server.saving;
 
 import core.utils.FileManager;
+import core.utils.Saver;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.MaterialsData;
@@ -101,7 +102,7 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
     @Override
-    void save(Chunk chunk) {
+    protected void save(Chunk chunk) {
         saveInt(chunk.X);
         saveInt(chunk.Y);
         saveInt(chunk.Z);
@@ -110,7 +111,7 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
     @Override
-    Chunk load() {
+    protected Chunk load() {
         int x = loadInt();
         int y = loadInt();
         int z = loadInt();
@@ -123,12 +124,12 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
     @Override
-    Chunk getDefault() {
+    protected Chunk getDefault() {
         return null;
     }
 
     @Override
-    int getVersionNumber() {
+    protected int getVersionNumber() {
         return 0;
     }
 }

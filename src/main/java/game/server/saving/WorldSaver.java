@@ -1,5 +1,6 @@
 package game.server.saving;
 
+import core.utils.Saver;
 import game.server.World;
 import game.server.generation.WorldGeneration;
 
@@ -14,22 +15,22 @@ public final class WorldSaver extends Saver<World> {
     }
 
     @Override
-    void save(World world) {
+    protected void save(World world) {
         saveLong(WorldGeneration.SEED);
     }
 
     @Override
-    World load() {
+    protected World load() {
         return new World(loadLong());
     }
 
     @Override
-    World getDefault() {
+    protected World getDefault() {
         return new World(0);
     }
 
     @Override
-    int getVersionNumber() {
+    protected int getVersionNumber() {
         return 0;
     }
 }
