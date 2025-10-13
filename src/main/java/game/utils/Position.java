@@ -5,7 +5,7 @@ import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
-public class Position {
+public final class Position {
 
     public int intX, intY, intZ;
     public float fractionX, fractionY, fractionZ;

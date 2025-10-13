@@ -6,15 +6,13 @@ import core.renderables.UiElement;
 import core.rendering_api.Window;
 
 import game.assets.Textures;
+import game.player.interaction.CubePlaceable;
+import game.player.interaction.Placeable;
 import game.player.rendering.StructureDisplay;
 import game.player.interaction.Target;
-import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
-
-
-import static game.utils.Constants.*;
 
 public final class Hotbar extends UiElement {
 
@@ -45,24 +43,30 @@ public final class Hotbar extends UiElement {
         if (button == KeySetting.HOTBAR_SLOT_8.value()) setSelectedSlot(7);
         if (button == KeySetting.HOTBAR_SLOT_9.value()) setSelectedSlot(8);
 
-        if (button == KeySetting.DROP.value()) setContent(selectedSlot, AIR);
+        if (button == KeySetting.DROP.value()) setContent(selectedSlot, null);
         if (button == KeySetting.PICK_BLOCK.value()) handlePickBlock();
     }
 
-    public byte getSelectedMaterial() {
+    public Placeable getSelectedMaterial() {
         return contents[selectedSlot];
     }
 
     public void setContent(int slotIndex, byte material) {
+        setContent(slotIndex, new CubePlaceable(material));
+    }
+
+    public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
-        contents[slotIndex] = material;
+        contents[slotIndex] = placeable;
 
         if (displays[slotIndex] != null) displays[slotIndex].delete();
         getChildren().remove(displays[slotIndex]);
 
-        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), new Structure(material));
-        displays[slotIndex].setScaleWithGuiSize(false);
-        addRenderable(displays[slotIndex]);
+        if (placeable != null) {
+            displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), placeable.getStructure());
+            displays[slotIndex].setScaleWithGuiSize(false);
+            addRenderable(displays[slotIndex]);
+        }
     }
 
 
@@ -88,13 +92,15 @@ public final class Hotbar extends UiElement {
 
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
-            if (contents[slot % LENGTH] == AIR) return slot % LENGTH;
+            if (contents[slot % LENGTH] == null) return slot % LENGTH;
         return selectedSlot;
     }
 
     private int indexOf(byte material) {
-        for (int slot = 0; slot < LENGTH; slot++)
-            if (contents[slot] == material) return slot;
+        for (int slot = 0; slot < LENGTH; slot++) {
+            Placeable placeable = contents[slot];
+            if (placeable instanceof CubePlaceable && ((CubePlaceable) placeable).getMaterial() == material) return slot;
+        }
         return -1;
     }
 
@@ -113,14 +119,6 @@ public final class Hotbar extends UiElement {
         setSelectedSlot(slot);
     }
 
-    public byte[] getContents() {
-        return contents;
-    }
-
-    public void setContent(byte[] contents) {
-        for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);
-    }
-
     public int getSelectedSlot() {
         return selectedSlot;
     }
@@ -132,6 +130,6 @@ public final class Hotbar extends UiElement {
 
     private int selectedSlot = 0;
     private final UiElement hotBarSelectionIndicator;
-    private final byte[] contents = new byte[LENGTH];
+    private final Placeable[] contents = new Placeable[LENGTH];
     private final StructureDisplay[] displays = new StructureDisplay[LENGTH];
 }

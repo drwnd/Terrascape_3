@@ -1,10 +1,12 @@
 package game.server.saving;
 
 import core.utils.Saver;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
+
 import game.player.Player;
 import game.utils.Position;
+
+import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 public final class PlayerSaver extends Saver<Player> {
 
@@ -13,7 +15,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     public PlayerSaver() {
-        super(61);
+        super(52);
     }
 
     @Override
@@ -21,7 +23,6 @@ public final class PlayerSaver extends Saver<Player> {
         savePosition(player.getPosition());
         saveVector3f(player.getCamera().getRotation());
         saveVector3f(player.getMovement().getVelocity());
-        saveByteArray(player.getHotbar().getContents());
         saveInt(player.getHotbar().getSelectedSlot());
     }
 
@@ -30,13 +31,11 @@ public final class PlayerSaver extends Saver<Player> {
         Position position = loadPosition();
         Vector3f rotation = loadVector3f();
         Vector3f velocity = loadVector3f();
-        byte[] hotbarContent = loadByteArray();
         int selectedSlot = loadInt();
 
         Player player = new Player(position);
         player.getCamera().setRotation(rotation);
         player.getMovement().setVelocity(velocity);
-        player.getHotbar().setContent(hotbarContent);
         player.getHotbar().setSelectedSlot(selectedSlot);
 
         return player;
@@ -49,6 +48,6 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
     }
 }

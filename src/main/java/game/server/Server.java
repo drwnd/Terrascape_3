@@ -1,5 +1,6 @@
 package game.server;
 
+import game.player.interaction.Placeable;
 import org.joml.Vector3i;
 import game.player.rendering.MeshCollector;
 import game.server.generation.ChunkGenerator;
@@ -29,38 +30,15 @@ public final class Server {
     }
 
 
-    public boolean requestBreakPlaceInteraction(Vector3i position, int breakPlaceSize, byte material) {
-        ChunkSaver saver = new ChunkSaver();
+    public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
+        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            int mask = -(1 << breakPlaceSize);
-            if (Integer.numberOfTrailingZeros(position.x & mask) < lod
-                    || Integer.numberOfTrailingZeros(position.y & mask) < lod
-                    || Integer.numberOfTrailingZeros(position.z & mask) < lod) break;
-
-            int chunkX = position.x >> CHUNK_SIZE_BITS + lod;
-            int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
-            int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
-
-            int inChunkX = position.x >> lod & CHUNK_SIZE_MASK;
-            int inChunkY = position.y >> lod & CHUNK_SIZE_MASK;
-            int inChunkZ = position.z >> lod & CHUNK_SIZE_MASK;
-
-            int lodSize = Math.max(0, breakPlaceSize - lod);
-            mask = -(1 << lodSize);
-            inChunkX &= mask;
-            inChunkY &= mask;
-            inChunkZ &= mask;
-
-            Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-            chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, lodSize);
-
-            MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
-            meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
-            if (inChunkX == 0) meshCollector.setMeshed(false, chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD);
-            if (inChunkY == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD);
-            if (inChunkZ == 0) meshCollector.setMeshed(false, chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD);
+            placeable.place(position, lod);
+            for (Chunk chunk : placeable.getAffectedChunks()) {
+                if (chunk == null) continue;
+                meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
+            }
         }
-
         generatorRestartScheduled = true;
         return true;
     }

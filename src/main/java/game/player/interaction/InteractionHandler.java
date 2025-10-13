@@ -34,16 +34,16 @@ public final class InteractionHandler {
     }
 
     private void handleUse() {
-        byte material = Game.getPlayer().getHeldMaterial();
-        if (material == AIR) return;
-        handleUseDestroy(useInfo, material, true);
+        Placeable placeable = Game.getPlayer().getHeldPlaceable();
+        if (placeable == null) return;
+        handleUseDestroy(useInfo, placeable, true);
     }
 
     private void handleDestroy() {
-        handleUseDestroy(destroyInfo, AIR, false);
+        handleUseDestroy(destroyInfo, new CubePlaceable(AIR), false);
     }
 
-    private void handleUseDestroy(PlaceDestroyInfo info, byte material, boolean offsetPosition) {
+    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < FloatSetting.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
@@ -52,7 +52,7 @@ public final class InteractionHandler {
         if (target == null) return;
 
         Vector3i position = offsetPosition ? target.offsetPosition() : target.position();
-        if (Game.getServer().requestBreakPlaceInteraction(position, placeBreakSize, material)) info.lastAction = currentGameTick;
+        if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
     }
 
     private void updateInfo(int action, PlaceDestroyInfo info) {

@@ -2,9 +2,10 @@ package game.player;
 
 import core.rendering_api.Window;
 import core.settings.KeySetting;
-
 import core.settings.ToggleSetting;
+
 import game.player.interaction.InteractionHandler;
+import game.player.interaction.Placeable;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
@@ -97,7 +98,7 @@ public final class Player {
     }
 
 
-    public byte getHeldMaterial() {
+    public Placeable getHeldPlaceable() {
         return hotbar.getSelectedMaterial();
     }
 
