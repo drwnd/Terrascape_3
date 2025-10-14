@@ -24,7 +24,7 @@ public final class Player {
         camera = new Camera();
         input = new PlayerInput();
         movement = new Movement();
-        renderer = new Renderer();
+        renderer = new Renderer(this);
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
         inventory = new Inventory();
@@ -33,7 +33,6 @@ public final class Player {
         renderer.addRenderable(inventory);
         this.position = position;
         Window.pushRenderable(renderer);
-        setInput();
     }
 
 
@@ -133,7 +132,7 @@ public final class Player {
     }
 
     public void setInput() {
-        Window.setInput(input);
+        Window.setInput(inventory.isVisible() ? new InventoryInput(inventory) : input);
     }
 
     public boolean canDoActiveActions() {

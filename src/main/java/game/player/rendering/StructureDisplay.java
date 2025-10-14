@@ -35,10 +35,14 @@ public final class StructureDisplay extends Renderable {
         }
     }
 
+    public void changeZoom(float factor) {
+        zoom *= factor;
+    }
+
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
-        Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ);
+        Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ, zoom);
         GL46.glViewport(
                 (int) ((position.x + size.x * 0.5f * (1.0f - guiSize)) * Window.getWidth()),
                 (int) ((position.y + size.y * 0.5f * (1.0f - guiSize)) * Window.getHeight()),
@@ -102,4 +106,6 @@ public final class StructureDisplay extends Renderable {
     private final OpaqueModel[] opaqueModels;
     private final TransparentModel[] transparentModels;
     private final int sizeX, sizeY, sizeZ;
+
+    private float zoom = 1;
 }

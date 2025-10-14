@@ -90,7 +90,6 @@ public final class PauseMenu extends Renderable {
         return () -> {
             Window.popRenderable();
             Game.getServer().startTicks();
-            Game.getPlayer().setInput();
         };
     }
 

@@ -31,9 +31,13 @@ public final class MeshGenerator {
     public ArrayList<Mesh> generateMesh(Structure structure) {
         ArrayList<Mesh> meshes = new ArrayList<>();
 
-        for (int structureX = 0; structureX < structure.sizeX(); structureX += CHUNK_SIZE)
-            for (int structureY = 0; structureY < structure.sizeX(); structureY += CHUNK_SIZE)
-                for (int structureZ = 0; structureZ < structure.sizeX(); structureZ += CHUNK_SIZE) {
+        int endX = structure.sizeX() & ~CHUNK_SIZE_MASK;
+        int endY = structure.sizeY() & ~CHUNK_SIZE_MASK;
+        int endZ = structure.sizeZ() & ~CHUNK_SIZE_MASK;
+
+        for (int structureX = 0; structureX <= endX; structureX += CHUNK_SIZE)
+            for (int structureY = 0; structureY <= endY; structureY += CHUNK_SIZE)
+                for (int structureZ = 0; structureZ <= endZ; structureZ += CHUNK_SIZE) {
                     clear();
                     addNorthSouthFaces(structure, structureX, structureY, structureZ);
                     addTopBottomFaces(structure, structureX, structureY, structureZ);
@@ -153,8 +157,8 @@ public final class MeshGenerator {
 
         for (int materialZ = structureZ; materialZ < structureZ + CHUNK_SIZE; materialZ++) {
             copyMaterialsNorthSouth(structure, structureX, structureY, materialZ + 1, upper);
-            addNorthSouthLayer(NORTH, materialZ, lower, upper);
-            addNorthSouthLayer(SOUTH, materialZ, upper, lower);
+            addNorthSouthLayer(NORTH, materialZ & CHUNK_SIZE_MASK, lower, upper);
+            addNorthSouthLayer(SOUTH, materialZ & CHUNK_SIZE_MASK, upper, lower);
 
             byte[] temp = lower;
             lower = upper;
@@ -173,8 +177,8 @@ public final class MeshGenerator {
 
         for (int materialY = structureY; materialY < structureY + CHUNK_SIZE; materialY++) {
             copyMaterialsTopBottom(structure, structureX, materialY + 1, structureZ, upper);
-            addTopBottomLayer(TOP, materialY, lower, upper);
-            addTopBottomLayer(BOTTOM, materialY, upper, lower);
+            addTopBottomLayer(TOP, materialY & CHUNK_SIZE_MASK, lower, upper);
+            addTopBottomLayer(BOTTOM, materialY & CHUNK_SIZE_MASK, upper, lower);
 
             byte[] temp = lower;
             lower = upper;
@@ -193,8 +197,8 @@ public final class MeshGenerator {
 
         for (int materialX = structureX; materialX < structureX + CHUNK_SIZE; materialX++) {
             copyMaterialsWestEast(structure, materialX + 1, structureY, structureZ, upper);
-            addWestEastLayer(WEST, materialX, lower, upper);
-            addWestEastLayer(EAST, materialX, upper, lower);
+            addWestEastLayer(WEST, materialX & CHUNK_SIZE_MASK, lower, upper);
+            addWestEastLayer(EAST, materialX & CHUNK_SIZE_MASK, upper, lower);
 
             byte[] temp = lower;
             lower = upper;

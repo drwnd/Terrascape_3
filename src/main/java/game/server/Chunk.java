@@ -86,6 +86,18 @@ public final class Chunk {
         modified = true;
     }
 
+    public void storeMaterials(int inChunkX, int inChunkY, int inChunkZ,
+                               int startX, int startY, int startZ,
+                               int lengthX, int lengthY, int lengthZ,
+                               int stepSize, MaterialsData source) {
+        this.materials.storeMaterials(
+                inChunkX, inChunkY, inChunkZ,
+                startX, startY, startZ,
+                lengthX, lengthY, lengthZ,
+                stepSize, source);
+        modified = true;
+    }
+
     public int getIndex() {
         return INDEX;
     }

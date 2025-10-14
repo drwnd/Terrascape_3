@@ -11,6 +11,7 @@ import game.player.interaction.Placeable;
 import game.player.rendering.StructureDisplay;
 import game.player.interaction.Target;
 
+import game.server.generation.Structure;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
@@ -62,11 +63,13 @@ public final class Hotbar extends UiElement {
         if (displays[slotIndex] != null) displays[slotIndex].delete();
         getChildren().remove(displays[slotIndex]);
 
-        if (placeable != null) {
-            displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), placeable.getStructure());
-            displays[slotIndex].setScaleWithGuiSize(false);
-            addRenderable(displays[slotIndex]);
-        }
+        if (placeable == null) return;
+        Structure structure = placeable.getStructure();
+        if (structure == null) return;
+
+        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), structure);
+        displays[slotIndex].setScaleWithGuiSize(false);
+        addRenderable(displays[slotIndex]);
     }
 
 

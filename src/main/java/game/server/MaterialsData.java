@@ -69,6 +69,34 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
+    public void storeMaterials(int inChunkX, int inChunkY, int inChunkZ,
+                               int startX, int startY, int startZ,
+                               int lengthX, int lengthY, int lengthZ,
+                               int stepSize, MaterialsData source) {
+        byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
+        fillUncompressedMaterialsInto(uncompressedMaterials);
+
+        int thisX = inChunkX;
+        for (int x = startX; x < startX + lengthX; x += stepSize) {
+            int thisZ = inChunkZ;
+            for (int z = startZ; z < startZ + lengthZ; z += stepSize) {
+                int thisY = inChunkY;
+                for (int y = startY; y < startY + lengthY; y += stepSize) {
+
+                    byte material = source.getMaterial(x, y, z);
+                    int index = getUncompressedIndex(thisX, thisY, thisZ);
+                    uncompressedMaterials[index] = material;
+
+                    thisY++;
+                }
+                thisZ++;
+            }
+            thisX++;
+        }
+
+        compressIntoData(uncompressedMaterials);
+    }
+
     public void storeLowerLODChunks(Chunk chunk0, Chunk chunk1, Chunk chunk2, Chunk chunk3,
                                     Chunk chunk4, Chunk chunk5, Chunk chunk6, Chunk chunk7) {
 

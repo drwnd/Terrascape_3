@@ -31,8 +31,9 @@ public final class Renderer extends Renderable {
 
     public int renderedOpaqueModels, renderedWaterModels, renderedGlassModels;
 
-    public Renderer() {
+    public Renderer(Player player) {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        this.player = player;
         setAllowFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
@@ -112,7 +113,6 @@ public final class Renderer extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        Player player = Game.getPlayer();
         Camera camera = player.getCamera();
         player.updateFrame();
         renderingOptimizer.computeVisibility(player);
@@ -122,11 +122,16 @@ public final class Renderer extends Renderable {
 
         setupRenderState();
         renderSkybox(camera);
-        renderOpaqueGeometry(cameraPosition, projectionViewMatrix, player);
-        renderWater(cameraPosition, projectionViewMatrix, player);
-        renderGlass(cameraPosition, projectionViewMatrix, player);
+        renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
+        renderWater(cameraPosition, projectionViewMatrix);
+        renderGlass(cameraPosition, projectionViewMatrix);
         renderDebugInfo();
         GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
+    }
+
+    @Override
+    public void setOnTop() {
+        player.setInput();
     }
 
     private void setupRenderState() {
@@ -171,7 +176,7 @@ public final class Renderer extends Renderable {
         GL46.glDepthMask(true);
     }
 
-    private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
+    private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix) {
         renderedOpaqueModels = 0;
 
         int playerChunkX = Utils.floor(playerPosition.intX) >> CHUNK_SIZE_BITS;
@@ -197,7 +202,7 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
+    private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix) {
         renderedWaterModels = 0;
 
         Shader shader = AssetManager.get(Shaders.WATER);
@@ -219,7 +224,7 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderGlass(Position playerPosition, Matrix4f projectionViewMatrix, Player player) {
+    private void renderGlass(Position playerPosition, Matrix4f projectionViewMatrix) {
         renderedGlassModels = 0;
 
         Shader shader = AssetManager.get(Shaders.GLASS);
@@ -256,4 +261,5 @@ public final class Renderer extends Renderable {
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
     private final RenderingOptimizer renderingOptimizer = new RenderingOptimizer();
+    private final Player player;
 }

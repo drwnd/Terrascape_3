@@ -35,7 +35,11 @@ public final class InteractionHandler {
 
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable == null) return;
+        if (placeable == null) {
+            useInfo.lastAction = Game.getServer().getCurrentGameTick();
+            useInfo.forceAction = false;
+            return;
+        }
         handleUseDestroy(useInfo, placeable, true);
     }
 
@@ -49,7 +53,11 @@ public final class InteractionHandler {
         info.forceAction = false;
 
         Target target = Target.getPlayerTarget();
-        if (target == null) return;
+        if (target == null) {
+            info.lastAction = currentGameTick;
+            info.forceAction = false;
+            return;
+        }
 
         Vector3i position = offsetPosition ? target.offsetPosition() : target.position();
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;

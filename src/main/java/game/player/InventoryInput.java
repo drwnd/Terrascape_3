@@ -31,12 +31,16 @@ public final class InventoryInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
+        float newScroll = (float) (scroll - yScroll * 0.05);
+        inventory.moveStructureButtons(newScroll - scroll);
+        scroll = newScroll;
 
+        inventory.hoverOver(cursorPos); // Fixes buttons being selected even if the cursor isn't hovered over them
     }
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE) Game.getPlayer().toggleInventory();
+        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) Game.getPlayer().toggleInventory();
         Game.getPlayer().handleInactiveKeyInput(key, action);
         inventory.handleInput(key, action, cursorPos);
     }
@@ -47,4 +51,5 @@ public final class InventoryInput extends Input {
     }
 
     private final Inventory inventory;
+    private float scroll = 0;
 }

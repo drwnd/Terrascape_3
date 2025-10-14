@@ -1,10 +1,16 @@
 package game.server.saving;
 
 import core.utils.Saver;
+
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class StructureSaver extends Saver<Structure> {
+
+    public static String getSaveFileLocation(String structureName) {
+        return "assets/structures/%s".formatted(structureName);
+    }
+
     @Override
     protected void save(Structure structure) {
         saveInt(structure.sizeX());
