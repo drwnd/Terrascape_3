@@ -96,13 +96,13 @@ public final class Window {
         GLFW.glfwDestroyWindow(window);
     }
 
-    public static Vector2f toPixelCoordinate(Vector2f position) {
-        float guiSize = FloatSetting.GUI_SIZE.value();
+    public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
         return position.mul(guiSize).add((1 - guiSize) * 0.5f, (1 - guiSize) * 0.5f).mul(Window.getWidth(), Window.getHeight());
     }
 
-    public static Vector2f toPixelSize(Vector2f size) {
-        float guiSize = FloatSetting.GUI_SIZE.value();
+    public static Vector2f toPixelSize(Vector2f size, boolean scalesWithGuiSize) {
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
         return size.mul(Window.getWidth(), Window.getHeight()).mul(guiSize);
     }
 
@@ -132,6 +132,10 @@ public final class Window {
         renderablesStack.removeLast().delete();
         if (renderablesStack.isEmpty()) GLFW.glfwSetWindowShouldClose(window, true);
         else renderablesStack.getLast().setOnTop();
+    }
+
+    public static Renderable topRenderable() {
+        return renderablesStack.getLast();
     }
 
     public static void setInput(Input input) {

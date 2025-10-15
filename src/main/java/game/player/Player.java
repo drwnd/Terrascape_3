@@ -131,8 +131,12 @@ public final class Player {
         return interactionHandler;
     }
 
+    public Inventory getInventory() {
+        return inventory;
+    }
+
     public void setInput() {
-        Window.setInput(inventory.isVisible() ? new InventoryInput(inventory) : input);
+        Window.setInput(inventory.isVisible() ? inventory.getInput() : input);
     }
 
     public boolean canDoActiveActions() {
@@ -149,8 +153,7 @@ public final class Player {
 
     void toggleInventory() {
         inventory.setVisible(!inventory.isVisible());
-        Window.setInput(inventory.isVisible() ? new InventoryInput(inventory) : input);
-        if (inventory.isVisible()) inventory.updateDisplayPositions();
+        setInput();
     }
 
     private final MeshCollector meshCollector;

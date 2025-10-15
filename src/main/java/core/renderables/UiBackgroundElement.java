@@ -31,5 +31,9 @@ public class UiBackgroundElement extends Renderable {
         this.rimThicknessMultiplier = rimThicknessMultiplier;
     }
 
+    protected float getRimThicknessMultiplier() {
+        return rimThicknessMultiplier;
+    }
+
     private float rimThicknessMultiplier = 1.0f;
 }

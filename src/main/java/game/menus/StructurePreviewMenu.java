@@ -37,8 +37,8 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
 
-        display.setSizeToParent(1.0f / Window.getAspectRatio(), 1.0f);
-        display.setOffsetToParent(0.5f - 0.5f / Window.getAspectRatio(), 0.0f);
+        display.setSizeToParent(1.0f, Window.getAspectRatio());
+        display.setOffsetToParent(0.0f, 0.5f - Window.getAspectRatio() * 0.5f);
     }
 
     @Override

@@ -7,8 +7,11 @@ import game.server.Game;
 public final class InventoryInput extends Input {
 
     public InventoryInput(Inventory inventory) {
-        super(inventory);
         this.inventory = inventory;
+    }
+
+    public float getScroll() {
+        return scroll;
     }
 
     @Override
@@ -31,7 +34,7 @@ public final class InventoryInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        float newScroll = (float) (scroll - yScroll * 0.05);
+        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0f);
         inventory.moveStructureButtons(newScroll - scroll);
         scroll = newScroll;
 

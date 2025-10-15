@@ -20,6 +20,7 @@ import game.utils.Utils;
 
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46;
 
@@ -132,6 +133,11 @@ public final class Renderer extends Renderable {
     @Override
     public void setOnTop() {
         player.setInput();
+    }
+
+    @Override
+    public void hoverOver(Vector2i pixelCoordinate) {
+        if (player.getInventory().isVisible()) player.getInventory().hoverOver(pixelCoordinate);
     }
 
     private void setupRenderState() {

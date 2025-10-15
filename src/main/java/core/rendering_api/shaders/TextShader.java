@@ -67,7 +67,7 @@ public class TextShader extends Shader {
         float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
         float factor = textSize * charWidth / (guiSize * 7);
 
-        return offsets[text.length()] * factor;
+        return offsets[Math.min(MAX_TEXT_LENGTH, text.length())] * factor;
     }
 
     private static int[] toIntFormat(String text) {

@@ -71,8 +71,8 @@ public class Renderable {
     }
 
     public boolean containsPixelCoordinate(Vector2i pixelCoordinate) {
-        Vector2f position = Window.toPixelCoordinate(getPosition());
-        Vector2f size = Window.toPixelSize(getSize());
+        Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
+        Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
 
         return position.x <= pixelCoordinate.x && position.x + size.x >= pixelCoordinate.x && position.y <= pixelCoordinate.y && position.y + size.y >= pixelCoordinate.y;
     }
@@ -152,6 +152,7 @@ public class Renderable {
 
     public void setAllowFocusScaling(boolean allowScaling) {
         setFlag(allowScaling, ALLOW_FOCUS_SCALING_MASK);
+        if (!isFlag(ALLOW_FOCUS_SCALING_MASK)) setFlag(false, FOCUSSED_MASK);
     }
 
     public void setVisible(boolean visible) {
@@ -159,6 +160,7 @@ public class Renderable {
     }
 
     public void setFocused(boolean focused) {
+        if (!isFlag(ALLOW_FOCUS_SCALING_MASK)) return;
         setFlag(focused, FOCUSSED_MASK);
 
         if (isFocused()) return;

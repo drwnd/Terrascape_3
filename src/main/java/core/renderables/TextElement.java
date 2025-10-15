@@ -18,6 +18,7 @@ public final class TextElement extends Renderable {
 
     public TextElement(Vector2f offsetToParent) {
         super(new Vector2f(1.0f, 1.0f), offsetToParent);
+        text = new Message("");
     }
 
     public TextElement(Vector2f offsetToParent, StringGetter text) {

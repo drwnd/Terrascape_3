@@ -2,6 +2,7 @@ package core.renderables;
 
 import core.rendering_api.Input;
 
+import core.rendering_api.Window;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
@@ -25,11 +26,7 @@ public final class TextFieldInput extends Input {
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         if (action != GLFW.GLFW_PRESS) return;
-
-        if (!field.containsPixelCoordinate(cursorPos)) {
-            field.getParent().setOnTop();
-            field.getParent().hoverOver(cursorPos);
-        }
+        if (!field.containsPixelCoordinate(cursorPos)) unselect();
     }
 
     @Override
@@ -40,10 +37,7 @@ public final class TextFieldInput extends Input {
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW.GLFW_PRESS && action != GLFW.GLFW_REPEAT) return;
-        if (key == GLFW.GLFW_KEY_ESCAPE) {
-            field.getParent().setOnTop();
-            field.getParent().hoverOver(cursorPos);
-        }
+        if (key == GLFW.GLFW_KEY_ESCAPE) unselect();
         if (key == GLFW.GLFW_KEY_BACKSPACE) handleBackspace();
     }
 
@@ -51,6 +45,13 @@ public final class TextFieldInput extends Input {
     public void charCallback(long window, int codePoint) {
         char[] chars = Character.toChars(codePoint);
         field.setText(field.getText() + toString(chars));
+    }
+
+
+    private void unselect() {
+        Renderable renderable = Window.topRenderable();
+        renderable.setOnTop();
+        renderable.hoverOver(cursorPos);
     }
 
     private void handleBackspace() {

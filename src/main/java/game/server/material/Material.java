@@ -14,12 +14,13 @@ import static game.utils.Constants.*;
 public final class Material {
 
     public static void loadMaterials() {
-
+        long start = System.nanoTime();
         AssetManager.reload(TextureArrays.MATERIALS);
         AssetManager.reload(TextureArrays.PROPERTIES);
 
         Gson gson = new Gson();
         for (MaterialIdentifier identifier : MaterialIdentifier.values()) loadMaterial(identifier, gson);
+        System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_0000);
     }
 
     public static byte getTextureIndex(byte material) {

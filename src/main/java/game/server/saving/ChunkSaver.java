@@ -28,6 +28,7 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
     private static void generateLod(int lod) {
+        long start = System.nanoTime();
         ChunkSaver saver = new ChunkSaver();
         int lowerLOD = lod - 1;
 
@@ -56,7 +57,7 @@ public final class ChunkSaver extends Saver<Chunk> {
             generateChunk(thisLodChunk, saver);
             saver.save(thisLodChunk, getSaveFileLocation(thisLodChunkId, lod));
         }
-        System.out.printf("Finished generating lod %s, generated from %s lowerLod chunks%n", lod, lowerLodChunkFiles.length);
+        System.out.printf("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_0000);
     }
 
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {

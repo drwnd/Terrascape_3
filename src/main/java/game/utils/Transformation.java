@@ -32,9 +32,10 @@ public final class Transformation {
     public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom) {
         float centerX = x * 0.5f, centerY = y * 0.5f, centerZ = z * 0.5f;
         Matrix4f matrix = new Matrix4f();
+        int maxSize = Math.max(x, Math.max(y, z));
 
-        matrix.ortho((-x - z >> 1) / zoom, (x + z >> 1) / zoom, -y / zoom, y / zoom, 50, 50000);
-        matrix.lookAt(centerX + 200, centerY + 200, centerZ + 200, centerX, centerY, centerZ, Y_AXIS.x, Y_AXIS.y, Y_AXIS.z);
+        matrix.ortho(-maxSize / zoom, maxSize / zoom, -maxSize / zoom, maxSize / zoom, 50, 50000);
+        matrix.lookAt(centerX + 2000, centerY + 2000, centerZ + 2000, centerX, centerY, centerZ, Y_AXIS.x, Y_AXIS.y, Y_AXIS.z);
 
         return matrix;
     }

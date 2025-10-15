@@ -56,8 +56,8 @@ public final class Slider extends UiButton {
 
     private void action(Vector2i cursorPos, int button, int action) {
         if (action != GLFW.GLFW_PRESS) return;
-        Vector2f position = Window.toPixelCoordinate(getPosition());
-        Vector2f size = Window.toPixelSize(getSize());
+        Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
+        Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
 
         float fraction = (cursorPos.x - position.x) / size.x;
         fraction = Math.clamp(fraction, 0.0f, 1.0f);
