@@ -47,9 +47,9 @@ public final class StructurePlaceable implements Placeable {
         int startY = chunkStartY + (inChunkY << chunk.LOD) - position.y;
         int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - position.z;
 
-        int lengthX = min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX >> chunk.LOD, structure.sizeX());
-        int lengthY = min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY >> chunk.LOD, structure.sizeY());
-        int lengthZ = min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ >> chunk.LOD, structure.sizeZ());
+        int lengthX = min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
+        int lengthY = min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
+        int lengthZ = min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
 
         chunk.storeMaterials(
                 inChunkX, inChunkY, inChunkZ,
