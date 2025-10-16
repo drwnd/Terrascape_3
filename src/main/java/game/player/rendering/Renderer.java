@@ -33,7 +33,7 @@ public final class Renderer extends Renderable {
     public int renderedOpaqueModels, renderedWaterModels, renderedGlassModels;
 
     public Renderer(Player player) {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         this.player = player;
         setAllowFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
@@ -108,7 +108,7 @@ public final class Renderer extends Renderable {
     }
 
     public float getTime() {
-        return 1.0f;
+        return 1.0F;
     }
 
 
@@ -127,7 +127,6 @@ public final class Renderer extends Renderable {
         renderWater(cameraPosition, projectionViewMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
         renderDebugInfo();
-        GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
     }
 
     @Override
@@ -150,7 +149,7 @@ public final class Renderer extends Renderable {
         GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
 
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
-        crosshair.setOffsetToParent(0.5f - crosshairSize * 0.5f, 0.5f - crosshairSize * 0.5f * Window.getAspectRatio());
+        crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
         crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
 

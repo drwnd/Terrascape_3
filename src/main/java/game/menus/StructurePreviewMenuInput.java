@@ -2,6 +2,7 @@ package game.menus;
 
 import core.rendering_api.Input;
 import core.rendering_api.Window;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
 public final class StructurePreviewMenuInput extends Input {
@@ -9,6 +10,12 @@ public final class StructurePreviewMenuInput extends Input {
     public StructurePreviewMenuInput(StructurePreviewMenu menu) {
         super(menu);
         this.menu = menu;
+    }
+
+    public Vector2i getCursorMovement() {
+        Vector2i movement = new Vector2i(cursorPos).sub(lastCursorPos);
+        lastCursorPos.set(cursorPos);
+        return movement;
     }
 
     @Override
@@ -45,4 +52,5 @@ public final class StructurePreviewMenuInput extends Input {
     }
 
     private final StructurePreviewMenu menu;
+    private final Vector2i lastCursorPos = new Vector2i();
 }

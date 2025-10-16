@@ -1,8 +1,9 @@
 package game.utils;
 
+import game.player.rendering.Camera;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import game.player.rendering.Camera;
 
 public final class Transformation {
 
@@ -10,32 +11,29 @@ public final class Transformation {
         Vector3f rotation = camera.getRotation();
 
         Matrix4f matrix = new Matrix4f(camera.getProjectionMatrix());
-        matrix.rotate((float) Math.toRadians(rotation.x), X_AXIS)
-                .rotate((float) Math.toRadians(rotation.y), Y_AXIS)
-                .rotate((float) Math.toRadians(rotation.z), Z_AXIS);
+        matrix.rotate((float) Math.toRadians(rotation.x), 1.0F, 0.0F, 0.0F)
+                .rotate((float) Math.toRadians(rotation.y), 0.0F, 1.0F, 0.0F)
+                .rotate((float) Math.toRadians(rotation.z), 0.0F, 0.0F, 1.0F);
 
         return matrix;
     }
 
     public static Matrix4f getProjectionViewMatrix(Camera camera) {
         Vector3f position = camera.getPosition().getInChunkPosition();
-        return getProjectionViewMatrix(camera, position);
-    }
-
-    private static Matrix4f getProjectionViewMatrix(Camera camera, Vector3f translation) {
         Matrix4f matrix = createProjectionRotationMatrix(camera);
-        matrix.translate(-translation.x, -translation.y, -translation.z);
+        matrix.translate(-position.x, -position.y, -position.z);
 
         return matrix;
     }
 
-    public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom) {
-        float centerX = x * 0.5f, centerY = y * 0.5f, centerZ = z * 0.5f;
-        Matrix4f matrix = new Matrix4f();
-        int maxSize = Math.max(x, Math.max(y, z));
+    public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom, Vector3f rotation) {
+        float centerX = x * 0.5F, centerY = y * 0.5F, centerZ = z * 0.5F;
+        float frustumDistance = Math.max(x, Math.max(y, z)) / zoom;
+        Vector3f direction = Utils.getDirection(rotation).mul(-400.0F);
 
-        matrix.ortho(-maxSize / zoom, maxSize / zoom, -maxSize / zoom, maxSize / zoom, 50, 50000);
-        matrix.lookAt(centerX + 2000, centerY + 2000, centerZ + 2000, centerX, centerY, centerZ, Y_AXIS.x, Y_AXIS.y, Y_AXIS.z);
+        Matrix4f matrix = new Matrix4f();
+        matrix.ortho(-frustumDistance, frustumDistance, -frustumDistance, frustumDistance, 50.0F, 5000.0F);
+        matrix.lookAt(centerX + direction.x, centerY + direction.y, centerZ + direction.z, centerX, centerY, centerZ, 0.0F, 1.0F, 0.0F);
 
         return matrix;
     }
@@ -51,8 +49,4 @@ public final class Transformation {
 
     private Transformation() {
     }
-
-    private static final Vector3f X_AXIS = new Vector3f(1.0f, 0.0f, 0.0f);
-    private static final Vector3f Y_AXIS = new Vector3f(0.0f, 1.0f, 0.0f);
-    private static final Vector3f Z_AXIS = new Vector3f(0.0f, 0.0f, 1.0f);
 }
