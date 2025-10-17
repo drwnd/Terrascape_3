@@ -4,6 +4,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
+import game.utils.Utils;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -34,6 +35,23 @@ public final class StructurePlaceable implements Placeable {
                 }
     }
 
+    @Override
+    public ArrayList<Chunk> getAffectedChunks() {
+        return affectedChunks;
+    }
+
+    @Override
+    public Structure getStructure() {
+        return structure;
+    }
+
+    @Override
+    public void offsetPosition(Vector3i position) {
+        position.x -= structure.sizeX() >> 1;
+        position.z -= structure.sizeZ() >> 1;
+    }
+
+
     private void placeInChunk(Chunk chunk, Vector3i position) {
         int chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
@@ -47,35 +65,31 @@ public final class StructurePlaceable implements Placeable {
         int startY = chunkStartY + (inChunkY << chunk.LOD) - position.y;
         int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - position.z;
 
-        int lengthX = min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
-        int lengthY = min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
-        int lengthZ = min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
+        int lengthX = Utils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
+        int lengthY = Utils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
+        int lengthZ = Utils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
+
+        int mask = -(1 << chunk.LOD);
+        lengthX &= mask;
+        lengthY &= mask;
+        lengthZ &= mask;
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
+
+        startX &= mask;
+        startY &= mask;
+        startZ &= mask;
 
         chunk.storeMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                1 << chunk.LOD, structure.materials());
+                chunk.LOD, structure.materials());
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
         if (inChunkX == 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD));
         if (inChunkY == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD));
         if (inChunkZ == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD));
-    }
-
-    private int min(int a, int b, int c) {
-        return Math.min(a, Math.min(b, c));
-    }
-
-    @Override
-    public ArrayList<Chunk> getAffectedChunks() {
-        return affectedChunks;
-    }
-
-    @Override
-    public Structure getStructure() {
-        return structure;
     }
 
     private final Structure structure;

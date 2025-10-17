@@ -89,12 +89,12 @@ public final class Chunk {
     public void storeMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                int startX, int startY, int startZ,
                                int lengthX, int lengthY, int lengthZ,
-                               int stepSize, MaterialsData source) {
+                               int lod, MaterialsData source) {
         this.materials.storeMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                stepSize, source);
+                lod, source);
         modified = true;
     }
 

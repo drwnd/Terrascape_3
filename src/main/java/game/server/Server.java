@@ -32,6 +32,7 @@ public final class Server {
 
     public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+        placeable.offsetPosition(position);
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             placeable.place(position, lod);
             for (Chunk chunk : placeable.getAffectedChunks()) {

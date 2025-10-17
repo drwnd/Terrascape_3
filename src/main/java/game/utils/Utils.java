@@ -44,6 +44,10 @@ public final class Utils {
         return value | 1;
     }
 
+    public static int min(int a, int b, int c) {
+        return Math.min(a, Math.min(b, c));
+    }
+
     public static int floor(float value) {
         int addend = value < 0 ? -1 : 0;
         return (int) value + addend;

@@ -1,6 +1,8 @@
 package game.server;
 
 import core.utils.ByteArrayList;
+import game.utils.Utils;
+import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
@@ -72,28 +74,18 @@ public final class MaterialsData {
     public void storeMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                int startX, int startY, int startZ,
                                int lengthX, int lengthY, int lengthZ,
-                               int stepSize, MaterialsData source) {
+                               int lod, MaterialsData source) {
+
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
+        Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
+        Vector3i sourceStart = new Vector3i(startX, startY, startZ);
+        Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
+
         fillUncompressedMaterialsInto(uncompressedMaterials);
-
-        int thisX = inChunkX;
-        for (int x = startX; x < startX + lengthX; x += stepSize) {
-            int thisZ = inChunkZ;
-            for (int z = startZ; z < startZ + lengthZ; z += stepSize) {
-                int thisY = inChunkY;
-                for (int y = startY; y < startY + lengthY; y += stepSize) {
-
-                    byte material = source.getMaterial(x, y, z);
-                    int index = getUncompressedIndex(thisX, thisY, thisZ);
-                    uncompressedMaterials[index] = material;
-
-                    thisY++;
-                }
-                thisZ++;
-            }
-            thisX++;
-        }
-
+        if (lod == 0)
+            source.fillUncompressedMaterials(uncompressedMaterials, totalSizeBits, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
+        else
+            source.fillUncompressedMaterials(uncompressedMaterials, totalSizeBits, lod, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
         compressIntoData(uncompressedMaterials);
     }
 
@@ -182,6 +174,117 @@ public final class MaterialsData {
         fillUncompressedMaterials(uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
         fillUncompressedMaterials(uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
         fillUncompressedMaterials(uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+    }
+
+    private void fillUncompressedMaterials(byte[] uncompressedMaterials, int targetSizeBits, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
+                                           int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+        int length = 1 << sizeBits;
+        if (currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
+                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
+                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + SPLITTER_BYTE_SIZE, currentX, currentY, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 1), currentX, currentY, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 4), currentX, currentY + nextSize, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 7), currentX, currentY + nextSize, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 10), currentX + nextSize, currentY, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 13), currentX + nextSize, currentY, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 16), currentX + nextSize, currentY + nextSize, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 19), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
+            return;
+        }
+
+        int sourceStartX = Math.max(currentX, sourceStart.x);
+        int sourceStartY = Math.max(currentY, sourceStart.y);
+        int sourceStartZ = Math.max(currentZ, sourceStart.z);
+
+        int lengthX = Math.min(currentX + length, sourceStart.x + size.x) - sourceStartX;
+        int lengthY = Math.min(currentY + length, sourceStart.y + size.y) - sourceStartY;
+        int lengthZ = Math.min(currentZ + length, sourceStart.z + size.z) - sourceStartZ;
+
+        int targetStartX = targetStart.x + sourceStartX - sourceStart.x;
+        int targetStartY = targetStart.y + sourceStartY - sourceStart.y;
+        int targetStartZ = targetStart.z + sourceStartZ - sourceStart.z;
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+
+            for (int x = 0; x < lengthX; x++)
+                for (int z = 0; z < lengthZ; z++)
+                    for (int y = 0; y < lengthY; y++) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                        uncompressedMaterials[targetIndex] = material;
+                    }
+            return;
+        }
+//        if (identifier == DETAIL)
+        for (int x = 0; x < lengthX; x++)
+            for (int z = 0; z < lengthZ; z++)
+                for (int y = 0; y < lengthY; y++) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                    byte material = data[startIndex + getInDetailIndex(x, y, z)];
+                    uncompressedMaterials[targetIndex] = material;
+                }
+    }
+
+    private void fillUncompressedMaterials(byte[] uncompressedMaterials, int targetSizeBits, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
+                                           int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+        int length = 1 << sizeBits;
+        if (Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
+                || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
+                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
+                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + SPLITTER_BYTE_SIZE, currentX, currentY, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 1), currentX, currentY, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 4), currentX, currentY + nextSize, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 7), currentX, currentY + nextSize, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 10), currentX + nextSize, currentY, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 13), currentX + nextSize, currentY, currentZ + nextSize);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 16), currentX + nextSize, currentY + nextSize, currentZ);
+            fillUncompressedMaterials(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 19), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
+            return;
+        }
+
+        int sourceStartX = Math.max(currentX, sourceStart.x);
+        int sourceStartY = Math.max(currentY, sourceStart.y);
+        int sourceStartZ = Math.max(currentZ, sourceStart.z);
+
+        int lengthX = Math.min(currentX + length, sourceStart.x + size.x) - sourceStartX;
+        int lengthY = Math.min(currentY + length, sourceStart.y + size.y) - sourceStartY;
+        int lengthZ = Math.min(currentZ + length, sourceStart.z + size.z) - sourceStartZ;
+
+        int targetStartX = targetStart.x + (sourceStartX - sourceStart.x >> lod);
+        int targetStartY = targetStart.y + (sourceStartY - sourceStart.y >> lod);
+        int targetStartZ = targetStart.z + (sourceStartZ - sourceStart.z >> lod);
+
+        int stepSize = 1 << lod;
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+
+            for (int x = 0; x < lengthX; x += stepSize)
+                for (int z = 0; z < lengthZ; z += stepSize)
+                    for (int y = 0; y < lengthY; y += stepSize) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                        uncompressedMaterials[targetIndex] = material;
+                    }
+            return;
+        }
+//        if (identifier == DETAIL)
+        for (int x = 0; x < lengthX; x += stepSize)
+            for (int z = 0; z < lengthZ; z += stepSize)
+                for (int y = 0; y < lengthY; y += stepSize) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                    byte material = data[startIndex + getInDetailIndex((x >> lod), (y >> lod), (z >> lod))];
+                    uncompressedMaterials[targetIndex] = material;
+                }
     }
 
     private void fillUncompressedSouthLayer(byte[] uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY) {

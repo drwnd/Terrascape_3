@@ -15,4 +15,6 @@ public interface Placeable {
 
     Structure getStructure();
 
+    default void offsetPosition(Vector3i position) {}
+
 }

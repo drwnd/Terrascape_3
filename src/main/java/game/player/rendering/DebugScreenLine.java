@@ -35,7 +35,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         shader.bind();
 
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
-        Vector2f position = new Vector2f(0.0f, 1.0f - textLine * lineSeparation);
+        Vector2f position = new Vector2f(0.0F, 1.0F - textLine * lineSeparation);
         Color color = ((ColorOption) this.color.value()).getColor();
 
         shader.drawText(position, string.get(), color, true, false);
@@ -53,7 +53,13 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
-            return "FPS: %s".formatted(frameTimes.size());
+            long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE;
+            for (int index = 0; index < frameTimes.size() - 1; index++) {
+                maxFrameTime = Math.max(maxFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
+                minFrameTime = Math.min(minFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
+            }
+
+            return "FPS: %s, lowest: %s, highest: %s".formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime));
         }, "FPS"));
 
         lines.add(new DebugScreenLine(OptionSetting.RENDERED_MODELS_VISIBILITY, OptionSetting.RENDERED_MODELS_COLOR, () -> {
