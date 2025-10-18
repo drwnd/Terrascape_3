@@ -1,6 +1,5 @@
 package game.player;
 
-import core.assets.AssetManager;
 import core.assets.CoreTextures;
 import core.languages.Language;
 import core.languages.UiMessage;
@@ -131,7 +130,6 @@ public final class Inventory extends UiElement {
     }
 
     private void reloadStructureButtons() {
-        for (StructureSelectionButton button : structureButtons) AssetManager.reload(button);
         getChildren().removeAll(structureButtons);
         structureButtons.clear();
 
