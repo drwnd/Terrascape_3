@@ -53,12 +53,17 @@ public final class World {
 
     public void cleanUp() {
         ChunkSaver saver = new ChunkSaver();
-        for (Chunk chunk : chunks[0]) {
-            if (chunk == null || !chunk.isModified()) continue;
-            saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
-        }
+        for (Chunk[] lod : chunks)
+            for (Chunk chunk : lod) {
+                if (chunk == null || !chunk.isModified()) continue;
+                saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
+            }
 
-        for (int lod = 1; lod < LOD_COUNT; lod++) FileManager.delete(new File(ChunkSaver.getSaveFileLocation(lod)));
+        File[] lodFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation()));
+        for (File file : lodFiles) {
+            String fileLod = file.getName();
+            if (!Utils.isInteger(fileLod, 10) || Integer.parseInt(fileLod) >= LOD_COUNT) FileManager.delete(file);
+        }
     }
 
 

@@ -36,6 +36,19 @@ public final class Utils {
                 || Math.abs(chunkY - playerChunkY) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
     }
 
+    public static boolean isInteger(String string, int radix) {
+        if (string.isEmpty()) return false;
+        for (int index = 0; index < string.length(); index++) {
+            char character = string.charAt(index);
+            if (index == 0 && (character == '-' || character == '+')) {
+                if (string.length() == 1) return false;
+                continue;
+            }
+            if (Character.digit(character, radix) < 0) return false;
+        }
+        return true;
+    }
+
     public static int makeEven(int value) {
         return value & 0xFFFFFFFE;
     }
@@ -49,17 +62,17 @@ public final class Utils {
     }
 
     public static int floor(float value) {
-        int addend = value < 0 ? -1 : 0;
+        int addend = value < 0.0F ? -1 : 0;
         return (int) value + addend;
     }
 
     public static int floor(double value) {
-        int addend = value < 0 ? -1 : 0;
+        int addend = value < 0.0F ? -1 : 0;
         return (int) value + addend;
     }
 
     public static float fraction(float number) {
-        int addend = number < 0 ? 1 : 0;
+        int addend = number < 0.0F ? 1 : 0;
         return (number - (int) number) + addend;
     }
 
@@ -132,12 +145,12 @@ public final class Utils {
         float x = (float) Math.sin(rotationXRadians);
         float z = (float) -Math.cos(rotationXRadians);
 
-        return new Vector3f(x, 0, z);
+        return new Vector3f(x, 0.0F, z);
     }
 
     public static void normalizeToMaxComponent(Vector3f velocity) {
         float max = Math.abs(velocity.get(velocity.maxComponent()));
-        if (max < 1E-4) return;
+        if (max < 1E-4F) return;
         velocity.normalize(max);
     }
 

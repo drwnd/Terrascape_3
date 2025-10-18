@@ -19,11 +19,11 @@ public final class MaterialsData {
     }
 
     public static MaterialsData getCompressedMaterials(int sizeBits, byte[] uncompressedMaterials) {
-        ByteArrayList data = new ByteArrayList(1000);
-        compressMaterials(data, uncompressedMaterials, sizeBits, sizeBits, 0, 0, 0, 0);
-        byte[] dataArray = new byte[data.size()];
-        data.copyInto(dataArray, 0);
-        return new MaterialsData(sizeBits, dataArray);
+        ByteArrayList dataList = new ByteArrayList(1000);
+        compressMaterials(dataList, uncompressedMaterials, sizeBits, sizeBits, 0, 0, 0, 0);
+        byte[] data = new byte[dataList.size()];
+        dataList.copyInto(data, 0);
+        return new MaterialsData(sizeBits, data);
     }
 
     public byte getMaterial(int inChunkX, int inChunkY, int inChunkZ) {
@@ -136,25 +136,23 @@ public final class MaterialsData {
         ByteArrayList dataList = new ByteArrayList(1000);
         compressMaterials(dataList, uncompressedMaterials, totalSizeBits, totalSizeBits, 0, 0, 0, 0);
 
-        byte[] dataArray = new byte[dataList.size()];
-        dataList.copyInto(dataArray, 0);
+        byte[] data = new byte[dataList.size()];
+        dataList.copyInto(data, 0);
         synchronized (this) {
-            data = dataArray;
+            this.data = data;
         }
     }
 
     private void storeLowerLODChunk(Chunk chunk, byte[] uncompressedMaterials, int startX, int startY, int startZ) {
         if (chunk == null) return;
-        for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX += 2)
-            for (int inChunkY = 0; inChunkY < CHUNK_SIZE; inChunkY += 2)
-                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ += 2) {
-                    byte material = chunk.getSaveMaterial(inChunkX, inChunkY, inChunkZ);
 
-                    int thisChunkInChunkX = (inChunkX >> 1) + startX;
-                    int thisChunkInChunkY = (inChunkY >> 1) + startY;
-                    int thisChunkInChunkZ = (inChunkZ >> 1) + startZ;
-                    uncompressedMaterials[getUncompressedIndex(thisChunkInChunkX, thisChunkInChunkY, thisChunkInChunkZ)] = material;
-                }
+        Vector3i targetStart = new Vector3i(startX, startY, startZ);
+        Vector3i sourceStart = new Vector3i(0, 0, 0);
+        Vector3i size = new Vector3i(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
+
+        synchronized (chunk.getMaterials()) {
+            chunk.getMaterials().fillUncompressedMaterialsInto(uncompressedMaterials, CHUNK_SIZE_BITS, 1, targetStart, sourceStart, size, CHUNK_SIZE_BITS, 0, 0, 0, 0);
+        }
     }
 
     private void fillUncompressedMaterialsInto(byte[] uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {

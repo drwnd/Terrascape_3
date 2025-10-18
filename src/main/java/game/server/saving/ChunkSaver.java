@@ -23,8 +23,14 @@ public final class ChunkSaver extends Saver<Chunk> {
         return "saves/%s/chunks/%s".formatted(Game.getWorld().getName(), lod);
     }
 
+    public static String getSaveFileLocation() {
+        return "saves/%s/chunks".formatted(Game.getWorld().getName());
+    }
+
     public static void generateHigherLODs() {
+        long start = System.nanoTime();
         for (int lod = 1; lod < LOD_COUNT; lod++) generateLod(lod);
+        System.out.printf("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
     private static void generateLod(int lod) {
@@ -33,9 +39,12 @@ public final class ChunkSaver extends Saver<Chunk> {
         int lowerLOD = lod - 1;
 
         File lowerLodFile = new File(getSaveFileLocation(lowerLOD));
-        if (!lowerLodFile.exists()) return;
+        File thisLodFile = new File(getSaveFileLocation(lod));
 
-        File thisLodFile = FileManager.loadAndCreateDirectory(getSaveFileLocation(lod));
+        if (!lowerLodFile.exists()) return; // No stored chunks to propagate into higher LODs
+        if (thisLodFile.exists()) return;   // LOD is saved from previous play session
+
+        else thisLodFile = FileManager.loadAndCreateDirectory(thisLodFile.getPath());
         File[] lowerLodChunkFiles = FileManager.getChildren(lowerLodFile);
 
         if (lowerLodChunkFiles == null) {
@@ -57,7 +66,7 @@ public final class ChunkSaver extends Saver<Chunk> {
             generateChunk(thisLodChunk, saver);
             saver.save(thisLodChunk, getSaveFileLocation(thisLodChunkId, lod));
         }
-        System.out.printf("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_0000);
+        System.out.printf("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
     }
 
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {
