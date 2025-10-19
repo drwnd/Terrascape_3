@@ -67,7 +67,7 @@ public final class Utils {
     }
 
     public static int floor(double value) {
-        int addend = value < 0.0F ? -1 : 0;
+        int addend = value < 0.0 ? -1 : 0;
         return (int) value + addend;
     }
 
@@ -87,7 +87,7 @@ public final class Utils {
     }
 
     public static int hash(int x, int z, int seed) {
-        final int mask = 0x5bd1e995;
+        final int mask = 0x5BD1E995;
         int hash = seed;
         // process first vector element
         int k = x;

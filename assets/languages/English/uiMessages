@@ -26,7 +26,6 @@ Font
 Field Of View
 Gui Size
 Sensitivity
-Reach
 Text Size
 Master Audio
 Footsteps Audio
@@ -37,7 +36,6 @@ Miscellaneous Audio
 Rim Thickness
 Crosshair Size
 Hotbar Size
-Break Place Intervall
 Hotbar Indicator Size
 Pause Menu Background Blur
 Inventory Item Size
@@ -65,22 +63,13 @@ Destroy
 Use
 Pick Block
 Open Inventory
-Open Debug Menu
-Toggle No Clip
 Zoom
 Increase Break Place Size
 Decrease Break Place Size
 Drop Item
 Resize Window
-Reload Assets
-Reload Settings
-Toggle Flying-Following Movement State
 Scroll Hotbar
 Raw Mouse Input
 Use Shadow Mapping
-X-Ray
-V-Sync
-Reload Language
-Reload Font
-Reload Materials
 Structure Name
+Night Brightness

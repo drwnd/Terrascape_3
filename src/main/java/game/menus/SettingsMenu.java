@@ -4,6 +4,7 @@ import core.settings.FloatSetting;
 import core.settings.KeySetting;
 import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
+import core.utils.Message;
 import core.utils.StringGetter;
 import core.languages.UiMessage;
 import core.renderables.*;
@@ -20,10 +21,10 @@ import java.util.ArrayList;
 public final class SettingsMenu extends UiBackgroundElement {
 
     public SettingsMenu() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
-        UiButton backButton = new UiButton(new Vector2f(0.25f, 0.1f), new Vector2f(0.05f, 0.85f), getBackButtonAction());
-        backButton.addRenderable(new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.BACK));
+        UiButton backButton = new UiButton(new Vector2f(0.25F, 0.1F), new Vector2f(0.05F, 0.85F), getBackButtonAction());
+        backButton.addRenderable(new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.BACK));
         addRenderable(backButton);
 
         int index = 0;
@@ -36,14 +37,14 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
     public void scrollSectionButtons(float scroll) {
-        Vector2f offset = new Vector2f(0, scroll);
+        Vector2f offset = new Vector2f(0.0F, scroll);
 
         for (Renderable renderable : sectionButtons) renderable.move(offset);
     }
 
     @Override
     public void setOnTop() {
-        float scroll = input == null ? 0.0f : input.getScroll();
+        float scroll = input == null ? 0.0F : input.getScroll();
         input = new SettingsMenuInput(this);
         input.setScroll(scroll);
         Window.setInput(input);
@@ -95,6 +96,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.FOV, UiMessage.FOV);
         section.addSlider(FloatSetting.CROSSHAIR_SIZE, UiMessage.CROSSHAIR_SIZE);
         section.addSlider(FloatSetting.HOTBAR_SIZE, UiMessage.HOTBAR_SIZE);
+        section.addSlider(FloatSetting.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
 
         section.addToggle(ToggleSetting.DO_SHADOW_MAPPING, UiMessage.DO_SHADOW_MAPPING);
 
@@ -135,21 +137,23 @@ public final class SettingsMenu extends UiBackgroundElement {
     private SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addKeySelector(KeySetting.DEBUG_MENU, UiMessage.DEBUG_MENU);
-        section.addKeySelector(KeySetting.NO_CLIP, UiMessage.NO_CLIP);
+        section.addKeySelector(KeySetting.DEBUG_MENU, new Message("Open Debug Screen"));
+        section.addKeySelector(KeySetting.NO_CLIP, new Message("Toggle No-Clip"));
         section.addKeySelector(KeySetting.RESIZE_WINDOW, UiMessage.RESIZE_WINDOW);
-        section.addKeySelector(KeySetting.RELOAD_SETTINGS, UiMessage.RELOAD_SETTINGS);
-        section.addKeySelector(KeySetting.RELOAD_ASSETS, UiMessage.RELOAD_ASSETS);
-        section.addKeySelector(KeySetting.RELOAD_LANGUAGE, UiMessage.RELOAD_LANGUAGE);
-        section.addKeySelector(KeySetting.RELOAD_FONT, UiMessage.RELOAD_FONT);
-        section.addKeySelector(KeySetting.RELOAD_MATERIALS, UiMessage.RELOAD_MATERIALS);
-        section.addKeySelector(KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE, UiMessage.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE);
+        section.addKeySelector(KeySetting.RELOAD_SETTINGS, new Message("Reload Settings"));
+        section.addKeySelector(KeySetting.RELOAD_ASSETS, new Message("Reload Assets"));
+        section.addKeySelector(KeySetting.RELOAD_LANGUAGE, new Message("Reload Language"));
+        section.addKeySelector(KeySetting.RELOAD_FONT, new Message("Reload Font"));
+        section.addKeySelector(KeySetting.RELOAD_MATERIALS, new Message("Reload Materials"));
+        section.addKeySelector(KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE, new Message("Toggle Flying/Following Movement State"));
 
-        section.addToggle(ToggleSetting.X_RAY, UiMessage.X_RAY);
-        section.addToggle(ToggleSetting.V_SYNC, UiMessage.V_SYNC);
+        section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
+        section.addToggle(ToggleSetting.V_SYNC, new Message("Use V-Sync"));
 
-        section.addSlider(FloatSetting.REACH, UiMessage.REACH);
-        section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, UiMessage.BREAK_PLACE_INTERVALL);
+        section.addSlider(FloatSetting.REACH, new Message("Reach"));
+        section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
+        section.addSlider(FloatSetting.TIME_SPEED, new Message("Time Speed"));
+        section.addSlider(FloatSetting.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
 
         return section;
     }
@@ -170,11 +174,11 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
     private void addSection(int sectionNumber, SectionCreator sectionCreator, StringGetter name) {
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - sectionNumber * 0.15f);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - sectionNumber * 0.15F);
 
         UiButton sectionButton = new UiButton(sizeToParent, offsetToParent, sectionButtonAction(sectionCreator));
-        sectionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), name));
+        sectionButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), name));
 
         addRenderable(sectionButton);
         sectionButtons.add(sectionButton);

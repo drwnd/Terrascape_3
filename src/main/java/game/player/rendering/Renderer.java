@@ -14,6 +14,7 @@ import game.assets.Textures;
 import game.assets.VertexArrays;
 import game.player.Player;
 import game.server.Game;
+import game.server.Server;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -21,6 +22,7 @@ import game.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46;
 
@@ -54,14 +56,24 @@ public final class Renderer extends Renderable {
         return frameTimes;
     }
 
+    public float getRenderTime() {
+        Server server = Game.getServer();
+        float renderTime = server.getDayTime() + FloatSetting.TIME_SPEED.value() * server.getCurrentGameTickFraction();
+        if (renderTime > 1.0F) renderTime -= 2.0F;
+        return renderTime;
+    }
+
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+
         shader.setUniform("textures", 0);
         shader.setUniform("propertiesTextures", 1);
-//        shader.setUniform("time", time);
+        shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
+        shader.setUniform("time", time);
+        shader.setUniform("sunDirection", getSunDirection(time));
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glDepthMask(true);
@@ -78,8 +90,11 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+
         shader.setUniform("textures", 0);
+        shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
+        shader.setUniform("sunDirection", getSunDirection(time));
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
@@ -105,10 +120,6 @@ public final class Renderer extends Renderable {
         GL46.glDepthMask(false);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
-    }
-
-    public float getTime() {
-        return 1.0F;
     }
 
 
@@ -139,6 +150,7 @@ public final class Renderer extends Renderable {
         if (player.getInventory().isVisible()) player.getInventory().hoverOver(pixelCoordinate);
     }
 
+
     private void setupRenderState() {
         long currentTime = System.nanoTime();
         frameTimes.removeIf(frameTime -> currentTime - frameTime > 1_000_000_000L);
@@ -160,7 +172,7 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.setUniform("textureAtlas1", 0);
         shader.setUniform("textureAtlas2", 1);
-        shader.setUniform("time", getTime());
+        shader.setUniform("time", getRenderTime());
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID());
@@ -189,7 +201,9 @@ public final class Renderer extends Renderable {
         int playerChunkZ = Utils.floor(playerPosition.intZ) >> CHUNK_SIZE_BITS;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE);
-        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getRenderTime());
+        shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
+        shader.setUniform("flags", getFlags(playerPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
@@ -211,8 +225,9 @@ public final class Renderer extends Renderable {
         renderedWaterModels = 0;
 
         Shader shader = AssetManager.get(Shaders.WATER);
-        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getTime());
+        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
+        shader.setUniform("flags", getFlags(playerPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
@@ -259,6 +274,24 @@ public final class Renderer extends Renderable {
     private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, long[] visibilityBits) {
         int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
         return (visibilityBits[index >> 6] & 1L << index) == 0;
+    }
+
+    private int getFlags(Position playerPosition) {
+        boolean headUnderWater = Game.getWorld().getMaterial(playerPosition.intX, playerPosition.intY, playerPosition.intZ, 0) == WATER;
+        return headUnderWater ? 1 : 0;
+    }
+
+    private static Vector3f getSunDirection(float renderTime) {
+        final float downwardsSunPart = FloatSetting.DOWNWARD_SUN_DIRECTION.value();
+        final float normalizer = (float) Math.sqrt(1 - downwardsSunPart * downwardsSunPart);
+
+        float alpha = (float) (renderTime * Math.PI);
+
+        return new Vector3f(
+                (float) -Math.sin(alpha) * normalizer,
+                downwardsSunPart,
+                (float) -Math.cos(alpha) * normalizer
+        );
     }
 
     private boolean debugScreenOpen = false;

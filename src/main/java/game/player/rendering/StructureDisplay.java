@@ -68,10 +68,13 @@ public final class StructureDisplay extends Renderable {
 
         Shader shader = AssetManager.get(Shaders.OPAQUE);
         Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0, 1.0F);
+        shader.setUniform("cameraPosition", 0.0F, 0.0F, 0.0F);
+        shader.setUniform("flags", 0);
         for (OpaqueModel opaqueModel : opaqueModels) renderOpaqueModel(opaqueModel, shader);
 
         shader = AssetManager.get(Shaders.WATER);
         Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0F);
+        shader.setUniform("flags", 0);
         for (TransparentModel transparentModel : transparentModels) renderWaterModel(transparentModel, shader);
 
         shader = AssetManager.get(Shaders.GLASS);

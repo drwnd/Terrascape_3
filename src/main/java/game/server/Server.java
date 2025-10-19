@@ -1,5 +1,6 @@
 package game.server;
 
+import core.settings.FloatSetting;
 import game.player.interaction.Placeable;
 import org.joml.Vector3i;
 import game.player.rendering.MeshCollector;
@@ -16,8 +17,9 @@ import static game.utils.Constants.*;
 
 public final class Server {
 
-    public Server(long currentGameTick) {
+    public Server(long currentGameTick, float dayTime) {
         this.currentGameTick = currentGameTick;
+        this.dayTime = dayTime;
     }
 
     public float getCurrentGameTickFraction() {
@@ -29,6 +31,9 @@ public final class Server {
         return currentGameTick;
     }
 
+    public float getDayTime() {
+        return dayTime;
+    }
 
     public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
@@ -86,6 +91,7 @@ public final class Server {
             gameTickStartTime = System.nanoTime();
             executeGameTick();
             currentGameTick++;
+            incrementTime();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -101,10 +107,17 @@ public final class Server {
         }
     }
 
+    private void incrementTime() {
+        dayTime += FloatSetting.TIME_SPEED.value();
+        if (dayTime > 1.0F) dayTime -= 2.0F;
+    }
+
+    private long currentGameTick;
+    private float dayTime;
+
     private ScheduledExecutorService executor;
     private final ChunkGenerator generator = new ChunkGenerator();
     private long gameTickStartTime;
-    private long currentGameTick;
     private boolean generatorRestartScheduled = true;
 
     private static final int NANOSECONDS_PER_GAME_TICK = 50_000_000;

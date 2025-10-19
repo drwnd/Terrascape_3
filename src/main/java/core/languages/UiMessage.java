@@ -31,7 +31,6 @@ public enum UiMessage implements StringGetter {
     FOV,
     GUI_SIZE,
     SENSITIVITY,
-    REACH,
     TEXT_SIZE,
     MASTER_AUDIO,
     FOOTSTEPS_AUDIO,
@@ -42,7 +41,6 @@ public enum UiMessage implements StringGetter {
     RIM_THICKNESS,
     CROSSHAIR_SIZE,
     HOTBAR_SIZE,
-    BREAK_PLACE_INTERVALL,
     HOTBAR_INDICATOR_SCALER,
     PAUSE_MENU_BACKGROUND_BLUR,
     INVENTORY_ITEM_SIZE,
@@ -70,25 +68,16 @@ public enum UiMessage implements StringGetter {
     USE,
     PICK_BLOCK,
     INVENTORY,
-    DEBUG_MENU,
-    NO_CLIP,
     ZOOM,
     INCREASE_BREAK_PLACE_SIZE,
     DECREASE_BREAK_PLACE_SIZE,
     DROP,
     RESIZE_WINDOW,
-    RELOAD_ASSETS,
-    RELOAD_SETTINGS,
-    TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE,
     SCROLL_HOTBAR,
     RAW_MOUSE_INPUT,
     DO_SHADOW_MAPPING,
-    X_RAY,
-    V_SYNC,
-    RELOAD_LANGUAGE,
-    RELOAD_FONT,
-    RELOAD_MATERIALS,
-    STRUCTURE_NAME;
+    STRUCTURE_NAME,
+    NIGHT_BRIGHTNESS;
 
     @Override
     public String get() {

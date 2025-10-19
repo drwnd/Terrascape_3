@@ -10,27 +10,29 @@ public final class ServerSaver extends Saver<Server> {
     }
 
     public ServerSaver() {
-        super(8);
+        super(12);
     }
 
     @Override
     protected void save(Server server) {
         saveLong(server.getCurrentGameTick());
+        saveFloat(server.getDayTime());
     }
 
     @Override
     protected Server load() {
         long currentGameTick = loadLong();
-        return new Server(currentGameTick);
+        float dayTime = loadFloat();
+        return new Server(currentGameTick, dayTime);
     }
 
     @Override
     protected Server getDefault() {
-        return new Server(0);
+        return new Server(0L, 1.0F);
     }
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
     }
 }

@@ -14,7 +14,7 @@ public final class Constants {
     public static final int MAX_CHUNKS_XZ = 0xFFFFFF;
     public static final int MAX_CHUNKS_Y = 0xFFFF;
 
-    // Make into core.core.settings later
+    // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
     public static final byte RENDER_DISTANCE_XZ = 6;
     public static final byte RENDER_DISTANCE_Y = 6;

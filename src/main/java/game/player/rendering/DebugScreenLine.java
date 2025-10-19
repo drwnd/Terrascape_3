@@ -48,7 +48,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                 () -> Game.getWorld().getName(), "World name"));
 
         lines.add(new DebugScreenLine(OptionSetting.WORLD_TICK_AND_TIME_VISIBILITY, OptionSetting.WORLD_TICK_AND_TIME_COLOR,
-                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getTime()),
+                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getRenderTime()),
                 "Gametick and time"));
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {

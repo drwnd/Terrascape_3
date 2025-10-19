@@ -26,7 +26,6 @@ Schriftart
 Sichtfeld
 Gui Größe
 Empfindsamkeit
-
 Text Größe
 Meisteraudio
 Fußstapfenaudio
@@ -37,7 +36,6 @@ Verschiedenes Audio
 Randbreite
 Fadenkreuzgröße
 Hotbargröße
-
 Hotbaranzeigergröße
 Pausenmenühintergrundsverwischung
 Inventargegenstandsgröße
@@ -65,22 +63,13 @@ Zerstören
 Benutzen
 Block wählen
 Inventar öffnen
-
-
 Heranzoomen
 Zerstör-, Platziergröße erhöhen
 Zerstör-, Platziergröße verringern
 Gegenstand fallen lassen
 Fenstergröße ändern
-
-
-
 Hotbarscrollen
 Direkte Mauseingabe
 Benutze Shadowmapping
-
-
-
-
-
 Strukturname
+Nachthelligkeit
