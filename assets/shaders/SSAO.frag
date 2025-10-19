@@ -13,7 +13,7 @@ in vec2 fragTextureCoordinate;
 out float occlusionFactor;
 
 const float RADIUS = 4;
-const float MAX_DISTANCE = 1000.0;
+const float MAX_DISTANCE = 2000.0;
 const vec2 HALF_2 = vec2(0.5);
 const int SAMPLE_COUNT = 64;
 const vec3[SAMPLE_COUNT] SAMPLES = vec3[SAMPLE_COUNT](
@@ -134,4 +134,5 @@ float computeOcclusion() {
 
 void main() {
     occlusionFactor = computeOcclusion();
+    occlusionFactor = max(occlusionFactor, 0.5);
 }
