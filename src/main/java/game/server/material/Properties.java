@@ -5,27 +5,23 @@ import java.util.List;
 public enum Properties {
 
     NO_COLLISION,
-    REPLACEABLE,
-    BLAST_RESISTANT,
-    HAS_GRAVITY,
-    REQUIRES_BOTTOM_SUPPORT,
     TRANSPARENT,
     OCCLUDES_SELF_ONLY(TRANSPARENT);
 
 
     Properties(Properties... properties) {
-        int value = 1 << ordinal();
+        byte value = (byte) (1 << ordinal());
         for (Properties property : properties) value |= property.value;
         this.value = value;
     }
 
     Properties() {
-        value = 1 << ordinal();
+        value = (byte) (1 << ordinal());
     }
 
-    public static int getCombinedValue(List<String> properties) {
+    public static byte getCombinedValue(List<String> properties) {
         if (properties == null) return 0;
-        int value = 0;
+        byte value = 0;
         for (String property : properties) {
             Properties propertyEnum;
             try {
@@ -43,7 +39,7 @@ public enum Properties {
         return (Material.getMaterialProperties(material) & properties) == properties;
     }
 
-    public static boolean doesntHaveProperties(byte material, int properties) {
+    public static boolean doesntHaveProperties(byte material, byte properties) {
         return (Material.getMaterialProperties(material) & properties) == 0;
     }
 
@@ -52,9 +48,9 @@ public enum Properties {
      *
      * @return The same value as {@code CONSTANTS.PROPERTY_NAME} just slower
      */
-    public int getValue() {
+    public byte getValue() {
         return value;
     }
 
-    private final int value;
+    private final byte value;
 }

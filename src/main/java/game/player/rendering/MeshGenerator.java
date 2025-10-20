@@ -6,13 +6,16 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.material.Material;
 import game.server.generation.Structure;
-import game.server.material.Properties;
 
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
 public final class MeshGenerator {
+
+    public MeshGenerator() {
+        Material.copyMaterialProperties(materialProperties);
+    }
 
     public void generateMesh(Chunk chunk) {
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
@@ -116,9 +119,8 @@ public final class MeshGenerator {
 
     private void addTopBottomFaces(Chunk chunk) {
         // Copy materials
-        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                lower[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS];
+        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE; index++)
+            lower[index] = materials[index << CHUNK_SIZE_BITS];
 
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
             copyMaterialsTopBottom(chunk, materialY);
@@ -134,9 +136,8 @@ public final class MeshGenerator {
     private void copyMaterialsTopBottom(Chunk chunk, int materialY) {
         if (materialY == CHUNK_SIZE - 1) chunk.getNeighbor(TOP).getMaterials().fillUncompressedSideLayerInto(upper, BOTTOM);
         else {
-            for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-                for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-                    upper[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY + 1];
+            for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE; index++)
+                upper[index] = materials[index << CHUNK_SIZE_BITS | materialY + 1];
         }
     }
 
@@ -244,8 +245,9 @@ public final class MeshGenerator {
 
         // Generate faces
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
-                if ((toMeshFacesMap[materialX] & 1L << materialY) == 0) continue;
+            for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
 
                 byte material = toMesh[materialX << CHUNK_SIZE_BITS | materialY];
                 int faceEndY = growFace1stDirection(toMesh, materialY + 1, materialX, material);
@@ -262,8 +264,9 @@ public final class MeshGenerator {
 
         // Generate faces
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
-                if ((toMeshFacesMap[materialX] & 1L << materialZ) == 0) continue;
+            for (int materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
+                 materialZ < CHUNK_SIZE;
+                 materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
 
                 byte material = toMesh[materialX << CHUNK_SIZE_BITS | materialZ];
                 int faceEndZ = growFace1stDirection(toMesh, materialZ + 1, materialX, material);
@@ -280,8 +283,9 @@ public final class MeshGenerator {
 
         // Generate faces
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
-            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
-                if ((toMeshFacesMap[materialZ] & 1L << materialY) == 0) continue;
+            for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ]);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ])) {
 
                 byte material = toMesh[materialZ << CHUNK_SIZE_BITS | materialY];
                 int faceEndY = growFace1stDirection(toMesh, materialY + 1, materialZ, material);
@@ -344,17 +348,18 @@ public final class MeshGenerator {
         vertices.add(side << 8 | material & 0xFF);
     }
 
-    private static boolean occludes(byte toTestMaterial, byte occludingMaterial) {
+    private boolean occludes(byte toTestMaterial, byte occludingMaterial) {
         if (occludingMaterial == AIR) return false;
-        if (Properties.doesntHaveProperties(occludingMaterial, TRANSPARENT)) return true;
+        if ((materialProperties[occludingMaterial & 0xFF] & TRANSPARENT) == 0) return true;
 
-        if (Properties.hasProperties(toTestMaterial, OCCLUDES_SELF_ONLY))
+        if ((materialProperties[toTestMaterial & 0xFF] & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY)
             return toTestMaterial == occludingMaterial;
         return false;
     }
 
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
 
+    private final byte[] materialProperties = new byte[AMOUNT_OF_MATERIALS];
     private final long[] toMeshFacesMap = new long[CHUNK_SIZE];
     private byte[] upper = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private byte[] lower = new byte[CHUNK_SIZE * CHUNK_SIZE];

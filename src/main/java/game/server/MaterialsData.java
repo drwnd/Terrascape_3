@@ -513,18 +513,20 @@ public final class MaterialsData {
         final int size = 1 << sizeBits;
         byte material = uncompressedMaterials[getUncompressedIndex(totalSizeBits, startX, startY, startZ)];
         for (int inChunkX = startX; inChunkX < startX + size; inChunkX++)
-            for (int inChunkZ = startZ; inChunkZ < startZ + size; inChunkZ++)
+            for (int inChunkZ = startZ; inChunkZ < startZ + size; inChunkZ++) {
+                int xzIndex = (inChunkX << totalSizeBits | inChunkZ) << totalSizeBits;
                 for (int inChunkY = startY; inChunkY < startY + size; inChunkY++)
-                    if (uncompressedMaterials[getUncompressedIndex(totalSizeBits, inChunkX, inChunkY, inChunkZ)] != material) return false;
+                    if (uncompressedMaterials[xzIndex | inChunkY] != material) return false;
+            }
         return true;
     }
 
     private static int getUncompressedIndex(int sizeBits, int x, int y, int z) {
-        return x << sizeBits * 2 | z << sizeBits | y;
+        return (x << sizeBits | z) << sizeBits | y;
     }
 
     private int getUncompressedIndex(int inChunkX, int inChunkY, int inChunkZ) {
-        return inChunkX << totalSizeBits * 2 | inChunkZ << totalSizeBits | inChunkY;
+        return (inChunkX << totalSizeBits | inChunkZ) << totalSizeBits | inChunkY;
     }
 
     private int getUncompressedIndex(int inChunkA, int inChunkB) {

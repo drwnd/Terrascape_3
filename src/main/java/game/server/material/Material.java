@@ -31,11 +31,15 @@ public final class Material {
         return MATERIAL_PROPERTIES[material & 0xFF];
     }
 
+    public static void copyMaterialProperties(byte[] destination) {
+        System.arraycopy(MATERIAL_PROPERTIES, 0, destination, 0, AMOUNT_OF_MATERIALS);
+    }
+
     public static boolean isSemiTransparentMaterial(byte material) {
         return (material & 0xFF) >= (RED_GLASS & 0xFF) && (material & 0xFF) <= (BLACK_GLASS & 0xFF);
     }
 
-    private static void setMaterialData(byte material, int properties, byte texture) {
+    private static void setMaterialData(byte material, byte properties, byte texture) {
         MATERIAL_TEXTURE_INDICES[material & 0xFF] = texture;
         MATERIAL_PROPERTIES[material & 0xFF] = properties;
     }
@@ -48,7 +52,7 @@ public final class Material {
     }
 
     private static final byte[] MATERIAL_TEXTURE_INDICES = new byte[AMOUNT_OF_MATERIALS];
-    private static final int[] MATERIAL_PROPERTIES = new int[AMOUNT_OF_MATERIALS];
+    private static final byte[] MATERIAL_PROPERTIES = new byte[AMOUNT_OF_MATERIALS];
 
     private Material() {
     }

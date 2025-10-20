@@ -14,9 +14,7 @@ public final class WorldGeneration {
     public static long SEED;
 
     public static void generate(Chunk chunk) {
-        if (chunk.isGenerated()) {
-            return;
-        }
+        if (chunk.isGenerated()) return;
         generate(chunk, new GenerationData(chunk.X, chunk.Z, chunk.LOD));
     }
 
@@ -46,16 +44,20 @@ public final class WorldGeneration {
 
             // Attempting to place biome specific materials and features
             boolean placedMaterial = biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data);
+            if (placedMaterial) continue;
 
             // Placing stone beneath surface materials
-            if (!placedMaterial && totalY <= data.height) {
+            if (totalY <= data.height) {
                 int totalX = data.getTotalX(inChunkX);
                 int totalZ = data.getTotalZ(inChunkZ);
                 data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingStoneType(totalX, totalY, totalZ));
-            }
+            } else {
+                // Reached surface, everything above is just air
+                if (totalY >= WATER_LEVEL) break;
 
-            // Filling Oceans with water
-            if (totalY > data.height && totalY < WATER_LEVEL && !placedMaterial) data.store(inChunkX, inChunkY, inChunkZ, WATER);
+                // Filling Oceans with water
+                data.store(inChunkX, inChunkY, inChunkZ, WATER);
+            }
         }
     }
 

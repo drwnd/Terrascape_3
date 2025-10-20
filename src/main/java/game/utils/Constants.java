@@ -56,13 +56,9 @@ public final class Constants {
     public static final int Z_COMPONENT = 2;
 
     // Block Properties. Used in performance critical situations, so they are pulled out of their wrapper classes
-    public static final int NO_COLLISION = Properties.NO_COLLISION.getValue();
-    public static final int REPLACEABLE = Properties.REPLACEABLE.getValue();
-    public static final int BLAST_RESISTANT = Properties.BLAST_RESISTANT.getValue();
-    public static final int HAS_GRAVITY = Properties.HAS_GRAVITY.getValue();
-    public static final int REQUIRES_BOTTOM_SUPPORT = Properties.REQUIRES_BOTTOM_SUPPORT.getValue();
-    public static final int TRANSPARENT = Properties.TRANSPARENT.getValue();
-    public static final int OCCLUDES_SELF_ONLY = Properties.OCCLUDES_SELF_ONLY.getValue();
+    public static final byte NO_COLLISION = Properties.NO_COLLISION.getValue();
+    public static final byte TRANSPARENT = Properties.TRANSPARENT.getValue();
+    public static final byte OCCLUDES_SELF_ONLY = Properties.OCCLUDES_SELF_ONLY.getValue();
 
     // All materials
     public static final byte AIR = 0;
