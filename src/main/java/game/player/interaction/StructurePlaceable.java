@@ -79,7 +79,7 @@ public final class StructurePlaceable implements Placeable {
         startY &= mask;
         startZ &= mask;
 
-        chunk.storeMaterials(
+        chunk.storeStructureMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,

@@ -85,10 +85,10 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
-    public void storeMaterials(int inChunkX, int inChunkY, int inChunkZ,
-                               int startX, int startY, int startZ,
-                               int lengthX, int lengthY, int lengthZ,
-                               int lod, MaterialsData source) {
+    public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
+                                        int startX, int startY, int startZ,
+                                        int lengthX, int lengthY, int lengthZ,
+                                        int lod, MaterialsData source) {
 
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
@@ -98,9 +98,9 @@ public final class MaterialsData {
         fillUncompressedMaterialsInto(uncompressedMaterials);
         synchronized (source) {
             if (lod == 0)
-                source.fillUncompressedMaterialsInto(uncompressedMaterials, totalSizeBits, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
+                source.fillStructureMaterialsInto(uncompressedMaterials, totalSizeBits, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
             else
-                source.fillUncompressedMaterialsInto(uncompressedMaterials, totalSizeBits, lod, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
+                source.fillStructureMaterialsInto(uncompressedMaterials, totalSizeBits, lod, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
             compressIntoData(uncompressedMaterials);
         }
     }
@@ -193,9 +193,7 @@ public final class MaterialsData {
     private void fillUncompressedMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
                                                int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
-        if (currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
-                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
-                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ) return;
+        if (isInValidCoordinate(sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = data[startIndex];
 
         if (identifier == SPLITTER) {
@@ -225,13 +223,7 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-
-            for (int x = 0; x < lengthX; x++)
-                for (int z = 0; z < lengthZ; z++)
-                    for (int y = 0; y < lengthY; y++) {
-                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
-                        uncompressedMaterials[targetIndex] = material;
-                    }
+            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, material);
             return;
         }
 //        if (identifier == DETAIL)
@@ -247,10 +239,7 @@ public final class MaterialsData {
     private void fillUncompressedMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
                                                int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
-        if (Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
-                || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
-                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
-                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ) return;
+        if (isInValidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = data[startIndex];
 
         if (identifier == SPLITTER) {
@@ -282,13 +271,7 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-
-            for (int x = 0; x < lengthX; x += stepSize)
-                for (int z = 0; z < lengthZ; z += stepSize)
-                    for (int y = 0; y < lengthY; y += stepSize) {
-                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
-                        uncompressedMaterials[targetIndex] = material;
-                    }
+            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lod, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, stepSize, material);
             return;
         }
 //        if (identifier == DETAIL)
@@ -297,6 +280,104 @@ public final class MaterialsData {
                 for (int y = 0; y < lengthY; y += stepSize) {
                     int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
                     byte material = data[startIndex + getInDetailIndex((x >> lod), (y >> lod), (z >> lod))];
+                    uncompressedMaterials[targetIndex] = material;
+                }
+    }
+
+    private void fillStructureMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
+                                               int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+        int length = 1 << sizeBits;
+        if (isInValidCoordinate(sourceStart, size, currentX, currentY, currentZ, length)) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + SPLITTER_BYTE_SIZE, currentX, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 1), currentX, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 4), currentX, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 7), currentX, currentY + nextSize, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 10), currentX + nextSize, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 13), currentX + nextSize, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 16), currentX + nextSize, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 19), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
+            return;
+        }
+
+        int sourceStartX = Math.max(currentX, sourceStart.x);
+        int sourceStartY = Math.max(currentY, sourceStart.y);
+        int sourceStartZ = Math.max(currentZ, sourceStart.z);
+
+        int lengthX = Math.min(currentX + length, sourceStart.x + size.x) - sourceStartX;
+        int lengthY = Math.min(currentY + length, sourceStart.y + size.y) - sourceStartY;
+        int lengthZ = Math.min(currentZ + length, sourceStart.z + size.z) - sourceStartZ;
+
+        int targetStartX = targetStart.x + sourceStartX - sourceStart.x;
+        int targetStartY = targetStart.y + sourceStartY - sourceStart.y;
+        int targetStartZ = targetStart.z + sourceStartZ - sourceStart.z;
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, material);
+            return;
+        }
+//        if (identifier == DETAIL)
+        for (int x = 0; x < lengthX; x++)
+            for (int z = 0; z < lengthZ; z++)
+                for (int y = 0; y < lengthY; y++) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                    byte material = data[startIndex + getInDetailIndex(x, y, z)];
+                    if (material == AIR) continue;
+                    uncompressedMaterials[targetIndex] = material;
+                }
+    }
+
+    private void fillStructureMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
+                                               int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+        int length = 1 << sizeBits;
+        if (isInValidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + SPLITTER_BYTE_SIZE, currentX, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 1), currentX, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 4), currentX, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 7), currentX, currentY + nextSize, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 10), currentX + nextSize, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 13), currentX + nextSize, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 16), currentX + nextSize, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, targetSizeBits, lod, targetStart, sourceStart, size, sizeBits, startIndex + getOffset(startIndex + 19), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
+            return;
+        }
+
+        int sourceStartX = Math.max(currentX, sourceStart.x);
+        int sourceStartY = Math.max(currentY, sourceStart.y);
+        int sourceStartZ = Math.max(currentZ, sourceStart.z);
+
+        int lengthX = Math.min(currentX + length, sourceStart.x + size.x) - sourceStartX;
+        int lengthY = Math.min(currentY + length, sourceStart.y + size.y) - sourceStartY;
+        int lengthZ = Math.min(currentZ + length, sourceStart.z + size.z) - sourceStartZ;
+
+        int targetStartX = targetStart.x + (sourceStartX - sourceStart.x >> lod);
+        int targetStartY = targetStart.y + (sourceStartY - sourceStart.y >> lod);
+        int targetStartZ = targetStart.z + (sourceStartZ - sourceStart.z >> lod);
+
+        int stepSize = 1 << lod;
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lod, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, stepSize, material);
+            return;
+        }
+//        if (identifier == DETAIL)
+        for (int x = 0; x < lengthX; x += stepSize)
+            for (int z = 0; z < lengthZ; z += stepSize)
+                for (int y = 0; y < lengthY; y += stepSize) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                    byte material = data[startIndex + getInDetailIndex((x >> lod), (y >> lod), (z >> lod))];
+                    if (material == AIR) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
     }
@@ -439,6 +520,43 @@ public final class MaterialsData {
         for (int a = 0; a < size; a++)
             for (int b = 0; b < size; b++)
                 uncompressedMaterials[getUncompressedIndex(inChunkA + a, inChunkB + b)] = material;
+    }
+
+    private void fillUncompressedHomogenousArea(byte[] uncompressedMaterials, int targetSizeBits,
+                                                int lengthX, int lengthY, int lengthZ,
+                                                int targetStartX, int targetStartY, int targetStartZ,
+                                                byte material) {
+        for (int x = 0; x < lengthX; x++)
+            for (int z = 0; z < lengthZ; z++)
+                for (int y = 0; y < lengthY; y++) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                    uncompressedMaterials[targetIndex] = material;
+                }
+    }
+
+    private void fillUncompressedHomogenousArea(byte[] uncompressedMaterials, int targetSizeBits, int lod,
+                                                int lengthX, int lengthY, int lengthZ,
+                                                int targetStartX, int targetStartY, int targetStartZ,
+                                                int stepSize, byte material) {
+        for (int x = 0; x < lengthX; x += stepSize)
+            for (int z = 0; z < lengthZ; z += stepSize)
+                for (int y = 0; y < lengthY; y += stepSize) {
+                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                    uncompressedMaterials[targetIndex] = material;
+                }
+    }
+
+    private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
+        return Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
+                || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
+                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
+                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ;
+    }
+
+    private static boolean isInValidCoordinate(Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
+        return currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
+                || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
+                || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ;
     }
 
     private int getOffset(int index) {
