@@ -77,7 +77,9 @@ public enum UiMessage implements StringGetter {
     RAW_MOUSE_INPUT,
     DO_SHADOW_MAPPING,
     STRUCTURE_NAME,
-    NIGHT_BRIGHTNESS;
+    NIGHT_BRIGHTNESS,
+    OPTIMIZE_WORLD,
+    WORLD_OPTIMIZER_TIME_WARNING;
 
     @Override
     public String get() {

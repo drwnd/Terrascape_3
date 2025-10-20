@@ -54,6 +54,25 @@ public final class Game {
         return server;
     }
 
+
+    public static boolean setTemporaryWorld(World world) {
+        if (Game.world != null || player != null || server != null) {
+            System.err.println("Cannot set temporary World. The Game might be running");
+            return false;
+        }
+        Game.world = world;
+        return true;
+    }
+
+    public static void removeTemporaryWorld() {
+        if (player != null || server != null) {
+            System.err.println("Cannot remove temporary World. The Game might be running");
+            return;
+        }
+        world = null;
+    }
+
+
     private static Player player;
     private static World world;
     private static Server server;
