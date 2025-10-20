@@ -59,13 +59,16 @@ public final class World {
                 saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
             }
 
+        deleteHigherLODs(LOD_COUNT - 1);
+    }
+
+    public void deleteHigherLODs(int maxKeptLod) {
         File[] lodFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation()));
         for (File file : lodFiles) {
             String fileLod = file.getName();
-            if (!Utils.isInteger(fileLod, 10) || Integer.parseInt(fileLod) >= LOD_COUNT) FileManager.delete(file);
+            if (!Utils.isInteger(fileLod, 10) || Integer.parseInt(fileLod) > maxKeptLod) FileManager.delete(file);
         }
     }
-
 
     public void setName(String name) {
         this.name = name;

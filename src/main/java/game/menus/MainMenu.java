@@ -1,18 +1,17 @@
 package game.menus;
 
+import core.renderables.*;
 import core.utils.FileManager;
 import core.languages.Language;
 import core.languages.UiMessage;
-import core.renderables.Renderable;
-import core.renderables.TextElement;
-import core.renderables.UiBackgroundElement;
-import core.renderables.UiButton;
 import core.rendering_api.Window;
 
 import game.server.Game;
+import game.server.WorldOptimizer;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.io.File;
@@ -21,31 +20,35 @@ import java.util.ArrayList;
 public final class MainMenu extends UiBackgroundElement {
 
     public MainMenu() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
-        Vector2f sizeToParent = new Vector2f(0.25f, 0.1f);
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
+        Vector2f sizeToParent = new Vector2f(0.25F, 0.1F);
 
-        UiButton closeApplicationButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), Window::popRenderable);
-        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.QUIT_GAME);
+        UiButton closeApplicationButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), Window::popRenderable);
+        TextElement text = new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.QUIT_GAME);
         closeApplicationButton.addRenderable(text);
 
-        UiButton createNewWorldButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.725f), getCreateWorldRunnable());
-        text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.NEW_WORLD);
+        UiButton createNewWorldButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.725F), getCreateWorldAction());
+        text = new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.NEW_WORLD);
         createNewWorldButton.addRenderable(text);
 
-        UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.6f), getSettingsRunnable());
-        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.SETTINGS));
+        UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.6F), getSettingsAction());
+        settingsButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.SETTINGS));
 
-        playWorldButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.475f));
-        playWorldButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f)));
+        playWorldButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.475F));
+        playWorldButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F)));
 
-        deleteWorldButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.05f));
-        deleteWorldButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f)));
+        deleteWorldButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.05F));
+        deleteWorldButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F)));
 
-        confirmDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.3f));
-        confirmDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.CONFIRM_DELETE_WORLD, Color.RED));
+        optimizeWorldButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.35F));
+        optimizeWorldButton.addRenderable(new TextElement(new Vector2f(0.05F, 2.0F / 3.0F)));
+        optimizeWorldButton.addRenderable(new TextElement(new Vector2f(0.05F, 1.0F / 3.0F), UiMessage.WORLD_OPTIMIZER_TIME_WARNING));
 
-        cancelDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.175f));
-        cancelDeletionButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.KEEP_WORLD, Color.GREEN));
+        confirmDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.175F));
+        confirmDeletionButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.CONFIRM_DELETE_WORLD, Color.RED));
+
+        cancelDeletionButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.05F));
+        cancelDeletionButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.KEEP_WORLD, Color.GREEN));
         cancelDeletionButton.setAction(this::hideWorldSpecificButtons);
 
         hideWorldSpecificButtons();
@@ -55,6 +58,7 @@ public final class MainMenu extends UiBackgroundElement {
         addRenderable(closeApplicationButton);
         addRenderable(playWorldButton);
         addRenderable(deleteWorldButton);
+        addRenderable(optimizeWorldButton);
         addRenderable(confirmDeletionButton);
         addRenderable(cancelDeletionButton);
     }
@@ -89,19 +93,25 @@ public final class MainMenu extends UiBackgroundElement {
 
 
     private void setSelectedWorld(File saveFile) {
-        playWorldButton.setAction(getPlayWorldRunnable(saveFile));
-        deleteWorldButton.setAction(getDeleteWorldRunnable(saveFile));
+        hideWorldSpecificButtons();
+
+        playWorldButton.setAction(getPlayWorldAction(saveFile));
+        deleteWorldButton.setAction(getDeleteWorldAction(saveFile));
+        optimizeWorldButton.setAction(getOptimizeWorldAction(saveFile));
 
         ((TextElement) playWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.PLAY_WORLD).formatted(saveFile.getName()));
         ((TextElement) deleteWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.DELETE_WORLD).formatted(saveFile.getName()));
+        ((TextElement) optimizeWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.OPTIMIZE_WORLD).formatted(saveFile.getName()));
 
         playWorldButton.setVisible(true);
         deleteWorldButton.setVisible(true);
+        optimizeWorldButton.setVisible(true);
     }
 
     private void hideWorldSpecificButtons() {
         playWorldButton.setVisible(false);
         deleteWorldButton.setVisible(false);
+        optimizeWorldButton.setVisible(false);
         confirmDeletionButton.setVisible(false);
         cancelDeletionButton.setVisible(false);
     }
@@ -125,48 +135,70 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
     private UiButton getPlayWorldButton(int index, File saveFile) {
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * (index + 1) + input.getScroll());
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * (index + 1) + input.getScroll());
 
         UiButton button = new UiButton(sizeToParent, offsetToParent, () -> setSelectedWorld(saveFile));
 
-        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f));
+        TextElement text = new TextElement(new Vector2f(0.05F, 0.5F));
         text.setText(saveFile.getName());
         button.addRenderable(text);
 
         return button;
     }
 
-    private Runnable getDeleteWorldRunnable(File saveFile) {
-        return () -> {
-            confirmDeletionButton.setAction(getConfirmDeletionRunnable(saveFile));
+    private Clickable getDeleteWorldAction(File saveFile) {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+            hideWorldSpecificButtons();
+
+            confirmDeletionButton.setAction(getConfirmDeletionAction(saveFile));
             confirmDeletionButton.setVisible(true);
             cancelDeletionButton.setVisible(true);
         };
     }
 
-    private Runnable getConfirmDeletionRunnable(File saveFile) {
-        return () -> {
+    private Clickable getConfirmDeletionAction(File saveFile) {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+
             FileManager.delete(saveFile);
             createWorldButtons();
             hideWorldSpecificButtons();
         };
     }
 
-
-    private static Runnable getSettingsRunnable() {
-        return () -> Window.pushRenderable(new SettingsMenu());
+    private Clickable getOptimizeWorldAction(File saveFile) {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+            WorldOptimizer.optimize(saveFile);
+            hideWorldSpecificButtons();
+        };
     }
 
-    private static Runnable getCreateWorldRunnable() {
-        return () -> Window.pushRenderable(new WorldCreationMenu());
+
+    private static Clickable getSettingsAction() {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+            Window.pushRenderable(new SettingsMenu());
+        };
     }
 
-    private static Runnable getPlayWorldRunnable(File saveFile) {
-        return () -> Game.play(saveFile);
+    private static Clickable getCreateWorldAction() {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+            Window.pushRenderable(new WorldCreationMenu());
+        };
+    }
+
+    private static Clickable getPlayWorldAction(File saveFile) {
+        return (Vector2i cursorPos, int button, int action) -> {
+            if (action != GLFW.GLFW_PRESS) return;
+            Game.play(saveFile);
+        };
     }
 
     private final ArrayList<UiButton> worldButtons = new ArrayList<>();
-    private final UiButton playWorldButton, deleteWorldButton, confirmDeletionButton, cancelDeletionButton;
+    private final UiButton playWorldButton, deleteWorldButton, optimizeWorldButton, confirmDeletionButton, cancelDeletionButton;
     private game.menus.MainMenuInput input;  // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
 }
