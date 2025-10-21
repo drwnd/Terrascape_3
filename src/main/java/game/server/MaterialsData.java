@@ -96,12 +96,16 @@ public final class MaterialsData {
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
         fillUncompressedMaterialsInto(uncompressedMaterials);
+        fillStructureMaterialsInto(uncompressedMaterials, source, totalSizeBits, lod, targetStart, sourceStart, size);
+        compressIntoData(uncompressedMaterials);
+    }
+
+    public static void fillStructureMaterialsInto(byte[] uncompressedMaterials, MaterialsData source, int totalSizeBits, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size) {
         synchronized (source) {
             if (lod == 0)
                 source.fillStructureMaterialsInto(uncompressedMaterials, totalSizeBits, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
             else
                 source.fillStructureMaterialsInto(uncompressedMaterials, totalSizeBits, lod, targetStart, sourceStart, size, source.totalSizeBits, 0, 0, 0, 0);
-            compressIntoData(uncompressedMaterials);
         }
     }
 
@@ -285,7 +289,7 @@ public final class MaterialsData {
     }
 
     private void fillStructureMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
-                                               int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+                                            int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
         if (isInValidCoordinate(sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = data[startIndex];
@@ -333,7 +337,7 @@ public final class MaterialsData {
     }
 
     private void fillStructureMaterialsInto(byte[] uncompressedMaterials, int targetSizeBits, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
-                                               int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+                                            int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
         if (isInValidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = data[startIndex];

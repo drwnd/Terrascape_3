@@ -11,6 +11,10 @@ public final class StructureSaver extends Saver<Structure> {
         return "assets/structures/%s".formatted(structureName);
     }
 
+    public static String getSaveFileLocation() {
+        return "assets/structures";
+    }
+
     @Override
     protected void save(Structure structure) {
         saveInt(structure.sizeX());

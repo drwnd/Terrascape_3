@@ -1,6 +1,8 @@
 package game.server.biomes;
 
+import game.assets.StructureCollectionIdentifier;
 import game.server.generation.GenerationData;
+import game.server.generation.Tree;
 
 public final class Wasteland extends Biome {
     @Override
@@ -16,6 +18,11 @@ public final class Wasteland extends Biome {
         if (data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) return false;   // Stone placed by caller
         data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingDirtType(totalX, totalY, totalZ));
         return true;
+    }
+
+    @Override
+    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+        return getRandomTree(totalX, height, totalZ, StructureCollectionIdentifier.BLACK_WOOD_TREES);
     }
 
     @Override

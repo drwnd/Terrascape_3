@@ -1,8 +1,12 @@
 package game.server.biomes;
 
-import game.server.generation.GenerationData;
+import core.assets.AssetManager;
 
-import static game.utils.Constants.DIRT;
+import game.assets.StructureCollectionIdentifier;
+import game.server.generation.GenerationData;
+import game.server.generation.Tree;
+
+import static game.utils.Constants.*;
 
 public abstract class Biome {
 
@@ -17,8 +21,16 @@ public abstract class Biome {
         return 0;
     }
 
+    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+        return null;
+    }
+
     public final String getName() {
         return getClass().getName();
+    }
+
+    protected static Tree getRandomTree(int x, int y, int z, StructureCollectionIdentifier trees) {
+        return new Tree(x, y, z, AssetManager.get(trees).getRandom(x, y, z), (byte) 0); // TODO random~ transform
     }
 
     protected static boolean placeHomogenousSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte material) {

@@ -1,6 +1,8 @@
 package game.server.biomes;
 
+import game.assets.StructureCollectionIdentifier;
 import game.server.generation.GenerationData;
+import game.server.generation.Tree;
 
 import static game.utils.Constants.DIRT;
 
@@ -19,6 +21,11 @@ public final class RedwoodForest extends Biome {
         if (data.isInsideSurfaceMaterialLevel(totalY, 8)) data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingGrassType(totalX, totalZ, totalZ));
         else data.store(inChunkX, inChunkY, inChunkZ, DIRT);
         return true;
+    }
+
+    @Override
+    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+        return getRandomTree(totalX, height, totalZ, StructureCollectionIdentifier.REDWOOD_TREES);
     }
 
     @Override

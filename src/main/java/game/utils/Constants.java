@@ -24,6 +24,7 @@ public final class Constants {
     public static final byte RENDERED_WORLD_HEIGHT = RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2;
 
     public static final int LOD_COUNT = 10;
+    public static final int MAX_TREE_LOD = 4;
 
     // Indices for the sides of blocks
     /**

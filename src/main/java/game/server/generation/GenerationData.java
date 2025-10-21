@@ -6,6 +6,8 @@ import game.server.MaterialsData;
 import game.server.biomes.Biome;
 import game.utils.Utils;
 
+import org.joml.Vector3i;
+
 import java.util.Arrays;
 
 import static game.server.generation.WorldGeneration.SEED;
@@ -29,6 +31,7 @@ public final class GenerationData {
         this.LOD = lod;
 
         featureMap = featureMap(chunkX, chunkZ, lod);
+        treeMap = treeMap(chunkX, chunkZ, lod);
 
         temperatureMap = temperatureMapPadded(chunkX, chunkZ, lod);
         humidityMap = humidityMapPadded(chunkX, chunkZ, lod);
@@ -139,6 +142,7 @@ public final class GenerationData {
         return humidity;
     }
 
+
     public boolean isBelowFloorMaterialLevel(int totalY, int floorMaterialDepth) {
         return totalY >> LOD < height - floorMaterialDepth >> LOD;
     }
@@ -151,8 +155,12 @@ public final class GenerationData {
         return totalY >> LOD > height >> LOD;
     }
 
+    public boolean hasTrees() {
+        return treeMap != null;
+    }
+
     public int getFloorMaterialDepthMod() {
-        return (int) (feature * 4.0f) - (steepness << 2);
+        return (int) (feature * 4.0F) - (steepness << 2);
     }
 
     public int getTotalX(int inChunkX) {
@@ -167,12 +175,58 @@ public final class GenerationData {
         return (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
     }
 
+    public static int getMapIndex(int mapX, int mapZ) {
+        return mapX * CHUNK_SIZE_PADDED + mapZ;
+    }
+
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
         uncompressedMaterials[inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY] = material;
     }
 
+    public void storeTree(Tree tree) {
+        int chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
+        int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
+        int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
+
+        int chunkMaxY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
+        if (chunkStartY > tree.getMaxY() || chunkMaxY < tree.getMinY()) return;
+
+        int inChunkX = Math.max(chunkStartX, tree.getMinX()) >> LOD & CHUNK_SIZE_MASK;
+        int inChunkY = Math.max(chunkStartY, tree.getMinY()) >> LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = Math.max(chunkStartZ, tree.getMinZ()) >> LOD & CHUNK_SIZE_MASK;
+
+        int startX = chunkStartX + (inChunkX << LOD) - tree.getMinX();
+        int startY = chunkStartY + (inChunkY << LOD) - tree.getMinY();
+        int startZ = chunkStartZ + (inChunkZ << LOD) - tree.getMinZ();
+
+        int lengthX = Utils.min(tree.structure().sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.structure().sizeX());
+        int lengthY = Utils.min(tree.structure().sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.structure().sizeY());
+        int lengthZ = Utils.min(tree.structure().sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.structure().sizeZ());
+
+        int mask = -(1 << LOD);
+        lengthX &= mask;
+        lengthY &= mask;
+        lengthZ &= mask;
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
+
+        startX &= mask;
+        startY &= mask;
+        startZ &= mask;
+
+        Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
+        Vector3i sourceStart = new Vector3i(startX, startY, startZ);
+        Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
+
+        MaterialsData source = tree.structure().materials();
+        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, source, CHUNK_SIZE_BITS, LOD, targetStart, sourceStart, size);
+    }
+
     public MaterialsData getCompressedMaterials() {
         return MaterialsData.getCompressedMaterials(CHUNK_SIZE_BITS, uncompressedMaterials);
+    }
+
+    public Tree treeMapValue(int index) {
+        return treeMap[index];
     }
 
 
@@ -462,14 +516,44 @@ public final class GenerationData {
         return steepnessMap;
     }
 
-    private int getCompressedIndex(int x, int y, int z) {
-        // >> 2 for compression and performance improvement
-        int compressedX = (x >> LOD & CHUNK_SIZE_MASK) >> 2;
-        int compressedY = (y >> LOD & CHUNK_SIZE_MASK) >> 2;
-        int compressedZ = (z >> LOD & CHUNK_SIZE_MASK) >> 2;
+    private static Tree[] treeMap(int chunkX, int chunkZ, int lod) {
+        if (lod > MAX_TREE_LOD) return null;
 
-        // Lookup cached value
-        return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
+        int sideLength = (1 << lod) + 2;
+        Tree[] treeMap = new Tree[sideLength * sideLength];
+
+        int treeStartX = (chunkX << CHUNK_SIZE_BITS + lod) - CHUNK_SIZE / 2;
+        int treeStartZ = (chunkZ << CHUNK_SIZE_BITS + lod) - CHUNK_SIZE / 2;
+
+        for (int x = 0; x < sideLength; x++)
+            for (int z = 0; z < sideLength; z++) {
+                int totalX = treeStartX + (x << CHUNK_SIZE_BITS);
+                int totalZ = treeStartZ + (z << CHUNK_SIZE_BITS);
+
+                treeMap[x * sideLength + z] = treeMapValue(totalX, totalZ);
+            }
+        return treeMap;
+    }
+
+    private static Tree treeMapValue(int totalX, int totalZ) {
+        double temperature = temperatureMapValue(totalX, totalZ);
+        double humidity = humidityMapValue(totalX, totalZ);
+        double height = heightMapValue(totalX, totalZ);
+        double erosion = erosionMapValue(totalX, totalZ);
+        double continental = continentalMapValue(totalX, totalZ);
+        double river = riverMapValue(totalX, totalZ);
+        double ridge = ridgeMapValue(totalX, totalZ);
+
+        int resultingHeight = WorldGeneration.getResultingHeight(height, erosion, continental, river, ridge);
+        int heightPlusX = WorldGeneration.getResultingHeight(totalX + 1, totalZ);
+        int heightPlusZ = WorldGeneration.getResultingHeight(totalX, totalZ + 1);
+        int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
+        if (steepness != 0) return null;
+
+        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental);
+
+        if ((Utils.hash(totalX, totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
+        return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
     }
 
     private static void interpolate(double[] map, int mapX, int mapZ) {
@@ -489,10 +573,18 @@ public final class GenerationData {
         }
     }
 
-    public static int getMapIndex(int mapX, int mapZ) {
-        return mapX * CHUNK_SIZE_PADDED + mapZ;
+    private int getCompressedIndex(int x, int y, int z) {
+        // >> 2 for compression and performance improvement
+        int compressedX = (x >> LOD & CHUNK_SIZE_MASK) >> 2;
+        int compressedY = (y >> LOD & CHUNK_SIZE_MASK) >> 2;
+        int compressedZ = (z >> LOD & CHUNK_SIZE_MASK) >> 2;
+
+        // Lookup cached value
+        return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 
+
+    private final Tree[] treeMap;
     private final double[] temperatureMap;
     private final double[] humidityMap;
     private final double[] featureMap;

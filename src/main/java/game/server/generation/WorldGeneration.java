@@ -34,9 +34,81 @@ public final class WorldGeneration {
                 generateBiome(biome, inChunkX, inChunkZ, generationData);
             }
 
+        generateTrees(generationData);
+
         chunk.setMaterials(generationData.getCompressedMaterials());
         Game.getWorld().storeChunk(chunk);
     }
+
+    public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
+        height = (height * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
+
+        double continentalModifier = getContinentalModifier(continental, ridge);
+        double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
+        double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
+
+        return Utils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+    }
+
+    public static int getResultingHeight(int totalX, int totalZ) {
+        double height = GenerationData.heightMapValue(totalX, totalZ);
+        double erosion = GenerationData.erosionMapValue(totalX, totalZ);
+        double continental = GenerationData.continentalMapValue(totalX, totalZ);
+        double river = GenerationData.riverMapValue(totalX, totalZ);
+        double ridge = GenerationData.ridgeMapValue(totalX, totalZ);
+
+        return getResultingHeight(height, erosion, continental, river, ridge);
+    }
+
+    public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
+        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
+        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
+            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
+
+                double height = heightMap[GenerationData.getMapIndex(mapX, mapZ)];
+                double erosion = erosionMap[GenerationData.getMapIndex(mapX, mapZ)];
+                double continental = continentalMap[GenerationData.getMapIndex(mapX, mapZ)];
+                double river = riverMap[GenerationData.getMapIndex(mapX, mapZ)];
+                double ridge = ridgeMap[GenerationData.getMapIndex(mapX, mapZ)];
+
+                resultingHeightMap[GenerationData.getMapIndex(mapX, mapZ)] = getResultingHeight(height, erosion, continental, river, ridge);
+            }
+
+        return resultingHeightMap;
+    }
+
+    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental) {
+        if (height < WATER_LEVEL) {
+            if (temperature > 0.33) return WARM_OCEAN;
+            else if (temperature < -0.33) return COLD_OCEAN;
+            return OCEAN;
+        }
+        if (height < beachHeight) return BEACH;
+        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.425) {
+            if (temperature > 0.33) return DRY_MOUNTAIN;
+            else if (temperature < -0.33) return SNOWY_MOUNTAIN;
+            return MOUNTAIN;
+        }
+
+        if (temperature > 0.33) {
+            if (temperature > 0.45 && humidity < -0.3) return CORRODED_MESA;
+            if (temperature > 0.55 && humidity < 0.15) return MESA;
+            if (humidity < 0.15) return DESERT;
+            if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;
+            if (humidity > 0.4 && temperature > 0.4) return DARK_OAK_FOREST;
+            return WASTELAND;
+        }
+        if (humidity > 0.33) {
+            if (temperature > -0.1) return REDWOOD_FOREST;
+            if (temperature > -0.4) return SPRUCE_FOREST;
+            return SNOWY_SPRUCE_FOREST;
+        }
+        if (humidity < 0.0 && temperature > -0.25) return PLAINS;
+        if (humidity > -0.33 && temperature > -0.33) return OAK_FOREST;
+        if (humidity < -0.33 && temperature > -0.5) return PINE_FOREST;
+        return SNOWY_PLAINS;
+    }
+
 
     private static void generateBiome(Biome biome, int inChunkX, int inChunkZ, GenerationData data) {
         for (int inChunkY = 0; inChunkY < CHUNK_SIZE; inChunkY++) {
@@ -61,14 +133,17 @@ public final class WorldGeneration {
         }
     }
 
-    public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
-        height = (height * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
+    private static void generateTrees(GenerationData data) {
+        if (!data.hasTrees()) return;
 
-        double continentalModifier = getContinentalModifier(continental, ridge);
-        double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
-        double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
+        int sideLength = (1 << data.LOD) + 2;
+        for (int x = 0; x < sideLength; x++)
+            for (int z = 0; z < sideLength; z++) {
+                Tree tree = data.treeMapValue(x * sideLength + z);
+                if (tree == null) continue;
 
-        return Utils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+                data.storeTree(tree);
+            }
     }
 
     private static double getContinentalModifier(double continental, double ridge) {
@@ -111,24 +186,6 @@ public final class WorldGeneration {
         return riverModifier;
     }
 
-    public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
-        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
-
-                double height = heightMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double erosion = erosionMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double continental = continentalMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double river = riverMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double ridge = ridgeMap[GenerationData.getMapIndex(mapX, mapZ)];
-
-                resultingHeightMap[GenerationData.getMapIndex(mapX, mapZ)] = getResultingHeight(height, erosion, continental, river, ridge);
-            }
-
-        return resultingHeightMap;
-    }
-
-
     private static Biome getBiome(GenerationData data) {
         int beachHeight = WATER_LEVEL + (int) (data.feature * 64.0) + 64;
         double dither = data.feature * 0.005f - 0.0025f;
@@ -140,37 +197,6 @@ public final class WorldGeneration {
         return getBiome(temperature, humidity, beachHeight, data.height, erosion, continental);
     }
 
-    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental) {
-        if (height < WATER_LEVEL) {
-            if (temperature > 0.33) return WARM_OCEAN;
-            else if (temperature < -0.33) return COLD_OCEAN;
-            return OCEAN;
-        }
-        if (height < beachHeight) return BEACH;
-        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.425) {
-            if (temperature > 0.33) return DRY_MOUNTAIN;
-            else if (temperature < -0.33) return SNOWY_MOUNTAIN;
-            return MOUNTAIN;
-        }
-
-        if (temperature > 0.33) {
-            if (temperature > 0.45 && humidity < -0.3) return CORRODED_MESA;
-            if (temperature > 0.55 && humidity < 0.15) return MESA;
-            if (humidity < 0.15) return DESERT;
-            if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;
-            if (humidity > 0.4 && temperature > 0.4) return DARK_OAK_FOREST;
-            return WASTELAND;
-        }
-        if (humidity > 0.33) {
-            if (temperature > -0.1) return REDWOOD_FOREST;
-            if (temperature > -0.4) return SPRUCE_FOREST;
-            return SNOWY_SPRUCE_FOREST;
-        }
-        if (humidity < 0.0 && temperature > -0.25) return PLAINS;
-        if (humidity > -0.33 && temperature > -0.33) return OAK_FOREST;
-        if (humidity < -0.33 && temperature > -0.5) return PINE_FOREST;
-        return SNOWY_PLAINS;
-    }
 
     private static final int OCEAN_FLOOR_LEVEL = WATER_LEVEL - 480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = WATER_LEVEL - 1120;
