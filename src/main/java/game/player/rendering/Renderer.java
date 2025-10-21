@@ -196,6 +196,7 @@ public final class Renderer extends Renderable {
 
     private void createTextures(int width, int height) {
         colorTexture = ObjectLoader.createTexture2D(GL46.GL_RGBA8, width, height, GL46.GL_RGBA, GL46.GL_UNSIGNED_BYTE, GL46.GL_NEAREST);
+        sideTexture = ObjectLoader.createTexture2D(GL46.GL_R8I, width, height, GL46.GL_RED_INTEGER, GL46.GL_UNSIGNED_BYTE, GL46.GL_NEAREST);
 
         ssaoTexture = ObjectLoader.createTexture2D(GL46.GL_RED, width, height, GL46.GL_RED, GL46.GL_FLOAT, GL46.GL_NEAREST);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_BORDER);
@@ -225,7 +226,9 @@ public final class Renderer extends Renderable {
         framebuffer = GL46.glCreateFramebuffers();
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
         GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT0, GL46.GL_TEXTURE_2D, colorTexture, 0);
+        GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT1, GL46.GL_TEXTURE_2D, sideTexture, 0);
         GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_DEPTH_ATTACHMENT, GL46.GL_TEXTURE_2D, depthTexture, 0);
+        GL46.glDrawBuffers(new int[]{GL46.GL_COLOR_ATTACHMENT0, GL46.GL_COLOR_ATTACHMENT1});
         if (GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER) != GL46.GL_FRAMEBUFFER_COMPLETE)
             throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER)));
 
@@ -241,8 +244,9 @@ public final class Renderer extends Renderable {
     private void deleteTextures() {
         GL46.glDeleteTextures(colorTexture);
         GL46.glDeleteTextures(depthTexture);
-        GL46.glDeleteTextures(ssaoTexture);
         GL46.glDeleteTextures(noiseTexture);
+        GL46.glDeleteTextures(ssaoTexture);
+        GL46.glDeleteTextures(sideTexture);
     }
 
     private void deleteFrameBuffers() {
@@ -322,6 +326,7 @@ public final class Renderer extends Renderable {
     }
 
     private void computeAmbientOcclusion() {
+        Matrix4f viewMatrix = Transformation.createViewMatrix(player.getCamera());
         Matrix4f projectionMatrix = player.getCamera().getProjectionMatrix();
         Matrix4f projectionInverse = new Matrix4f(projectionMatrix).invert();
 
@@ -329,14 +334,18 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.setUniform("depthTexture", 0);
         shader.setUniform("noiseTexture", 1);
+        shader.setUniform("sideTexture", 2);
         shader.setUniform("projectionMatrix", projectionMatrix);
         shader.setUniform("projectionInverse", projectionInverse);
+        shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthTexture);
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, noiseTexture);
+        GL46.glActiveTexture(GL46.GL_TEXTURE2);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, sideTexture);
         GL46.glDisable(GL46.GL_BLEND);
 
         shader.flipNextDrawVertically();
@@ -440,5 +449,5 @@ public final class Renderer extends Renderable {
     private final Player player;
 
     private int framebuffer, ssaoFramebuffer;
-    private int colorTexture, depthTexture, ssaoTexture, noiseTexture;
+    private int colorTexture, depthTexture, ssaoTexture, noiseTexture, sideTexture;
 }

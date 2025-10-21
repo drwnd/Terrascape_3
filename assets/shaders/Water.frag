@@ -4,7 +4,8 @@ in vec3 totalPosition;
 flat in vec3 normal;
 flat in int textureData;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out int side;
 
 uniform sampler2DArray textures;
 
@@ -50,12 +51,12 @@ vec2 getUVOffset(int side) {
 }
 
 void main() {
-    vec4 color = texture(textures, vec3(getUVOffset(textureData >> 8 & 7), textureData & 0xFF));
+    side = textureData >> 8 & 7;
+    vec4 color = texture(textures, vec3(getUVOffset(side), textureData & 0xFF));
 
     float distance = length(cameraPosition - totalPosition);
     float angle = abs(dot((totalPosition - cameraPosition) / distance, normal));
 
-    vec3 waterColor = color.rgb + angle * vec3(0.0, 0.4, 0.15);
 
     float absTime = abs(time);
     float skyLight = getSkyLight();
@@ -65,8 +66,12 @@ void main() {
     float timeLight = max(nightBrightness, easeInOutQuart(absTime));
     float nightLight = -0.6 * (1 - absTime) * (1 - absTime);
     float light = max(blockLight + nightBrightness, max(nightBrightness, skyLight) * timeLight + sunIllumination);
-    vec3 fragLight = vec3(light, light, max(blockLight + nightBrightness, max(nightBrightness, skyLight + nightLight) * timeLight + sunIllumination));
-
     float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
-    fragColor = vec4(waterColor * fragLight * (1 - waterFogMultiplier) + vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight, color.a - angle * 0.3);
+    float fogMultiplier = 1 - exp(-distance * 0.000005);
+
+    vec3 fragLight = vec3(light, light, max(blockLight + nightBrightness, max(nightBrightness, skyLight + nightLight) * timeLight + sunIllumination));
+    vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight * (1 - waterFogMultiplier);
+    vec3 waterColor = (color.rgb + angle * vec3(0.0, 0.4, 0.15)) * fragLight * (1 - fogMultiplier);
+    vec3 waterFog = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
+    fragColor = vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
 }

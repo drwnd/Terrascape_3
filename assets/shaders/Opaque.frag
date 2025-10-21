@@ -4,7 +4,8 @@ flat in int textureData;
 flat in vec3 normal;
 in vec3 totalPosition;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out int side;
 
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
@@ -61,16 +62,19 @@ vec3 getColor(vec3 color, vec3 textureCoord) {
     float light = max(blockLight + nightBrightness, max(nightBrightness, skyLight) * timeLight + sunIllumination);
     float distance = length(cameraPosition - totalPosition);
     float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
+    float fogMultiplier = 1 - exp(-distance * 0.000005);
 
     vec3 fragLight = max(vec3(emissivness), vec3(light, light, max(nightBrightness, max(nightBrightness, skyLight + nightLight) * timeLight + sunIllumination)));
-    vec3 baseColor = color * fragLight * (1 - waterFogMultiplier);
+    vec3 baseColor = color * fragLight * (1 - waterFogMultiplier) * (1 - fogMultiplier);
     vec3 waterColor = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
+    vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight;
 
-    return baseColor + waterColor;
+    return baseColor + waterColor + fogColor;
 }
 
 void main() {
-    vec3 textureCoord = vec3(getUVOffset(textureData >> 8 & 7), textureData & 0xFF);
+    side = textureData >> 8 & 7;
+    vec3 textureCoord = vec3(getUVOffset(side), textureData & 0xFF);
     vec4 color = texture(textures, textureCoord);
     if (color.a == 0) discard;
 

@@ -7,6 +7,17 @@ import org.joml.Vector3f;
 
 public final class Transformation {
 
+    public static Matrix4f createViewMatrix(Camera camera) {
+        Vector3f rotation = camera.getRotation();
+
+        Matrix4f matrix = new Matrix4f();
+        matrix.rotate((float) Math.toRadians(rotation.x), 1.0F, 0.0F, 0.0F)
+                .rotate((float) Math.toRadians(rotation.y), 0.0F, 1.0F, 0.0F)
+                .rotate((float) Math.toRadians(rotation.z), 0.0F, 0.0F, 1.0F);
+
+        return matrix;
+    }
+
     public static Matrix4f createProjectionRotationMatrix(Camera camera) {
         Vector3f rotation = camera.getRotation();
 

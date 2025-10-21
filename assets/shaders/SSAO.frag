@@ -2,16 +2,19 @@
 
 uniform sampler2D depthTexture;
 uniform sampler2D noiseTexture;
+uniform isampler2D sideTexture;
 
 uniform mat4 projectionMatrix;
 uniform mat4 projectionInverse;
+uniform mat4 viewMatrix;
 
 uniform ivec2 noiseScale;
 
 in vec2 fragTextureCoordinate;
 
-out float occlusionFactor;
+out float visibilityFactor;
 
+const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const float RADIUS = 4;
 const float MAX_DISTANCE = 2000.0;
 const vec2 HALF_2 = vec2(0.5);
@@ -87,7 +90,7 @@ vec3(-0.6765868, 0.17383541, 0.67600274)
 vec3 calcViewPosition(vec2 coords) {
     float fragmentDepth = texture(depthTexture, coords).r;
 
-    vec4 ndc = vec4(coords.x * 2.0 - 1.0, coords.y * 2.0 - 1.0, fragmentDepth * 2.0 - 1.0, 1.0);
+    vec4 ndc = vec4(coords * 2.0 - 1.0, fragmentDepth * 2.0 - 1.0, 1.0);
 
     vec4 vs_pos = projectionInverse * ndc;
     vs_pos.xyz = vs_pos.xyz / vs_pos.w;
@@ -96,20 +99,20 @@ vec3 calcViewPosition(vec2 coords) {
 }
 
 float computeOcclusion() {
+    int side = texture(sideTexture, fragTextureCoordinate).r;
+    if (side == 6) return 1;
+    vec3 worldNormal = NORMALS[side].xyz;
+    vec3 viewNormal = (viewMatrix * vec4(worldNormal, 0)).xyz;
     vec3 viewPos = calcViewPosition(fragTextureCoordinate);
 
-    vec3 viewNormal = cross(dFdy(viewPos.xyz), dFdx(viewPos.xyz));
-
-    viewNormal = normalize(viewNormal * -1.0);
     vec3 randomVec = texture(noiseTexture, fragTextureCoordinate * noiseScale).xyz;
     vec3 tangent = normalize(randomVec - viewNormal * dot(randomVec, viewNormal));
     vec3 bitangent = cross(viewNormal, tangent);
     mat3 TBN = mat3(tangent, bitangent, viewNormal);
-    float occlusion_factor = 0.0;
+    float occlusionFactor = 0.0;
 
     for (int i = 0; i < SAMPLE_COUNT; i++) {
-        vec3 samplePos = TBN * SAMPLES[i];
-
+        vec3 samplePos = TBN * SAMPLES[i].xyz;
         samplePos = viewPos + samplePos * RADIUS;
 
         vec4 offset = vec4(samplePos, 1.0);
@@ -121,18 +124,18 @@ float computeOcclusion() {
         float rangeCheck = float(abs(viewPos.z - geometryDepth) < RADIUS);
         float distanceScale = max(0.05, 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, abs(geometryDepth))));
 
-        occlusion_factor += float(geometryDepth >= samplePos.z + 0.0001) * rangeCheck * distanceScale;
+        occlusionFactor += float(geometryDepth >= samplePos.z + 0.0001) * rangeCheck * distanceScale;
     }
 
-    float average_occlusion_factor = occlusion_factor * (1.0 / SAMPLE_COUNT);
-    float visibility_factor = 1.0 - average_occlusion_factor;
+    float averageOcclusionFactor = occlusionFactor * (1.0 / SAMPLE_COUNT);
+    float visibilityFactor = 1.0 - averageOcclusionFactor;
 
-    visibility_factor = pow(visibility_factor, 5.0);
+    visibilityFactor = pow(visibilityFactor, 5.0);
 
-    return visibility_factor;
+    return visibilityFactor;
 }
 
 void main() {
-    occlusionFactor = computeOcclusion();
-    occlusionFactor = max(occlusionFactor, 0.5);
+    visibilityFactor = computeOcclusion();
+    visibilityFactor = max(visibilityFactor, 0.5);
 }

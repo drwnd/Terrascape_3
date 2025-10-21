@@ -25,7 +25,6 @@ void main() {
     vec4 color = texture(colorTexture, fragTextureCoordinate);
     if (color.a == 0) discard;
 
-    float
-    occlusion = getAmbientOcclusion();
+    float occlusion = getAmbientOcclusion();
     fragColor = vec4(color.rgb * occlusion, color.a);
 }
