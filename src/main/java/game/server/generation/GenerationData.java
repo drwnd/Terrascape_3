@@ -217,8 +217,7 @@ public final class GenerationData {
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
-        MaterialsData source = tree.structure().materials();
-        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, source, CHUNK_SIZE_BITS, LOD, targetStart, sourceStart, size);
+        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), CHUNK_SIZE_BITS, tree.transform(), LOD, targetStart, sourceStart, size);
     }
 
     public MaterialsData getCompressedMaterials() {

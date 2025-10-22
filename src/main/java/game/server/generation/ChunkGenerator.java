@@ -142,8 +142,15 @@ public final class ChunkGenerator {
             ChunkSaver saver = new ChunkSaver();
 
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY < playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++) {
-                Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-                if (!chunk.isGenerated()) WorldGeneration.generate(chunk, generationData);
+                try {
+                    Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
+                    if (!chunk.isGenerated()) WorldGeneration.generate(chunk, generationData);
+                } catch (Exception exception) {
+                    System.err.println("Generation:");
+                    System.err.println(exception.getClass());
+                    exception.printStackTrace();
+                    System.err.println(chunkX + " " + chunkY + " " + chunkZ);
+                }
             }
         }
     }

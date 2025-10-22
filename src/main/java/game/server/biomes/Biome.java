@@ -4,7 +4,10 @@ import core.assets.AssetManager;
 
 import game.assets.StructureCollectionIdentifier;
 import game.server.generation.GenerationData;
+import game.server.generation.Structure;
 import game.server.generation.Tree;
+import game.server.generation.WorldGeneration;
+import game.utils.Utils;
 
 import static game.utils.Constants.*;
 
@@ -30,7 +33,8 @@ public abstract class Biome {
     }
 
     protected static Tree getRandomTree(int x, int y, int z, StructureCollectionIdentifier trees) {
-        return new Tree(x, y, z, AssetManager.get(trees).getRandom(x, y, z), (byte) 0); // TODO random~ transform
+        byte transform = (byte) (Utils.hash(x >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, (int) WorldGeneration.SEED ^ 0xEB0A8449) & Structure.ALL_TRANSFORMS);
+        return new Tree(x, y, z, AssetManager.get(trees).getRandom(x, y, z), transform);
     }
 
     protected static boolean placeHomogenousSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte material) {

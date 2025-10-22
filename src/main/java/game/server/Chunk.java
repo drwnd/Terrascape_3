@@ -1,5 +1,6 @@
 package game.server;
 
+import game.server.generation.Structure;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
 
@@ -89,12 +90,12 @@ public final class Chunk {
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                         int startX, int startY, int startZ,
                                         int lengthX, int lengthY, int lengthZ,
-                                        int lod, MaterialsData source) {
+                                        int lod, Structure structure, byte transform) {
         this.materials.storeStructureMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                lod, source);
+                lod, structure, transform);
         modified = true;
     }
 

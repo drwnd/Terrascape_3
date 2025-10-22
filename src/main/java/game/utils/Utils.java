@@ -88,26 +88,23 @@ public final class Utils {
 
     public static int hash(int x, int z, int seed) {
         final int mask = 0x5BD1E995;
-        int hash = seed;
         // process first vector element
-        int k = x;
-        k *= mask;
-        k ^= k >> 24;
-        k *= mask;
-        hash *= mask;
-        hash ^= k;
+        x *= mask;
+        x ^= x >> 24;
+        x *= mask;
+        seed *= mask;
+        seed ^= x;
         // process second vector element
-        k = z;
-        k *= mask;
-        k ^= k >> 24;
-        k *= mask;
-        hash *= mask;
-        hash ^= k;
+        z *= mask;
+        z ^= z >> 24;
+        z *= mask;
+        seed *= mask;
+        seed ^= z;
         // some final mixing
-        hash ^= hash >> 13;
-        hash *= mask;
-        hash ^= hash >> 15;
-        return hash;
+        seed ^= seed >> 13;
+        seed *= mask;
+        seed ^= seed >> 15;
+        return seed;
     }
 
     public static Vector3i offsetByNormal(Vector3i value, int side) {
