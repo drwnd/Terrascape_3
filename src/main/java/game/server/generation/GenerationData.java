@@ -569,7 +569,6 @@ public final class GenerationData {
         int compressedY = (y >> LOD & CHUNK_SIZE_MASK) >> 2;
         int compressedZ = (z >> LOD & CHUNK_SIZE_MASK) >> 2;
 
-        // Lookup cached value
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 

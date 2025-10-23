@@ -80,10 +80,11 @@ public final class Renderer extends Renderable {
         shader.setUniform("sunDirection", getSunDirection(time));
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
-        GL46.glDepthMask(true);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_CULL_FACE);
+        GL46.glEnable(GL46.GL_STENCIL_TEST);
         GL46.glDisable(GL46.GL_BLEND);
+        GL46.glDepthMask(true);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
         GL46.glActiveTexture(GL46.GL_TEXTURE1);
@@ -102,8 +103,9 @@ public final class Renderer extends Renderable {
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_BLEND);
+        GL46.glEnable(GL46.GL_STENCIL_TEST);
+        GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glDepthMask(true);
         GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
@@ -118,9 +120,10 @@ public final class Renderer extends Renderable {
 
         GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_BLEND);
+        GL46.glEnable(GL46.GL_STENCIL_TEST);
         GL46.glBlendFunc(GL46.GL_ZERO, GL46.GL_SRC_COLOR);
+        GL46.glDisable(GL46.GL_CULL_FACE);
         GL46.glDepthMask(false);
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
@@ -139,13 +142,14 @@ public final class Renderer extends Renderable {
         setupRenderState();
 
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
-        GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT);
+        GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_STENCIL_BUFFER_BIT);
 
         renderSkybox(camera);
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
 
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
         GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
 
         computeAmbientOcclusion();
 
@@ -156,6 +160,7 @@ public final class Renderer extends Renderable {
         renderWater(cameraPosition, projectionViewMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
 
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
         GL46.glBlitNamedFramebuffer(framebuffer, 0,
                 0, 0, Window.getWidth(), Window.getHeight(),
@@ -202,7 +207,7 @@ public final class Renderer extends Renderable {
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_BORDER);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_BORDER);
 
-        depthTexture = ObjectLoader.createTexture2D(GL46.GL_DEPTH_COMPONENT32F, width, height, GL46.GL_DEPTH_COMPONENT, GL46.GL_FLOAT, GL46.GL_LINEAR);
+        depthTexture = ObjectLoader.createTexture2D(GL46.GL_DEPTH32F_STENCIL8, width, height, GL46.GL_DEPTH_STENCIL, GL46.GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL46.GL_LINEAR);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_BORDER);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_BORDER);
         GL46.glTexParameterfv(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_BORDER_COLOR, new float[]{1, 1, 1, 1});
@@ -227,7 +232,7 @@ public final class Renderer extends Renderable {
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
         GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT0, GL46.GL_TEXTURE_2D, colorTexture, 0);
         GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT1, GL46.GL_TEXTURE_2D, sideTexture, 0);
-        GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_DEPTH_ATTACHMENT, GL46.GL_TEXTURE_2D, depthTexture, 0);
+        GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_DEPTH_STENCIL_ATTACHMENT, GL46.GL_TEXTURE_2D, depthTexture, 0);
         GL46.glDrawBuffers(new int[]{GL46.GL_COLOR_ATTACHMENT0, GL46.GL_COLOR_ATTACHMENT1});
         if (GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER) != GL46.GL_FRAMEBUFFER_COMPLETE)
             throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER)));
@@ -261,6 +266,10 @@ public final class Renderer extends Renderable {
         frameTimes.add(currentTime);
 
         Game.getPlayer().getCamera().updateProjectionMatrix();
+
+        GL46.glStencilFunc(GL46.GL_ALWAYS, 0, 0xFF);
+        GL46.glStencilOp(GL46.GL_KEEP, GL46.GL_KEEP, GL46.GL_REPLACE);
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL46.GL_LINE : GL46.GL_FILL);
         GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
 
@@ -310,6 +319,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("flags", getFlags(playerPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
@@ -377,6 +387,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("flags", getFlags(playerPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
@@ -398,6 +409,7 @@ public final class Renderer extends Renderable {
         setUpGlassRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
