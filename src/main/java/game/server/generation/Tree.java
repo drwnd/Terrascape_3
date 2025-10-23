@@ -3,7 +3,7 @@ package game.server.generation;
 public record Tree(int centerX, int baseY, int centerZ, Structure structure, byte transform) {
 
     public int getMinX() {
-        return centerX - (structure.sizeX() >> 1);
+        return centerX - (sizeX() >> 1);
     }
 
     public int getMinY() {
@@ -11,10 +11,22 @@ public record Tree(int centerX, int baseY, int centerZ, Structure structure, byt
     }
 
     public int getMinZ() {
-        return centerZ - (structure.sizeZ() >> 1);
+        return centerZ - (sizeZ() >> 1);
     }
 
     public int getMaxY() {
         return baseY + structure.sizeY();
+    }
+
+    public int sizeX() {
+        return structure.sizeX(transform);
+    }
+
+    public int sizeY() {
+        return structure.sizeY();
+    }
+
+    public int sizeZ() {
+        return structure.sizeZ(transform);
     }
 }

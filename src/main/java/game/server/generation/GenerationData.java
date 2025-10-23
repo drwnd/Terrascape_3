@@ -199,19 +199,10 @@ public final class GenerationData {
         int startY = chunkStartY + (inChunkY << LOD) - tree.getMinY();
         int startZ = chunkStartZ + (inChunkZ << LOD) - tree.getMinZ();
 
-        int lengthX = Utils.min(tree.structure().sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.structure().sizeX());
-        int lengthY = Utils.min(tree.structure().sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.structure().sizeY());
-        int lengthZ = Utils.min(tree.structure().sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.structure().sizeZ());
-
-        int mask = -(1 << LOD);
-        lengthX &= mask;
-        lengthY &= mask;
-        lengthZ &= mask;
+        int lengthX = Utils.min(tree.sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.sizeX());
+        int lengthY = Utils.min(tree.sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.sizeY());
+        int lengthZ = Utils.min(tree.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.sizeZ());
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
-
-        startX &= mask;
-        startY &= mask;
-        startZ &= mask;
 
         Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);

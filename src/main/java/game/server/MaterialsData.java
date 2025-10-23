@@ -101,11 +101,12 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
-    public static void fillStructureMaterialsInto(byte[] uncompressedMaterials, Structure structure, int targetSizeBits, byte transform, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size) {
+    public static void fillStructureMaterialsInto(byte[] uncompressedMaterials, Structure structure, int targetSizeBits, byte transform, int lod,
+                                                  Vector3i targetStart, Vector3i sourceStart, Vector3i size) {
         MaterialsData source = structure.materials();
-        if ((transform & Structure.MIRROR_X) != 0) sourceStart.x = sourceStart.x + (1 << source.totalSizeBits) - structure.sizeX();
-        if ((transform & Structure.MIRROR_Z) != 0) sourceStart.z = sourceStart.z + (1 << source.totalSizeBits) - structure.sizeZ();
-        if ((transform & Structure.ROTATE_90) != 0) sourceStart.z = sourceStart.z + (1 << source.totalSizeBits) - structure.sizeZ();
+        if ((transform & Structure.MIRROR_X) != 0) sourceStart.x = sourceStart.x + (1 << source.totalSizeBits) - structure.sizeX(transform);
+        if (((transform & Structure.MIRROR_Z) == 0) == ((transform & Structure.ROTATE_90) != 0))
+            sourceStart.z = sourceStart.z + (1 << source.totalSizeBits) - structure.sizeZ(transform);
 
         synchronized (source) {
             if (lod == 0)

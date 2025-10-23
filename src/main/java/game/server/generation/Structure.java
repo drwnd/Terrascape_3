@@ -51,6 +51,14 @@ public final class Structure extends Asset {
         return sizeZ;
     }
 
+    public int sizeX(byte transform) {
+        return (transform & Structure.ROTATE_90) == 0 ? sizeX : sizeZ;
+    }
+
+    public int sizeZ(byte transform) {
+        return (transform & Structure.ROTATE_90) == 0 ? sizeZ : sizeX;
+    }
+
     public MaterialsData materials() {
         return materials;
     }
