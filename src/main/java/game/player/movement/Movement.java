@@ -14,15 +14,23 @@ import static game.utils.Constants.*;
 
 public final class Movement {
 
+    public Movement() {
+        state = new FlyingState();
+        state.movement = this;
+    }
+
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
+        grounded = checkGrounded(position);
+
+        Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
+        state.changeVelocity(velocity, acceleration, position, rotation);
+
         velocity.set(move(position));
         renderVelocity = position.vectorFrom(lastPosition);
 
-        Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0f);
-        state.changeVelocity(velocity, acceleration, position, rotation);
-
-        state = state.next;
+        if (!collides(position, state.next)) state = state.next;
+        state.movement = this;
         return position;
     }
 
@@ -46,6 +54,43 @@ public final class Movement {
         return state;
     }
 
+    public boolean isGrounded() {
+        return grounded;
+    }
+
+    public boolean collides(Position position, MovementState state) {
+        Vector3i hitboxSize = state.getHitboxSize();
+
+        int startX = position.intX + (int) (position.fractionX - (hitboxSize.x + 1) * 0.5F);
+        int startY = position.intY;
+        int startZ = position.intZ + (int) (position.fractionZ - (hitboxSize.z + 1) * 0.5F);
+
+        int width = hitboxSize.x + 1;
+        int height = hitboxSize.y;
+        int depth = hitboxSize.z + 1;
+
+        return collides(startX, startY, startZ, width, height, depth);
+    }
+
+
+    private boolean checkGrounded(Position position) {
+        if (velocity.y != 0) return false;
+        Vector3i hitboxSize = state.getHitboxSize();
+        World world = Game.getWorld();
+
+        int minX = position.intX - (hitboxSize.x >> 1);
+        int minZ = position.intZ - (hitboxSize.z >> 1);
+        int maxX = position.intX + (hitboxSize.x >> 1);
+        int maxZ = position.intZ + (hitboxSize.z >> 1);
+        int y = position.intY - 1;
+
+        for (int x = minX; x <= maxX; x++)
+            for (int z = minZ; z <= maxZ; z++) {
+                byte material = world.getMaterial(x, y, z, 0);
+                if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
+            }
+        return false;
+    }
 
     private Vector3f move(Position position) {
         if (Game.getPlayer().isNoClip()) {
@@ -100,9 +145,9 @@ public final class Movement {
         int startY = getStartY(position, hitboxSize, component);
         int startZ = getStartZ(position, hitboxSize, component);
 
-        int width = component == X_COMPONENT ? 1 : hitboxSize.x;
+        int width = component == X_COMPONENT ? 1 : hitboxSize.x + 1;
         int height = component == Y_COMPONENT ? 1 : hitboxSize.y;
-        int depth = component == Z_COMPONENT ? 1 : hitboxSize.z;
+        int depth = component == Z_COMPONENT ? 1 : hitboxSize.z + 1;
 
         return collides(startX, startY, startZ, width, height, depth);
     }
@@ -141,14 +186,14 @@ public final class Movement {
         Vector3i hitboxSize = state.getHitboxSize();
         Vector3f cornerFraction = position.fractionPosition();
         return cornerFraction.set(
-                Utils.fraction(cornerFraction.x + (velocity.x > 0 ? hitboxSize.x * 0.5f : -hitboxSize.x * 0.5f)),
+                Utils.fraction(cornerFraction.x + (velocity.x > 0 ? (hitboxSize.x + 1) * 0.5F : -hitboxSize.x * 0.5F)),
                 Utils.fraction(cornerFraction.y + (velocity.y > 0 ? hitboxSize.y : 0)),
-                Utils.fraction(cornerFraction.z + (velocity.z > 0 ? hitboxSize.z * 0.5f : -hitboxSize.z * 0.5f))
+                Utils.fraction(cornerFraction.z + (velocity.z > 0 ? (hitboxSize.z + 1) * 0.5F : -hitboxSize.z * 0.5F))
         );
     }
 
     private int getStartX(Position position, Vector3i hitboxSize, int component) {
-        float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5f : -hitboxSize.x * 0.5f;
+        float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F : -hitboxSize.x * 0.5F;
         return position.intX + Utils.floor(position.fractionX + offset);
     }
 
@@ -158,12 +203,13 @@ public final class Movement {
     }
 
     private int getStartZ(Position position, Vector3i hitboxSize, int component) {
-        float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5f : -hitboxSize.z * 0.5f;
+        float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F : -hitboxSize.z * 0.5F;
         return position.intZ + Utils.floor(position.fractionZ + offset);
     }
 
 
-    private MovementState state = new FlyingState();
+    private MovementState state;
+    private boolean grounded;
     private final Vector3f velocity = new Vector3f();
     private Vector3f renderVelocity = new Vector3f();
 }

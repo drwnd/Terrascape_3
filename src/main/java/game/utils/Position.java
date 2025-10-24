@@ -14,9 +14,9 @@ public final class Position {
         this.intX = 0;
         this.intY = 0;
         this.intZ = 0;
-        this.fractionX = 0.0f;
-        this.fractionY = 0.0f;
-        this.fractionZ = 0.0f;
+        this.fractionX = 0.0F;
+        this.fractionY = 0.0F;
+        this.fractionZ = 0.0F;
     }
 
     public Position(int intX, int intY, int intZ, float fractionX, float fractionY, float fractionZ) {
@@ -125,7 +125,7 @@ public final class Position {
     }
 
     public String fractionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(fractionX, fractionY, fractionZ);
+        return "[X:%s, Y:%s, Z:%s]".formatted(Utils.round(fractionX, 3), Utils.round(fractionY, 3), Utils.round(fractionZ, 3));
     }
 
     public String chunkCoordinateToString() {

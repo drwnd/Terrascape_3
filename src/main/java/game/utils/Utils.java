@@ -145,10 +145,10 @@ public final class Utils {
         return new Vector3f(x, 0.0F, z);
     }
 
-    public static void normalizeToMaxComponent(Vector3f velocity) {
-        float max = Math.abs(velocity.get(velocity.maxComponent()));
-        if (max < 1E-4F) return;
-        velocity.normalize(max);
+    public static double round(float value, int decimals) {
+        double multiplier = Math.pow(10, decimals);
+        int multipliedValue = (int) (value * multiplier);
+        return multipliedValue / multiplier;
     }
 
     private Utils() {

@@ -39,8 +39,7 @@ public enum KeySetting {
     RELOAD_SETTINGS(GLFW.GLFW_KEY_F9),
     RELOAD_LANGUAGE(GLFW.GLFW_KEY_F8),
     RELOAD_FONT(GLFW.GLFW_KEY_F7),
-    RELOAD_MATERIALS(GLFW.GLFW_KEY_F6),
-    TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE(GLFW.GLFW_KEY_K);
+    RELOAD_MATERIALS(GLFW.GLFW_KEY_F6);
 
     public static void setIfPresent(String name, String value) {
         try {

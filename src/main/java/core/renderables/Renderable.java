@@ -118,6 +118,12 @@ public class Renderable {
         return children;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends Renderable> T firstChildOf(Class<T> type) {
+        for (Renderable child : children) if (type.isInstance(child)) return (T) child;
+        return null;
+    }
+
     public Renderable getParent() {
         return parent;
     }

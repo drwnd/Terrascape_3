@@ -145,7 +145,6 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.RELOAD_LANGUAGE, new Message("Reload Language"));
         section.addKeySelector(KeySetting.RELOAD_FONT, new Message("Reload Font"));
         section.addKeySelector(KeySetting.RELOAD_MATERIALS, new Message("Reload Materials"));
-        section.addKeySelector(KeySetting.TOGGLE_FLYING_FOLLOWING_MOVEMENT_STATE, new Message("Toggle Flying/Following Movement State"));
 
         section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
         section.addToggle(ToggleSetting.V_SYNC, new Message("Use V-Sync"));

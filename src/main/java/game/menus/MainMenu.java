@@ -99,9 +99,9 @@ public final class MainMenu extends UiBackgroundElement {
         deleteWorldButton.setAction(getDeleteWorldAction(saveFile));
         optimizeWorldButton.setAction(getOptimizeWorldAction(saveFile));
 
-        ((TextElement) playWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.PLAY_WORLD).formatted(saveFile.getName()));
-        ((TextElement) deleteWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.DELETE_WORLD).formatted(saveFile.getName()));
-        ((TextElement) optimizeWorldButton.getChildren().getFirst()).setText(Language.getUiMessage(UiMessage.OPTIMIZE_WORLD).formatted(saveFile.getName()));
+        playWorldButton.firstChildOf(TextElement.class).setText(Language.getUiMessage(UiMessage.PLAY_WORLD).formatted(saveFile.getName()));
+        deleteWorldButton.firstChildOf(TextElement.class).setText(Language.getUiMessage(UiMessage.DELETE_WORLD).formatted(saveFile.getName()));
+        optimizeWorldButton.firstChildOf(TextElement.class).setText(Language.getUiMessage(UiMessage.OPTIMIZE_WORLD).formatted(saveFile.getName()));
 
         playWorldButton.setVisible(true);
         deleteWorldButton.setVisible(true);

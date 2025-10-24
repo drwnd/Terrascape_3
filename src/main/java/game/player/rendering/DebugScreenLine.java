@@ -16,6 +16,7 @@ import game.server.Game;
 import game.server.generation.WorldGeneration;
 import game.utils.Position;
 
+import game.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -74,7 +75,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.VELOCITY_VISIBILITY, OptionSetting.VELOCITY_COLOR, () -> {
             Vector3f velocity = Game.getPlayer().getMovement().getVelocity();
-            return "Velocity [X:%s, Y:%s, Z:%s]".formatted(velocity.x, velocity.y, velocity.z);
+            return "Velocity %sm/s : [X:%s, Y:%s, Z:%s]".formatted(Utils.round(velocity.length() * 20 / 16, 3), Utils.round(velocity.x, 3), Utils.round(velocity.y, 3), Utils.round(velocity.z, 3));
         }, "Player Velocity"));
 
         lines.add(new DebugScreenLine(OptionSetting.CHUNK_POSITION_VISIBILITY, OptionSetting.CHUNK_POSITION_COLOR, () -> {
