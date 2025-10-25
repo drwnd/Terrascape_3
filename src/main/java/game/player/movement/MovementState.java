@@ -34,7 +34,9 @@ public abstract class MovementState {
 
     abstract void handleInput(int key, int action);
 
-    public abstract Vector3i getHitboxSize();
+    abstract Vector3i getHitboxSize();
+
+    abstract int getMaxAutoStepHeight();
 
     public abstract float getCameraElevation();
 
@@ -54,9 +56,9 @@ public abstract class MovementState {
 
     static void toWorldDirection(Vector3f relativeVelocity, Vector3f direction) {
         relativeVelocity.set(
-          relativeVelocity.x * direction.x + relativeVelocity.z * direction.z,
-          relativeVelocity.y,
-          relativeVelocity.x * direction.z - relativeVelocity.z * direction.x
+                relativeVelocity.x * direction.x + relativeVelocity.z * direction.z,
+                relativeVelocity.y,
+                relativeVelocity.x * direction.z - relativeVelocity.z * direction.x
         );
     }
 

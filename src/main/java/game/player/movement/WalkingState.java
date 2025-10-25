@@ -58,7 +58,12 @@ public final class WalkingState extends MovementState {
         return 26;
     }
 
-    private long lastJumpTime = System.nanoTime();
+    @Override
+    public int getMaxAutoStepHeight() {
+        return 5;
+    }
+
+    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 
     private static final float JUMP_STRENGTH = 14.25F;
     private static final float WALKING_SPEED = 2.5F;

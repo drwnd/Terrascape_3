@@ -61,9 +61,9 @@ public final class Movement {
     public boolean collides(Position position, MovementState state) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + (int) (position.fractionX - (hitboxSize.x + 1) * 0.5F);
+        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x) * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + (int) (position.fractionZ - (hitboxSize.z + 1) * 0.5F);
+        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z) * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
@@ -80,8 +80,8 @@ public final class Movement {
 
         int minX = position.intX - (hitboxSize.x >> 1);
         int minZ = position.intZ - (hitboxSize.z >> 1);
-        int maxX = position.intX + (hitboxSize.x >> 1);
-        int maxZ = position.intZ + (hitboxSize.z >> 1);
+        int maxX = position.intX + (hitboxSize.x + 1 >> 1);
+        int maxZ = position.intZ + (hitboxSize.z + 1 >> 1);
         int y = position.intY - 1;
 
         for (int x = minX; x <= maxX; x++)
@@ -125,17 +125,61 @@ public final class Movement {
             position.addComponent(component, directionComponent);
             toMoveDistance.setComponent(component, toMove - directionComponent);
         }
-        if (collides(position, component)) {
-            nextVelocity.setComponent(component, 0);
-            lengths.setComponent(component, Double.POSITIVE_INFINITY);
-            toMoveDistance.setComponent(component, 0);
-            position.addComponent(component, -moved);
-            computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
-        } else {
-            double lengthComponent = lengths.get(component);
-            lengths.setComponent(component, lengthComponent + units.get(component));
-        }
+        if (collides(position, component)) resolveCollision(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
+        else advanceLength(units, lengths, component);
         if (toMoveDistance.get(component) == 0) lengths.setComponent(component, Double.POSITIVE_INFINITY);
+    }
+
+    private static void advanceLength(Vector3d units, Vector3d lengths, int component) {
+        double lengthComponent = lengths.get(component);
+        lengths.setComponent(component, lengthComponent + units.get(component));
+    }
+
+    private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
+        float requiredStepHeight = getRequiredStepHeight(position, component);
+        if (canAutoStep(position, requiredStepHeight, toMoveDistance)) {
+            position.addComponent(Y_COMPONENT, requiredStepHeight);
+            advanceLength(units, lengths, component);
+            toMoveDistance.y = 0.0F;
+            computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
+            return;
+        }
+
+        nextVelocity.setComponent(component, 0);
+        lengths.setComponent(component, Double.POSITIVE_INFINITY);
+        toMoveDistance.setComponent(component, 0);
+        position.addComponent(component, -moved);
+        computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
+    }
+
+    private float getRequiredStepHeight(Position position, int component) {
+        if (component == Y_COMPONENT) return Float.POSITIVE_INFINITY;
+        Vector3i hitboxSize = state.getHitboxSize();
+        World world = Game.getWorld();
+
+        int startX = getStartX(position, hitboxSize, component);
+        int startY = getStartY(position, hitboxSize, component);
+        int startZ = getStartZ(position, hitboxSize, component);
+
+        int width = component == X_COMPONENT ? 1 : hitboxSize.x + 1;
+        int height = hitboxSize.y;
+        int depth = component == Z_COMPONENT ? 1 : hitboxSize.z + 1;
+
+        for (int y = startY + height - 1; y >= startY; y--)
+            for (int x = startX; x < startX + width; x++)
+                for (int z = startZ; z < startZ + depth; z++) {
+                    byte material = world.getMaterial(x, y, z, 0);
+                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return (y - position.intY + 1) - position.fractionY;
+                }
+        return 0.0F;
+    }
+
+    private boolean canAutoStep(Position position, float requiredStepHeight, Vector3f toMoveDistance) {
+        if (requiredStepHeight > state.getMaxAutoStepHeight() || toMoveDistance.y > 0 || requiredStepHeight == 0.0F) return false;
+        Position steppedPosition = new Position(position);
+        steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
+        return !collides(steppedPosition, state);
+//        return true;
     }
 
     private boolean collides(Position position, int component) {
@@ -180,6 +224,10 @@ public final class Movement {
         lengths.x = units.x * (this.velocity.x < 0 ? cornerFraction.x : 1 - cornerFraction.x);
         lengths.y = units.y * (this.velocity.y < 0 ? cornerFraction.y : 1 - cornerFraction.y);
         lengths.z = units.z * (this.velocity.z < 0 ? cornerFraction.z : 1 - cornerFraction.z);
+
+        if (Double.isNaN(lengths.x)) lengths.x = Double.POSITIVE_INFINITY;
+        if (Double.isNaN(lengths.y)) lengths.y = Double.POSITIVE_INFINITY;
+        if (Double.isNaN(lengths.z)) lengths.z = Double.POSITIVE_INFINITY;
     }
 
     private Vector3f getCornerFractionPosition(Position position) {
@@ -193,7 +241,7 @@ public final class Movement {
     }
 
     private int getStartX(Position position, Vector3i hitboxSize, int component) {
-        float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F : -hitboxSize.x * 0.5F;
+        float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F + 0.5F : -hitboxSize.x * 0.5F;
         return position.intX + Utils.floor(position.fractionX + offset);
     }
 
@@ -203,7 +251,7 @@ public final class Movement {
     }
 
     private int getStartZ(Position position, Vector3i hitboxSize, int component) {
-        float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F : -hitboxSize.z * 0.5F;
+        float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
         return position.intZ + Utils.floor(position.fractionZ + offset);
     }
 

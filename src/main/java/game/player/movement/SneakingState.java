@@ -54,7 +54,12 @@ public final class SneakingState extends MovementState {
         return 22;
     }
 
-    private long lastJumpTime = System.nanoTime();
+    @Override
+    public int getMaxAutoStepHeight() {
+        return 5;
+    }
+
+    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 
     private static final float JUMP_STRENGTH = 11.125F;
     private static final float SNEAKING_SPEED = 1.25F;

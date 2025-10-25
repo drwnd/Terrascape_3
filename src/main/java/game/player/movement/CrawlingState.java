@@ -53,7 +53,12 @@ public final class CrawlingState extends MovementState {
         return 5;
     }
 
-    private long lastJumpTime = System.nanoTime();
+    @Override
+    public int getMaxAutoStepHeight() {
+        return 3;
+    }
+
+    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 
     private static final float JUMP_STRENGTH = 10.0F;
     private static final float CRAWLING_SPEED = 0.75F;

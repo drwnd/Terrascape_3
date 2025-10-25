@@ -55,7 +55,12 @@ public final class FlyingState extends MovementState {
         return 26;
     }
 
-    private long lastJumpTime = System.nanoTime();
+    @Override
+    public int getMaxAutoStepHeight() {
+        return 0;
+    }
+
+    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 
     private static final float VERTICAL_FLY_SPEED = 0.5F;
     private static final float HORIZONTAL_FLY_SPEED = 1.0F;
