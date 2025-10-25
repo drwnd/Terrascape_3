@@ -100,8 +100,9 @@ public final class MeshGenerator {
 
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
             copyMaterialsNorthSouth(chunk, materialZ);
-            addNorthSouthLayer(NORTH, materialZ, lower, upper);
-            addNorthSouthLayer(SOUTH, materialZ, upper, lower);
+            fillToMeshFacesMaps();
+            addNorthSouthLayer(NORTH, materialZ, lower, toMeshFacesMap1);
+            addNorthSouthLayer(SOUTH, materialZ, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -124,8 +125,9 @@ public final class MeshGenerator {
 
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
             copyMaterialsTopBottom(chunk, materialY);
-            addTopBottomLayer(TOP, materialY, lower, upper);
-            addTopBottomLayer(BOTTOM, materialY, upper, lower);
+            fillToMeshFacesMaps();
+            addTopBottomLayer(TOP, materialY, lower, toMeshFacesMap1);
+            addTopBottomLayer(BOTTOM, materialY, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -148,8 +150,9 @@ public final class MeshGenerator {
 
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
             copyMaterialsWestEast(chunk, materialX);
-            addWestEastLayer(WEST, materialX, lower, upper);
-            addWestEastLayer(EAST, materialX, upper, lower);
+            fillToMeshFacesMaps();
+            addWestEastLayer(WEST, materialX, lower, toMeshFacesMap1);
+            addWestEastLayer(EAST, materialX, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -168,8 +171,9 @@ public final class MeshGenerator {
 
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
             copyMaterialsNorthSouth(structure, structureX, structureY, structureZ, materialZ + 1, upper);
-            addNorthSouthLayer(NORTH, materialZ, lower, upper);
-            addNorthSouthLayer(SOUTH, materialZ, upper, lower);
+            fillToMeshFacesMaps();
+            addNorthSouthLayer(NORTH, materialZ, lower, toMeshFacesMap1);
+            addNorthSouthLayer(SOUTH, materialZ, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -193,8 +197,9 @@ public final class MeshGenerator {
 
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
             copyMaterialsTopBottom(structure, structureX, structureY, structureZ, materialY + 1, upper);
-            addTopBottomLayer(TOP, materialY, lower, upper);
-            addTopBottomLayer(BOTTOM, materialY, upper, lower);
+            fillToMeshFacesMaps();
+            addTopBottomLayer(TOP, materialY, lower, toMeshFacesMap1);
+            addTopBottomLayer(BOTTOM, materialY, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -220,8 +225,9 @@ public final class MeshGenerator {
 
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
             copyMaterialsWestEast(structure, structureX, structureY, structureZ, materialX + 1, upper);
-            addWestEastLayer(WEST, materialX, lower, upper);
-            addWestEastLayer(EAST, materialX, upper, lower);
+            fillToMeshFacesMaps();
+            addWestEastLayer(WEST, materialX, lower, toMeshFacesMap1);
+            addWestEastLayer(EAST, materialX, upper, toMeshFacesMap2);
 
             byte[] temp = lower;
             lower = upper;
@@ -240,93 +246,70 @@ public final class MeshGenerator {
     }
 
 
-    private void addNorthSouthLayer(int side, int materialZ, byte[] toMesh, byte[] occluding) {
-        fillToMeshFacesMap(toMesh, occluding);
-
-        // Generate faces
+    private void addNorthSouthLayer(int side, int materialZ, byte[] toMesh, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
                  materialY < CHUNK_SIZE;
                  materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
 
                 byte material = toMesh[materialX << CHUNK_SIZE_BITS | materialY];
-                int faceEndY = growFace1stDirection(toMesh, materialY + 1, materialX, material);
+                int faceEndY = growFace1stDirection(toMeshFacesMap, toMesh, materialY + 1, materialX, material);
                 long mask = getMask(faceEndY - materialY + 1, materialY);
-                int faceEndX = growFace2ndDirection(toMesh, materialX + 1, mask, materialY, faceEndY, material);
+                int faceEndX = growFace2ndDirection(toMeshFacesMap, toMesh, materialX + 1, mask, materialY, faceEndY, material);
 
-                removeFromBitMap(mask, materialX, faceEndX);
+                removeFromBitMap(toMeshFacesMap, mask, materialX, faceEndX);
                 addFace(side, materialX, materialY, materialZ, material, faceEndY - materialY, faceEndX - materialX);
             }
     }
 
-    private void addTopBottomLayer(int side, int materialY, byte[] toMesh, byte[] occluding) {
-        fillToMeshFacesMap(toMesh, occluding);
-
-        // Generate faces
+    private void addTopBottomLayer(int side, int materialY, byte[] toMesh, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
                  materialZ < CHUNK_SIZE;
                  materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
 
                 byte material = toMesh[materialX << CHUNK_SIZE_BITS | materialZ];
-                int faceEndZ = growFace1stDirection(toMesh, materialZ + 1, materialX, material);
+                int faceEndZ = growFace1stDirection(toMeshFacesMap, toMesh, materialZ + 1, materialX, material);
                 long mask = getMask(faceEndZ - materialZ + 1, materialZ);
-                int faceEndX = growFace2ndDirection(toMesh, materialX + 1, mask, materialZ, faceEndZ, material);
+                int faceEndX = growFace2ndDirection(toMeshFacesMap, toMesh, materialX + 1, mask, materialZ, faceEndZ, material);
 
-                removeFromBitMap(mask, materialX, faceEndX);
+                removeFromBitMap(toMeshFacesMap, mask, materialX, faceEndX);
                 addFace(side, materialX, materialY, materialZ, material, faceEndX - materialX, faceEndZ - materialZ);
             }
     }
 
-    private void addWestEastLayer(int side, int materialX, byte[] toMesh, byte[] occluding) {
-        fillToMeshFacesMap(toMesh, occluding);
-
-        // Generate faces
+    private void addWestEastLayer(int side, int materialX, byte[] toMesh, long[] toMeshFacesMap) {
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ]);
                  materialY < CHUNK_SIZE;
                  materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ])) {
 
                 byte material = toMesh[materialZ << CHUNK_SIZE_BITS | materialY];
-                int faceEndY = growFace1stDirection(toMesh, materialY + 1, materialZ, material);
+                int faceEndY = growFace1stDirection(toMeshFacesMap, toMesh, materialY + 1, materialZ, material);
                 long mask = getMask(faceEndY - materialY + 1, materialY);
-                int faceEndZ = growFace2ndDirection(toMesh, materialZ + 1, mask, materialY, faceEndY, material);
+                int faceEndZ = growFace2ndDirection(toMeshFacesMap, toMesh, materialZ + 1, mask, materialY, faceEndY, material);
 
-                removeFromBitMap(mask, materialZ, faceEndZ);
+                removeFromBitMap(toMeshFacesMap, mask, materialZ, faceEndZ);
                 addFace(side, materialX, materialY, materialZ, material, faceEndY - materialY, faceEndZ - materialZ);
             }
     }
 
 
-    private void fillToMeshFacesMap(byte[] toMesh, byte[] occluding) {
+    private void fillToMeshFacesMaps() {
         for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE; index++) {
-            byte toTestMaterial = toMesh[index];
-            if (toTestMaterial == AIR) continue;
-            byte occludingMaterial = occluding[index];
-            if (occludes(toTestMaterial, occludingMaterial)) continue;
-
-            toMeshFacesMap[index >> 6] |= 1L << index;
+            byte lower = this.lower[index];
+            byte upper = this.upper[index];
+            if (lower != AIR && (upper == AIR || isVisible(lower, upper))) toMeshFacesMap1[index >> 6] |= 1L << index;
+            if (upper != AIR && (lower == AIR || isVisible(upper, lower))) toMeshFacesMap2[index >> 6] |= 1L << index;
         }
     }
 
-    private int growFace1stDirection(byte[] toMesh, int growStart, int fixedStart, byte material) {
-        for (; growStart < CHUNK_SIZE; growStart++) {
-            int index = fixedStart << CHUNK_SIZE_BITS | growStart;
-            if ((toMeshFacesMap[fixedStart] & 1L << growStart) == 0 || toMesh[index] != material) return growStart - 1;
-        }
-        return CHUNK_SIZE - 1;
-    }
+    private boolean isVisible(byte toTestMaterial, byte occludingMaterial) {
+        if ((materialProperties[occludingMaterial & 0xFF] & TRANSPARENT) == 0) return false;
 
-    private int growFace2ndDirection(byte[] toMesh, int growStart, long mask, int fixedStart, int fixedEnd, byte material) {
-        for (; growStart < CHUNK_SIZE && (toMeshFacesMap[growStart] & mask) == mask; growStart++)
-            for (int index = fixedStart; index <= fixedEnd; index++)
-                if (toMesh[growStart << CHUNK_SIZE_BITS | index] != material) return growStart - 1;
-        return growStart - 1;
-    }
-
-    private void removeFromBitMap(long mask, int start, int end) {
-        mask = ~mask;
-        for (int index = start; index <= end; index++) toMeshFacesMap[index] &= mask;
+        if ((materialProperties[toTestMaterial & 0xFF] & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY)
+            return toTestMaterial != occludingMaterial;
+        return true;
     }
 
     private void addFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
@@ -339,8 +322,28 @@ public final class MeshGenerator {
     }
 
 
+    private static int growFace1stDirection(long[] toMeshFacesMap, byte[] toMesh, int growStart, int fixedStart, byte material) {
+        for (; growStart < CHUNK_SIZE; growStart++) {
+            int index = fixedStart << CHUNK_SIZE_BITS | growStart;
+            if ((toMeshFacesMap[fixedStart] & 1L << growStart) == 0 || toMesh[index] != material) return growStart - 1;
+        }
+        return CHUNK_SIZE - 1;
+    }
+
     private static long getMask(int length, int offset) {
         return length == CHUNK_SIZE ? -1L : (1L << length) - 1 << offset;
+    }
+
+    private static int growFace2ndDirection(long[] toMeshFacesMap, byte[] toMesh, int growStart, long mask, int fixedStart, int fixedEnd, byte material) {
+        for (; growStart < CHUNK_SIZE && (toMeshFacesMap[growStart] & mask) == mask; growStart++)
+            for (int index = fixedStart; index <= fixedEnd; index++)
+                if (toMesh[growStart << CHUNK_SIZE_BITS | index] != material) return growStart - 1;
+        return growStart - 1;
+    }
+
+    private static void removeFromBitMap(long[] toMeshFacesMap, long mask, int start, int end) {
+        mask = ~mask;
+        for (int index = start; index <= end; index++) toMeshFacesMap[index] &= mask;
     }
 
     private static void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
@@ -348,19 +351,12 @@ public final class MeshGenerator {
         vertices.add(side << 8 | material & 0xFF);
     }
 
-    private boolean occludes(byte toTestMaterial, byte occludingMaterial) {
-        if (occludingMaterial == AIR) return false;
-        if ((materialProperties[occludingMaterial & 0xFF] & TRANSPARENT) == 0) return true;
-
-        if ((materialProperties[toTestMaterial & 0xFF] & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY)
-            return toTestMaterial == occludingMaterial;
-        return false;
-    }
-
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
 
+
     private final byte[] materialProperties = new byte[AMOUNT_OF_MATERIALS];
-    private final long[] toMeshFacesMap = new long[CHUNK_SIZE];
+    private final long[] toMeshFacesMap1 = new long[CHUNK_SIZE];
+    private final long[] toMeshFacesMap2 = new long[CHUNK_SIZE];
     private byte[] upper = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private byte[] lower = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
