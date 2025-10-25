@@ -45,8 +45,18 @@ public final class SneakingState extends MovementState {
     }
 
     @Override
-    public Vector3i getHitboxSize() {
+    Vector3i getHitboxSize() {
         return new Vector3i(7, 24, 7);
+    }
+
+    @Override
+    int getMaxAutoStepHeight() {
+        return 5;
+    }
+
+    @Override
+    boolean preventsFallingFromEdge() {
+        return true;
     }
 
     @Override
@@ -54,10 +64,6 @@ public final class SneakingState extends MovementState {
         return 22;
     }
 
-    @Override
-    public int getMaxAutoStepHeight() {
-        return 5;
-    }
 
     private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 

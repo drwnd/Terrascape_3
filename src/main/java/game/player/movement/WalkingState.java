@@ -49,8 +49,18 @@ public final class WalkingState extends MovementState {
     }
 
     @Override
-    public Vector3i getHitboxSize() {
+    Vector3i getHitboxSize() {
         return new Vector3i(7, 28, 7);
+    }
+
+    @Override
+    int getMaxAutoStepHeight() {
+        return 5;
+    }
+
+    @Override
+    boolean preventsFallingFromEdge() {
+        return false;
     }
 
     @Override
@@ -58,10 +68,6 @@ public final class WalkingState extends MovementState {
         return 26;
     }
 
-    @Override
-    public int getMaxAutoStepHeight() {
-        return 5;
-    }
 
     private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 

@@ -11,6 +11,7 @@ import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
 
 public final class FlyingState extends MovementState {
+
     @Override
     protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPositon) {
 
@@ -46,8 +47,18 @@ public final class FlyingState extends MovementState {
     }
 
     @Override
-    public Vector3i getHitboxSize() {
+    Vector3i getHitboxSize() {
         return new Vector3i(7, 28, 7);
+    }
+
+    @Override
+    int getMaxAutoStepHeight() {
+        return 0;
+    }
+
+    @Override
+    boolean preventsFallingFromEdge() {
+        return false;
     }
 
     @Override
@@ -55,10 +66,6 @@ public final class FlyingState extends MovementState {
         return 26;
     }
 
-    @Override
-    public int getMaxAutoStepHeight() {
-        return 0;
-    }
 
     private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 

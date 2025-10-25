@@ -44,8 +44,18 @@ public final class CrawlingState extends MovementState {
     }
 
     @Override
-    public Vector3i getHitboxSize() {
+    Vector3i getHitboxSize() {
         return new Vector3i(7, 7, 7);
+    }
+
+    @Override
+    int getMaxAutoStepHeight() {
+        return 3;
+    }
+
+    @Override
+    boolean preventsFallingFromEdge() {
+        return true;
     }
 
     @Override
@@ -53,10 +63,6 @@ public final class CrawlingState extends MovementState {
         return 5;
     }
 
-    @Override
-    public int getMaxAutoStepHeight() {
-        return 3;
-    }
 
     private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 

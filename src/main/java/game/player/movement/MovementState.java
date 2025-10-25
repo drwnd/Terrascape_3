@@ -38,7 +38,10 @@ public abstract class MovementState {
 
     abstract int getMaxAutoStepHeight();
 
+    abstract boolean preventsFallingFromEdge();
+
     public abstract float getCameraElevation();
+
 
     static void normalizeToMaxComponent(Vector3f velocity) {
         float max = Math.abs(velocity.get(velocity.maxComponent()));

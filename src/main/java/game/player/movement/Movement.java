@@ -61,9 +61,9 @@ public final class Movement {
     public boolean collides(Position position, MovementState state) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x) * 0.5F);
+        int startX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z) * 0.5F);
+        int startZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
@@ -124,6 +124,13 @@ public final class Movement {
             moved = directionComponent;
             position.addComponent(component, directionComponent);
             toMoveDistance.setComponent(component, toMove - directionComponent);
+        }
+        if (shouldStopAtEdge(position, component)) {
+            nextVelocity.setComponent(component, 0);
+            lengths.setComponent(component, Double.POSITIVE_INFINITY);
+            toMoveDistance.setComponent(component, 0);
+            position.addComponent(component, -moved);
+            computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
         }
         if (collides(position, component)) resolveCollision(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
         else advanceLength(units, lengths, component);
@@ -192,6 +199,29 @@ public final class Movement {
         int width = component == X_COMPONENT ? 1 : hitboxSize.x + 1;
         int height = component == Y_COMPONENT ? 1 : hitboxSize.y;
         int depth = component == Z_COMPONENT ? 1 : hitboxSize.z + 1;
+
+        return collides(startX, startY, startZ, width, height, depth);
+    }
+
+    private boolean shouldStopAtEdge(Position position, int component) {
+        if (!grounded || velocity.y > 0.0F || !state.preventsFallingFromEdge()) return false;
+
+        Position loweredPosition = new Position(position);
+        loweredPosition.addComponent(Y_COMPONENT, -state.getMaxAutoStepHeight());
+        return !collides(loweredPosition, state, component);
+    }
+
+    private boolean collides(Position position, MovementState state, int component) {
+        Vector3i hitboxSize = state.getHitboxSize();
+
+        int offset = velocity.get(component) > 0.0F ? -1 : 1;
+        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x + offset) * 0.5F);
+        int startY = position.intY;
+        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z + offset) * 0.5F);
+
+        int width = hitboxSize.x + 1;
+        int height = hitboxSize.y;
+        int depth = hitboxSize.z + 1;
 
         return collides(startX, startY, startZ, width, height, depth);
     }
