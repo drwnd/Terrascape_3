@@ -21,7 +21,7 @@ public final class Movement {
 
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
-        grounded = checkGrounded(position);
+        grounded = velocity.y == 0.0F && checkGrounded(position);
 
         Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
         state.changeVelocity(velocity, acceleration, position, rotation);
@@ -74,18 +74,17 @@ public final class Movement {
 
 
     private boolean checkGrounded(Position position) {
-        if (velocity.y != 0) return false;
         Vector3i hitboxSize = state.getHitboxSize();
         World world = Game.getWorld();
 
-        int minX = position.intX - (hitboxSize.x >> 1);
-        int minZ = position.intZ - (hitboxSize.z >> 1);
-        int maxX = position.intX + (hitboxSize.x + 1 >> 1);
-        int maxZ = position.intZ + (hitboxSize.z + 1 >> 1);
+        int minX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        int minZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        int width = hitboxSize.x + 1;
+        int depth = hitboxSize.z + 1;
         int y = position.intY - 1;
 
-        for (int x = minX; x <= maxX; x++)
-            for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x < minX + width; x++)
+            for (int z = minZ; z < minZ + depth; z++) {
                 byte material = world.getMaterial(x, y, z, 0);
                 if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
             }
@@ -180,7 +179,7 @@ public final class Movement {
     }
 
     private boolean canAutoStep(Position position, float requiredStepHeight) {
-        if (requiredStepHeight == 0.0F || !grounded || velocity.y > 0.0F || requiredStepHeight > state.getMaxAutoStepHeight()) return false;
+        if (requiredStepHeight == 0.0F || !checkGrounded(position) || requiredStepHeight > state.getMaxAutoStepHeight()) return false;
         Position steppedPosition = new Position(position);
         steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
         return !collides(steppedPosition, state);
