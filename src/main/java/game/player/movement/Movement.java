@@ -210,10 +210,11 @@ public final class Movement {
     private boolean collides(Position position, MovementState state, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int offset = velocity.get(component) > 0.0F ? -1 : 1;
-        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x + offset) * 0.5F);
+        int xOffset = component == X_COMPONENT ? (velocity.x > 0.0F ? -1 : 1) : 0;
+        int zOffset = component == Z_COMPONENT ? (velocity.z > 0.0F ? -1 : 1) : 0;
+        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z + offset) * 0.5F);
+        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
