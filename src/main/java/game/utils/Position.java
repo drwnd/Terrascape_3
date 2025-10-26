@@ -46,16 +46,18 @@ public final class Position {
         this.fractionZ = position.fractionZ;
     }
 
-    public void set(Position position) {
+    public Position set(Position position) {
         this.intX = position.intX;
         this.intY = position.intY;
         this.intZ = position.intZ;
         this.fractionX = position.fractionX;
         this.fractionY = position.fractionY;
         this.fractionZ = position.fractionZ;
+
+        return this;
     }
 
-    public void add(float x, float y, float z) {
+    public Position add(float x, float y, float z) {
         fractionX += x;
         fractionY += y;
         fractionZ += z;
@@ -67,9 +69,11 @@ public final class Position {
         fractionX = Utils.fraction(fractionX);
         fractionY = Utils.fraction(fractionY);
         fractionZ = Utils.fraction(fractionZ);
+
+        return this;
     }
 
-    public void addComponent(int component, float value) {
+    public Position addComponent(int component, float value) {
 
         switch (component) {
             case X_COMPONENT -> {
@@ -88,6 +92,8 @@ public final class Position {
                 fractionZ = Utils.fraction(fractionZ);
             }
         }
+
+        return this;
     }
 
     public Vector3f vectorFrom(Position position) {

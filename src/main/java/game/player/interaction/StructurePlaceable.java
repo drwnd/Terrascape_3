@@ -4,7 +4,9 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
+import game.server.material.Properties;
 import game.utils.Utils;
+
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -51,6 +53,19 @@ public final class StructurePlaceable implements Placeable {
         position.z -= structure.sizeZ() >> 1;
     }
 
+    @Override
+    public boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max) {
+        min.sub(position);
+        max.sub(position);
+
+        for (int structureX = min.x; structureX < max.x; structureX++)
+            for (int structureY = min.y; structureY < max.y; structureY++)
+                for (int structureZ = min.z; structureZ < max.z; structureZ++) {
+                    byte material = structure.getMaterial(structureX, structureY, structureZ);
+                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
+                }
+        return false;
+    }
 
     private void placeInChunk(Chunk chunk, Vector3i position) {
         int chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;

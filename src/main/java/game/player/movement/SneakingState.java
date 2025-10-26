@@ -45,7 +45,7 @@ public final class SneakingState extends MovementState {
     }
 
     @Override
-    Vector3i getHitboxSize() {
+    public Vector3i getHitboxSize() {
         return new Vector3i(7, 24, 7);
     }
 

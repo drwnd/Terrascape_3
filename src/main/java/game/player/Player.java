@@ -15,7 +15,10 @@ import game.server.material.Material;
 import game.utils.Position;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
+
+import static game.utils.Constants.*;
 
 public final class Player {
 
@@ -41,14 +44,14 @@ public final class Player {
         meshCollector.deleteOldMeshes();
 
         float fraction = Game.getServer().getCurrentGameTickFraction();
-        fraction = Math.clamp(fraction, 0.0f, 1.0f);
+        fraction = Math.clamp(fraction, 0.0F, 1.0F);
 
         synchronized (this) {
             camera.rotate(input.getCursorMovement());
-            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1);
-            Position toRenderPosition = new Position(position);
-            toRenderPosition.add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
-            toRenderPosition.add(0, movement.getState().getCameraElevation(), 0);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
+            Position toRenderPosition = new Position(position)
+                    .add(movementThisTick.x, movementThisTick.y, movementThisTick.z)
+                    .addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
             camera.setPosition(toRenderPosition);
         }
     }
@@ -85,7 +88,7 @@ public final class Player {
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {
         if (camera.isZoomed()) {
-            final float zoomFactorChange = 0.9f;
+            final float zoomFactorChange = 0.9F;
             camera.changeZoom(yScroll > 0 ? zoomFactorChange : 1 / zoomFactorChange);
             return;
         }
@@ -96,6 +99,16 @@ public final class Player {
         }
     }
 
+
+    public Vector3i getMinCoordinate() {
+        Vector3i hitboxSize = movement.getState().getHitboxSize();
+        return new Position(this.position).add(-hitboxSize.x * 0.5F, 0.0F, -hitboxSize.z * 0.5F).intPosition();
+    }
+
+    public Vector3i getMaxCoordinate() {
+        Vector3i hitboxSize = movement.getState().getHitboxSize();
+        return new Position(this.position).add(hitboxSize.x * 0.5F, hitboxSize.y, hitboxSize.z * 0.5F).intPosition();
+    }
 
     public Placeable getHeldPlaceable() {
         return hotbar.getSelectedMaterial();

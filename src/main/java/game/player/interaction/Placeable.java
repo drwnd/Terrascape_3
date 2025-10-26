@@ -15,6 +15,9 @@ public interface Placeable {
 
     Structure getStructure();
 
-    default void offsetPosition(Vector3i position) {}
+    boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max);
+
+    default void offsetPosition(Vector3i position) {
+    }
 
 }

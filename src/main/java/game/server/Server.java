@@ -1,13 +1,16 @@
 package game.server;
 
 import core.settings.FloatSetting;
+
+import game.player.Player;
 import game.player.interaction.Placeable;
-import org.joml.Vector3i;
 import game.player.rendering.MeshCollector;
 import game.server.generation.ChunkGenerator;
 import game.server.saving.ChunkSaver;
 import game.utils.Position;
 import game.utils.Utils;
+
+import org.joml.Vector3i;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -36,8 +39,12 @@ public final class Server {
     }
 
     public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
-        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         placeable.offsetPosition(position);
+
+        Player player = Game.getPlayer();
+        if (!player.isNoClip() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
+
+        MeshCollector meshCollector = player.getMeshCollector();
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             placeable.place(position, lod);
             for (Chunk chunk : placeable.getAffectedChunks()) {

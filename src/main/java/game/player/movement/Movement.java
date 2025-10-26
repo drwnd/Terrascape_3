@@ -125,13 +125,7 @@ public final class Movement {
             position.addComponent(component, directionComponent);
             toMoveDistance.setComponent(component, toMove - directionComponent);
         }
-        if (shouldStopAtEdge(position, component)) {
-            nextVelocity.setComponent(component, 0);
-            lengths.setComponent(component, Double.POSITIVE_INFINITY);
-            toMoveDistance.setComponent(component, 0);
-            position.addComponent(component, -moved);
-            computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
-        }
+        if (shouldStopAtEdge(position, component)) stopAndUndoMove(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
         if (collides(position, component)) resolveCollision(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
         else advanceLength(units, lengths, component);
         if (toMoveDistance.get(component) == 0) lengths.setComponent(component, Double.POSITIVE_INFINITY);
@@ -144,7 +138,7 @@ public final class Movement {
 
     private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         float requiredStepHeight = getRequiredStepHeight(position, component);
-        if (canAutoStep(position, requiredStepHeight, toMoveDistance)) {
+        if (canAutoStep(position, requiredStepHeight)) {
             position.addComponent(Y_COMPONENT, requiredStepHeight);
             advanceLength(units, lengths, component);
             toMoveDistance.y = 0.0F;
@@ -152,6 +146,10 @@ public final class Movement {
             return;
         }
 
+        stopAndUndoMove(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
+    }
+
+    private void stopAndUndoMove(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         nextVelocity.setComponent(component, 0);
         lengths.setComponent(component, Double.POSITIVE_INFINITY);
         toMoveDistance.setComponent(component, 0);
@@ -181,12 +179,11 @@ public final class Movement {
         return 0.0F;
     }
 
-    private boolean canAutoStep(Position position, float requiredStepHeight, Vector3f toMoveDistance) {
-        if (requiredStepHeight > state.getMaxAutoStepHeight() || toMoveDistance.y > 0 || requiredStepHeight == 0.0F) return false;
+    private boolean canAutoStep(Position position, float requiredStepHeight) {
+        if (requiredStepHeight == 0.0F || !grounded || velocity.y > 0.0F || requiredStepHeight > state.getMaxAutoStepHeight()) return false;
         Position steppedPosition = new Position(position);
         steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
         return !collides(steppedPosition, state);
-//        return true;
     }
 
     private boolean collides(Position position, int component) {

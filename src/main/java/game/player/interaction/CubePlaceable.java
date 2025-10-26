@@ -4,6 +4,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
+import game.server.material.Properties;
 
 import org.joml.Vector3i;
 
@@ -64,6 +65,27 @@ public final class CubePlaceable implements Placeable {
     @Override
     public Structure getStructure() {
         return new Structure(material);
+    }
+
+    @Override
+    public boolean intersectsAABB(Vector3i position,  Vector3i min, Vector3i max) {
+        if (Properties.hasProperties(material, NO_COLLISION)) return false;
+
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
+        breakPlaceSize = 1 << breakPlaceSize;
+        int mask = -breakPlaceSize;
+
+        int cubeMinX = position.x & mask;
+        int cubeMinY = position.y & mask;
+        int cubeMinZ = position.z & mask;
+
+        int cubeMaxX = cubeMinX + breakPlaceSize;
+        int cubeMaxY = cubeMinY + breakPlaceSize;
+        int cubeMaxZ = cubeMinZ + breakPlaceSize;
+
+        return min.x < cubeMaxX && cubeMinX <= max.x
+                && min.y < cubeMaxY && cubeMinY <= max.y
+                && min.z < cubeMaxZ && cubeMinZ <= max.z;
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();

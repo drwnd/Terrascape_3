@@ -34,11 +34,11 @@ public abstract class MovementState {
 
     abstract void handleInput(int key, int action);
 
-    abstract Vector3i getHitboxSize();
-
     abstract int getMaxAutoStepHeight();
 
     abstract boolean preventsFallingFromEdge();
+
+    public abstract Vector3i getHitboxSize();
 
     public abstract float getCameraElevation();
 
