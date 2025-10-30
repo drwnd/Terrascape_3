@@ -55,6 +55,9 @@ public final class CubePlaceable implements Placeable {
         if (inChunkX == 0) affectedChunks.add(world.getChunk(chunkX - 1, chunkY, chunkZ, lod));
         if (inChunkY == 0) affectedChunks.add(world.getChunk(chunkX, chunkY - 1, chunkZ, lod));
         if (inChunkZ == 0) affectedChunks.add(world.getChunk(chunkX, chunkY, chunkZ - 1, lod));
+        if (inChunkX + (1 << lodSize) == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunkX + 1, chunkY, chunkZ, lod));
+        if (inChunkY + (1 << lodSize) == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunkX, chunkY + 1, chunkZ, lod));
+        if (inChunkZ + (1 << lodSize) == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunkX, chunkY, chunkZ + 1, lod));
     }
 
     @Override
@@ -68,7 +71,7 @@ public final class CubePlaceable implements Placeable {
     }
 
     @Override
-    public boolean intersectsAABB(Vector3i position,  Vector3i min, Vector3i max) {
+    public boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max) {
         if (Properties.hasProperties(material, NO_COLLISION)) return false;
 
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();

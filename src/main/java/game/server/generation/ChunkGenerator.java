@@ -1,12 +1,13 @@
 package game.server.generation;
 
-import org.joml.Vector3i;
 import game.player.Player;
 import game.player.rendering.MeshCollector;
-import game.player.rendering.MeshGenerator;
+import game.player.generation.ChunkMeshGenerator;
 import game.server.*;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
+
+import org.joml.Vector3i;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -160,7 +161,7 @@ public final class ChunkGenerator {
         @Override
         public void run() {
 
-            MeshGenerator meshGenerator = new MeshGenerator();
+            ChunkMeshGenerator meshGenerator = new ChunkMeshGenerator();
             World world = Game.getWorld();
             MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
 

@@ -7,6 +7,7 @@ import core.rendering_api.shaders.Shader;
 import core.settings.FloatSetting;
 
 import game.assets.Shaders;
+import game.player.generation.StructureMeshGenerator;
 import game.server.generation.Structure;
 import game.utils.Transformation;
 
@@ -26,7 +27,7 @@ public final class StructureDisplay extends Renderable {
         sizeZ = structure.sizeZ();
         rotation = new Vector3f(35.26439F, -45.0F, 0.0F); // Direction : x == y == z
 
-        ArrayList<Mesh> meshes = new MeshGenerator().generateMesh(structure);
+        ArrayList<Mesh> meshes = new StructureMeshGenerator().generateMesh(structure);
 
         opaqueModels = new OpaqueModel[meshes.size()];
         transparentModels = new TransparentModel[meshes.size()];

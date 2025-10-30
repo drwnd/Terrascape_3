@@ -6,7 +6,6 @@ import core.utils.FileManager;
 
 import game.assets.TextureArrays;
 
-import java.io.*;
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
@@ -31,11 +30,7 @@ public final class Material {
         return MATERIAL_PROPERTIES[material & 0xFF];
     }
 
-    public static void copyMaterialProperties(byte[] destination) {
-        System.arraycopy(MATERIAL_PROPERTIES, 0, destination, 0, AMOUNT_OF_MATERIALS);
-    }
-
-    public static boolean isSemiTransparentMaterial(byte material) {
+    public static boolean isGlass(byte material) {
         return (material & 0xFF) >= (RED_GLASS & 0xFF) && (material & 0xFF) <= (BLACK_GLASS & 0xFF);
     }
 

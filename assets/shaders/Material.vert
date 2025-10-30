@@ -20,17 +20,23 @@ uniform ivec3 iCameraPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const vec2[6] FACE_POSITIONS = vec2[6](vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1), vec2(1, 0), vec2(0, 1));
+const int NORTH = 0;
+const int TOP = 1;
+const int WEST = 2;
+const int SOUTH = 3;
+const int BOTTOM = 4;
+const int EAST = 5;
 
 vec3 getFacePositions(int side, int currentVertexId, int faceSize1, int faceSize2) {
     vec3 currentVertexOffset = vec3(FACE_POSITIONS[currentVertexId].xy, 0);
 
     switch (side) {
-        case 0: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1) + vec3(0, 0, 1);
-        case 1: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2) + vec3(0, 1, 0);
-        case 2: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2) + vec3(1, 0, 0);
-        case 3: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 1) + vec3(0, 0, 1);
-        case 4: return currentVertexOffset.yzx * vec3(faceSize1, 1, faceSize2) + vec3(0, 1, 0);
-        case 5: return currentVertexOffset.zxy * vec3(1, faceSize1, faceSize2) + vec3(1, 0, 0);
+        case NORTH: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1) + vec3(0, 0, 1);
+        case TOP: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2) + vec3(0, 1, 0);
+        case WEST: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2) + vec3(1, 0, 0);
+        case SOUTH: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 1);
+        case BOTTOM: return currentVertexOffset.yzx * vec3(faceSize1, 1, faceSize2);
+        case EAST: return currentVertexOffset.zxy * vec3(1, faceSize1, faceSize2);
     }
 
     return vec3(0, 0, 0);
