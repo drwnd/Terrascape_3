@@ -24,6 +24,7 @@ public final class GenerationData {
     public int height, specialHeight;
     public byte steepness;
     public int chunkX, chunkY, chunkZ;
+    public int totalX, totalY, totalZ;
 
     public final int LOD;
 
@@ -58,6 +59,9 @@ public final class GenerationData {
     public void set(int inChunkX, int inChunkZ) {
         int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
 
+        totalX = (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
+        totalZ = (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
+
         feature = featureMap[index];
         steepness = steepnessMap[index];
 
@@ -68,8 +72,12 @@ public final class GenerationData {
         height = resultingHeightMap[getMapIndex(inChunkX + 1, inChunkZ + 1)];
     }
 
-    public void setBiome(int inChunkX, int inChunkZ, Biome biome) {
-        specialHeight = biome.getSpecialHeight(getTotalX(inChunkX), getTotalZ(inChunkZ), this);
+    public void setBiome(Biome biome) {
+        specialHeight = biome.getSpecialHeight(totalX, totalZ, this);
+    }
+
+    public void computeTotalY(int inChunkY) {
+        totalY = (chunkY << CHUNK_SIZE_BITS | inChunkY) << LOD;
     }
 
 
@@ -161,18 +169,6 @@ public final class GenerationData {
 
     public int getFloorMaterialDepthMod() {
         return (int) (feature * 4.0F) - (steepness << 2);
-    }
-
-    public int getTotalX(int inChunkX) {
-        return (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
-    }
-
-    public int getTotalY(int inChunkY) {
-        return (chunkY << CHUNK_SIZE_BITS | inChunkY) << LOD;
-    }
-
-    public int getTotalZ(int inChunkZ) {
-        return (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
     }
 
     public static int getMapIndex(int mapX, int mapZ) {

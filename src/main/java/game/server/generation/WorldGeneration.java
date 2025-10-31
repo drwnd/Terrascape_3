@@ -29,7 +29,7 @@ public final class WorldGeneration {
 
                 generationData.set(inChunkX, inChunkZ);
                 Biome biome = getBiome(generationData);
-                generationData.setBiome(inChunkX, inChunkZ, biome);
+                generationData.setBiome(biome);
 
                 generateBiome(biome, inChunkX, inChunkZ, generationData);
             }
@@ -111,25 +111,20 @@ public final class WorldGeneration {
 
 
     private static void generateBiome(Biome biome, int inChunkX, int inChunkZ, GenerationData data) {
+        int height = data.height;
+
         for (int inChunkY = 0; inChunkY < CHUNK_SIZE; inChunkY++) {
-            int totalY = data.getTotalY(inChunkY);
+            data.computeTotalY(inChunkY);
+            int totalY = data.totalY;
 
             // Attempting to place biome specific materials and features
-            boolean placedMaterial = biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data);
-            if (placedMaterial) continue;
-
+            if (totalY > height - MAX_SURFACE_MATERIALS_DEPTH && biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
             // Placing stone beneath surface materials
-            if (totalY <= data.height) {
-                int totalX = data.getTotalX(inChunkX);
-                int totalZ = data.getTotalZ(inChunkZ);
-                data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingStoneType(totalX, totalY, totalZ));
-            } else {
+            if (totalY <= height) data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingStoneType(data.totalX, totalY, data.totalZ));
                 // Reached surface, everything above is just air
-                if (totalY >= WATER_LEVEL) break;
-
+            else if (totalY >= WATER_LEVEL) break;
                 // Filling Oceans with water
-                data.store(inChunkX, inChunkY, inChunkZ, WATER);
-            }
+            else data.store(inChunkX, inChunkY, inChunkZ, WATER);
         }
     }
 
@@ -198,6 +193,7 @@ public final class WorldGeneration {
     }
 
 
+    private static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
     private static final int OCEAN_FLOOR_LEVEL = WATER_LEVEL - 480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = WATER_LEVEL - 1120;
     private static final int FLATLAND_LEVEL = WATER_LEVEL + 130;

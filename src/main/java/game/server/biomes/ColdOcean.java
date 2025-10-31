@@ -10,9 +10,9 @@ import static game.utils.Constants.SAND;
 public final class ColdOcean extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalX = data.getTotalX(inChunkX);
-        int totalY = data.getTotalY(inChunkY);
-        int totalZ = data.getTotalZ(inChunkZ);
+        int totalX = data.totalX;
+        int totalY = data.totalY;
+        int totalZ = data.totalZ;
 
         int iceHeight = Math.min(data.specialHeight, WATER_LEVEL - data.height);
         if (totalY > WATER_LEVEL - iceHeight && totalY <= WATER_LEVEL + (iceHeight >> 1)) {

@@ -29,7 +29,7 @@ public final class Movement {
         velocity.set(move(position));
         renderVelocity = position.vectorFrom(lastPosition);
 
-        if (!collides(position, state.next)) state = state.next;
+        if (Game.getPlayer().isNoClip() || !collides(position, state.next)) state = state.next;
         state.movement = this;
         return position;
     }

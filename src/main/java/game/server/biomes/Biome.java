@@ -38,7 +38,7 @@ public abstract class Biome {
     }
 
     protected static boolean placeHomogenousSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte material) {
-        int totalY = data.getTotalY(inChunkY);
+        int totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 
@@ -50,7 +50,7 @@ public abstract class Biome {
     }
 
     protected static boolean placeLayeredSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte topMaterial) {
-        int totalY = data.getTotalY(inChunkY);
+        int totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 

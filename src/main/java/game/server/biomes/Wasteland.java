@@ -7,9 +7,9 @@ import game.server.generation.Tree;
 public final class Wasteland extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalX = data.getTotalX(inChunkX);
-        int totalY = data.getTotalY(inChunkY);
-        int totalZ = data.getTotalZ(inChunkZ);
+        int totalX = data.totalX;
+        int totalY = data.totalY;
+        int totalZ = data.totalZ;
 
         if (data.isAboveSurface(totalY)) return false;
 

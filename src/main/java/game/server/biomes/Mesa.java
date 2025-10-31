@@ -8,7 +8,7 @@ import static game.utils.Constants.RED_SANDSTONE;
 public final class Mesa extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalY = data.getTotalY(inChunkY);
+        int totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 

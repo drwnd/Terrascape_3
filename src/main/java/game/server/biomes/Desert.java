@@ -8,7 +8,7 @@ import static game.utils.Constants.SANDSTONE;
 public final class Desert extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalY = data.getTotalY(inChunkY);
+        int totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 
