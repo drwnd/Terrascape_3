@@ -131,8 +131,18 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialsTopBottom(int materialY) {
-        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE; index++)
-            materialsLayer[index] = materials[index << CHUNK_SIZE_BITS | materialY];
+        long[] toMeshFaces1 = toMeshFacesMaps[TOP][materialY];
+        long[] toMeshFaces2 = toMeshFacesMaps[BOTTOM][materialY];
+
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
+            long requiredMaterials = toMeshFaces1[materialX] | toMeshFaces2[materialX];
+            for (int materialZ = Long.numberOfTrailingZeros(requiredMaterials);
+                 materialZ < CHUNK_SIZE;
+                 materialZ = Long.numberOfTrailingZeros(requiredMaterials)) {
+                    materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY];
+                    requiredMaterials &= -2L << materialZ;
+            }
+        }
     }
 
     private void addWestEastFaces() {
