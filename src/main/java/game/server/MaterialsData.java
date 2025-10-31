@@ -2,7 +2,7 @@ package game.server;
 
 import core.utils.ByteArrayList;
 
-import game.player.generation.MeshGenerator;
+import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
 import game.utils.Utils;
 
@@ -660,7 +660,7 @@ public final class MaterialsData {
 
     private static void generateToMeshFacesHomogenousNorthSouthLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         for (int x = inChunkX; x < inChunkX + length; x++) {
-            long map = 0L;
+            long map = toMeshFacesMap[x];
             for (int y = inChunkY; y < inChunkY + length; y++) {
                 byte occludingMaterial = getMaterial(uncompressedMaterials, adjacentChunkLayers, x, y, inChunkZ);
                 if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << y;
@@ -671,7 +671,7 @@ public final class MaterialsData {
 
     private static void generateToMeshFacesHomogenousTopBottomLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         for (int x = inChunkX; x < inChunkX + length; x++) {
-            long map = 0L;
+            long map = toMeshFacesMap[x];
             for (int z = inChunkZ; z < inChunkZ + length; z++) {
                 byte occludingMaterial = getMaterial(uncompressedMaterials, adjacentChunkLayers, x, inChunkY, z);
                 if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << z;
@@ -682,7 +682,7 @@ public final class MaterialsData {
 
     private static void generateToMeshFacesHomogenousWestEastLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         for (int z = inChunkZ; z < inChunkZ + length; z++) {
-            long map = 0L;
+            long map = toMeshFacesMap[z];
             for (int y = inChunkY; y < inChunkY + length; y++) {
                 byte occludingMaterial = getMaterial(uncompressedMaterials, adjacentChunkLayers, inChunkX, y, z);
                 if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << y;

@@ -127,10 +127,6 @@ public class Shader extends Asset {
 
         if (vertexShaderID != 0) GL46.glDetachShader(programID, vertexShaderID);
         if (fragmentShaderID != 0) GL46.glDetachShader(programID, fragmentShaderID);
-
-        GL46.glValidateProgram(programID);
-        if (GL46.glGetProgrami(programID, GL46.GL_VALIDATE_STATUS) == 0)
-            throw new Exception("Unable to validate shader code: " + GL46.glGetProgramInfoLog(programID, 1024));
     }
 
     private static int createShader(String shaderCode, int shaderType, int programID) throws Exception {

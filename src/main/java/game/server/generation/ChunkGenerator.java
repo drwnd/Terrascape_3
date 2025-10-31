@@ -2,7 +2,7 @@ package game.server.generation;
 
 import game.player.Player;
 import game.player.rendering.MeshCollector;
-import game.player.generation.ChunkMeshGenerator;
+import game.player.rendering.MeshGenerator;
 import game.server.*;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
@@ -161,7 +161,7 @@ public final class ChunkGenerator {
         @Override
         public void run() {
 
-            ChunkMeshGenerator meshGenerator = new ChunkMeshGenerator();
+            MeshGenerator meshGenerator = new MeshGenerator();
             World world = Game.getWorld();
             MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
 
