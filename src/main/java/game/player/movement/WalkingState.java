@@ -2,8 +2,10 @@ package game.player.movement;
 
 import core.rendering_api.Input;
 import core.settings.KeySetting;
+
 import game.utils.Position;
 import game.utils.Utils;
+
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.lwjgl.glfw.GLFW;
@@ -11,19 +13,20 @@ import org.lwjgl.glfw.GLFW;
 public final class WalkingState extends MovementState {
 
     @Override
-    Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPositon) {
+    Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (Input.isKeyPressed(KeySetting.SNEAK)) next = new SneakingState();
         if (Input.isKeyPressed(KeySetting.CRAWL)) next = new CrawlingState();
+        if (Input.isKeyPressed(KeySetting.SPRINT) && Input.isKeyPressed(KeySetting.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
-        float speed = movement.isGrounded() ? WALKING_SPEED : IN_AIR_SPEED;
+        float speed = getMovementSpeed(lastPosition, WALKING_SPEED, IN_AIR_SPEED, SWIM_STRENGTH);
 
         applyXZMovement(velocityChange, speed, SPRINT_SPEED_MODIFIER);
 
-        if (Input.isKeyPressed(KeySetting.JUMP) && movement.isGrounded()) {
-            velocityChange.y = JUMP_STRENGTH;
-            if (Input.isKeyPressed(KeySetting.MOVE_FORWARD) && Input.isKeyPressed(KeySetting.SPRINT))
+        if (Input.isKeyPressed(KeySetting.JUMP)) {
+            handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
+            if (Input.isKeyPressed(KeySetting.MOVE_FORWARD) && Input.isKeyPressed(KeySetting.SPRINT) && movement.isGrounded())
                 velocityChange.x += JUMP_SPEED_GAIN;
         }
 
@@ -31,13 +34,6 @@ public final class WalkingState extends MovementState {
         toWorldDirection(velocityChange, playerDirection);
 
         return velocityChange;
-    }
-
-    @Override
-    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        float drag = movement.isGrounded() ? WALKING_DRAG : IN_AIR_DRAG;
-        velocity.add(acceleration).mul(drag);
-        applyGravity(velocity);
     }
 
     @Override
@@ -69,9 +65,8 @@ public final class WalkingState extends MovementState {
     }
 
 
-    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
-
     private static final float JUMP_STRENGTH = 14.25F;
+    private static final float SWIM_STRENGTH = 0.0025F;
     private static final float WALKING_SPEED = 2.5F;
     private static final float IN_AIR_SPEED = 0.2F;
     private static final float SPRINT_SPEED_MODIFIER = 1.5F;

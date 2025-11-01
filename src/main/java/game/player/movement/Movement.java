@@ -4,8 +4,8 @@ import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
 import game.utils.Position;
-
 import game.utils.Utils;
+
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -56,20 +56,6 @@ public final class Movement {
 
     public boolean isGrounded() {
         return grounded;
-    }
-
-    public boolean collides(Position position, MovementState state) {
-        Vector3i hitboxSize = state.getHitboxSize();
-
-        int startX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
-
-        int width = hitboxSize.x + 1;
-        int height = hitboxSize.y;
-        int depth = hitboxSize.z + 1;
-
-        return collides(startX, startY, startZ, width, height, depth);
     }
 
 
@@ -130,11 +116,6 @@ public final class Movement {
         if (toMoveDistance.get(component) == 0) lengths.setComponent(component, Double.POSITIVE_INFINITY);
     }
 
-    private static void advanceLength(Vector3d units, Vector3d lengths, int component) {
-        double lengthComponent = lengths.get(component);
-        lengths.setComponent(component, lengthComponent + units.get(component));
-    }
-
     private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         float requiredStepHeight = getRequiredStepHeight(position, component);
         if (canAutoStep(position, requiredStepHeight)) {
@@ -179,7 +160,12 @@ public final class Movement {
     }
 
     private boolean canAutoStep(Position position, float requiredStepHeight) {
-        if (requiredStepHeight == 0.0F || !checkGrounded(position) || requiredStepHeight > state.getMaxAutoStepHeight()) return false;
+        if (requiredStepHeight == 0.0F) return false;
+
+        boolean swimming = MovementState.intersectsLiquid(position, state);
+        float maxStepHeight = state.getMaxAutoStepHeight() * (swimming ? 2.5F : 1.0F);
+        if ((!checkGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
+
         Position steppedPosition = new Position(position);
         steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
         return !collides(steppedPosition, state);
@@ -221,18 +207,6 @@ public final class Movement {
         int depth = hitboxSize.z + 1;
 
         return collides(startX, startY, startZ, width, height, depth);
-    }
-
-    private static boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
-        World world = Game.getWorld();
-
-        for (int x = startX; x < startX + width; x++)
-            for (int y = startY; y < startY + height; y++)
-                for (int z = startZ; z < startZ + depth; z++) {
-                    byte material = world.getMaterial(x, y, z, 0);
-                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
-                }
-        return false;
     }
 
     private void computeRayCastConstants(Position position, Vector3f velocity, Vector3i direction, Vector3d units, Vector3d lengths) {
@@ -280,6 +254,38 @@ public final class Movement {
     private int getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
         return position.intZ + Utils.floor(position.fractionZ + offset);
+    }
+
+
+    private static boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
+        World world = Game.getWorld();
+
+        for (int x = startX; x < startX + width; x++)
+            for (int y = startY; y < startY + height; y++)
+                for (int z = startZ; z < startZ + depth; z++) {
+                    byte material = world.getMaterial(x, y, z, 0);
+                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
+                }
+        return false;
+    }
+
+    private static boolean collides(Position position, MovementState state) {
+        Vector3i hitboxSize = state.getHitboxSize();
+
+        int startX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        int startY = position.intY;
+        int startZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+
+        int width = hitboxSize.x + 1;
+        int height = hitboxSize.y;
+        int depth = hitboxSize.z + 1;
+
+        return collides(startX, startY, startZ, width, height, depth);
+    }
+
+    private static void advanceLength(Vector3d units, Vector3d lengths, int component) {
+        double lengthComponent = lengths.get(component);
+        lengths.setComponent(component, lengthComponent + units.get(component));
     }
 
 

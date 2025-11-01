@@ -13,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 public final class FlyingState extends MovementState {
 
     @Override
-    protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPositon) {
+    protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
@@ -34,7 +34,7 @@ public final class FlyingState extends MovementState {
 
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        velocity.add(acceleration).mul(IN_AIR_DRAG);
+        velocity.add(acceleration).mul(AIR_DRAG);
         if (movement.isGrounded()) next = new WalkingState();
     }
 
@@ -66,8 +66,6 @@ public final class FlyingState extends MovementState {
         return 26;
     }
 
-
-    private long lastJumpTime = System.nanoTime() - JUMP_FLYING_INTERVALL;
 
     private static final float VERTICAL_FLY_SPEED = 0.5F;
     private static final float HORIZONTAL_FLY_SPEED = 1.0F;
