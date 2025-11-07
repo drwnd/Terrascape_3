@@ -1,9 +1,9 @@
 package game.player.rendering;
 
-import org.joml.Vector3i;
-import org.lwjgl.opengl.GL46;
 import game.server.Game;
 import game.utils.Utils;
+
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -29,11 +29,11 @@ public final class MeshCollector {
 
     public void deleteOldMeshes() {
         synchronized (toDeleteOpaqueModels) {
-            for (OpaqueModel opaqueModel : toDeleteOpaqueModels) GL46.glDeleteBuffers(opaqueModel.verticesBuffer());
+            for (OpaqueModel opaqueModel : toDeleteOpaqueModels) opaqueModel.delete();
             toDeleteOpaqueModels.clear();
         }
         synchronized (toDeleteTransparentModels) {
-            for (TransparentModel transparentModel : toDeleteTransparentModels) GL46.glDeleteBuffers(transparentModel.verticesBuffer());
+            for (TransparentModel transparentModel : toDeleteTransparentModels) transparentModel.delete();
             toDeleteTransparentModels.clear();
         }
     }
@@ -51,10 +51,6 @@ public final class MeshCollector {
     public void setMeshed(boolean meshed, int chunkIndex, int lod) {
         if (meshed) isMeshed[lod][chunkIndex >> 6] |= 1L << chunkIndex;
         else isMeshed[lod][chunkIndex >> 6] &= ~(1L << chunkIndex);
-    }
-
-    public void setMeshed(boolean meshed, int chunkX, int chunkY, int chunkZ, int lod) {
-        setMeshed(meshed, Utils.getChunkIndex(chunkX, chunkY, chunkZ), lod);
     }
 
     public OpaqueModel[] getOpaqueModels(int lod) {
@@ -101,12 +97,12 @@ public final class MeshCollector {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
 
-        if (opaqueModel != null) opaqueModel.delete();
-        if (transparentModel != null) transparentModel.delete();
-
         setOpaqueModel(null, chunkIndex, lod);
         setTransparentModel(null, chunkIndex, lod);
         setMeshed(false, chunkIndex, lod);
+
+        if (opaqueModel != null) opaqueModel.delete();
+        if (transparentModel != null) transparentModel.delete();
     }
 
     private void setOpaqueModel(OpaqueModel opaqueModel, int index, int lod) {
@@ -128,6 +124,7 @@ public final class MeshCollector {
         setTransparentModel(transparentModel, chunkIndex, mesh.lod());
         setMeshed(true, chunkIndex, mesh.lod());
     }
+
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
 

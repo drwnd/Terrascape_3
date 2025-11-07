@@ -6,6 +6,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.WorldGeneration;
+import game.utils.Status;
 import game.utils.Utils;
 
 import java.io.File;
@@ -105,7 +106,7 @@ public final class ChunkSaver extends Saver<Chunk> {
     private Chunk load(int chunkX, int chunkY, int chunkZ, int lod, long id) {
         Chunk chunk = load(getSaveFileLocation(id, lod));
         if (chunk == null) chunk = new Chunk(chunkX, chunkY, chunkZ, lod);
-        else chunk.setGenerated();
+        else chunk.setGenerationStatus(Status.DONE);
 
         Game.getWorld().storeChunk(chunk);
         return chunk;

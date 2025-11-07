@@ -1,7 +1,7 @@
 package game.server;
 
 import game.server.generation.Structure;
-import game.server.saving.ChunkSaver;
+import game.utils.Status;
 import game.utils.Utils;
 
 import static game.utils.Constants.*;
@@ -38,48 +38,14 @@ public final class Chunk {
         return materials.getMaterial(inChunkX, inChunkY, inChunkZ);
     }
 
-//    public byte getMaterial(int inChunkX, int inChunkY, int inChunkZ) {
-//        if (inChunkX < 0) {
-//            Chunk neighbor = Game.getWorld().getChunk(X - 1, Y, Z, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(CHUNK_SIZE + inChunkX, inChunkY, inChunkZ);
-//        } else if (inChunkX >= CHUNK_SIZE) {
-//            Chunk neighbor = Game.getWorld().getChunk(X + 1, Y, Z, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(inChunkX - CHUNK_SIZE, inChunkY, inChunkZ);
-//        }
-//        if (inChunkY < 0) {
-//            Chunk neighbor = Game.getWorld().getChunk(X, Y - 1, Z, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(inChunkX, CHUNK_SIZE + inChunkY, inChunkZ);
-//        } else if (inChunkY >= CHUNK_SIZE) {
-//            Chunk neighbor = Game.getWorld().getChunk(X, Y + 1, Z, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(inChunkX, inChunkY - CHUNK_SIZE, inChunkZ);
-//        }
-//        if (inChunkZ < 0) {
-//            Chunk neighbor = Game.getWorld().getChunk(X, Y, Z - 1, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(inChunkX, inChunkY, CHUNK_SIZE + inChunkZ);
-//        } else if (inChunkZ >= CHUNK_SIZE) {
-//            Chunk neighbor = Game.getWorld().getChunk(X, Y, Z + 1, LOD);
-//            if (neighbor == null) return OUT_OF_WORLD;
-//            return neighbor.getSaveMaterial(inChunkX, inChunkY, inChunkZ - CHUNK_SIZE);
-//        }
-//
-//        return getSaveMaterial(inChunkX, inChunkY, inChunkZ);
-//    }
-
-    public void generateSurroundingChunks() {
+    public boolean areSurroundingChunksGenerated() {
         World world = Game.getWorld();
-        ChunkSaver saver = new ChunkSaver();
-
-        world.loadAndGenerate(X, Y, Z - 1, LOD, saver);
-        world.loadAndGenerate(X, Y, Z + 1, LOD, saver);
-        world.loadAndGenerate(X, Y - 1, Z, LOD, saver);
-        world.loadAndGenerate(X, Y + 1, Z, LOD, saver);
-        world.loadAndGenerate(X - 1, Y, Z, LOD, saver);
-        world.loadAndGenerate(X + 1, Y, Z, LOD, saver);
+        return world.getGenerationStatus(X, Y, Z + 1, LOD) == Status.DONE
+                && world.getGenerationStatus(X, Y, Z - 1, LOD) == Status.DONE
+                && world.getGenerationStatus(X, Y + 1, Z, LOD) == Status.DONE
+                && world.getGenerationStatus(X, Y - 1, Z, LOD) == Status.DONE
+                && world.getGenerationStatus(X + 1, Y, Z, LOD) == Status.DONE
+                && world.getGenerationStatus(X - 1, Y, Z, LOD) == Status.DONE;
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int size) {
@@ -127,19 +93,19 @@ public final class Chunk {
         return modified;
     }
 
-    public boolean isGenerated() {
-        return generated;
-    }
-
     public boolean isAir() {
         return materials.isHomogenous(AIR);
     }
 
-    public void setGenerated() {
-        this.generated = true;
+    public Status getGenerationStatus() {
+        return generationStatus;
+    }
+
+    public void setGenerationStatus(Status status) {
+        generationStatus = status;
     }
 
     private MaterialsData materials;
-
-    private boolean generated, modified;
+    private boolean modified;
+    private Status generationStatus = Status.NOT_STARTED;
 }

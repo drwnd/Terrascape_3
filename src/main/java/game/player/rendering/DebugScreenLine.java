@@ -108,7 +108,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
-            return "Current Chunk generated:%s, meshed:%s".formatted(chunk.isGenerated(), Game.getPlayer().getMeshCollector().isMeshed(chunk.INDEX, 0));
+            return "Current Chunk generation status:%s, meshed:%s".formatted(chunk.getGenerationStatus().name(), Game.getPlayer().getMeshCollector().isMeshed(chunk.INDEX, 0));
         }, "Chunk status"));
 
         lines.add(new DebugScreenLine(OptionSetting.CHUNK_IDENTIFIERS_VISIBILITY, OptionSetting.CHUNK_IDENTIFIERS_COLOR, () -> {

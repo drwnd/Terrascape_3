@@ -32,7 +32,10 @@ public final class MeshGenerator {
             Game.getPlayer().getMeshCollector().queueMesh(mesh);
             return;
         }
-        chunk.generateSurroundingChunks();
+        if (!chunk.areSurroundingChunksGenerated()) {
+            Game.getServer().scheduleGeneratorRestart();
+            return;
+        }
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
         clear();

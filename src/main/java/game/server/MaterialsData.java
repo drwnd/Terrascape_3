@@ -195,9 +195,10 @@ public final class MaterialsData {
             int size = 1 << sizeBits;
             byte material = data[startIndex + 1];
             for (int x = 0; x < size; x++)
-                for (int z = 0; z < size; z++)
-                    for (int y = 0; y < size; y++)
-                        uncompressedMaterials[getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z)] = material;
+                for (int z = 0; z < size; z++) {
+                    int index = getUncompressedIndex(inChunkX + x, inChunkY, inChunkZ + z);
+                    for (int y = 0; y < size; y++) uncompressedMaterials[index + y] = material;
+                }
             return;
         }
         if (identifier == DETAIL) {

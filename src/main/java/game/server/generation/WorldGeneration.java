@@ -4,6 +4,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.biomes.Biome;
 import game.server.biomes.*;
+import game.utils.Status;
 import game.utils.Utils;
 
 import static game.utils.Constants.*;
@@ -14,13 +15,13 @@ public final class WorldGeneration {
     public static long SEED;
 
     public static void generate(Chunk chunk) {
-        if (chunk.isGenerated()) return;
+        if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
         generate(chunk, new GenerationData(chunk.X, chunk.Z, chunk.LOD));
     }
 
     public static void generate(Chunk chunk, GenerationData generationData) {
-        if (chunk.isGenerated()) return;
-        chunk.setGenerated();
+        if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
+        chunk.setGenerationStatus(Status.IN_PROGRESS);
 
         generationData.setChunk(chunk);
 
@@ -38,6 +39,7 @@ public final class WorldGeneration {
 
         chunk.setMaterials(generationData.getCompressedMaterials());
         Game.getWorld().storeChunk(chunk);
+        chunk.setGenerationStatus(Status.DONE);
     }
 
     public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
@@ -116,9 +118,10 @@ public final class WorldGeneration {
         for (int inChunkY = 0; inChunkY < CHUNK_SIZE; inChunkY++) {
             data.computeTotalY(inChunkY);
             int totalY = data.totalY;
+            int lod = data.LOD;
 
             // Attempting to place biome specific materials and features
-            if (totalY > height - MAX_SURFACE_MATERIALS_DEPTH && biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
+            if (totalY >> lod >= height - MAX_SURFACE_MATERIALS_DEPTH >> lod && biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
             // Placing stone beneath surface materials
             if (totalY <= height) data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingStoneType(data.totalX, totalY, data.totalZ));
                 // Reached surface, everything above is just air

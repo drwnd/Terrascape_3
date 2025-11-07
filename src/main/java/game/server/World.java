@@ -3,6 +3,7 @@ package game.server;
 import core.utils.FileManager;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
+import game.utils.Status;
 import game.utils.Utils;
 
 import java.io.File;
@@ -36,9 +37,10 @@ public final class World {
         chunks[chunk.LOD][chunk.getIndex()] = chunk;
     }
 
-    public void loadAndGenerate(int chunkX, int chunkY, int chunkZ, int lod, ChunkSaver saver) {
-        Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-        if (!chunk.isGenerated()) WorldGeneration.generate(chunk);
+    public Status getGenerationStatus(int chunkX, int chunkY, int chunkZ, int lod) {
+        Chunk chunk = getChunk(chunkX, chunkY, chunkZ, lod);
+        if (chunk == null) return Status.NOT_STARTED;
+        return chunk.getGenerationStatus();
     }
 
     public byte getMaterial(int x, int y, int z, int lod) {

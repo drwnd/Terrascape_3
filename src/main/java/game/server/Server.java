@@ -52,7 +52,9 @@ public final class Server {
                 meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
             }
         }
-        generatorRestartScheduled = true;
+        synchronized (generator) {
+            generatorRestartScheduled = true;
+        }
         return true;
     }
 
@@ -92,6 +94,12 @@ public final class Server {
         }
     }
 
+    public void scheduleGeneratorRestart() {
+        synchronized (generator) {
+            generatorRestartScheduled = true;
+        }
+    }
+
 
     private void executeGameTickCatchException() {
         try {
@@ -108,9 +116,11 @@ public final class Server {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         Game.getPlayer().updateGameTick();
         Position newPlayerPosition = Game.getPlayer().getPosition();
-        if (!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) {
-            generator.restart();
-            generatorRestartScheduled = false;
+        synchronized (generator) {
+            if (!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) {
+                generator.restart();
+                generatorRestartScheduled = false;
+            }
         }
     }
 
