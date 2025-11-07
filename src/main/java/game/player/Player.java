@@ -4,6 +4,7 @@ import core.rendering_api.Window;
 import core.settings.KeySetting;
 import core.settings.ToggleSetting;
 
+import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.InteractionHandler;
 import game.player.interaction.Placeable;
 import game.player.movement.Movement;
@@ -84,6 +85,7 @@ public final class Player {
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
         if (button == KeySetting.NO_CLIP.value() && action == GLFW.GLFW_PRESS) noClip = !noClip;
+        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.value() && action == GLFW.GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {

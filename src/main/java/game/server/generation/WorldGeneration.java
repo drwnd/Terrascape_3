@@ -1,7 +1,6 @@
 package game.server.generation;
 
 import game.server.Chunk;
-import game.server.Game;
 import game.server.biomes.Biome;
 import game.server.biomes.*;
 import game.utils.Status;
@@ -38,7 +37,6 @@ public final class WorldGeneration {
         generateTrees(generationData);
 
         chunk.setMaterials(generationData.getCompressedMaterials());
-        Game.getWorld().storeChunk(chunk);
         chunk.setGenerationStatus(Status.DONE);
     }
 

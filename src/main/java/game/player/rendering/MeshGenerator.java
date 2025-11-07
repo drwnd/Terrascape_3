@@ -26,8 +26,8 @@ public final class MeshGenerator {
 
 
     public void generateMesh(Chunk chunk) {
-        Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
         if (chunk.isAir()) {
+            Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
             Mesh mesh = new Mesh(new int[0], new int[6], new int[0], 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD);
             Game.getPlayer().getMeshCollector().queueMesh(mesh);
             return;
@@ -36,6 +36,7 @@ public final class MeshGenerator {
             Game.getServer().scheduleGeneratorRestart();
             return;
         }
+        Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
         clear();

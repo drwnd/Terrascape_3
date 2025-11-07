@@ -39,7 +39,8 @@ public enum KeySetting {
     RELOAD_SETTINGS(GLFW.GLFW_KEY_F9),
     RELOAD_LANGUAGE(GLFW.GLFW_KEY_F8),
     RELOAD_FONT(GLFW.GLFW_KEY_F7),
-    RELOAD_MATERIALS(GLFW.GLFW_KEY_F6);
+    RELOAD_MATERIALS(GLFW.GLFW_KEY_F6),
+    GET_CHUNK_REBUILD_PLACEABLE(GLFW.GLFW_KEY_F5);
 
     public static void setIfPresent(String name, String value) {
         try {

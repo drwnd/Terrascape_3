@@ -145,7 +145,10 @@ public final class ChunkGenerator {
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY < playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++) {
                 try {
                     Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-                    if (chunk.getGenerationStatus() == Status.NOT_STARTED) WorldGeneration.generate(chunk, generationData);
+                    if (chunk.getGenerationStatus() == Status.NOT_STARTED) {
+                        WorldGeneration.generate(chunk, generationData);
+                        Game.getWorld().storeChunk(chunk);
+                    }
                 } catch (Exception exception) {
                     System.err.println("Generation:");
                     System.err.println(exception.getClass());

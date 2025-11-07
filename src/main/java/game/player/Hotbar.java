@@ -60,14 +60,15 @@ public final class Hotbar extends UiElement {
         slotIndex = clampSlot(slotIndex);
         contents[slotIndex] = placeable;
 
-        if (displays[slotIndex] != null) displays[slotIndex].delete();
         getChildren().remove(displays[slotIndex]);
+        if (displays[slotIndex] != null) displays[slotIndex].delete();
+        displays[slotIndex] = null;
 
         if (placeable == null) return;
         Structure structure = placeable.getStructure();
         if (structure == null) return;
 
-        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0f / LENGTH, 1.0f), new Vector2f((float) slotIndex / LENGTH, 0.0f), structure);
+        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);
         displays[slotIndex].setScaleWithGuiSize(false);
         addRenderable(displays[slotIndex]);
     }
@@ -76,12 +77,12 @@ public final class Hotbar extends UiElement {
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float hotbarSize = FloatSetting.HOTBAR_SIZE.value();
-        setOffsetToParent(0.5f - hotbarSize * Hotbar.LENGTH * 0.5f, 0);
+        setOffsetToParent(0.5F - hotbarSize * Hotbar.LENGTH * 0.5F, 0);
         setSizeToParent(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio());
         super.renderSelf(getPosition(), getSize());
 
         float hotbarIndicatorScaler = FloatSetting.HOTBAR_INDICATOR_SCALER.value();
-        float scalingOffset = (1.0f - hotbarIndicatorScaler) * 0.5f;
+        float scalingOffset = (1.0F - hotbarIndicatorScaler) * 0.5F;
         hotBarSelectionIndicator.setOffsetToParent((selectedSlot + scalingOffset) / LENGTH, scalingOffset);
         hotBarSelectionIndicator.setSizeToParent(hotbarIndicatorScaler / LENGTH, hotbarIndicatorScaler);
     }

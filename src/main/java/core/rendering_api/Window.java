@@ -65,7 +65,7 @@ public final class Window {
             Window.width = width;
             Window.height = height;
             Vector2i size = new Vector2i(width, height);
-            for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0f, 1.0f);
+            for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0F, 1.0F);
         });
 
         GLFW.glfwMakeContextCurrent(window);
@@ -74,12 +74,18 @@ public final class Window {
 
     public static void renderLoop() {
         while (!GLFW.glfwWindowShouldClose(window)) {
-            GL46.glViewport(0, 0, width, height);
-            GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_STENCIL_BUFFER_BIT);
-            Renderable renderable = renderablesStack.getLast();
-            renderable.render(new Vector2f(0.0f, 0.0f), new Vector2f(1.0f, 1.0f));
-            GLFW.glfwSwapBuffers(window);
-            GLFW.glfwPollEvents();
+            try {
+                GL46.glViewport(0, 0, width, height);
+                GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_STENCIL_BUFFER_BIT);
+                Renderable renderable = renderablesStack.getLast();
+                renderable.render(new Vector2f(0.0F, 0.0F), new Vector2f(1.0F, 1.0F));
+                GLFW.glfwSwapBuffers(window);
+                GLFW.glfwPollEvents();
+
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                GLFW.glfwSetWindowShouldClose(window, true);
+            }
         }
     }
 
@@ -97,12 +103,12 @@ public final class Window {
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
-        return position.mul(guiSize).add((1 - guiSize) * 0.5f, (1 - guiSize) * 0.5f).mul(Window.getWidth(), Window.getHeight());
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
+        return position.mul(guiSize).add((1 - guiSize) * 0.5F, (1 - guiSize) * 0.5F).mul(Window.getWidth(), Window.getHeight());
     }
 
     public static Vector2f toPixelSize(Vector2f size, boolean scalesWithGuiSize) {
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
         return size.mul(Window.getWidth(), Window.getHeight()).mul(guiSize);
     }
 

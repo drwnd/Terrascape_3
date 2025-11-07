@@ -72,6 +72,7 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {
         WorldGeneration.generate(chunk);
+        Game.getWorld().storeChunk(chunk);
 
         int lowLODStartX = chunk.X << 1;
         int lowLODStartY = chunk.Y << 1;

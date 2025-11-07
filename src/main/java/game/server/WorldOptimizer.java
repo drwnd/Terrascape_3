@@ -52,6 +52,7 @@ public final class WorldOptimizer {
         Chunk worldChunk = new Chunk(savedChunk.X, savedChunk.Y, savedChunk.Z, savedChunk.LOD);
 
         WorldGeneration.generate(worldChunk);
+        Game.getWorld().storeChunk(worldChunk);
 
         byte[] savedData = savedChunk.getMaterials().getBytes();
         byte[] worldData = worldChunk.getMaterials().getBytes();
