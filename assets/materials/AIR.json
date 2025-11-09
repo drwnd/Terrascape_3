@@ -1,1 +1,9 @@
-{"textureIndex":0,"properties":["NO_COLLISION","REPLACEABLE","TRANSPARENT"]}
+{
+  "textureIndex": 0,
+  "properties": [
+    "NO_COLLISION",
+    "REPLACEABLE",
+    "TRANSPARENT",
+    "STRUCTURE_REPLACEABLE"
+  ]
+}

@@ -1,1 +1,11 @@
-{"textureIndex":64,"properties":["NO_COLLISION","REPLACEABLE","BLAST_RESISTANT","TRANSPARENT","OCCLUDES_SELF_ONLY"]}
+{
+  "textureIndex": 64,
+  "properties": [
+    "NO_COLLISION",
+    "REPLACEABLE",
+    "BLAST_RESISTANT",
+    "TRANSPARENT",
+    "OCCLUDES_SELF_ONLY",
+    "STRUCTURE_REPLACEABLE"
+  ]
+}

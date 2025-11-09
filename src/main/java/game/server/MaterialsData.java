@@ -4,6 +4,7 @@ import core.utils.ByteArrayList;
 
 import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
+import game.server.material.Material;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -279,7 +280,12 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, material);
+            for (int x = 0; x < lengthX; x++)
+                for (int z = 0; z < lengthZ; z++)
+                    for (int y = 0; y < lengthY; y++) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                        uncompressedMaterials[targetIndex] = material;
+                    }
             return;
         }
 //        if (identifier == DETAIL)
@@ -327,7 +333,12 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lod, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, stepSize, material);
+            for (int x = 0; x < lengthX; x += stepSize)
+                for (int z = 0; z < lengthZ; z += stepSize)
+                    for (int y = 0; y < lengthY; y += stepSize) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                        uncompressedMaterials[targetIndex] = material;
+                    }
             return;
         }
 //        if (identifier == DETAIL)
@@ -374,7 +385,13 @@ public final class MaterialsData {
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
             if (material == AIR) return;
-            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, material);
+            for (int x = 0; x < lengthX; x++)
+                for (int z = 0; z < lengthZ; z++)
+                    for (int y = 0; y < lengthY; y++) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
+                        if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                        uncompressedMaterials[targetIndex] = material;
+                    }
             return;
         }
 //        if (identifier == DETAIL)
@@ -384,6 +401,7 @@ public final class MaterialsData {
                     int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
                     byte material = data[startIndex + getInDetailIndex(transform, x, y, z)];
                     if (material == AIR) continue;
+                    if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
     }
@@ -424,7 +442,13 @@ public final class MaterialsData {
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
             if (material == AIR) return;
-            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lod, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, stepSize, material);
+            for (int x = 0; x < lengthX; x += stepSize)
+                for (int z = 0; z < lengthZ; z += stepSize)
+                    for (int y = 0; y < lengthY; y += stepSize) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                        if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                        uncompressedMaterials[targetIndex] = material;
+                    }
             return;
         }
 //        if (identifier == DETAIL)
@@ -434,6 +458,7 @@ public final class MaterialsData {
                     int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
                     byte material = data[startIndex + getInDetailIndex(transform, x >> lod, y >> lod, z >> lod)];
                     if (material == AIR) continue;
+                    if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
     }
@@ -473,7 +498,12 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-            fillUncompressedHomogenousArea(uncompressedMaterials, targetSizeBits, lod, lengthX, lengthY, lengthZ, targetStartX, targetStartY, targetStartZ, stepSize, material);
+            for (int x = 0; x < lengthX; x += stepSize)
+                for (int z = 0; z < lengthZ; z += stepSize)
+                    for (int y = 0; y < lengthY; y += stepSize) {
+                        int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
+                        uncompressedMaterials[targetIndex] = material;
+                    }
             return;
         }
 //        if (identifier == DETAIL)
@@ -624,30 +654,6 @@ public final class MaterialsData {
         for (int a = 0; a < size; a++)
             for (int b = 0; b < size; b++)
                 uncompressedMaterials[getUncompressedIndex(inChunkA + a, inChunkB + b)] = material;
-    }
-
-    private void fillUncompressedHomogenousArea(byte[] uncompressedMaterials, int targetSizeBits,
-                                                int lengthX, int lengthY, int lengthZ,
-                                                int targetStartX, int targetStartY, int targetStartZ,
-                                                byte material) {
-        for (int x = 0; x < lengthX; x++)
-            for (int z = 0; z < lengthZ; z++)
-                for (int y = 0; y < lengthY; y++) {
-                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + x, targetStartY + y, targetStartZ + z);
-                    uncompressedMaterials[targetIndex] = material;
-                }
-    }
-
-    private void fillUncompressedHomogenousArea(byte[] uncompressedMaterials, int targetSizeBits, int lod,
-                                                int lengthX, int lengthY, int lengthZ,
-                                                int targetStartX, int targetStartY, int targetStartZ,
-                                                int stepSize, byte material) {
-        for (int x = 0; x < lengthX; x += stepSize)
-            for (int z = 0; z < lengthZ; z += stepSize)
-                for (int y = 0; y < lengthY; y += stepSize) {
-                    int targetIndex = getUncompressedIndex(targetSizeBits, targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
-                    uncompressedMaterials[targetIndex] = material;
-                }
     }
 
     private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {

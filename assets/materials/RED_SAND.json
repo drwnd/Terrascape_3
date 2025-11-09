@@ -1,1 +1,6 @@
-{"textureIndex":-78,"properties":["HAS_GRAVITY"]}
+{
+  "textureIndex": -78,
+  "properties": [
+    "HAS_GRAVITY"
+  ]
+}

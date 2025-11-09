@@ -1,1 +1,8 @@
-{"textureIndex":54,"properties":["TRANSPARENT","OCCLUDES_SELF_ONLY"]}
+{
+  "textureIndex": 54,
+  "properties": [
+    "TRANSPARENT",
+    "OCCLUDES_SELF_ONLY",
+    "STRUCTURE_REPLACEABLE"
+  ]
+}
