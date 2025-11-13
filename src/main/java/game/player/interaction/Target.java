@@ -3,6 +3,7 @@ package game.player.interaction;
 import core.settings.FloatSetting;
 
 import game.server.Game;
+import game.server.material.Material;
 import game.server.material.Properties;
 import game.utils.Position;
 import game.utils.Utils;
@@ -82,6 +83,7 @@ public record Target(Vector3i position, int side, byte material) {
     }
 
     public String string() {
-        return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s".formatted(position.x, position.y, position.z, side, material);
+        return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s"
+                .formatted(position.x, position.y, position.z, side, Material.getSystemName(material));
     }
 }

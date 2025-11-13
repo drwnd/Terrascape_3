@@ -1,9 +1,11 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
+import core.rendering_api.Input;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
 import core.settings.FloatSetting;
+import core.settings.KeySetting;
 import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
@@ -134,7 +136,7 @@ public final class Renderer extends Renderable {
     protected void renderSelf(Vector2f position, Vector2f size) {
         Camera camera = player.getCamera();
         player.updateFrame();
-        renderingOptimizer.computeVisibility(player);
+        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player);
 
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
@@ -258,7 +260,6 @@ public final class Renderer extends Renderable {
         GL46.glDeleteFramebuffers(framebuffer);
         GL46.glDeleteFramebuffers(ssaoFramebuffer);
     }
-
 
     private void setupRenderState() {
         long currentTime = System.nanoTime();

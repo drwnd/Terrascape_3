@@ -34,6 +34,11 @@ public final class Material {
         return (material & 0xFF) >= (RED_GLASS & 0xFF) && (material & 0xFF) <= (BLACK_GLASS & 0xFF);
     }
 
+    public static String getSystemName(byte material) {
+        if ((material & 0xFF) >= AMOUNT_OF_MATERIALS) return "UNKNOWN";
+        return MaterialIdentifier.values()[material & 0xFF].name();
+    }
+
     private static void setMaterialData(byte material, byte properties, byte texture) {
         MATERIAL_TEXTURE_INDICES[material & 0xFF] = texture;
         MATERIAL_PROPERTIES[material & 0xFF] = properties;

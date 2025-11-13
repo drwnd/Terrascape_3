@@ -67,10 +67,8 @@ public final class RenderingOptimizer {
         if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0) return;
 
         if (Game.getWorld().getChunk(chunkIndex, lod) == null) return;
-        int intersectionType = intersection.intersectAab(
-                chunkX << chunkSizeBits, chunkY << chunkSizeBits, chunkZ << chunkSizeBits,
-                chunkX + 1 << chunkSizeBits, chunkY + 1 << chunkSizeBits, chunkZ + 1 << chunkSizeBits);
-        if (intersectionType != FrustumIntersection.INSIDE && intersectionType != FrustumIntersection.INTERSECT) return;
+        if (!intersection.testAab(chunkX << chunkSizeBits, chunkY << chunkSizeBits, chunkZ << chunkSizeBits,
+                chunkX + 1 << chunkSizeBits, chunkY + 1 << chunkSizeBits, chunkZ + 1 << chunkSizeBits)) return;
 
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
 
