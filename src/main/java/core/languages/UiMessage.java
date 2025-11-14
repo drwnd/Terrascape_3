@@ -79,7 +79,10 @@ public enum UiMessage implements StringGetter {
     STRUCTURE_NAME,
     NIGHT_BRIGHTNESS,
     OPTIMIZE_WORLD,
-    WORLD_OPTIMIZER_TIME_WARNING;
+    WORLD_OPTIMIZER_TIME_WARNING,
+    OPEN_CHAT,
+    CHAT_MESSAGE_DURATION,
+    CHAT_MESSAGE_PROMPT;
 
     @Override
     public String get() {

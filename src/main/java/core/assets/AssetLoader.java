@@ -82,8 +82,8 @@ public final class AssetLoader {
     public static int generateTextRowVertexArray() {
         int vao = createVAO();
 
-        final int offsetX = 128;
-        final int offsetY = 256;
+        final int offsetX = 256;
+        final int offsetY = 512;
 
         int[] textData = new int[TextShader.MAX_TEXT_LENGTH * 4];
         for (int i = 0; i < textData.length; i += 4) {

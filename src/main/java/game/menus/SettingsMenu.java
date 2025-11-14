@@ -85,6 +85,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.INCREASE_BREAK_PLACE_SIZE, UiMessage.INCREASE_BREAK_PLACE_SIZE);
         section.addKeySelector(KeySetting.DECREASE_BREAK_PLACE_SIZE, UiMessage.DECREASE_BREAK_PLACE_SIZE);
         section.addKeySelector(KeySetting.DROP, UiMessage.DROP);
+        section.addKeySelector(KeySetting.OPEN_CHAT, UiMessage.OPEN_CHAT);
         section.addKeySelector(KeySetting.RESIZE_WINDOW, UiMessage.RESIZE_WINDOW);
 
         return section;
@@ -112,6 +113,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.GUI_SIZE, UiMessage.GUI_SIZE);
         section.addSlider(FloatSetting.TEXT_SIZE, UiMessage.TEXT_SIZE);
         section.addSlider(FloatSetting.RIM_THICKNESS, UiMessage.RIM_THICKNESS);
+        section.addSlider(FloatSetting.CHAT_MESSAGE_DURATION, UiMessage.CHAT_MESSAGE_DURATION);
         section.addSlider(FloatSetting.HOTBAR_INDICATOR_SCALER, UiMessage.HOTBAR_INDICATOR_SCALER);
         section.addSlider(FloatSetting.PAUSE_MENU_BACKGROUND_BLUR, UiMessage.PAUSE_MENU_BACKGROUND_BLUR);
         section.addSlider(FloatSetting.INVENTORY_ITEM_SIZE, UiMessage.INVENTORY_ITEM_SIZE);

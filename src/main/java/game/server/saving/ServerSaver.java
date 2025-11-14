@@ -3,6 +3,8 @@ package game.server.saving;
 import core.utils.Saver;
 import game.server.Server;
 
+import java.util.ArrayList;
+
 public final class ServerSaver extends Saver<Server> {
 
     public static String getSaveFileLocation(String worldName) {
@@ -23,12 +25,12 @@ public final class ServerSaver extends Saver<Server> {
     protected Server load() {
         long currentGameTick = loadLong();
         float dayTime = loadFloat();
-        return new Server(currentGameTick, dayTime);
+        return new Server(currentGameTick, dayTime, new ArrayList<>()); // TODO load and store chat messages
     }
 
     @Override
     protected Server getDefault() {
-        return new Server(0L, 1.0F);
+        return new Server(0L, 1.0F, new ArrayList<>());
     }
 
     @Override

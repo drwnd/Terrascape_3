@@ -1,7 +1,9 @@
 package game.server;
 
+import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
 
+import core.settings.optionSettings.ColorOption;
 import game.player.Player;
 import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
@@ -12,6 +14,7 @@ import game.utils.Utils;
 
 import org.joml.Vector3i;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,9 +23,10 @@ import static game.utils.Constants.*;
 
 public final class Server {
 
-    public Server(long currentGameTick, float dayTime) {
+    public Server(long currentGameTick, float dayTime, ArrayList<ChatMessage> messages) {
         this.currentGameTick = currentGameTick;
         this.dayTime = dayTime;
+        this.messages = messages;
     }
 
     public float getCurrentGameTickFraction() {
@@ -100,6 +104,13 @@ public final class Server {
         }
     }
 
+    public void sendPlayerMessage(String message) {
+        sendMessage(message, ColorOption.WHITE, Sender.PLAYER);
+    }
+
+    public ArrayList<ChatMessage> getMessages() {
+        return messages;
+    }
 
     private void executeGameTickCatchException() {
         try {
@@ -129,9 +140,23 @@ public final class Server {
         if (dayTime > 1.0F) dayTime -= 2.0F;
     }
 
+    private void sendServerMessage(String message, ColorOption color) {
+        sendMessage(message, color, Sender.SERVER);
+    }
+
+    private void sendMessage(String message, ColorOption color, Sender sender) {
+        if (sender == Sender.CONTINUE) return;
+
+        for (int index = 0; index < message.length(); index += TextShader.MAX_TEXT_LENGTH) {
+            String messagePart = message.substring(index, Math.min(message.length(), index + TextShader.MAX_TEXT_LENGTH));
+            messages.add(new ChatMessage(messagePart, index == 0 ? sender : Sender.CONTINUE, color));
+        }
+    }
+
     private long currentGameTick;
     private float dayTime;
 
+    private final ArrayList<ChatMessage> messages;
     private ScheduledExecutorService executor;
     private final ChunkGenerator generator = new ChunkGenerator();
     private long gameTickStartTime;

@@ -92,7 +92,7 @@ public final class Language implements Option {
     private static void fill(String[] destination, String[] source, String[] backUp) {
         for (int index = 0; index < destination.length; index++) {
             if (index >= source.length || "".equals(source[index]) || source[index] == null) {
-                destination[index] = backUp[index];
+                destination[index] = backUp.length > index ? backUp[index] : "--Undefined--";
                 continue;
             }
             destination[index] = source[index];

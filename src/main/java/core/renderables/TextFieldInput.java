@@ -6,7 +6,7 @@ import core.rendering_api.Window;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-public final class TextFieldInput extends Input {
+public class TextFieldInput extends Input {
 
     public TextFieldInput(TextField field) {
         super(field);
@@ -54,7 +54,7 @@ public final class TextFieldInput extends Input {
         renderable.hoverOver(cursorPos);
     }
 
-    private void handleBackspace() {
+    protected void handleBackspace() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
 
@@ -71,6 +71,6 @@ public final class TextFieldInput extends Input {
         return stringBuilder.toString();
     }
 
-    private final TextField field;
+    protected final TextField field;
     private final Vector2i cursorPos = new Vector2i();
 }

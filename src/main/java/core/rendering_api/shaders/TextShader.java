@@ -30,11 +30,11 @@ public class TextShader extends Shader {
     }
 
     public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
 
         setUniform("string", toIntFormat(text));
         setUniform("offsets", getOffsets(text));
-        setUniform("position", (position.x - 0.5f) * guiSize, (position.y - 0.5f) * guiSize);
+        setUniform("position", (position.x - 0.5F) * guiSize, (position.y - 0.5F) * guiSize);
         setUniform("color", color);
         setUniform("textAtlas", 0);
         setUniform("addTransparentBackground", addTransparentBackground);
@@ -45,14 +45,14 @@ public class TextShader extends Shader {
         GL46.glEnableVertexAttribArray(0);
         GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
 
-        GL46.glDrawElements(GL46.GL_TRIANGLES, 768, GL46.GL_UNSIGNED_INT, 0);
+        GL46.glDrawElements(GL46.GL_TRIANGLES, 6 * MAX_TEXT_LENGTH, GL46.GL_UNSIGNED_INT, 0);
     }
 
     public static int getMaxLength(String text, float maxAllowedLength, float charWidth, boolean scalesWithGuiSize) {
         int[] offsets = getOffsets(text);
 
         float textSize = FloatSetting.TEXT_SIZE.value();
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
         float factor = textSize * charWidth / (guiSize * 7);
 
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)
@@ -64,7 +64,7 @@ public class TextShader extends Shader {
         int[] offsets = getOffsets(text);
 
         float textSize = FloatSetting.TEXT_SIZE.value();
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
         float factor = textSize * charWidth / (guiSize * 7);
 
         return offsets[Math.min(MAX_TEXT_LENGTH, text.length())] * factor;

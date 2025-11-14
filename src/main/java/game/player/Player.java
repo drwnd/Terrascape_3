@@ -32,9 +32,11 @@ public final class Player {
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
         inventory = new Inventory();
+        chat = new ChatTextField();
 
         renderer.addRenderable(hotbar);
         renderer.addRenderable(inventory);
+        renderer.addRenderable(chat);
         this.position = position;
         Window.pushRenderable(renderer);
     }
@@ -81,6 +83,7 @@ public final class Player {
     public void handleInactiveKeyInput(int button, int action) {
         if (button == KeySetting.ZOOM.value() && action != GLFW.GLFW_REPEAT) camera.setZoomed(action == GLFW.GLFW_PRESS);
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
+        if (button == KeySetting.OPEN_CHAT.value() && action == GLFW.GLFW_PRESS) toggleChat();
 
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
@@ -151,22 +154,35 @@ public final class Player {
     }
 
     public void setInput() {
-        Window.setInput(inventory.isVisible() ? inventory.getInput() : input);
+        if (inventory.isVisible()) Window.setInput(inventory.getInput());
+        else if (chat.isVisible()) Window.setInput(chat.getInput());
+        else Window.setInput(input);
     }
 
     public boolean canDoActiveActions() {
-        return !inventory.isVisible();
+        return !inventory.isVisible() && !chat.isVisible();
     }
 
     public boolean isNoClip() {
         return noClip;
     }
 
+    public boolean isChatOpen() {
+        return chat.isVisible();
+    }
+
     public void cleanUp() {
 
     }
 
+    void toggleChat() {
+        if (inventory.isVisible()) return;
+        chat.setVisible(!chat.isVisible());
+        setInput();
+    }
+
     void toggleInventory() {
+        if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());
         setInput();
     }
@@ -179,6 +195,7 @@ public final class Player {
     private final InteractionHandler interactionHandler;
     private final Hotbar hotbar;
     private final Inventory inventory;
+    private final ChatTextField chat;
 
     private boolean noClip = false;
     private Position position; // Center of the players feet

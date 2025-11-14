@@ -1,21 +1,27 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
+import core.assets.CoreShaders;
 import core.rendering_api.Input;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
+import core.rendering_api.shaders.TextShader;
+import core.rendering_api.Window;
 import core.settings.FloatSetting;
 import core.settings.KeySetting;
+import core.settings.OptionSetting;
+import core.settings.optionSettings.FontOption;
 import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
-import core.rendering_api.Window;
 
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
 import game.assets.VertexArrays;
+import game.player.ChatTextField;
 import game.player.Player;
+import game.server.ChatMessage;
 import game.server.Game;
 import game.server.Server;
 import game.utils.Position;
@@ -29,6 +35,7 @@ import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
@@ -170,6 +177,7 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
+        renderChat();
         renderDebugInfo();
     }
 
@@ -423,6 +431,29 @@ public final class Renderer extends Renderable {
                 GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount() * (6 / 2));
                 renderedGlassModels++;
             }
+        }
+    }
+
+    private void renderChat() {
+        ArrayList<ChatMessage> messages = Game.getServer().getMessages();
+        long currentTime = System.nanoTime();
+
+        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
+        shader.bind();
+        float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
+        float chatMessageDuration = FloatSetting.CHAT_MESSAGE_DURATION.value();
+        ChatTextField chatTextField = firstChildOf(ChatTextField.class);
+        float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
+
+        for (int chatMessage = 0; chatMessage < messages.size(); chatMessage++) {
+            ChatMessage message = messages.get(chatMessage);
+            if (!player.isChatOpen() && (currentTime - message.timestamp()) / 1_000_000_000D > chatMessageDuration) continue;
+
+            Vector2f position = new Vector2f(0.0F, (messages.size() - chatMessage - 1) * lineSeparation + chatHeight);
+            Color color = message.color().getColor();
+
+            shader.drawText(position, message.message(), color, true, false);
         }
     }
 
