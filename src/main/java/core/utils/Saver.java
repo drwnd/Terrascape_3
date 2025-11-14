@@ -235,6 +235,18 @@ public abstract class Saver<T> {
         return new Position(loadVector3i(), loadVector3f());
     }
 
+    protected final void saveString(String string) {
+        saveInt(string.length());
+        for (char character : string.toCharArray()) saveShort((short) character);
+    }
+
+    protected final String loadString() {
+        int length = loadInt();
+        StringBuilder builder = new StringBuilder(length);
+        for (int counter = 0; counter < length; counter++) builder.append((char) loadShort());
+        return builder.toString();
+    }
+
 
     private int currentIndex;
     private final ByteArrayList data;

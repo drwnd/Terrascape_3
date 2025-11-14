@@ -26,5 +26,10 @@ public enum ColorOption implements Option {
         return color;
     }
 
+    public static ColorOption fromColor(Color color) {
+        for (ColorOption colorOption : values()) if (colorOption.color.equals(color)) return colorOption;
+        return WHITE;
+    }
+
     private final Color color;
 }
