@@ -6,6 +6,8 @@ import core.settings.optionSettings.ColorOption;
 import game.player.Player;
 import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
+import game.server.command.Command;
+import game.server.command.CommandResult;
 import game.server.generation.ChunkGenerator;
 import game.server.saving.ChunkSaver;
 import game.utils.Position;
@@ -104,14 +106,26 @@ public final class Server {
     }
 
     public void sendPlayerMessage(String message) {
+        if (message == null || message.isEmpty()) return;
         synchronized (messages) {
             messages.add(new ChatMessage(message, Sender.PLAYER, ColorOption.WHITE));
         }
+
+        if (message.charAt(0) != '/') return;
+        CommandResult result = Command.execute(message);
+
+        if (!result.successful()) sendServerMessage(result.reason(), ColorOption.RED);
     }
 
     public ArrayList<ChatMessage> getMessages() {
         synchronized (messages) {
             return new ArrayList<>(messages);
+        }
+    }
+
+    public void sendServerMessage(String message, ColorOption color) {
+        synchronized (messages) {
+            messages.add(new ChatMessage(message, Sender.SERVER, color));
         }
     }
 
@@ -142,12 +156,6 @@ public final class Server {
     private void incrementTime() {
         dayTime += FloatSetting.TIME_SPEED.value();
         if (dayTime > 1.0F) dayTime -= 2.0F;
-    }
-
-    private void sendServerMessage(String message, ColorOption color) {
-        synchronized (messages) {
-            messages.add(new ChatMessage(message, Sender.SERVER, color));
-        }
     }
 
     private void removeOldChatMessages() {

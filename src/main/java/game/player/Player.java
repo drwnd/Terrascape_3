@@ -85,6 +85,7 @@ public final class Player {
         if (button == KeySetting.ZOOM.value() && action != GLFW.GLFW_REPEAT) camera.setZoomed(action == GLFW.GLFW_PRESS);
         if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
         if (button == KeySetting.OPEN_CHAT.value() && action == GLFW.GLFW_PRESS) toggleChat();
+        if (button == KeySetting.START_COMMAND.value() && action == GLFW.GLFW_PRESS) startCommand();
 
         if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
@@ -174,6 +175,13 @@ public final class Player {
 
     public void cleanUp() {
 
+    }
+
+    void startCommand() {
+        if (inventory.isVisible()) return;
+        chat.setVisible(!chat.isVisible());
+        setInput();
+        chat.setText("/");
     }
 
     void toggleChat() {
