@@ -24,7 +24,8 @@ public enum FloatSetting {
     TIME_SPEED(0.0F, 0.001F, 0.00008333F, 0.000001F),
     DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F),
     NIGHT_BRIGHTNESS(0.05F, 1.0F, 0.2F, 0.01F),
-    CHAT_MESSAGE_DURATION(1.0F, 30.0F, 5.0F, 0.1F);
+    CHAT_MESSAGE_DURATION(1.0F, 30.0F, 5.0F, 0.1F),
+    MAX_CHAT_MESSAGE_COUNT(10, 1000, 100, 1);
 
     public static void setIfPresent(String name, String value) {
         try {

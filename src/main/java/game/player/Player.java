@@ -64,6 +64,7 @@ public final class Player {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
         }
         if (canDoActiveActions()) interactionHandler.updateGameTick();
+        renderer.updateGameTick();
     }
 
     /**

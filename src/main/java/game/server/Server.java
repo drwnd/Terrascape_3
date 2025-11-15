@@ -1,6 +1,5 @@
 package game.server;
 
-import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
 
 import core.settings.optionSettings.ColorOption;
@@ -105,11 +104,15 @@ public final class Server {
     }
 
     public void sendPlayerMessage(String message) {
-        sendMessage(message, ColorOption.WHITE, Sender.PLAYER);
+        synchronized (messages) {
+            messages.add(new ChatMessage(message, Sender.PLAYER, ColorOption.WHITE));
+        }
     }
 
     public ArrayList<ChatMessage> getMessages() {
-        return messages;
+        synchronized (messages) {
+            return new ArrayList<>(messages);
+        }
     }
 
     private void executeGameTickCatchException() {
@@ -133,6 +136,7 @@ public final class Server {
                 generatorRestartScheduled = false;
             }
         }
+        removeOldChatMessages();
     }
 
     private void incrementTime() {
@@ -141,15 +145,18 @@ public final class Server {
     }
 
     private void sendServerMessage(String message, ColorOption color) {
-        sendMessage(message, color, Sender.SERVER);
+        synchronized (messages) {
+            messages.add(new ChatMessage(message, Sender.SERVER, color));
+        }
     }
 
-    private void sendMessage(String message, ColorOption color, Sender sender) {
-        if (sender == Sender.CONTINUE) return;
-
-        for (int index = 0; index < message.length(); index += TextShader.MAX_TEXT_LENGTH) {
-            String messagePart = message.substring(index, Math.min(message.length(), index + TextShader.MAX_TEXT_LENGTH));
-            messages.add(new ChatMessage(messagePart, index == 0 ? sender : Sender.CONTINUE, color));
+    private void removeOldChatMessages() {
+        synchronized (messages) {
+            int maxMessageCount = (int) FloatSetting.MAX_CHAT_MESSAGE_COUNT.value();
+            int toRemoveMessagesCount = messages.size() - maxMessageCount;
+            if (toRemoveMessagesCount <= 0) return;
+            for (int index = 0; index < maxMessageCount; index++) messages.set(index, messages.get(index + toRemoveMessagesCount));
+            for (int removedMessageIndex = 0; removedMessageIndex < toRemoveMessagesCount; removedMessageIndex++) messages.removeLast();
         }
     }
 

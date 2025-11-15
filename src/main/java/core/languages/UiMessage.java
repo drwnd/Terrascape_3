@@ -82,7 +82,8 @@ public enum UiMessage implements StringGetter {
     WORLD_OPTIMIZER_TIME_WARNING,
     OPEN_CHAT,
     CHAT_MESSAGE_DURATION,
-    CHAT_MESSAGE_PROMPT;
+    CHAT_MESSAGE_PROMPT,
+    MAX_CHAT_MESSAGE_COUNT;
 
     @Override
     public String get() {

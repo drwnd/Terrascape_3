@@ -76,6 +76,10 @@ public final class Renderer extends Renderable {
         return renderTime;
     }
 
+    public void updateGameTick() {
+        messages = Game.getServer().getMessages();
+    }
+
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
         shader.bind();
@@ -435,25 +439,38 @@ public final class Renderer extends Renderable {
     }
 
     private void renderChat() {
-        ArrayList<ChatMessage> messages = Game.getServer().getMessages();
         long currentTime = System.nanoTime();
 
+        ChatTextField chatTextField = firstChildOf(ChatTextField.class);
         Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        Vector2f position = new Vector2f();
         TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         shader.bind();
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
         float chatMessageDuration = FloatSetting.CHAT_MESSAGE_DURATION.value();
-        ChatTextField chatTextField = firstChildOf(ChatTextField.class);
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
 
-        for (int chatMessage = 0; chatMessage < messages.size(); chatMessage++) {
-            ChatMessage message = messages.get(chatMessage);
-            if (!player.isChatOpen() && (currentTime - message.timestamp()) / 1_000_000_000D > chatMessageDuration) continue;
+        int lineCount = 0;
+        for (int messageIndex = messages.size() - 1; messageIndex >= 0; messageIndex--) {
+            ChatMessage chatMessage = messages.get(messageIndex);
+            if (!player.isChatOpen() && (currentTime - chatMessage.timestamp()) / 1_000_000_000D > chatMessageDuration) return;
 
-            Vector2f position = new Vector2f(0.0F, (messages.size() - chatMessage - 1) * lineSeparation + chatHeight);
-            Color color = message.color().getColor();
+            int messageLines = chatMessage.lines().length;
+            Color color = chatMessage.color().getColor();
+            String prefix = chatMessage.prefix();
+            float prefixSize = TextShader.getTextLength(prefix, defaultTextSize.x, false);
 
-            shader.drawText(position, message.message(), color, true, false);
+            position.set(0.0F, (lineCount + messageLines - 1) * lineSeparation + chatHeight);
+            shader.drawText(position, prefix, color, true, false);
+
+            lineCount += messageLines;
+            for (String line : chatMessage.lines()) {
+                lineCount--;
+                position.set(prefixSize, lineCount * lineSeparation + chatHeight);
+                if (position.y >= 1.0F) return;
+                shader.drawText(position, line, color, true, false);
+            }
+            lineCount += messageLines;
         }
     }
 
@@ -486,6 +503,7 @@ public final class Renderer extends Renderable {
     }
 
     private boolean debugScreenOpen = false;
+    private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;

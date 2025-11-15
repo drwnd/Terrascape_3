@@ -27,7 +27,7 @@ public final class ServerSaver extends Saver<Server> {
         ArrayList<ChatMessage> messages = server.getMessages();
         saveInt(messages.size());
         for (ChatMessage message : messages) {
-            saveString(message.messageNoPrefix());
+            saveString(message.message());
             saveInt(message.color().getColor().getRGB());
             saveInt(message.sender().ordinal());
         }
@@ -57,6 +57,6 @@ public final class ServerSaver extends Saver<Server> {
 
     @Override
     protected int getVersionNumber() {
-        return 2;
+        return 3;
     }
 }

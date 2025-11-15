@@ -114,6 +114,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.TEXT_SIZE, UiMessage.TEXT_SIZE);
         section.addSlider(FloatSetting.RIM_THICKNESS, UiMessage.RIM_THICKNESS);
         section.addSlider(FloatSetting.CHAT_MESSAGE_DURATION, UiMessage.CHAT_MESSAGE_DURATION);
+        section.addSlider(FloatSetting.MAX_CHAT_MESSAGE_COUNT, UiMessage.MAX_CHAT_MESSAGE_COUNT);
         section.addSlider(FloatSetting.HOTBAR_INDICATOR_SCALER, UiMessage.HOTBAR_INDICATOR_SCALER);
         section.addSlider(FloatSetting.PAUSE_MENU_BACKGROUND_BLUR, UiMessage.PAUSE_MENU_BACKGROUND_BLUR);
         section.addSlider(FloatSetting.INVENTORY_ITEM_SIZE, UiMessage.INVENTORY_ITEM_SIZE);
