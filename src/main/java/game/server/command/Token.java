@@ -42,7 +42,7 @@ interface Token {
             tokens.add(new StringToken(command.substring(startIndex, stringEndIndex)));
             return stringEndIndex + 1;
         }
-        if (Character.isDigit(startChar)) {
+        if (Character.isDigit(startChar) || startChar == '-') {
             int numberEndIndex = nextIndexOf(' ', chars, startIndex);
             double number = Double.parseDouble(command.substring(startIndex, numberEndIndex));
             tokens.add(new NumberToken(number));

@@ -24,6 +24,8 @@ import org.joml.Vector3i;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static game.utils.Constants.*;
+
 public record DebugScreenLine(OptionSetting visibility, OptionSetting color, StringGetter string, String name) {
 
     public boolean shouldShow(boolean debugScreenOpen) {
@@ -80,7 +82,12 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.CHUNK_POSITION_VISIBILITY, OptionSetting.CHUNK_POSITION_COLOR, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
-            return "Chunk Position %s, In Chunk Position %s".formatted(playerPosition.chunkCoordinateToString(), playerPosition.inChunkPositionToString());
+            Chunk chunk = Game.getWorld().getChunk(
+                    playerPosition.intX >> CHUNK_SIZE_BITS,
+                    playerPosition.intY >> CHUNK_SIZE_BITS,
+                    playerPosition.intZ >> CHUNK_SIZE_BITS, 0);
+            if (chunk == null) return "Chunk is null";
+            return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y,chunk.Z, playerPosition.inChunkPositionToString());
         }, "Chunk Position"));
 
         lines.add(new DebugScreenLine(OptionSetting.DIRECTION_VISIBILITY, OptionSetting.DIRECTION_COLOR, () -> {

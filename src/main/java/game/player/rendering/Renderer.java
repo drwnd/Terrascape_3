@@ -322,9 +322,9 @@ public final class Renderer extends Renderable {
     private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix) {
         renderedOpaqueModels = 0;
 
-        int playerChunkX = Utils.floor(playerPosition.intX) >> CHUNK_SIZE_BITS;
-        int playerChunkY = Utils.floor(playerPosition.intY) >> CHUNK_SIZE_BITS;
-        int playerChunkZ = Utils.floor(playerPosition.intZ) >> CHUNK_SIZE_BITS;
+        int playerChunkX = playerPosition.intX >> CHUNK_SIZE_BITS;
+        int playerChunkY = playerPosition.intY >> CHUNK_SIZE_BITS;
+        int playerChunkZ = playerPosition.intZ >> CHUNK_SIZE_BITS;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE);
         setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getRenderTime());

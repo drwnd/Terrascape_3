@@ -58,17 +58,17 @@ public record Target(Vector3i position, int side, byte material) {
                 return new Target(new Vector3i(x, y, z), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {
-                x += xDir;
+                x = x + xDir & WORLD_SIZE_XZ_MASK;
                 length = lengthX;
                 lengthX += xUnit;
                 intersectedSide = xSide;
             } else if (lengthZ < lengthX && lengthZ < lengthY) {
-                z += zDir;
+                z = z + zDir & WORLD_SIZE_XZ_MASK;
                 length = lengthZ;
                 lengthZ += zUnit;
                 intersectedSide = zSide;
             } else {
-                y += yDir;
+                y = y + yDir & WORLD_SIZE_Y_MASK;
                 length = lengthY;
                 lengthY += yUnit;
                 intersectedSide = ySide;

@@ -8,6 +8,8 @@ import game.utils.Position;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import static game.utils.Constants.*;
+
 public final class PlayerSaver extends Saver<Player> {
 
     public static String getSaveFileLocation(String worldName) {
@@ -43,7 +45,8 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player getDefault() {
-        return new Player(new Position(new Vector3i(), new Vector3f()));
+        Vector3i worldCenter = new Vector3i(WORLD_SIZE_XZ_MASK / 2, WORLD_SIZE_Y_MASK / 2, WORLD_SIZE_XZ_MASK / 2);
+        return new Player(new Position(worldCenter, new Vector3f()));
     }
 
     @Override

@@ -31,6 +31,9 @@ public final class GenerationData {
     public GenerationData(int chunkX, int chunkZ, int lod) {
         this.LOD = lod;
 
+        chunkX &= MAX_CHUNKS_XZ >> lod;
+        chunkZ &= MAX_CHUNKS_XZ >> lod;
+
         featureMap = featureMap(chunkX, chunkZ, lod);
         treeMap = treeMap(chunkX, chunkZ, lod);
 

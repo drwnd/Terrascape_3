@@ -88,10 +88,10 @@ public final class Server {
             for (Chunk chunk : Game.getWorld().getLod(lod)) {
                 if (chunk == null) continue;
 
-                if (Utils.outsideRenderKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z))
+                if (Utils.outsideRenderKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD))
                     meshCollector.removeMesh(chunk.INDEX, chunk.LOD);
 
-                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z)) {
+                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD)) {
                     Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
                     if (chunk.isModified()) saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
                 }

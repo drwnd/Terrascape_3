@@ -59,7 +59,7 @@ public final class ChunkSaver extends Saver<Chunk> {
             int thisLodChunkX = chunk.X >> 1;
             int thisLodChunkY = chunk.Y >> 1;
             int thisLodChunkZ = chunk.Z >> 1;
-            long thisLodChunkId = Utils.getChunkId(thisLodChunkX, thisLodChunkY, thisLodChunkZ);
+            long thisLodChunkId = Utils.getChunkId(thisLodChunkX, thisLodChunkY, thisLodChunkZ, lod);
             File thisLodChunkFile = new File(thisLodFile.getPath() + "/" + thisLodChunkId);
             if (thisLodChunkFile.exists()) continue;
 
@@ -79,21 +79,21 @@ public final class ChunkSaver extends Saver<Chunk> {
         int lowLODStartZ = chunk.Z << 1;
         int lowLOD = chunk.LOD - 1;
 
-        Chunk chunk0 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY, lowLODStartZ), lowLOD));
-        Chunk chunk1 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY, lowLODStartZ + 1), lowLOD));
-        Chunk chunk2 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY + 1, lowLODStartZ), lowLOD));
-        Chunk chunk3 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY + 1, lowLODStartZ + 1), lowLOD));
-        Chunk chunk4 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY, lowLODStartZ), lowLOD));
-        Chunk chunk5 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY, lowLODStartZ + 1), lowLOD));
-        Chunk chunk6 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY + 1, lowLODStartZ), lowLOD));
-        Chunk chunk7 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY + 1, lowLODStartZ + 1), lowLOD));
+        Chunk chunk0 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY, lowLODStartZ, lowLOD), lowLOD));
+        Chunk chunk1 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY, lowLODStartZ + 1, lowLOD), lowLOD));
+        Chunk chunk2 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY + 1, lowLODStartZ, lowLOD), lowLOD));
+        Chunk chunk3 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX, lowLODStartY + 1, lowLODStartZ + 1, lowLOD), lowLOD));
+        Chunk chunk4 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY, lowLODStartZ, lowLOD), lowLOD));
+        Chunk chunk5 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY, lowLODStartZ + 1, lowLOD), lowLOD));
+        Chunk chunk6 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY + 1, lowLODStartZ, lowLOD), lowLOD));
+        Chunk chunk7 = saver.load(getSaveFileLocation(Utils.getChunkId(lowLODStartX + 1, lowLODStartY + 1, lowLODStartZ + 1, lowLOD), lowLOD));
 
         chunk.getMaterials().storeLowerLODChunks(chunk0, chunk1, chunk2, chunk3, chunk4, chunk5, chunk6, chunk7);
     }
 
 
     public Chunk load(int chunkX, int chunkY, int chunkZ, int lod) {
-        long expectedID = Utils.getChunkId(chunkX, chunkY, chunkZ);
+        long expectedID = Utils.getChunkId(chunkX, chunkY, chunkZ, lod);
         Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, lod);
 
         if (chunk == null) return load(chunkX, chunkY, chunkZ, lod, expectedID);

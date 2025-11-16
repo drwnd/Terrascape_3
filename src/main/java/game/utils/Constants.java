@@ -13,6 +13,8 @@ public final class Constants {
     public static final int CHUNK_SIZE_MASK = CHUNK_SIZE - 1;
     public static final int MAX_CHUNKS_XZ = 0xFFFFFF;
     public static final int MAX_CHUNKS_Y = 0xFFFF;
+    public static final int WORLD_SIZE_XZ_MASK = MAX_CHUNKS_XZ * CHUNK_SIZE + CHUNK_SIZE_MASK;
+    public static final int WORLD_SIZE_Y_MASK = MAX_CHUNKS_Y * CHUNK_SIZE + CHUNK_SIZE_MASK;
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
@@ -20,8 +22,12 @@ public final class Constants {
     public static final byte RENDER_DISTANCE_Y = 6;
     public static final byte RENDER_KEEP_DISTANCE = 2;
 
-    public static final byte RENDERED_WORLD_WIDTH = RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2;
-    public static final byte RENDERED_WORLD_HEIGHT = RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2;
+    public static final int RENDERED_WORLD_WIDTH = Utils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
+    public static final int RENDERED_WORLD_HEIGHT = Utils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
+    public static final int RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
+    public static final int RENDERED_WORLD_HEIGHT_MASK = RENDERED_WORLD_HEIGHT - 1;
+    public static final int RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
+    public static final int RENDERED_WORLD_HEIGHT_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_HEIGHT);
 
     public static final int LOD_COUNT = 10;
     public static final int MAX_TREE_LOD = 4;

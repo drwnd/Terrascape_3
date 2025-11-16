@@ -18,7 +18,7 @@ public final class MeshCollector {
                 int playerChunkX = playerChunkCoordinate.x >> mesh.lod();
                 int playerChunkY = playerChunkCoordinate.y >> mesh.lod();
                 int playerChunkZ = playerChunkCoordinate.z >> mesh.lod();
-                if (Utils.outsideRenderKeepDistance(playerChunkX, playerChunkY, playerChunkZ, mesh.chunkX(), mesh.chunkY(), mesh.chunkZ()))
+                if (Utils.outsideRenderKeepDistance(playerChunkX, playerChunkY, playerChunkZ, mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod()))
                     continue;
 
                 upload(mesh);

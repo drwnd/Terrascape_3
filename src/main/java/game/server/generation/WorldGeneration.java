@@ -10,7 +10,7 @@ import static game.utils.Constants.*;
 
 public final class WorldGeneration {
 
-    public static final int WATER_LEVEL = 0;
+    public static final int WATER_LEVEL = 1 << 21;
     public static long SEED;
 
     public static void generate(Chunk chunk) {
@@ -149,14 +149,14 @@ public final class WorldGeneration {
             continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * ridge * 100000;
             // Normal ocean
         else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
-            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_LEVEL;
+            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
         else if (continental <= OCEAN_THRESHOLD - 0.05 && continental > OCEAN_THRESHOLD - 0.2)
-            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_LEVEL;
+            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
             // Deep Ocean
         else if (continental <= OCEAN_THRESHOLD - 0.2 && continental > OCEAN_THRESHOLD - 0.25)
-            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_LEVEL - 15;
+            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
         else if (continental <= OCEAN_THRESHOLD - 0.25)
-            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_LEVEL + DEEP_OCEAN_FLOOR_OFFSET - 15;
+            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
         return continentalModifier;
     }
 
@@ -167,18 +167,18 @@ public final class WorldGeneration {
         else if (erosion <= -0.40) erosionModifier = (erosion + 0.40) * 20 + 55;
             // Flatland
         else if (erosion > FLATLAND_THRESHOLD && erosion < FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_LEVEL) * Utils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
+            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_OFFSET) * Utils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
         else if (erosion >= FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -height * 0.75 - continentalModifier + FLATLAND_LEVEL;
+            erosionModifier = -height * 0.75 - continentalModifier + FLATLAND_OFFSET;
         return erosionModifier;
     }
 
     private static double getRiverModifier(double height, double continentalModifier, double erosionModifier, double river) {
         double riverModifier = 0.0;
         if (Math.abs(river) < 0.005)
-            riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_LEVEL;
+            riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
         else if (Math.abs(river) < RIVER_THRESHOLD)
-            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_LEVEL) * (1 - Utils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
+            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - Utils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
         return riverModifier;
     }
 
@@ -195,10 +195,10 @@ public final class WorldGeneration {
 
 
     private static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
-    private static final int OCEAN_FLOOR_LEVEL = WATER_LEVEL - 480;
-    private static final int DEEP_OCEAN_FLOOR_OFFSET = WATER_LEVEL - 1120;
-    private static final int FLATLAND_LEVEL = WATER_LEVEL + 130;
-    private static final int RIVER_LEVEL = WATER_LEVEL - 200;
+    private static final int OCEAN_FLOOR_OFFSET = -480;
+    private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
+    private static final int FLATLAND_OFFSET = 130;
+    private static final int RIVER_OFFSET = -200;
 
     private static final double HEIGHT_MAP_MULTIPLIER = 250;
 

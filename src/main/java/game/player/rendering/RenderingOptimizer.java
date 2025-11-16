@@ -24,7 +24,7 @@ public final class RenderingOptimizer {
         FrustumIntersection frustumIntersection = new FrustumIntersection(projectionViewMatrix);
 
         meshCollector = player.getMeshCollector();
-        position = player.getPosition().intPosition();
+        Vector3i position = player.getCamera().getPosition().intPosition();
 
         playerX = position.x;
         playerY = position.y;
@@ -40,9 +40,9 @@ public final class RenderingOptimizer {
 
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection, long[][] visibilityBits) {
-        int chunkX = position.x >> CHUNK_SIZE_BITS + lod;
-        int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
-        int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
+        int chunkX = playerX >> CHUNK_SIZE_BITS + lod;
+        int chunkY = playerY >> CHUNK_SIZE_BITS + lod;
+        int chunkZ = playerZ >> CHUNK_SIZE_BITS + lod;
 
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
@@ -134,9 +134,9 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs((Utils.floor(position.x) >> CHUNK_SIZE_BITS + lod) - lodModelX);
-        int distanceY = Math.abs((Utils.floor(position.y) >> CHUNK_SIZE_BITS + lod) - lodModelY);
-        int distanceZ = Math.abs((Utils.floor(position.z) >> CHUNK_SIZE_BITS + lod) - lodModelZ);
+        int distanceX = Math.abs((playerX >> CHUNK_SIZE_BITS + lod) - lodModelX);
+        int distanceY = Math.abs((playerY >> CHUNK_SIZE_BITS + lod) - lodModelY);
+        int distanceZ = Math.abs((playerZ >> CHUNK_SIZE_BITS + lod) - lodModelZ);
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
@@ -175,7 +175,6 @@ public final class RenderingOptimizer {
 
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
-    private Vector3i position;
     private int playerX, playerY, playerZ;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64 + 1];

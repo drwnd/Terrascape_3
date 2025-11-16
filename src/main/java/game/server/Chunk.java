@@ -14,11 +14,11 @@ public final class Chunk {
 
     public Chunk(int chunkX, int chunkY, int chunkZ, int lod) {
         materials = new MaterialsData(CHUNK_SIZE_BITS, AIR);
-        X = chunkX;
-        Y = chunkY;
-        Z = chunkZ;
+        X = chunkX & MAX_CHUNKS_XZ >> lod;
+        Y = chunkY & MAX_CHUNKS_Y >> lod;
+        Z = chunkZ & MAX_CHUNKS_XZ >> lod;
         INDEX = Utils.getChunkIndex(X, Y, Z);
-        ID = Utils.getChunkId(X, Y, Z);
+        ID = Utils.getChunkId(X, Y, Z, lod);
         LOD = lod;
     }
 

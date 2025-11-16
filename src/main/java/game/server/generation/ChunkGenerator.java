@@ -171,21 +171,19 @@ public final class ChunkGenerator {
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y; chunkY < playerChunkY + RENDER_DISTANCE_Y + 1; chunkY++) {
                 try {
                     int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
-                    long expectedId = Utils.getChunkId(chunkX, chunkY, chunkZ);
+                    long expectedId = Utils.getChunkId(chunkX, chunkY, chunkZ, lod);
                     Chunk chunk = world.getChunk(chunkIndex, lod);
                     if (chunk == null) {
-                        System.err.println("to mesh chunk is null");
-                        System.err.println(chunkX + " " + chunkY + " " + chunkZ);
+                        System.err.println("to mesh chunk is null" + chunkX + " " + chunkY + " " + chunkZ + " " + lod);
                         continue;
                     }
                     if (chunk.ID != expectedId) {
-                        System.err.println("Chunk has wrong ID");
-                        System.err.println(chunkX + " " + chunkY + " " + chunkZ);
+                        System.err.println("Chunk has wrong ID" + chunkX + " " + chunkY + " " + chunkZ + " " + lod + " is "+ chunk.ID + " should be " + expectedId);
                         continue;
                     }
                     if (chunk.getGenerationStatus() != Status.DONE) {
                         System.err.println("to mesh chunk hasn't been generated " + chunk.getGenerationStatus().name());
-                        System.err.println(chunkX + " " + chunkY + " " + chunkZ);
+                        System.err.println(chunkX + " " + chunkY + " " + chunkZ + " " + lod);
                         continue;
                     }
                     if (meshCollector.isMeshed(chunkIndex, lod)) continue;
