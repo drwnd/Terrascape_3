@@ -6,6 +6,7 @@ import core.renderables.TextFieldInput;
 import game.server.ChatMessage;
 import game.server.Game;
 
+import game.server.Sender;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -16,7 +17,9 @@ public final class ChatInput extends TextFieldInput {
         super(field);
     }
 
-    public void setActive() {
+    @Override
+    public void setInputMode() {
+        setStandardInputMode();
         skipNextInput = true;
         messageIndex = 0;
     }
@@ -43,16 +46,21 @@ public final class ChatInput extends TextFieldInput {
             field.setText("");
             Game.getPlayer().toggleChat();
         }
-        if (key == GLFW.GLFW_KEY_UP) {
-            ArrayList<ChatMessage> messages = Game.getServer().getMessages();
-            messageIndex = Math.clamp(messageIndex + 1, 1, messages.size());
-            field.setText(messages.get(messages.size() - messageIndex).message());
+        if (key == GLFW.GLFW_KEY_UP) field.setText(nextPlayerMessage(1));
+        if (key == GLFW.GLFW_KEY_DOWN) field.setText(nextPlayerMessage(-1));
+    }
+
+    private String nextPlayerMessage(int increment) {
+        ArrayList<ChatMessage> messages = Game.getServer().getMessages();
+        do {
+            messageIndex += increment;
+            if (messageIndex <= 0 || messageIndex >= messages.size() + 1) {
+                messageIndex = Math.clamp(messageIndex, 0, messages.size());
+                return "";
+            }
         }
-        if (key == GLFW.GLFW_KEY_DOWN) {
-            ArrayList<ChatMessage> messages = Game.getServer().getMessages();
-            messageIndex = Math.clamp(messageIndex - 1, 1, messages.size());
-            field.setText(messages.get(messages.size() - messageIndex).message());
-        }
+        while (messages.get(messages.size() - messageIndex).sender() != Sender.PLAYER);
+        return messages.get(messages.size() - messageIndex).message();
     }
 
     private boolean skipNextInput = false;

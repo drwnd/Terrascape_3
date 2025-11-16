@@ -26,12 +26,12 @@ public final class RenderingOptimizer {
         meshCollector = player.getMeshCollector();
         position = player.getPosition().intPosition();
 
-        int playerChunkX = position.x >> CHUNK_SIZE_BITS;
-        int playerChunkY = position.y >> CHUNK_SIZE_BITS;
-        int playerChunkZ = position.z >> CHUNK_SIZE_BITS;
+        playerX = position.x;
+        playerY = position.y;
+        playerZ = position.z;
 
         for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, playerChunkX, playerChunkY, playerChunkZ);
+        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, playerX >> CHUNK_SIZE_BITS, playerY >> CHUNK_SIZE_BITS, playerZ >> CHUNK_SIZE_BITS);
     }
 
     public long[][] getVisibilityBits() {
@@ -67,8 +67,13 @@ public final class RenderingOptimizer {
         if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0) return;
 
         if (Game.getWorld().getChunk(chunkIndex, lod) == null) return;
-        if (!intersection.testAab(chunkX << chunkSizeBits, chunkY << chunkSizeBits, chunkZ << chunkSizeBits,
-                chunkX + 1 << chunkSizeBits, chunkY + 1 << chunkSizeBits, chunkZ + 1 << chunkSizeBits)) return;
+        if (!intersection.testAab(
+                (chunkX << chunkSizeBits) - playerX,
+                (chunkY << chunkSizeBits) - playerY,
+                (chunkZ << chunkSizeBits) - playerZ,
+                (chunkX + 1 << chunkSizeBits) - playerX,
+                (chunkY + 1 << chunkSizeBits) - playerY,
+                (chunkZ + 1 << chunkSizeBits) - playerZ)) return;
 
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
 
@@ -171,6 +176,7 @@ public final class RenderingOptimizer {
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
     private Vector3i position;
+    private int playerX, playerY, playerZ;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64 + 1];
 }

@@ -451,11 +451,13 @@ public final class Renderer extends Renderable {
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
 
         int lineCount = 0;
+        ArrayList<ChatMessage> messages = this.messages;
         for (int messageIndex = messages.size() - 1; messageIndex >= 0; messageIndex--) {
             ChatMessage chatMessage = messages.get(messageIndex);
             if (!player.isChatOpen() && (currentTime - chatMessage.timestamp()) / 1_000_000_000D > chatMessageDuration) return;
 
             int messageLines = chatMessage.lines().length;
+            if (messageLines == 0) continue;
             Color color = chatMessage.color().getColor();
             String prefix = chatMessage.prefix();
             float prefixSize = TextShader.getTextLength(prefix, defaultTextSize.x, false);

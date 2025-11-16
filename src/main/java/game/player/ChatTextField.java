@@ -17,7 +17,6 @@ public final class ChatTextField extends TextField {
     }
 
     public Input getInput() {
-        input.setActive();
         return input;
     }
 

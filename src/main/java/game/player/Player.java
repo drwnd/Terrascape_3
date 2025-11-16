@@ -161,6 +161,12 @@ public final class Player {
         else Window.setInput(input);
     }
 
+    public void setPosition(Position position) {
+        synchronized (this) {
+            this.position = new Position(position);
+        }
+    }
+
     public boolean canDoActiveActions() {
         return !inventory.isVisible() && !chat.isVisible();
     }
