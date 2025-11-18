@@ -57,8 +57,7 @@ public final class Utils {
     }
 
     public static int floor(float value) {
-        int addend = value < 0.0F ? -1 : 0;
-        return (int) value + addend;
+        return (int) Math.floor(value);
     }
 
     public static int floor(double value) {
@@ -66,9 +65,8 @@ public final class Utils {
         return (int) value + addend;
     }
 
-    public static float fraction(float number) {
-        int addend = number < 0.0F ? 1 : 0;
-        return (number - (int) number) + addend;
+    public static float fraction(float value) {
+        return (float) (value - Math.floor(value));
     }
 
     public static double smoothInOutQuad(double x, double lowBound, double highBound) {
@@ -106,6 +104,12 @@ public final class Utils {
         int powOf2 = 1;
         while (powOf2 < value) powOf2 <<= 1;
         return powOf2;
+    }
+
+    public static int getWrappedPosition(int actualPosition, int reference, int wrappingDistance) {
+        if (actualPosition - reference > wrappingDistance >> 1) return actualPosition - wrappingDistance;
+        if (reference - actualPosition > wrappingDistance >> 1) return actualPosition + wrappingDistance;
+        return actualPosition;
     }
 
     public static Vector3i offsetByNormal(Vector3i value, int side) {

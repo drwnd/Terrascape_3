@@ -92,7 +92,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     private void renderOpaqueModel(OpaqueModel model, Shader shader) {
-        if (!model.containsGeometry()) return;
+        if (model.isEmpty()) return;
 
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
         shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -100,7 +100,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     private void renderWaterModel(TransparentModel model, Shader shader) {
-        if (!model.containsWater()) return;
+        if (model.isWaterEmpty()) return;
 
         shader.setUniform("cameraPosition", 3000.0F, 4000.0F, 2000.0F);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
@@ -109,7 +109,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     private void renderGlassModel(TransparentModel model, Shader shader) {
-        if (!model.containsGlass()) return;
+        if (model.isGlassEmpty()) return;
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
         shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
         shader.setUniform("indexOffset", model.waterVertexCount() >> 1);

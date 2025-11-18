@@ -42,6 +42,20 @@ vec3 getFacePositions(int side, int currentVertexId, int faceSize1, int faceSize
     return vec3(0, 0, 0);
 }
 
+int getWrappedPosition(int actualPosition, int reference, int wrappingDistance) {
+    if (actualPosition - reference > wrappingDistance >> 1) return actualPosition - wrappingDistance;
+    if (reference - actualPosition > wrappingDistance >> 1) return actualPosition + wrappingDistance;
+    return actualPosition;
+}
+
+ivec3 getWrappedPosition(ivec3 worldPos) {
+    return ivec3(
+    getWrappedPosition(worldPos.x, iCameraPosition.x, 1 << 30),
+    getWrappedPosition(worldPos.y, iCameraPosition.y, 1 << 22),
+    getWrappedPosition(worldPos.z, iCameraPosition.z, 1 << 30)
+    ) - iCameraPosition;
+}
+
 void main() {
     Vertex currentVertex = vertices[gl_VertexID / 6 + indexOffset];
     int currentVertexId = gl_VertexID % 6;
@@ -53,7 +67,8 @@ void main() {
 
     int faceSize1 = (currentVertex.positionData >> 24 & 63) + 1;
     int faceSize2 = (currentVertex.positionData >> 18 & 63) + 1;
-    totalPosition = (worldPos.xyz - iCameraPosition) + (vec3(x, y, z) + getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * worldPos.w + vec3(0, -worldPos.w + 1, 0);
+    vec3 inChunkPosition = (vec3(x, y, z) + getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * worldPos.w;
+    totalPosition = getWrappedPosition(worldPos.xyz) + ivec3(0, -worldPos.w + 1, 0) + inChunkPosition;
 
     gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
 

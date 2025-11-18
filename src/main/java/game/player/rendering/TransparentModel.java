@@ -11,12 +11,12 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
         this(position.x << lod, position.y << lod, position.z << lod, lod, verticesBuffer, waterVertexCount, glassVertexCount);
     }
 
-    public boolean containsWater() {
-        return waterVertexCount != 0;
+    public boolean isWaterEmpty() {
+        return waterVertexCount == 0;
     }
 
-    public boolean containsGlass() {
-        return glassVertexCount != 0;
+    public boolean isGlassEmpty() {
+        return glassVertexCount == 0;
     }
 
     public void delete() {

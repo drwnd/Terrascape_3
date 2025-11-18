@@ -319,25 +319,25 @@ public final class Renderer extends Renderable {
         GL46.glDepthMask(true);
     }
 
-    private void renderOpaqueGeometry(Position playerPosition, Matrix4f projectionViewMatrix) {
+    private void renderOpaqueGeometry(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedOpaqueModels = 0;
 
-        int playerChunkX = playerPosition.intX >> CHUNK_SIZE_BITS;
-        int playerChunkY = playerPosition.intY >> CHUNK_SIZE_BITS;
-        int playerChunkZ = playerPosition.intZ >> CHUNK_SIZE_BITS;
+        int cameraChunkX = cameraPosition.intX >> CHUNK_SIZE_BITS;
+        int cameraChunkY = cameraPosition.intY >> CHUNK_SIZE_BITS;
+        int cameraChunkZ = cameraPosition.intZ >> CHUNK_SIZE_BITS;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE);
-        setupOpaqueRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getRenderTime());
-        shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
-        shader.setUniform("flags", getFlags(playerPosition));
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
+        shader.setUniform("flags", getFlags(cameraPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (model == null || !model.containsGeometry() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
-                int[] toRenderVertexCounts = model.getVertexCounts(playerChunkX, playerChunkY, playerChunkZ);
+                if (model == null || model.isEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                int[] toRenderVertexCounts = model.getVertexCounts(cameraChunkX, cameraChunkY, cameraChunkZ);
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
                 shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -391,20 +391,20 @@ public final class Renderer extends Renderable {
         shader.drawFullScreenQuad();
     }
 
-    private void renderWater(Position playerPosition, Matrix4f projectionViewMatrix) {
+    private void renderWater(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedWaterModels = 0;
 
         Shader shader = AssetManager.get(Shaders.WATER);
-        setUpWaterRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ, getRenderTime());
-        shader.setUniform("cameraPosition", playerPosition.getInChunkPosition());
-        shader.setUniform("flags", getFlags(playerPosition));
+        setUpWaterRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
+        shader.setUniform("flags", getFlags(cameraPosition));
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model == null || !model.containsWater() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                if (model == null || model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
                 shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -415,18 +415,18 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderGlass(Position playerPosition, Matrix4f projectionViewMatrix) {
+    private void renderGlass(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedGlassModels = 0;
 
         Shader shader = AssetManager.get(Shaders.GLASS);
-        setUpGlassRendering(shader, projectionViewMatrix, playerPosition.intX, playerPosition.intY, playerPosition.intZ);
+        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model == null || !model.containsGlass() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                if (model == null || model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
                 shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -486,8 +486,8 @@ public final class Renderer extends Renderable {
         return (visibilityBits[index >> 6] & 1L << index) == 0;
     }
 
-    private int getFlags(Position playerPosition) {
-        boolean headUnderWater = Game.getWorld().getMaterial(playerPosition.intX, playerPosition.intY, playerPosition.intZ, 0) == WATER;
+    private int getFlags(Position cameraPosition) {
+        boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
         return headUnderWater ? 1 : 0;
     }
 
