@@ -68,6 +68,7 @@ final class TPCommand {
 
         if (!xSet || !ySet || !zSet) return CommandResult.fail("Not all coordinates specified");
         Game.getPlayer().setPosition(new Position(intX, intY, intZ, fractionX, fractionY, fractionZ));
+        Game.getServer().scheduleGeneratorRestart();
         return CommandResult.success();
     }
 }

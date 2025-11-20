@@ -8,13 +8,17 @@ import static game.utils.Constants.*;
 public final class Utils {
 
     public static long getChunkId(int chunkX, int chunkY, int chunkZ, int lod) {
-        return (long) (chunkX & MAX_CHUNKS_XZ >> lod) << 40 | (long) (chunkY & MAX_CHUNKS_Y >> lod) << 24 | chunkZ & MAX_CHUNKS_XZ >> lod;
+        chunkX &= MAX_CHUNKS_XZ >> lod;
+        chunkY &= MAX_CHUNKS_Y >> lod;
+        chunkZ &= MAX_CHUNKS_XZ >> lod;
+
+        return (long) chunkX << 40 | (long) chunkY << 24 | chunkZ;
     }
 
-    public static int getChunkIndex(int chunkX, int chunkY, int chunkZ) {
-        chunkX &= RENDERED_WORLD_WIDTH_MASK;
-        chunkY &= RENDERED_WORLD_HEIGHT_MASK;
-        chunkZ &= RENDERED_WORLD_WIDTH_MASK;
+    public static int getChunkIndex(int chunkX, int chunkY, int chunkZ, int lod) {
+        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ >> lod;
+        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_Y >> lod;
+        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ >> lod;
 
         return ((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY;
     }

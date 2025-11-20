@@ -47,7 +47,7 @@ public final class RenderingOptimizer {
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
 
-        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
+        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
 
         fillVisibleChunks(chunkX, chunkY, chunkZ + 1, (byte) (1 << NORTH), lod, frustumIntersection);
@@ -63,7 +63,7 @@ public final class RenderingOptimizer {
     private void fillVisibleChunks(int chunkX, int chunkY, int chunkZ, byte traveledDirections, int lod, FrustumIntersection intersection) {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
 
-        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
+        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
         if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0) return;
 
         if (Game.getWorld().getChunk(chunkIndex, lod) == null) return;
@@ -114,7 +114,7 @@ public final class RenderingOptimizer {
     }
 
     private void removeModelVisibilityOverlap(int lod, int lodModelX, int lodModelY, int lodModelZ) {
-        int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ);
+        int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
         if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) return;
 
         OpaqueModel opaqueModel = meshCollector.getOpaqueModel(index, lod);
@@ -155,21 +155,21 @@ public final class RenderingOptimizer {
     private void clearModelCubeVisibility(int lodModelX, int lodModelY, int lodModelZ, int lod) {
         long[] visibilityBits = this.visibilityBits[lod];
         int index;
-        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ);
+        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ + 1);
+        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ + 1, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ);
+        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ + 1);
+        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ + 1, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ);
+        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ + 1);
+        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ + 1, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ);
+        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ + 1);
+        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ + 1, lod);
         visibilityBits[index >> 6] &= ~(1L << index);
     }
 

@@ -336,7 +336,7 @@ public final class Renderer extends Renderable {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (model == null || model.isEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                if (model == null || model.isEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
                 int[] toRenderVertexCounts = model.getVertexCounts(cameraChunkX, cameraChunkY, cameraChunkZ);
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
@@ -404,7 +404,7 @@ public final class Renderer extends Renderable {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model == null || model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                if (model == null || model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
                 shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -426,7 +426,7 @@ public final class Renderer extends Renderable {
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model == null || model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lodVisibilityBits)) continue;
+                if (model == null || model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
                 shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
@@ -481,8 +481,8 @@ public final class Renderer extends Renderable {
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
-    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, long[] visibilityBits) {
-        int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ);
+    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits) {
+        int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
         return (visibilityBits[index >> 6] & 1L << index) == 0;
     }
 

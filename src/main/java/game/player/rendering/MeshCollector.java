@@ -89,7 +89,7 @@ public final class MeshCollector {
     }
 
     public boolean isModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ), lod) != null;
+        return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 
 
@@ -114,7 +114,7 @@ public final class MeshCollector {
     }
 
     private void upload(Mesh mesh) {
-        int chunkIndex = Utils.getChunkIndex(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ());
+        int chunkIndex = Utils.getChunkIndex(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod());
         deleteMesh(chunkIndex, mesh.lod());
 
         OpaqueModel opaqueModel = ObjectLoader.loadOpaqueModel(mesh);

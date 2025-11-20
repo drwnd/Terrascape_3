@@ -17,7 +17,7 @@ public final class Chunk {
         X = chunkX & MAX_CHUNKS_XZ >> lod;
         Y = chunkY & MAX_CHUNKS_Y >> lod;
         Z = chunkZ & MAX_CHUNKS_XZ >> lod;
-        INDEX = Utils.getChunkIndex(X, Y, Z);
+        INDEX = Utils.getChunkIndex(X, Y, Z, lod);
         ID = Utils.getChunkId(X, Y, Z, lod);
         LOD = lod;
     }

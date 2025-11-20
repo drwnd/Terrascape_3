@@ -22,7 +22,7 @@ public final class World {
     }
 
     public Chunk getChunk(int chunkX, int chunkY, int chunkZ, int lod) {
-        return chunks[lod][Utils.getChunkIndex(chunkX, chunkY, chunkZ)];
+        return chunks[lod][Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod)];
     }
 
     public Chunk getChunk(int chunkIndex, int lod) {
