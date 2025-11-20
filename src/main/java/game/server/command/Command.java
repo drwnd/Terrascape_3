@@ -4,8 +4,10 @@ import java.util.ArrayList;
 
 public enum Command {
 
-    ECHO(EchoCommand::execute),
-    TP(TPCommand::execute);
+    ECHO(EchoCommand::execute, EchoCommand.EXPLANATION, EchoCommand.SYNTAX),
+    TP(TPCommand::execute, TPCommand.EXPLANATION, TPCommand.SYNTAX),
+    CLEAR(ClearCommand::execute, ClearCommand.EXPLANATION, ClearCommand.SYNTAX),
+    HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
     public static CommandResult execute(String commandString) {
         try {
@@ -22,8 +24,18 @@ public enum Command {
         }
     }
 
-    Command(Executable executable) {
+    Command(Executable executable, String explanation, String syntax) {
         this.executable = executable;
+        this.explanation = explanation;
+        this.syntax = syntax;
+    }
+
+    String getExplanation() {
+        return explanation;
+    }
+
+    String getSyntax() {
+        return syntax;
     }
 
     private static void printTokens(ArrayList<Token> tokens) {
@@ -38,6 +50,7 @@ public enum Command {
     }
 
     private final Executable executable;
+    private final String explanation, syntax;
 
     private interface Executable {
 

@@ -1,6 +1,6 @@
 package game.server.command;
 
-public record KeyWordToken(String keyword) implements Token {
+record KeyWordToken(String keyword) implements Token {
 
     @Override
     public TokenType type() {

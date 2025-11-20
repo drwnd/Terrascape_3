@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 final class EchoCommand {
 
+    static final String SYNTAX = "[Number of Repeats] [Color of Messages] \"Message\"";
+    static final String EXPLANATION = "Prints a specified Message";
+
     private EchoCommand() {
 
     }

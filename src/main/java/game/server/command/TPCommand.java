@@ -7,6 +7,9 @@ import java.util.ArrayList;
 
 final class TPCommand {
 
+    static final String SYNTAX = "[~]X-Coordinate [~]Y-Coordinate [~]Z-Coordinate // Adding ~ before a Coordinate adds that Coordinate to the Players Position";
+    static final String EXPLANATION = "Teleports the Player to a specified Position";
+
     private TPCommand() {
 
     }

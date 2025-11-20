@@ -150,7 +150,7 @@ public final class Server {
                 generatorRestartScheduled = false;
             }
         }
-        removeOldChatMessages();
+        removeOldChatMessages((int) FloatSetting.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
     private void incrementTime() {
@@ -158,9 +158,8 @@ public final class Server {
         if (dayTime > 1.0F) dayTime -= 2.0F;
     }
 
-    private void removeOldChatMessages() {
+    public void removeOldChatMessages(int maxMessageCount) {
         synchronized (messages) {
-            int maxMessageCount = (int) FloatSetting.MAX_CHAT_MESSAGE_COUNT.value();
             int toRemoveMessagesCount = messages.size() - maxMessageCount;
             if (toRemoveMessagesCount <= 0) return;
             for (int index = 0; index < maxMessageCount; index++) messages.set(index, messages.get(index + toRemoveMessagesCount));

@@ -38,28 +38,42 @@ interface Token {
         char startChar = chars[startIndex];
 
         if (startChar == '"') {
-            int stringEndIndex = nextIndexOf('"', chars, ++startIndex);
+            int stringEndIndex = getStringEndIndex(chars, ++startIndex);
             tokens.add(new StringToken(command.substring(startIndex, stringEndIndex)));
             return stringEndIndex + 1;
         }
-        if (Character.isDigit(startChar) || startChar == '-') {
-            int numberEndIndex = nextIndexOf(' ', chars, startIndex);
+        if (isNumberChar(startChar)) {
+            int numberEndIndex = nextNonNumberIndex(chars, startIndex);
             double number = Double.parseDouble(command.substring(startIndex, numberEndIndex));
             tokens.add(new NumberToken(number));
-            return numberEndIndex + 1;
+            return numberEndIndex;
         }
         if (Character.isLetter(startChar)) {
-            int keywordEndIndex = nextIndexOf(' ', chars, startIndex);
+            int keywordEndIndex = nextNotLetterIndex(chars, startIndex);
             tokens.add(new KeyWordToken(command.substring(startIndex, keywordEndIndex)));
-            return keywordEndIndex + 1;
+            return keywordEndIndex;
         }
 
         tokens.add(new OperatorToken(startChar));
         return startIndex + 1;
     }
 
-    private static int nextIndexOf(char target, char[] chars, int startIndex) {
-        while (startIndex < chars.length && chars[startIndex] != target) startIndex++;
+    private static int getStringEndIndex(char[] chars, int startIndex) {
+        while (startIndex < chars.length && chars[startIndex] != '"') startIndex++;
         return startIndex == chars.length ? -65536 : startIndex;
+    }
+
+    private static int nextNonNumberIndex(char[] chars, int startIndex) {
+        while (startIndex < chars.length && isNumberChar(chars[startIndex])) startIndex++;
+        return startIndex;
+    }
+
+    private static int nextNotLetterIndex(char[] chars, int startIndex) {
+        while (startIndex < chars.length && Character.isLetter(chars[startIndex])) startIndex++;
+        return startIndex;
+    }
+
+    private static boolean isNumberChar(char character) {
+        return Character.isDigit(character) || character == '.' || character == '-';
     }
 }
