@@ -51,6 +51,10 @@ public final class StructurePlaceable implements Placeable {
     public void offsetPosition(Vector3i position) {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
+
+        position.x &= WORLD_SIZE_XZ_MASK;
+        position.y &= WORLD_SIZE_Y_MASK;
+        position.z &= WORLD_SIZE_XZ_MASK;
     }
 
     @Override
@@ -72,13 +76,17 @@ public final class StructurePlaceable implements Placeable {
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int inChunkX = Math.max(chunkStartX, position.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkY = Math.max(chunkStartY, position.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkZ = Math.max(chunkStartZ, position.z) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int positionX = Utils.getWrappedPosition(position.x, chunkStartX, WORLD_SIZE_XZ_MASK + 1);
+        int positionY = Utils.getWrappedPosition(position.y, chunkStartY, WORLD_SIZE_Y_MASK + 1);
+        int positionZ = Utils.getWrappedPosition(position.z, chunkStartZ, WORLD_SIZE_XZ_MASK + 1);
 
-        int startX = chunkStartX + (inChunkX << chunk.LOD) - position.x;
-        int startY = chunkStartY + (inChunkY << chunk.LOD) - position.y;
-        int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - position.z;
+        int inChunkX = Math.max(chunkStartX, positionX) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkY = Math.max(chunkStartY, positionY) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = Math.max(chunkStartZ, positionZ) >> chunk.LOD & CHUNK_SIZE_MASK;
+
+        int startX = chunkStartX + (inChunkX << chunk.LOD) - positionX;
+        int startY = chunkStartY + (inChunkY << chunk.LOD) - positionY;
+        int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - positionZ;
 
         int lengthX = Utils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
         int lengthY = Utils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());

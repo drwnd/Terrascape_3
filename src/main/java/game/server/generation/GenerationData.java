@@ -187,16 +187,20 @@ public final class GenerationData {
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
 
+        int treeMinX = Utils.getWrappedPosition(tree.getMinX() & WORLD_SIZE_XZ_MASK, chunkStartX, WORLD_SIZE_XZ_MASK + 1);
+        int treeMinY = Utils.getWrappedPosition(tree.getMinY() & WORLD_SIZE_Y_MASK, chunkStartY, WORLD_SIZE_Y_MASK + 1);
+        int treeMinZ = Utils.getWrappedPosition(tree.getMinZ() & WORLD_SIZE_XZ_MASK, chunkStartZ, WORLD_SIZE_XZ_MASK + 1);
+
         int chunkMaxY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
-        if (chunkStartY > tree.getMaxY() || chunkMaxY < tree.getMinY()) return;
+        if (chunkStartY > tree.getMaxY() || chunkMaxY < treeMinY) return;
 
-        int inChunkX = Math.max(chunkStartX, tree.getMinX()) >> LOD & CHUNK_SIZE_MASK;
-        int inChunkY = Math.max(chunkStartY, tree.getMinY()) >> LOD & CHUNK_SIZE_MASK;
-        int inChunkZ = Math.max(chunkStartZ, tree.getMinZ()) >> LOD & CHUNK_SIZE_MASK;
+        int inChunkX = Math.max(chunkStartX, treeMinX) >> LOD & CHUNK_SIZE_MASK;
+        int inChunkY = Math.max(chunkStartY, treeMinY) >> LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = Math.max(chunkStartZ, treeMinZ) >> LOD & CHUNK_SIZE_MASK;
 
-        int startX = chunkStartX + (inChunkX << LOD) - tree.getMinX();
-        int startY = chunkStartY + (inChunkY << LOD) - tree.getMinY();
-        int startZ = chunkStartZ + (inChunkZ << LOD) - tree.getMinZ();
+        int startX = chunkStartX + (inChunkX << LOD) - treeMinX;
+        int startY = chunkStartY + (inChunkY << LOD) - treeMinY;
+        int startZ = chunkStartZ + (inChunkZ << LOD) - treeMinZ;
 
         int lengthX = Utils.min(tree.sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.sizeX());
         int lengthY = Utils.min(tree.sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.sizeY());
@@ -516,8 +520,8 @@ public final class GenerationData {
 
         for (int x = 0; x < sideLength; x++)
             for (int z = 0; z < sideLength; z++) {
-                int totalX = treeStartX + (x << CHUNK_SIZE_BITS);
-                int totalZ = treeStartZ + (z << CHUNK_SIZE_BITS);
+                int totalX = treeStartX + (x << CHUNK_SIZE_BITS) & WORLD_SIZE_XZ_MASK;
+                int totalZ = treeStartZ + (z << CHUNK_SIZE_BITS) & WORLD_SIZE_XZ_MASK;
 
                 treeMap[x * sideLength + z] = treeMapValue(totalX, totalZ);
             }
