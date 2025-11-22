@@ -5,6 +5,8 @@ import core.utils.Saver;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
+import static game.utils.Constants.*;
+
 public final class StructureSaver extends Saver<Structure> {
 
     public static String getSaveFileLocation(String structureName) {
@@ -37,7 +39,7 @@ public final class StructureSaver extends Saver<Structure> {
 
     @Override
     protected Structure getDefault() {
-        return null;
+        return new Structure(OUT_OF_WORLD);
     }
 
     @Override
