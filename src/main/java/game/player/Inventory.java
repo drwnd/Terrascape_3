@@ -56,7 +56,7 @@ public final class Inventory extends UiElement {
             cubeDisplays.add(new CubeDisplay(display, (byte) index));
             addRenderable(display);
         }
-        System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_0000);
+        System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         addRenderable(itemNameDisplay);
         addRenderable(filterTextField);
     }

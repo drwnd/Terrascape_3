@@ -88,12 +88,6 @@ public final class Hotbar extends UiElement {
     }
 
 
-    private int clampSlot(int slot) {
-        slot %= LENGTH;
-        if (slot < 0) slot += LENGTH;
-        return slot;
-    }
-
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
             if (contents[slot % LENGTH] == null) return slot % LENGTH;
@@ -131,9 +125,25 @@ public final class Hotbar extends UiElement {
         this.selectedSlot = clampSlot(selectedSlot);
     }
 
+    public Placeable[] getContents() {
+        return contents;
+    }
+
+    public void setContents(Placeable[] contents) {
+        if (contents.length != LENGTH) return;
+        for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);
+    }
+
+
+    private static int clampSlot(int slot) {
+        slot %= LENGTH;
+        if (slot < 0) slot += LENGTH;
+        return slot;
+    }
+
 
     private int selectedSlot = 0;
-    private final UiElement hotBarSelectionIndicator;
     private final Placeable[] contents = new Placeable[LENGTH];
+    private final UiElement hotBarSelectionIndicator;
     private final StructureDisplay[] displays = new StructureDisplay[LENGTH];
 }

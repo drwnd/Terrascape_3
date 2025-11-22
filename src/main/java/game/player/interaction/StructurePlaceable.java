@@ -1,5 +1,7 @@
 package game.player.interaction;
 
+import core.assets.AssetManager;
+import game.assets.StructureIdentifier;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
@@ -16,8 +18,9 @@ import static game.utils.Constants.*;
 
 public final class StructurePlaceable implements Placeable {
 
-    public StructurePlaceable(Structure structure) {
-        this.structure = structure;
+    public StructurePlaceable(StructureIdentifier identifier) {
+        this.identifier = identifier;
+        this.structure = AssetManager.get(identifier);
     }
 
     @Override
@@ -71,6 +74,12 @@ public final class StructurePlaceable implements Placeable {
         return false;
     }
 
+
+    public StructureIdentifier getIdentifier() {
+        return identifier;
+    }
+
+
     private void placeInChunk(Chunk chunk, Vector3i position) {
         int chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
@@ -109,6 +118,7 @@ public final class StructurePlaceable implements Placeable {
         if (inChunkZ + lengthZ == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
     }
 
+    private final StructureIdentifier identifier;
     private final Structure structure;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
 }

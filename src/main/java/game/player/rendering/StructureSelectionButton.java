@@ -9,7 +9,6 @@ import core.utils.Message;
 
 import game.assets.StructureIdentifier;
 import game.menus.StructurePreviewMenu;
-import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -25,14 +24,14 @@ public final class StructureSelectionButton extends UiButton {
         addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), new Message(structureName)));
     }
 
-    public Structure getStructure() {
-        return AssetManager.get(identifier);
+    public StructureIdentifier getStructure() {
+        return identifier;
     }
 
     private Clickable getAction() {
         return (Vector2i cursorPos, int button, int action) -> {
             if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT && button != GLFW.GLFW_MOUSE_BUTTON_RIGHT || action != GLFW.GLFW_PRESS) return;
-            Window.pushRenderable(new StructurePreviewMenu(getStructure()));
+            Window.pushRenderable(new StructurePreviewMenu(AssetManager.get(identifier)));
         };
     }
 
