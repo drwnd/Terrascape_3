@@ -60,6 +60,11 @@ public final class SneakingState extends MovementState {
         return 22;
     }
 
+    @Override
+    public byte getIdentifier() {
+        return 2;
+    }
+
 
     private static final float JUMP_STRENGTH = 11.125F;
     private static final float SWIM_STRENGTH = 0.00096268F;

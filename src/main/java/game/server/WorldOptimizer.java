@@ -30,7 +30,7 @@ public final class WorldOptimizer {
     }
 
     private static void deleteHigherLODs() {
-        Game.getWorld().deleteHigherLODs(0);
+        World.deleteHigherLODs(0);
     }
 
     private static int deleteRedundantChunks() {

@@ -72,11 +72,15 @@ public final class Server {
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
+    public void loadImmediateSurroundings() {
+        generator.loadImmediateSurroundings();
+    }
+
     void cleanUp() {
         generator.cleanUp();
     }
 
-    public void unloadDistantChunks(Vector3i playerChunkPosition) {
+    public static void unloadDistantChunks(Vector3i playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
 

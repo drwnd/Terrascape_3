@@ -64,6 +64,11 @@ public final class WalkingState extends MovementState {
         return 26;
     }
 
+    @Override
+    public byte getIdentifier() {
+        return 0;
+    }
+
 
     private static final float JUMP_STRENGTH = 14.25F;
     private static final float SWIM_STRENGTH = 0.0025F;

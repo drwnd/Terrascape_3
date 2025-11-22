@@ -74,5 +74,10 @@ public final class SwimmingState extends MovementState {
         return 5;
     }
 
+    @Override
+    public byte getIdentifier() {
+        return 1;
+    }
+
     private static final float SWIM_SPEED = 0.0045F;
 }

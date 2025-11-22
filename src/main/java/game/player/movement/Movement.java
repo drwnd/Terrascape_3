@@ -15,7 +15,7 @@ import static game.utils.Constants.*;
 public final class Movement {
 
     public Movement() {
-        state = new FlyingState();
+        state = new WalkingState();
         state.movement = this;
     }
 
@@ -48,6 +48,13 @@ public final class Movement {
 
     public void setVelocity(Vector3f velocity) {
         this.velocity.set(velocity);
+    }
+
+    public void setState(byte identifier) {
+        MovementState state = MovementState.getStateFromIdentifier(identifier);
+        if (state == null) return;
+        this.state = state;
+        this.state.movement = this;
     }
 
     public MovementState getState() {

@@ -59,6 +59,20 @@ public abstract class MovementState {
 
     public abstract float getCameraElevation();
 
+    public abstract byte getIdentifier();
+
+
+    public static MovementState getStateFromIdentifier(byte identifier) {
+        return switch (identifier) {
+            case 0 -> new WalkingState();
+            case 1 -> new SwimmingState();
+            case 2 -> new SneakingState();
+            case 3 -> new FlyingState();
+            case 4 -> new CrawlingState();
+            default -> null;
+        };
+    }
+
 
     void handleJump(Position position, Vector3f velocityChange, float jumpStrength, float swimStrength) {
         if (movement.isGrounded()) velocityChange.y = jumpStrength;

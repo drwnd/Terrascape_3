@@ -66,6 +66,11 @@ public final class FlyingState extends MovementState {
         return 26;
     }
 
+    @Override
+    public byte getIdentifier() {
+        return 3;
+    }
+
 
     private static final float VERTICAL_FLY_SPEED = 0.5F;
     private static final float HORIZONTAL_FLY_SPEED = 1.0F;

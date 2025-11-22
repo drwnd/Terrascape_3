@@ -26,6 +26,7 @@ public final class PlayerSaver extends Saver<Player> {
         saveVector3f(player.getCamera().getRotation());
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());
+        saveByte(player.getMovement().getState().getIdentifier());
     }
 
     @Override
@@ -39,6 +40,7 @@ public final class PlayerSaver extends Saver<Player> {
         player.getCamera().setRotation(rotation);
         player.getMovement().setVelocity(velocity);
         player.getHotbar().setSelectedSlot(selectedSlot);
+        player.getMovement().setState(loadByte());
 
         return player;
     }
@@ -51,6 +53,6 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected int getVersionNumber() {
-        return 1;
+        return 2;
     }
 }

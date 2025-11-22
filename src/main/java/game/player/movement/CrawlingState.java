@@ -59,6 +59,11 @@ public final class CrawlingState extends MovementState {
         return 5;
     }
 
+    @Override
+    public byte getIdentifier() {
+        return 4;
+    }
+
 
     private static final float JUMP_STRENGTH = 10.0F;
     private static final float SWIM_STRENGTH = 0.0033F;

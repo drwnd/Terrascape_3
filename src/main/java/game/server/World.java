@@ -17,8 +17,9 @@ public final class World {
         chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     }
 
-    public void init() {
+    public static void init() {
         ChunkSaver.generateHigherLODs();
+        Game.getServer().loadImmediateSurroundings();
     }
 
     public Chunk getChunk(int chunkX, int chunkY, int chunkZ, int lod) {
@@ -64,7 +65,7 @@ public final class World {
         deleteHigherLODs(LOD_COUNT - 1);
     }
 
-    public void deleteHigherLODs(int maxKeptLod) {
+    public static void deleteHigherLODs(int maxKeptLod) {
         File[] lodFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation()));
         for (File file : lodFiles) {
             String fileLod = file.getName();
