@@ -5,11 +5,12 @@ public enum ToggleSetting {
     RAW_MOUSE_INPUT(true),
     DO_SHADOW_MAPPING(false),
     X_RAY(false),
-    V_SYNC(true);
+    V_SYNC(true),
+    FAKE_COORDINATES(true);
 
     public static void setIfPresent(String name, String value) {
         try {
-            valueOf(name).setValue(Boolean.parseBoolean(value));
+            valueOf(name).value = Boolean.parseBoolean(value);
         } catch (IllegalArgumentException ignore) {
 
         }

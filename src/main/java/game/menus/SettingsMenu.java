@@ -28,12 +28,12 @@ public final class SettingsMenu extends UiBackgroundElement {
         addRenderable(backButton);
 
         int index = 0;
-        addSection(++index, this::createControlsSection, UiMessage.CONTROLS_SECTION);
-        addSection(++index, this::createRenderingSection, UiMessage.RENDERING_SECTION);
-        addSection(++index, this::createUiSection, UiMessage.UI_CUSTOMIZATION_SECTION);
-        addSection(++index, this::createSoundSection, UiMessage.SOUND_SECTION);
-        addSection(++index, this::createDebugSection, UiMessage.DEBUG_SECTION);
-        addSection(++index, this::createDebugScreenSection, UiMessage.DEBUG_SCREEN_SECTION);
+        addSection(++index, SettingsMenu::createControlsSection, UiMessage.CONTROLS_SECTION);
+        addSection(++index, SettingsMenu::createRenderingSection, UiMessage.RENDERING_SECTION);
+        addSection(++index, SettingsMenu::createUiSection, UiMessage.UI_CUSTOMIZATION_SECTION);
+        addSection(++index, SettingsMenu::createSoundSection, UiMessage.SOUND_SECTION);
+        addSection(++index, SettingsMenu::createDebugSection, UiMessage.DEBUG_SECTION);
+        addSection(++index, SettingsMenu::createDebugScreenSection, UiMessage.DEBUG_SCREEN_SECTION);
     }
 
     public void scrollSectionButtons(float scroll) {
@@ -51,7 +51,7 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
 
-    private SettingsRenderable createControlsSection() {
+    private static SettingsRenderable createControlsSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addToggle(ToggleSetting.SCROLL_HOTBAR, UiMessage.SCROLL_HOTBAR);
@@ -91,7 +91,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private SettingsRenderable createRenderingSection() {
+    private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addSlider(FloatSetting.FOV, UiMessage.FOV);
@@ -104,7 +104,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private SettingsRenderable createUiSection() {
+    private static SettingsRenderable createUiSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addOption(OptionSetting.LANGUAGE, UiMessage.LANGUAGE);
@@ -124,7 +124,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private SettingsRenderable createSoundSection() {
+    private static SettingsRenderable createSoundSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addSlider(FloatSetting.MASTER_AUDIO, UiMessage.MASTER_AUDIO);
@@ -137,7 +137,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private SettingsRenderable createDebugSection() {
+    private static SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addKeySelector(KeySetting.DEBUG_MENU, new Message("Open Debug Screen"));
@@ -154,6 +154,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
         section.addToggle(ToggleSetting.V_SYNC, new Message("Use V-Sync"));
+        section.addToggle(ToggleSetting.FAKE_COORDINATES, new Message("Fake Coordinates"));
 
         section.addSlider(FloatSetting.REACH, new Message("Reach"));
         section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
@@ -163,7 +164,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private SettingsRenderable createDebugScreenSection() {
+    private static SettingsRenderable createDebugScreenSection() {
         SettingsRenderable section = new SettingsRenderable();
 
         for (DebugScreenLine debugLine : DebugScreenLine.getDebugLines()) section.addDebugLineSetting(debugLine);
@@ -171,7 +172,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
-    private Clickable getBackButtonAction() {
+    private static Clickable getBackButtonAction() {
         return (Vector2i pixelCoordinate, int button, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.popRenderable();
@@ -189,7 +190,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         sectionButtons.add(sectionButton);
     }
 
-    private Clickable sectionButtonAction(SectionCreator sectionCreator) {
+    private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i pixelCoordinate, int button, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.pushRenderable(sectionCreator.getSection());

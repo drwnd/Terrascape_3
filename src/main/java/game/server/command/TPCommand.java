@@ -2,6 +2,7 @@ package game.server.command;
 
 import game.server.Game;
 import game.utils.Position;
+import game.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ final class TPCommand {
         if (Token.isOperator(tokenIndex, tokens)) {
             OperatorToken operatorToken = (OperatorToken) tokens.get(tokenIndex);
             if (operatorToken.operator() != '~') return CommandResult.fail("Bad Operator : " + operatorToken.operator());
-            intX = position.intX;
+            intX = Utils.toFakeXZ(position.intX);
             fractionX = position.fractionX;
             xSet = true;
             tokenIndex++;
@@ -41,7 +42,7 @@ final class TPCommand {
         if (Token.isOperator(tokenIndex, tokens)) {
             OperatorToken operatorToken = (OperatorToken) tokens.get(tokenIndex);
             if (operatorToken.operator() != '~') return CommandResult.fail("Bad Operator : " + operatorToken.operator());
-            intY = position.intY;
+            intY = Utils.toFakeY(position.intY);
             fractionY = position.fractionY;
             ySet = true;
             tokenIndex++;
@@ -57,7 +58,7 @@ final class TPCommand {
         if (Token.isOperator(tokenIndex, tokens)) {
             OperatorToken operatorToken = (OperatorToken) tokens.get(tokenIndex);
             if (operatorToken.operator() != '~') return CommandResult.fail("Bad Operator : " + operatorToken.operator());
-            intZ = position.intZ;
+            intZ = Utils.toFakeXZ(position.intZ);
             fractionZ = position.fractionZ;
             zSet = true;
             tokenIndex++;
@@ -70,7 +71,7 @@ final class TPCommand {
         }
 
         if (!xSet || !ySet || !zSet) return CommandResult.fail("Not all coordinates specified");
-        Game.getPlayer().setPosition(new Position(intX, intY, intZ, fractionX, fractionY, fractionZ));
+        Game.getPlayer().setPosition(new Position(Utils.fromFakeXZ(intX), Utils.fromFakeY(intY), Utils.fromFakeXZ(intZ), fractionX, fractionY, fractionZ));
         Game.getServer().scheduleGeneratorRestart();
         return CommandResult.success();
     }

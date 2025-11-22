@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.settings.ToggleSetting;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -114,6 +115,26 @@ public final class Utils {
         if (actualPosition - reference > wrappingDistance >> 1) return actualPosition - wrappingDistance;
         if (reference - actualPosition > wrappingDistance >> 1) return actualPosition + wrappingDistance;
         return actualPosition;
+    }
+
+    public static int toFakeXZ(int xz) {
+        if (!ToggleSetting.FAKE_COORDINATES.value()) return xz;
+        return xz - WORLD_SIZE_XZ / 2;
+    }
+
+    public static int toFakeY(int y) {
+        if (!ToggleSetting.FAKE_COORDINATES.value()) return y;
+        return y - WORLD_SIZE_Y / 2;
+    }
+
+    public static int fromFakeXZ(int xz) {
+        if (!ToggleSetting.FAKE_COORDINATES.value()) return xz;
+        return xz + WORLD_SIZE_XZ / 2 & WORLD_SIZE_XZ_MASK;
+    }
+
+    public static int fromFakeY(int y) {
+        if (!ToggleSetting.FAKE_COORDINATES.value()) return y;
+        return y + WORLD_SIZE_Y / 2 & WORLD_SIZE_Y_MASK;
     }
 
     public static Vector3i offsetByNormal(Vector3i value, int side) {

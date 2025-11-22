@@ -127,7 +127,10 @@ public final class Position {
     }
 
     public String intPositionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(intX, intY, intZ);
+        return "[X:%s, Y:%s, Z:%s]".formatted(
+                Utils.toFakeXZ(intX),
+                Utils.toFakeY(intY),
+                Utils.toFakeXZ(intZ));
     }
 
     public String fractionToString() {
