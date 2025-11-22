@@ -31,8 +31,8 @@ public final class GenerationData {
     public GenerationData(int chunkX, int chunkZ, int lod) {
         this.LOD = lod;
 
-        chunkX &= MAX_CHUNKS_XZ >> lod;
-        chunkZ &= MAX_CHUNKS_XZ >> lod;
+        chunkX &= MAX_CHUNKS_XZ_MASK >> lod;
+        chunkZ &= MAX_CHUNKS_XZ_MASK >> lod;
 
         featureMap = featureMap(chunkX, chunkZ, lod);
         treeMap = treeMap(chunkX, chunkZ, lod);
@@ -187,9 +187,9 @@ public final class GenerationData {
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
 
-        int treeMinX = Utils.getWrappedPosition(tree.getMinX() & WORLD_SIZE_XZ_MASK, chunkStartX, WORLD_SIZE_XZ_MASK + 1);
-        int treeMinY = Utils.getWrappedPosition(tree.getMinY() & WORLD_SIZE_Y_MASK, chunkStartY, WORLD_SIZE_Y_MASK + 1);
-        int treeMinZ = Utils.getWrappedPosition(tree.getMinZ() & WORLD_SIZE_XZ_MASK, chunkStartZ, WORLD_SIZE_XZ_MASK + 1);
+        int treeMinX = Utils.getWrappedPosition(tree.getMinX() & WORLD_SIZE_XZ_MASK, chunkStartX, WORLD_SIZE_XZ);
+        int treeMinY = Utils.getWrappedPosition(tree.getMinY() & WORLD_SIZE_Y_MASK, chunkStartY, WORLD_SIZE_Y);
+        int treeMinZ = Utils.getWrappedPosition(tree.getMinZ() & WORLD_SIZE_XZ_MASK, chunkStartZ, WORLD_SIZE_XZ);
 
         int chunkMaxY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
         if (chunkStartY > tree.getMaxY() || chunkMaxY < treeMinY) return;

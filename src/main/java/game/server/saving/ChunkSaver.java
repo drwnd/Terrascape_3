@@ -92,6 +92,12 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
 
+    public Chunk loadAndGenerate(int chunkX, int chunkY, int chunkZ, int lod) {
+        Chunk chunk = load(chunkX, chunkY, chunkZ, lod);
+        WorldGeneration.generate(chunk);
+        return chunk;
+    }
+
     public Chunk load(int chunkX, int chunkY, int chunkZ, int lod) {
         long expectedID = Utils.getChunkId(chunkX, chunkY, chunkZ, lod);
         Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, lod);

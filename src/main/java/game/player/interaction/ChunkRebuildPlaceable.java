@@ -8,7 +8,6 @@ import game.server.World;
 import game.server.generation.Structure;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
-import game.utils.Status;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -29,9 +28,7 @@ public final class ChunkRebuildPlaceable implements Placeable {
         int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
         int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
 
-        Chunk chunk = new ChunkSaver().load(chunkX, chunkY, chunkZ, lod);
-        if (chunk.getGenerationStatus() != Status.DONE) WorldGeneration.generate(chunk);
-        Game.getWorld().storeChunk(chunk);
+        Chunk chunk = new ChunkSaver().loadAndGenerate(chunkX, chunkY, chunkZ, lod);
 
         int inChunkX = position.x >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkY = position.y >> chunk.LOD & CHUNK_SIZE_MASK;

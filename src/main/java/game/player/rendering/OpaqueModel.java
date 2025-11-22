@@ -19,9 +19,9 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verti
         cameraChunkX >>= LOD;
         cameraChunkY >>= LOD;
         cameraChunkZ >>= LOD;
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ + 1 >> LOD);
+        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
+        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
+        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
 
         toRenderVertexCounts[WEST] = cameraChunkX >= modelChunkX ? vertexCounts[WEST] : 0;
         toRenderVertexCounts[EAST] = cameraChunkX <= modelChunkX ? vertexCounts[EAST] : 0;

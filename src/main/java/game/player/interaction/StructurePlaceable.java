@@ -5,6 +5,7 @@ import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
+import game.server.saving.ChunkSaver;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -28,13 +29,12 @@ public final class StructurePlaceable implements Placeable {
         int chunkEndX = position.x + structure.sizeX() >> lod + CHUNK_SIZE_BITS;
         int chunkEndY = position.y + structure.sizeY() >> lod + CHUNK_SIZE_BITS;
         int chunkEndZ = position.z + structure.sizeZ() >> lod + CHUNK_SIZE_BITS;
+        ChunkSaver saver = new ChunkSaver();
 
         for (int chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (int chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
-                for (int chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
-                    Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, lod);
-                    if (chunk != null) placeInChunk(chunk, position);
-                }
+                for (int chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
+                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), position);
     }
 
     @Override
@@ -76,9 +76,9 @@ public final class StructurePlaceable implements Placeable {
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int positionX = Utils.getWrappedPosition(position.x, chunkStartX, WORLD_SIZE_XZ_MASK + 1);
-        int positionY = Utils.getWrappedPosition(position.y, chunkStartY, WORLD_SIZE_Y_MASK + 1);
-        int positionZ = Utils.getWrappedPosition(position.z, chunkStartZ, WORLD_SIZE_XZ_MASK + 1);
+        int positionX = Utils.getWrappedPosition(position.x, chunkStartX, WORLD_SIZE_XZ);
+        int positionY = Utils.getWrappedPosition(position.y, chunkStartY, WORLD_SIZE_Y);
+        int positionZ = Utils.getWrappedPosition(position.z, chunkStartZ, WORLD_SIZE_XZ);
 
         int inChunkX = Math.max(chunkStartX, positionX) >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkY = Math.max(chunkStartY, positionY) >> chunk.LOD & CHUNK_SIZE_MASK;

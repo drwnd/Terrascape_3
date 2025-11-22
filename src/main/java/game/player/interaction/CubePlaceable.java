@@ -6,6 +6,7 @@ import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
 
+import game.server.saving.ChunkSaver;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -47,8 +48,7 @@ public final class CubePlaceable implements Placeable {
         inChunkZ &= mask;
 
         World world = Game.getWorld();
-        Chunk chunk = world.getChunk(chunkX, chunkY, chunkZ, lod);
-        if (chunk == null) return;
+        Chunk chunk = new ChunkSaver().loadAndGenerate(chunkX, chunkY, chunkZ, lod);
 
         chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, lodSize);
         affectedChunks.add(chunk);

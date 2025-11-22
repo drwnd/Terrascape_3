@@ -8,31 +8,31 @@ import static game.utils.Constants.*;
 public final class Utils {
 
     public static long getChunkId(int chunkX, int chunkY, int chunkZ, int lod) {
-        chunkX &= MAX_CHUNKS_XZ >> lod;
-        chunkY &= MAX_CHUNKS_Y >> lod;
-        chunkZ &= MAX_CHUNKS_XZ >> lod;
+        chunkX &= MAX_CHUNKS_XZ_MASK >> lod;
+        chunkY &= MAX_CHUNKS_Y_MASK >> lod;
+        chunkZ &= MAX_CHUNKS_XZ_MASK >> lod;
 
         return (long) chunkX << 40 | (long) chunkY << 24 | chunkZ;
     }
 
     public static int getChunkIndex(int chunkX, int chunkY, int chunkZ, int lod) {
-        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ >> lod;
-        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_Y >> lod;
-        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ >> lod;
+        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ_MASK >> lod;
+        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_Y_MASK >> lod;
+        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ_MASK >> lod;
 
         return ((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY;
     }
 
     public static boolean outsideChunkKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(chunkX - playerChunkX, MAX_CHUNKS_XZ >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
+        return distance(chunkX - playerChunkX, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
     }
 
     public static boolean outsideRenderKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(playerChunkX - chunkX, MAX_CHUNKS_XZ >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
+        return distance(playerChunkX - chunkX, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
     }
 
     public static boolean isInteger(String string, int radix) {

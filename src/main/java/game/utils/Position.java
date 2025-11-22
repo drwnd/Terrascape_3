@@ -98,9 +98,9 @@ public final class Position {
 
     public Vector3f vectorFrom(Position position) {
         return new Vector3f(
-                (Utils.getWrappedPosition(intX, position.intX, WORLD_SIZE_XZ_MASK + 1) - position.intX) + (fractionX - position.fractionX),
-                (Utils.getWrappedPosition(intY, position.intY, WORLD_SIZE_Y_MASK + 1) - position.intY) + (fractionY - position.fractionY),
-                (Utils.getWrappedPosition(intZ, position.intZ, WORLD_SIZE_XZ_MASK + 1) - position.intZ) + (fractionZ - position.fractionZ)
+                (Utils.getWrappedPosition(intX, position.intX, WORLD_SIZE_XZ) - position.intX) + (fractionX - position.fractionX),
+                (Utils.getWrappedPosition(intY, position.intY, WORLD_SIZE_Y) - position.intY) + (fractionY - position.fractionY),
+                (Utils.getWrappedPosition(intZ, position.intZ, WORLD_SIZE_XZ) - position.intZ) + (fractionZ - position.fractionZ)
         );
     }
 
