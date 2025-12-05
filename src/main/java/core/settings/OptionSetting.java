@@ -18,6 +18,8 @@ public enum OptionSetting {
     TARGET_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     RENDERED_MODELS_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     VELOCITY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
+    CHUNK_MEMORY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
+    TOTAL_MEMORY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
 
     WORLD_NAME_COLOR(ColorOption.LIGHT_GRAY),
     WORLD_TICK_AND_TIME_COLOR(ColorOption.LIGHT_GRAY),
@@ -32,6 +34,8 @@ public enum OptionSetting {
     TARGET_COLOR(ColorOption.BLUE),
     RENDERED_MODELS_COLOR(ColorOption.RED),
     VELOCITY_COLOR(ColorOption.WHITE),
+    CHUNK_MEMORY_COLOR(ColorOption.RED),
+    TOTAL_MEMORY_COLOR(ColorOption.RED),
 
     FONT(new FontOption("Default")),
     LANGUAGE(new Language("English"));
@@ -42,7 +46,7 @@ public enum OptionSetting {
 
             Option savedValue = setting.defaultValue.value(value);
 
-            if (savedValue != null) setting.setValue(savedValue);
+            if (savedValue != null) setting.value = savedValue;
         } catch (IllegalArgumentException ignore) {
 
         }

@@ -16,6 +16,7 @@ import game.server.Game;
 import game.server.generation.WorldGeneration;
 import game.utils.Position;
 
+import game.utils.Status;
 import game.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -51,7 +52,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                 () -> Game.getWorld().getName(), "World name"));
 
         lines.add(new DebugScreenLine(OptionSetting.WORLD_TICK_AND_TIME_VISIBILITY, OptionSetting.WORLD_TICK_AND_TIME_COLOR,
-                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getRenderTime()),
+                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()),
                 "Gametick and time"));
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
@@ -64,6 +65,27 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
             return "FPS: %s, lowest: %s, highest: %s".formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime));
         }, "FPS"));
+
+        lines.add(new DebugScreenLine(OptionSetting.TOTAL_MEMORY_VISIBILITY, OptionSetting.TOTAL_MEMORY_COLOR, () -> {
+            long total = Runtime.getRuntime().totalMemory();
+            long free = Runtime.getRuntime().freeMemory();
+            long used = total - free;
+
+            return "Total Memory: %sMB, used: %sMB, free: %sMB".formatted(total / 1_000_000L, used / 1_000_000L, free / 1_000_000L);
+        }, "Total Memory"));
+
+        lines.add(new DebugScreenLine(OptionSetting.CHUNK_MEMORY_VISIBILITY, OptionSetting.CHUNK_MEMORY_COLOR, () -> {
+            long memory = 0L;
+            int chunks = 0;
+            for (int lod = 0; lod < LOD_COUNT; lod++)
+                for (Chunk chunk : Game.getWorld().getLod(lod)) {
+                    if (chunk == null || chunk.getGenerationStatus() != Status.DONE) continue;
+                    memory += chunk.getMaterials().getBytes().length;
+                    chunks++;
+                }
+            if (chunks == 0) return "No generated Chunks";
+            return "Chunk Memory: %sMB, average: %sB".formatted(memory / 1_000_000L, memory / chunks);
+        }, "Chunk Memory"));
 
         lines.add(new DebugScreenLine(OptionSetting.RENDERED_MODELS_VISIBILITY, OptionSetting.RENDERED_MODELS_COLOR, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
@@ -87,7 +109,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                     playerPosition.intY >> CHUNK_SIZE_BITS,
                     playerPosition.intZ >> CHUNK_SIZE_BITS, 0);
             if (chunk == null) return "Chunk is null";
-            return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y,chunk.Z, playerPosition.inChunkPositionToString());
+            return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
         }, "Chunk Position"));
 
         lines.add(new DebugScreenLine(OptionSetting.DIRECTION_VISIBILITY, OptionSetting.DIRECTION_COLOR, () -> {

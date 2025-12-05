@@ -26,7 +26,7 @@ public final class MaterialsData {
 
     public static MaterialsData getCompressedMaterials(int sizeBits, byte[] uncompressedMaterials) {
         ByteArrayList dataList = new ByteArrayList(1000);
-        compressMaterials(dataList, uncompressedMaterials, sizeBits, sizeBits, 0, 0, 0, 0);
+        compressMaterials(dataList, uncompressedMaterials, sizeBits);
         byte[] data = new byte[dataList.size()];
         dataList.copyInto(data, 0);
         return new MaterialsData(sizeBits, data);
@@ -190,7 +190,7 @@ public final class MaterialsData {
 
     private void compressIntoData(byte[] uncompressedMaterials) {
         ByteArrayList dataList = new ByteArrayList(1000);
-        compressMaterials(dataList, uncompressedMaterials, totalSizeBits, totalSizeBits, 0, 0, 0, 0);
+        compressMaterials(dataList, uncompressedMaterials, totalSizeBits);
 
         byte[] data = new byte[dataList.size()];
         dataList.copyInto(data, 0);
@@ -199,7 +199,7 @@ public final class MaterialsData {
         }
     }
 
-    private void storeLowerLODChunk(Chunk chunk, byte[] uncompressedMaterials, int startX, int startY, int startZ) {
+    private static void storeLowerLODChunk(Chunk chunk, byte[] uncompressedMaterials, int startX, int startY, int startZ) {
         if (chunk == null) return;
 
         Vector3i targetStart = new Vector3i(startX, startY, startZ);
@@ -836,6 +836,48 @@ public final class MaterialsData {
         return 3 * ((inChunkX >> sizeBits & 1) << 2 | (inChunkY >> sizeBits & 1) << 1 | (inChunkZ >> sizeBits & 1));
     }
 
+    private static void compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int totalSizeBits) {
+        if (isHomogenous(uncompressedMaterials)) {
+            data.add(HOMOGENOUS);
+            data.add(uncompressedMaterials[0]);
+            return;
+        }
+
+        if (totalSizeBits <= 1) {
+            data.add(DETAIL);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 0, 0, 0)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 0, 1, 0)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 0, 0, 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 0, 1, 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 1, 0, 0)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 1, 1, 0)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 1, 0, 1)]);
+            data.add(uncompressedMaterials[getUncompressedIndex(totalSizeBits, 1, 1, 1)]);
+            return;
+        }
+
+        int nextSize = 1 << totalSizeBits - 1;
+        data.add(SPLITTER);
+        data.pad(SPLITTER_BYTE_SIZE - 1);
+        int offset = SPLITTER_BYTE_SIZE;
+
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, 0, 0, 0);
+        setOffset(data, offset, 1);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, 0, 0, nextSize);
+        setOffset(data, offset, 4);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, 0, nextSize, 0);
+        setOffset(data, offset, 7);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, 0, nextSize, nextSize);
+        setOffset(data, offset, 10);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, nextSize, 0, 0);
+        setOffset(data, offset, 13);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, nextSize, 0, nextSize);
+        setOffset(data, offset, 16);
+        offset += compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, nextSize, nextSize, 0);
+        setOffset(data, offset, 19);
+        compressMaterials(data, uncompressedMaterials, totalSizeBits, totalSizeBits - 1, offset, nextSize, nextSize, nextSize);
+    }
+
     private static int compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int totalSizeBits, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         if (isHomogenous(inChunkX, inChunkY, inChunkZ, sizeBits, uncompressedMaterials, totalSizeBits)) {
             data.add(HOMOGENOUS);
@@ -885,9 +927,16 @@ public final class MaterialsData {
         for (int inChunkX = startX; inChunkX < startX + size; inChunkX++)
             for (int inChunkZ = startZ; inChunkZ < startZ + size; inChunkZ++) {
                 int xzIndex = (inChunkX << totalSizeBits | inChunkZ) << totalSizeBits;
-                for (int inChunkY = startY; inChunkY < startY + size; inChunkY++)
-                    if (uncompressedMaterials[xzIndex | inChunkY] != material) return false;
+                for (int inChunkY = startY; inChunkY < startY + size; inChunkY += 2)
+                    if (uncompressedMaterials[xzIndex | inChunkY] != material
+                            || uncompressedMaterials[xzIndex | inChunkY + 1] != material) return false;
             }
+        return true;
+    }
+
+    private static boolean isHomogenous(byte[] uncompressedMaterials) {
+        byte reference = uncompressedMaterials[0];
+        for (byte material : uncompressedMaterials) if (material != reference) return false;
         return true;
     }
 

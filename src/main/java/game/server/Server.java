@@ -72,8 +72,8 @@ public final class Server {
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
-    public void loadImmediateSurroundings() {
-        generator.loadImmediateSurroundings();
+    public static void loadImmediateSurroundings() {
+        ChunkGenerator.loadImmediateSurroundings();
     }
 
     void cleanUp() {

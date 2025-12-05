@@ -21,22 +21,23 @@ public final class ChunkGenerator {
         executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
     }
 
-    public void loadImmediateSurroundings() {
+    public static void loadImmediateSurroundings() {
         Vector3i playerPosition = Game.getPlayer().getPosition().intPosition();
 
         int playerChunkX = playerPosition.x >> CHUNK_SIZE_BITS;
         int playerChunkY = playerPosition.y >> CHUNK_SIZE_BITS;
         int playerChunkZ = playerPosition.z >> CHUNK_SIZE_BITS;
 
-        submitColumnGeneration(playerChunkX, playerChunkY, playerChunkZ + 1, 0);
-        submitColumnGeneration(playerChunkX, playerChunkY, playerChunkZ, 0);
-        submitColumnGeneration(playerChunkX, playerChunkY, playerChunkZ - 1, 0);
-        submitColumnGeneration(playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0);
-        submitColumnGeneration(playerChunkX + 1, playerChunkY, playerChunkZ, 0);
-        submitColumnGeneration(playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0);
-        submitColumnGeneration(playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0);
-        submitColumnGeneration(playerChunkX - 1, playerChunkY, playerChunkZ, 0);
-        submitColumnGeneration(playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0);
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
+        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ - 1, 0));
+        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0));
+        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0));
 
         executor.shutdown();
         try {
@@ -45,7 +46,6 @@ public final class ChunkGenerator {
         } catch (InterruptedException ignore) {
             System.err.println("Executor failed to generate immediate surroundings.");
         }
-        executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
     }
 
     public void restart() {
@@ -147,7 +147,7 @@ public final class ChunkGenerator {
     }
 
 
-    private ThreadPoolExecutor executor;
+    private final ThreadPoolExecutor executor;
 
     private record Generator(int chunkX, int playerChunkY, int chunkZ, int lod) implements Runnable {
 

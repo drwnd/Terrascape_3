@@ -69,7 +69,7 @@ public final class Renderer extends Renderable {
         return frameTimes;
     }
 
-    public float getRenderTime() {
+    public static float getRenderTime() {
         Server server = Game.getServer();
         float renderTime = server.getDayTime() + FloatSetting.TIME_SPEED.value() * server.getCurrentGameTickFraction();
         if (renderTime > 1.0F) renderTime -= 2.0F;
@@ -226,8 +226,9 @@ public final class Renderer extends Renderable {
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_BORDER);
         GL46.glTexParameterfv(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_BORDER_COLOR, new float[]{1, 1, 1, 1});
 
-        float[] noise = new float[4 * 4 * 3];
-        for (int i = 0; i < noise.length; i += 3) {
+        int noiseSamples = 4 * 4 * 3;
+        float[] noise = new float[noiseSamples];
+        for (int i = 0; i < noiseSamples; i += 3) {
             noise[i] = (float) (Math.random() * 2 - 1);
             noise[i + 1] = (float) (Math.random() * 2 - 1);
             noise[i + 2] = 0.0F;
@@ -291,7 +292,7 @@ public final class Renderer extends Renderable {
         crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
 
-    private void renderSkybox(Camera camera) {
+    private static void renderSkybox(Camera camera) {
         GL46.glDisable(GL46.GL_BLEND);
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
@@ -486,7 +487,7 @@ public final class Renderer extends Renderable {
         return (visibilityBits[index >> 6] & 1L << index) == 0;
     }
 
-    private int getFlags(Position cameraPosition) {
+    private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
         return headUnderWater ? 1 : 0;
     }

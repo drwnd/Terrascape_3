@@ -65,13 +65,14 @@ public final class WorldGeneration {
         for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
 
-                double height = heightMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double erosion = erosionMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double continental = continentalMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double river = riverMap[GenerationData.getMapIndex(mapX, mapZ)];
-                double ridge = ridgeMap[GenerationData.getMapIndex(mapX, mapZ)];
+                int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
+                double height = heightMap[mapIndex];
+                double erosion = erosionMap[mapIndex];
+                double continental = continentalMap[mapIndex];
+                double river = riverMap[mapIndex];
+                double ridge = ridgeMap[mapIndex];
 
-                resultingHeightMap[GenerationData.getMapIndex(mapX, mapZ)] = getResultingHeight(height, erosion, continental, river, ridge);
+                resultingHeightMap[mapIndex] = getResultingHeight(height, erosion, continental, river, ridge);
             }
 
         return resultingHeightMap;
@@ -112,14 +113,14 @@ public final class WorldGeneration {
 
     private static void generateBiome(Biome biome, int inChunkX, int inChunkZ, GenerationData data) {
         int height = data.height;
+        int start = generateStone(inChunkX, inChunkZ, data);
 
-        for (int inChunkY = 0; inChunkY < CHUNK_SIZE; inChunkY++) {
+        for (int inChunkY = start; inChunkY < CHUNK_SIZE; inChunkY++) {
             data.computeTotalY(inChunkY);
             int totalY = data.totalY;
-            int lod = data.LOD;
 
             // Attempting to place biome specific materials and features
-            if (totalY >> lod >= height - MAX_SURFACE_MATERIALS_DEPTH >> lod && biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
+            if (biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
             // Placing stone beneath surface materials
             if (totalY <= height) data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingStoneType(data.totalX, totalY, data.totalZ));
                 // Reached surface, everything above is just air
@@ -127,6 +128,20 @@ public final class WorldGeneration {
                 // Filling Oceans with water
             else data.store(inChunkX, inChunkY, inChunkZ, WATER);
         }
+    }
+
+    private static int generateStone(int inChunkX, int inChunkZ, GenerationData data) {
+        int maxY = Math.min((data.height - MAX_SURFACE_MATERIALS_DEPTH >> data.LOD) - (data.chunkY << CHUNK_SIZE_BITS), CHUNK_SIZE);
+        if (maxY <= 0) return 0;
+
+        int inChunkY = 0;
+        for (; inChunkY < maxY; inChunkY += 8) {
+            data.computeTotalY(inChunkY);
+            byte stoneType = data.getGeneratingStoneType(data.totalX, data.totalY, data.totalZ);
+            data.store8Consecutive(inChunkX, inChunkY + 0, inChunkZ, stoneType);
+        }
+        while (--inChunkY >= maxY + 1) data.store(inChunkX, inChunkY, inChunkZ, AIR);
+        return maxY;
     }
 
     private static void generateTrees(GenerationData data) {

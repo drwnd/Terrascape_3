@@ -19,7 +19,7 @@ public final class World {
 
     public static void init() {
         ChunkSaver.generateHigherLODs();
-        Game.getServer().loadImmediateSurroundings();
+        Server.loadImmediateSurroundings();
     }
 
     public Chunk getChunk(int chunkX, int chunkY, int chunkZ, int lod) {
