@@ -11,21 +11,18 @@ import org.joml.Vector3i;
 import java.util.Arrays;
 
 import static game.server.generation.WorldGeneration.SEED;
+import static game.server.generation.WorldGeneration.WATER_LEVEL;
 import static game.utils.Constants.*;
 
 public final class GenerationData {
 
-    public double temperature;
-    public double humidity;
+    public Biome biome;
     public double feature;
-    public double erosion;
-    public double continental;
-
     public int height, specialHeight;
     public byte steepness;
-    public int chunkX, chunkY, chunkZ;
     public int totalX, totalY, totalZ;
 
+    public int chunkX, chunkY, chunkZ;
     public final int LOD;
 
     public GenerationData(int chunkX, int chunkZ, int lod) {
@@ -37,16 +34,18 @@ public final class GenerationData {
         featureMap = featureMap(chunkX, chunkZ, lod);
         treeMap = treeMap(chunkX, chunkZ, lod);
 
-        temperatureMap = temperatureMapPadded(chunkX, chunkZ, lod);
-        humidityMap = humidityMapPadded(chunkX, chunkZ, lod);
-        erosionMap = erosionMapPadded(chunkX, chunkZ, lod);
-        continentalMap = continentalMapPadded(chunkX, chunkZ, lod);
+        double[] temperatureMap = temperatureMapPadded(chunkX, chunkZ, lod);
+        double[] humidityMap = humidityMapPadded(chunkX, chunkZ, lod);
+        double[] erosionMap = erosionMapPadded(chunkX, chunkZ, lod);
+        double[] continentalMap = continentalMapPadded(chunkX, chunkZ, lod);
         double[] heightMap = heightMapPadded(chunkX, chunkZ, lod);
         double[] riverMap = riverMapPadded(chunkX, chunkZ, lod);
         double[] ridgeMap = ridgeMapPadded(chunkX, chunkZ, lod);
 
         resultingHeightMap = WorldGeneration.getResultingHeightMap(heightMap, erosionMap, continentalMap, riverMap, ridgeMap);
         steepnessMap = steepnessMap(resultingHeightMap, lod);
+        biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, humidityMap, temperatureMap, erosionMap, continentalMap);
+        specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap, resultingHeightMap);
     }
 
     public void setChunk(Chunk chunk) {
@@ -56,7 +55,6 @@ public final class GenerationData {
 
         Arrays.fill(uncompressedMaterials, AIR);
         Arrays.fill(cachedMaterials, AIR);
-        Arrays.fill(cachedStoneMaterials, AIR);
     }
 
     public void set(int inChunkX, int inChunkZ) {
@@ -68,16 +66,9 @@ public final class GenerationData {
 
         feature = featureMap[index];
         steepness = steepnessMap[index];
-
-        temperature = temperatureMap[mapIndex];
-        humidity = humidityMap[mapIndex];
-        erosion = erosionMap[mapIndex];
-        continental = continentalMap[mapIndex];
+        biome = biomeMap[index];
+        specialHeight = specialHeightMap[index];
         height = resultingHeightMap[mapIndex];
-    }
-
-    public void setBiome(Biome biome) {
-        specialHeight = biome.getSpecialHeight(totalX, totalZ, this);
     }
 
     public void computeTotalY(int inChunkY) {
@@ -180,19 +171,17 @@ public final class GenerationData {
     }
 
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
-        uncompressedMaterials[inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY] = material;
+//        uncompressedMaterials[inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY] = material;
+        uncompressedMaterials[MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = material;
     }
 
-    public void store8Consecutive(int inChunkX, int inChunkY, int inChunkZ, byte material) {
-        int index = inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY;
-        uncompressedMaterials[index + 0] = material;
-        uncompressedMaterials[index + 1] = material;
-        uncompressedMaterials[index + 2] = material;
-        uncompressedMaterials[index + 3] = material;
-        uncompressedMaterials[index + 4] = material;
-        uncompressedMaterials[index + 5] = material;
-        uncompressedMaterials[index + 6] = material;
-        uncompressedMaterials[index + 7] = material;
+    public void storeConsecutive(int startIndex, int count, byte material) {
+        for (int index = startIndex; index < startIndex + count; index++) uncompressedMaterials[index] = material;
+    }
+
+    public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {
+        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
+        for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
     public void storeTree(Tree tree) {
@@ -224,7 +213,7 @@ public final class GenerationData {
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
-        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), CHUNK_SIZE_BITS, tree.transform(), LOD, targetStart, sourceStart, size);
+        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), tree.transform(), LOD, targetStart, sourceStart, size);
     }
 
     public MaterialsData getCompressedMaterials() {
@@ -235,21 +224,19 @@ public final class GenerationData {
         return treeMap[index];
     }
 
+    public boolean chunkContainsGround() {
+        int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
+        int maxHeight = resultingHeightMap[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
+        return chunkStartY < maxHeight || chunkStartY < WATER_LEVEL;
+    }
 
-    public byte getGeneratingStoneType(int x, int y, int z) {
-        int index = getCompressedStoneIndex(x, y, z);
-        byte material = cachedStoneMaterials[index];
-        if (material != AIR) return material;
 
-        // Generate if not yet generated
+    public static byte getGeneratingStoneType(int x, int y, int z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
-        if (Math.abs(noise) < ANDESITE_THRESHOLD) material = ANDESITE;
-        else if (noise > SLATE_THRESHOLD) material = SLATE;
-        else if (noise < BLACKSTONE_THRESHOLD) material = BLACKSTONE;
-        else material = STONE;
-
-        cachedStoneMaterials[index] = material;
-        return material;
+        if (Math.abs(noise) < ANDESITE_THRESHOLD) return ANDESITE;
+        else if (noise > SLATE_THRESHOLD) return SLATE;
+        else if (noise < BLACKSTONE_THRESHOLD) return BLACKSTONE;
+        else return STONE;
     }
 
     public byte getOceanFloorMaterial(int x, int y, int z) {
@@ -522,6 +509,24 @@ public final class GenerationData {
         return steepnessMap;
     }
 
+    private static int[] specialHeightMap(int chunkX, int chunkZ, int lod, Biome[] biomeMap, int[] resultingHeightMap) {
+        int[] specialHeightMap = new int[CHUNK_SIZE * CHUNK_SIZE];
+        int chunkStartX = chunkX << CHUNK_SIZE_BITS + lod;
+        int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + lod;
+        int max = Integer.MIN_VALUE;
+
+        for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
+                int index = mapX << CHUNK_SIZE_BITS | mapZ;
+                int height = biomeMap[index].getSpecialHeight(chunkStartX + (mapX << lod), chunkStartZ + (mapZ << lod));
+                specialHeightMap[index] = height;
+                int combinedHeight = height + Math.max(WATER_LEVEL, resultingHeightMap[getMapIndex(mapX, mapZ)]);
+                max = Math.max(max, combinedHeight);
+            }
+        resultingHeightMap[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED] = max;
+        return specialHeightMap;
+    }
+
     private static Tree[] treeMap(int chunkX, int chunkZ, int lod) {
         if (lod > MAX_TREE_LOD) return null;
 
@@ -588,27 +593,14 @@ public final class GenerationData {
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 
-    private int getCompressedStoneIndex(int x, int y, int z) {
-        // >> 3 for compression and performance improvement
-        int compressedX = (x >> LOD & CHUNK_SIZE_MASK) >> 3;
-        int compressedY = (y >> LOD & CHUNK_SIZE_MASK) >> 3;
-        int compressedZ = (z >> LOD & CHUNK_SIZE_MASK) >> 3;
-
-        return compressedX << CHUNK_SIZE_BITS * 2 - 6 | compressedZ << CHUNK_SIZE_BITS - 3 | compressedY;
-    }
-
-
     private final Tree[] treeMap;
-    private final double[] temperatureMap;
-    private final double[] humidityMap;
     private final double[] featureMap;
-    private final double[] erosionMap;
-    private final double[] continentalMap;
+    private final Biome[] biomeMap;
 
     private final int[] resultingHeightMap;
+    private final int[] specialHeightMap;
     private final byte[] steepnessMap;
     private final byte[] cachedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE >> 6];
-    private final byte[] cachedStoneMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE >> 9];
 
     private final byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 

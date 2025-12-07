@@ -29,7 +29,7 @@ public final class CorrodedMesa extends Biome {
     }
 
     @Override
-    public int getSpecialHeight(int totalX, int totalZ, GenerationData data) {
+    public int getSpecialHeight(int totalX, int totalZ) {
         double noise = OpenSimplex2S.noise2(SEED ^ 0xDF860F2E2A604A17L, totalX * MESA_PILLAR_FREQUENCY, totalZ * MESA_PILLAR_FREQUENCY);
         if (Math.abs(noise) > MESA_PILLAR_THRESHOLD) return MESA_PILLAR_HEIGHT;
         return 0;

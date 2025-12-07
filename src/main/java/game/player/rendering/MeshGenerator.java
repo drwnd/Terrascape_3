@@ -4,6 +4,7 @@ import core.utils.IntArrayList;
 
 import game.server.Chunk;
 import game.server.Game;
+import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 
@@ -62,7 +63,7 @@ public final class MeshGenerator {
                     int chunkY = structureY >> CHUNK_SIZE_BITS;
                     int chunkZ = structureZ >> CHUNK_SIZE_BITS;
                     clear();
-                    structure.materials().fillUncompressedMaterialsInto(materials, CHUNK_SIZE_BITS,
+                    structure.materials().fillUncompressedMaterialsInto(materials,
                             0, 0, 0,
                             structureX, structureY, structureZ,
                             CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
@@ -103,7 +104,7 @@ public final class MeshGenerator {
         for (IntArrayList vertexList : opaqueVerticesLists) totalVertexCount += vertexList.size();
         int[] opaqueVertices = new int[totalVertexCount];
 
-        for (int index = 0; index < opaqueVerticesLists.length; index++) {
+        for (int index = 0; index < 6; index++) {
             IntArrayList vertexList = opaqueVerticesLists[index];
             vertexCounts[index] = vertexList.size() * 3;
             vertexList.copyInto(opaqueVertices, verticesIndex);
@@ -122,9 +123,18 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialsNorthSouth(int materialZ) {
-        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
-            System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS, materialsLayer, materialX << CHUNK_SIZE_BITS, CHUNK_SIZE);
-    }
+        long[] toMeshFaces1 = toMeshFacesMaps[NORTH][materialZ];
+        long[] toMeshFaces2 = toMeshFacesMaps[SOUTH][materialZ];
+
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
+            long requiredMaterials = toMeshFaces1[materialX] | toMeshFaces2[materialX];
+            for (int materialY = Long.numberOfTrailingZeros(requiredMaterials);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(requiredMaterials)) {
+                materialsLayer[materialX << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+                requiredMaterials &= -2L << materialY;
+            }
+        }}
 
     private void addTopBottomFaces() {
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
@@ -143,7 +153,7 @@ public final class MeshGenerator {
             for (int materialZ = Long.numberOfTrailingZeros(requiredMaterials);
                  materialZ < CHUNK_SIZE;
                  materialZ = Long.numberOfTrailingZeros(requiredMaterials)) {
-                    materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[materialX << CHUNK_SIZE_BITS * 2 | materialZ << CHUNK_SIZE_BITS | materialY];
+                    materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
                     requiredMaterials &= -2L << materialZ;
             }
         }
@@ -158,7 +168,18 @@ public final class MeshGenerator {
     }
 
     private void copyMaterialsWestEast(int materialX) {
-        System.arraycopy(materials, materialX << CHUNK_SIZE_BITS * 2, materialsLayer, 0, CHUNK_SIZE * CHUNK_SIZE);
+        long[] toMeshFaces1 = toMeshFacesMaps[WEST][materialX];
+        long[] toMeshFaces2 = toMeshFacesMaps[EAST][materialX];
+
+        for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
+            long requiredMaterials = toMeshFaces1[materialZ] | toMeshFaces2[materialZ];
+            for (int materialY = Long.numberOfTrailingZeros(requiredMaterials);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(requiredMaterials)) {
+                materialsLayer[materialZ << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+                requiredMaterials &= -2L << materialY;
+            }
+        }
     }
 
 

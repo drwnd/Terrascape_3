@@ -181,6 +181,49 @@ public final class Utils {
         return multipliedValue / multiplier;
     }
 
+    public static int[] zOrderCurveLookupTable(int size, int split, int shift) {
+        int[] table = new int[size];
+        for (int index = 0; index < size; index++) table[index] = zOrderCurveValue(index, split) << shift;
+        return table;
+    }
+
+    public static int getInChunkX(int zCurveIndex) {
+        return zCurveIndex >> 2 & 1 |
+                zCurveIndex >> 4 & 2 |
+                zCurveIndex >> 6 & 4 |
+                zCurveIndex >> 8 & 8 |
+                zCurveIndex >> 10 & 16 |
+                zCurveIndex >> 12 & 32;
+    }
+
+    public static int getInChunkY(int zCurveIndex) {
+        return zCurveIndex >> 1 & 1 |
+                zCurveIndex >> 3 & 2 |
+                zCurveIndex >> 5 & 4 |
+                zCurveIndex >> 7 & 8 |
+                zCurveIndex >> 9 & 16 |
+                zCurveIndex >> 11 & 32;
+    }
+    public static int getInChunkZ(int zCurveIndex) {
+        return zCurveIndex & 1 |
+                zCurveIndex >> 2 & 2 |
+                zCurveIndex >> 4 & 4 |
+                zCurveIndex >> 6 & 8 |
+                zCurveIndex >> 8 & 16 |
+                zCurveIndex >> 10 & 32;
+    }
+
+
+
+    private static int zOrderCurveValue(int value, int split) {
+        int zOrderValue = 0;
+        for (int index = 0; index < 10; index++) {
+            int bit = value >> index & 1;
+            bit <<= index * split;
+            zOrderValue |= bit;
+        }
+        return zOrderValue;
+    }
 
     private static int distance(int distance, int maxMask) {
         distance = Math.abs(distance) & maxMask;

@@ -31,7 +31,7 @@ public final class ColdOcean extends Biome {
     }
 
     @Override
-    public int getSpecialHeight(int totalX, int totalZ, GenerationData data) {
+    public int getSpecialHeight(int totalX, int totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
         double icePlainNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x649C844EA835C9A7L, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
         if (iceBergNoise > ICE_BERG_THRESHOLD + 0.1) return (int) (ICE_BERG_HEIGHT + (icePlainNoise * 4.0));

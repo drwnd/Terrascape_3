@@ -16,7 +16,7 @@ public abstract class Biome {
     public abstract boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data);
 
 
-    public int getSpecialHeight(int totalX, int totalZ, GenerationData data) {
+    public int getSpecialHeight(int totalX, int totalZ) {
         return 0;
     }
 
