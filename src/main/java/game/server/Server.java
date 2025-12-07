@@ -16,6 +16,8 @@ import game.utils.Utils;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -133,6 +135,28 @@ public final class Server {
         }
     }
 
+    public void removeOldChatMessages(int maxMessageCount) {
+        synchronized (messages) {
+            int toRemoveMessagesCount = messages.size() - maxMessageCount;
+            if (toRemoveMessagesCount <= 0) return;
+            for (int index = 0; index < maxMessageCount; index++) messages.set(index, messages.get(index + toRemoveMessagesCount));
+            for (int removedMessageIndex = 0; removedMessageIndex < toRemoveMessagesCount; removedMessageIndex++) messages.removeLast();
+        }
+    }
+
+    public void addFunction(Function function, Object identifier) {
+        synchronized (functions) {
+            functions.put(identifier, function);
+        }
+    }
+
+    public Function removeFunction(Object identifier) {
+        synchronized (functions) {
+            return functions.remove(identifier);
+        }
+    }
+
+
     private void executeGameTickCatchException() {
         try {
             gameTickStartTime = System.nanoTime();
@@ -147,6 +171,12 @@ public final class Server {
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         Game.getPlayer().updateGameTick();
+        synchronized (functions) {
+            for (Iterator<Function> iterator = functions.values().iterator(); iterator.hasNext(); ) {
+                boolean shouldRemove = !iterator.next().run();
+                if (shouldRemove) iterator.remove();
+            }
+        }
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
             if (!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) {
@@ -162,21 +192,14 @@ public final class Server {
         if (dayTime > 1.0F) dayTime -= 2.0F;
     }
 
-    public void removeOldChatMessages(int maxMessageCount) {
-        synchronized (messages) {
-            int toRemoveMessagesCount = messages.size() - maxMessageCount;
-            if (toRemoveMessagesCount <= 0) return;
-            for (int index = 0; index < maxMessageCount; index++) messages.set(index, messages.get(index + toRemoveMessagesCount));
-            for (int removedMessageIndex = 0; removedMessageIndex < toRemoveMessagesCount; removedMessageIndex++) messages.removeLast();
-        }
-    }
-
     private long currentGameTick;
     private float dayTime;
 
-    private final ArrayList<ChatMessage> messages;
     private ScheduledExecutorService executor;
+    private final ArrayList<ChatMessage> messages;
     private final ChunkGenerator generator = new ChunkGenerator();
+    private final HashMap<Object, Function> functions = new HashMap<>();
+
     private long gameTickStartTime;
     private boolean generatorRestartScheduled = true;
 

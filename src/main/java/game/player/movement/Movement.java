@@ -57,6 +57,12 @@ public final class Movement {
         this.state.movement = this;
     }
 
+    public void setState(MovementState state) {
+        if (state == null) return;
+        this.state = state;
+        this.state.movement = this;
+    }
+
     public MovementState getState() {
         return state;
     }

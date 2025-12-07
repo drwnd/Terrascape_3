@@ -7,6 +7,7 @@ public enum Command {
     ECHO(EchoCommand::execute, EchoCommand.EXPLANATION, EchoCommand.SYNTAX),
     TP(TPCommand::execute, TPCommand.EXPLANATION, TPCommand.SYNTAX),
     CLEAR(ClearCommand::execute, ClearCommand.EXPLANATION, ClearCommand.SYNTAX),
+    RECORD(RecordCommand::execute, RecordCommand.EXPLANATION, RecordCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
     public static CommandResult execute(String commandString) {

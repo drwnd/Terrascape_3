@@ -100,10 +100,7 @@ public final class Player {
             return;
         }
 
-        if (ToggleSetting.SCROLL_HOTBAR.value()) {
-            Hotbar hotbar = Game.getPlayer().getHotbar();
-            hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
-        }
+        if (ToggleSetting.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
     }
 
 
@@ -173,6 +170,10 @@ public final class Player {
 
     public boolean isNoClip() {
         return noClip;
+    }
+
+    public void setNoClip(boolean noClip) {
+        this.noClip = noClip;
     }
 
     public boolean isChatOpen() {
