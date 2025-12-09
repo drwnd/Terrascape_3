@@ -24,14 +24,14 @@ public final class WorldGeneration {
 
         data.setChunk(chunk);
 
-        if (data.chunkContainsGround()) {
-            generateStone(data);
+        if (data.chunkContainsGround()) generateStone(data);
+        if (data.chunkContainsBiome())
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
                     data.set(inChunkX, inChunkZ);
                     generateBiome(inChunkX, inChunkZ, data);
                 }
-        }
+
         generateTrees(data);
 
         chunk.setMaterials(data.getCompressedMaterials());
@@ -59,8 +59,7 @@ public final class WorldGeneration {
     }
 
     public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
-        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED + 1];
-        int max = Integer.MIN_VALUE;
+        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
         for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
 
@@ -72,11 +71,8 @@ public final class WorldGeneration {
                 double ridge = ridgeMap[mapIndex];
 
                 int resultingHeight = getResultingHeight(height, erosion, continental, river, ridge);
-                max = Math.max(max, resultingHeight);
                 resultingHeightMap[mapIndex] = resultingHeight;
             }
-
-        resultingHeightMap[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED] = max;
         return resultingHeightMap;
     }
 
@@ -134,7 +130,7 @@ public final class WorldGeneration {
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
         int height = data.height;
-        int start = Math.min((data.height - MAX_SURFACE_MATERIALS_DEPTH >> data.LOD) - (data.chunkY << CHUNK_SIZE_BITS), CHUNK_SIZE);
+        int start = Math.clamp((data.height - MAX_SURFACE_MATERIALS_DEPTH >> data.LOD) - ((long) data.chunkY << CHUNK_SIZE_BITS), 0, CHUNK_SIZE);
 
         for (int inChunkY = start; inChunkY < CHUNK_SIZE; inChunkY++) {
             data.computeTotalY(inChunkY);

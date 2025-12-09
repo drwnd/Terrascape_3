@@ -45,7 +45,11 @@ public final class GenerationData {
         resultingHeightMap = WorldGeneration.getResultingHeightMap(heightMap, erosionMap, continentalMap, riverMap, ridgeMap);
         steepnessMap = steepnessMap(resultingHeightMap, lod);
         biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, humidityMap, temperatureMap, erosionMap, continentalMap);
-        specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap, resultingHeightMap);
+        specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
+
+        minHeight = getMinHeight(resultingHeightMap);
+        maxHeight = getMaxHeight(resultingHeightMap);
+        maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
     }
 
     public void setChunk(Chunk chunk) {
@@ -171,7 +175,6 @@ public final class GenerationData {
     }
 
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
-//        uncompressedMaterials[inChunkX << CHUNK_SIZE_BITS * 2 | inChunkZ << CHUNK_SIZE_BITS | inChunkY] = material;
         uncompressedMaterials[MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = material;
     }
 
@@ -226,8 +229,13 @@ public final class GenerationData {
 
     public boolean chunkContainsGround() {
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
-        int maxHeight = resultingHeightMap[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        return chunkStartY < maxHeight || chunkStartY < WATER_LEVEL;
+        return chunkStartY < maxHeight;
+    }
+
+    public boolean chunkContainsBiome() {
+        int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
+        int chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
+        return chunkStartY < maxSpecialHeight && chunkEndY > minHeight || chunkStartY < WATER_LEVEL;
     }
 
 
@@ -509,21 +517,17 @@ public final class GenerationData {
         return steepnessMap;
     }
 
-    private static int[] specialHeightMap(int chunkX, int chunkZ, int lod, Biome[] biomeMap, int[] resultingHeightMap) {
+    private static int[] specialHeightMap(int chunkX, int chunkZ, int lod, Biome[] biomeMap) {
         int[] specialHeightMap = new int[CHUNK_SIZE * CHUNK_SIZE];
         int chunkStartX = chunkX << CHUNK_SIZE_BITS + lod;
         int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + lod;
-        int max = Integer.MIN_VALUE;
 
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
                 int index = mapX << CHUNK_SIZE_BITS | mapZ;
                 int height = biomeMap[index].getSpecialHeight(chunkStartX + (mapX << lod), chunkStartZ + (mapZ << lod));
                 specialHeightMap[index] = height;
-                int combinedHeight = height + Math.max(WATER_LEVEL, resultingHeightMap[getMapIndex(mapX, mapZ)]);
-                max = Math.max(max, combinedHeight);
             }
-        resultingHeightMap[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED] = max;
         return specialHeightMap;
     }
 
@@ -584,6 +588,29 @@ public final class GenerationData {
         }
     }
 
+    private static int getMinHeight(int[] resultingHeightMap) {
+        int min = Integer.MAX_VALUE;
+        for (int height : resultingHeightMap) min = Math.min(min, height);
+        return min;
+    }
+
+    private static int getMaxHeight(int[] resultingHeightMap) {
+        int max = Integer.MIN_VALUE;
+        for (int height : resultingHeightMap) max = Math.max(max, height);
+        return max;
+    }
+
+    private static int getMaxSpecialHeight(int[] resultingHeightMap, int[] specialHeightMap) {
+        int max = Integer.MIN_VALUE;
+        for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
+                int height = Math.max(resultingHeightMap[getMapIndex(mapX, mapZ)], WATER_LEVEL);
+                max = Math.max(max, height + specialHeightMap[mapX << CHUNK_SIZE_BITS | mapZ]);
+            }
+        return max;
+    }
+
+
     private int getCompressedIndex(int x, int y, int z) {
         // >> 2 for compression and performance improvement
         int compressedX = (x >> LOD & CHUNK_SIZE_MASK) >> 2;
@@ -593,6 +620,7 @@ public final class GenerationData {
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 
+    private final int minHeight, maxHeight, maxSpecialHeight;
     private final Tree[] treeMap;
     private final double[] featureMap;
     private final Biome[] biomeMap;
