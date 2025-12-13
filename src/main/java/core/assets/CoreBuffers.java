@@ -4,7 +4,7 @@ import core.assets.identifiers.BufferIdentifier;
 
 public enum CoreBuffers implements BufferIdentifier {
 
-    TEXT_ELEMENT_ARRAY_BUFFER(AssetLoader::generateModelIndexBuffer);
+    TEXT_ELEMENT_ARRAY_BUFFER(() -> AssetLoader.generateModelIndexBuffer(128));
 
 
     CoreBuffers(ObjectGenerator generator) {

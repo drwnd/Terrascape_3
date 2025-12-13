@@ -335,13 +335,13 @@ public final class Renderer extends Renderable {
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            shader.setUniform("lodSize", 1 << lod);
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
                 if (model == null || model.isEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
                 int[] toRenderVertexCounts = model.getVertexCounts(cameraChunkX, cameraChunkY, cameraChunkZ);
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-                shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
 
                 GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), toRenderVertexCounts);
                 renderedOpaqueModels++;
@@ -403,14 +403,14 @@ public final class Renderer extends Renderable {
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            shader.setUniform("lodSize", 1 << lod);
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
                 if (model == null || model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-                shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
 
-                GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount() * (6 / 2));
+                GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount());
                 renderedWaterModels++;
             }
         }
@@ -425,15 +425,15 @@ public final class Renderer extends Renderable {
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            shader.setUniform("lodSize", 1 << lod);
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
                 if (model == null || model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
 
                 GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-                shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
                 shader.setUniform("indexOffset", model.waterVertexCount() >> 1);
 
-                GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount() * (6 / 2));
+                GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount());
                 renderedGlassModels++;
             }
         }

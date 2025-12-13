@@ -16,9 +16,8 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL46;
 
-import java.util.ArrayList;
-
 public final class StructureDisplay extends Renderable {
+
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
         super(sizeToParent, offsetToParent);
         sizeX = structure.sizeX();
@@ -26,16 +25,9 @@ public final class StructureDisplay extends Renderable {
         sizeZ = structure.sizeZ();
         rotation = new Vector3f(35.26439F, -45.0F, 0.0F); // Direction : x == y == z
 
-        ArrayList<Mesh> meshes = new MeshGenerator().generateMesh(structure);
-
-        opaqueModels = new OpaqueModel[meshes.size()];
-        transparentModels = new TransparentModel[meshes.size()];
-
-        for (int index = 0; index < meshes.size(); index++) {
-            Mesh mesh = meshes.get(index);
-            opaqueModels[index] = ObjectLoader.loadOpaqueModel(mesh);
-            transparentModels[index] = ObjectLoader.loadTransparentModel(mesh);
-        }
+        Mesh mesh = new MeshGenerator().generateMesh(structure);
+        opaqueModel = ObjectLoader.loadOpaqueModel(mesh);
+        transparentModel = ObjectLoader.loadTransparentModel(mesh);
     }
 
     public void changeZoom(float factor) {
@@ -70,16 +62,16 @@ public final class StructureDisplay extends Renderable {
         Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0, 1.0F);
         shader.setUniform("cameraPosition", 0.0F, 0.0F, 0.0F);
         shader.setUniform("flags", 0);
-        for (OpaqueModel opaqueModel : opaqueModels) renderOpaqueModel(opaqueModel, shader);
+        renderOpaqueModel(opaqueModel, shader);
 
         shader = AssetManager.get(Shaders.WATER);
         Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0F);
         shader.setUniform("flags", 0);
-        for (TransparentModel transparentModel : transparentModels) renderWaterModel(transparentModel, shader);
+        renderWaterModel(transparentModel, shader);
 
         shader = AssetManager.get(Shaders.GLASS);
         Renderer.setUpGlassRendering(shader, matrix, 0, 0, 0);
-        for (TransparentModel transparentModel : transparentModels) renderGlassModel(transparentModel, shader);
+        renderGlassModel(transparentModel, shader);
         GL46.glDepthMask(true);
 
         GL46.glViewport(0, 0, Window.getWidth(), Window.getHeight());
@@ -87,37 +79,38 @@ public final class StructureDisplay extends Renderable {
 
     @Override
     public void deleteSelf() {
-        for (OpaqueModel opaqueModel : opaqueModels) if (opaqueModel != null) opaqueModel.delete();
-        for (TransparentModel transparentModel : transparentModels) if (transparentModel != null) transparentModel.delete();
+        if (opaqueModel != null) opaqueModel.delete();
+        if (transparentModel != null) transparentModel.delete();
     }
 
-    private void renderOpaqueModel(OpaqueModel model, Shader shader) {
+    private static void renderOpaqueModel(OpaqueModel model, Shader shader) {
         if (model.isEmpty()) return;
 
+        shader.setUniform("lodSize", 1);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
         GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), model.vertexCounts());
     }
 
-    private void renderWaterModel(TransparentModel model, Shader shader) {
+    private static void renderWaterModel(TransparentModel model, Shader shader) {
         if (model.isWaterEmpty()) return;
 
         shader.setUniform("cameraPosition", 3000.0F, 4000.0F, 2000.0F);
+        shader.setUniform("lodSize", 1);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount() * (6 / 2));
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount());
     }
 
-    private void renderGlassModel(TransparentModel model, Shader shader) {
+    private static void renderGlassModel(TransparentModel model, Shader shader) {
         if (model.isGlassEmpty()) return;
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-        shader.setUniform("worldPos", model.totalX(), model.totalY(), model.totalZ(), 1 << model.LOD());
+
         shader.setUniform("indexOffset", model.waterVertexCount() >> 1);
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount() * (6 / 2));
+        shader.setUniform("lodSize", 1);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount());
     }
 
-    private final OpaqueModel[] opaqueModels;
-    private final TransparentModel[] transparentModels;
+    private final OpaqueModel opaqueModel;
+    private final TransparentModel transparentModel;
     private final int sizeX, sizeY, sizeZ;
 
     private float zoom = 1.0F;

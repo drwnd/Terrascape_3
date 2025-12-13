@@ -8,8 +8,6 @@ import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 
-import java.util.ArrayList;
-
 import static game.utils.Constants.*;
 
 public final class MeshGenerator {
@@ -40,6 +38,10 @@ public final class MeshGenerator {
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
+        xStart = chunk.X << CHUNK_SIZE_BITS;
+        yStart = chunk.Y << CHUNK_SIZE_BITS;
+        zStart = chunk.Z << CHUNK_SIZE_BITS;
+
         clear();
         addNorthSouthFaces();
         addTopBottomFaces();
@@ -49,32 +51,30 @@ public final class MeshGenerator {
         Game.getPlayer().getMeshCollector().queueMesh(mesh);
     }
 
-    public ArrayList<Mesh> generateMesh(Structure structure) {
-        ArrayList<Mesh> meshes = new ArrayList<>();
+    public Mesh generateMesh(Structure structure) {
 
         int endX = structure.sizeX();
         int endY = structure.sizeY();
         int endZ = structure.sizeZ();
+        clear();
 
-        for (int structureX = 0; structureX < endX; structureX += CHUNK_SIZE)
-            for (int structureY = 0; structureY < endY; structureY += CHUNK_SIZE)
-                for (int structureZ = 0; structureZ < endZ; structureZ += CHUNK_SIZE) {
-                    int chunkX = structureX >> CHUNK_SIZE_BITS;
-                    int chunkY = structureY >> CHUNK_SIZE_BITS;
-                    int chunkZ = structureZ >> CHUNK_SIZE_BITS;
-                    clear();
+        for (xStart = 0; xStart < endX; xStart += CHUNK_SIZE)
+            for (yStart = 0; yStart < endY; yStart += CHUNK_SIZE)
+                for (zStart = 0; zStart < endZ; zStart += CHUNK_SIZE) {
+                    int chunkX = xStart >> CHUNK_SIZE_BITS;
+                    int chunkY = yStart >> CHUNK_SIZE_BITS;
+                    int chunkZ = zStart >> CHUNK_SIZE_BITS;
                     structure.materials().fillUncompressedMaterialsInto(materials,
                             0, 0, 0,
-                            structureX, structureY, structureZ,
+                            xStart, yStart, zStart,
                             CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
                     structure.materials().generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, chunkX, chunkY, chunkZ);
 
                     addNorthSouthFaces();
                     addTopBottomFaces();
                     addWestEastFaces();
-                    meshes.add(loadMesh(chunkX, chunkY, chunkZ, 0));
                 }
-        return meshes;
+        return loadMesh(0, 0, 0, 0);
     }
 
 
@@ -89,7 +89,10 @@ public final class MeshGenerator {
         int[] opaqueVertices = loadOpaqueVertices(vertexCounts);
         int[] transparentVertices = loadTransparentVertices();
 
-        return new Mesh(opaqueVertices, vertexCounts, transparentVertices, waterVerticesList.size(), glassVerticesList.size(), chunkX, chunkY, chunkZ, lod);
+        return new Mesh(opaqueVertices, vertexCounts, transparentVertices,
+                waterVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
+                glassVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
+                chunkX, chunkY, chunkZ, lod);
     }
 
     private int[] loadTransparentVertices() {
@@ -106,7 +109,7 @@ public final class MeshGenerator {
 
         for (int index = 0; index < 6; index++) {
             IntArrayList vertexList = opaqueVerticesLists[index];
-            vertexCounts[index] = vertexList.size() * 3;
+            vertexCounts[index] = vertexList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX;
             vertexList.copyInto(opaqueVertices, verticesIndex);
             verticesIndex += vertexList.size();
         }
@@ -134,7 +137,8 @@ public final class MeshGenerator {
                 materialsLayer[materialX << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
                 requiredMaterials &= -2L << materialY;
             }
-        }}
+        }
+    }
 
     private void addTopBottomFaces() {
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
@@ -153,8 +157,8 @@ public final class MeshGenerator {
             for (int materialZ = Long.numberOfTrailingZeros(requiredMaterials);
                  materialZ < CHUNK_SIZE;
                  materialZ = Long.numberOfTrailingZeros(requiredMaterials)) {
-                    materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
-                    requiredMaterials &= -2L << materialZ;
+                materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+                requiredMaterials &= -2L << materialZ;
             }
         }
     }
@@ -266,17 +270,24 @@ public final class MeshGenerator {
         for (int index = start; index <= end; index++) toMeshFacesMap[index] &= mask;
     }
 
-    private static void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
-        vertices.add(faceSize1 << 24 | faceSize2 << 18 | materialX << 12 | materialY << 6 | materialZ);
-        vertices.add(side << 8 | material & 0xFF);
+    private void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
+//        vertices.add(faceSize1 << 24 | faceSize2 << 18 | materialX << 12 | materialY << 6 | materialZ);
+//        vertices.add(side << 8 | material & 0xFF);
+        vertices.add(xStart | materialX);
+        vertices.add(yStart | materialY);
+        vertices.add(zStart | materialZ);
+        vertices.add(faceSize1 << 24 | faceSize2 << 18 | side << 8 | material & 0xFF);
     }
 
+    private int xStart, yStart, zStart;
 
     private final long[][][] toMeshFacesMaps = new long[6][CHUNK_SIZE][CHUNK_SIZE];
     private final byte[][] adjacentChunkLayers = new byte[6][CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materialsLayer = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
+    private static final int INTS_PER_VERTEX = 4;
+    private static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
     private final IntArrayList waterVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{

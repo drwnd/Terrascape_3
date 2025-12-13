@@ -29,7 +29,7 @@ public final class AssetLoader {
 
             String filepath = identifier.filepath();
             buffer = STBImage.stbi_load(filepath, w, h, c, 4);
-            if (buffer == null) throw new RuntimeException("Image FIle " + filepath + " not loaded " + STBImage.stbi_failure_reason());
+            if (buffer == null) throw new RuntimeException("Image File " + filepath + " not loaded " + STBImage.stbi_failure_reason());
 
             width = w.get();
             height = h.get();
@@ -60,11 +60,12 @@ public final class AssetLoader {
         return new GuiElement(vao, identifier.vertices().length);
     }
 
-    public static int generateModelIndexBuffer() {
-        int[] indices = new int[393216];
+    public static int generateModelIndexBuffer(int quadCount) {
+        int length = quadCount * 6;
+        int[] indices = new int[length];
         int index = 0;
-        for (int i = 0; i < indices.length; i += 6) {
-            indices[i] = index;
+        for (int i = 0; i < length; i += 6) {
+            indices[i + 0] = index + 0;
             indices[i + 1] = index + 1;
             indices[i + 2] = index + 2;
             indices[i + 3] = index + 3;
@@ -86,7 +87,7 @@ public final class AssetLoader {
         final int offsetY = 512;
 
         int[] textData = new int[TextShader.MAX_TEXT_LENGTH * 4];
-        for (int i = 0; i < textData.length; i += 4) {
+        for (int i = 0; i < TextShader.MAX_TEXT_LENGTH * 4; i += 4) {
             textData[i] = i >> 2;
             textData[i + 1] = i >> 2 | offsetX;
             textData[i + 2] = i >> 2 | offsetY;

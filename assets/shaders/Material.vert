@@ -5,7 +5,7 @@ flat out vec3 normal;
 flat out int textureData;
 
 struct Vertex {
-    int positionData;
+    int x, y, z;
     int textureData;
 };
 
@@ -14,7 +14,7 @@ layout (std430, binding = 0) restrict readonly buffer vertexBuffer {
 };
 
 uniform mat4 projectionViewMatrix;
-uniform ivec4 worldPos;
+uniform int lodSize;
 uniform int indexOffset;
 uniform ivec3 iCameraPosition;
 
@@ -60,15 +60,15 @@ void main() {
     Vertex currentVertex = vertices[gl_VertexID / 6 + indexOffset];
     int currentVertexId = gl_VertexID % 6;
 
-    float x = currentVertex.positionData >> 12 & 63;
-    float y = currentVertex.positionData >> 6 & 63;
-    float z = currentVertex.positionData & 63;
+    int x = currentVertex.x;
+    int y = currentVertex.y;
+    int z = currentVertex.z;
     int side = currentVertex.textureData >> 8 & 7;
 
-    int faceSize1 = (currentVertex.positionData >> 24 & 63) + 1;
-    int faceSize2 = (currentVertex.positionData >> 18 & 63) + 1;
-    vec3 inChunkPosition = (vec3(x, y, z) + getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * worldPos.w;
-    totalPosition = getWrappedPosition(worldPos.xyz) + ivec3(0, -worldPos.w + 1, 0) + inChunkPosition;
+    int faceSize1 = (currentVertex.textureData >> 24 & 63) + 1;
+    int faceSize2 = (currentVertex.textureData >> 18 & 63) + 1;
+    vec3 inChunkPosition = (getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * lodSize;
+    totalPosition = getWrappedPosition(ivec3(x, y, z) * lodSize) + ivec3(0, -lodSize + 1, 0) + inChunkPosition;
 
     gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
 
