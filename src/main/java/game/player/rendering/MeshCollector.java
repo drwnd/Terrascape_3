@@ -4,12 +4,20 @@ import game.server.Game;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
+import org.lwjgl.opengl.GL46;
 
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
 public final class MeshCollector {
+
+    public MeshCollector() {
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            filledOpaqueModels[lod] = new ArrayList<>();
+            filledTransparentModels[lod] = new ArrayList<>();
+        }
+    }
 
     public void uploadAllMeshes() {
         Vector3i playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
@@ -29,11 +37,17 @@ public final class MeshCollector {
 
     public void deleteOldMeshes() {
         synchronized (toDeleteOpaqueModels) {
-            for (OpaqueModel opaqueModel : toDeleteOpaqueModels) opaqueModel.delete();
+            for (OpaqueModel model : toDeleteOpaqueModels) {
+                allocator.memFree(model.bufferOrStart());
+                filledOpaqueModels[model.LOD()].remove(model);
+            }
             toDeleteOpaqueModels.clear();
         }
         synchronized (toDeleteTransparentModels) {
-            for (TransparentModel transparentModel : toDeleteTransparentModels) transparentModel.delete();
+            for (TransparentModel model : toDeleteTransparentModels) {
+                allocator.memFree(model.bufferOrStart());
+                filledTransparentModels[model.LOD()].remove(model);
+            }
             toDeleteTransparentModels.clear();
         }
     }
@@ -53,12 +67,12 @@ public final class MeshCollector {
         else isMeshed[lod][chunkIndex >> 6] &= ~(1L << chunkIndex);
     }
 
-    public OpaqueModel[] getOpaqueModels(int lod) {
-        return opaqueModels[lod];
+    public ArrayList<OpaqueModel> getOpaqueModels(int lod) {
+        return filledOpaqueModels[lod];
     }
 
-    public TransparentModel[] getTransparentModels(int lod) {
-        return transparentModels[lod];
+    public ArrayList<TransparentModel> getTransparentModels(int lod) {
+        return filledTransparentModels[lod];
     }
 
     public void removeMesh(int chunkIndex, int lod) {
@@ -92,43 +106,77 @@ public final class MeshCollector {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 
+    public int getBuffer() {
+        return allocator.getBuffer();
+    }
+
+    public MemoryAllocator getAllocator() {
+        return allocator;
+    }
+
 
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
+        filledOpaqueModels[lod].remove(opaqueModel);
+        filledTransparentModels[lod].remove(transparentModel);
 
         setOpaqueModel(null, chunkIndex, lod);
         setTransparentModel(null, chunkIndex, lod);
         setMeshed(false, chunkIndex, lod);
 
-        if (opaqueModel != null) opaqueModel.delete();
-        if (transparentModel != null) transparentModel.delete();
+        if (opaqueModel != null) allocator.memFree(opaqueModel.bufferOrStart());
+        if (transparentModel != null) allocator.memFree(transparentModel.bufferOrStart());
     }
 
-    private void setOpaqueModel(OpaqueModel opaqueModel, int index, int lod) {
-        opaqueModels[lod][index] = opaqueModel;
+    private void setOpaqueModel(OpaqueModel model, int index, int lod) {
+        opaqueModels[lod][index] = model;
+        if (model != null && !model.isEmpty()) filledOpaqueModels[lod].add(model);
     }
 
-    private void setTransparentModel(TransparentModel transparentModel, int index, int lod) {
-        transparentModels[lod][index] = transparentModel;
+    private void setTransparentModel(TransparentModel model, int index, int lod) {
+        transparentModels[lod][index] = model;
+        if (model != null && !model.isEmpty()) filledTransparentModels[lod].add(model);
     }
 
     private void upload(Mesh mesh) {
         int chunkIndex = Utils.getChunkIndex(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod());
         deleteMesh(chunkIndex, mesh.lod());
 
-        OpaqueModel opaqueModel = ObjectLoader.loadOpaqueModel(mesh);
+        OpaqueModel opaqueModel = loadOpaqueModel(mesh);
         setOpaqueModel(opaqueModel, chunkIndex, mesh.lod());
 
-        TransparentModel transparentModel = ObjectLoader.loadTransparentModel(mesh);
+        TransparentModel transparentModel = loadTransparentModel(mesh);
         setTransparentModel(transparentModel, chunkIndex, mesh.lod());
         setMeshed(true, chunkIndex, mesh.lod());
     }
 
+    private OpaqueModel loadOpaqueModel(Mesh mesh) {
+        int start = allocator.memAlloc(mesh.getOpaqueByteSize());
+        if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
+
+        GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
+        return new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
+    }
+
+    private TransparentModel loadTransparentModel(Mesh mesh) {
+        int start = allocator.memAlloc(mesh.getTransparentByteSize());
+        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+
+        GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
+        return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+    }
+
+    private final MemoryAllocator allocator = new MemoryAllocator(500_000_000);
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
-
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
+
+    @SuppressWarnings("unchecked")
+    private final ArrayList<OpaqueModel>[] filledOpaqueModels = new ArrayList[LOD_COUNT];
+    @SuppressWarnings("unchecked")
+    private final ArrayList<TransparentModel>[] filledTransparentModels = new ArrayList[LOD_COUNT];
+
     private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];

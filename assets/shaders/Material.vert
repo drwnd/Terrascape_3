@@ -15,7 +15,6 @@ layout (std430, binding = 0) restrict readonly buffer vertexBuffer {
 
 uniform mat4 projectionViewMatrix;
 uniform int lodSize;
-uniform int indexOffset;
 uniform ivec3 iCameraPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
@@ -57,7 +56,7 @@ ivec3 getWrappedPosition(ivec3 worldPos) {
 }
 
 void main() {
-    Vertex currentVertex = vertices[gl_VertexID / 6 + indexOffset];
+    Vertex currentVertex = vertices[gl_VertexID / 6];
     int currentVertexId = gl_VertexID % 6;
 
     int x = currentVertex.x;

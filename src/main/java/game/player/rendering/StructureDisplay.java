@@ -87,8 +87,8 @@ public final class StructureDisplay extends Renderable {
         if (model.isEmpty()) return;
 
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-        GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.getIndices(), model.vertexCounts());
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
+        GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.indices(), model.vertexCounts());
     }
 
     private static void renderWaterModel(TransparentModel model, Shader shader) {
@@ -96,17 +96,16 @@ public final class StructureDisplay extends Renderable {
 
         shader.setUniform("cameraPosition", 3000.0F, 4000.0F, 2000.0F);
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
         GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount());
     }
 
     private static void renderGlassModel(TransparentModel model, Shader shader) {
         if (model.isGlassEmpty()) return;
 
-        shader.setUniform("indexOffset", model.waterVertexCount() >> 1);
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.verticesBuffer());
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.glassVertexCount());
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, model.waterVertexCount(), model.glassVertexCount());
     }
 
     private final OpaqueModel opaqueModel;

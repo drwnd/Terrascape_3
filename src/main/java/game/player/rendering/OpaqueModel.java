@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.utils.IntArrayList;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -7,15 +8,17 @@ import org.lwjgl.opengl.GL46;
 
 import static game.utils.Constants.*;
 
-public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verticesBuffer, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
+public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
     public static final int FACE_COUNT = 6;
 
-    public OpaqueModel(Vector3i position, int[] vertexCounts, int verticesBuffer, int lod) {
-        this(position.x << lod, position.y << lod, position.z << lod, lod, verticesBuffer, vertexCounts, new int[FACE_COUNT], getIndices(vertexCounts));
+    public OpaqueModel(Vector3i position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
+        this(position.x << lod, position.y << lod, position.z << lod,
+                lod, bufferOrStart, vertexCounts, new int[FACE_COUNT],
+                getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
-    public int[] getVertexCounts(int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+    public void addData(IntArrayList indices, IntArrayList vertexCounts, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         cameraChunkX >>= LOD;
         cameraChunkY >>= LOD;
         cameraChunkZ >>= LOD;
@@ -23,17 +26,12 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verti
         int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
         int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
 
-        toRenderVertexCounts[WEST] = cameraChunkX >= modelChunkX ? vertexCounts[WEST] : 0;
-        toRenderVertexCounts[EAST] = cameraChunkX <= modelChunkX ? vertexCounts[EAST] : 0;
-        toRenderVertexCounts[TOP] = cameraChunkY >= modelChunkY ? vertexCounts[TOP] : 0;
-        toRenderVertexCounts[BOTTOM] = cameraChunkY <= modelChunkY ? vertexCounts[BOTTOM] : 0;
-        toRenderVertexCounts[NORTH] = cameraChunkZ >= modelChunkZ ? vertexCounts[NORTH] : 0;
-        toRenderVertexCounts[SOUTH] = cameraChunkZ <= modelChunkZ ? vertexCounts[SOUTH] : 0;
-        return toRenderVertexCounts;
-    }
-
-    public int[] getIndices() {
-        return indices;
+        if (cameraChunkX >= modelChunkX) addData(indices, vertexCounts, WEST);
+        if (cameraChunkX <= modelChunkX) addData(indices, vertexCounts, EAST);
+        if (cameraChunkY >= modelChunkY) addData(indices, vertexCounts, TOP);
+        if (cameraChunkY <= modelChunkY) addData(indices, vertexCounts, BOTTOM);
+        if (cameraChunkZ >= modelChunkZ) addData(indices, vertexCounts, NORTH);
+        if (cameraChunkZ <= modelChunkZ) addData(indices, vertexCounts, SOUTH);
     }
 
     public boolean isEmpty() {
@@ -41,7 +39,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verti
     }
 
     public void delete() {
-        GL46.glDeleteBuffers(verticesBuffer);
+        GL46.glDeleteBuffers(bufferOrStart);
     }
 
     public int chunkX() {
@@ -57,12 +55,22 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int verti
     }
 
 
-    private static int[] getIndices(int[] vertexCounts) {
+    private void addData(IntArrayList indices, IntArrayList vertexCounts, int side) {
+        indices.add(this.indices[side]);
+        vertexCounts.add(this.vertexCounts[side]);
+    }
+
+    private static int[] getIndices(int[] vertexCounts, int bufferOrStart, boolean isBuffer) {
         int[] indices = new int[FACE_COUNT];
         if (vertexCounts == null) return indices;
-        indices[0] = 0;
+        indices[0] = firstIndex(bufferOrStart, isBuffer);
         for (int index = 1; index < FACE_COUNT; index++)
             indices[index] = indices[index - 1] + vertexCounts[index - 1];
         return indices;
+    }
+
+    private static int firstIndex(int bufferOrStart, boolean isBuffer) {
+        if (isBuffer) return 0;
+        return (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX;
     }
 }

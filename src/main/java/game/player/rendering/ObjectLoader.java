@@ -14,10 +14,10 @@ public final class ObjectLoader {
 
     public static OpaqueModel loadOpaqueModel(Mesh mesh) {
         Vector3i position = mesh.getWorldCoordinate();
-        if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod());
+        if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod(), true);
         int vertexBuffer = GL46.glCreateBuffers();
         GL46.glNamedBufferData(vertexBuffer, mesh.opaqueVertices(), GL46.GL_STATIC_DRAW);
-        return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod());
+        return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
     public static TransparentModel loadTransparentModel(Mesh mesh) {

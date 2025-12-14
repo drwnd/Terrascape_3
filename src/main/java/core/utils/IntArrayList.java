@@ -1,5 +1,7 @@
 package core.utils;
 
+import java.util.Arrays;
+
 /**
  * {@code ArrayList<Integer>} is nice and all but the performance sucks compared to this.
  */
@@ -19,12 +21,20 @@ public final class IntArrayList {
         size = 0;
     }
 
+    public void fillWith0AfterEnd() {
+        Arrays.fill(data, size, data.length, 0);
+    }
+
     public void copyInto(int[] target, int startIndex) {
         System.arraycopy(data, 0, target, startIndex, size);
     }
 
     public int size() {
         return size;
+    }
+
+    public int[] getData() {
+        return data;
     }
 
 

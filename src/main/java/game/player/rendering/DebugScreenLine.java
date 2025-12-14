@@ -87,6 +87,16 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             return "Chunk Memory: %sMB, average: %sB".formatted(memory / 1_000_000L, memory / chunks);
         }, "Chunk Memory"));
 
+        lines.add(new DebugScreenLine(OptionSetting.BUFFER_STORAGE_VISIBILITY, OptionSetting.BUFFER_STORAGE_COLOR, () -> {
+            MemoryAllocator allocator = Game.getPlayer().getMeshCollector().getAllocator();
+            int used = allocator.getUsed() / 1000;
+            int free = allocator.getFree() / 1000;
+            int capacity = allocator.getCapacity() / 1000;
+            int highestAllocated = allocator.getHighestAllocated() / 1000;
+
+            return "Capacity:%sKB, Highest Allocated:%sKB, Used: %sKB, Free: %sKB".formatted(capacity, highestAllocated, used, free);
+        }, "Mesh Buffer Storage Info"));
+
         lines.add(new DebugScreenLine(OptionSetting.RENDERED_MODELS_VISIBILITY, OptionSetting.RENDERED_MODELS_COLOR, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
             return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedWaterModels, renderer.renderedGlassModels);

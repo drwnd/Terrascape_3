@@ -286,8 +286,8 @@ public final class MeshGenerator {
     private final byte[] materialsLayer = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
-    private static final int INTS_PER_VERTEX = 4;
-    private static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
+    public static final int INTS_PER_VERTEX = 4;
+    public static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
     private final IntArrayList waterVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{

@@ -20,6 +20,7 @@ public enum OptionSetting {
     VELOCITY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     CHUNK_MEMORY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
     TOTAL_MEMORY_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
+    BUFFER_STORAGE_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
 
     WORLD_NAME_COLOR(ColorOption.LIGHT_GRAY),
     WORLD_TICK_AND_TIME_COLOR(ColorOption.LIGHT_GRAY),
@@ -36,6 +37,7 @@ public enum OptionSetting {
     VELOCITY_COLOR(ColorOption.WHITE),
     CHUNK_MEMORY_COLOR(ColorOption.RED),
     TOTAL_MEMORY_COLOR(ColorOption.RED),
+    BUFFER_STORAGE_COLOR(ColorOption.ORANGE),
 
     FONT(new FontOption("Default")),
     LANGUAGE(new Language("English"));

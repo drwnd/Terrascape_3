@@ -11,4 +11,12 @@ public record Mesh(int[] opaqueVertices, int[] vertexCounts,
     public Vector3i getWorldCoordinate() {
         return new Vector3i(chunkX << CHUNK_SIZE_BITS, chunkY << CHUNK_SIZE_BITS, chunkZ << CHUNK_SIZE_BITS);
     }
+
+    public int getOpaqueByteSize() {
+        return opaqueVertices.length << 2;
+    }
+
+    public int getTransparentByteSize() {
+        return transparentVertices.length << 2;
+    }
 }
