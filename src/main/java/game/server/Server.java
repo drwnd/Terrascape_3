@@ -4,6 +4,7 @@ import core.settings.FloatSetting;
 
 import core.settings.optionSettings.ColorOption;
 import game.player.Player;
+import game.player.interaction.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
 import game.server.command.Command;
@@ -25,6 +26,9 @@ import java.util.concurrent.TimeUnit;
 import static game.utils.Constants.*;
 
 public final class Server {
+
+    public static final int TARGET_TPS = 20;
+    public static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
 
     public Server(long currentGameTick, float dayTime, ArrayList<ChatMessage> messages) {
         this.currentGameTick = currentGameTick;
@@ -50,6 +54,11 @@ public final class Server {
 
         Player player = Game.getPlayer();
         if (!player.isNoClip() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
+
+        if (placeable instanceof CubePlaceable cubePlaceable) {
+            int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
+            player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, cubePlaceable.getMaterial());
+        }
 
         MeshCollector meshCollector = player.getMeshCollector();
         for (int lod = 0; lod < LOD_COUNT; lod++) {
@@ -203,5 +212,5 @@ public final class Server {
     private long gameTickStartTime;
     private boolean generatorRestartScheduled = true;
 
-    private static final int NANOSECONDS_PER_GAME_TICK = 50_000_000;
+    private static final int NANOSECONDS_PER_GAME_TICK = NANOSECONDS_PER_SECOND / TARGET_TPS;
 }

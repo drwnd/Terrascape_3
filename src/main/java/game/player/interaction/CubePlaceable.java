@@ -91,6 +91,15 @@ public final class CubePlaceable implements Placeable {
                 && min.z < cubeMaxZ && cubeMinZ <= max.z;
     }
 
+    @Override
+    public void offsetPosition(Vector3i position) {
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
+        int mask = -(1 << breakPlaceSize);
+        position.x &= mask;
+        position.y &= mask;
+        position.z &= mask;
+    }
+
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private final byte material;
 }

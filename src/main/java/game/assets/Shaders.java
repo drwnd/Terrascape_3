@@ -4,6 +4,13 @@ import core.assets.identifiers.ShaderIdentifier;
 
 public enum Shaders implements ShaderIdentifier {
 
-    OPAQUE, SKYBOX, WATER, GLASS, SSAO, AO_APPLIER
+    OPAQUE_GEOMETRY,
+    SKYBOX,
+    WATER,
+    GLASS,
+    SSAO,
+    AO_APPLIER,
+    OPAQUE_PARTICLE,
+    TRANSPARENT_PARTICLE
 
 }

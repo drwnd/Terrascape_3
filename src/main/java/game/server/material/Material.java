@@ -19,7 +19,7 @@ public final class Material {
 
         Gson gson = new Gson();
         for (MaterialIdentifier identifier : MaterialIdentifier.values()) loadMaterial(identifier, gson);
-        System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_0000);
+        System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
     public static byte getTextureIndex(byte material) {

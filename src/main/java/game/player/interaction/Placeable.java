@@ -17,7 +17,6 @@ public interface Placeable {
 
     boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max);
 
-    default void offsetPosition(Vector3i position) {
-    }
+    void offsetPosition(Vector3i position);
 
 }

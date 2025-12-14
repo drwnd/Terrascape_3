@@ -58,7 +58,7 @@ public final class StructureDisplay extends Renderable {
                 (int) (size.y * guiSize * Window.getHeight()));
         GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
 
-        Shader shader = AssetManager.get(Shaders.OPAQUE);
+        Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
         Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0, 1.0F);
         shader.setUniform("cameraPosition", 0.0F, 0.0F, 0.0F);
         shader.setUniform("flags", 0);

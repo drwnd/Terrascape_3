@@ -10,6 +10,7 @@ import game.player.interaction.Placeable;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
+import game.player.rendering.ParticleCollector;
 import game.player.rendering.Renderer;
 import game.server.Game;
 import game.server.material.Material;
@@ -25,6 +26,7 @@ public final class Player {
 
     public Player(Position position) {
         meshCollector = new MeshCollector();
+        particleCollector = new ParticleCollector();
         camera = new Camera();
         input = new PlayerInput();
         movement = new Movement();
@@ -43,6 +45,8 @@ public final class Player {
 
 
     public void updateFrame() {
+        particleCollector.unloadParticleEffects();
+        particleCollector.uploadParticleEffects();
         meshCollector.uploadAllMeshes();
         meshCollector.deleteOldMeshes();
 
@@ -120,6 +124,10 @@ public final class Player {
 
     public MeshCollector getMeshCollector() {
         return meshCollector;
+    }
+
+    public ParticleCollector getParticleCollector() {
+        return particleCollector;
     }
 
     public Camera getCamera() {
@@ -204,6 +212,7 @@ public final class Player {
     }
 
     private final MeshCollector meshCollector;
+    private final ParticleCollector particleCollector;
     private final Camera camera;
     private final PlayerInput input;
     private final Movement movement;

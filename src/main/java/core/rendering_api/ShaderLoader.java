@@ -19,12 +19,14 @@ public final class ShaderLoader {
             case CoreShaders.GUI -> new GuiShader("assets/shaders/Gui.vert", "assets/shaders/Gui.frag", identifier);
             case CoreShaders.GUI_BACKGROUND -> new GuiShader("assets/shaders/Gui.vert", "assets/shaders/GuiBackground.frag", identifier);
             case CoreShaders.TEXT -> new TextShader("assets/shaders/Text.vert", "assets/shaders/Text.frag", identifier);
-            case Shaders.OPAQUE -> new Shader("assets/shaders/Material.vert", "assets/shaders/Opaque.frag", identifier);
+            case Shaders.OPAQUE_GEOMETRY -> new Shader("assets/shaders/Material.vert", "assets/shaders/Opaque.frag", identifier);
             case Shaders.SKYBOX -> new Shader("assets/shaders/Skybox.vert", "assets/shaders/Skybox.frag", identifier);
             case Shaders.WATER -> new Shader("assets/shaders/Material.vert", "assets/shaders/Water.frag", identifier);
             case Shaders.GLASS -> new Shader("assets/shaders/Material.vert", "assets/shaders/Glass.frag", identifier);
             case Shaders.SSAO -> new GuiShader("assets/shaders/Gui.vert", "assets/shaders/SSAO.frag", identifier);
             case Shaders.AO_APPLIER -> new GuiShader("assets/shaders/Gui.vert", "assets/shaders/AO_Applier.frag", identifier);
+            case Shaders.OPAQUE_PARTICLE -> new Shader("assets/shaders/Particle.vert", "assets/shaders/Opaque.frag", identifier);
+            case Shaders.TRANSPARENT_PARTICLE -> new Shader("assets/shaders/Particle.vert", "assets/shaders/Glass.frag", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

@@ -160,6 +160,7 @@ public final class Renderer extends Renderable {
 
         renderSkybox(camera);
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
+        renderOpaqueParticles(cameraPosition, projectionViewMatrix);
 
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
         GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
@@ -173,6 +174,7 @@ public final class Renderer extends Renderable {
 
         renderWater(cameraPosition, projectionViewMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
+        renderTransparentParticles(cameraPosition, projectionViewMatrix);
 
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
@@ -328,7 +330,7 @@ public final class Renderer extends Renderable {
         int cameraChunkY = cameraPosition.intY >> CHUNK_SIZE_BITS;
         int cameraChunkZ = cameraPosition.intZ >> CHUNK_SIZE_BITS;
 
-        Shader shader = AssetManager.get(Shaders.OPAQUE);
+        Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
@@ -352,6 +354,21 @@ public final class Renderer extends Renderable {
             vertexCounts.fillWith0AfterEnd();
 
             GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+        }
+    }
+
+    private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
+        Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        shader.setUniform("currentTime", (int) (System.nanoTime() >> ParticleCollector.PARTICLE_TIME_SHIFT));
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
+
+        for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
+            if (!particleEffect.isOpaque()) continue;
+            shader.setUniform("spawnTime", particleEffect.spawnTime());
+            shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
+            GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
+            GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, particleEffect.count());
         }
     }
 
@@ -458,6 +475,21 @@ public final class Renderer extends Renderable {
             vertexCounts.fillWith0AfterEnd();
 
             GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+        }
+    }
+
+    private void renderTransparentParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
+        Shader shader = AssetManager.get(Shaders.TRANSPARENT_PARTICLE);
+        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
+        shader.setUniform("currentTime", (int) (System.nanoTime() >> ParticleCollector.PARTICLE_TIME_SHIFT));
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
+
+        for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
+            if (particleEffect.isOpaque()) continue;
+            shader.setUniform("spawnTime", particleEffect.spawnTime());
+            shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
+            GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
+            GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, particleEffect.count());
         }
     }
 
