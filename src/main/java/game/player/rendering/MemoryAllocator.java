@@ -164,4 +164,15 @@ public final class MemoryAllocator {
     private MemoryRegion used;
     private int buffer;
     private int capacity;
+
+    private static final class MemoryRegion {
+        int start;
+        int size;
+        MemoryRegion next = null;
+
+        MemoryRegion(int start, int size) {
+            this.start = start;
+            this.size = size;
+        }
+    }
 }
