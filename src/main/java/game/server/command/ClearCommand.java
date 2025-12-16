@@ -2,8 +2,6 @@ package game.server.command;
 
 import game.server.Game;
 
-import java.util.ArrayList;
-
 final class ClearCommand {
 
     static final String SYNTAX = "[Number of Messages to be spared]";
@@ -13,14 +11,14 @@ final class ClearCommand {
 
     }
 
-    static CommandResult execute(ArrayList<Token> tokens) {
+    static CommandResult execute(TokenList tokens) {
         int sparedMessagesCount = 0;
 
-        if (Token.isNumber(1, tokens)) {
-            NumberToken token = (NumberToken) tokens.get(1);
-            if (!token.isInteger() || token.number() < 0) return CommandResult.fail("Number must be a positiv integer");
-            sparedMessagesCount = (int) token.number();
+        if (tokens.getNext() instanceof NumberToken number) {
+            if (!number.isInteger() || number.number() < 0) return CommandResult.fail("Number must be a positiv integer");
+            sparedMessagesCount = (int) number.number();
         }
+        tokens.expectFinishedLess();
 
         Game.getServer().removeOldChatMessages(sparedMessagesCount);
         return CommandResult.success();

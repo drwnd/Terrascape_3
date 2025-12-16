@@ -21,14 +21,18 @@ final class RecordCommand {
 
     }
 
-    static CommandResult execute(ArrayList<Token> tokens) {
-        if (!(tokens.get(1) instanceof KeyWordToken(String keyword))) return CommandResult.fail("First token must be a valid keyword");
-        if (!(tokens.get(2) instanceof KeyWordToken(String recordName))) return CommandResult.fail("Second token must be a keyword");
+    static CommandResult execute(TokenList tokens) {
+        String keyword = tokens.expectNextKeyWord().keyword();
+        String recordName = tokens.expectNextKeyWord().keyword();
 
-        if ("start".equalsIgnoreCase(keyword)) Game.getServer().addFunction(new RecordFunction(), recordName);
-        else if ("cancel".equalsIgnoreCase(keyword)) Game.getServer().removeFunction(recordName);
-
-        else if ("stop".equalsIgnoreCase(keyword)) {
+        if ("start".equalsIgnoreCase(keyword)) {
+            tokens.expectFinishedLess();
+            Game.getServer().addFunction(new RecordFunction(), recordName);
+        } else if ("cancel".equalsIgnoreCase(keyword)) {
+            tokens.expectFinishedLess();
+            Game.getServer().removeFunction(recordName);
+        } else if ("stop".equalsIgnoreCase(keyword)) {
+            tokens.expectFinishedLess();
             Function function = Game.getServer().removeFunction(recordName);
             if (!(function instanceof RecordFunction recordFunction)) {
                 if (function != null) Game.getServer().addFunction(function, recordName);
@@ -40,7 +44,8 @@ final class RecordCommand {
 
         } else if ("play".equalsIgnoreCase(keyword)) {
             boolean playBackRotations = true;
-            if (Token.isKeyWord(3, tokens)) playBackRotations = Boolean.parseBoolean(((KeyWordToken) tokens.get(3)).keyword());
+            if (tokens.getNext() instanceof KeywordToken(String flag)) playBackRotations = Boolean.parseBoolean(flag);
+            tokens.expectFinishedLess();
 
             PlayerRecord record = new PlayerRecordSaver().load(PlayerRecordSaver.getSaveFileLocation(recordName));
             Game.getServer().addFunction(new RecordPlaybackFunction(record, playBackRotations), recordName);

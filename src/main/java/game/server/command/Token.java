@@ -6,24 +6,8 @@ interface Token {
 
     TokenType type();
 
-    static boolean isKeyWord(int tokenIndex, ArrayList<Token> tokens) {
-        return tokens.size() > tokenIndex && tokens.get(tokenIndex).type() == TokenType.KEYWORD;
-    }
-
-    static boolean isString(int tokenIndex, ArrayList<Token> tokens) {
-        return tokens.size() > tokenIndex && tokens.get(tokenIndex).type() == TokenType.STRING;
-    }
-
-    static boolean isNumber(int tokenIndex, ArrayList<Token> tokens) {
-        return tokens.size() > tokenIndex && tokens.get(tokenIndex).type() == TokenType.NUMBER;
-    }
-
-    static boolean isOperator(int tokenIndex, ArrayList<Token> tokens) {
-        return tokens.size() > tokenIndex && tokens.get(tokenIndex).type() == TokenType.OPERATOR;
-    }
-
-    static ArrayList<Token> tokenize(String command) {
-        ArrayList<Token> tokens = new ArrayList<>();
+    static TokenList tokenize(String command) {
+        TokenList tokens = new TokenList();
         command += ' ';
         char[] chars = command.toCharArray();
         int index = 0;
@@ -50,7 +34,7 @@ interface Token {
         }
         if (Character.isLetter(startChar)) {
             int keywordEndIndex = nextNotLetterIndex(chars, startIndex);
-            tokens.add(new KeyWordToken(command.substring(startIndex, keywordEndIndex)));
+            tokens.add(new KeywordToken(command.substring(startIndex, keywordEndIndex)));
             return keywordEndIndex;
         }
 
