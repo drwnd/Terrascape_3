@@ -109,6 +109,10 @@ public final class MemoryAllocator {
         return max;
     }
 
+    public void cleanUp() {
+        GL46.glDeleteBuffers(buffer);
+    }
+
 
     private void growAtLeast(int size) {
         int oldCapacity = capacity;

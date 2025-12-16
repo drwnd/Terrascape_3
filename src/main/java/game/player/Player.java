@@ -189,7 +189,8 @@ public final class Player {
     }
 
     public void cleanUp() {
-
+        meshCollector.cleanUp();
+        particleCollector.cleanUp();
     }
 
     void startCommand() {

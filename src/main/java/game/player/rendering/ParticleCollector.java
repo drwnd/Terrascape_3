@@ -33,6 +33,13 @@ public final class ParticleCollector {
         }
     }
 
+    public void cleanUp() {
+        synchronized (particleEffects) {
+            for (ParticleEffect particleEffect : particleEffects) GL46.glDeleteBuffers(particleEffect.buffer());
+            particleEffects.clear();
+        }
+    }
+
     public ArrayList<ParticleEffect> getParticleEffects() {
         return particleEffects;
     }

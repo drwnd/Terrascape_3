@@ -114,6 +114,10 @@ public final class MeshCollector {
         return allocator;
     }
 
+    public void cleanUp() {
+        allocator.cleanUp();
+    }
+
 
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
