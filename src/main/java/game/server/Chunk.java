@@ -1,5 +1,6 @@
 package game.server;
 
+import core.utils.ByteArrayList;
 import game.server.generation.Structure;
 import game.utils.Status;
 import game.utils.Utils;
@@ -53,16 +54,19 @@ public final class Chunk {
         modified = true;
     }
 
-    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers) {
-        getNeighbor(NORTH).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
-        getNeighbor(TOP).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
-        getNeighbor(WEST).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[WEST], EAST);
-        getNeighbor(SOUTH).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[SOUTH], NORTH);
-        getNeighbor(BOTTOM).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[BOTTOM], TOP);
-        getNeighbor(EAST).materials.fillUncompressedSideLayerInto(adjacentChunkLayers[EAST], WEST);
+    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers) {
+        getNeighbor(NORTH).materials.fillSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
+        getNeighbor(TOP).materials.fillSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
+        getNeighbor(WEST).materials.fillSideLayerInto(adjacentChunkLayers[WEST], EAST);
+        getNeighbor(SOUTH).materials.fillSideLayerInto(adjacentChunkLayers[SOUTH], NORTH);
+        getNeighbor(BOTTOM).materials.fillSideLayerInto(adjacentChunkLayers[BOTTOM], TOP);
+        getNeighbor(EAST).materials.fillSideLayerInto(adjacentChunkLayers[EAST], WEST);
         materials.fillUncompressedMaterialsInto(uncompressedMaterials);
 
-        materials.generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayers);
+        byte[][] adjacentChunkLayersData = {
+                adjacentChunkLayers[NORTH].getData(), adjacentChunkLayers[TOP].getData(), adjacentChunkLayers[WEST].getData(),
+                adjacentChunkLayers[SOUTH].getData(), adjacentChunkLayers[BOTTOM].getData(), adjacentChunkLayers[EAST].getData()};
+        materials.generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayersData);
     }
 
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,

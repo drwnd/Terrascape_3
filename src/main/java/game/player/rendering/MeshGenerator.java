@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.utils.ByteArrayList;
 import core.utils.IntArrayList;
 
 import game.server.Chunk;
@@ -82,6 +83,7 @@ public final class MeshGenerator {
         waterVerticesList.clear();
         glassVerticesList.clear();
         for (IntArrayList list : opaqueVerticesLists) list.clear();
+        for (ByteArrayList list : adjacentChunkLayers) list.clear();
     }
 
     private Mesh loadMesh(int chunkX, int chunkY, int chunkZ, int lod) {
@@ -282,9 +284,12 @@ public final class MeshGenerator {
     private int xStart, yStart, zStart;
 
     private final long[][][] toMeshFacesMaps = new long[6][CHUNK_SIZE][CHUNK_SIZE];
-    private final byte[][] adjacentChunkLayers = new byte[6][CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materialsLayer = new byte[CHUNK_SIZE * CHUNK_SIZE];
     private final byte[] materials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+    private final ByteArrayList[] adjacentChunkLayers = new ByteArrayList[]{
+            new ByteArrayList(64), new ByteArrayList(64), new ByteArrayList(64),
+            new ByteArrayList(64), new ByteArrayList(64), new ByteArrayList(64)
+    };
 
     public static final int INTS_PER_VERTEX = 4;
     public static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
@@ -293,5 +298,4 @@ public final class MeshGenerator {
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{
             new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE),
             new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE)};
-
 }
