@@ -1,1 +1,1 @@
-rootProject.name = "Terrascape_4096x_remastered"
+rootProject.name = "Terrascape_3"

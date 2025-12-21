@@ -162,15 +162,17 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix);
 
-        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
-        GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
-        GL46.glDisable(GL46.GL_STENCIL_TEST);
+        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value()) {
+            GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
+            GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
+            GL46.glDisable(GL46.GL_STENCIL_TEST);
 
-        computeAmbientOcclusion();
+            computeAmbientOcclusion();
 
-        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
+            GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
 
-        applyAmbientOcclusion();
+            applyAmbientOcclusion();
+        }
 
         renderWater(cameraPosition, projectionViewMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);

@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.settings.ToggleSetting;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
@@ -47,6 +48,7 @@ public final class ParticleCollector {
     }
 
     public void addBreakParticleEffect(int startX, int startY, int startZ, int sideLength, byte ignoreMaterial) {
+        if (!ToggleSetting.SHOW_BREAK_PARTICLES.value()) return;
         ArrayList<Particle> opaqueParticles = new ArrayList<>(sideLength * sideLength);
         ArrayList<Particle> transparentParticles = new ArrayList<>(sideLength * sideLength);
 
@@ -68,7 +70,7 @@ public final class ParticleCollector {
     }
     
     public void addPlaceParticleEffect(int startX, int startY, int startZ, int sideLength, byte material) {
-        if (material == AIR) return;
+        if (!ToggleSetting.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
         ArrayList<Particle> particles = new ArrayList<>(sideLength * sideLength * sideLength);
 
         for (int xOffset = 0; xOffset < sideLength; xOffset++)
@@ -84,6 +86,7 @@ public final class ParticleCollector {
     }
 
     public void addPlaceParticleEffect(int startX, int startY, int startZ, Structure structure) {
+        if (!ToggleSetting.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         ArrayList<Particle> opaqueParticles = new ArrayList<>(structure.sizeX() * structure.sizeZ());
         ArrayList<Particle> transparentParticles = new ArrayList<>(structure.sizeX() * structure.sizeZ());
         MaterialsData materials = structure.materials();
@@ -98,7 +101,7 @@ public final class ParticleCollector {
                             .add(new Particle(xOffset, yOffset, zOffset,
                                     getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
                                     getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, PLACE_PARTICLE_LIFETIME_TICKS, material,
-                                    false, false));
+                                    false, true));
                 }
 
         addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
@@ -114,6 +117,7 @@ public final class ParticleCollector {
     }
 
     public void addSplashParticleEffect(int x, int y, int z, byte material) {
+        if (!ToggleSetting.SHOW_SPLASH_PARTICLES.value()) return;
         ArrayList<Particle> particles = new ArrayList<>(SPLASH_PARTICLE_COUNT);
 
         for (int count = 0; count < SPLASH_PARTICLE_COUNT; count++) {

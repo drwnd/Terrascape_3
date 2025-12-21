@@ -3,7 +3,12 @@ package core.settings;
 public enum ToggleSetting {
     SCROLL_HOTBAR(true),
     RAW_MOUSE_INPUT(true),
-    DO_SHADOW_MAPPING(false),
+    USE_SHADOW_MAPPING(false),
+    USE_AMBIENT_OCCLUSION(true),
+    SHOW_BREAK_PARTICLES(true),
+    SHOW_CUBE_PLACE_PARTICLES(true),
+    SHOW_STRUCTURE_PLACE_PARTICLES(true),
+    SHOW_SPLASH_PARTICLES(true),
     X_RAY(false),
     V_SYNC(true),
     FAKE_COORDINATES(true);
