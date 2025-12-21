@@ -23,12 +23,11 @@ public final class MaterialsData {
         this.totalSizeBits = totalSizeBits;
     }
 
-
+    // Static API
     public static int getUncompressedIndex(int inChunkX, int inChunkY, int inChunkZ) {
 //        return (inChunkX << totalSizeBits | inChunkZ) << totalSizeBits | inChunkY;
         return Z_ORDER_3D_TABLE_X[inChunkX] | Z_ORDER_3D_TABLE_Y[inChunkY] | T_ORDER_3D_TABLE_Z[inChunkZ];
     }
-
 
     public static MaterialsData getCompressedMaterials(int sizeBits, byte[] uncompressedMaterials) {
         ByteArrayList dataList = new ByteArrayList(1000);
@@ -61,7 +60,7 @@ public final class MaterialsData {
         }
     }
 
-
+    // Object API
     public byte getMaterial(int inChunkX, int inChunkY, int inChunkZ) {
         int index = 0, sizeBits = totalSizeBits;
         synchronized (this) {
@@ -174,13 +173,10 @@ public final class MaterialsData {
         }
     }
 
-    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers, int chunkX, int chunkY, int chunkZ) {
-        int startIndex = startIndexOf(chunkX << CHUNK_SIZE_BITS, chunkY << CHUNK_SIZE_BITS, chunkZ << CHUNK_SIZE_BITS, CHUNK_SIZE_BITS);
-        byte[][] adjacentChunkLayersData = {
-                adjacentChunkLayers[NORTH].getData(), adjacentChunkLayers[TOP].getData(), adjacentChunkLayers[WEST].getData(),
-                adjacentChunkLayers[SOUTH].getData(), adjacentChunkLayers[BOTTOM].getData(), adjacentChunkLayers[EAST].getData()};
+    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, int chunkX, int chunkY, int chunkZ) {
         synchronized (this) {
-            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayersData, Math.min(CHUNK_SIZE_BITS, totalSizeBits), startIndex, 0, 0, 0);
+            int startIndex = startIndexOf(chunkX << CHUNK_SIZE_BITS, chunkY << CHUNK_SIZE_BITS, chunkZ << CHUNK_SIZE_BITS, CHUNK_SIZE_BITS);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, Math.min(CHUNK_SIZE_BITS, totalSizeBits), startIndex, 0, 0, 0);
         }
     }
 
@@ -196,7 +192,7 @@ public final class MaterialsData {
         return data[0] == HOMOGENOUS && data[1] == material;
     }
 
-
+    // Miscellaneous functions
     private void compressIntoData(byte[] uncompressedMaterials) {
         ByteArrayList dataList = new ByteArrayList(1000);
         compressMaterials(dataList, uncompressedMaterials, totalSizeBits);
@@ -220,6 +216,7 @@ public final class MaterialsData {
         }
     }
 
+    // Functions to store data into something
     private void fillUncompressedMaterialsInto(byte[] uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         byte identifier = data[startIndex];
 
@@ -702,6 +699,38 @@ public final class MaterialsData {
         return offset;
     }
 
+    // Helper functions
+    private int getOffset(int index) {
+        return (data[index] & 0xFF) << 16 | (data[index + 1] & 0xFF) << 8 | data[index + 2] & 0xFF;
+    }
+
+    private int getOffset(int startIndex, byte transform, int intend) {
+        if ((transform & Structure.MIRROR_X) != 0) intend ^= 0b100;
+        if ((transform & Structure.MIRROR_Z) != 0) intend ^= 0b001;
+        if ((transform & Structure.ROTATE_90) != 0) intend = (~intend & 0b001) << 2 | intend & 0b010 | intend >> 2;
+        if (intend == 0) return SPLITTER_BYTE_SIZE;
+        return getOffset(startIndex - 2 + 3 * intend);
+    }
+
+    private int getOffset(int splitterIndex, int inChunkX, int inChunkY, int inChunkZ, int sizeBits) {
+        int inSplitterIndex = getInSplitterIndex(inChunkX, inChunkY, inChunkZ, sizeBits);
+        if (inSplitterIndex == 0) return SPLITTER_BYTE_SIZE;
+        return getOffset(splitterIndex + inSplitterIndex - 2);
+    }
+
+    private int startIndexOf(int inChunkX, int inChunkY, int inChunkZ, int targetSizeBits) {
+        int index = 0, sizeBits = totalSizeBits;
+        synchronized (this) {
+            while (true) { // Scary but should be fine
+                byte identifier = data[index];
+                if (sizeBits <= targetSizeBits || identifier == HOMOGENOUS || identifier == DETAIL) return index;
+//            if (identifier == SPLITTER)
+                index += getOffset(index, inChunkX, inChunkY, inChunkZ, --sizeBits);
+            }
+        }
+    }
+
+    // Mesh generation for chunks
     private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         byte identifier = data[startIndex];
 
@@ -741,37 +770,6 @@ public final class MaterialsData {
         generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayers, inChunkX + 1, inChunkY + 1, inChunkZ);
         generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayers, inChunkX + 1, inChunkY + 1, inChunkZ + 1);
     }
-
-    private int getOffset(int index) {
-        return (data[index] & 0xFF) << 16 | (data[index + 1] & 0xFF) << 8 | data[index + 2] & 0xFF;
-    }
-
-    private int getOffset(int startIndex, byte transform, int intend) {
-        if ((transform & Structure.MIRROR_X) != 0) intend ^= 0b100;
-        if ((transform & Structure.MIRROR_Z) != 0) intend ^= 0b001;
-        if ((transform & Structure.ROTATE_90) != 0) intend = (~intend & 0b001) << 2 | intend & 0b010 | intend >> 2;
-        if (intend == 0) return SPLITTER_BYTE_SIZE;
-        return getOffset(startIndex - 2 + 3 * intend);
-    }
-
-    private int getOffset(int splitterIndex, int inChunkX, int inChunkY, int inChunkZ, int sizeBits) {
-        int inSplitterIndex = getInSplitterIndex(inChunkX, inChunkY, inChunkZ, sizeBits);
-        if (inSplitterIndex == 0) return SPLITTER_BYTE_SIZE;
-        return getOffset(splitterIndex + inSplitterIndex - 2);
-    }
-
-    private int startIndexOf(int inChunkX, int inChunkY, int inChunkZ, int targetSizeBits) {
-        int index = 0, sizeBits = totalSizeBits;
-        synchronized (this) {
-            while (true) { // Scary but should be fine
-                byte identifier = data[index];
-                if (sizeBits <= targetSizeBits || identifier == HOMOGENOUS || identifier == DETAIL) return index;
-//            if (identifier == SPLITTER)
-                index += getOffset(index, inChunkX, inChunkY, inChunkZ, --sizeBits);
-            }
-        }
-    }
-
 
     private void generateToMeshFacesHomogenousNorthLayer(long[] toMeshFacesMap, byte[][] adjacentChunkLayers, int sizeBits, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         if (inChunkZ == CHUNK_SIZE) {
@@ -1029,6 +1027,106 @@ public final class MaterialsData {
         if (MeshGenerator.isVisible(material, adjacentChunkLayer[startIndex + 4])) toMeshFacesMap[inChunkA + 1] |= 1L << inChunkB + 1;
     }
 
+    // Mesh generation for structures
+    private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+            return;
+        }
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+            int length = 1 << sizeBits;
+
+            generateToMeshFacesHomogenousNorthSouthLayer(toMeshFacesMaps[NORTH][inChunkZ + length - 1], uncompressedMaterials, length, material, inChunkX, inChunkY, inChunkZ + length);
+            generateToMeshFacesHomogenousTopBottomLayer(toMeshFacesMaps[TOP][inChunkY + length - 1], uncompressedMaterials, length, material, inChunkX, inChunkY + length, inChunkZ);
+            generateToMeshFacesHomogenousWestEastLayer(toMeshFacesMaps[WEST][inChunkX + length - 1], uncompressedMaterials, length, material, inChunkX + length, inChunkY, inChunkZ);
+            generateToMeshFacesHomogenousNorthSouthLayer(toMeshFacesMaps[SOUTH][inChunkZ], uncompressedMaterials, length, material, inChunkX, inChunkY, inChunkZ - 1);
+            generateToMeshFacesHomogenousTopBottomLayer(toMeshFacesMaps[BOTTOM][inChunkY], uncompressedMaterials, length, material, inChunkX, inChunkY - 1, inChunkZ);
+            generateToMeshFacesHomogenousWestEastLayer(toMeshFacesMaps[EAST][inChunkX], uncompressedMaterials, length, material, inChunkX - 1, inChunkY, inChunkZ);
+            return;
+        }
+
+//        if (identifier == DETAIL)
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX, inChunkY, inChunkZ);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX, inChunkY, inChunkZ + 1);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX, inChunkY + 1, inChunkZ);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX, inChunkY + 1, inChunkZ + 1);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX + 1, inChunkY, inChunkZ);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX + 1, inChunkY, inChunkZ + 1);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX + 1, inChunkY + 1, inChunkZ);
+        generateToMeshFacesDetail(toMeshFacesMaps, uncompressedMaterials, inChunkX + 1, inChunkY + 1, inChunkZ + 1);
+    }
+
+    private static void generateToMeshFacesHomogenousNorthSouthLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
+        for (int x = inChunkX; x < inChunkX + length; x++) {
+            long map = toMeshFacesMap[x];
+            for (int y = inChunkY; y < inChunkY + length; y++) {
+                byte occludingMaterial = getMaterial(uncompressedMaterials, x, y, inChunkZ);
+                if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << y;
+            }
+            toMeshFacesMap[x] = map;
+        }
+    }
+
+    private static void generateToMeshFacesHomogenousTopBottomLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
+        for (int x = inChunkX; x < inChunkX + length; x++) {
+            long map = toMeshFacesMap[x];
+            for (int z = inChunkZ; z < inChunkZ + length; z++) {
+                byte occludingMaterial = getMaterial(uncompressedMaterials, x, inChunkY, z);
+                if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << z;
+            }
+            toMeshFacesMap[x] = map;
+        }
+    }
+
+    private static void generateToMeshFacesHomogenousWestEastLayer(long[] toMeshFacesMap, byte[] uncompressedMaterials, int length, byte material, int inChunkX, int inChunkY, int inChunkZ) {
+        for (int z = inChunkZ; z < inChunkZ + length; z++) {
+            long map = toMeshFacesMap[z];
+            for (int y = inChunkY; y < inChunkY + length; y++) {
+                byte occludingMaterial = getMaterial(uncompressedMaterials, inChunkX, y, z);
+                if (MeshGenerator.isVisible(material, occludingMaterial)) map |= 1L << y;
+            }
+            toMeshFacesMap[z] = map;
+        }
+    }
+
+    private static void generateToMeshFacesDetail(long[][][] toMeshFacesMap, byte[] uncompressedMaterials, int inChunkX, int inChunkY, int inChunkZ) {
+        byte material = uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)];
+        if (material == AIR) return;
+
+        byte northMaterial = getMaterial(uncompressedMaterials, inChunkX, inChunkY, inChunkZ + 1);
+        byte topMaterial = getMaterial(uncompressedMaterials, inChunkX, inChunkY + 1, inChunkZ);
+        byte westMaterial = getMaterial(uncompressedMaterials, inChunkX + 1, inChunkY, inChunkZ);
+        byte southMaterial = getMaterial(uncompressedMaterials, inChunkX, inChunkY, inChunkZ - 1);
+        byte bottomMaterial = getMaterial(uncompressedMaterials, inChunkX, inChunkY - 1, inChunkZ);
+        byte eastMaterial = getMaterial(uncompressedMaterials, inChunkX - 1, inChunkY, inChunkZ);
+
+        if (MeshGenerator.isVisible(material, northMaterial)) toMeshFacesMap[NORTH][inChunkZ][inChunkX] |= 1L << inChunkY;
+        if (MeshGenerator.isVisible(material, topMaterial)) toMeshFacesMap[TOP][inChunkY][inChunkX] |= 1L << inChunkZ;
+        if (MeshGenerator.isVisible(material, westMaterial)) toMeshFacesMap[WEST][inChunkX][inChunkZ] |= 1L << inChunkY;
+        if (MeshGenerator.isVisible(material, southMaterial)) toMeshFacesMap[SOUTH][inChunkZ][inChunkX] |= 1L << inChunkY;
+        if (MeshGenerator.isVisible(material, bottomMaterial)) toMeshFacesMap[BOTTOM][inChunkY][inChunkX] |= 1L << inChunkZ;
+        if (MeshGenerator.isVisible(material, eastMaterial)) toMeshFacesMap[EAST][inChunkX][inChunkZ] |= 1L << inChunkY;
+    }
+
+    private static byte getMaterial(byte[] uncompressedMaterials, int inChunkX, int inChunkY, int inChunkZ) {
+        if (inChunkX == -1 || inChunkX == CHUNK_SIZE || inChunkY == -1 || inChunkY == CHUNK_SIZE || inChunkZ == -1 || inChunkZ == CHUNK_SIZE) return AIR;
+
+        return uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)];
+    }
+
+    // Helper functions
     private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
         return Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
                 || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX

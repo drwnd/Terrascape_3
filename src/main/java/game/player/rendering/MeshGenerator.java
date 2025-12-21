@@ -69,7 +69,7 @@ public final class MeshGenerator {
                             0, 0, 0,
                             xStart, yStart, zStart,
                             CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-                    structure.materials().generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, chunkX, chunkY, chunkZ);
+                    structure.materials().generateToMeshFacesMaps(toMeshFacesMaps, materials, chunkX, chunkY, chunkZ);
 
                     addNorthSouthFaces();
                     addTopBottomFaces();
@@ -273,8 +273,6 @@ public final class MeshGenerator {
     }
 
     private void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
-//        vertices.add(faceSize1 << 24 | faceSize2 << 18 | materialX << 12 | materialY << 6 | materialZ);
-//        vertices.add(side << 8 | material & 0xFF);
         vertices.add(xStart | materialX);
         vertices.add(yStart | materialY);
         vertices.add(zStart | materialZ);

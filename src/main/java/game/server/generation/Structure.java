@@ -20,7 +20,7 @@ public final class Structure extends Asset {
 
 
     public Structure(byte material) {
-        this(16, 16, 16, getMaterialDisplayData(material));
+        this(16, 16, 16, new MaterialsData(4, material));
     }
 
     public byte getMaterial(int structureX, int structureY, int structureZ) {
@@ -63,16 +63,8 @@ public final class Structure extends Asset {
         return materials;
     }
 
-    private static MaterialsData getMaterialDisplayData(byte material) {
-        byte[] data = MATERIAL_DISPLAY_DATA_TEMPLATE.clone();
-        data[45] = material;
-        return new MaterialsData(CHUNK_SIZE_BITS, data);
-    }
-
     private final int sizeX;
     private final int sizeY;
     private final int sizeZ;
     private final MaterialsData materials;
-
-    private static final byte[] MATERIAL_DISPLAY_DATA_TEMPLATE = new byte[]{2, 0, 0, 60, 0, 0, 62, 0, 0, 64, 0, 0, 66, 0, 0, 68, 0, 0, 70, 0, 0, 72, 2, 0, 0, 24, 0, 0, 26, 0, 0, 28, 0, 0, 30, 0, 0, 32, 0, 0, 34, 0, 0, 36, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 }
