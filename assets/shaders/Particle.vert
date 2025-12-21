@@ -31,10 +31,15 @@ const float TARGET_TPS = 20.0;
 const float NANOSECONDS_PER_SECOND = 1000000000;
 const int PARTICLE_TIME_SHIFT = 20;
 
-float getTimeScaler(Particle currentParticle, float aliveTime) {
+float getTimeScaler(Particle currentParticle) {
+    int aliveTimeInt = currentTime - spawnTime;
+    float aliveTime = float(aliveTimeInt) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
     float maxLiveTime = float(currentParticle.packedLifeTimeRotationMaterial >> 24 & 0xFF) / TARGET_TPS;
+    float scalar = max(0.0, (maxLiveTime - aliveTime) / maxLiveTime);
 
-    return max(0.0, (maxLiveTime - aliveTime) / maxLiveTime);
+    if ((currentParticle.packedOffset & (1 << 30)) != 0) scalar = 1 - scalar;
+
+    return scalar;
 }
 
 float getGravity(Particle currentParticle) {
@@ -42,8 +47,13 @@ float getGravity(Particle currentParticle) {
 }
 
 float getAliveTime(Particle currentParticle) {
-    int aliveTime = currentTime - spawnTime;
-    return float(aliveTime) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
+    int aliveTimeInt = currentTime - spawnTime;
+    float aliveTime = float(aliveTimeInt) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
+
+    float maxLiveTime = float(currentParticle.packedLifeTimeRotationMaterial >> 24 & 0xFF) / TARGET_TPS;
+    if ((currentParticle.packedOffset & (1 << 31)) != 0) aliveTime = maxLiveTime - aliveTime;
+
+    return aliveTime;
 }
 
 vec2 getRotationSpeed(Particle currentParticle) {
@@ -113,7 +123,7 @@ void main() {
     int z = (currentParticle.packedOffset >> 00 & 0x3FF) + startPosition.z - PARTICLE_OFFSET;
     int side = (gl_VertexID / 6) % 6;
     float aliveTime = getAliveTime(currentParticle);
-    float timeScaler = getTimeScaler(currentParticle, aliveTime);
+    float timeScaler = getTimeScaler(currentParticle);
 
     ivec3 wrappedPositon = getWrappedPosition(ivec3(x, y, z));
     vec3 facePosition = getFacePositions(side, currentVertexId);

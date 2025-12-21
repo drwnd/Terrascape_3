@@ -47,7 +47,7 @@ public final class InteractionHandler {
         handleUseDestroy(destroyInfo, new CubePlaceable(AIR), false);
     }
 
-    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
+    private static void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < FloatSetting.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
@@ -63,7 +63,7 @@ public final class InteractionHandler {
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
     }
 
-    private void updateInfo(int action, PlaceDestroyInfo info) {
+    private static void updateInfo(int action, PlaceDestroyInfo info) {
         info.buttonIsHeld = action == GLFW.GLFW_PRESS;
         if (info.buttonIsHeld) info.forceAction = true;
     }

@@ -6,6 +6,7 @@ import core.settings.optionSettings.ColorOption;
 import game.player.Player;
 import game.player.interaction.CubePlaceable;
 import game.player.interaction.Placeable;
+import game.player.interaction.StructurePlaceable;
 import game.player.rendering.MeshCollector;
 import game.server.command.Command;
 import game.server.command.CommandResult;
@@ -58,6 +59,10 @@ public final class Server {
         if (placeable instanceof CubePlaceable cubePlaceable) {
             int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
             player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, cubePlaceable.getMaterial());
+            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, cubePlaceable.getMaterial());
+        }
+        if (placeable instanceof StructurePlaceable structurePlaceable) {
+            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structurePlaceable.getStructure());
         }
 
         MeshCollector meshCollector = player.getMeshCollector();
