@@ -5,14 +5,14 @@ public record Particle(int packedOffset, int packedVelocityGravity, int packedLi
     Particle(int xOffset, int yOffset, int zOffset,
              float velocityX, float velocityY, float velocityZ,
              float rotationSpeedX, float rotationSpeedY,
-             float gravity, int lifeTimeTicks, byte material, boolean invertTimeScalar, boolean invertMotion) {
-        this(packOffset(xOffset, yOffset, zOffset, invertTimeScalar,invertMotion),
+             float gravity, int lifeTimeTicks, byte material, boolean disableTimeScalar, boolean invertMotion) {
+        this(packOffset(xOffset, yOffset, zOffset, disableTimeScalar,invertMotion),
                 packVelocityGravity(velocityX, velocityY, velocityZ, gravity),
                 packLifeTimeRotationMaterial(lifeTimeTicks, rotationSpeedX, rotationSpeedY, material));
     }
 
-    private static int packOffset(int x, int y, int z, boolean invertTimeScalar, boolean invertMotion) {
-        int invertTimeScalarInt = invertTimeScalar ? 1 << 30 : 0;
+    private static int packOffset(int x, int y, int z, boolean diableTimeScalar, boolean invertMotion) {
+        int invertTimeScalarInt = diableTimeScalar ? 1 << 30 : 0;
         int invertMotionInt = invertMotion ? 1 << 31 : 0;
         return invertMotionInt | invertTimeScalarInt | (x + PARTICLE_OFFSET & 0x3FF) << 20 | (y + PARTICLE_OFFSET & 0x3FF) << 10 | z + PARTICLE_OFFSET & 0x3FF;
     }

@@ -32,12 +32,13 @@ const float NANOSECONDS_PER_SECOND = 1000000000;
 const int PARTICLE_TIME_SHIFT = 20;
 
 float getTimeScaler(Particle currentParticle) {
+    if ((currentParticle.packedOffset & (1 << 30)) != 0) return 1;
+
     int aliveTimeInt = currentTime - spawnTime;
     float aliveTime = float(aliveTimeInt) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
     float maxLiveTime = float(currentParticle.packedLifeTimeRotationMaterial >> 24 & 0xFF) / TARGET_TPS;
     float scalar = max(0.0, (maxLiveTime - aliveTime) / maxLiveTime);
 
-    if ((currentParticle.packedOffset & (1 << 30)) != 0) scalar = 1 - scalar;
 
     return scalar;
 }

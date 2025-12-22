@@ -79,7 +79,7 @@ public final class ParticleCollector {
                     particles.add(new Particle(xOffset, yOffset, zOffset,
                             getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
                             getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, PLACE_PARTICLE_LIFETIME_TICKS, material,
-                            false, true));
+                            true, true));
                 }
         
         addParticles(startX, startY, startZ, particles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
@@ -101,7 +101,7 @@ public final class ParticleCollector {
                             .add(new Particle(xOffset, yOffset, zOffset,
                                     getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
                                     getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, PLACE_PARTICLE_LIFETIME_TICKS, material,
-                                    false, true));
+                                    true, true));
                 }
 
         addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
