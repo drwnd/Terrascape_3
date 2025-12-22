@@ -6,6 +6,8 @@ public enum Command {
     TP(TPCommand::execute, TPCommand.EXPLANATION, TPCommand.SYNTAX),
     CLEAR(ClearCommand::execute, ClearCommand.EXPLANATION, ClearCommand.SYNTAX),
     RECORD(RecordCommand::execute, RecordCommand.EXPLANATION, RecordCommand.SYNTAX),
+    RELOAD(ReloadCommand::execute, ReloadCommand.EXPLANATION, ReloadCommand.SYNTAX),
+    CRASH(CrashCommand::execute, CrashCommand.EXPLANATION, CrashCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
     public static CommandResult execute(String commandString) {
@@ -15,6 +17,8 @@ public enum Command {
             Command command = getCommand(tokens.expectNextKeyWord().keyword().toUpperCase());
 
             return command.executable.execute(tokens);
+        } catch (CrashException exception) {
+            throw exception;
         } catch (Exception exception) {
             exception.printStackTrace();
             return CommandResult.fail(exception.getClass().getSimpleName() + " " + exception.getMessage());

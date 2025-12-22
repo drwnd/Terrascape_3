@@ -720,13 +720,11 @@ public final class MaterialsData {
 
     private int startIndexOf(int inChunkX, int inChunkY, int inChunkZ, int targetSizeBits) {
         int index = 0, sizeBits = totalSizeBits;
-        synchronized (this) {
-            while (true) { // Scary but should be fine
-                byte identifier = data[index];
-                if (sizeBits <= targetSizeBits || identifier == HOMOGENOUS || identifier == DETAIL) return index;
+        while (true) { // Scary but should be fine
+            byte identifier = data[index];
+            if (sizeBits <= targetSizeBits || identifier == HOMOGENOUS || identifier == DETAIL) return index;
 //            if (identifier == SPLITTER)
-                index += getOffset(index, inChunkX, inChunkY, inChunkZ, --sizeBits);
-            }
+            index += getOffset(index, inChunkX, inChunkY, inChunkZ, --sizeBits);
         }
     }
 

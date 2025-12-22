@@ -83,8 +83,16 @@ public final class Window {
                 GLFW.glfwPollEvents();
 
             } catch (Exception exception) {
-                exception.printStackTrace();
-                GLFW.glfwSetWindowShouldClose(window, true);
+                CrashAction action = crashCallback.notify(exception);
+                switch (action) {
+                    case PRINT -> exception.printStackTrace();
+                    case CLOSE -> GLFW.glfwSetWindowShouldClose(window, true);
+                    case THROW -> throw exception;
+                    case PRINT_AND_CLOSE -> {
+                        exception.printStackTrace();
+                        GLFW.glfwSetWindowShouldClose(window, true);
+                    }
+                }
             }
         }
     }
@@ -168,6 +176,10 @@ public final class Window {
         });
     }
 
+    public static void setCrashCallback(CrashCallback crashCallback) {
+        Window.crashCallback = crashCallback;
+    }
+
     public static void checkError(String lastAction) {
         int error = GL46.glGetError();
         System.out.println(lastAction + " : " + switch (error) {
@@ -192,4 +204,5 @@ public final class Window {
 
     private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
     private static final StandardWindowInput standardInput = new StandardWindowInput();
+    private static CrashCallback crashCallback = _ -> CrashAction.PRINT;
 }

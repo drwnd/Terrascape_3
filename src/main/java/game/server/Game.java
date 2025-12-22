@@ -22,11 +22,20 @@ public final class Game {
         world.setName(worldName);
         World.init();
         server.startTicks();
+        Window.setCrashCallback(server);
     }
 
     public static void quit() {
         Window.popRenderable();
+        cleanUp();
+        Window.popRenderable();
 
+        player = null;
+        world = null;
+        server = null;
+    }
+
+    public static void cleanUp() {
         String worldName = world.getName();
         new PlayerSaver().save(player, PlayerSaver.getSaveFileLocation(worldName));
         new ServerSaver().save(server, ServerSaver.getSaveFileLocation(worldName));
@@ -35,11 +44,6 @@ public final class Game {
         world.cleanUp();
         player.cleanUp();
         server.cleanUp();
-        Window.popRenderable();
-
-        player = null;
-        world = null;
-        server = null;
     }
 
     public static Player getPlayer() {

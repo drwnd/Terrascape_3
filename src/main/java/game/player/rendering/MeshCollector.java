@@ -7,6 +7,7 @@ import org.joml.Vector3i;
 import org.lwjgl.opengl.GL46;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static game.utils.Constants.*;
 
@@ -116,6 +117,21 @@ public final class MeshCollector {
 
     public void cleanUp() {
         allocator.cleanUp();
+    }
+
+    public void removeAll() {
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            for (OpaqueModel model : opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+            for (TransparentModel model : transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+
+            Arrays.fill(opaqueModels[lod], null);
+            Arrays.fill(transparentModels[lod], null);
+
+            filledOpaqueModels[lod].clear();
+            filledTransparentModels[lod].clear();
+
+            Arrays.fill(isMeshed[lod], 0L);
+        }
     }
 
 

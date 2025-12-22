@@ -1,8 +1,10 @@
 package game.server;
 
+import core.rendering_api.CrashAction;
+import core.rendering_api.CrashCallback;
 import core.settings.FloatSetting;
-
 import core.settings.optionSettings.ColorOption;
+
 import game.player.Player;
 import game.player.interaction.CubePlaceable;
 import game.player.interaction.Placeable;
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import static game.utils.Constants.*;
 
-public final class Server {
+public final class Server implements CrashCallback {
 
     public static final int TARGET_TPS = 20;
     public static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
@@ -36,6 +38,52 @@ public final class Server {
         this.dayTime = dayTime;
         this.messages = messages;
     }
+
+
+    @Override
+    public CrashAction notify(Exception exception) {
+        Game.cleanUp();
+        return CrashAction.PRINT_AND_CLOSE;
+    }
+
+    public static void loadImmediateSurroundings() {
+        ChunkGenerator.loadImmediateSurroundings();
+    }
+
+    public static void unloadDistantChunks(Vector3i playerChunkPosition) {
+        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+        ChunkSaver saver = new ChunkSaver();
+
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            int lodPlayerX = playerChunkPosition.x >> lod;
+            int lodPlayerY = playerChunkPosition.y >> lod;
+            int lodPlayerZ = playerChunkPosition.z >> lod;
+
+            for (Chunk chunk : Game.getWorld().getLod(lod)) {
+                if (chunk == null) continue;
+
+                if (Utils.outsideRenderKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD))
+                    meshCollector.removeMesh(chunk.INDEX, chunk.LOD);
+
+                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD)) {
+                    Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
+                    if (chunk.isModified()) saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
+                }
+            }
+        }
+    }
+
+    public static void unloadAll() {
+        ChunkSaver saver = new ChunkSaver();
+
+        for (int lod = 0; lod < LOD_COUNT; lod++)
+            for (Chunk chunk : Game.getWorld().getLod(lod)) {
+                if (chunk == null) continue;
+                Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
+                if (chunk.isModified()) saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
+            }
+    }
+
 
     public float getCurrentGameTickFraction() {
         long currentGameTickDuration = System.nanoTime() - gameTickStartTime;
@@ -88,35 +136,9 @@ public final class Server {
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
-    public static void loadImmediateSurroundings() {
-        ChunkGenerator.loadImmediateSurroundings();
-    }
-
     void cleanUp() {
         generator.cleanUp();
-    }
-
-    public static void unloadDistantChunks(Vector3i playerChunkPosition) {
-        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
-        ChunkSaver saver = new ChunkSaver();
-
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            int lodPlayerX = playerChunkPosition.x >> lod;
-            int lodPlayerY = playerChunkPosition.y >> lod;
-            int lodPlayerZ = playerChunkPosition.z >> lod;
-
-            for (Chunk chunk : Game.getWorld().getLod(lod)) {
-                if (chunk == null) continue;
-
-                if (Utils.outsideRenderKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD))
-                    meshCollector.removeMesh(chunk.INDEX, chunk.LOD);
-
-                if (Utils.outsideChunkKeepDistance(lodPlayerX, lodPlayerY, lodPlayerZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD)) {
-                    Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
-                    if (chunk.isModified()) saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
-                }
-            }
-        }
+        pauseTicks();
     }
 
     public void scheduleGeneratorRestart() {
