@@ -47,14 +47,14 @@ public final class ParticleCollector {
         return particleEffects;
     }
 
-    public void addBreakParticleEffect(int startX, int startY, int startZ, int sideLength, byte ignoreMaterial) {
+    public void addBreakParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte ignoreMaterial) {
         if (!ToggleSetting.SHOW_BREAK_PARTICLES.value()) return;
-        ArrayList<Particle> opaqueParticles = new ArrayList<>(sideLength * sideLength);
-        ArrayList<Particle> transparentParticles = new ArrayList<>(sideLength * sideLength);
+        ArrayList<Particle> opaqueParticles = new ArrayList<>(lengthX * lengthY * lengthZ);
+        ArrayList<Particle> transparentParticles = new ArrayList<>(lengthX * lengthY * lengthZ);
 
-        for (int xOffset = 0; xOffset < sideLength; xOffset++)
-            for (int yOffset = 0; yOffset < sideLength; yOffset++)
-                for (int zOffset = 0; zOffset < sideLength; zOffset++) {
+        for (int xOffset = 0; xOffset < lengthX; xOffset++)
+            for (int yOffset = 0; yOffset < lengthY; yOffset++)
+                for (int zOffset = 0; zOffset < lengthZ; zOffset++) {
                     byte material = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
                     if (material == AIR || material == OUT_OF_WORLD || material == ignoreMaterial) continue;
 
@@ -69,13 +69,13 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
     }
     
-    public void addPlaceParticleEffect(int startX, int startY, int startZ, int sideLength, byte material) {
+    public void addPlaceParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte material) {
         if (!ToggleSetting.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
-        ArrayList<Particle> particles = new ArrayList<>(sideLength * sideLength * sideLength);
+        ArrayList<Particle> particles = new ArrayList<>(lengthX * lengthY * lengthZ);
 
-        for (int xOffset = 0; xOffset < sideLength; xOffset++)
-            for (int yOffset = 0; yOffset < sideLength; yOffset++)
-                for (int zOffset = 0; zOffset < sideLength; zOffset++) {
+        for (int xOffset = 0; xOffset < lengthX; xOffset++)
+            for (int yOffset = 0; yOffset < lengthY; yOffset++)
+                for (int zOffset = 0; zOffset < lengthZ; zOffset++) {
                     particles.add(new Particle(xOffset, yOffset, zOffset,
                             getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
                             getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, PLACE_PARTICLE_LIFETIME_TICKS, material,

@@ -81,6 +81,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.USE, UiMessage.USE);
         section.addKeySelector(KeySetting.PICK_BLOCK, UiMessage.PICK_BLOCK);
         section.addKeySelector(KeySetting.INVENTORY, UiMessage.INVENTORY);
+        section.addKeySelector(KeySetting.LOCK_PLACE_POSITION, UiMessage.LOCK_PLACE_POSITION);
         section.addKeySelector(KeySetting.ZOOM, UiMessage.ZOOM);
         section.addKeySelector(KeySetting.INCREASE_BREAK_PLACE_SIZE, UiMessage.INCREASE_BREAK_PLACE_SIZE);
         section.addKeySelector(KeySetting.DECREASE_BREAK_PLACE_SIZE, UiMessage.DECREASE_BREAK_PLACE_SIZE);
@@ -178,7 +179,7 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
     private static Clickable getBackButtonAction() {
-        return (Vector2i pixelCoordinate, int button, int action) -> {
+        return (Vector2i _, int _, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.popRenderable();
         };
@@ -196,7 +197,7 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
-        return (Vector2i pixelCoordinate, int button, int action) -> {
+        return (Vector2i _, int _, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.pushRenderable(sectionCreator.getSection());
         };

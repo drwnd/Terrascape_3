@@ -7,6 +7,7 @@ import core.settings.optionSettings.ColorOption;
 
 import game.player.Player;
 import game.player.interaction.CubePlaceable;
+import game.player.interaction.CuboidPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.player.rendering.MeshCollector;
@@ -106,8 +107,14 @@ public final class Server implements CrashCallback {
 
         if (placeable instanceof CubePlaceable cubePlaceable) {
             int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
-            player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, cubePlaceable.getMaterial());
-            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, cubePlaceable.getMaterial());
+            player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, cubePlaceable.getMaterial());
+            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, cubePlaceable.getMaterial());
+        }
+        if (placeable instanceof CuboidPlaceable cuboidPlaceable) {
+            Vector3i minPosition = cuboidPlaceable.getMinPosition();
+            Vector3i length = new Vector3i(cuboidPlaceable.getMaxPosition()).sub(minPosition).add(1, 1, 1);
+            player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
+            player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
         }
         if (placeable instanceof StructurePlaceable structurePlaceable) {
             player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structurePlaceable.getStructure());

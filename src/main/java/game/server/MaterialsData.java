@@ -108,13 +108,14 @@ public final class MaterialsData {
         }
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength) {
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int lengthX, int lengthY, int lengthZ) {
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
 
-        for (int x = 0; x < sideLength; x++)
-            for (int z = 0; z < sideLength; z++)
-                for (int y = 0; y < sideLength; y++)
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++)
                     uncompressedMaterials[getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z)] = material;
 
         compressIntoData(uncompressedMaterials);

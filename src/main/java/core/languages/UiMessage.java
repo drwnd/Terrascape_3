@@ -88,7 +88,8 @@ public enum UiMessage implements StringGetter {
     SHOW_BREAK_PARTICLES,
     SHOW_CUBE_PLACE_PARTICLES,
     SHOW_STRUCTURE_PLACE_PARTICLES,
-    SHOW_SPLASH_PARTICLES;
+    SHOW_SPLASH_PARTICLES,
+    LOCK_PLACE_POSITION;
 
     @Override
     public String get() {

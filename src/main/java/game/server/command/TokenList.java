@@ -35,8 +35,8 @@ public final class TokenList extends ArrayList<Token> {
 
     KeywordToken expectGetKeyWord() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
-        if (!(token instanceof KeywordToken)) throw new SyntaxError("Expected Keyword but found " + token.type().name());
+        Token token = get();
+        if (!(token instanceof KeywordToken)) throw new SyntaxError("Expected Keyword but found " + getName(token));
         return (KeywordToken) token;
     }
 
@@ -46,8 +46,7 @@ public final class TokenList extends ArrayList<Token> {
     }
 
     Token getIncrementKeyword() {
-        if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
+        Token token = get();
         if (token instanceof KeywordToken) index++;
         return token;
     }
@@ -60,8 +59,8 @@ public final class TokenList extends ArrayList<Token> {
 
     NumberToken expectGetNumber() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
-        if (!(token instanceof NumberToken)) throw new SyntaxError("Expected Number but found " + token.type().name());
+        Token token = get();
+        if (!(token instanceof NumberToken)) throw new SyntaxError("Expected Number but found " + getName(token));
         return (NumberToken) token;
     }
 
@@ -71,8 +70,7 @@ public final class TokenList extends ArrayList<Token> {
     }
 
     Token getIncrementNumber() {
-        if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
+        Token token = get();
         if (token instanceof NumberToken) index++;
         return token;
     }
@@ -85,8 +83,8 @@ public final class TokenList extends ArrayList<Token> {
 
     StringToken expectGetString() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
-        if (!(token instanceof StringToken)) throw new SyntaxError("Expected String but found " + token.type().name());
+        Token token = get();
+        if (!(token instanceof StringToken)) throw new SyntaxError("Expected String but found " + getName(token));
         return (StringToken) token;
     }
 
@@ -96,8 +94,7 @@ public final class TokenList extends ArrayList<Token> {
     }
 
     Token getIncrementString() {
-        if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
+        Token token = get();
         if (token instanceof StringToken) index++;
         return token;
     }
@@ -110,8 +107,8 @@ public final class TokenList extends ArrayList<Token> {
 
     OperatorToken expectGetOperator() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
-        if (!(token instanceof OperatorToken)) throw new SyntaxError("Expected Operator but found " + token.type().name());
+        Token token = get();
+        if (!(token instanceof OperatorToken)) throw new SyntaxError("Expected Operator but found " + getName(token));
         return (OperatorToken) token;
     }
 
@@ -121,9 +118,12 @@ public final class TokenList extends ArrayList<Token> {
     }
 
     Token getIncrementOperator() {
-        if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
-        Token token = get(index);
+        Token token = get();
         if (token instanceof OperatorToken) index++;
         return token;
+    }
+
+    private static String getName(Token token) {
+        return token == null ? "null" : token.type().name();
     }
 }

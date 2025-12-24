@@ -50,7 +50,7 @@ final class TPCommand {
             fractionZ = position.fractionZ;
             zSet = true;
         }
-        if (tokens.get() instanceof NumberToken(double z)) {
+        if (tokens.getIncrementNumber() instanceof NumberToken(double z)) {
             intZ += (int) Math.floor(z);
             fractionZ += (float) (z - Math.floor(z));
             zSet = true;

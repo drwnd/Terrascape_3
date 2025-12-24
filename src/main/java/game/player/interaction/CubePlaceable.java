@@ -50,7 +50,8 @@ public final class CubePlaceable implements Placeable {
         World world = Game.getWorld();
         Chunk chunk = new ChunkSaver().loadAndGenerate(chunkX, chunkY, chunkZ, lod);
 
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, lodSize);
+        int length = 1 << lodSize;
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, length, length, length);
         affectedChunks.add(chunk);
         if (inChunkX == 0) affectedChunks.add(world.getChunk(chunkX - 1, chunkY, chunkZ, lod));
         if (inChunkY == 0) affectedChunks.add(world.getChunk(chunkX, chunkY - 1, chunkZ, lod));

@@ -3,6 +3,7 @@ package game.player.movement;
 import core.rendering_api.Input;
 import core.settings.KeySetting;
 
+import game.server.Game;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -35,7 +36,7 @@ public final class FlyingState extends MovementState {
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
-        if (movement.isGrounded()) next = new WalkingState();
+        if (movement.isGrounded() && !Game.getPlayer().isNoClip()) next = new WalkingState();
     }
 
     @Override

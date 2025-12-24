@@ -49,8 +49,8 @@ public final class Chunk {
                 && world.getGenerationStatus(X - 1, Y, Z, LOD) == Status.DONE;
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int size) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1 << size);
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int lengthX, int lengthY, int lengthZ) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, lengthX, lengthY, lengthZ);
         modified = true;
     }
 

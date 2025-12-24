@@ -43,11 +43,12 @@ public enum KeySetting {
     RELOAD_FONT(GLFW.GLFW_KEY_F7),
     RELOAD_MATERIALS(GLFW.GLFW_KEY_F6),
     GET_CHUNK_REBUILD_PLACEABLE(GLFW.GLFW_KEY_F5),
-    SKIP_COMPUTING_VISIBILITY(GLFW.GLFW_KEY_G);
+    SKIP_COMPUTING_VISIBILITY(GLFW.GLFW_KEY_G),
+    LOCK_PLACE_POSITION(GLFW.GLFW_KEY_TAB);
 
     public static void setIfPresent(String name, String value) {
         try {
-            valueOf(name).setValue(Integer.parseInt(value));
+            valueOf(name).value = Integer.parseInt(value);
         } catch (IllegalArgumentException ignore) {
 
         }
