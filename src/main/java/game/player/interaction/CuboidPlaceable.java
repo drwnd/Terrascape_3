@@ -19,8 +19,21 @@ public class CuboidPlaceable implements Placeable {
 
     public CuboidPlaceable(byte material, Vector3i position1, Vector3i position2) {
         this.material = material;
-        this.minPosition = min(position1, position2);
-        this.maxPosition = max(position1, position2);
+        this.minPosition = Utils.min(position1, position2);
+        this.maxPosition = Utils.max(position1, position2);
+    }
+
+    public static void offsetPositions(Vector3i minPosition, Vector3i maxPosition) {
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
+        int mask = -(1 << breakPlaceSize);
+
+        minPosition.x &= mask;
+        minPosition.y &= mask;
+        minPosition.z &= mask;
+
+        maxPosition.x = (maxPosition.x & mask) + (1 << breakPlaceSize) - 1;
+        maxPosition.y = (maxPosition.y & mask) + (1 << breakPlaceSize) - 1;
+        maxPosition.z = (maxPosition.z & mask) + (1 << breakPlaceSize) - 1;
     }
 
     @Override
@@ -60,16 +73,7 @@ public class CuboidPlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3i position) {
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
-        int mask = -(1 << breakPlaceSize);
-
-        minPosition.x &= mask;
-        minPosition.y &= mask;
-        minPosition.z &= mask;
-
-        maxPosition.x = (maxPosition.x & mask) + (1 << breakPlaceSize) - 1;
-        maxPosition.y = (maxPosition.y & mask) + (1 << breakPlaceSize) - 1;
-        maxPosition.z = (maxPosition.z & mask) + (1 << breakPlaceSize) - 1;
+        offsetPositions(minPosition, maxPosition);
     }
 
     public Vector3i getMinPosition() {
@@ -113,23 +117,6 @@ public class CuboidPlaceable implements Placeable {
         if (inChunkEndX == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
         if (inChunkEndY == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
         if (inChunkEndZ == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
-    }
-
-
-    private static Vector3i min(Vector3i a, Vector3i b) {
-        return new Vector3i(
-                Math.min(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                Math.min(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                Math.min(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
-        );
-    }
-
-    private static Vector3i max(Vector3i a, Vector3i b) {
-        return new Vector3i(
-                Math.max(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                Math.max(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                Math.max(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
-        );
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();

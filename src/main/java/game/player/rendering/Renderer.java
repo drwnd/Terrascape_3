@@ -22,6 +22,10 @@ import game.assets.Textures;
 import game.assets.VertexArrays;
 import game.player.ChatTextField;
 import game.player.Player;
+import game.player.interaction.CubePlaceable;
+import game.player.interaction.CuboidPlaceable;
+import game.player.interaction.Placeable;
+import game.player.interaction.Target;
 import game.server.ChatMessage;
 import game.server.Game;
 import game.server.Server;
@@ -29,14 +33,12 @@ import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
 
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL46;
 
 import java.awt.*;
+import java.lang.Math;
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
@@ -93,7 +95,6 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
 
-        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_CULL_FACE);
         GL46.glEnable(GL46.GL_STENCIL_TEST);
@@ -115,7 +116,6 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
 
-        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glEnable(GL46.GL_STENCIL_TEST);
@@ -132,7 +132,6 @@ public final class Renderer extends Renderable {
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
         shader.setUniform("textures", 0);
 
-        GL46.glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).getID()); // Just bind something IDK
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glEnable(GL46.GL_BLEND);
         GL46.glEnable(GL46.GL_STENCIL_TEST);
@@ -177,6 +176,7 @@ public final class Renderer extends Renderable {
         renderWater(cameraPosition, projectionViewMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
         renderTransparentParticles(cameraPosition, projectionViewMatrix);
+        renderVolumeIndicator(cameraPosition, projectionViewMatrix);
 
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
@@ -493,6 +493,46 @@ public final class Renderer extends Renderable {
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
             GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, particleEffect.count());
         }
+    }
+
+    private void renderVolumeIndicator(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        Target startTarget = player.getInteractionHandler().getStartTarget();
+        Target currentTarget = Target.getPlayerTarget();
+        if (startTarget == null || currentTarget == null) return;
+
+        Placeable placeable = player.getHeldPlaceable();
+        byte material = placeable instanceof CubePlaceable ? ((CubePlaceable) placeable).getMaterial() : AIR;
+
+        Vector3i startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
+        Vector3i endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
+
+        Vector3i minPosition = Utils.min(startPositon, endPosition);
+        Vector3i maxPosition = Utils.max(startPositon, endPosition);
+        CuboidPlaceable.offsetPositions(minPosition, maxPosition);
+        maxPosition.add(1, 1, 1);
+
+        GL46.glDisable(GL46.GL_DEPTH_TEST);
+        GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
+        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
+        GL46.glEnable(GL46.GL_BLEND);
+        GL46.glDepthMask(false);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        shader.setUniform("iCameraPosition",
+                cameraPositon.intX & ~CHUNK_SIZE_MASK,
+                cameraPositon.intY & ~CHUNK_SIZE_MASK,
+                cameraPositon.intZ & ~CHUNK_SIZE_MASK);
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("minPosition", minPosition);
+        shader.setUniform("maxPosition", maxPosition);
+        shader.setUniform("textures", 0);
+        shader.setUniform("material", material);
+
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 36);
     }
 
     private void renderChat() {

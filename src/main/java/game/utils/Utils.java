@@ -175,6 +175,22 @@ public final class Utils {
         return new Vector3f(x, 0.0F, z);
     }
 
+    public static Vector3i min(Vector3i a, Vector3i b) {
+        return new Vector3i(
+                org.joml.Math.min(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
+                org.joml.Math.min(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
+                org.joml.Math.min(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+        );
+    }
+
+    public static Vector3i max(Vector3i a, Vector3i b) {
+        return new Vector3i(
+                org.joml.Math.max(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
+                org.joml.Math.max(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
+                org.joml.Math.max(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+        );
+    }
+
     public static double round(float value, int decimals) {
         double multiplier = Math.pow(10, decimals);
         int multipliedValue = (int) (value * multiplier);

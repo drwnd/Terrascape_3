@@ -4,10 +4,7 @@ import core.assets.Asset;
 import core.assets.identifiers.ShaderIdentifier;
 
 import core.utils.FileManager;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.system.MemoryStack;
 
@@ -56,6 +53,10 @@ public class Shader extends Asset {
 
     public void setUniform(String uniformName, Vector2i value) {
         GL46.glUniform2i(uniforms.get(uniformName), value.x, value.y);
+    }
+
+    public void setUniform(String uniformName, Vector3i value) {
+        GL46.glUniform3i(uniforms.get(uniformName), value.x, value.y, value.z);
     }
 
     public void setUniform(String uniformName, int x, int y, int z) {

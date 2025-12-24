@@ -35,6 +35,10 @@ public final class InteractionHandler {
         return placeBreakSize;
     }
 
+    public Target getStartTarget() {
+        return startTarget;
+    }
+
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         if (placeable == null) {
