@@ -10,6 +10,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public class Shader extends Asset {
 
@@ -165,11 +166,16 @@ public class Shader extends Asset {
     }
 
     private static String strip(String line) {
-        return line.strip()                                  // Remove accidental white space
-                .replaceAll(";", "")        // Remove trailing semicolon
-                .replaceAll("\\[.*]", "")   // Remove Array declarations (C-Style ones would cause problems)
-                .replaceAll(" +", " ");     // Remove unnecessary white space
+        line = line.strip();                                                           // Remove accidental white space
+        line = REMOVE_SEMICOLON.matcher(line).replaceAll("");               // Remove trailing semicolon
+        line = REMOVE_ARRAY_DECLARATION.matcher(line).replaceAll("");       // Remove Array declarations (C-Style ones would cause problems)
+        line = REMOVE_UNNECESSARY_WHITESPACE.matcher(line).replaceAll(" "); // Remove unnecessary white space
+        return line;
     }
+
+    private static final Pattern REMOVE_SEMICOLON = Pattern.compile(";");
+    private static final Pattern REMOVE_ARRAY_DECLARATION = Pattern.compile("\\[.*]");
+    private static final Pattern REMOVE_UNNECESSARY_WHITESPACE = Pattern.compile(" +");
 
     protected final int programID;
     private final HashMap<String, Integer> uniforms;

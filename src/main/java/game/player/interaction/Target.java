@@ -84,8 +84,8 @@ public record Target(Vector3i position, int side, byte material) {
 
     public String string() {
         return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s".formatted(
-                Utils.toFakeXZ(position.x),
-                Utils.toFakeY(position.y),
-                Utils.toFakeXZ(position.z), side, Material.getSystemName(material));
+                Utils.toDisplayXZ(position.x),
+                Utils.toDisplayY(position.y),
+                Utils.toDisplayXZ(position.z), side, Material.getSystemName(material));
     }
 }
