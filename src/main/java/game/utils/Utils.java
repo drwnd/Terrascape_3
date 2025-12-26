@@ -1,6 +1,7 @@
 package game.utils;
 
 import core.settings.ToggleSetting;
+
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -167,17 +168,17 @@ public final class Utils {
 
     public static Vector3i min(Vector3i a, Vector3i b) {
         return new Vector3i(
-                org.joml.Math.min(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                org.joml.Math.min(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                org.joml.Math.min(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+                Math.min(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
+                Math.min(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
+                Math.min(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
         );
     }
 
     public static Vector3i max(Vector3i a, Vector3i b) {
         return new Vector3i(
-                org.joml.Math.max(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                org.joml.Math.max(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                org.joml.Math.max(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+                Math.max(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
+                Math.max(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
+                Math.max(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
         );
     }
 

@@ -362,12 +362,14 @@ public final class Renderer extends Renderable {
     private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
-        shader.setUniform("currentTime", (int) (System.nanoTime() >> ParticleCollector.PARTICLE_TIME_SHIFT));
         GL46.glDisable(GL46.GL_STENCIL_TEST);
+        long currentTick = Game.getServer().getCurrentGameTick();
+        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
 
         for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
             if (!particleEffect.isOpaque()) continue;
-            shader.setUniform("spawnTime", particleEffect.spawnTime());
+            shader.setUniform("lifeTimeTicks", particleEffect.lifeTimeTicks());
+            shader.setUniform("aliveTicks", (int) (currentTick - particleEffect.spawnTick()));
             shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
             GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, particleEffect.count());
@@ -483,12 +485,14 @@ public final class Renderer extends Renderable {
     private void renderTransparentParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.TRANSPARENT_PARTICLE);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
-        shader.setUniform("currentTime", (int) (System.nanoTime() >> ParticleCollector.PARTICLE_TIME_SHIFT));
         GL46.glDisable(GL46.GL_STENCIL_TEST);
+        long currentTick = Game.getServer().getCurrentGameTick();
+        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
 
         for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
             if (particleEffect.isOpaque()) continue;
-            shader.setUniform("spawnTime", particleEffect.spawnTime());
+            shader.setUniform("lifeTimeTicks", particleEffect.lifeTimeTicks());
+            shader.setUniform("aliveTicks", (int) (currentTick - particleEffect.spawnTick()));
             shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
             GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
             GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, particleEffect.count());

@@ -15,30 +15,28 @@ layout (std430, binding = 0) restrict readonly buffer particleBuffer {
 };
 
 uniform mat4 projectionViewMatrix;
-uniform int currentTime;
-uniform int spawnTime;
+uniform int aliveTicks;
+uniform int lifeTimeTicks;
+uniform float gameTickFraction;
 uniform ivec3 iCameraPosition;
 uniform ivec3 startPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const vec2[6] FACE_POSITIONS = vec2[6](vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1), vec2(1, 0), vec2(0, 1));
 
-const float VELOCITY_PACKING_FACTOR = 0.25;     // Inverse in Particle.java
-const float GRAVITY_PACKING_FACTOR = 0.5;       // Inverse in Particle.java
-const float ROTATION_PACKING_FACTOR = 0.0625;   // Inverse in Particle.java
-const int PARTICLE_OFFSET = 512;                // Same in Particle.java
+const float VELOCITY_PACKING_FACTOR = 0.25;     // Inverse in ParticleCollector.java
+const float GRAVITY_PACKING_FACTOR = 0.5;       // Inverse in ParticleCollector.java
+const float ROTATION_PACKING_FACTOR = 0.0625;   // Inverse in ParticleCollector.java
+const int PARTICLE_OFFSET = 512;                // Same in ParticleCollector.java
 const float TARGET_TPS = 20.0;
 const float NANOSECONDS_PER_SECOND = 1000000000;
-const int PARTICLE_TIME_SHIFT = 20;
 
 float getTimeScaler(Particle currentParticle) {
     if ((currentParticle.packedOffset & (1 << 30)) != 0) return 1;
 
-    int aliveTimeInt = currentTime - spawnTime;
-    float aliveTime = float(aliveTimeInt) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
-    float maxLiveTime = float(currentParticle.packedLifeTimeRotationMaterial >> 24 & 0xFF) / TARGET_TPS;
+    float aliveTime = (float(aliveTicks) + gameTickFraction) / TARGET_TPS;
+    float maxLiveTime = float(lifeTimeTicks) / TARGET_TPS;
     float scalar = max(0.0, (maxLiveTime - aliveTime) / maxLiveTime);
-
 
     return scalar;
 }
@@ -48,10 +46,9 @@ float getGravity(Particle currentParticle) {
 }
 
 float getAliveTime(Particle currentParticle) {
-    int aliveTimeInt = currentTime - spawnTime;
-    float aliveTime = float(aliveTimeInt) * (float(1 << PARTICLE_TIME_SHIFT) / NANOSECONDS_PER_SECOND);
+    float aliveTime = (float(aliveTicks) + gameTickFraction) / TARGET_TPS;
 
-    float maxLiveTime = float(currentParticle.packedLifeTimeRotationMaterial >> 24 & 0xFF) / TARGET_TPS;
+    float maxLiveTime = float(lifeTimeTicks) / TARGET_TPS;
     if ((currentParticle.packedOffset & (1 << 31)) != 0) aliveTime = maxLiveTime - aliveTime;
 
     return aliveTime;

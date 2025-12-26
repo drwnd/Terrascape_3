@@ -33,6 +33,10 @@ public final class IntArrayList {
         return size;
     }
 
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
     public int[] getData() {
         return data;
     }
