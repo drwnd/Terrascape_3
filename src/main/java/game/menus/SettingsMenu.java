@@ -161,6 +161,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
         section.addToggle(ToggleSetting.V_SYNC, new Message("Use V-Sync"));
         section.addToggle(ToggleSetting.FAKE_COORDINATES, new Message("Fake Coordinates"));
+        section.addToggle(ToggleSetting.RENDER_OCCLUDERS, new Message("Render Occluders"));
+        section.addToggle(ToggleSetting.RENDER_OCCLUDEES, new Message("Render Occludees"));
 
         section.addSlider(FloatSetting.REACH, new Message("Reach"));
         section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));

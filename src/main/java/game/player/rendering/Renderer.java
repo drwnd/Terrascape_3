@@ -27,6 +27,7 @@ import game.player.interaction.CuboidPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.Target;
 import game.server.ChatMessage;
+import game.server.Chunk;
 import game.server.Game;
 import game.server.Server;
 import game.utils.Position;
@@ -177,6 +178,8 @@ public final class Renderer extends Renderable {
         renderGlass(cameraPosition, projectionViewMatrix);
         renderTransparentParticles(cameraPosition, projectionViewMatrix);
         renderVolumeIndicator(cameraPosition, projectionViewMatrix);
+        renderOccluders(cameraPosition, projectionViewMatrix);
+        renderOccludees(cameraPosition, projectionViewMatrix);
 
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
@@ -580,6 +583,74 @@ public final class Renderer extends Renderable {
     private void renderDebugInfo() {
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
+    }
+
+    private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        if (!ToggleSetting.RENDER_OCCLUDERS.value()) return;
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
+        MeshCollector meshCollector = player.getMeshCollector();
+
+        for (Chunk chunk : Game.getWorld().getLod(0)) {
+            if (chunk == null || !meshCollector.neighborHasModel(chunk.X, chunk.Y, chunk.Z)) continue;
+//            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
+//            if (opaqueModel == null || opaqueModel.isEmpty()) continue;
+
+            AABB aabb = chunk.getMaterials().getMinSolidAABB();
+            renderVolume(shader, chunk, aabb);
+        }
+    }
+
+    private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        if (!ToggleSetting.RENDER_OCCLUDEES.value()) return;
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
+        MeshCollector meshCollector = player.getMeshCollector();
+
+        for (Chunk chunk : Game.getWorld().getLod(0)) {
+            if (chunk == null) continue;
+            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
+            if (opaqueModel == null || opaqueModel.isEmpty()) continue;
+
+            AABB aabb = chunk.getMaterials().getMaxSolidAABB();
+            renderVolume(shader, chunk, aabb);
+        }
+    }
+
+    private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
+        if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
+
+        int x = chunk.X << CHUNK_SIZE_BITS;
+        int y = chunk.Y << CHUNK_SIZE_BITS;
+        int z = chunk.Z << CHUNK_SIZE_BITS;
+
+        shader.setUniform("minPosition", x + aabb.minX, y + aabb.minY, z + aabb.minZ);
+        shader.setUniform("maxPosition", x + aabb.maxX, y + aabb.maxY, z + aabb.maxZ);
+
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 36);
+    }
+
+    private static void setUpVolumeRendering(Position cameraPositon, Matrix4f projectionViewMatrix, Shader shader) {
+        GL46.glDisable(GL46.GL_DEPTH_TEST);
+        GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
+        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
+        GL46.glEnable(GL46.GL_BLEND);
+        GL46.glDepthMask(false);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+
+        shader.setUniform("iCameraPosition",
+                cameraPositon.intX & ~CHUNK_SIZE_MASK,
+                cameraPositon.intY & ~CHUNK_SIZE_MASK,
+                cameraPositon.intZ & ~CHUNK_SIZE_MASK);
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("material", 0);
+        shader.setUniform("textures", 0);
     }
 
     private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits) {

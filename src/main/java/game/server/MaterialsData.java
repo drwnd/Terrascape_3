@@ -2,9 +2,11 @@ package game.server;
 
 import core.utils.ByteArrayList;
 
+import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
 import game.server.material.Material;
+import game.server.material.Properties;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -191,6 +193,23 @@ public final class MaterialsData {
 
     public boolean isHomogenous(byte material) {
         return data[0] == HOMOGENOUS && data[1] == material;
+    }
+
+    public AABB getMinSolidAABB() {
+        AABB aabb = AABB.newMaxChunkAABB();
+        synchronized (this) {
+            minSolidAABB(aabb, totalSizeBits, 0, 0, 0, 0);
+        }
+        if (aabb.maxX <= aabb.minX || aabb.maxY <= aabb.minY || aabb.maxZ <= aabb.minZ) aabb.setEmpty();
+        return aabb;
+    }
+
+    public AABB getMaxSolidAABB() {
+        AABB aabb = AABB.newMinChunkAABB();
+        synchronized (this) {
+            maxSolidAABB(aabb, totalSizeBits, 0, 0, 0, 0);
+        }
+        return aabb;
     }
 
     // Miscellaneous functions
@@ -1125,6 +1144,61 @@ public final class MaterialsData {
         return uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)];
     }
 
+    // AABB generation
+    private void minSolidAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int size = 1 << sizeBits;
+        if (!aabb.intersects(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size)) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            minSolidAABB(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+            return;
+        }
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (Properties.doesntHaveProperties(material, TRANSPARENT)) return;
+            aabb.excludeMaximizeSurfaceArea(inChunkX, inChunkY, inChunkZ, size);
+        }
+    }
+
+    private void maxSolidAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int size = 1 << sizeBits;
+        if (aabb.includes(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size)) return;
+        byte identifier = data[startIndex];
+
+        if (identifier == SPLITTER) {
+            int nextSize = 1 << --sizeBits;
+            maxSolidAABB(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+            return;
+        }
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+
+            aabb.min(inChunkX, inChunkY, inChunkZ);
+            aabb.max(inChunkX + size, inChunkY + size, inChunkZ + size);
+            return;
+        }
+//        if (identifier == DETAIL)
+        aabb.min(inChunkX, inChunkY, inChunkZ);
+        aabb.max(inChunkX + 2, inChunkY + 2, inChunkZ + 2);
+    }
+
     // Helper functions
     private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
         return Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
@@ -1294,7 +1368,7 @@ public final class MaterialsData {
         return offset;
     }
 
-    private static boolean isHomogenous(final int startX, final int startY, final int startZ, int sizeBits, byte[] uncompressedMaterials) {
+    private static boolean isHomogenous(int startX, int startY, int startZ, int sizeBits, byte[] uncompressedMaterials) {
         int startIndex = getUncompressedIndex(startX, startY, startZ);
         byte material = uncompressedMaterials[startIndex];
         int endIndex = startIndex + (1 << sizeBits * 3);

@@ -211,6 +211,7 @@ public final class Utils {
                 zCurveIndex >> 9 & 16 |
                 zCurveIndex >> 11 & 32;
     }
+
     public static int getInChunkZ(int zCurveIndex) {
         return zCurveIndex & 1 |
                 zCurveIndex >> 2 & 2 |
@@ -219,7 +220,6 @@ public final class Utils {
                 zCurveIndex >> 8 & 16 |
                 zCurveIndex >> 10 & 32;
     }
-
 
 
     private static int zOrderCurveValue(int value, int split) {

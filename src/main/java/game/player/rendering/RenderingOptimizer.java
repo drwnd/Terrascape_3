@@ -156,21 +156,13 @@ public final class RenderingOptimizer {
         long[] visibilityBits = this.visibilityBits[lod];
         int index;
         index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
+        visibilityBits[index >> 6] &= ~(3L << index);
         index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY + 1, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
+        visibilityBits[index >> 6] &= ~(3L << index);
         index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
+        visibilityBits[index >> 6] &= ~(3L << index);
         index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY + 1, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(1L << index);
+        visibilityBits[index >> 6] &= ~(3L << index);
     }
 
     private long[] lodVisibilityBits;

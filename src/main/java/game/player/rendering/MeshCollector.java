@@ -134,6 +134,16 @@ public final class MeshCollector {
         }
     }
 
+    public boolean neighborHasModel(int chunkX, int chunkY, int chunkZ) {
+        OpaqueModel model;
+        return (model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, 0), 0)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, 0), 0)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, 0), 0)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, 0), 0)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, 0), 0)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, 0), 0)) != null && !model.isEmpty();
+    }
+
 
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
