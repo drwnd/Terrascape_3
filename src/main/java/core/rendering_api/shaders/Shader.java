@@ -1,9 +1,7 @@
 package core.rendering_api.shaders;
 
 import core.assets.Asset;
-import core.assets.identifiers.ShaderIdentifier;
 
-import core.utils.FileManager;
 import org.joml.*;
 import org.lwjgl.opengl.GL46;
 import org.lwjgl.system.MemoryStack;
@@ -12,25 +10,11 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
-public class Shader extends Asset {
+public abstract class Shader extends Asset {
 
-    public Shader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
+    public Shader() {
         uniforms = new HashMap<>();
-
-        String vertexShaderCode = FileManager.loadFileContents(vertexShaderFilePath);
-        String fragmentShaderCode = FileManager.loadFileContents(fragmentShaderFilePath);
-        try {
-            programID = createProgram();
-            int vertexShaderID = createVertexShader(vertexShaderCode, programID);
-            int fragmentShaderID = createFragmentShader(fragmentShaderCode, programID);
-            link(programID, vertexShaderID, fragmentShaderID);
-
-            System.out.printf("Creating uniforms for Shader %s%n", identifier);
-            createUniforms(vertexShaderCode);
-            createUniforms(fragmentShaderCode);
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
+        programID = createProgram();
     }
 
 
@@ -107,46 +91,35 @@ public class Shader extends Asset {
     }
 
 
-    private static int createProgram() throws Exception {
+    static int createProgram() {
         int programID = GL46.glCreateProgram();
-        if (programID == 0) throw new Exception("Could not create Shader");
+        if (programID == 0) throw new RuntimeException("Could not create Shader");
         return programID;
     }
 
-    private static int createVertexShader(String shaderCode, int programID) throws Exception {
-        return createShader(shaderCode, GL46.GL_VERTEX_SHADER, programID);
-    }
-
-    private static int createFragmentShader(String shaderCode, int programID) throws Exception {
-        return createShader(shaderCode, GL46.GL_FRAGMENT_SHADER, programID);
-    }
-
-    private static void link(int programID, int vertexShaderID, int fragmentShaderID) throws Exception {
+    static void link(int programID) {
         GL46.glLinkProgram(programID);
 
         if (GL46.glGetProgrami(programID, GL46.GL_LINK_STATUS) == 0)
-            throw new Exception("Error linking shader code: " + GL46.glGetProgramInfoLog(programID, 1024));
-
-        if (vertexShaderID != 0) GL46.glDetachShader(programID, vertexShaderID);
-        if (fragmentShaderID != 0) GL46.glDetachShader(programID, fragmentShaderID);
+            throw new RuntimeException("Error linking shader code: " + GL46.glGetProgramInfoLog(programID, 1024));
     }
 
-    private static int createShader(String shaderCode, int shaderType, int programID) throws Exception {
+    static int createShader(String shaderCode, int shaderType, int programID) {
         int shaderID = GL46.glCreateShader(shaderType);
-        if (shaderID == 0) throw new Exception("Error creating shader. Type: " + shaderType);
+        if (shaderID == 0) throw new RuntimeException("Error creating shader. Type: " + shaderType);
 
         GL46.glShaderSource(shaderID, shaderCode);
         GL46.glCompileShader(shaderID);
 
         if (GL46.glGetShaderi(shaderID, GL46.GL_COMPILE_STATUS) == 0)
-            throw new Exception("Error compiling shader code: Type: " + shaderType + "Info: " + GL46.glGetShaderInfoLog(shaderID, 1024));
+            throw new RuntimeException("Error compiling shader code: Type: " + shaderType + "Info: " + GL46.glGetShaderInfoLog(shaderID, 1024));
 
         GL46.glAttachShader(programID, shaderID);
 
         return shaderID;
     }
 
-    private void createUniforms(String shaderCode) {
+    void createUniforms(String shaderCode) {
         String[] lines = shaderCode.split("\n");
 
         for (String line : lines) {
