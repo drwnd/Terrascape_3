@@ -21,7 +21,7 @@ public final class MeshCollector {
 
         opaqueIndirectBuffer = GL46.glGenBuffers();
         GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
-        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, ((long) RenderingOptimizer.LOD_OFFSET_SIZE << 6) * INDIRECT_COMMAND_SIZE, GL46.GL_DYNAMIC_DRAW);
+        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, ((long) RenderingOptimizer.LOD_OFFSET_SIZE << 6) * INDIRECT_COMMAND_SIZE * 6 * LOD_COUNT, GL46.GL_DYNAMIC_DRAW);
     }
 
     public void uploadAllMeshes() {
@@ -195,10 +195,24 @@ public final class MeshCollector {
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getOpaqueByteSize());
-        if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
+        if (start == -1) {
+            GL46.glNamedBufferSubData(opaqueIndirectBuffer, mesh.index() * INDIRECT_COMMAND_SIZE * 6L, new int[6 * INDIRECT_COMMAND_SIZE / 4]);
+            return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
+        }
 
+        int lodOffset = mesh.lod() * RenderingOptimizer.LOD_OFFSET_SIZE * 64;
+        OpaqueModel model = new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
+        int[] indirectCommands = new int[]{
+                model.vertexCounts()[NORTH], 1, model.indices()[NORTH], 0,
+                model.vertexCounts()[TOP], 1, model.indices()[TOP], 0,
+                model.vertexCounts()[WEST], 1, model.indices()[WEST], 0,
+                model.vertexCounts()[SOUTH], 1, model.indices()[SOUTH], 0,
+                model.vertexCounts()[BOTTOM], 1, model.indices()[BOTTOM], 0,
+                model.vertexCounts()[EAST], 1, model.indices()[EAST], 0
+        };
+        GL46.glNamedBufferSubData(opaqueIndirectBuffer, (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE * 6L, indirectCommands);
         GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
-        return new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
+        return model;
     }
 
     private TransparentModel loadTransparentModel(Mesh mesh) {
@@ -223,7 +237,7 @@ public final class MeshCollector {
     private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];
 
-    private final int opaqueIndirectBuffer;
+    public final int opaqueIndirectBuffer;
 
     private static final int INDIRECT_COMMAND_SIZE = 16;
 }

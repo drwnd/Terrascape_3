@@ -340,26 +340,29 @@ public final class Renderer extends Renderable {
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().opaqueIndirectBuffer);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            int lodOffset = lod * RenderingOptimizer.LOD_OFFSET_SIZE;
+            int lodOffset = lod * RenderingOptimizer.LOD_OFFSET_SIZE * 64 * 16 * 6;
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             long[] lodVisibilityBits = renderingOptimizer.getChunkVisibilityBits();
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+//            indices.clear();
+//            vertexCounts.clear();
+//
+//            for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
+//                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits, lodOffset)) continue;
+//                model.addData(indices, vertexCounts, cameraChunkX, cameraChunkY, cameraChunkZ);
+//                renderedOpaqueModels++;
+//            }
+//
+//            indices.fillWith0AfterEnd();
+//            vertexCounts.fillWith0AfterEnd();
+//
+//            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
 
-            for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits, lodOffset)) continue;
-                model.addData(indices, vertexCounts, cameraChunkX, cameraChunkY, cameraChunkZ);
-                renderedOpaqueModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, lodOffset, RenderingOptimizer.LOD_OFFSET_SIZE * 64 * 6, 0);
         }
     }
 
