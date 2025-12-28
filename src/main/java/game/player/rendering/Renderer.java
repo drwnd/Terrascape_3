@@ -342,15 +342,16 @@ public final class Renderer extends Renderable {
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            int lodOffset = lod * RenderingOptimizer.LOD_OFFSET_SIZE;
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            long[] lodVisibilityBits = renderingOptimizer.getChunkVisibilityBits();
             shader.setUniform("lodSize", 1 << lod);
 
             indices.clear();
             vertexCounts.clear();
 
             for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
+                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits, lodOffset)) continue;
                 model.addData(indices, vertexCounts, cameraChunkX, cameraChunkY, cameraChunkZ);
                 renderedOpaqueModels++;
             }
@@ -432,15 +433,16 @@ public final class Renderer extends Renderable {
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            int lodOffset = lod * RenderingOptimizer.LOD_OFFSET_SIZE;
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            long[] lodVisibilityBits = renderingOptimizer.getChunkVisibilityBits();
             shader.setUniform("lodSize", 1 << lod);
 
             indices.clear();
             vertexCounts.clear();
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
+                if (model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits, lodOffset)) continue;
 
                 indices.add(model.index());
                 vertexCounts.add(model.waterVertexCount());
@@ -463,15 +465,16 @@ public final class Renderer extends Renderable {
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
+            int lodOffset = lod * RenderingOptimizer.LOD_OFFSET_SIZE;
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
+            long[] lodVisibilityBits = renderingOptimizer.getChunkVisibilityBits();
             shader.setUniform("lodSize", 1 << lod);
 
             indices.clear();
             vertexCounts.clear();
 
             for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
+                if (model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits, lodOffset)) continue;
 
                 indices.add(model.index() + model.waterVertexCount());
                 vertexCounts.add(model.glassVertexCount());
@@ -653,9 +656,9 @@ public final class Renderer extends Renderable {
         shader.setUniform("textures", 0);
     }
 
-    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits) {
+    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits, int lodOffset) {
         int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        return (visibilityBits[index >> 6] & 1L << index) == 0;
+        return (visibilityBits[lodOffset + (index >> 6)] & 1L << index) == 0;
     }
 
     private static int getFlags(Position cameraPosition) {

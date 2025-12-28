@@ -73,4 +73,8 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         if (isBuffer) return 0;
         return (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX;
     }
+
+    public int index() {
+        return Utils.getChunkIndex(chunkX(), chunkY(), chunkZ(), LOD);
+    }
 }

@@ -11,7 +11,7 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFW;
 
-public class SettingsRenderable extends CoreSettingsRenderable {
+public final class SettingsRenderable extends CoreSettingsRenderable {
 
     public void addDebugLineSetting(DebugScreenLine debugLine) {
         settingsCount++;
@@ -32,7 +32,7 @@ public class SettingsRenderable extends CoreSettingsRenderable {
         options.add(colorOption);
         options.add(visibilityOption);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             colorOption.setToDefault();
             visibilityOption.setToDefault();

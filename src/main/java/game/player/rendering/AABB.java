@@ -2,7 +2,7 @@ package game.player.rendering;
 
 import static game.utils.Constants.*;
 
-public class AABB {
+public final class AABB {
 
     public int minX, minY, minZ;
     public int maxX, maxY, maxZ;

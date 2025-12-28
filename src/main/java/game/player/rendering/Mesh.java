@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import game.utils.Utils;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -18,5 +19,9 @@ public record Mesh(int[] opaqueVertices, int[] vertexCounts,
 
     public int getTransparentByteSize() {
         return transparentVertices.length << 2;
+    }
+
+    public int index() {
+        return Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
     }
 }

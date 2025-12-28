@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import game.utils.Utils;
 import org.joml.Vector3i;
 import org.lwjgl.opengl.GL46;
 
@@ -39,6 +40,10 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
 
     public int chunkZ() {
         return totalZ >> CHUNK_SIZE_BITS + LOD;
+    }
+
+    public int index() {
+        return Utils.getChunkIndex(chunkX(), chunkY(), chunkZ(), LOD);
     }
 }
 

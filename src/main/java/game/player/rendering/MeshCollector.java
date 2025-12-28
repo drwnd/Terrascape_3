@@ -18,6 +18,10 @@ public final class MeshCollector {
             filledOpaqueModels[lod] = new ArrayList<>();
             filledTransparentModels[lod] = new ArrayList<>();
         }
+
+        opaqueIndirectBuffer = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
+        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, ((long) RenderingOptimizer.LOD_OFFSET_SIZE << 6) * INDIRECT_COMMAND_SIZE, GL46.GL_DYNAMIC_DRAW);
     }
 
     public void uploadAllMeshes() {
@@ -117,6 +121,7 @@ public final class MeshCollector {
 
     public void cleanUp() {
         allocator.cleanUp();
+        GL46.glDeleteBuffers(opaqueIndirectBuffer);
     }
 
     public void removeAll() {
@@ -142,6 +147,13 @@ public final class MeshCollector {
                 || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, 0), 0)) != null && !model.isEmpty()
                 || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, 0), 0)) != null && !model.isEmpty()
                 || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, 0), 0)) != null && !model.isEmpty();
+    }
+
+    public boolean isNonEmptyModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
+        OpaqueModel opaqueModel = getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod);
+        if (opaqueModel != null && !opaqueModel.isEmpty()) return true;
+        TransparentModel transparentModel = getTransparentModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod);
+        return transparentModel != null && !transparentModel.isEmpty();
     }
 
 
@@ -210,4 +222,8 @@ public final class MeshCollector {
     private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
     private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];
+
+    private final int opaqueIndirectBuffer;
+
+    private static final int INDIRECT_COMMAND_SIZE = 16;
 }
