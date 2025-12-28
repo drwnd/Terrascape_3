@@ -50,7 +50,7 @@ public final class KeySelector extends UiButton {
     }
 
 
-    private static String getDisplayString(int value) {
+    public static String getDisplayString(int value) {
         return switch (value) {
             case GLFW.GLFW_KEY_UNKNOWN -> "None";
             case GLFW.GLFW_KEY_TAB -> "Tab";
@@ -97,7 +97,7 @@ public final class KeySelector extends UiButton {
     }
 
     private Clickable getAction() {
-        return (Vector2i cursorPos, int button, int action) -> {
+        return (Vector2i _, int _, int action) -> {
             if (action != GLFW.GLFW_PRESS) return;
             Window.setInput(new KeySelectorInput(this));
         };

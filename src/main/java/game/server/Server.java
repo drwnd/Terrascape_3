@@ -99,6 +99,10 @@ public final class Server implements CrashCallback {
         return dayTime;
     }
 
+    public void setDayTime(float dayTime) {
+        this.dayTime = dayTime;
+    }
+
     public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
         placeable.offsetPosition(position);
 

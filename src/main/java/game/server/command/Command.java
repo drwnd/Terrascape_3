@@ -8,6 +8,8 @@ public enum Command {
     RECORD(RecordCommand::execute, RecordCommand.EXPLANATION, RecordCommand.SYNTAX),
     RELOAD(ReloadCommand::execute, ReloadCommand.EXPLANATION, ReloadCommand.SYNTAX),
     CRASH(CrashCommand::execute, CrashCommand.EXPLANATION, CrashCommand.SYNTAX),
+    TIME(TimeCommand::execute, TimeCommand.EXPLANATION, TimeCommand.SYNTAX),
+    SETTING(SettingCommand::execute, SettingCommand.EXPLANATION, SettingCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
     public static CommandResult execute(String commandString) {
@@ -17,8 +19,10 @@ public enum Command {
             Command command = getCommand(tokens.expectNextKeyWord().keyword().toUpperCase());
 
             return command.executable.execute(tokens);
-        } catch (CrashException exception) {
-            throw exception;
+        } catch (CrashException crash) {
+            throw crash;
+        } catch (SyntaxError syntaxError) {
+            return CommandResult.fail(syntaxError.getMessage());
         } catch (Exception exception) {
             exception.printStackTrace();
             return CommandResult.fail(exception.getClass().getSimpleName() + " " + exception.getMessage());

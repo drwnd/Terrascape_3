@@ -57,5 +57,13 @@ public final class Settings {
         }
     }
 
+    public static Enum<?> getSettingWithName(String name) {
+        for (Enum<?> setting : FloatSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : KeySetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : ToggleSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : OptionSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        return null;
+    }
+
     private static final String SETTINGS_FILE_LOCATION = "assets/textData/Settings";
 }

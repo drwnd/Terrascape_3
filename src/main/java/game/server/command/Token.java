@@ -53,7 +53,7 @@ interface Token {
     }
 
     private static int nextNotLetterIndex(char[] chars, int startIndex) {
-        while (startIndex < chars.length && Character.isLetter(chars[startIndex])) startIndex++;
+        while (startIndex < chars.length && (Character.isLetter(chars[startIndex]) || chars[startIndex] == '_')) startIndex++;
         return startIndex;
     }
 
