@@ -99,6 +99,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.CROSSHAIR_SIZE, UiMessage.CROSSHAIR_SIZE);
         section.addSlider(FloatSetting.HOTBAR_SIZE, UiMessage.HOTBAR_SIZE);
         section.addSlider(FloatSetting.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
+        section.addSlider(FloatSetting.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
 
         section.addToggle(ToggleSetting.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
         section.addToggle(ToggleSetting.USE_AMBIENT_OCCLUSION, UiMessage.USE_AMBIENT_OCCLUSION);

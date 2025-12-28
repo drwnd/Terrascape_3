@@ -25,11 +25,12 @@ public enum FloatSetting {
     DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F),
     NIGHT_BRIGHTNESS(0.05F, 1.0F, 0.2F, 0.01F),
     CHAT_MESSAGE_DURATION(1.0F, 30.0F, 5.0F, 0.1F),
-    MAX_CHAT_MESSAGE_COUNT(10, 1000, 100, 1);
+    MAX_CHAT_MESSAGE_COUNT(10, 1000, 100, 1),
+    AMBIENT_OCCLUSION_SAMPLES(0, 64, 64, 1);
 
     public static void setIfPresent(String name, String value) {
         try {
-            valueOf(name).setValue(Float.parseFloat(value));
+            valueOf(name).value = Float.parseFloat(value);
         } catch (IllegalArgumentException ignore) {
 
         }

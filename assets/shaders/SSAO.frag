@@ -9,13 +9,13 @@ uniform mat4 projectionInverse;
 uniform mat4 viewMatrix;
 
 uniform ivec2 noiseScale;
+uniform int samples;
 
 in vec2 fragTextureCoordinate;
 
 out float visibilityFactor;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
-const float RADIUS = 4;
 const float MAX_DISTANCE = 2000.0;
 const vec2 HALF_2 = vec2(0.5);
 const int SAMPLE_COUNT = 64;
@@ -109,11 +109,14 @@ float computeOcclusion() {
     vec3 tangent = normalize(randomVec - viewNormal * dot(randomVec, viewNormal));
     vec3 bitangent = cross(viewNormal, tangent);
     mat3 TBN = mat3(tangent, bitangent, viewNormal);
-    float occlusionFactor = 0.0;
 
-    for (int i = 0; i < SAMPLE_COUNT; i++) {
+    float occlusionFactor = 0.0;
+    float radius = 4.0 * 64.0 / samples;
+
+    int count = clamp(samples, 0, SAMPLE_COUNT);
+    for (int i = 0; i < count; i++) {
         vec3 samplePos = TBN * SAMPLES[i].xyz;
-        samplePos = viewPos + samplePos * RADIUS;
+        samplePos = viewPos + samplePos * radius;
 
         vec4 offset = vec4(samplePos, 1.0);
         offset = projectionMatrix * offset;
@@ -121,13 +124,13 @@ float computeOcclusion() {
         offset.xy = offset.xy * HALF_2 + HALF_2;
 
         float geometryDepth = calcViewPosition(offset.xy).z;
-        float rangeCheck = float(abs(viewPos.z - geometryDepth) < RADIUS);
-        float distanceScale = max(0.05, 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, abs(geometryDepth))));
+        float rangeCheck = float(abs(viewPos.z - geometryDepth) < radius);
 
-        occlusionFactor += float(geometryDepth >= samplePos.z + 0.0001) * rangeCheck * distanceScale;
+        occlusionFactor += float(geometryDepth >= samplePos.z + 0.0001) * rangeCheck;
     }
 
-    float averageOcclusionFactor = occlusionFactor * (1.0 / SAMPLE_COUNT);
+    float distanceScale = max(0.05, 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, abs(viewPos.z))));
+    float averageOcclusionFactor = occlusionFactor * distanceScale / count;
     float visibilityFactor = 1.0 - averageOcclusionFactor;
 
     visibilityFactor = pow(visibilityFactor, 5.0);

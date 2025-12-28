@@ -161,7 +161,7 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix);
 
-        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value()) {
+        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value() && FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value() >= 1) {
             GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
             GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
             GL46.glDisable(GL46.GL_STENCIL_TEST);
@@ -390,6 +390,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
+        shader.setUniform("samples", (int) FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value());
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthTexture);

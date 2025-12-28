@@ -8,7 +8,6 @@ import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
 
-import org.joml.Math;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
@@ -97,9 +96,9 @@ public class CuboidPlaceable implements Placeable {
         int inChunkStartY = Math.max(chunkStartY, Utils.getWrappedPosition(minPosition.y, chunkStartY, WORLD_SIZE_Y)) >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkStartZ = Math.max(chunkStartZ, Utils.getWrappedPosition(minPosition.z, chunkStartZ, WORLD_SIZE_XZ)) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int inChunkEndX = Math.min(chunkStartX + CHUNK_SIZE - 1, Utils.getWrappedPosition(maxPosition.x, chunkStartX, WORLD_SIZE_XZ)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndY = Math.min(chunkStartY + CHUNK_SIZE - 1, Utils.getWrappedPosition(maxPosition.y, chunkStartY, WORLD_SIZE_Y)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndZ = Math.min(chunkStartZ + CHUNK_SIZE - 1, Utils.getWrappedPosition(maxPosition.z, chunkStartZ, WORLD_SIZE_XZ)) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndX = Math.min(chunkStartX + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.x, chunkStartX, WORLD_SIZE_XZ)) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndY = Math.min(chunkStartY + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.y, chunkStartY, WORLD_SIZE_Y)) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndZ = Math.min(chunkStartZ + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.z, chunkStartZ, WORLD_SIZE_XZ)) >> chunk.LOD & CHUNK_SIZE_MASK;
 
         chunk.storeMaterial(
                 inChunkStartX, inChunkStartY, inChunkStartZ,
