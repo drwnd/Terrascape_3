@@ -292,7 +292,10 @@ public final class Renderer extends Renderable {
         GL46.glStencilOp(GL46.GL_KEEP, GL46.GL_KEEP, GL46.GL_REPLACE);
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL46.GL_LINE : GL46.GL_FILL);
-        GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
+        if (vSync != ToggleSetting.V_SYNC.value()) {
+            vSync = ToggleSetting.V_SYNC.value();
+            GLFW.glfwSwapInterval(vSync ? 1 : 0);
+        }
 
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
@@ -334,14 +337,14 @@ public final class Renderer extends Renderable {
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
-        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().opaqueIndirectBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getDataBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().getOpaqueIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             int lodOffset = lod * RenderingOptimizer.CHUNKS_PER_LOD * MeshCollector.INDIRECT_COMMAND_SIZE * 6;
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
-            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, lodOffset, RenderingOptimizer.CHUNKS_PER_LOD * 6, 0);
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, lodOffset, RenderingOptimizer.CHUNKS_PER_LOD * 6, MeshCollector.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -412,8 +415,8 @@ public final class Renderer extends Renderable {
         setUpWaterRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
-        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().waterIndirectBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getDataBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().getWaterIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             int lodOffset = lod * RenderingOptimizer.CHUNKS_PER_LOD * MeshCollector.INDIRECT_COMMAND_SIZE;
@@ -428,8 +431,8 @@ public final class Renderer extends Renderable {
 
         Shader shader = AssetManager.get(Shaders.GLASS);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
-        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().glassIndirectBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getDataBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, player.getMeshCollector().getGlassIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             int lodOffset = lod * RenderingOptimizer.CHUNKS_PER_LOD * MeshCollector.INDIRECT_COMMAND_SIZE;
@@ -625,7 +628,7 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private boolean debugScreenOpen = false;
+    private boolean debugScreenOpen = false, vSync;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;

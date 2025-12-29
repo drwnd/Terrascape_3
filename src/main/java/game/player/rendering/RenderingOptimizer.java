@@ -1,9 +1,14 @@
 package game.player.rendering;
 
+import core.assets.AssetManager;
+import core.rendering_api.shaders.Shader;
+
+import game.assets.Shaders;
 import game.player.Player;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
+import org.lwjgl.opengl.GL46;
 
 import java.util.Arrays;
 
@@ -14,30 +19,59 @@ public final class RenderingOptimizer {
     public static final int CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH;
 
     public RenderingOptimizer() {
+        chunkVisibilityBitsBuffer = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_SHADER_STORAGE_BUFFER, chunkVisibilityBitsBuffer);
+        GL46.glBufferData(GL46.GL_SHADER_STORAGE_BUFFER, (long) CHUNKS_PER_LOD * LOD_COUNT / 8, GL46.GL_DYNAMIC_DRAW);
 
+        occluderVisibilityBitsBuffer = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_SHADER_STORAGE_BUFFER, occluderVisibilityBitsBuffer);
+        GL46.glBufferData(GL46.GL_SHADER_STORAGE_BUFFER, (long) CHUNKS_PER_LOD * LOD_COUNT / 8, GL46.GL_DYNAMIC_DRAW);
     }
 
     public void computeVisibility(Player player) {
         meshCollector = player.getMeshCollector();
         Vector3i position = player.getCamera().getPosition().intPosition();
 
-        playerChunkX = position.x >> CHUNK_SIZE_BITS;
-        playerChunkY = position.y >> CHUNK_SIZE_BITS;
-        playerChunkZ = position.z >> CHUNK_SIZE_BITS;
+        cameraChunkX = position.x >> CHUNK_SIZE_BITS;
+        cameraChunkY = position.y >> CHUNK_SIZE_BITS;
+        cameraChunkZ = position.z >> CHUNK_SIZE_BITS;
 
         Arrays.fill(chunkVisibilityBits, -1L);
         Arrays.fill(occluderVisibilityBits, 0L);
 
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, playerChunkX, playerChunkY, playerChunkZ);
-        for (int lod = 0; lod < LOD_COUNT; lod++) removeEmptyChunks(lod, playerChunkX, playerChunkY, playerChunkZ);
-        for (int lod = 0; lod < LOD_COUNT; lod++) setOccluderVisibilityBits(lod, playerChunkX, playerChunkY, playerChunkZ);
+        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, cameraChunkX, cameraChunkY, cameraChunkZ);
+        for (int lod = 0; lod < LOD_COUNT; lod++) removeEmptyChunks(lod, cameraChunkX, cameraChunkY, cameraChunkZ);
+        for (int lod = 0; lod < LOD_COUNT; lod++) setOccluderVisibilityBits(lod, cameraChunkX, cameraChunkY, cameraChunkZ);
+
+        GL46.glNamedBufferSubData(chunkVisibilityBitsBuffer, 0, chunkVisibilityBits);
+        GL46.glNamedBufferSubData(occluderVisibilityBitsBuffer, 0, occluderVisibilityBits);
+
+        Shader shader = AssetManager.get(Shaders.CULLING);
+        shader.bind();
+        shader.setUniform("cameraChunkPosition", cameraChunkX, cameraChunkY, cameraChunkZ);
+        shader.setUniform("renderedWorldSizeBits", RENDERED_WORLD_WIDTH_BITS, RENDERED_WORLD_HEIGHT_BITS);
+        shader.setUniform("longsPerLod", LONGS_PER_LOD);
+
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, chunkVisibilityBitsBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 1, occluderVisibilityBitsBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 2, player.getMeshCollector().getOpaqueIndirectBuffer());
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 3, player.getMeshCollector().getWaterIndirectBuffer());
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 4, player.getMeshCollector().getGlassIndirectBuffer());
+
+        GL46.glDispatchCompute(LOD_COUNT, 1, LONGS_PER_LOD);
+        GL46.glMemoryBarrier(GL46.GL_ALL_BARRIER_BITS);
     }
 
-    private void removeLodVisibilityOverlap(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
+    public void cleanUp() {
+        GL46.glDeleteBuffers(chunkVisibilityBitsBuffer);
+        GL46.glDeleteBuffers(occluderVisibilityBitsBuffer);
+    }
+
+    private void removeLodVisibilityOverlap(int lod, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         lodOffset = lod * LONGS_PER_LOD;
-        int lodPlayerX = playerChunkX >> lod;
-        int lodPlayerY = playerChunkY >> lod;
-        int lodPlayerZ = playerChunkZ >> lod;
+        int lodPlayerX = cameraChunkX >> lod;
+        int lodPlayerY = cameraChunkY >> lod;
+        int lodPlayerZ = cameraChunkZ >> lod;
 
         int endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
         int endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
@@ -74,9 +108,9 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs((playerChunkX >> lod) - lodModelX);
-        int distanceY = Math.abs((playerChunkY >> lod) - lodModelY);
-        int distanceZ = Math.abs((playerChunkZ >> lod) - lodModelZ);
+        int distanceX = Math.abs((cameraChunkX >> lod) - lodModelX);
+        int distanceY = Math.abs((cameraChunkY >> lod) - lodModelY);
+        int distanceZ = Math.abs((cameraChunkZ >> lod) - lodModelZ);
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
@@ -105,11 +139,11 @@ public final class RenderingOptimizer {
         chunkVisibilityBits[lodOffset + (index >> 6)] &= ~(3L << index);
     }
 
-    private void removeEmptyChunks(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
+    private void removeEmptyChunks(int lod, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         lodOffset = lod * LONGS_PER_LOD;
-        int lodPlayerX = playerChunkX >> lod;
-        int lodPlayerY = playerChunkY >> lod;
-        int lodPlayerZ = playerChunkZ >> lod;
+        int lodPlayerX = cameraChunkX >> lod;
+        int lodPlayerY = cameraChunkY >> lod;
+        int lodPlayerZ = cameraChunkZ >> lod;
 
         int endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
         int endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
@@ -128,11 +162,11 @@ public final class RenderingOptimizer {
                 }
     }
 
-    private void setOccluderVisibilityBits(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
+    private void setOccluderVisibilityBits(int lod, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         lodOffset = lod * LONGS_PER_LOD;
-        int lodPlayerX = playerChunkX >> lod;
-        int lodPlayerY = playerChunkY >> lod;
-        int lodPlayerZ = playerChunkZ >> lod;
+        int lodPlayerX = cameraChunkX >> lod;
+        int lodPlayerY = cameraChunkY >> lod;
+        int lodPlayerZ = cameraChunkZ >> lod;
 
         int endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
         int endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
@@ -169,10 +203,11 @@ public final class RenderingOptimizer {
 
     private int lodOffset;
     private MeshCollector meshCollector;
-    private int playerChunkX, playerChunkY, playerChunkZ;
+    private int cameraChunkX, cameraChunkY, cameraChunkZ;
 
     private final long[] chunkVisibilityBits = new long[LOD_COUNT * LONGS_PER_LOD];
     private final long[] occluderVisibilityBits = new long[LOD_COUNT * LONGS_PER_LOD];
 
     private static final int LONGS_PER_LOD = CHUNKS_PER_LOD / 64;
+    private final int chunkVisibilityBitsBuffer, occluderVisibilityBitsBuffer;
 }

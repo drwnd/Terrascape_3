@@ -12,6 +12,7 @@ public enum Shaders implements ShaderIdentifier {
     AO_APPLIER,
     OPAQUE_PARTICLE,
     TRANSPARENT_PARTICLE,
-    VOLUME_INDICATOR
+    VOLUME_INDICATOR,
+    CULLING
 
 }

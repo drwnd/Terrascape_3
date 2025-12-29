@@ -1,0 +1,77 @@
+#version 460 core
+
+layout (local_size_x = 1, local_size_y = 64, local_size_z = 1) in;
+
+struct IndirectCommand {
+    uint count;
+    uint instanceCount;
+    uint first;
+    uint baseInstance;
+};
+
+struct Long {
+    int a, b;
+};
+
+const int NORTH = 0;
+const int TOP = 1;
+const int WEST = 2;
+const int SOUTH = 3;
+const int BOTTOM = 4;
+const int EAST = 5;
+
+layout (std430, binding = 0) restrict readonly buffer chunkVisibilityBits {
+    Long[] chunkBits;
+};
+layout (std430, binding = 1) restrict readonly buffer occluderVisibilityBits {
+    Long[] occluderBits;
+};
+layout (std430, binding = 2) restrict writeonly buffer opaqueIndirectBuffer {
+    IndirectCommand[] opaqueCommands;
+};
+layout (std430, binding = 3) restrict writeonly buffer waterIndirectBuffer {
+    IndirectCommand[] waterCommands;
+};
+layout (std430, binding = 4) restrict writeonly buffer glassIndirectBuffer {
+    IndirectCommand[] glassCommands;
+};
+
+uniform ivec3 cameraChunkPosition;
+uniform ivec2 renderedWorldSizeBits;
+uniform int longsPerLod;
+
+int bitAt(Long value, uint index) {
+    int bits = index >= 32 ? value.b : value.a;
+    return bits >> index & 1;
+}
+
+void main() {
+    const uint lod = gl_GlobalInvocationID.x;
+    const int chunkIndex = int(gl_GlobalInvocationID.z * 64 + gl_LocalInvocationID.y);
+
+    uint bitsIndex = lod * longsPerLod + gl_GlobalInvocationID.z;
+    int chunkBit = bitAt(chunkBits[bitsIndex], gl_LocalInvocationID.y);
+    int occluderBit = bitAt(occluderBits[bitsIndex], gl_LocalInvocationID.y);
+
+    int chunkXZMaks = (1 << renderedWorldSizeBits.x) - 1;
+    int chunkYMask = (1 << renderedWorldSizeBits.y) - 1;
+
+    int chunkX = (chunkIndex >> renderedWorldSizeBits.x + renderedWorldSizeBits.y) & chunkXZMaks;
+    int chunkY = chunkIndex & chunkYMask;
+    int chunkZ = (chunkIndex >> renderedWorldSizeBits.y) & chunkXZMaks;
+
+    chunkX += (cameraChunkPosition.x >> lod) & ~chunkXZMaks;
+    chunkY += (cameraChunkPosition.y >> lod) & ~chunkYMask;
+    chunkZ += (cameraChunkPosition.z >> lod) & ~chunkXZMaks;
+
+    uint commandIndex = lod * longsPerLod * 64 + chunkIndex;
+    opaqueCommands[commandIndex * 6 + NORTH].instanceCount = (cameraChunkPosition.z >> lod) >= chunkZ ? chunkBit : 0;
+    opaqueCommands[commandIndex * 6 + TOP].instanceCount = (cameraChunkPosition.y >> lod) >= chunkY ? chunkBit : 0;
+    opaqueCommands[commandIndex * 6 + WEST].instanceCount = (cameraChunkPosition.x >> lod) >= chunkX ? chunkBit : 0;
+    opaqueCommands[commandIndex * 6 + SOUTH].instanceCount = (cameraChunkPosition.z >> lod) <= chunkZ ? chunkBit : 0;
+    opaqueCommands[commandIndex * 6 + BOTTOM].instanceCount = (cameraChunkPosition.y >> lod) <= chunkY ? chunkBit : 0;
+    opaqueCommands[commandIndex * 6 + EAST].instanceCount = (cameraChunkPosition.x >> lod) <= chunkX ? chunkBit : 0;
+
+    waterCommands[commandIndex].instanceCount = chunkBit;
+    glassCommands[commandIndex].instanceCount = chunkBit;
+}

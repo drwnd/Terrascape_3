@@ -102,8 +102,20 @@ public final class MeshCollector {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 
-    public int getBuffer() {
+    public int getDataBuffer() {
         return allocator.getBuffer();
+    }
+
+    public int getOpaqueIndirectBuffer() {
+        return opaqueIndirectBuffer;
+    }
+
+    public int getWaterIndirectBuffer() {
+        return waterIndirectBuffer;
+    }
+
+    public int getGlassIndirectBuffer() {
+        return glassIndirectBuffer;
     }
 
     public MemoryAllocator getAllocator() {
@@ -189,12 +201,12 @@ public final class MeshCollector {
 
         OpaqueModel model = new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
         int[] indirectCommands = new int[]{
-                model.vertexCounts()[NORTH], 1, model.indices()[NORTH], 0,
-                model.vertexCounts()[TOP], 1, model.indices()[TOP], 0,
-                model.vertexCounts()[WEST], 1, model.indices()[WEST], 0,
-                model.vertexCounts()[SOUTH], 1, model.indices()[SOUTH], 0,
-                model.vertexCounts()[BOTTOM], 1, model.indices()[BOTTOM], 0,
-                model.vertexCounts()[EAST], 1, model.indices()[EAST], 0
+                model.vertexCounts()[NORTH], 0, model.indices()[NORTH], 0,
+                model.vertexCounts()[TOP], 0, model.indices()[TOP], 0,
+                model.vertexCounts()[WEST], 0, model.indices()[WEST], 0,
+                model.vertexCounts()[SOUTH], 0, model.indices()[SOUTH], 0,
+                model.vertexCounts()[BOTTOM], 0, model.indices()[BOTTOM], 0,
+                model.vertexCounts()[EAST], 0, model.indices()[EAST], 0
         };
         GL46.glNamedBufferSubData(opaqueIndirectBuffer, (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE * 6L, indirectCommands);
         GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
@@ -211,8 +223,8 @@ public final class MeshCollector {
         }
 
         TransparentModel model = new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
-        int[] waterIndirectCommand = new int[]{model.waterVertexCount(), 1, model.waterIndex(), 0};
-        int[] glassIndirectCommand = new int[]{model.glassVertexCount(), 1, model.glassIndex(), 0};
+        int[] waterIndirectCommand = new int[]{model.waterVertexCount(), 0, model.waterIndex(), 0};
+        int[] glassIndirectCommand = new int[]{model.glassVertexCount(), 0, model.glassIndex(), 0};
 
         GL46.glNamedBufferSubData(waterIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, waterIndirectCommand);
         GL46.glNamedBufferSubData(glassIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, glassIndirectCommand);
@@ -242,5 +254,5 @@ public final class MeshCollector {
     private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RenderingOptimizer.CHUNKS_PER_LOD];
     private final long[][] isMeshed = new long[LOD_COUNT][RenderingOptimizer.CHUNKS_PER_LOD / 64];
 
-    public final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
+    private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
 }

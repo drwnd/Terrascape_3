@@ -1,11 +1,8 @@
 package core.rendering_api;
 
 import core.assets.identifiers.ShaderIdentifier;
-import core.rendering_api.shaders.RenderShader;
-import core.rendering_api.shaders.Shader;
+import core.rendering_api.shaders.*;
 import core.assets.CoreShaders;
-import core.rendering_api.shaders.GuiShader;
-import core.rendering_api.shaders.TextShader;
 
 import game.assets.Shaders;
 
@@ -29,6 +26,8 @@ public final class ShaderLoader {
             case Shaders.OPAQUE_PARTICLE -> new RenderShader("assets/shaders/Particle.vert", "assets/shaders/Opaque.frag", identifier);
             case Shaders.TRANSPARENT_PARTICLE -> new RenderShader("assets/shaders/Particle.vert", "assets/shaders/Glass.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new RenderShader("assets/shaders/VolumeIndicator.vert", "assets/shaders/VolumeIndicator.frag", identifier);
+
+            case Shaders.CULLING -> new ComputeShader("assets/shaders/Culling.comp", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }
