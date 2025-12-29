@@ -11,7 +11,7 @@ import static game.utils.Constants.*;
 
 public final class RenderingOptimizer {
 
-    public static final int LOD_OFFSET_SIZE = RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64;
+    public static final int CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH;
 
     public RenderingOptimizer() {
 
@@ -33,16 +33,8 @@ public final class RenderingOptimizer {
         for (int lod = 0; lod < LOD_COUNT; lod++) setOccluderVisibilityBits(lod, playerChunkX, playerChunkY, playerChunkZ);
     }
 
-    public long[] getChunkVisibilityBits() {
-        return chunkVisibilityBits;
-    }
-
-    public long[] getOccluderVisibilityBits() {
-        return occluderVisibilityBits;
-    }
-
     private void removeLodVisibilityOverlap(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
-        lodOffset = lod * LOD_OFFSET_SIZE;
+        lodOffset = lod * LONGS_PER_LOD;
         int lodPlayerX = playerChunkX >> lod;
         int lodPlayerY = playerChunkY >> lod;
         int lodPlayerZ = playerChunkZ >> lod;
@@ -101,7 +93,7 @@ public final class RenderingOptimizer {
     }
 
     private void clearModelCubeVisibility(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int lodOffset = lod * LOD_OFFSET_SIZE;
+        int lodOffset = lod * LONGS_PER_LOD;
         int index;
         index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
         chunkVisibilityBits[lodOffset + (index >> 6)] &= ~(3L << index);
@@ -114,7 +106,7 @@ public final class RenderingOptimizer {
     }
 
     private void removeEmptyChunks(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
-        lodOffset = lod * LOD_OFFSET_SIZE;
+        lodOffset = lod * LONGS_PER_LOD;
         int lodPlayerX = playerChunkX >> lod;
         int lodPlayerY = playerChunkY >> lod;
         int lodPlayerZ = playerChunkZ >> lod;
@@ -137,7 +129,7 @@ public final class RenderingOptimizer {
     }
 
     private void setOccluderVisibilityBits(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
-        lodOffset = lod * LOD_OFFSET_SIZE;
+        lodOffset = lod * LONGS_PER_LOD;
         int lodPlayerX = playerChunkX >> lod;
         int lodPlayerY = playerChunkY >> lod;
         int lodPlayerZ = playerChunkZ >> lod;
@@ -179,6 +171,8 @@ public final class RenderingOptimizer {
     private MeshCollector meshCollector;
     private int playerChunkX, playerChunkY, playerChunkZ;
 
-    private final long[] chunkVisibilityBits = new long[LOD_COUNT * LOD_OFFSET_SIZE];
-    private final long[] occluderVisibilityBits = new long[LOD_COUNT * LOD_OFFSET_SIZE];
+    private final long[] chunkVisibilityBits = new long[LOD_COUNT * LONGS_PER_LOD];
+    private final long[] occluderVisibilityBits = new long[LOD_COUNT * LONGS_PER_LOD];
+
+    private static final int LONGS_PER_LOD = CHUNKS_PER_LOD / 64;
 }

@@ -1,6 +1,5 @@
 package game.player.rendering;
 
-import core.utils.IntArrayList;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -16,22 +15,6 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         this(position.x << lod, position.y << lod, position.z << lod,
                 lod, bufferOrStart, vertexCounts, new int[FACE_COUNT],
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
-    }
-
-    public void addData(IntArrayList indices, IntArrayList vertexCounts, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
-        cameraChunkX >>= LOD;
-        cameraChunkY >>= LOD;
-        cameraChunkZ >>= LOD;
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
-
-        if (cameraChunkX >= modelChunkX) addData(indices, vertexCounts, WEST);
-        if (cameraChunkX <= modelChunkX) addData(indices, vertexCounts, EAST);
-        if (cameraChunkY >= modelChunkY) addData(indices, vertexCounts, TOP);
-        if (cameraChunkY <= modelChunkY) addData(indices, vertexCounts, BOTTOM);
-        if (cameraChunkZ >= modelChunkZ) addData(indices, vertexCounts, NORTH);
-        if (cameraChunkZ <= modelChunkZ) addData(indices, vertexCounts, SOUTH);
     }
 
     public boolean isEmpty() {
@@ -54,12 +37,6 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         return totalZ >> CHUNK_SIZE_BITS + LOD;
     }
 
-
-    private void addData(IntArrayList indices, IntArrayList vertexCounts, int side) {
-        indices.add(this.indices[side]);
-        vertexCounts.add(this.vertexCounts[side]);
-    }
-
     private static int[] getIndices(int[] vertexCounts, int bufferOrStart, boolean isBuffer) {
         int[] indices = new int[FACE_COUNT];
         if (vertexCounts == null) return indices;
@@ -74,7 +51,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         return (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX;
     }
 
-    public int index() {
+    public int chunkIndex() {
         return Utils.getChunkIndex(chunkX(), chunkY(), chunkZ(), LOD);
     }
 }

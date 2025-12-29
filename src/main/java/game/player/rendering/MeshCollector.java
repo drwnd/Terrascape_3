@@ -13,15 +13,20 @@ import static game.utils.Constants.*;
 
 public final class MeshCollector {
 
-    public MeshCollector() {
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            filledOpaqueModels[lod] = new ArrayList<>();
-            filledTransparentModels[lod] = new ArrayList<>();
-        }
+    public static final int INDIRECT_COMMAND_SIZE = 16;
 
+    public MeshCollector() {
         opaqueIndirectBuffer = GL46.glGenBuffers();
         GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
-        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, ((long) RenderingOptimizer.LOD_OFFSET_SIZE << 6) * INDIRECT_COMMAND_SIZE * 6 * LOD_COUNT, GL46.GL_DYNAMIC_DRAW);
+        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, (long) RenderingOptimizer.CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * LOD_COUNT * 6, GL46.GL_DYNAMIC_DRAW);
+
+        waterIndirectBuffer = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, waterIndirectBuffer);
+        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, (long) RenderingOptimizer.CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * LOD_COUNT, GL46.GL_DYNAMIC_DRAW);
+
+        glassIndirectBuffer = GL46.glGenBuffers();
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, glassIndirectBuffer);
+        GL46.glBufferData(GL46.GL_DRAW_INDIRECT_BUFFER, (long) RenderingOptimizer.CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * LOD_COUNT, GL46.GL_DYNAMIC_DRAW);
     }
 
     public void uploadAllMeshes() {
@@ -42,17 +47,11 @@ public final class MeshCollector {
 
     public void deleteOldMeshes() {
         synchronized (toDeleteOpaqueModels) {
-            for (OpaqueModel model : toDeleteOpaqueModels) {
-                allocator.memFree(model.bufferOrStart());
-                filledOpaqueModels[model.LOD()].remove(model);
-            }
+            for (OpaqueModel model : toDeleteOpaqueModels) delete(model);
             toDeleteOpaqueModels.clear();
         }
         synchronized (toDeleteTransparentModels) {
-            for (TransparentModel model : toDeleteTransparentModels) {
-                allocator.memFree(model.bufferOrStart());
-                filledTransparentModels[model.LOD()].remove(model);
-            }
+            for (TransparentModel model : toDeleteTransparentModels) delete(model);
             toDeleteTransparentModels.clear();
         }
     }
@@ -70,14 +69,6 @@ public final class MeshCollector {
     public void setMeshed(boolean meshed, int chunkIndex, int lod) {
         if (meshed) isMeshed[lod][chunkIndex >> 6] |= 1L << chunkIndex;
         else isMeshed[lod][chunkIndex >> 6] &= ~(1L << chunkIndex);
-    }
-
-    public ArrayList<OpaqueModel> getOpaqueModels(int lod) {
-        return filledOpaqueModels[lod];
-    }
-
-    public ArrayList<TransparentModel> getTransparentModels(int lod) {
-        return filledTransparentModels[lod];
     }
 
     public void removeMesh(int chunkIndex, int lod) {
@@ -122,18 +113,17 @@ public final class MeshCollector {
     public void cleanUp() {
         allocator.cleanUp();
         GL46.glDeleteBuffers(opaqueIndirectBuffer);
+        GL46.glDeleteBuffers(waterIndirectBuffer);
+        GL46.glDeleteBuffers(glassIndirectBuffer);
     }
 
     public void removeAll() {
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            for (OpaqueModel model : opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
-            for (TransparentModel model : transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+            for (OpaqueModel model : opaqueModels[lod]) if (model != null) delete(model);
+            for (TransparentModel model : transparentModels[lod]) if (model != null) delete(model);
 
             Arrays.fill(opaqueModels[lod], null);
             Arrays.fill(transparentModels[lod], null);
-
-            filledOpaqueModels[lod].clear();
-            filledTransparentModels[lod].clear();
 
             Arrays.fill(isMeshed[lod], 0L);
         }
@@ -160,25 +150,21 @@ public final class MeshCollector {
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
-        filledOpaqueModels[lod].remove(opaqueModel);
-        filledTransparentModels[lod].remove(transparentModel);
 
         setOpaqueModel(null, chunkIndex, lod);
         setTransparentModel(null, chunkIndex, lod);
         setMeshed(false, chunkIndex, lod);
 
-        if (opaqueModel != null) allocator.memFree(opaqueModel.bufferOrStart());
-        if (transparentModel != null) allocator.memFree(transparentModel.bufferOrStart());
+        if (opaqueModel != null) delete(opaqueModel);
+        if (transparentModel != null) delete(transparentModel);
     }
 
     private void setOpaqueModel(OpaqueModel model, int index, int lod) {
         opaqueModels[lod][index] = model;
-        if (model != null && !model.isEmpty()) filledOpaqueModels[lod].add(model);
     }
 
     private void setTransparentModel(TransparentModel model, int index, int lod) {
         transparentModels[lod][index] = model;
-        if (model != null && !model.isEmpty()) filledTransparentModels[lod].add(model);
     }
 
     private void upload(Mesh mesh) {
@@ -194,13 +180,13 @@ public final class MeshCollector {
     }
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
+        int lodOffset = mesh.lod() * RenderingOptimizer.CHUNKS_PER_LOD;
         int start = allocator.memAlloc(mesh.getOpaqueByteSize());
         if (start == -1) {
-            GL46.glNamedBufferSubData(opaqueIndirectBuffer, mesh.index() * INDIRECT_COMMAND_SIZE * 6L, new int[6 * INDIRECT_COMMAND_SIZE / 4]);
+            GL46.glNamedBufferSubData(opaqueIndirectBuffer, (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE * 6L, new int[6 * INDIRECT_COMMAND_SIZE / 4]);
             return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
         }
 
-        int lodOffset = mesh.lod() * RenderingOptimizer.LOD_OFFSET_SIZE * 64;
         OpaqueModel model = new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
         int[] indirectCommands = new int[]{
                 model.vertexCounts()[NORTH], 1, model.indices()[NORTH], 0,
@@ -216,11 +202,35 @@ public final class MeshCollector {
     }
 
     private TransparentModel loadTransparentModel(Mesh mesh) {
+        int lodOffset = mesh.lod() * RenderingOptimizer.CHUNKS_PER_LOD;
         int start = allocator.memAlloc(mesh.getTransparentByteSize());
-        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        if (start == -1) {
+            GL46.glNamedBufferSubData(waterIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, new int[INDIRECT_COMMAND_SIZE / 4]);
+            GL46.glNamedBufferSubData(glassIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, new int[INDIRECT_COMMAND_SIZE / 4]);
+            return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        }
 
+        TransparentModel model = new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        int[] waterIndirectCommand = new int[]{model.waterVertexCount(), 1, model.waterIndex(), 0};
+        int[] glassIndirectCommand = new int[]{model.glassVertexCount(), 1, model.glassIndex(), 0};
+
+        GL46.glNamedBufferSubData(waterIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, waterIndirectCommand);
+        GL46.glNamedBufferSubData(glassIndirectBuffer, (long) (lodOffset + mesh.index()) * INDIRECT_COMMAND_SIZE, glassIndirectCommand);
         GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
-        return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        return model;
+    }
+
+    private void delete(OpaqueModel model) {
+        allocator.memFree(model.bufferOrStart());
+        int lodOffset = model.LOD() * RenderingOptimizer.CHUNKS_PER_LOD;
+        GL46.glNamedBufferSubData(opaqueIndirectBuffer, (lodOffset + model.chunkIndex()) * INDIRECT_COMMAND_SIZE * 6L, new int[6 * INDIRECT_COMMAND_SIZE / 4]);
+    }
+
+    private void delete(TransparentModel model) {
+        allocator.memFree(model.bufferOrStart());
+        int lodOffset = model.LOD() * RenderingOptimizer.CHUNKS_PER_LOD;
+        GL46.glNamedBufferSubData(waterIndirectBuffer, (long) (lodOffset + model.chunkIndex()) * INDIRECT_COMMAND_SIZE, new int[INDIRECT_COMMAND_SIZE / 4]);
+        GL46.glNamedBufferSubData(glassIndirectBuffer, (long) (lodOffset + model.chunkIndex()) * INDIRECT_COMMAND_SIZE, new int[INDIRECT_COMMAND_SIZE / 4]);
     }
 
     private final MemoryAllocator allocator = new MemoryAllocator(500_000_000);
@@ -228,16 +238,9 @@ public final class MeshCollector {
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
-    private final ArrayList<OpaqueModel>[] filledOpaqueModels = new ArrayList[LOD_COUNT];
-    @SuppressWarnings("unchecked")
-    private final ArrayList<TransparentModel>[] filledTransparentModels = new ArrayList[LOD_COUNT];
+    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RenderingOptimizer.CHUNKS_PER_LOD];
+    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RenderingOptimizer.CHUNKS_PER_LOD];
+    private final long[][] isMeshed = new long[LOD_COUNT][RenderingOptimizer.CHUNKS_PER_LOD / 64];
 
-    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];
-
-    public final int opaqueIndirectBuffer;
-
-    private static final int INDIRECT_COMMAND_SIZE = 16;
+    public final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
 }

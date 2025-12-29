@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL46;
 
 import static game.utils.Constants.CHUNK_SIZE_BITS;
 
-public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
+public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int waterIndex) {
 
     public TransparentModel(Vector3i position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
         this(position.x << lod, position.y << lod, position.z << lod,
@@ -42,7 +42,11 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
         return totalZ >> CHUNK_SIZE_BITS + LOD;
     }
 
-    public int index() {
+    public int glassIndex() {
+        return waterIndex + waterVertexCount;
+    }
+
+    public int chunkIndex() {
         return Utils.getChunkIndex(chunkX(), chunkY(), chunkZ(), LOD);
     }
 }
