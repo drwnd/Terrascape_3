@@ -61,7 +61,7 @@ public final class Window {
 
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
-        GLFW.glfwSetFramebufferSizeCallback(window, (long window, int width, int height) -> {
+        GLFW.glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
             Window.width = width;
             Window.height = height;
             Vector2i size = new Vector2i(width, height);
@@ -153,6 +153,8 @@ public final class Window {
     }
 
     public static void setInput(Input input) {
+        Window.input.unset();
+        Window.input = input;
         input.setInputMode();
         GLFW.glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
             standardInput.cursorPosCallback(window, xPos, yPos);
@@ -198,11 +200,13 @@ public final class Window {
         while (GL46.glGetError() != GL46.GL_NO_ERROR) ;
     }
 
+    private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
+    private static final StandardWindowInput standardInput = new StandardWindowInput();
+
     private static int width, height;
     private static long window;
     private static boolean maximized;
 
-    private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
-    private static final StandardWindowInput standardInput = new StandardWindowInput();
+    private static Input input = standardInput;
     private static CrashCallback crashCallback = _ -> CrashAction.PRINT;
 }

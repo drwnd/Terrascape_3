@@ -49,6 +49,10 @@ public abstract class Input {
         cursorPos.set((int) xPos, Window.getHeight() - (int) yPos);
     }
 
+    public void unset() {
+
+    }
+
     public abstract void setInputMode();
 
     public abstract void cursorPosCallback(long window, double xPos, double yPos);

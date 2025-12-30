@@ -551,6 +551,7 @@ public final class Renderer extends Renderable {
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
         float chatMessageDuration = FloatSetting.CHAT_MESSAGE_DURATION.value();
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
+        float scroll = chatTextField == null ? 0 : chatTextField.getInput().getScroll();
 
         int lineCount = 0;
         ArrayList<ChatMessage> messages = this.messages;
@@ -564,13 +565,13 @@ public final class Renderer extends Renderable {
             String prefix = chatMessage.prefix();
             float prefixSize = TextShader.getTextLength(prefix, defaultTextSize.x, false);
 
-            position.set(0.0F, (lineCount + messageLines - 1) * lineSeparation + chatHeight);
+            position.set(0.0F, (lineCount + messageLines - 1) * lineSeparation + chatHeight - scroll);
             shader.drawText(position, prefix, color, true, false);
 
             lineCount += messageLines;
             for (String line : chatMessage.lines()) {
                 lineCount--;
-                position.set(prefixSize, lineCount * lineSeparation + chatHeight);
+                position.set(prefixSize, lineCount * lineSeparation + chatHeight - scroll);
                 if (position.y >= 1.0F) return;
                 shader.drawText(position, line, color, true, false);
             }

@@ -5,11 +5,12 @@ import core.settings.*;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
 import game.server.Game;
+import game.server.Server;
 
 final class SettingCommand {
 
-    static final String SYNTAX = "{get Setting_Name, set Setting_Name value, reload}";
-    static final String EXPLANATION = "Queries a Setting, sets a setting value or reloads all Settings from file";
+    static final String SYNTAX = "{get Setting_Name, set Setting_Name value, reload, list}";
+    static final String EXPLANATION = "Queries a Setting, sets a setting value, reloads all Settings from file or shows a list of all settings";
 
     private SettingCommand() {
 
@@ -58,6 +59,19 @@ final class SettingCommand {
         } else if ("reload".equalsIgnoreCase(keyword)) {
             tokens.expectFinishedLess();
             Settings.loadFromFile();
+        } else if ("list".equalsIgnoreCase(keyword)) {
+            tokens.expectFinishedLess();
+            Server server = Game.getServer();
+
+            server.sendServerMessage("Float settings:", ColorOption.ORANGE);
+            for (FloatSetting setting : FloatSetting.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            server.sendServerMessage("Key settings:", ColorOption.ORANGE);
+            for (KeySetting setting : KeySetting.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            server.sendServerMessage("Toggle settings:", ColorOption.ORANGE);
+            for (ToggleSetting setting : ToggleSetting.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            server.sendServerMessage("Option settings:", ColorOption.ORANGE);
+            for (OptionSetting setting : OptionSetting.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+
         } else return CommandResult.fail("Unrecognized keyword : " + keyword);
         return CommandResult.success();
     }

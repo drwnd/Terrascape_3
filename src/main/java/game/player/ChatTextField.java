@@ -2,7 +2,6 @@ package game.player;
 
 import core.languages.UiMessage;
 import core.renderables.TextField;
-import core.rendering_api.Input;
 import org.joml.Vector2f;
 
 public final class ChatTextField extends TextField {
@@ -16,7 +15,7 @@ public final class ChatTextField extends TextField {
         setRimThicknessMultiplier(0.5F);
     }
 
-    public Input getInput() {
+    public ChatInput getInput() {
         return input;
     }
 

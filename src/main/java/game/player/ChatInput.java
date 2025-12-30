@@ -17,11 +17,21 @@ public final class ChatInput extends TextFieldInput {
         super(field);
     }
 
+    public float getScroll() {
+        return scroll;
+    }
+
     @Override
     public void setInputMode() {
         setStandardInputMode();
         skipNextInput = true;
         messageIndex = 0;
+        scroll = 0;
+    }
+
+    @Override
+    public void unset() {
+        scroll = 0;
     }
 
     @Override
@@ -33,6 +43,11 @@ public final class ChatInput extends TextFieldInput {
     public void charCallback(long window, int codePoint) {
         if (!skipNextInput) super.charCallback(window, codePoint);
         else skipNextInput = false;
+    }
+
+    @Override
+    public void scrollCallback(long window, double xScroll, double yScroll) {
+        scroll = Math.max((float) (scroll + yScroll * 0.05), 0.0F);
     }
 
     @Override
@@ -65,4 +80,5 @@ public final class ChatInput extends TextFieldInput {
 
     private boolean skipNextInput = false;
     int messageIndex = 0;
+    private float scroll = 0;
 }
