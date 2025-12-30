@@ -16,12 +16,12 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
 
     public void addData(IntArrayList waterCommands, IntArrayList glassCommands) {
         waterCommands.add(isWaterEmpty() ? 0 : waterVertexCount);
-        waterCommands.add(1);
+        waterCommands.add(0);
         waterCommands.add(isWaterEmpty() ? 0 : index);
         waterCommands.add(0);
 
         glassCommands.add(isGlassEmpty() ? 0 : glassVertexCount);
-        glassCommands.add(1);
+        glassCommands.add(0);
         glassCommands.add(isGlassEmpty() ? 0 : index + waterVertexCount);
         glassCommands.add(0);
     }

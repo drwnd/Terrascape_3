@@ -79,6 +79,7 @@ public final class RenderingOptimizer {
         glassCommands.clear();
         aabbs.clear();
         for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommands(lod);
+        int occludeeCount = aabbs.size() / AABB_INT_SIZE;
 
         GL46.glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
         GL46.glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
@@ -91,6 +92,7 @@ public final class RenderingOptimizer {
         int occluderCount = aabbs.size() / AABB_INT_SIZE;
 
         renderOccluders(cameraPosition, projectionViewMatrix, occluderCount);
+        renderOccludees(cameraPosition, projectionViewMatrix, occludeeCount);
     }
 
     public long getOpaqueLodStart(int lod) {
@@ -326,6 +328,14 @@ public final class RenderingOptimizer {
     }
 
     private void renderOccluders(Position cameraPosition, Matrix4f projectionViewMatrix, int occluderCount) {
+        Shader shader = AssetManager.get(Shaders.AABB);
+        shader.bind();
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("iCameraPosition",
+                cameraPosition.intX & ~CHUNK_SIZE_MASK,
+                cameraPosition.intY & ~CHUNK_SIZE_MASK,
+                cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
@@ -335,7 +345,11 @@ public final class RenderingOptimizer {
         GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
         GL46.glDepthMask(true);
 
-        Shader shader = AssetManager.get(Shaders.AABB);
+        GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, occluderCount);
+    }
+
+    private void renderOccludees(Position cameraPosition, Matrix4f projectionViewMatrix, int occludeeCount) {
+        Shader shader = AssetManager.get(Shaders.OCCLUSION_CULLING);
         shader.bind();
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
         shader.setUniform("iCameraPosition",
@@ -343,7 +357,14 @@ public final class RenderingOptimizer {
                 cameraPosition.intY & ~CHUNK_SIZE_MASK,
                 cameraPosition.intZ & ~CHUNK_SIZE_MASK);
 
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, occluderCount * 36);
+        GL46.glDepthMask(false);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 2, waterIndirectBuffer);
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 3, glassIndirectBuffer);
+
+        GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, occludeeCount);
+        GL46.glDepthMask(true);
     }
 
 

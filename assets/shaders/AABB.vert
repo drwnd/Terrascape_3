@@ -1,5 +1,7 @@
 #version 460 core
 
+flat out int instanceID;
+
 struct AABB {
     int x, y, z;
     int packedSize;
@@ -50,7 +52,7 @@ ivec3 getWrappedPosition(ivec3 worldPos) {
 }
 
 void main() {
-    AABB currentAABB = aabbs[gl_VertexID / 36];
+    AABB currentAABB = aabbs[gl_InstanceID];
     int side = gl_VertexID / 6 % 6;
     int currentVertexId = gl_VertexID % 6;
 
@@ -64,4 +66,6 @@ void main() {
 
     ivec3 totalPosition = getWrappedPosition(getFacePositions(side, currentVertexId, minPosition, maxPosition));
     gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
+
+    instanceID = gl_InstanceID;
 }

@@ -55,7 +55,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
 
     private void addData(IntArrayList commands, boolean isVisible, int side) {
         commands.add(isVisible ? vertexCounts[side] : 0);
-        commands.add(1);
+        commands.add(0);
         commands.add(isVisible ? indices[side] : 0);
         commands.add(0);
     }

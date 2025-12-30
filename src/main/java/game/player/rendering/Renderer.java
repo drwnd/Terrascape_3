@@ -187,6 +187,11 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
+//        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+//        shader.bind();
+//        shader.flipNextDrawVertically();
+//        shader.drawQuad(new Vector2f(0), new Vector2f(1), new Texture(renderingOptimizer.depthTexture));
+
         renderChat();
         renderDebugInfo();
     }
