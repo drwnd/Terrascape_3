@@ -61,7 +61,7 @@ public final class Window {
 
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
-        GLFW.glfwSetFramebufferSizeCallback(window, (long window, int width, int height) -> {
+        GLFW.glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
             Window.width = width;
             Window.height = height;
             Vector2i size = new Vector2i(width, height);
@@ -70,6 +70,7 @@ public final class Window {
 
         GLFW.glfwMakeContextCurrent(window);
         GLFW.glfwShowWindow(window);
+        GLFW.glfwSwapInterval(1);
     }
 
     public static void renderLoop() {

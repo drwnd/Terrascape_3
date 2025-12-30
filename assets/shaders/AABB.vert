@@ -1,14 +1,17 @@
-#version 400 core
+#version 460 core
 
-out vec3 totalPosition;
-flat out int side;
+struct AABB {
+    int x, y, z;
+    int packedSize;
+};
+
+layout (std430, binding = 0) restrict readonly buffer AABBsBuffer {
+    AABB[] aabbs;
+};
 
 uniform mat4 projectionViewMatrix;
 uniform ivec3 iCameraPosition;
-uniform ivec3 minPosition;
-uniform ivec3 maxPosition;
 
-const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const ivec2[6] FACE_POSITIONS = ivec2[6](ivec2(0, 0), ivec2(0, 1), ivec2(1, 0), ivec2(1, 1), ivec2(1, 0), ivec2(0, 1));
 const int NORTH = 0;
 const int TOP = 1;
@@ -17,7 +20,7 @@ const int SOUTH = 3;
 const int BOTTOM = 4;
 const int EAST = 5;
 
-ivec3 getFacePositions(int side, int currentVertexId) {
+ivec3 getFacePositions(int side, int currentVertexId, ivec3 minPosition, ivec3 maxPosition) {
     ivec3 currentVertexOffset = ivec3(FACE_POSITIONS[currentVertexId].xy, 0);
 
     switch (side) {
@@ -47,9 +50,18 @@ ivec3 getWrappedPosition(ivec3 worldPos) {
 }
 
 void main() {
-    side = gl_VertexID / 6;
+    AABB currentAABB = aabbs[gl_VertexID / 36];
+    int side = gl_VertexID / 6 % 6;
     int currentVertexId = gl_VertexID % 6;
 
-    totalPosition = getWrappedPosition(getFacePositions(side, currentVertexId));
+    int lod = currentAABB.packedSize >> 21;
+    int lengthX = currentAABB.packedSize >> 14 & 0x7F;
+    int lengthY = currentAABB.packedSize >> 7 & 0x7F;
+    int lengthZ = currentAABB.packedSize & 0x7F;
+
+    ivec3 minPosition = ivec3(currentAABB.x, currentAABB.y, currentAABB.z);
+    ivec3 maxPosition = minPosition + ivec3(lengthX << lod, lengthY << lod, lengthZ << lod);
+
+    ivec3 totalPosition = getWrappedPosition(getFacePositions(side, currentVertexId, minPosition, maxPosition));
     gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
 }

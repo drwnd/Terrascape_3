@@ -1,8 +1,10 @@
 package game.player.rendering;
 
+import core.utils.IntArrayList;
+
 import static game.utils.Constants.*;
 
-public class AABB {
+public final class AABB {
 
     public int minX, minY, minZ;
     public int maxX, maxY, maxZ;
@@ -25,6 +27,17 @@ public class AABB {
         return new AABB(0, 0, 0, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
     }
 
+
+    public void addData(IntArrayList aabbs, int chunkX, int chunkY, int chunkZ, int lod) {
+        aabbs.add((chunkX << CHUNK_SIZE_BITS) + minX << lod);
+        aabbs.add((chunkY << CHUNK_SIZE_BITS) + minY << lod);
+        aabbs.add((chunkZ << CHUNK_SIZE_BITS) + minZ << lod);
+
+//        aabbs.add((chunkX << CHUNK_SIZE_BITS) + maxX << lod);
+//        aabbs.add((chunkY << CHUNK_SIZE_BITS) + maxY << lod);
+//        aabbs.add((chunkZ << CHUNK_SIZE_BITS) + maxZ << lod);
+        aabbs.add(lod << 21 | Math.max(0, maxX - minX) << 14 | Math.max(0, maxY - minY) << 7 | Math.max(0, maxZ - minZ));
+    }
 
     public boolean intersects(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         return this.minX < maxX && minX < this.maxX
