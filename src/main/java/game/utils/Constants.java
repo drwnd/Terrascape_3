@@ -30,6 +30,7 @@ public final class Constants {
     public static final int RENDERED_WORLD_HEIGHT_MASK = RENDERED_WORLD_HEIGHT - 1;
     public static final int RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
     public static final int RENDERED_WORLD_HEIGHT_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_HEIGHT);
+    public static final int CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH;
 
     public static final int LOD_COUNT = 10;
     public static final int MAX_TREE_LOD = 4;

@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.utils.IntArrayList;
 import org.joml.Vector3i;
 import org.lwjgl.opengl.GL46;
 
@@ -11,6 +12,18 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
         this(position.x << lod, position.y << lod, position.z << lod,
                 lod, bufferOrStart, waterVertexCount, glassVertexCount,
                 (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX);
+    }
+
+    public void addData(IntArrayList waterCommands, IntArrayList glassCommands) {
+        waterCommands.add(isWaterEmpty() ? 0 : waterVertexCount);
+        waterCommands.add(1);
+        waterCommands.add(isWaterEmpty() ? 0 : index);
+        waterCommands.add(0);
+
+        glassCommands.add(isGlassEmpty() ? 0 : glassVertexCount);
+        glassCommands.add(1);
+        glassCommands.add(isGlassEmpty() ? 0 : index + waterVertexCount);
+        glassCommands.add(0);
     }
 
     public boolean isWaterEmpty() {

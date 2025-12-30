@@ -15,7 +15,6 @@ import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 
-import core.utils.IntArrayList;
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
@@ -331,34 +330,22 @@ public final class Renderer extends Renderable {
     private void renderOpaqueGeometry(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedOpaqueModels = 0;
 
-        int cameraChunkX = cameraPosition.intX >> CHUNK_SIZE_BITS;
-        int cameraChunkY = cameraPosition.intY >> CHUNK_SIZE_BITS;
-        int cameraChunkZ = cameraPosition.intZ >> CHUNK_SIZE_BITS;
-
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getOpaqueIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getOpaqueLodStart(lod);
+            int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
+            renderedOpaqueModels += drawCount;
 
-            for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-                model.addData(indices, vertexCounts, cameraChunkX, cameraChunkY, cameraChunkZ);
-                renderedOpaqueModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -430,28 +417,17 @@ public final class Renderer extends Renderable {
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getWaterIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getTransparentLodStart(lod);
+            int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
+            renderedWaterModels += drawCount;
 
-            for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-
-                indices.add(model.index());
-                vertexCounts.add(model.waterVertexCount());
-
-                renderedWaterModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -461,27 +437,17 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.GLASS);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getGlassIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getTransparentLodStart(lod);
+            int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
+            renderedGlassModels += drawCount;
 
-            for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-
-                indices.add(model.index() + model.waterVertexCount());
-                vertexCounts.add(model.glassVertexCount());
-                renderedGlassModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -653,11 +619,6 @@ public final class Renderer extends Renderable {
         shader.setUniform("textures", 0);
     }
 
-    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits) {
-        int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        return (visibilityBits[index >> 6] & 1L << index) == 0;
-    }
-
     private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
         return headUnderWater ? 1 : 0;
@@ -683,8 +644,6 @@ public final class Renderer extends Renderable {
     private final UiElement crosshair;
     private final RenderingOptimizer renderingOptimizer = new RenderingOptimizer();
     private final Player player;
-    private final IntArrayList indices = new IntArrayList(500);
-    private final IntArrayList vertexCounts = new IntArrayList(500);
 
     private int framebuffer, ssaoFramebuffer;
     private int colorTexture, depthTexture, ssaoTexture, noiseTexture, sideTexture;
