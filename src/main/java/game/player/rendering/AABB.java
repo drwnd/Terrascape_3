@@ -33,9 +33,6 @@ public final class AABB {
         aabbs.add((chunkY << CHUNK_SIZE_BITS) + minY << lod);
         aabbs.add((chunkZ << CHUNK_SIZE_BITS) + minZ << lod);
 
-//        aabbs.add((chunkX << CHUNK_SIZE_BITS) + maxX << lod);
-//        aabbs.add((chunkY << CHUNK_SIZE_BITS) + maxY << lod);
-//        aabbs.add((chunkZ << CHUNK_SIZE_BITS) + maxZ << lod);
         aabbs.add(lod << 21 | Math.max(0, maxX - minX) << 14 | Math.max(0, maxY - minY) << 7 | Math.max(0, maxZ - minZ));
     }
 

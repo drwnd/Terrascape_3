@@ -2,18 +2,19 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
+import core.assets.Texture;
+import core.renderables.Renderable;
+import core.renderables.UiElement;
 import core.rendering_api.Input;
+import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
 import core.rendering_api.shaders.TextShader;
-import core.rendering_api.Window;
 import core.settings.FloatSetting;
 import core.settings.KeySetting;
 import core.settings.OptionSetting;
-import core.settings.optionSettings.FontOption;
 import core.settings.ToggleSetting;
-import core.renderables.Renderable;
-import core.renderables.UiElement;
+import core.settings.optionSettings.FontOption;
 
 import game.assets.Shaders;
 import game.assets.TextureArrays;
@@ -187,9 +188,11 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
+        // TODO remove
 //        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
 //        shader.bind();
 //        shader.flipNextDrawVertically();
+//        GL46.glDisable(GL46.GL_BLEND);
 //        shader.drawQuad(new Vector2f(0), new Vector2f(1), new Texture(renderingOptimizer.depthTexture));
 
         renderChat();
@@ -308,7 +311,6 @@ public final class Renderer extends Renderable {
     }
 
     private static void renderSkybox(Camera camera) {
-        GL46.glDisable(GL46.GL_BLEND);
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
@@ -329,6 +331,7 @@ public final class Renderer extends Renderable {
         GL46.glDepthMask(false);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_BLEND);
 
         GL46.glDrawElements(GL46.GL_TRIANGLES, SKY_BOX_INDICES.length, GL46.GL_UNSIGNED_INT, 0);
 
@@ -351,7 +354,7 @@ public final class Renderer extends Renderable {
 
             long start = renderingOptimizer.getOpaqueLodStart(lod);
             int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
-            renderedOpaqueModels += drawCount;
+            renderedOpaqueModels += drawCount / 6;
 
             GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }

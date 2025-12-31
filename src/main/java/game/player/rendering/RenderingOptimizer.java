@@ -1,6 +1,7 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
+import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
 import core.utils.IntArrayList;
 
@@ -45,10 +46,10 @@ public final class RenderingOptimizer {
         GL46.glBindBuffer(GL46.GL_SHADER_STORAGE_BUFFER, occludeeBuffer);
         GL46.glBufferData(GL46.GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL46.GL_DYNAMIC_DRAW);
 
-        depthTexture = ObjectLoader.createTexture2D(GL46.GL_DEPTH_COMPONENT32F, 1920, 1080, GL46.GL_DEPTH_COMPONENT, GL46.GL_FLOAT, GL46.GL_LINEAR);
+        depthTexture = ObjectLoader.createTexture2D(GL46.GL_DEPTH_COMPONENT32F, width, height, GL46.GL_DEPTH_COMPONENT, GL46.GL_FLOAT, GL46.GL_NEAREST);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_BORDER);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_BORDER);
-        GL46.glTexParameterfv(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_BORDER_COLOR, new float[]{1, 1, 1, 1});
+        GL46.glTexParameterfv(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
 
         framebuffer = GL46.glCreateFramebuffers();
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
@@ -336,15 +337,20 @@ public final class RenderingOptimizer {
                 cameraPosition.intY & ~CHUNK_SIZE_MASK,
                 cameraPosition.intZ & ~CHUNK_SIZE_MASK);
 
+        GL46.glViewport(0, 0, width, height);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glEnable(GL46.GL_CULL_FACE);
+        GL46.glCullFace(GL46.GL_FRONT);
         GL46.glDisable(GL46.GL_STENCIL_TEST);
+        GL46.glDisable(GL46.GL_BLEND);
+        GL46.glDepthFunc(GL46.GL_LESS);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, framebuffer);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, occluderBuffer);
-        GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
+        GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_COLOR_BUFFER_BIT);
         GL46.glDepthMask(true);
+        GL46.glColorMask(false, false, false, false);
 
+        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, occluderBuffer);
         GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, occluderCount);
     }
 
@@ -357,6 +363,8 @@ public final class RenderingOptimizer {
                 cameraPosition.intY & ~CHUNK_SIZE_MASK,
                 cameraPosition.intZ & ~CHUNK_SIZE_MASK);
 
+        GL46.glEnable(GL46.GL_DEPTH_TEST);
+        GL46.glDepthFunc(GL46.GL_NEVER);
         GL46.glDepthMask(false);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
@@ -364,7 +372,13 @@ public final class RenderingOptimizer {
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 3, glassIndirectBuffer);
 
         GL46.glDrawArraysInstanced(GL46.GL_TRIANGLES, 0, 36, occludeeCount);
+
         GL46.glDepthMask(true);
+        GL46.glColorMask(true, true, true, true);
+        GL46.glViewport(0, 0, Window.getWidth(), Window.getHeight());
+        GL46.glDisable(GL46.GL_BLEND);
+        GL46.glCullFace(GL46.GL_BACK);
+        GL46.glDepthFunc(GL46.GL_LESS);
     }
 
 
@@ -375,7 +389,7 @@ public final class RenderingOptimizer {
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
-    public final int framebuffer, depthTexture;
+    public final int framebuffer, depthTexture; // TODO make private
 
     private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
     private final long[] lodStarts = new long[LOD_COUNT * 2];
@@ -387,4 +401,5 @@ public final class RenderingOptimizer {
     private final IntArrayList aabbs = new IntArrayList(AABB_INT_SIZE * 256);
 
     private static final int AABB_INT_SIZE = 4;
+    private static final int width = 400, height = 225;
 }

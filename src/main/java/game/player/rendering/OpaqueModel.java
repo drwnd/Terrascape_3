@@ -24,12 +24,12 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
         boolean notNull = vertexCounts != null && indices != null;
 
-        addData(commands, notNull && cameraChunkX >= modelChunkX, WEST);
-        addData(commands, notNull && cameraChunkX <= modelChunkX, EAST);
-        addData(commands, notNull && cameraChunkY >= modelChunkY, TOP);
-        addData(commands, notNull && cameraChunkY <= modelChunkY, BOTTOM);
         addData(commands, notNull && cameraChunkZ >= modelChunkZ, NORTH);
+        addData(commands, notNull && cameraChunkY >= modelChunkY, TOP);
+        addData(commands, notNull && cameraChunkX >= modelChunkX, WEST);
         addData(commands, notNull && cameraChunkZ <= modelChunkZ, SOUTH);
+        addData(commands, notNull && cameraChunkY <= modelChunkY, BOTTOM);
+        addData(commands, notNull && cameraChunkX <= modelChunkX, EAST);
     }
 
     public boolean isEmpty() {
