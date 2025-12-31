@@ -7,6 +7,7 @@ build/
 /core.assets/textData/Settings
 
 ### IntelliJ IDEA ###
+/.idea/inspectionProfiles/
 /.idea/
 /idea/
 .idea/modules.xml

@@ -183,7 +183,7 @@ public final class RenderingOptimizer {
                     if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
                     if (meshCollector.noNeighborHasModel(lodModelX, lodModelY, lodModelZ, lod)) continue;
                     AABB occluder = meshCollector.getOccluder(index, lod);
-                    if (occluder != null && occluder.hasVolume()) aabbs.add(occluder);
+                    if (lod == 0 && occluder != null && occluder.hasVolume()) aabbs.add(occluder);
                 }
     }
 
@@ -212,11 +212,11 @@ public final class RenderingOptimizer {
 
         for (AABB occluder : aabbs) {
             renderNorthSide(a, b, c, d, occluder);
-            renderTopSide(a, b, c, d, occluder);
-            renderWestSide(a, b, c, d, occluder);
-            renderSouthSide(a, b, c, d, occluder);
-            renderBottomSide(a, b, c, d, occluder);
-            renderEastSide(a, b, c, d, occluder);
+//            renderTopSide(a, b, c, d, occluder);
+//            renderWestSide(a, b, c, d, occluder);
+//            renderSouthSide(a, b, c, d, occluder);
+//            renderBottomSide(a, b, c, d, occluder);
+//            renderEastSide(a, b, c, d, occluder);
         }
     }
 
@@ -235,25 +235,25 @@ public final class RenderingOptimizer {
 
     private void renderTopSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
         a.set(aabb.minX, aabb.maxY, aabb.minZ);
-        b.set(aabb.minX, aabb.maxY, aabb.maxZ);
+        b.set(aabb.maxX, aabb.maxY, aabb.minZ);
         c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        d.set(aabb.minX, aabb.maxY, aabb.maxZ);
         renderQuad(a, b, c, d);
     }
 
     private void renderWestSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
         a.set(aabb.maxX, aabb.minY, aabb.minZ);
-        b.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        b.set(aabb.maxX, aabb.minY, aabb.maxZ);
         c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.minY, aabb.maxZ);
+        d.set(aabb.maxX, aabb.maxY, aabb.minZ);
         renderQuad(a, b, c, d);
     }
 
     private void renderSouthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
         a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.minX, aabb.maxY, aabb.minZ);
+        b.set(aabb.maxX, aabb.minY, aabb.minZ);
         c.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        d.set(aabb.maxX, aabb.minY, aabb.minZ);
+        d.set(aabb.minX, aabb.maxY, aabb.minZ);
         renderQuad(a, b, c, d);
     }
 
@@ -278,11 +278,20 @@ public final class RenderingOptimizer {
         b.transform();
         c.transform();
         d.transform();
+        // Problem for later
+        if (a.isBehindCamera() || b.isBehindCamera() || c.isBehindCamera() || d.isBehindCamera()) return;
 
-        if (a.isInsideScreen()) depthMap[toDepthIndex(a.x, a.y)] = a.fz;
-        if (b.isInsideScreen()) depthMap[toDepthIndex(b.x, b.y)] = b.fz;
-        if (c.isInsideScreen()) depthMap[toDepthIndex(c.x, c.y)] = c.fz;
-        if (d.isInsideScreen()) depthMap[toDepthIndex(d.x, d.y)] = d.fz;
+        int minX = minX(a, b, c, d), minY = minY(a, b, c, d);
+        int maxX = maxX(a, b, c, d), maxY = maxY(a, b, c, d);
+
+        for (int y = minY; y <= maxY; y++)
+            for (int x = minX; x <= maxX; x++) {
+                if (!isInside(a, b, c, d, x, y)) {
+                    depthMap[toDepthIndex(x, y)] = 0.25F;
+                    continue;
+                }
+                depthMap[toDepthIndex(x, y)] = 0.5F;
+            }
     }
 
 
@@ -304,6 +313,29 @@ public final class RenderingOptimizer {
         return y * WIDTH + x;
     }
 
+    private static int minX(Vertex a, Vertex b, Vertex c, Vertex d) {
+        return Math.max(Math.min(Math.min(a.x, b.x), Math.min(c.x, d.x)), 0);
+    }
+
+    private static int minY(Vertex a, Vertex b, Vertex c, Vertex d) {
+        return Math.max(Math.min(Math.min(a.y, b.y), Math.min(c.y, d.y)), 0);
+    }
+
+    private static int maxX(Vertex a, Vertex b, Vertex c, Vertex d) {
+        return Math.min(Math.max(Math.max(a.x, b.x), Math.max(c.x, d.x)), WIDTH - 1);
+    }
+
+    private static int maxY(Vertex a, Vertex b, Vertex c, Vertex d) {
+        return Math.min(Math.max(Math.max(a.y, b.y), Math.max(c.y, d.y)), HEIGHT - 1);
+    }
+
+    private static boolean isInside(Vertex a, Vertex b, Vertex c, Vertex d, int x, int y) {
+        return (b.fy - a.fy) * (x - a.fx) + (a.fx - b.fx) * (y - a.fy) >= 0
+                && (c.fy - b.fy) * (x - b.fx) + (b.fx - c.fx) * (y - b.fy) >= 0
+                && (d.fy - c.fy) * (x - c.fx) + (c.fx - d.fx) * (y - c.fy) >= 0
+                && (a.fy - d.fy) * (x - d.fx) + (d.fx - a.fx) * (y - d.fy) >= 0;
+    }
+
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
     private Matrix4f projectionViewMatrix;
@@ -320,7 +352,7 @@ public final class RenderingOptimizer {
     private class Vertex {
 
         private int x, y, z;
-        private float fz;
+        private float fx, fy, fz;
 
         private void set(int x, int y, int z) {
             this.x = x;
@@ -329,7 +361,6 @@ public final class RenderingOptimizer {
         }
 
         private void transform() {
-            float fx, fy;
             fx = Utils.getWrappedPosition(x, cameraX, WORLD_SIZE_XZ) - (cameraX & ~CHUNK_SIZE_MASK);
             fy = Utils.getWrappedPosition(y, cameraY, WORLD_SIZE_Y) - (cameraY & ~CHUNK_SIZE_MASK);
             fz = Utils.getWrappedPosition(z, cameraZ, WORLD_SIZE_XZ) - (cameraZ & ~CHUNK_SIZE_MASK);
@@ -340,16 +371,16 @@ public final class RenderingOptimizer {
             float newW = fx * projectionViewMatrix.m03() + fy * projectionViewMatrix.m13() + fz * projectionViewMatrix.m23() + projectionViewMatrix.m33();
 
             float inverseW = 1.0F / newW;
-            fx = newX * inverseW;
-            fy = newY * inverseW;
+            fx = newX * inverseW * WIDTH + HALF_WIDTH;
+            fy = newY * inverseW * HEIGHT + HALF_HEIGHT;
             fz = newZ * inverseW;
 
-            x = (int) (fx * WIDTH + HALF_WIDTH);
-            y = (int) (fy * HEIGHT + HALF_HEIGHT);
+            x = (int) fx;
+            y = (int) fy;
         }
 
-        private boolean isInsideScreen() {
-            return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && fz > 0;
+        private boolean isBehindCamera() {
+            return fz <= 0.0F;
         }
     }
 }
