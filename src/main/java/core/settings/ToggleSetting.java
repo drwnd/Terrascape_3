@@ -13,7 +13,8 @@ public enum ToggleSetting {
     V_SYNC(true),
     FAKE_COORDINATES(true),
     RENDER_OCCLUDERS(false),
-    RENDER_OCCLUDEES(false);
+    RENDER_OCCLUDEES(false),
+    RENDER_OCCLUDER_DEPTH_MAP(false);
 
     public static void setIfPresent(String name, String value) {
         try {

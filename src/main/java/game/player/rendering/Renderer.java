@@ -2,6 +2,7 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
+import core.assets.Texture;
 import core.rendering_api.Input;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
@@ -14,8 +15,8 @@ import core.settings.optionSettings.FontOption;
 import core.settings.ToggleSetting;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
-
 import core.utils.IntArrayList;
+
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
@@ -189,6 +190,8 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
+        renderOccluderDepthMap();
+
         renderChat();
         renderDebugInfo();
     }
@@ -293,7 +296,10 @@ public final class Renderer extends Renderable {
         GL46.glStencilOp(GL46.GL_KEEP, GL46.GL_KEEP, GL46.GL_REPLACE);
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL46.GL_LINE : GL46.GL_FILL);
-        GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
+        if (vSync != ToggleSetting.V_SYNC.value()) {
+            vSync = ToggleSetting.V_SYNC.value();
+            GLFW.glfwSwapInterval(vSync ? 1 : 0);
+        }
 
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
@@ -621,6 +627,24 @@ public final class Renderer extends Renderable {
         }
     }
 
+    private void renderOccluderDepthMap() {
+        if (!ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) return;
+        int textureId = GL46.glGenTextures();
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D, textureId);
+        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, GL46.GL_R32F, RenderingOptimizer.WIDTH, RenderingOptimizer.HEIGHT, 0, GL46.GL_RED, GL46.GL_FLOAT, renderingOptimizer.getDepthMap());
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MIN_FILTER, GL46.GL_NEAREST);
+        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MAG_FILTER, GL46.GL_NEAREST);
+
+        Texture texture = new Texture(textureId);
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+        shader.bind();
+        shader.flipNextDrawVertically();
+
+        GL46.glDisable(GL46.GL_BLEND);
+        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), texture);
+        texture.delete();
+    }
+
     private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
@@ -676,7 +700,7 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private boolean debugScreenOpen = false;
+    private boolean debugScreenOpen = false, vSync;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;

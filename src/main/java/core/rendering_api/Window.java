@@ -34,6 +34,7 @@ public final class Window {
         GL46.glDepthFunc(GL46.GL_LESS);
         GL46.glEnable(GL46.GL_CULL_FACE);
         GL46.glCullFace(GL46.GL_BACK);
+        GLFW.glfwSwapInterval(1);
     }
 
     private static void createWindow(String title) {
@@ -61,7 +62,7 @@ public final class Window {
 
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
-        GLFW.glfwSetFramebufferSizeCallback(window, (long window, int width, int height) -> {
+        GLFW.glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
             Window.width = width;
             Window.height = height;
             Vector2i size = new Vector2i(width, height);

@@ -15,6 +15,9 @@ import static game.utils.Constants.*;
 
 public final class RenderingOptimizer {
 
+    public static final int WIDTH = 400;
+    public static final int HEIGHT = 225;
+
     public RenderingOptimizer() {
 
     }
@@ -26,23 +29,30 @@ public final class RenderingOptimizer {
         meshCollector = player.getMeshCollector();
         Vector3i position = player.getCamera().getPosition().intPosition();
 
-        playerX = position.x;
-        playerY = position.y;
-        playerZ = position.z;
+        cameraX = position.x;
+        cameraY = position.y;
+        cameraZ = position.z;
+        int cameraChunkX = cameraX >> CHUNK_SIZE_BITS;
+        int cameraChunkY = cameraY >> CHUNK_SIZE_BITS;
+        int cameraChunkZ = cameraZ >> CHUNK_SIZE_BITS;
 
         for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, playerX >> CHUNK_SIZE_BITS, playerY >> CHUNK_SIZE_BITS, playerZ >> CHUNK_SIZE_BITS);
+        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, cameraChunkX, cameraChunkY, cameraChunkZ);
     }
 
     public long[][] getVisibilityBits() {
         return visibilityBits;
     }
 
+    public float[] getDepthMap() {
+        return depthMap;
+    }
+
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection, long[][] visibilityBits) {
-        int chunkX = playerX >> CHUNK_SIZE_BITS + lod;
-        int chunkY = playerY >> CHUNK_SIZE_BITS + lod;
-        int chunkZ = playerZ >> CHUNK_SIZE_BITS + lod;
+        int chunkX = cameraX >> CHUNK_SIZE_BITS + lod;
+        int chunkY = cameraY >> CHUNK_SIZE_BITS + lod;
+        int chunkZ = cameraZ >> CHUNK_SIZE_BITS + lod;
 
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
@@ -68,12 +78,12 @@ public final class RenderingOptimizer {
 
         if (Game.getWorld().getChunk(chunkIndex, lod) == null) return;
         if (!intersection.testAab(
-                (chunkX << chunkSizeBits) - playerX,
-                (chunkY << chunkSizeBits) - playerY,
-                (chunkZ << chunkSizeBits) - playerZ,
-                (chunkX + 1 << chunkSizeBits) - playerX,
-                (chunkY + 1 << chunkSizeBits) - playerY,
-                (chunkZ + 1 << chunkSizeBits) - playerZ)) return;
+                (chunkX << chunkSizeBits) - cameraX,
+                (chunkY << chunkSizeBits) - cameraY,
+                (chunkZ << chunkSizeBits) - cameraZ,
+                (chunkX + 1 << chunkSizeBits) - cameraX,
+                (chunkY + 1 << chunkSizeBits) - cameraY,
+                (chunkZ + 1 << chunkSizeBits) - cameraZ)) return;
 
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
 
@@ -93,11 +103,11 @@ public final class RenderingOptimizer {
             fillVisibleChunks(chunkX - 1, chunkY, chunkZ, (byte) (traveledDirections | 1 << EAST), lod, intersection);
     }
 
-    private void removeLodVisibilityOverlap(int lod, int playerChunkX, int playerChunkY, int playerChunkZ) {
+    private void removeLodVisibilityOverlap(int lod, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         lodVisibilityBits = visibilityBits[lod];
-        int lodPlayerX = playerChunkX >> lod;
-        int lodPlayerY = playerChunkY >> lod;
-        int lodPlayerZ = playerChunkZ >> lod;
+        int lodPlayerX = cameraChunkX >> lod;
+        int lodPlayerY = cameraChunkY >> lod;
+        int lodPlayerZ = cameraChunkZ >> lod;
 
         int endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
         int endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
@@ -134,9 +144,9 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs((playerX >> CHUNK_SIZE_BITS + lod) - lodModelX);
-        int distanceY = Math.abs((playerY >> CHUNK_SIZE_BITS + lod) - lodModelY);
-        int distanceZ = Math.abs((playerZ >> CHUNK_SIZE_BITS + lod) - lodModelZ);
+        int distanceX = Math.abs((cameraX >> CHUNK_SIZE_BITS + lod) - lodModelX);
+        int distanceY = Math.abs((cameraY >> CHUNK_SIZE_BITS + lod) - lodModelY);
+        int distanceZ = Math.abs((cameraZ >> CHUNK_SIZE_BITS + lod) - lodModelZ);
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
@@ -167,7 +177,8 @@ public final class RenderingOptimizer {
 
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
-    private int playerX, playerY, playerZ;
+    private int cameraX, cameraY, cameraZ;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
+    private final float[] depthMap = new float[WIDTH * HEIGHT];
 }
