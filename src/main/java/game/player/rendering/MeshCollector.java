@@ -103,6 +103,14 @@ public final class MeshCollector {
         return transparentModels[lod][chunkIndex];
     }
 
+    public AABB getOccluder(int chunkIndex, int lod) {
+        return occluders[lod][chunkIndex];
+    }
+
+    public AABB getOccludee(int chunkIndex, int lod) {
+        return occludees[lod][chunkIndex];
+    }
+
     public boolean isModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
@@ -179,6 +187,9 @@ public final class MeshCollector {
         TransparentModel transparentModel = loadTransparentModel(mesh);
         setTransparentModel(transparentModel, chunkIndex, mesh.lod());
         setMeshed(true, chunkIndex, mesh.lod());
+
+        occluders[mesh.lod()][chunkIndex] = mesh.occluder();
+        occludees[mesh.lod()][chunkIndex] = mesh.occludee();
     }
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
@@ -207,7 +218,9 @@ public final class MeshCollector {
     @SuppressWarnings("unchecked")
     private final ArrayList<TransparentModel>[] filledTransparentModels = new ArrayList[LOD_COUNT];
 
-    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];
+    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][CHUNKS_PER_LOD];
+    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][CHUNKS_PER_LOD];
+    private final AABB[][] occluders = new AABB[LOD_COUNT][CHUNKS_PER_LOD];
+    private final AABB[][] occludees = new AABB[LOD_COUNT][CHUNKS_PER_LOD];
+    private final long[][] isMeshed = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
 }

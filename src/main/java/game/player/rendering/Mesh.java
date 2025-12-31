@@ -6,7 +6,8 @@ import static game.utils.Constants.*;
 
 public record Mesh(int[] opaqueVertices, int[] vertexCounts,
                    int[] transparentVertices, int waterVertexCount, int glassVertexCount,
-                   int chunkX, int chunkY, int chunkZ, int lod) {
+                   int chunkX, int chunkY, int chunkZ, int lod,
+                   AABB occluder, AABB occludee) {
 
     public Vector3i getWorldCoordinate() {
         return new Vector3i(chunkX << CHUNK_SIZE_BITS, chunkY << CHUNK_SIZE_BITS, chunkZ << CHUNK_SIZE_BITS);

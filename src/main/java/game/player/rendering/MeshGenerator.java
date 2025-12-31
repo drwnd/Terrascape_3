@@ -26,9 +26,15 @@ public final class MeshGenerator {
 
 
     public void generateMesh(Chunk chunk) {
+        AABB occluder = chunk.getMaterials().getMinSolidAABB();
+        AABB occludee = chunk.getMaterials().getMaxSolidAABB();
+
         if (chunk.isAir()) {
             Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
-            Mesh mesh = new Mesh(new int[0], new int[6], new int[0], 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD);
+            Mesh mesh = new Mesh(new int[0], new int[6], new int[0],
+                    0, 0,
+                    chunk.X, chunk.Y, chunk.Z, chunk.LOD,
+                    occluder, occludee);
             Game.getPlayer().getMeshCollector().queueMesh(mesh);
             return;
         }
@@ -48,7 +54,7 @@ public final class MeshGenerator {
         addTopBottomFaces();
         addWestEastFaces();
 
-        Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
+        Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
         Game.getPlayer().getMeshCollector().queueMesh(mesh);
     }
 
@@ -75,7 +81,7 @@ public final class MeshGenerator {
                     addTopBottomFaces();
                     addWestEastFaces();
                 }
-        return loadMesh(0, 0, 0, 0);
+        return loadMesh(0, 0, 0, 0, null, null);
     }
 
 
@@ -86,7 +92,7 @@ public final class MeshGenerator {
         for (ByteArrayList list : adjacentChunkLayers) list.clear();
     }
 
-    private Mesh loadMesh(int chunkX, int chunkY, int chunkZ, int lod) {
+    private Mesh loadMesh(int chunkX, int chunkY, int chunkZ, int lod, AABB occluder, AABB occludee) {
         int[] vertexCounts = new int[opaqueVerticesLists.length];
         int[] opaqueVertices = loadOpaqueVertices(vertexCounts);
         int[] transparentVertices = loadTransparentVertices();
@@ -94,7 +100,8 @@ public final class MeshGenerator {
         return new Mesh(opaqueVertices, vertexCounts, transparentVertices,
                 waterVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
                 glassVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
-                chunkX, chunkY, chunkZ, lod);
+                chunkX, chunkY, chunkZ, lod,
+                occluder, occludee);
     }
 
     private int[] loadTransparentVertices() {

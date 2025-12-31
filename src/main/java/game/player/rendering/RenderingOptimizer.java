@@ -169,5 +169,5 @@ public final class RenderingOptimizer {
     private MeshCollector meshCollector;
     private int playerX, playerY, playerZ;
 
-    private final long[][] visibilityBits = new long[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH / 64 + 1];
+    private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
 }
