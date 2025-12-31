@@ -6,6 +6,7 @@ public class AABB {
 
     public int minX, minY, minZ;
     public int maxX, maxY, maxZ;
+    public int lod, index;
 
     public AABB(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this.minX = minX;
@@ -26,6 +27,19 @@ public class AABB {
     }
 
 
+    public AABB toAbsoluteCoordinates(int chunkX, int chunkY, int chunkZ, int lod) {
+
+        minX = ((chunkX << CHUNK_SIZE_BITS) + minX) << lod;
+        minY = ((chunkY << CHUNK_SIZE_BITS) + minY) << lod;
+        minZ = ((chunkZ << CHUNK_SIZE_BITS) + minZ) << lod;
+
+        maxX = ((chunkX << CHUNK_SIZE_BITS) + maxX) << lod;
+        maxY = ((chunkY << CHUNK_SIZE_BITS) + maxY) << lod;
+        maxZ = ((chunkZ << CHUNK_SIZE_BITS) + maxZ) << lod;
+
+        return this;
+    }
+
     public boolean intersects(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         return this.minX < maxX && minX < this.maxX
                 && this.minY < maxY && minY < this.maxY
@@ -36,6 +50,10 @@ public class AABB {
         return this.minX <= minX && maxX <= this.maxX
                 && this.minY <= minY && maxY <= this.maxY
                 && this.minZ <= minZ && maxZ <= this.maxZ;
+    }
+
+    public boolean hasVolume() {
+        return minX <= maxX && minY <= maxY && minZ <= maxZ;
     }
 
     public void min(int x, int y, int z) {

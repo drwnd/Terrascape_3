@@ -142,14 +142,14 @@ public final class MeshCollector {
         }
     }
 
-    public boolean neighborHasModel(int chunkX, int chunkY, int chunkZ) {
+    public boolean noNeighborHasModel(int chunkX, int chunkY, int chunkZ, int lod) {
         OpaqueModel model;
-        return (model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, 0), 0)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, 0), 0)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, 0), 0)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, 0), 0)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, 0), 0)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, 0), 0)) != null && !model.isEmpty();
+        return ((model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, lod), lod)) == null || model.isEmpty());
     }
 
 
@@ -188,8 +188,8 @@ public final class MeshCollector {
         setTransparentModel(transparentModel, chunkIndex, mesh.lod());
         setMeshed(true, chunkIndex, mesh.lod());
 
-        occluders[mesh.lod()][chunkIndex] = mesh.occluder();
-        occludees[mesh.lod()][chunkIndex] = mesh.occludee();
+        occluders[mesh.lod()][chunkIndex] = mesh.occluder().toAbsoluteCoordinates(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod());
+        occludees[mesh.lod()][chunkIndex] = mesh.occludee().toAbsoluteCoordinates(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod());
     }
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {

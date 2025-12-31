@@ -149,10 +149,12 @@ public final class Renderer extends Renderable {
     protected void renderSelf(Vector2f position, Vector2f size) {
         Camera camera = player.getCamera();
         player.updateFrame();
-        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player);
 
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
+
+        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY))
+            renderingOptimizer.computeVisibility(player, projectionViewMatrix);
 
         setupRenderState();
 
@@ -600,12 +602,10 @@ public final class Renderer extends Renderable {
         MeshCollector meshCollector = player.getMeshCollector();
 
         for (Chunk chunk : Game.getWorld().getLod(0)) {
-            if (chunk == null || !meshCollector.neighborHasModel(chunk.X, chunk.Y, chunk.Z)) continue;
-//            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
-//            if (opaqueModel == null || opaqueModel.isEmpty()) continue;
+            if (chunk == null || meshCollector.noNeighborHasModel(chunk.X, chunk.Y, chunk.Z, 0)) continue;
 
-            AABB aabb = chunk.getMaterials().getMinSolidAABB();
-            renderVolume(shader, chunk, aabb);
+            AABB occluder = meshCollector.getOccluder(chunk.INDEX, 0);
+            if (occluder != null) renderVolume(shader, occluder);
         }
     }
 
@@ -617,13 +617,12 @@ public final class Renderer extends Renderable {
         setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
         MeshCollector meshCollector = player.getMeshCollector();
 
-        for (Chunk chunk : Game.getWorld().getLod(0)) {
-            if (chunk == null) continue;
-            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
+        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, 0);
             if (opaqueModel == null || opaqueModel.isEmpty()) continue;
 
-            AABB aabb = chunk.getMaterials().getMaxSolidAABB();
-            renderVolume(shader, chunk, aabb);
+            AABB occludee = meshCollector.getOccludee(chunkIndex, 0);
+            if (occludee != null) renderVolume(shader, occludee);
         }
     }
 
@@ -645,15 +644,11 @@ public final class Renderer extends Renderable {
         texture.delete();
     }
 
-    private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
+    private static void renderVolume(Shader shader, AABB aabb) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
-        int x = chunk.X << CHUNK_SIZE_BITS;
-        int y = chunk.Y << CHUNK_SIZE_BITS;
-        int z = chunk.Z << CHUNK_SIZE_BITS;
-
-        shader.setUniform("minPosition", x + aabb.minX, y + aabb.minY, z + aabb.minZ);
-        shader.setUniform("maxPosition", x + aabb.maxX, y + aabb.maxY, z + aabb.maxZ);
+        shader.setUniform("minPosition", aabb.minX, aabb.minY, aabb.minZ);
+        shader.setUniform("maxPosition", aabb.maxX, aabb.maxY, aabb.maxZ);
 
         GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 36);
     }

@@ -9,6 +9,7 @@ import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static game.utils.Constants.*;
@@ -22,22 +23,28 @@ public final class RenderingOptimizer {
 
     }
 
-    public void computeVisibility(Player player) {
-        Matrix4f projectionViewMatrix = Transformation.getFrustumCullingMatrix(player.getCamera());
-        FrustumIntersection frustumIntersection = new FrustumIntersection(projectionViewMatrix);
+    public void computeVisibility(Player player, Matrix4f projectionViewMatrix) {
+        FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
 
+        this.projectionViewMatrix = projectionViewMatrix;
         meshCollector = player.getMeshCollector();
         Vector3i position = player.getCamera().getPosition().intPosition();
 
         cameraX = position.x;
         cameraY = position.y;
         cameraZ = position.z;
-        int cameraChunkX = cameraX >> CHUNK_SIZE_BITS;
-        int cameraChunkY = cameraY >> CHUNK_SIZE_BITS;
-        int cameraChunkZ = cameraZ >> CHUNK_SIZE_BITS;
 
         for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod, cameraChunkX, cameraChunkY, cameraChunkZ);
+        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
+
+        aabbs.clear();
+        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluders(lod);
+        Arrays.fill(depthMap, 0.0F);
+        renderOccluders();
+
+        aabbs.clear();
+        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccludees(lod);
+        testOccludees();
     }
 
     public long[][] getVisibilityBits() {
@@ -103,19 +110,9 @@ public final class RenderingOptimizer {
             fillVisibleChunks(chunkX - 1, chunkY, chunkZ, (byte) (traveledDirections | 1 << EAST), lod, intersection);
     }
 
-    private void removeLodVisibilityOverlap(int lod, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+    private void removeLodVisibilityOverlap(int lod) {
         lodVisibilityBits = visibilityBits[lod];
-        int lodPlayerX = cameraChunkX >> lod;
-        int lodPlayerY = cameraChunkY >> lod;
-        int lodPlayerZ = cameraChunkZ >> lod;
-
-        int endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
-        int endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
-        int endZ = Utils.makeOdd(lodPlayerZ + RENDER_DISTANCE_XZ + 2);
-
-        int startX = Utils.makeEven(lodPlayerX - RENDER_DISTANCE_XZ - 2);
-        int startY = Utils.makeEven(lodPlayerY - RENDER_DISTANCE_Y - 2);
-        int startZ = Utils.makeEven(lodPlayerZ - RENDER_DISTANCE_XZ - 2);
+        computeStartEnd(lod);
 
         for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
             for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
@@ -175,10 +172,184 @@ public final class RenderingOptimizer {
         visibilityBits[index >> 6] &= ~(3L << index);
     }
 
+    private void populateOccluders(int lod) {
+        lodVisibilityBits = visibilityBits[lod];
+        computeStartEnd(lod);
+
+        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
+            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
+                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
+                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
+                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
+                    if (meshCollector.noNeighborHasModel(lodModelX, lodModelY, lodModelZ, lod)) continue;
+                    AABB occluder = meshCollector.getOccluder(index, lod);
+                    if (occluder != null && occluder.hasVolume()) aabbs.add(occluder);
+                }
+    }
+
+    private void populateOccludees(int lod) {
+        lodVisibilityBits = visibilityBits[lod];
+        computeStartEnd(lod);
+
+        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
+            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
+                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
+                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
+                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
+                    AABB occludee = meshCollector.getOccludee(index, lod);
+                    if (occludee == null || !occludee.hasVolume()) continue;
+                    aabbs.add(occludee);
+                    occludee.lod = lod;
+                    occludee.index = index;
+                }
+    }
+
+    private void renderOccluders() {
+        Vertex a = new Vertex();
+        Vertex b = new Vertex();
+        Vertex c = new Vertex();
+        Vertex d = new Vertex();
+
+        for (AABB occluder : aabbs) {
+            renderNorthSide(a, b, c, d, occluder);
+            renderTopSide(a, b, c, d, occluder);
+            renderWestSide(a, b, c, d, occluder);
+            renderSouthSide(a, b, c, d, occluder);
+            renderBottomSide(a, b, c, d, occluder);
+            renderEastSide(a, b, c, d, occluder);
+        }
+    }
+
+    private void testOccludees() {
+
+    }
+
+
+    private void renderNorthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.minX, aabb.minY, aabb.maxZ);
+        b.set(aabb.minX, aabb.maxY, aabb.maxZ);
+        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
+        d.set(aabb.maxX, aabb.minY, aabb.maxZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderTopSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.minX, aabb.maxY, aabb.minZ);
+        b.set(aabb.minX, aabb.maxY, aabb.maxZ);
+        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
+        d.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderWestSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.maxX, aabb.minY, aabb.minZ);
+        b.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
+        d.set(aabb.maxX, aabb.minY, aabb.maxZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderSouthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.minX, aabb.minY, aabb.minZ);
+        b.set(aabb.minX, aabb.maxY, aabb.minZ);
+        c.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        d.set(aabb.maxX, aabb.minY, aabb.minZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderBottomSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.minX, aabb.minY, aabb.minZ);
+        b.set(aabb.minX, aabb.minY, aabb.maxZ);
+        c.set(aabb.maxX, aabb.minY, aabb.maxZ);
+        d.set(aabb.maxX, aabb.minY, aabb.minZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderEastSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
+        a.set(aabb.minX, aabb.minY, aabb.minZ);
+        b.set(aabb.minX, aabb.maxY, aabb.minZ);
+        c.set(aabb.minX, aabb.maxY, aabb.maxZ);
+        d.set(aabb.minX, aabb.minY, aabb.maxZ);
+        renderQuad(a, b, c, d);
+    }
+
+    private void renderQuad(Vertex a, Vertex b, Vertex c, Vertex d) {
+        a.transform();
+        b.transform();
+        c.transform();
+        d.transform();
+
+        if (a.isInsideScreen()) depthMap[toDepthIndex(a.x, a.y)] = a.fz;
+        if (b.isInsideScreen()) depthMap[toDepthIndex(b.x, b.y)] = b.fz;
+        if (c.isInsideScreen()) depthMap[toDepthIndex(c.x, c.y)] = c.fz;
+        if (d.isInsideScreen()) depthMap[toDepthIndex(d.x, d.y)] = d.fz;
+    }
+
+
+    private void computeStartEnd(int lod) {
+        int lodPlayerX = cameraX >> CHUNK_SIZE_BITS + lod;
+        int lodPlayerY = cameraY >> CHUNK_SIZE_BITS + lod;
+        int lodPlayerZ = cameraZ >> CHUNK_SIZE_BITS + lod;
+
+        startX = Utils.makeEven(lodPlayerX - RENDER_DISTANCE_XZ - 2);
+        startY = Utils.makeEven(lodPlayerY - RENDER_DISTANCE_Y - 2);
+        startZ = Utils.makeEven(lodPlayerZ - RENDER_DISTANCE_XZ - 2);
+
+        endX = Utils.makeOdd(lodPlayerX + RENDER_DISTANCE_XZ + 2);
+        endY = Utils.makeOdd(lodPlayerY + RENDER_DISTANCE_Y + 2);
+        endZ = Utils.makeOdd(lodPlayerZ + RENDER_DISTANCE_XZ + 2);
+    }
+
+    private static int toDepthIndex(int x, int y) {
+        return y * WIDTH + x;
+    }
+
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
+    private Matrix4f projectionViewMatrix;
     private int cameraX, cameraY, cameraZ;
+    private int startX, startY, startZ, endX, endY, endZ;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
     private final float[] depthMap = new float[WIDTH * HEIGHT];
+    private final ArrayList<AABB> aabbs = new ArrayList<>(1024);
+
+    private static final int HALF_WIDTH = WIDTH / 2;
+    private static final int HALF_HEIGHT = HEIGHT / 2;
+
+    private class Vertex {
+
+        private int x, y, z;
+        private float fz;
+
+        private void set(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        private void transform() {
+            float fx, fy;
+            fx = Utils.getWrappedPosition(x, cameraX, WORLD_SIZE_XZ) - (cameraX & ~CHUNK_SIZE_MASK);
+            fy = Utils.getWrappedPosition(y, cameraY, WORLD_SIZE_Y) - (cameraY & ~CHUNK_SIZE_MASK);
+            fz = Utils.getWrappedPosition(z, cameraZ, WORLD_SIZE_XZ) - (cameraZ & ~CHUNK_SIZE_MASK);
+
+            float newX = fx * projectionViewMatrix.m00() + fy * projectionViewMatrix.m10() + fz * projectionViewMatrix.m20() + projectionViewMatrix.m30();
+            float newY = fx * projectionViewMatrix.m01() + fy * projectionViewMatrix.m11() + fz * projectionViewMatrix.m21() + projectionViewMatrix.m31();
+            float newZ = fx * projectionViewMatrix.m02() + fy * projectionViewMatrix.m13() + fz * projectionViewMatrix.m22() + projectionViewMatrix.m32();
+            float newW = fx * projectionViewMatrix.m03() + fy * projectionViewMatrix.m13() + fz * projectionViewMatrix.m23() + projectionViewMatrix.m33();
+
+            float inverseW = 1.0F / newW;
+            fx = newX * inverseW;
+            fy = newY * inverseW;
+            fz = newZ * inverseW;
+
+            x = (int) (fx * WIDTH + HALF_WIDTH);
+            y = (int) (fy * HEIGHT + HALF_HEIGHT);
+        }
+
+        private boolean isInsideScreen() {
+            return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && fz > 0;
+        }
+    }
 }
