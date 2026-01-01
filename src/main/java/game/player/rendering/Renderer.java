@@ -630,7 +630,7 @@ public final class Renderer extends Renderable {
         if (!ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) return;
         int textureId = GL46.glGenTextures();
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, textureId);
-        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, GL46.GL_R32F, RenderingOptimizer.WIDTH, RenderingOptimizer.HEIGHT, 0, GL46.GL_RED, GL46.GL_FLOAT, renderingOptimizer.getDepthMap());
+        GL46.glTexImage2D(GL46.GL_TEXTURE_2D, 0, GL46.GL_R32F, Rasterizer.WIDTH, Rasterizer.HEIGHT, 0, GL46.GL_RED, GL46.GL_FLOAT, renderingOptimizer.getDepthMap());
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MIN_FILTER, GL46.GL_NEAREST);
         GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_MAG_FILTER, GL46.GL_NEAREST);
 
