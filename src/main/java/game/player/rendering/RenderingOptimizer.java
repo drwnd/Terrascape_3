@@ -32,7 +32,7 @@ public final class RenderingOptimizer {
         for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
         for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
 
-        long start = System.nanoTime();
+//        long start = System.nanoTime(); // TODO remove
 
         aabbs.clear();
         for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluders(lod);
@@ -43,7 +43,7 @@ public final class RenderingOptimizer {
         for (int lod = 0; lod < LOD_COUNT; lod++) populateOccludees(lod);
         rasterizer.testOccludees(aabbs, visibilityBits);
 
-        System.out.println(System.nanoTime() - start);
+//        System.out.println(System.nanoTime() - start); // TODO remove
     }
 
     public long[][] getVisibilityBits() {
@@ -182,7 +182,8 @@ public final class RenderingOptimizer {
                     if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
                     if (meshCollector.noNeighborHasModel(lodModelX, lodModelY, lodModelZ, lod)) continue;
                     AABB occluder = meshCollector.getOccluder(index, lod);
-                    if (occluder != null && occluder.hasVolume()) aabbs.add(occluder);
+                    // TODO remove lod == 0
+                    if (lod == 0 && occluder != null && occluder.hasVolume()) aabbs.add(occluder);
                 }
     }
 

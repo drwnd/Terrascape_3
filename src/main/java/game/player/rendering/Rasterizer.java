@@ -12,8 +12,20 @@ import static game.utils.Constants.WORLD_SIZE_XZ;
 
 public final class Rasterizer {
 
-    public static final int WIDTH = 128;
-    public static final int HEIGHT = 64;
+    public static final int WIDTH = 144;
+    public static final int HEIGHT = 81;
+
+    public Rasterizer() {
+        v0 = new Vertex();
+        v1 = new Vertex();
+        v2 = new Vertex();
+        v3 = new Vertex();
+        v4 = new Vertex();
+        v5 = new Vertex();
+        v6 = new Vertex();
+        v7 = new Vertex();
+    }
+
 
     public void set(Matrix4f projectionViewMatrix, int cameraX, int cameraY, int cameraZ) {
         this.projectionViewMatrix = projectionViewMatrix;
@@ -24,29 +36,22 @@ public final class Rasterizer {
 
     public void renderOccluders(ArrayList<AABB> occluders) {
         Arrays.fill(depthMap, 0.0F);
-        Vertex a = new Vertex();
-        Vertex b = new Vertex();
-        Vertex c = new Vertex();
-        Vertex d = new Vertex();
 
         for (AABB occluder : occluders) {
-            if (cameraZ > occluder.minZ) renderNorthSide(a, b, c, d, occluder);
-            if (cameraY > occluder.minY) renderTopSide(a, b, c, d, occluder);
-            if (cameraX > occluder.minX) renderWestSide(a, b, c, d, occluder);
-            if (cameraZ < occluder.maxZ) renderSouthSide(a, b, c, d, occluder);
-            if (cameraY < occluder.maxY) renderBottomSide(a, b, c, d, occluder);
-            if (cameraX < occluder.maxX) renderEastSide(a, b, c, d, occluder);
+            setVertices(occluder);
+
+            if (cameraZ < occluder.maxZ) renderNorthSide();
+            if (cameraY < occluder.maxY) renderTopSide();
+            if (cameraX < occluder.maxX) renderWestSide();
+            if (cameraZ > occluder.minZ) renderSouthSide();
+            if (cameraY > occluder.minY) renderBottomSide();
+            if (cameraX > occluder.minX) renderEastSide();
         }
     }
 
     public void testOccludees(ArrayList<AABB> occludees, long[][] visibilityBits) {
-        Vertex a = new Vertex();
-        Vertex b = new Vertex();
-        Vertex c = new Vertex();
-        Vertex d = new Vertex();
-
         for (AABB occludee : occludees) {
-            if (testOccludee(a, b, c, d, occludee)) continue;
+            if (testOccludee(occludee)) continue;
             visibilityBits[occludee.lod][occludee.index >> 6] &= ~(1L << occludee.index);
         }
     }
@@ -56,148 +61,141 @@ public final class Rasterizer {
     }
 
 
-    private boolean testOccludee(Vertex a, Vertex b, Vertex c, Vertex d, AABB occludee) {
-        if (cameraZ > occludee.minZ && testNorthSide(a, b, c, d, occludee)) return true;
-        if (cameraY > occludee.minY && testTopSide(a, b, c, d, occludee)) return true;
-        if (cameraX > occludee.minX && testWestSide(a, b, c, d, occludee)) return true;
-        if (cameraZ < occludee.maxZ && testSouthSide(a, b, c, d, occludee)) return true;
-        if (cameraY < occludee.maxY && testBottomSide(a, b, c, d, occludee)) return true;
-        return cameraX < occludee.maxX && testEastSide(a, b, c, d, occludee);
+    private void renderNorthSide() {
+        a = v1;
+        b = v3;
+        c = v7;
+        d = v5;
+        renderQuad();
     }
 
-
-    private void renderNorthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.maxZ);
-        b.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        renderQuad(a, b, c, d);
+    private void renderTopSide() {
+        a = v2;
+        b = v6;
+        c = v7;
+        d = v3;
+        renderQuad();
     }
 
-    private void renderTopSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.maxY, aabb.minZ);
-        b.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        renderQuad(a, b, c, d);
+    private void renderWestSide() {
+        a = v4;
+        b = v5;
+        c = v7;
+        d = v6;
+        renderQuad();
     }
 
-    private void renderWestSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.maxX, aabb.minY, aabb.minZ);
-        b.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        renderQuad(a, b, c, d);
+    private void renderSouthSide() {
+        a = v0;
+        b = v4;
+        c = v6;
+        d = v2;
+        renderQuad();
     }
 
-    private void renderSouthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.maxX, aabb.minY, aabb.minZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        d.set(aabb.minX, aabb.maxY, aabb.minZ);
-        renderQuad(a, b, c, d);
+    private void renderBottomSide() {
+        a = v0;
+        b = v1;
+        c = v5;
+        d = v4;
+        renderQuad();
     }
 
-    private void renderBottomSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.minX, aabb.minY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.minY, aabb.minZ);
-        renderQuad(a, b, c, d);
+    private void renderEastSide() {
+        a = v0;
+        b = v2;
+        c = v3;
+        d = v1;
+        renderQuad();
     }
 
-    private void renderEastSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.minX, aabb.maxY, aabb.minZ);
-        c.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.minX, aabb.minY, aabb.maxZ);
-        renderQuad(a, b, c, d);
-    }
-
-    private void renderQuad(Vertex a, Vertex b, Vertex c, Vertex d) {
-        a.transform();
-        b.transform();
-        c.transform();
-        d.transform();
+    private void renderQuad() {
         // Problem for later
         if (a.isBehindCamera() || b.isBehindCamera() || c.isBehindCamera() || d.isBehindCamera()) return;
 
-        int minX = minX(a, b, c, d), minY = minY(a, b, c, d);
-        int maxX = maxX(a, b, c, d), maxY = maxY(a, b, c, d);
+        int minX = minX(), minY = minY();
+        int maxX = maxX(), maxY = maxY();
 
         for (int y = minY; y <= maxY; y++)
             for (int x = minX; x <= maxX; x++) {
-                if (isOutsideQuad(a, b, c, d, x, y)) continue;
-                float depth = interpolateDepth(a, b, c, d, x, y);
+                if (isOutsideQuad(x, y)) continue;
+                float depth = interpolateDepth(x, y);
                 int depthIndex = toDepthIndex(x, y);
                 if (depthMap[depthIndex] < depth) depthMap[depthIndex] = depth;
             }
     }
 
 
-    private boolean testNorthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.maxZ);
-        b.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        return testQuad(a, b, c, d);
+    private boolean testOccludee(AABB occludee) {
+        setVertices(occludee);
+
+        if (cameraZ < occludee.maxZ && testNorthSide()) return true;
+        if (cameraY < occludee.maxY && testTopSide()) return true;
+        if (cameraX < occludee.maxX && testWestSide()) return true;
+        if (cameraZ > occludee.minZ && testSouthSide()) return true;
+        if (cameraY > occludee.minY && testBottomSide()) return true;
+        return cameraX > occludee.minX && testEastSide();
     }
 
-    private boolean testTopSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.maxY, aabb.minZ);
-        b.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        return testQuad(a, b, c, d);
+    private boolean testNorthSide() {
+        a = v1;
+        b = v3;
+        c = v7;
+        d = v5;
+        return testQuad();
     }
 
-    private boolean testWestSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.maxX, aabb.minY, aabb.minZ);
-        b.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        return testQuad(a, b, c, d);
+    private boolean testTopSide() {
+        a = v2;
+        b = v6;
+        c = v7;
+        d = v3;
+        return testQuad();
     }
 
-    private boolean testSouthSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.maxX, aabb.minY, aabb.minZ);
-        c.set(aabb.maxX, aabb.maxY, aabb.minZ);
-        d.set(aabb.minX, aabb.maxY, aabb.minZ);
-        return testQuad(a, b, c, d);
+    private boolean testWestSide() {
+        a = v4;
+        b = v5;
+        c = v7;
+        d = v6;
+        return testQuad();
     }
 
-    private boolean testBottomSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.minX, aabb.minY, aabb.maxZ);
-        c.set(aabb.maxX, aabb.minY, aabb.maxZ);
-        d.set(aabb.maxX, aabb.minY, aabb.minZ);
-        return testQuad(a, b, c, d);
+    private boolean testSouthSide() {
+        a = v0;
+        b = v4;
+        c = v6;
+        d = v2;
+        return testQuad();
     }
 
-    private boolean testEastSide(Vertex a, Vertex b, Vertex c, Vertex d, AABB aabb) {
-        a.set(aabb.minX, aabb.minY, aabb.minZ);
-        b.set(aabb.minX, aabb.maxY, aabb.minZ);
-        c.set(aabb.minX, aabb.maxY, aabb.maxZ);
-        d.set(aabb.minX, aabb.minY, aabb.maxZ);
-        return testQuad(a, b, c, d);
+    private boolean testBottomSide() {
+        a = v0;
+        b = v1;
+        c = v5;
+        d = v4;
+        return testQuad();
     }
 
-    private boolean testQuad(Vertex a, Vertex b, Vertex c, Vertex d) {
-        a.transform();
-        b.transform();
-        c.transform();
-        d.transform();
+    private boolean testEastSide() {
+        a = v0;
+        b = v2;
+        c = v3;
+        d = v1;
+        return testQuad();
+    }
+
+    private boolean testQuad() {
         // Problem for later
         if (a.isBehindCamera() || b.isBehindCamera() || c.isBehindCamera() || d.isBehindCamera()) return true;
 
-        int minX = minX(a, b, c, d), minY = minY(a, b, c, d);
-        int maxX = maxX(a, b, c, d), maxY = maxY(a, b, c, d);
+        int minX = minX(), minY = minY();
+        int maxX = maxX(), maxY = maxY();
 
         for (int y = minY; y <= maxY; y++)
             for (int x = minX; x <= maxX; x++) {
-                if (isOutsideQuad(a, b, c, d, x, y)) continue;
-                float depth = interpolateDepth(a, b, c, d, x, y);
+                if (isOutsideQuad(x, y)) continue;
+                float depth = interpolateDepth(x, y);
                 int depthIndex = toDepthIndex(x, y);
                 if (depthMap[depthIndex] <= depth) return true;
             }
@@ -205,38 +203,46 @@ public final class Rasterizer {
     }
 
 
-    private static int toDepthIndex(int x, int y) {
-        return y * WIDTH + x;
-    }
-
-    private static int minX(Vertex a, Vertex b, Vertex c, Vertex d) {
+    private int minX() {
         return Math.max(Math.min(Math.min(a.x, b.x), Math.min(c.x, d.x)), 0);
     }
 
-    private static int minY(Vertex a, Vertex b, Vertex c, Vertex d) {
+    private int minY() {
         return Math.max(Math.min(Math.min(a.y, b.y), Math.min(c.y, d.y)), 0);
     }
 
-    private static int maxX(Vertex a, Vertex b, Vertex c, Vertex d) {
+    private int maxX() {
         return Math.min(Math.max(Math.max(a.x, b.x), Math.max(c.x, d.x)), WIDTH - 1);
     }
 
-    private static int maxY(Vertex a, Vertex b, Vertex c, Vertex d) {
+    private int maxY() {
         return Math.min(Math.max(Math.max(a.y, b.y), Math.max(c.y, d.y)), HEIGHT - 1);
     }
 
-    private static boolean isOutsideQuad(Vertex a, Vertex b, Vertex c, Vertex d, int x, int y) {
-        return !((b.fy - a.fy) * (x - a.fx) + (a.fx - b.fx) * (y - a.fy) >= 0)
-                || !((c.fy - b.fy) * (x - b.fx) + (b.fx - c.fx) * (y - b.fy) >= 0)
-                || !((d.fy - c.fy) * (x - c.fx) + (c.fx - d.fx) * (y - c.fy) >= 0)
-                || !((a.fy - d.fy) * (x - d.fx) + (d.fx - a.fx) * (y - d.fy) >= 0);
+    private boolean isOutsideQuad(int x, int y) {
+        return (b.fy - a.fy) * (x - a.fx) + (a.fx - b.fx) * (y - a.fy) > 0
+                || (c.fy - b.fy) * (x - b.fx) + (b.fx - c.fx) * (y - b.fy) > 0
+                || (d.fy - c.fy) * (x - c.fx) + (c.fx - d.fx) * (y - c.fy) > 0
+                || (a.fy - d.fy) * (x - d.fx) + (d.fx - a.fx) * (y - d.fy) > 0;
     }
 
-    private static float interpolateDepth(Vertex a, Vertex b, Vertex c, Vertex d, int x, int y) {
+    private float interpolateDepth(int x, int y) {
         if (squareDistance(a, x, y) > squareDistance(c, x, y))
             return interpolateDepth(b, c, d, x, y);
         return interpolateDepth(a, b, d, x, y);
     }
+
+    private void setVertices(AABB aabb) {
+        v0.set(aabb.minX, aabb.minY, aabb.minZ);
+        v1.set(aabb.minX, aabb.minY, aabb.maxZ);
+        v2.set(aabb.minX, aabb.maxY, aabb.minZ);
+        v3.set(aabb.minX, aabb.maxY, aabb.maxZ);
+        v4.set(aabb.maxX, aabb.minY, aabb.minZ);
+        v5.set(aabb.maxX, aabb.minY, aabb.maxZ);
+        v6.set(aabb.maxX, aabb.maxY, aabb.minZ);
+        v7.set(aabb.maxX, aabb.maxY, aabb.maxZ);
+    }
+
 
     private static float interpolateDepth(Vertex a, Vertex b, Vertex c, int x, int y) {
         float divisor = (b.fy - c.fy) * (a.fx - c.fx) + (c.fx - b.fx) * (a.fy - c.fy);
@@ -253,7 +259,15 @@ public final class Rasterizer {
         return dx * dx + dy * dy;
     }
 
+    private static int toDepthIndex(int x, int y) {
+        return y * WIDTH + x;
+    }
+
+
+    private final Vertex v0, v1, v2, v3, v4, v5, v6, v7;
     private final float[] depthMap = new float[WIDTH * HEIGHT];
+
+    private Vertex a, b, c, d;
     private Matrix4f projectionViewMatrix;
     private int cameraX, cameraY, cameraZ;
 
@@ -266,6 +280,8 @@ public final class Rasterizer {
             this.x = x;
             this.y = y;
             this.z = z;
+
+            transform();
         }
 
         private void transform() {
