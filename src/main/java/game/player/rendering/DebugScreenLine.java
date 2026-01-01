@@ -57,13 +57,14 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
-            long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE;
+            long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE, frameTime = Game.getPlayer().getRenderer().getFrameTime();
             for (int index = 0; index < frameTimes.size() - 1; index++) {
                 maxFrameTime = Math.max(maxFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
                 minFrameTime = Math.min(minFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
             }
 
-            return "FPS: %s, lowest: %s, highest: %s".formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime));
+            return "FPS: %s, lowest: %s, highest: %s, CPU Frame Time: %sµs"
+                    .formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime), frameTime / 1_000L);
         }, "FPS"));
 
         lines.add(new DebugScreenLine(OptionSetting.TOTAL_MEMORY_VISIBILITY, OptionSetting.TOTAL_MEMORY_COLOR, () -> {

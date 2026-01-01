@@ -62,6 +62,7 @@ public final class Renderer extends Renderable {
 
         createTextures(Window.getWidth(), Window.getHeight());
         createFrameBuffers();
+        GLFW.glfwSwapInterval(vSync ? 1 : 0);
     }
 
     public void toggleDebugScreen() {
@@ -70,6 +71,10 @@ public final class Renderer extends Renderable {
 
     public ArrayList<Long> getFrameTimes() {
         return frameTimes;
+    }
+
+    public long getFrameTime() {
+        return frameTime;
     }
 
     public static float getRenderTime() {
@@ -145,6 +150,8 @@ public final class Renderer extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
+        long frameStart = System.nanoTime();
+
         Camera camera = player.getCamera();
         player.updateFrame();
         if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player);
@@ -188,6 +195,8 @@ public final class Renderer extends Renderable {
 
         renderChat();
         renderDebugInfo();
+
+        frameTime = (long) ((System.nanoTime() - frameStart) * 0.025 + frameTime * 0.975);
     }
 
     @Override
@@ -290,7 +299,10 @@ public final class Renderer extends Renderable {
         GL46.glStencilOp(GL46.GL_KEEP, GL46.GL_KEEP, GL46.GL_REPLACE);
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL46.GL_LINE : GL46.GL_FILL);
-        GLFW.glfwSwapInterval(ToggleSetting.V_SYNC.value() ? 1 : 0);
+        if (vSync != ToggleSetting.V_SYNC.value()) {
+            vSync = ToggleSetting.V_SYNC.value();
+            GLFW.glfwSwapInterval(vSync ? 1 : 0);
+        }
 
         float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
@@ -607,7 +619,8 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private boolean debugScreenOpen = false;
+    private long frameTime;
+    private boolean debugScreenOpen = false, vSync;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;

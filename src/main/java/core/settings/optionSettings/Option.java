@@ -26,7 +26,8 @@ public interface Option {
     default Option value(String name) {
         Enum<?> thisEnum = (Enum<?>) this;
 
-        return (Option) Enum.valueOf(thisEnum.getClass(), name);
+        //noinspection unchecked
+        return (Option) Enum.valueOf(thisEnum.getClass(), name.toUpperCase());
     }
 
     default String name() {
