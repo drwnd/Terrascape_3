@@ -220,10 +220,10 @@ public final class Rasterizer {
     }
 
     private boolean isOutsideQuad(int x, int y) {
-        return (b.fy - a.fy) * (x - a.fx) + (a.fx - b.fx) * (y - a.fy) > 0
-                || (c.fy - b.fy) * (x - b.fx) + (b.fx - c.fx) * (y - b.fy) > 0
-                || (d.fy - c.fy) * (x - c.fx) + (c.fx - d.fx) * (y - c.fy) > 0
-                || (a.fy - d.fy) * (x - d.fx) + (d.fx - a.fx) * (y - d.fy) > 0;
+        return /**/(b.fy - a.fy) * (x - a.fx) + (a.fx - b.fx) * (y - a.fy) > 0.0F
+                || (c.fy - b.fy) * (x - b.fx) + (b.fx - c.fx) * (y - b.fy) > 0.0F
+                || (d.fy - c.fy) * (x - c.fx) + (c.fx - d.fx) * (y - c.fy) > 0.0F
+                || (a.fy - d.fy) * (x - d.fx) + (d.fx - a.fx) * (y - d.fy) > 0.0F;
     }
 
     private float interpolateDepth(int x, int y) {
@@ -273,25 +273,17 @@ public final class Rasterizer {
 
     private class Vertex {
 
-        private int x, y, z;
+        private int x, y;
         private float fx, fy, fz;
 
         private void set(int x, int y, int z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-
-            transform();
-        }
-
-        private void transform() {
             fx = Utils.getWrappedPosition(x, cameraX, WORLD_SIZE_XZ) - (cameraX & ~CHUNK_SIZE_MASK);
             fy = Utils.getWrappedPosition(y, cameraY, WORLD_SIZE_Y) - (cameraY & ~CHUNK_SIZE_MASK);
             fz = Utils.getWrappedPosition(z, cameraZ, WORLD_SIZE_XZ) - (cameraZ & ~CHUNK_SIZE_MASK);
 
             float newX = fx * projectionViewMatrix.m00() + fy * projectionViewMatrix.m10() + fz * projectionViewMatrix.m20() + projectionViewMatrix.m30();
             float newY = fx * projectionViewMatrix.m01() + fy * projectionViewMatrix.m11() + fz * projectionViewMatrix.m21() + projectionViewMatrix.m31();
-            float newZ = fx * projectionViewMatrix.m02() + fy * projectionViewMatrix.m13() + fz * projectionViewMatrix.m22() + projectionViewMatrix.m32();
+            float newZ = fx * projectionViewMatrix.m02() + fy * projectionViewMatrix.m12() + fz * projectionViewMatrix.m22() + projectionViewMatrix.m32();
             float newW = fx * projectionViewMatrix.m03() + fy * projectionViewMatrix.m13() + fz * projectionViewMatrix.m23() + projectionViewMatrix.m33();
 
             float inverseW = 1.0F / newW;
@@ -299,8 +291,8 @@ public final class Rasterizer {
             fy = (newY * inverseW * HEIGHT + HEIGHT) * 0.5F;
             fz = newZ * inverseW;
 
-            x = (int) fx;
-            y = (int) fy;
+            this.x = (int) fx;
+            this.y = (int) fy;
         }
 
         private boolean isBehindCamera() {
