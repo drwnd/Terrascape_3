@@ -18,24 +18,36 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
-    public void addData(IntArrayList indices, IntArrayList vertexCounts, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
-        cameraChunkX >>= LOD;
-        cameraChunkY >>= LOD;
-        cameraChunkZ >>= LOD;
+    public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
+        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
+        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
+        boolean notNull = !isEmpty();
+
+        addData(commands, notNull && cameraChunkZ >= modelChunkZ, NORTH);
+        addData(commands, notNull && cameraChunkY >= modelChunkY, TOP);
+        addData(commands, notNull && cameraChunkX >= modelChunkX, WEST);
+        addData(commands, notNull && cameraChunkZ <= modelChunkZ, SOUTH);
+        addData(commands, notNull && cameraChunkY <= modelChunkY, BOTTOM);
+        addData(commands, notNull && cameraChunkX <= modelChunkX, EAST);
+    }
+
+    public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+        if (isEmpty()) return;
         int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
         int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
         int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
 
-        if (cameraChunkX >= modelChunkX) addData(indices, vertexCounts, WEST);
-        if (cameraChunkX <= modelChunkX) addData(indices, vertexCounts, EAST);
-        if (cameraChunkY >= modelChunkY) addData(indices, vertexCounts, TOP);
-        if (cameraChunkY <= modelChunkY) addData(indices, vertexCounts, BOTTOM);
-        if (cameraChunkZ >= modelChunkZ) addData(indices, vertexCounts, NORTH);
-        if (cameraChunkZ <= modelChunkZ) addData(indices, vertexCounts, SOUTH);
+        if (cameraChunkZ >= modelChunkZ) addData(commands, NORTH);
+        if (cameraChunkY >= modelChunkY) addData(commands, TOP);
+        if (cameraChunkX >= modelChunkX) addData(commands, WEST);
+        if (cameraChunkZ <= modelChunkZ) addData(commands, SOUTH);
+        if (cameraChunkY <= modelChunkY) addData(commands, BOTTOM);
+        if (cameraChunkX <= modelChunkX) addData(commands, EAST);
     }
 
     public boolean isEmpty() {
-        return vertexCounts == null;
+        return vertexCounts == null || indices == null;
     }
 
     public void delete() {
@@ -55,9 +67,18 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
 
-    private void addData(IntArrayList indices, IntArrayList vertexCounts, int side) {
-        indices.add(this.indices[side]);
-        vertexCounts.add(this.vertexCounts[side]);
+    private void addData(IntArrayList commands, boolean isVisible, int side) {
+        commands.add(isVisible ? vertexCounts[side] : 0);
+        commands.add(0);
+        commands.add(isVisible ? indices[side] : 0);
+        commands.add(0);
+    }
+
+    private void addData(IntArrayList commands, int side) {
+        commands.add(vertexCounts[side]);
+        commands.add(1);
+        commands.add(indices[side]);
+        commands.add(0);
     }
 
     private static int[] getIndices(int[] vertexCounts, int bufferOrStart, boolean isBuffer) {

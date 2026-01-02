@@ -2,20 +2,20 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
+import core.assets.Texture;
+import core.renderables.Renderable;
+import core.renderables.UiElement;
 import core.rendering_api.Input;
+import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
 import core.rendering_api.shaders.TextShader;
-import core.rendering_api.Window;
 import core.settings.FloatSetting;
 import core.settings.KeySetting;
 import core.settings.OptionSetting;
-import core.settings.optionSettings.FontOption;
 import core.settings.ToggleSetting;
-import core.renderables.Renderable;
-import core.renderables.UiElement;
+import core.settings.optionSettings.FontOption;
 
-import core.utils.IntArrayList;
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
@@ -27,6 +27,7 @@ import game.player.interaction.CuboidPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.Target;
 import game.server.ChatMessage;
+import game.server.Chunk;
 import game.server.Game;
 import game.server.Server;
 import game.utils.Position;
@@ -62,7 +63,6 @@ public final class Renderer extends Renderable {
 
         createTextures(Window.getWidth(), Window.getHeight());
         createFrameBuffers();
-        GLFW.glfwSwapInterval(vSync ? 1 : 0);
     }
 
     public void toggleDebugScreen() {
@@ -71,10 +71,6 @@ public final class Renderer extends Renderable {
 
     public ArrayList<Long> getFrameTimes() {
         return frameTimes;
-    }
-
-    public long getFrameTime() {
-        return frameTime;
     }
 
     public static float getRenderTime() {
@@ -150,14 +146,11 @@ public final class Renderer extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        long frameStart = System.nanoTime();
-
         Camera camera = player.getCamera();
         player.updateFrame();
-        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player);
-
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
+        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
 
         setupRenderState();
 
@@ -168,7 +161,7 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix);
 
-        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value() && FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value() >= 1) {
+        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value()) {
             GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, ssaoFramebuffer);
             GL46.glClear(GL46.GL_COLOR_BUFFER_BIT);
             GL46.glDisable(GL46.GL_STENCIL_TEST);
@@ -193,10 +186,12 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
+        renderOccluders(cameraPosition, projectionViewMatrix);
+        renderOccludees(cameraPosition, projectionViewMatrix);
+        renderOccluderDepthMap();
+
         renderChat();
         renderDebugInfo();
-
-        frameTime = (long) ((System.nanoTime() - frameStart) * 0.025 + frameTime * 0.975);
     }
 
     @Override
@@ -224,6 +219,7 @@ public final class Renderer extends Renderable {
     public void deleteSelf() {
         deleteFrameBuffers();
         deleteTextures();
+        renderingOptimizer.cleanUp();
     }
 
 
@@ -310,7 +306,6 @@ public final class Renderer extends Renderable {
     }
 
     private static void renderSkybox(Camera camera) {
-        GL46.glDisable(GL46.GL_BLEND);
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
@@ -331,6 +326,7 @@ public final class Renderer extends Renderable {
         GL46.glDepthMask(false);
         GL46.glEnable(GL46.GL_DEPTH_TEST);
         GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_BLEND);
 
         GL46.glDrawElements(GL46.GL_TRIANGLES, SKY_BOX_INDICES.length, GL46.GL_UNSIGNED_INT, 0);
 
@@ -340,34 +336,22 @@ public final class Renderer extends Renderable {
     private void renderOpaqueGeometry(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedOpaqueModels = 0;
 
-        int cameraChunkX = cameraPosition.intX >> CHUNK_SIZE_BITS;
-        int cameraChunkY = cameraPosition.intY >> CHUNK_SIZE_BITS;
-        int cameraChunkZ = cameraPosition.intZ >> CHUNK_SIZE_BITS;
-
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getOpaqueIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getOpaqueLodStart(lod);
+            int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
+            renderedOpaqueModels += drawCount / 6;
 
-            for (OpaqueModel model : player.getMeshCollector().getOpaqueModels(lod)) {
-                if (isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-                model.addData(indices, vertexCounts, cameraChunkX, cameraChunkY, cameraChunkZ);
-                renderedOpaqueModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -402,7 +386,6 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
-        shader.setUniform("samples", (int) FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value());
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthTexture);
@@ -440,28 +423,17 @@ public final class Renderer extends Renderable {
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("flags", getFlags(cameraPosition));
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getWaterIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getWaterLodStart(lod);
+            int drawCount = renderingOptimizer.getWaterLodDrawCount(lod);
+            renderedWaterModels += drawCount;
 
-            for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isWaterEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-
-                indices.add(model.index());
-                vertexCounts.add(model.waterVertexCount());
-
-                renderedWaterModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -471,27 +443,17 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.GLASS);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+        GL46.glBindBuffer(GL46.GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getGlassIndirectBuffer());
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
-            long[] lodVisibilityBits = renderingOptimizer.getVisibilityBits()[lod];
             shader.setUniform("lodSize", 1 << lod);
 
-            indices.clear();
-            vertexCounts.clear();
+            long start = renderingOptimizer.getGlassLodStart(lod);
+            int drawCount = renderingOptimizer.getGlassLodDrawCount(lod);
+            renderedGlassModels += drawCount;
 
-            for (TransparentModel model : player.getMeshCollector().getTransparentModels(lod)) {
-                if (model.isGlassEmpty() || isInvisible(model.chunkX(), model.chunkY(), model.chunkZ(), lod, lodVisibilityBits)) continue;
-
-                indices.add(model.index() + model.waterVertexCount());
-                vertexCounts.add(model.glassVertexCount());
-                renderedGlassModels++;
-            }
-
-            indices.fillWith0AfterEnd();
-            vertexCounts.fillWith0AfterEnd();
-
-            GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, indices.getData(), vertexCounts.getData());
+            GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
     }
 
@@ -563,7 +525,6 @@ public final class Renderer extends Renderable {
         float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
         float chatMessageDuration = FloatSetting.CHAT_MESSAGE_DURATION.value();
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
-        float scroll = chatTextField == null ? 0 : chatTextField.getInput().getScroll();
 
         int lineCount = 0;
         ArrayList<ChatMessage> messages = this.messages;
@@ -577,13 +538,13 @@ public final class Renderer extends Renderable {
             String prefix = chatMessage.prefix();
             float prefixSize = TextShader.getTextLength(prefix, defaultTextSize.x, false);
 
-            position.set(0.0F, (lineCount + messageLines - 1) * lineSeparation + chatHeight - scroll);
+            position.set(0.0F, (lineCount + messageLines - 1) * lineSeparation + chatHeight);
             shader.drawText(position, prefix, color, true, false);
 
             lineCount += messageLines;
             for (String line : chatMessage.lines()) {
                 lineCount--;
-                position.set(prefixSize, lineCount * lineSeparation + chatHeight - scroll);
+                position.set(prefixSize, lineCount * lineSeparation + chatHeight);
                 if (position.y >= 1.0F) return;
                 shader.drawText(position, line, color, true, false);
             }
@@ -596,9 +557,82 @@ public final class Renderer extends Renderable {
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
-    private static boolean isInvisible(int chunkX, int chunkY, int chunkZ, int lod, long[] visibilityBits) {
-        int index = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        return (visibilityBits[index >> 6] & 1L << index) == 0;
+    private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        if (!ToggleSetting.RENDER_OCCLUDERS.value()) return;
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
+        MeshCollector meshCollector = player.getMeshCollector();
+
+        for (Chunk chunk : Game.getWorld().getLod(0)) {
+            if (chunk == null || !meshCollector.neighborHasModel(chunk.X, chunk.Y, chunk.Z, 0)) continue;
+
+            AABB occluder = meshCollector.getOccluder(chunk.INDEX, chunk.LOD);
+            if (occluder == null) continue;
+            renderVolume(shader, chunk, occluder);
+        }
+    }
+
+    private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        if (!ToggleSetting.RENDER_OCCLUDEES.value()) return;
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
+        MeshCollector meshCollector = player.getMeshCollector();
+
+        for (Chunk chunk : Game.getWorld().getLod(0)) {
+            if (chunk == null) continue;
+            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
+            if (opaqueModel == null || opaqueModel.isEmpty()) continue;
+
+            AABB occludee = meshCollector.getOccludee(chunk.INDEX, chunk.LOD);
+            if (occludee == null) continue;
+            renderVolume(shader, chunk, occludee);
+        }
+    }
+
+    private void renderOccluderDepthMap() {
+        if (!ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) return;
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+        shader.bind();
+        shader.flipNextDrawVertically();
+        GL46.glDisable(GL46.GL_BLEND);
+        Texture texture = new Texture(renderingOptimizer.depthTexture);
+        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), texture);
+    }
+
+    private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
+        if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
+
+        int x = chunk.X << CHUNK_SIZE_BITS;
+        int y = chunk.Y << CHUNK_SIZE_BITS;
+        int z = chunk.Z << CHUNK_SIZE_BITS;
+
+        shader.setUniform("minPosition", x + aabb.minX, y + aabb.minY, z + aabb.minZ);
+        shader.setUniform("maxPosition", x + aabb.maxX, y + aabb.maxY, z + aabb.maxZ);
+
+        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, 36);
+    }
+
+    private static void setUpVolumeRendering(Position cameraPositon, Matrix4f projectionViewMatrix, Shader shader) {
+        GL46.glDisable(GL46.GL_DEPTH_TEST);
+        GL46.glDisable(GL46.GL_CULL_FACE);
+        GL46.glDisable(GL46.GL_STENCIL_TEST);
+        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
+        GL46.glEnable(GL46.GL_BLEND);
+        GL46.glDepthMask(false);
+        GL46.glActiveTexture(GL46.GL_TEXTURE0);
+        GL46.glBindTexture(GL46.GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+
+        shader.setUniform("iCameraPosition",
+                cameraPositon.intX & ~CHUNK_SIZE_MASK,
+                cameraPositon.intY & ~CHUNK_SIZE_MASK,
+                cameraPositon.intZ & ~CHUNK_SIZE_MASK);
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("material", 0);
+        shader.setUniform("textures", 0);
     }
 
     private static int getFlags(Position cameraPosition) {
@@ -619,16 +653,13 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private long frameTime;
-    private boolean debugScreenOpen = false, vSync;
+    private boolean debugScreenOpen = false, vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
     private final RenderingOptimizer renderingOptimizer = new RenderingOptimizer();
     private final Player player;
-    private final IntArrayList indices = new IntArrayList(500);
-    private final IntArrayList vertexCounts = new IntArrayList(500);
 
     private int framebuffer, ssaoFramebuffer;
     private int colorTexture, depthTexture, ssaoTexture, noiseTexture, sideTexture;

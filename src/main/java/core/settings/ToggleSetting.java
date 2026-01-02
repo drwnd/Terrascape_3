@@ -11,7 +11,11 @@ public enum ToggleSetting {
     SHOW_SPLASH_PARTICLES(true),
     X_RAY(false),
     V_SYNC(true),
-    FAKE_COORDINATES(true);
+    FAKE_COORDINATES(true),
+    RENDER_OCCLUDERS(false),
+    RENDER_OCCLUDEES(false),
+    RENDER_OCCLUDER_DEPTH_MAP(false),
+    USE_OCCLUSION_CULLING(true);
 
     public static void setIfPresent(String name, String value) {
         try {

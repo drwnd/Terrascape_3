@@ -70,6 +70,7 @@ public final class Window {
 
         GLFW.glfwMakeContextCurrent(window);
         GLFW.glfwShowWindow(window);
+        GLFW.glfwSwapInterval(1);
     }
 
     public static void renderLoop() {

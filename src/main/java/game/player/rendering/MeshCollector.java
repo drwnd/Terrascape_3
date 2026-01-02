@@ -13,13 +13,6 @@ import static game.utils.Constants.*;
 
 public final class MeshCollector {
 
-    public MeshCollector() {
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            filledOpaqueModels[lod] = new ArrayList<>();
-            filledTransparentModels[lod] = new ArrayList<>();
-        }
-    }
-
     public void uploadAllMeshes() {
         Vector3i playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (meshQueue) {
@@ -38,17 +31,11 @@ public final class MeshCollector {
 
     public void deleteOldMeshes() {
         synchronized (toDeleteOpaqueModels) {
-            for (OpaqueModel model : toDeleteOpaqueModels) {
-                allocator.memFree(model.bufferOrStart());
-                filledOpaqueModels[model.LOD()].remove(model);
-            }
+            for (OpaqueModel model : toDeleteOpaqueModels) allocator.memFree(model.bufferOrStart());
             toDeleteOpaqueModels.clear();
         }
         synchronized (toDeleteTransparentModels) {
-            for (TransparentModel model : toDeleteTransparentModels) {
-                allocator.memFree(model.bufferOrStart());
-                filledTransparentModels[model.LOD()].remove(model);
-            }
+            for (TransparentModel model : toDeleteTransparentModels) allocator.memFree(model.bufferOrStart());
             toDeleteTransparentModels.clear();
         }
     }
@@ -66,14 +53,6 @@ public final class MeshCollector {
     public void setMeshed(boolean meshed, int chunkIndex, int lod) {
         if (meshed) isMeshed[lod][chunkIndex >> 6] |= 1L << chunkIndex;
         else isMeshed[lod][chunkIndex >> 6] &= ~(1L << chunkIndex);
-    }
-
-    public ArrayList<OpaqueModel> getOpaqueModels(int lod) {
-        return filledOpaqueModels[lod];
-    }
-
-    public ArrayList<TransparentModel> getTransparentModels(int lod) {
-        return filledTransparentModels[lod];
     }
 
     public void removeMesh(int chunkIndex, int lod) {
@@ -103,6 +82,14 @@ public final class MeshCollector {
         return transparentModels[lod][chunkIndex];
     }
 
+    public AABB getOccluder(int chunkIndex, int lod) {
+        return occluders[lod][chunkIndex];
+    }
+
+    public AABB getOccludee(int chunkIndex, int lod) {
+        return occludees[lod][chunkIndex];
+    }
+
     public boolean isModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
@@ -127,19 +114,24 @@ public final class MeshCollector {
             Arrays.fill(opaqueModels[lod], null);
             Arrays.fill(transparentModels[lod], null);
 
-            filledOpaqueModels[lod].clear();
-            filledTransparentModels[lod].clear();
-
             Arrays.fill(isMeshed[lod], 0L);
         }
+    }
+
+    public boolean neighborHasModel(int chunkX, int chunkY, int chunkZ, int lod) {
+        OpaqueModel model;
+        return (model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, lod), lod)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, lod), lod)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, lod), lod)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, lod), lod)) != null && !model.isEmpty()
+                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, lod), lod)) != null && !model.isEmpty();
     }
 
 
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
-        filledOpaqueModels[lod].remove(opaqueModel);
-        filledTransparentModels[lod].remove(transparentModel);
 
         setOpaqueModel(null, chunkIndex, lod);
         setTransparentModel(null, chunkIndex, lod);
@@ -151,12 +143,10 @@ public final class MeshCollector {
 
     private void setOpaqueModel(OpaqueModel model, int index, int lod) {
         opaqueModels[lod][index] = model;
-        if (model != null && !model.isEmpty()) filledOpaqueModels[lod].add(model);
     }
 
     private void setTransparentModel(TransparentModel model, int index, int lod) {
         transparentModels[lod][index] = model;
-        if (model != null && !model.isEmpty()) filledTransparentModels[lod].add(model);
     }
 
     private void upload(Mesh mesh) {
@@ -169,6 +159,9 @@ public final class MeshCollector {
         TransparentModel transparentModel = loadTransparentModel(mesh);
         setTransparentModel(transparentModel, chunkIndex, mesh.lod());
         setMeshed(true, chunkIndex, mesh.lod());
+
+        occluders[mesh.lod()][chunkIndex] = mesh.occluder();
+        occludees[mesh.lod()][chunkIndex] = mesh.occludee();
     }
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
@@ -192,12 +185,9 @@ public final class MeshCollector {
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
-    private final ArrayList<OpaqueModel>[] filledOpaqueModels = new ArrayList[LOD_COUNT];
-    @SuppressWarnings("unchecked")
-    private final ArrayList<TransparentModel>[] filledTransparentModels = new ArrayList[LOD_COUNT];
-
-    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_HEIGHT * RENDERED_WORLD_WIDTH];
-    private final long[][] isMeshed = new long[LOD_COUNT][opaqueModels[0].length / 64 + 1];
+    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][CHUNKS_PER_LOD];
+    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][CHUNKS_PER_LOD];
+    private final AABB[][] occluders = new AABB[LOD_COUNT][CHUNKS_PER_LOD];
+    private final AABB[][] occludees = new AABB[LOD_COUNT][CHUNKS_PER_LOD];
+    private final long[][] isMeshed = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
 }

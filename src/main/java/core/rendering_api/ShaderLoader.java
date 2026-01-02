@@ -28,6 +28,8 @@ public final class ShaderLoader {
             case Shaders.OPAQUE_PARTICLE -> new Shader("assets/shaders/Particle.vert", "assets/shaders/Opaque.frag", identifier);
             case Shaders.TRANSPARENT_PARTICLE -> new Shader("assets/shaders/Particle.vert", "assets/shaders/Glass.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new Shader("assets/shaders/VolumeIndicator.vert", "assets/shaders/VolumeIndicator.frag", identifier);
+            case Shaders.AABB -> new Shader("assets/shaders/AABB.vert", "assets/shaders/Null.frag", identifier);
+            case Shaders.OCCLUSION_CULLING -> new Shader("assets/shaders/AABB.vert", "assets/shaders/OcclusionCulling.frag", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }
