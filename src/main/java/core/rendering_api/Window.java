@@ -76,10 +76,15 @@ public final class Window {
     public static void renderLoop() {
         while (!GLFW.glfwWindowShouldClose(window)) {
             try {
+                long start = System.nanoTime();
+
                 GL46.glViewport(0, 0, width, height);
                 GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_STENCIL_BUFFER_BIT);
                 Renderable renderable = renderablesStack.getLast();
                 renderable.render(new Vector2f(0.0F, 0.0F), new Vector2f(1.0F, 1.0F));
+
+                frameTime = (long) (frameTime * 0.975 + (System.nanoTime() - start) * 0.025);
+
                 GLFW.glfwSwapBuffers(window);
                 GLFW.glfwPollEvents();
 
@@ -137,6 +142,10 @@ public final class Window {
         return window;
     }
 
+    public static long getCPUFrameTime() {
+        return frameTime;
+    }
+
     public static void pushRenderable(Renderable element) {
         renderablesStack.add(element);
         element.setOnTop();
@@ -179,6 +188,7 @@ public final class Window {
         });
     }
 
+
     public static void setCrashCallback(CrashCallback crashCallback) {
         Window.crashCallback = crashCallback;
     }
@@ -207,6 +217,7 @@ public final class Window {
     private static int width, height;
     private static long window;
     private static boolean maximized;
+    private static long frameTime = 0L;
 
     private static Input input = standardInput;
     private static CrashCallback crashCallback = _ -> CrashAction.PRINT;

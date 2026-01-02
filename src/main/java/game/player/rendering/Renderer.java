@@ -386,6 +386,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
+        shader.setUniform("samples", (int) FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value());
 
         GL46.glActiveTexture(GL46.GL_TEXTURE0);
         GL46.glBindTexture(GL46.GL_TEXTURE_2D, depthTexture);
@@ -599,7 +600,7 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.flipNextDrawVertically();
         GL46.glDisable(GL46.GL_BLEND);
-        Texture texture = new Texture(renderingOptimizer.depthTexture);
+        Texture texture = new Texture(renderingOptimizer.getDepthTexture());
         shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), texture);
     }
 

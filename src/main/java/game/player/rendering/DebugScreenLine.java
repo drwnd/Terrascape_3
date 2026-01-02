@@ -2,6 +2,7 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
+import core.rendering_api.Window;
 import core.settings.OptionSetting;
 import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
@@ -57,7 +58,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         lines.add(new DebugScreenLine(OptionSetting.FPS_VISIBILITY, OptionSetting.FPS_COLOR, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
-            long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE, frameTime = Game.getPlayer().getRenderer().getFrameTime();
+            long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE, frameTime = Window.getCPUFrameTime();
             for (int index = 0; index < frameTimes.size() - 1; index++) {
                 maxFrameTime = Math.max(maxFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
                 minFrameTime = Math.min(minFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));

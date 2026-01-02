@@ -120,6 +120,10 @@ public final class RenderingOptimizer {
         return glassIndirectBuffer;
     }
 
+    public int getDepthTexture() {
+        return depthTexture;
+    }
+
     public void cleanUp() {
         GL46.glDeleteBuffers(opaqueIndirectBuffer);
         GL46.glDeleteBuffers(waterIndirectBuffer);
@@ -337,7 +341,7 @@ public final class RenderingOptimizer {
                     transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
                 }
 
-        lodDrawCounts[lod * 3 + 0] =  opaqueCommands.size() / 4 - oldOpaqueDrawCount;
+        lodDrawCounts[lod * 3 + 0] = opaqueCommands.size() / 4 - oldOpaqueDrawCount;
         lodDrawCounts[lod * 3 + 1] = waterCommands.size() / 4 - oldWaterDrawCount;
         lodDrawCounts[lod * 3 + 2] = glassCommands.size() / 4 - oldGlassDrawCount;
     }
@@ -433,7 +437,7 @@ public final class RenderingOptimizer {
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
-    public final int framebuffer, depthTexture; // TODO make private
+    private final int framebuffer, depthTexture;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
     private final long[] lodStarts = new long[LOD_COUNT * 3];
