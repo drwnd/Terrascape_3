@@ -1,12 +1,13 @@
 #version 460 core
 
 flat in int instanceID;
+layout(early_fragment_tests) in;
 
 struct IndirectCommand {
-    uint count;
-    uint instanceCount;
-    uint first;
-    uint baseInstance;
+uint count;
+uint instanceCount;
+uint first;
+uint baseInstance;
 };
 
 layout (std430, binding = 1) restrict writeonly buffer opaqueIndirectBuffer {

@@ -3,6 +3,7 @@ package game.player.rendering;
 import core.assets.AssetManager;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
+import core.settings.ToggleSetting;
 import core.utils.IntArrayList;
 
 import game.assets.Shaders;
@@ -78,38 +79,33 @@ public final class RenderingOptimizer {
         opaqueCommands.clear();
         waterCommands.clear();
         glassCommands.clear();
-        aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommands(lod);
-        int occludeeCount = aabbs.size() / AABB_INT_SIZE;
-
-        GL46.glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
-        GL46.glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
-        GL46.glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
-        GL46.glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
-
-        aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluderBuffer(lod);
-        GL46.glNamedBufferSubData(occluderBuffer, 0, aabbs.toArray());
-        int occluderCount = aabbs.size() / AABB_INT_SIZE;
-
-        renderOccluders(cameraPosition, projectionViewMatrix, occluderCount);
-        renderOccludees(cameraPosition, projectionViewMatrix, occludeeCount);
+        if (ToggleSetting.USE_OCCLUSION_CULLING.value())
+            generateIndirectCommandsWithOcclusionCulling(cameraPosition, projectionViewMatrix);
+        else generateIndirectCommandsWithoutOcclusionCulling();
     }
 
     public long getOpaqueLodStart(int lod) {
-        return lodStarts[lod * 2];
+        return lodStarts[lod * 3];
     }
 
     public int getOpaqueLodDrawCount(int lod) {
-        return lodDrawCounts[lod * 2];
+        return lodDrawCounts[lod * 3];
     }
 
-    public long getTransparentLodStart(int lod) {
-        return lodStarts[lod * 2 + 1];
+    public long getWaterLodStart(int lod) {
+        return lodStarts[lod * 3 + 1];
     }
 
-    public int getTransparentLodDrawCount(int lod) {
-        return lodDrawCounts[lod * 2 + 1];
+    public int getWaterLodDrawCount(int lod) {
+        return lodDrawCounts[lod * 3 + 1];
+    }
+
+    public long getGlassLodStart(int lod) {
+        return lodStarts[lod * 3 + 2];
+    }
+
+    public int getGlassLodDrawCount(int lod) {
+        return lodDrawCounts[lod * 3 + 2];
     }
 
     public int getOpaqueIndirectBuffer() {
@@ -134,6 +130,33 @@ public final class RenderingOptimizer {
         GL46.glDeleteFramebuffers(framebuffer);
     }
 
+
+    private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
+        aabbs.clear();
+        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithOcclusionCulling(lod);
+        int occludeeCount = aabbs.size() / AABB_INT_SIZE;
+
+        GL46.glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
+        GL46.glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
+        GL46.glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
+        GL46.glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
+
+        aabbs.clear();
+        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluderBuffer(lod);
+        GL46.glNamedBufferSubData(occluderBuffer, 0, aabbs.toArray());
+        int occluderCount = aabbs.size() / AABB_INT_SIZE;
+
+        renderOccluders(cameraPosition, projectionViewMatrix, occluderCount);
+        renderOccludees(cameraPosition, projectionViewMatrix, occludeeCount);
+    }
+
+    private void generateIndirectCommandsWithoutOcclusionCulling() {
+        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
+
+        GL46.glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
+        GL46.glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
+        GL46.glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
+    }
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection, long[][] visibilityBits) {
         int chunkX = cameraChunkX >> lod;
@@ -191,17 +214,7 @@ public final class RenderingOptimizer {
 
     private void removeLodVisibilityOverlap(int lod) {
         lodVisibilityBits = visibilityBits[lod];
-        int lodCameraChunkX = cameraChunkX >> lod;
-        int lodCameraChunkY = cameraChunkY >> lod;
-        int lodCameraChunkZ = cameraChunkZ >> lod;
-
-        int endX = Utils.makeOdd(lodCameraChunkX + RENDER_DISTANCE_XZ + 2);
-        int endY = Utils.makeOdd(lodCameraChunkY + RENDER_DISTANCE_Y + 2);
-        int endZ = Utils.makeOdd(lodCameraChunkZ + RENDER_DISTANCE_XZ + 2);
-
-        int startX = Utils.makeEven(lodCameraChunkX - RENDER_DISTANCE_XZ - 2);
-        int startY = Utils.makeEven(lodCameraChunkY - RENDER_DISTANCE_Y - 2);
-        int startZ = Utils.makeEven(lodCameraChunkZ - RENDER_DISTANCE_XZ - 2);
+        computeStartEnd(lod);
 
         for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
             for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
@@ -261,23 +274,17 @@ public final class RenderingOptimizer {
         visibilityBits[index >> 6] &= ~(3L << index);
     }
 
-    private void generateIndirectCommands(int lod) {
+    private void generateIndirectCommandsWithOcclusionCulling(int lod) {
         int drawCount = 0;
-        lodStarts[lod * 2 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
-        lodStarts[lod * 2 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
         lodVisibilityBits = visibilityBits[lod];
+        computeStartEnd(lod);
         int lodCameraChunkX = cameraChunkX >> lod;
         int lodCameraChunkY = cameraChunkY >> lod;
         int lodCameraChunkZ = cameraChunkZ >> lod;
-
-        int endX = Utils.makeOdd(lodCameraChunkX + RENDER_DISTANCE_XZ + 2);
-        int endY = Utils.makeOdd(lodCameraChunkY + RENDER_DISTANCE_Y + 2);
-        int endZ = Utils.makeOdd(lodCameraChunkZ + RENDER_DISTANCE_XZ + 2);
-
-        int startX = Utils.makeEven(lodCameraChunkX - RENDER_DISTANCE_XZ - 2);
-        int startY = Utils.makeEven(lodCameraChunkY - RENDER_DISTANCE_Y - 2);
-        int startZ = Utils.makeEven(lodCameraChunkZ - RENDER_DISTANCE_XZ - 2);
 
         for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
             for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
@@ -293,28 +300,51 @@ public final class RenderingOptimizer {
                     if (opaqueModel.isEmpty() && transparentModel.isEmpty()) continue;
 
                     drawCount++;
-                    opaqueModel.addData(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
-                    transparentModel.addData(waterCommands, glassCommands);
+                    opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                    transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
                     occludee.addData(aabbs, lodModelX, lodModelY, lodModelZ, lod);
                 }
-        lodDrawCounts[lod * 2 + 0] = drawCount * 6;
-        lodDrawCounts[lod * 2 + 1] = drawCount;
+        lodDrawCounts[lod * 3 + 0] = drawCount * 6;
+        lodDrawCounts[lod * 3 + 1] = drawCount;
+        lodDrawCounts[lod * 3 + 2] = drawCount;
     }
 
-    private void populateOccluderBuffer(int lod) {
-        lodVisibilityBits = visibilityBits[lod];
+    private void generateIndirectCommandsWithoutOcclusionCulling(int lod) {
+        int oldOpaqueDrawCount = opaqueCommands.size() / 4;
+        int oldWaterDrawCount = waterCommands.size() / 4;
+        int oldGlassDrawCount = glassCommands.size() / 4;
+        lodStarts[lod * 3 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
+        lodVisibilityBits = visibilityBits[lod];
+        computeStartEnd(lod);
         int lodCameraChunkX = cameraChunkX >> lod;
         int lodCameraChunkY = cameraChunkY >> lod;
         int lodCameraChunkZ = cameraChunkZ >> lod;
 
-        int endX = Utils.makeOdd(lodCameraChunkX + RENDER_DISTANCE_XZ + 2);
-        int endY = Utils.makeOdd(lodCameraChunkY + RENDER_DISTANCE_Y + 2);
-        int endZ = Utils.makeOdd(lodCameraChunkZ + RENDER_DISTANCE_XZ + 2);
+        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
+            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
+                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
+                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
+                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
 
-        int startX = Utils.makeEven(lodCameraChunkX - RENDER_DISTANCE_XZ - 2);
-        int startY = Utils.makeEven(lodCameraChunkY - RENDER_DISTANCE_Y - 2);
-        int startZ = Utils.makeEven(lodCameraChunkZ - RENDER_DISTANCE_XZ - 2);
+                    OpaqueModel opaqueModel = meshCollector.getOpaqueModel(index, lod);
+                    TransparentModel transparentModel = meshCollector.getTransparentModel(index, lod);
+                    if (opaqueModel == null || transparentModel == null) continue;
+
+                    opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                    transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
+                }
+
+        lodDrawCounts[lod * 3 + 0] =  opaqueCommands.size() / 4 - oldOpaqueDrawCount;
+        lodDrawCounts[lod * 3 + 1] = waterCommands.size() / 4 - oldWaterDrawCount;
+        lodDrawCounts[lod * 3 + 2] = glassCommands.size() / 4 - oldGlassDrawCount;
+    }
+
+    private void populateOccluderBuffer(int lod) {
+        lodVisibilityBits = visibilityBits[lod];
+        computeStartEnd(lod);
 
         for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
             for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
@@ -363,8 +393,7 @@ public final class RenderingOptimizer {
                 cameraPosition.intY & ~CHUNK_SIZE_MASK,
                 cameraPosition.intZ & ~CHUNK_SIZE_MASK);
 
-        GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDepthFunc(GL46.GL_NEVER);
+        GL46.glDepthFunc(GL46.GL_LEQUAL);
         GL46.glDepthMask(false);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
         GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
@@ -381,19 +410,34 @@ public final class RenderingOptimizer {
         GL46.glDepthFunc(GL46.GL_LESS);
     }
 
+    private void computeStartEnd(int lod) {
+        int lodCameraChunkX = cameraChunkX >> lod;
+        int lodCameraChunkY = cameraChunkY >> lod;
+        int lodCameraChunkZ = cameraChunkZ >> lod;
+
+        startX = Utils.makeEven(lodCameraChunkX - RENDER_DISTANCE_XZ - 2);
+        startY = Utils.makeEven(lodCameraChunkY - RENDER_DISTANCE_Y - 2);
+        startZ = Utils.makeEven(lodCameraChunkZ - RENDER_DISTANCE_XZ - 2);
+
+        endX = Utils.makeOdd(lodCameraChunkX + RENDER_DISTANCE_XZ + 2);
+        endY = Utils.makeOdd(lodCameraChunkY + RENDER_DISTANCE_Y + 2);
+        endZ = Utils.makeOdd(lodCameraChunkZ + RENDER_DISTANCE_XZ + 2);
+    }
+
 
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
     private int cameraChunkX, cameraChunkY, cameraChunkZ;
     private int cameraX, cameraY, cameraZ;
+    private int startX, endX, startY, endY, startZ, endZ;
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
     public final int framebuffer, depthTexture; // TODO make private
 
     private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
-    private final long[] lodStarts = new long[LOD_COUNT * 2];
-    private final int[] lodDrawCounts = new int[LOD_COUNT * 2];
+    private final long[] lodStarts = new long[LOD_COUNT * 3];
+    private final int[] lodDrawCounts = new int[LOD_COUNT * 3];
 
     private final IntArrayList opaqueCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 256);
     private final IntArrayList waterCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);

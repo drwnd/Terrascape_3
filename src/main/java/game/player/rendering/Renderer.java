@@ -429,8 +429,8 @@ public final class Renderer extends Renderable {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
 
-            long start = renderingOptimizer.getTransparentLodStart(lod);
-            int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
+            long start = renderingOptimizer.getWaterLodStart(lod);
+            int drawCount = renderingOptimizer.getWaterLodDrawCount(lod);
             renderedWaterModels += drawCount;
 
             GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
@@ -449,8 +449,8 @@ public final class Renderer extends Renderable {
             GL46.glStencilFunc(GL46.GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
 
-            long start = renderingOptimizer.getTransparentLodStart(lod);
-            int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
+            long start = renderingOptimizer.getGlassLodStart(lod);
+            int drawCount = renderingOptimizer.getGlassLodDrawCount(lod);
             renderedGlassModels += drawCount;
 
             GL46.glMultiDrawArraysIndirect(GL46.GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);

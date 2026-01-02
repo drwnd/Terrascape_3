@@ -14,7 +14,7 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
                 (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX);
     }
 
-    public void addData(IntArrayList waterCommands, IntArrayList glassCommands) {
+    public void addDataWithOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {
         waterCommands.add(isWaterEmpty() ? 0 : waterVertexCount);
         waterCommands.add(0);
         waterCommands.add(isWaterEmpty() ? 0 : index);
@@ -24,6 +24,22 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
         glassCommands.add(0);
         glassCommands.add(isGlassEmpty() ? 0 : index + waterVertexCount);
         glassCommands.add(0);
+    }
+
+    public void addDataWithoutOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {
+        if (!isWaterEmpty()) {
+            waterCommands.add(waterVertexCount);
+            waterCommands.add(1);
+            waterCommands.add(index);
+            waterCommands.add(0);
+        }
+
+        if (!isGlassEmpty()) {
+            glassCommands.add(glassVertexCount);
+            glassCommands.add(1);
+            glassCommands.add(index + waterVertexCount);
+            glassCommands.add(0);
+        }
     }
 
     public boolean isWaterEmpty() {
