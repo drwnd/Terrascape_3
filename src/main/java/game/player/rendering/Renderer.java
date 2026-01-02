@@ -177,8 +177,6 @@ public final class Renderer extends Renderable {
         renderGlass(cameraPosition, projectionViewMatrix);
         renderTransparentParticles(cameraPosition, projectionViewMatrix);
         renderVolumeIndicator(cameraPosition, projectionViewMatrix);
-        renderOccluders(cameraPosition, projectionViewMatrix);
-        renderOccludees(cameraPosition, projectionViewMatrix);
 
         GL46.glDisable(GL46.GL_STENCIL_TEST);
         GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
@@ -188,12 +186,9 @@ public final class Renderer extends Renderable {
                 GL46.GL_COLOR_BUFFER_BIT, GL46.GL_NEAREST);
         GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
 
-        // TODO remove
-//        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
-//        shader.bind();
-//        shader.flipNextDrawVertically();
-//        GL46.glDisable(GL46.GL_BLEND);
-//        shader.drawQuad(new Vector2f(0), new Vector2f(1), new Texture(renderingOptimizer.depthTexture));
+        renderOccluders(cameraPosition, projectionViewMatrix);
+        renderOccludees(cameraPosition, projectionViewMatrix);
+        renderOccluderDepthMap();
 
         renderChat();
         renderDebugInfo();
@@ -596,6 +591,16 @@ public final class Renderer extends Renderable {
             if (occludee == null) continue;
             renderVolume(shader, chunk, occludee);
         }
+    }
+
+    private void renderOccluderDepthMap() {
+        if (!ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) return;
+        GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
+        shader.bind();
+        shader.flipNextDrawVertically();
+        GL46.glDisable(GL46.GL_BLEND);
+        Texture texture = new Texture(renderingOptimizer.depthTexture);
+        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), texture);
     }
 
     private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
