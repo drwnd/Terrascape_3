@@ -3,6 +3,7 @@ package game.player.rendering;
 import core.assets.AssetLoader;
 
 import core.assets.Texture;
+import core.assets.TextureArray;
 import game.server.material.MaterialIdentifier;
 import org.joml.Vector3i;
 
@@ -37,7 +38,7 @@ public final class ObjectLoader {
         return vao;
     }
 
-    public static int generateTextureArray(String texturesFilepath) {
+    public static TextureArray generateTextureArray(String texturesFilepath) {
         Texture[] textures = getTextures(texturesFilepath);
         int textureSize = 0;
         for (Texture texture : textures) textureSize = Math.max(textureSize, texture.getWidth());
@@ -57,9 +58,13 @@ public final class ObjectLoader {
                     textureArray, GL_TEXTURE_2D_ARRAY, 0, 0, 0, material,
                     texture.getWidth(), texture.getWidth(), 1);
         }
-        for (Texture texture : textures) glDeleteTextures(texture.getID());
 
-        return textureArray;
+        int[] textureSizes = new int[AMOUNT_OF_MATERIALS];
+        for (int material = 0; material < AMOUNT_OF_MATERIALS; material++)
+            textureSizes[material] = textures[material].getWidth();
+
+        for (Texture texture : textures) glDeleteTextures(texture.getID());
+        return new TextureArray(textureArray, textureSizes);
     }
 
     public static int createTexture2D(int internalFormat, int width, int height, int format, int type, int sampling) {

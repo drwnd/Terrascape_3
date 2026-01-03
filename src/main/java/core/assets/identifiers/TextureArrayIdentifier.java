@@ -1,14 +1,14 @@
 package core.assets.identifiers;
 
 import core.assets.AssetGenerator;
-import core.assets.ObjectGenerator;
 import core.assets.TextureArray;
+import core.assets.TextureArrayGenerator;
 
 public interface TextureArrayIdentifier extends AssetIdentifier<TextureArray> {
 
-    ObjectGenerator getGenerator();
+    TextureArrayGenerator getGenerator();
 
     default AssetGenerator<TextureArray> getAssetGenerator() {
-        return () -> new TextureArray(getGenerator());
+        return () -> getGenerator().generate();
     }
 }

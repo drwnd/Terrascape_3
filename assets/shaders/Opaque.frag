@@ -1,4 +1,5 @@
 #version 400 core
+#define MAX_AMOUNT_OF_MATERIALS 256
 
 flat in int textureData;
 flat in vec3 normal;
@@ -10,6 +11,9 @@ layout (location = 1) out int side;
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
 
+uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
+uniform int maxTextureSize;
+
 uniform int flags;
 uniform float nightBrightness;
 uniform float time;
@@ -19,17 +23,21 @@ uniform vec3 cameraPosition;
 const int HEAD_UNDER_WATER_BIT = 1;
 const int DO_SHADOW_MAPPING_BIT = 2;
 
-vec2 getUVOffset(int side) {
+vec2 getUVOffset(int side, int textureSize) {
+    float invTextureSize = 1.0 / textureSize;
+    vec3 textureCoordinate = fract(totalPosition * invTextureSize);
+    float normalizer = float(textureSize) / maxTextureSize;
+
     switch (side) {
-        case 0: return vec2(fract(totalPosition.x * 0.0625), 1 - fract(totalPosition.y * 0.0625));
-        case 1: return fract(totalPosition.xz * 0.0625);
-        case 2: return 1 - fract(totalPosition.zy * 0.0625);
-        case 3: return 1 - fract(totalPosition.xy * 0.0625);
-        case 4: return fract(totalPosition.xz * 0.0625);
-        case 5: return vec2(fract(totalPosition.z * 0.0625), 1 - fract(totalPosition.y * 0.0625));
+        case 0: return vec2(textureCoordinate.x, 1 - textureCoordinate.y) * normalizer;
+        case 1: return textureCoordinate.xz * normalizer;
+        case 2: return (1 - textureCoordinate.zy) * normalizer;
+        case 3: return (1 - textureCoordinate.xy) * normalizer;
+        case 4: return textureCoordinate.xz * normalizer;
+        case 5: return vec2(textureCoordinate.z, 1 - textureCoordinate.y) * normalizer;
     }
 
-    return fract(totalPosition.zx);
+    return fract(textureCoordinate.zx);
 }
 
 float easeInOutQuart(float x) {
@@ -74,7 +82,10 @@ vec3 getColor(vec3 color, vec3 textureCoord) {
 
 void main() {
     side = textureData >> 8 & 7;
-    vec3 textureCoord = vec3(getUVOffset(side), textureData & 0xFF);
+    int material = textureData & 0xFF;
+    int textureSize = textureSizes[material];
+
+    vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
     vec4 color = texture(textures, textureCoord);
     if (color.a == 0) discard;
 

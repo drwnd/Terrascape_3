@@ -3,6 +3,7 @@ package game.player.rendering;
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
 import core.assets.Texture;
+import core.assets.TextureArray;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.Input;
@@ -86,6 +87,7 @@ public final class Renderer extends Renderable {
 
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -95,6 +97,8 @@ public final class Renderer extends Renderable {
         shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
+        shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.getMaxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -102,12 +106,13 @@ public final class Renderer extends Renderable {
         glDisable(GL_BLEND);
         glDepthMask(true);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.getID());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.PROPERTIES).getID());
     }
 
     public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -116,6 +121,8 @@ public final class Renderer extends Renderable {
         shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
+        shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.getMaxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -124,14 +131,18 @@ public final class Renderer extends Renderable {
         glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.getID());
     }
 
     public static void setUpGlassRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
+        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+
         shader.setUniform("textures", 0);
+        shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.getMaxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -140,7 +151,7 @@ public final class Renderer extends Renderable {
         glDisable(GL_CULL_FACE);
         glDepthMask(false);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.getID());
     }
 
 
