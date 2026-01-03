@@ -568,7 +568,7 @@ public final class Renderer extends Renderable {
         MeshCollector meshCollector = player.getMeshCollector();
 
         for (Chunk chunk : Game.getWorld().getLod(0)) {
-            if (chunk == null || !meshCollector.neighborHasModel(chunk.X, chunk.Y, chunk.Z, 0)) continue;
+            if (chunk == null || meshCollector.isIsolated(chunk.X, chunk.Y, chunk.Z, 0)) continue;
 
             AABB occluder = meshCollector.getOccluder(chunk.INDEX, chunk.LOD);
             if (occluder == null) continue;

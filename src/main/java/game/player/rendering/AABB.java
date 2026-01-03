@@ -28,10 +28,10 @@ public final class AABB {
     }
 
 
-    public void addData(IntArrayList aabbs, int chunkX, int chunkY, int chunkZ, int lod) {
-        aabbs.add((chunkX << CHUNK_SIZE_BITS) + minX << lod);
-        aabbs.add((chunkY << CHUNK_SIZE_BITS) + minY << lod);
-        aabbs.add((chunkZ << CHUNK_SIZE_BITS) + minZ << lod);
+    public void addData(IntArrayList aabbs, int totalX, int totalY, int totalZ, int lod) {
+        aabbs.add(totalX + minX);
+        aabbs.add(totalY + minY);
+        aabbs.add(totalZ + minZ);
 
         aabbs.add(lod << 21 | Math.max(0, maxX - minX) << 14 | Math.max(0, maxY - minY) << 7 | Math.max(0, maxZ - minZ));
     }

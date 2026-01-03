@@ -118,14 +118,14 @@ public final class MeshCollector {
         }
     }
 
-    public boolean neighborHasModel(int chunkX, int chunkY, int chunkZ, int lod) {
+    public boolean isIsolated(int chunkX, int chunkY, int chunkZ, int lod) {
         OpaqueModel model;
-        return (model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, lod), lod)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, lod), lod)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, lod), lod)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, lod), lod)) != null && !model.isEmpty()
-                || (model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, lod), lod)) != null && !model.isEmpty();
+        return ((model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY - 1, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY + 1, chunkZ, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ - 1, lod), lod)) == null || model.isEmpty())
+                && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, lod), lod)) == null || model.isEmpty());
     }
 
 

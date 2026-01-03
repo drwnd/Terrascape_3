@@ -217,33 +217,33 @@ public final class RenderingOptimizer {
     }
 
     private void removeLodVisibilityOverlap(int lod) {
-        lodVisibilityBits = visibilityBits[lod];
-        computeStartEnd(lod);
+        long[] lodVisibilityBits = visibilityBits[lod];
 
-        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
-            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
-                for (int lodModelY = startY; lodModelY <= endY; lodModelY++)
-                    removeModelVisibilityOverlap(lod, lodModelX, lodModelY, lodModelZ);
-    }
+        for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
+            for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
+                 end = bitsIndex + 1 << 6; chunkIndex < end; chunkIndex++) {
 
-    private void removeModelVisibilityOverlap(int lod, int lodModelX, int lodModelY, int lodModelZ) {
-        int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-        if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) return;
+                if ((lodVisibilityBits[bitsIndex] & 1L << chunkIndex) == 0) continue;
 
-        OpaqueModel opaqueModel = meshCollector.getOpaqueModel(index, lod);
-        TransparentModel transparentModel = meshCollector.getTransparentModel(index, lod);
-        if (opaqueModel == null || transparentModel == null) {
-            lodVisibilityBits[index >> 6] &= ~(1L << index);
-            return;
-        }
+                OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
+                TransparentModel transparentModel = meshCollector.getTransparentModel(chunkIndex, lod);
+                if (opaqueModel == null || transparentModel == null) {
+                    lodVisibilityBits[bitsIndex] &= ~(1L << chunkIndex);
+                    continue;
+                }
 
-        if (lod == 0 || modelFarEnoughAway(lodModelX, lodModelY, lodModelZ, lod)) return;
+                int lodModelX = opaqueModel.chunkX();
+                int lodModelY = opaqueModel.chunkY();
+                int lodModelZ = opaqueModel.chunkZ();
 
-        int nextLodX = lodModelX << 1;
-        int nextLodY = lodModelY << 1;
-        int nextLodZ = lodModelZ << 1;
-        if (modelCubePresent(nextLodX, nextLodY, nextLodZ, lod - 1)) lodVisibilityBits[index >> 6] &= ~(1L << index);
-        else clearModelCubeVisibility(nextLodX, nextLodY, nextLodZ, lod - 1);
+                if (lod == 0 || modelFarEnoughAway(lodModelX, lodModelY, lodModelZ, lod)) continue;
+
+                int nextLodX = lodModelX << 1;
+                int nextLodY = lodModelY << 1;
+                int nextLodZ = lodModelZ << 1;
+                if (modelCubePresent(nextLodX, nextLodY, nextLodZ, lod - 1)) lodVisibilityBits[bitsIndex] &= ~(1L << chunkIndex);
+                else clearModelCubeVisibility(nextLodX, nextLodY, nextLodZ, lod - 1);
+            }
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
@@ -266,16 +266,16 @@ public final class RenderingOptimizer {
     }
 
     private void clearModelCubeVisibility(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        long[] visibilityBits = this.visibilityBits[lod];
-        int index;
-        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(3L << index);
-        index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(3L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ, lod);
-        visibilityBits[index >> 6] &= ~(3L << index);
-        index = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ + 1, lod);
-        visibilityBits[index >> 6] &= ~(3L << index);
+        long[] lodVisibilityBits = visibilityBits[lod];
+        int chunkIndex;
+        chunkIndex = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
+        lodVisibilityBits[chunkIndex >> 6] &= ~(3L << chunkIndex);
+        chunkIndex = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ + 1, lod);
+        lodVisibilityBits[chunkIndex >> 6] &= ~(3L << chunkIndex);
+        chunkIndex = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ, lod);
+        lodVisibilityBits[chunkIndex >> 6] &= ~(3L << chunkIndex);
+        chunkIndex = Utils.getChunkIndex(lodModelX + 1, lodModelY, lodModelZ + 1, lod);
+        lodVisibilityBits[chunkIndex >> 6] &= ~(3L << chunkIndex);
     }
 
     private void generateIndirectCommandsWithOcclusionCulling(int lod) {
@@ -284,30 +284,28 @@ public final class RenderingOptimizer {
         lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
-        lodVisibilityBits = visibilityBits[lod];
-        computeStartEnd(lod);
+        long[] lodVisibilityBits = visibilityBits[lod];
         int lodCameraChunkX = cameraChunkX >> lod;
         int lodCameraChunkY = cameraChunkY >> lod;
         int lodCameraChunkZ = cameraChunkZ >> lod;
 
-        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
-            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
-                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
+        for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
+            for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
+                 end = bitsIndex + 1 << 6; chunkIndex < end; chunkIndex++) {
 
-                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
+                if ((lodVisibilityBits[bitsIndex] & 1L << chunkIndex) == 0) continue;
 
-                    OpaqueModel opaqueModel = meshCollector.getOpaqueModel(index, lod);
-                    TransparentModel transparentModel = meshCollector.getTransparentModel(index, lod);
-                    AABB occludee = meshCollector.getOccludee(index, lod);
-                    if (opaqueModel == null || transparentModel == null) continue;
-                    if (opaqueModel.isEmpty() && transparentModel.isEmpty()) continue;
+                OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
+                TransparentModel transparentModel = meshCollector.getTransparentModel(chunkIndex, lod);
+                AABB occludee = meshCollector.getOccludee(chunkIndex, lod);
+                if (opaqueModel == null || transparentModel == null) continue;
+                if (opaqueModel.isEmpty() && transparentModel.isEmpty()) continue;
 
-                    drawCount++;
-                    opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
-                    transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
-                    occludee.addData(aabbs, lodModelX, lodModelY, lodModelZ, lod);
-                }
+                drawCount++;
+                opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
+                occludee.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
+            }
         lodDrawCounts[lod * 3 + 0] = drawCount * 6;
         lodDrawCounts[lod * 3 + 1] = drawCount;
         lodDrawCounts[lod * 3 + 2] = drawCount;
@@ -321,25 +319,24 @@ public final class RenderingOptimizer {
         lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
-        lodVisibilityBits = visibilityBits[lod];
-        computeStartEnd(lod);
+        long[] lodVisibilityBits = visibilityBits[lod];
         int lodCameraChunkX = cameraChunkX >> lod;
         int lodCameraChunkY = cameraChunkY >> lod;
         int lodCameraChunkZ = cameraChunkZ >> lod;
 
-        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
-            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
-                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
-                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
+        for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
+            for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
+                 end = bitsIndex + 1 << 6; chunkIndex < end; chunkIndex++) {
 
-                    OpaqueModel opaqueModel = meshCollector.getOpaqueModel(index, lod);
-                    TransparentModel transparentModel = meshCollector.getTransparentModel(index, lod);
-                    if (opaqueModel == null || transparentModel == null) continue;
+                if ((lodVisibilityBits[bitsIndex] & 1L << chunkIndex) == 0) continue;
 
-                    opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
-                    transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
-                }
+                OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
+                TransparentModel transparentModel = meshCollector.getTransparentModel(chunkIndex, lod);
+                if (opaqueModel == null || transparentModel == null) continue;
+
+                opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
+            }
 
         lodDrawCounts[lod * 3 + 0] = opaqueCommands.size() / 4 - oldOpaqueDrawCount;
         lodDrawCounts[lod * 3 + 1] = waterCommands.size() / 4 - oldWaterDrawCount;
@@ -347,19 +344,21 @@ public final class RenderingOptimizer {
     }
 
     private void populateOccluderBuffer(int lod) {
-        lodVisibilityBits = visibilityBits[lod];
-        computeStartEnd(lod);
+        long[] lodVisibilityBits = visibilityBits[lod];
 
-        for (int lodModelX = startX; lodModelX <= endX; lodModelX++)
-            for (int lodModelZ = startZ; lodModelZ <= endZ; lodModelZ++)
-                for (int lodModelY = startY; lodModelY <= endY; lodModelY++) {
-                    int index = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
-                    if ((lodVisibilityBits[index >> 6] & 1L << index) == 0) continue;
-                    if (!meshCollector.neighborHasModel(lodModelX, lodModelY, lodModelZ, lod)) continue;
+        for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
+            for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
+                 end = bitsIndex + 1 << 6; chunkIndex < end; chunkIndex++) {
 
-                    AABB occluder = meshCollector.getOccluder(index, lod);
-                    if (occluder != null) occluder.addData(aabbs, lodModelX, lodModelY, lodModelZ, lod);
-                }
+                if ((lodVisibilityBits[bitsIndex] & 1L << chunkIndex) == 0) continue;
+                OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
+                if (opaqueModel == null || opaqueModel.isEmpty()) continue;
+
+                if (meshCollector.isIsolated(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod)) continue;
+
+                AABB occluder = meshCollector.getOccluder(chunkIndex, lod);
+                if (occluder != null) occluder.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
+            }
     }
 
     private void renderOccluders(Position cameraPosition, Matrix4f projectionViewMatrix, int occluderCount) {
@@ -414,32 +413,17 @@ public final class RenderingOptimizer {
         glDepthFunc(GL_LESS);
     }
 
-    private void computeStartEnd(int lod) {
-        int lodCameraChunkX = cameraChunkX >> lod;
-        int lodCameraChunkY = cameraChunkY >> lod;
-        int lodCameraChunkZ = cameraChunkZ >> lod;
-
-        startX = Utils.makeEven(lodCameraChunkX - RENDER_DISTANCE_XZ - 2);
-        startY = Utils.makeEven(lodCameraChunkY - RENDER_DISTANCE_Y - 2);
-        startZ = Utils.makeEven(lodCameraChunkZ - RENDER_DISTANCE_XZ - 2);
-
-        endX = Utils.makeOdd(lodCameraChunkX + RENDER_DISTANCE_XZ + 2);
-        endY = Utils.makeOdd(lodCameraChunkY + RENDER_DISTANCE_Y + 2);
-        endZ = Utils.makeOdd(lodCameraChunkZ + RENDER_DISTANCE_XZ + 2);
-    }
-
 
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
     private int cameraChunkX, cameraChunkY, cameraChunkZ;
     private int cameraX, cameraY, cameraZ;
-    private int startX, endX, startY, endY, startZ, endZ;
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
     private final int framebuffer, depthTexture;
 
-    private final long[][] visibilityBits = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
+    private final long[][] visibilityBits = new long[LOD_COUNT][LONGS_PER_LOD_BITS];
     private final long[] lodStarts = new long[LOD_COUNT * 3];
     private final int[] lodDrawCounts = new int[LOD_COUNT * 3];
 
@@ -448,6 +432,7 @@ public final class RenderingOptimizer {
     private final IntArrayList glassCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList aabbs = new IntArrayList(AABB_INT_SIZE * 256);
 
+    private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
     private static final int width = 400, height = 225;
 }
