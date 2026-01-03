@@ -1,6 +1,6 @@
 package game.server.material;
 
-enum MaterialIdentifier {
+public enum MaterialIdentifier {
 
     AIR,
     OUT_OF_WORLD,

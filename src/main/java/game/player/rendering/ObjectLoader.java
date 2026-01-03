@@ -1,11 +1,12 @@
 package game.player.rendering;
 
 import core.assets.AssetLoader;
+
 import core.assets.Texture;
-
-import game.server.material.Material;
-
+import game.server.material.MaterialIdentifier;
 import org.joml.Vector3i;
+
+import java.io.File;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
@@ -36,9 +37,10 @@ public final class ObjectLoader {
         return vao;
     }
 
-    public static int generateAtlasTextureArray(Texture atlas) {
-        final int textureSize = 16;
-        int atlasId = atlas.getID();
+    public static int generateTextureArray(String texturesFilepath) {
+        Texture[] textures = getTextures(texturesFilepath);
+        int textureSize = 0;
+        for (Texture texture : textures) textureSize = Math.max(textureSize, texture.getWidth());
 
         int textureArray = glGenTextures();
         glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
@@ -50,15 +52,12 @@ public final class ObjectLoader {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
-            int textureCoordinate = Material.getTextureIndex((byte) material);
-            int u = (textureCoordinate & 0xF) * textureSize;
-            int v = (textureCoordinate >> 4 & 0xF) * textureSize;
-
-            glCopyImageSubData(
-                    atlasId, GL_TEXTURE_2D, 0, u, v, 0,
+            Texture texture = textures[material];
+            glCopyImageSubData(texture.getID(), GL_TEXTURE_2D, 0, 0, 0, 0,
                     textureArray, GL_TEXTURE_2D_ARRAY, 0, 0, 0, material,
-                    textureSize, textureSize, 1);
+                    texture.getWidth(), texture.getWidth(), 1);
         }
+        for (Texture texture : textures) glDeleteTextures(texture.getID());
 
         return textureArray;
     }
@@ -70,5 +69,23 @@ public final class ObjectLoader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, sampling);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, sampling);
         return texture;
+    }
+
+    private static Texture[] getTextures(String filepath) {
+        Texture[] textures = new Texture[AMOUNT_OF_MATERIALS];
+        filepath += '/';
+
+        for (MaterialIdentifier material : MaterialIdentifier.values()) {
+            String path = filepath + material.name() + ".png";
+            if (!new File(path).exists()) {
+                textures[material.ordinal()] = textures[AIR];
+                continue;
+            }
+
+            Texture texture = AssetLoader.loadTexture2D(path);
+            textures[material.ordinal()] = texture;
+        }
+
+        return textures;
     }
 }

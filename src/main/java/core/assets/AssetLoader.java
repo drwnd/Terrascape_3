@@ -20,7 +20,7 @@ public final class AssetLoader {
     }
 
 
-    public static Texture loadTexture2D(TextureIdentifier identifier) {
+    public static Texture loadTexture2D(String filepath) {
         int width, height;
         ByteBuffer buffer;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -28,7 +28,6 @@ public final class AssetLoader {
             IntBuffer h = stack.mallocInt(1);
             IntBuffer c = stack.mallocInt(1);
 
-            String filepath = identifier.filepath();
             buffer = STBImage.stbi_load(filepath, w, h, c, 4);
             if (buffer == null) throw new RuntimeException("Image File " + filepath + " not loaded " + STBImage.stbi_failure_reason());
 
@@ -44,7 +43,11 @@ public final class AssetLoader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         STBImage.stbi_image_free(buffer);
-        return new Texture(id);
+        return new Texture(id, width, height);
+    }
+
+    public static Texture loadTexture2D(TextureIdentifier identifier) {
+        return loadTexture2D(identifier.filepath());
     }
 
     public static GuiElement loadGuiElement(GuiElementIdentifier identifier) {
