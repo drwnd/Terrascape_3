@@ -1,7 +1,8 @@
 package game.menus;
 
-import org.lwjgl.glfw.GLFW;
 import core.rendering_api.Input;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class MainMenuInput extends Input {
     public MainMenuInput(MainMenu menu) {
@@ -26,14 +27,14 @@ public final class MainMenuInput extends Input {
 
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
-        if (action != GLFW.GLFW_PRESS) return;
+        if (action != GLFW_PRESS) return;
 
         menu.clickOn(cursorPos, button, action);
     }
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0f);
+        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0F);
         menu.moveWorldButtons(newScroll - scroll);
         scroll = newScroll;
 

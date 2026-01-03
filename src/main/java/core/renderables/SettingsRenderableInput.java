@@ -2,7 +2,7 @@ package core.renderables;
 
 import core.rendering_api.Input;
 
-import org.lwjgl.glfw.GLFW;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class SettingsRenderableInput extends Input {
 
@@ -27,7 +27,7 @@ public final class SettingsRenderableInput extends Input {
     @Override
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
-        if (Input.isKeyPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON))
+        if (Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON))
             menu.dragOver(cursorPos);
         else menu.hoverOver(cursorPos);
     }
@@ -39,7 +39,7 @@ public final class SettingsRenderableInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0f);
+        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0F);
         menu.scrollSettingButtons(newScroll - scroll);
         scroll = newScroll;
 
@@ -48,7 +48,7 @@ public final class SettingsRenderableInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) menu.cancelSelection();
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) menu.cancelSelection();
     }
 
     @Override

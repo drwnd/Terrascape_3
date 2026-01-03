@@ -5,14 +5,15 @@ import core.settings.FloatSetting;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL46;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.ArrayList;
+
+import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class Window {
 
@@ -24,79 +25,79 @@ public final class Window {
 
         GLFWErrorCallback.createPrint(System.err).set();
 
-        if (!GLFW.glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
+        if (!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
 
         createWindow(title);
         GL.createCapabilities();
 
-        GL46.glClearColor(0, 0, 0, 1);
-        GL46.glEnable(GL46.GL_DEPTH_TEST);
-        GL46.glDepthFunc(GL46.GL_LESS);
-        GL46.glEnable(GL46.GL_CULL_FACE);
-        GL46.glCullFace(GL46.GL_BACK);
+        glClearColor(0, 0, 0, 1);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
     }
 
     private static void createWindow(String title) {
-        GLFW.glfwDefaultWindowHints();
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL46.GL_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL46.GL_TRUE);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
-        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6);
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL46.GL_TRUE);
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-        GLFWVidMode vidMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode == null) throw new RuntimeException("Could not get video mode");
 
         if (maximized) {
-            window = GLFW.glfwCreateWindow(vidMode.width(), vidMode.height(), title, GLFW.glfwGetPrimaryMonitor(), MemoryUtil.NULL);
+            window = glfwCreateWindow(vidMode.width(), vidMode.height(), title, glfwGetPrimaryMonitor(), MemoryUtil.NULL);
             width = vidMode.width();
             height = vidMode.height();
         } else {
             width = vidMode.width() / 2;
             height = vidMode.height() / 2;
-            window = GLFW.glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
-            GLFW.glfwSetWindowPos(window, (vidMode.width() - width) / 2, (vidMode.height() - height) / 2);
+            window = glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL);
+            glfwSetWindowPos(window, (vidMode.width() - width) / 2, (vidMode.height() - height) / 2);
         }
 
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
-        GLFW.glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
+        glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
             Window.width = width;
             Window.height = height;
             Vector2i size = new Vector2i(width, height);
             for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0F, 1.0F);
         });
 
-        GLFW.glfwMakeContextCurrent(window);
-        GLFW.glfwShowWindow(window);
-        GLFW.glfwSwapInterval(1);
+        glfwMakeContextCurrent(window);
+        glfwShowWindow(window);
+        glfwSwapInterval(1);
     }
 
     public static void renderLoop() {
-        while (!GLFW.glfwWindowShouldClose(window)) {
+        while (!glfwWindowShouldClose(window)) {
             try {
                 long start = System.nanoTime();
 
-                GL46.glViewport(0, 0, width, height);
-                GL46.glClear(GL46.GL_COLOR_BUFFER_BIT | GL46.GL_DEPTH_BUFFER_BIT | GL46.GL_STENCIL_BUFFER_BIT);
+                glViewport(0, 0, width, height);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
                 Renderable renderable = renderablesStack.getLast();
                 renderable.render(new Vector2f(0.0F, 0.0F), new Vector2f(1.0F, 1.0F));
 
                 frameTime = (long) (frameTime * 0.975 + (System.nanoTime() - start) * 0.025);
 
-                GLFW.glfwSwapBuffers(window);
-                GLFW.glfwPollEvents();
+                glfwSwapBuffers(window);
+                glfwPollEvents();
 
             } catch (Exception exception) {
                 CrashAction action = crashCallback.notify(exception);
                 switch (action) {
                     case PRINT -> exception.printStackTrace();
-                    case CLOSE -> GLFW.glfwSetWindowShouldClose(window, true);
+                    case CLOSE -> glfwSetWindowShouldClose(window, true);
                     case THROW -> throw exception;
                     case PRINT_AND_CLOSE -> {
                         exception.printStackTrace();
-                        GLFW.glfwSetWindowShouldClose(window, true);
+                        glfwSetWindowShouldClose(window, true);
                     }
                 }
             }
@@ -105,15 +106,15 @@ public final class Window {
 
     public static void toggleFullScreen() {
         maximized = !maximized;
-        GLFWVidMode vidMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode == null) throw new RuntimeException("Could not get video mode");
 
-        if (maximized) GLFW.glfwSetWindowMonitor(window, GLFW.glfwGetPrimaryMonitor(), 0, 0, vidMode.width(), vidMode.height(), GLFW.GLFW_DONT_CARE);
-        else GLFW.glfwSetWindowMonitor(window, MemoryUtil.NULL, width / 4, height / 4, width / 2, height / 2, GLFW.GLFW_DONT_CARE);
+        if (maximized) glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, vidMode.width(), vidMode.height(), GLFW_DONT_CARE);
+        else glfwSetWindowMonitor(window, MemoryUtil.NULL, width / 4, height / 4, width / 2, height / 2, GLFW_DONT_CARE);
     }
 
     public static void cleanUp() {
-        GLFW.glfwDestroyWindow(window);
+        glfwDestroyWindow(window);
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {
@@ -149,12 +150,12 @@ public final class Window {
     public static void pushRenderable(Renderable element) {
         renderablesStack.add(element);
         element.setOnTop();
-        GL46.glPolygonMode(GL46.GL_FRONT_AND_BACK, GL46.GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     public static void popRenderable() {
         renderablesStack.removeLast().delete();
-        if (renderablesStack.isEmpty()) GLFW.glfwSetWindowShouldClose(window, true);
+        if (renderablesStack.isEmpty()) glfwSetWindowShouldClose(window, true);
         else renderablesStack.getLast().setOnTop();
     }
 
@@ -166,23 +167,23 @@ public final class Window {
         Window.input.unset();
         Window.input = input;
         input.setInputMode();
-        GLFW.glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
+        glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
             standardInput.cursorPosCallback(window, xPos, yPos);
             input.cursorPosCallback(window, xPos, yPos);
         });
-        GLFW.glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
+        glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
             standardInput.mouseButtonCallback(window, button, action, mods);
             input.mouseButtonCallback(window, button, action, mods);
         });
-        GLFW.glfwSetScrollCallback(window, (long window, double xScroll, double yScroll) -> {
+        glfwSetScrollCallback(window, (long window, double xScroll, double yScroll) -> {
             standardInput.scrollCallback(window, xScroll, yScroll);
             input.scrollCallback(window, xScroll, yScroll);
         });
-        GLFW.glfwSetKeyCallback(window, (long window, int key, int scancode, int action, int mods) -> {
+        glfwSetKeyCallback(window, (long window, int key, int scancode, int action, int mods) -> {
             standardInput.keyCallback(window, key, scancode, action, mods);
             input.keyCallback(window, key, scancode, action, mods);
         });
-        GLFW.glfwSetCharCallback(window, (long window, int codePoint) -> {
+        glfwSetCharCallback(window, (long window, int codePoint) -> {
             standardInput.charCallback(window, codePoint);
             input.charCallback(window, codePoint);
         });
@@ -194,21 +195,21 @@ public final class Window {
     }
 
     public static void checkError(String lastAction) {
-        int error = GL46.glGetError();
+        int error = glGetError();
         System.out.println(lastAction + " : " + switch (error) {
-            case GL46.GL_NO_ERROR -> "No error";
-            case GL46.GL_INVALID_ENUM -> "Invalid Enum";
-            case GL46.GL_INVALID_VALUE -> "Invalid Value";
-            case GL46.GL_INVALID_OPERATION -> "Invalid Operation";
-            case GL46.GL_STACK_OVERFLOW -> "Stack Overflow";
-            case GL46.GL_STACK_UNDERFLOW -> "Stack Underflow";
-            case GL46.GL_OUT_OF_MEMORY -> "Out of Memory";
+            case GL_NO_ERROR -> "No error";
+            case GL_INVALID_ENUM -> "Invalid Enum";
+            case GL_INVALID_VALUE -> "Invalid Value";
+            case GL_INVALID_OPERATION -> "Invalid Operation";
+            case GL_STACK_OVERFLOW -> "Stack Overflow";
+            case GL_STACK_UNDERFLOW -> "Stack Underflow";
+            case GL_OUT_OF_MEMORY -> "Out of Memory";
             default -> "Unknown 0x" + Integer.toHexString(error).toUpperCase();
         });
     }
 
     public static void clearOldErrors() {
-        while (GL46.glGetError() != GL46.GL_NO_ERROR) ;
+        while (glGetError() != GL_NO_ERROR) ;
     }
 
     private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();

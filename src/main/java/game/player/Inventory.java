@@ -22,17 +22,17 @@ import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class Inventory extends UiElement {
 
     public Inventory() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f), CoreTextures.OVERLAY);
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), CoreTextures.OVERLAY);
         input = new InventoryInput(this);
 
         setVisible(false);
@@ -41,7 +41,7 @@ public final class Inventory extends UiElement {
         itemNameDisplay.setAddTransparentBackground(true);
         itemNameDisplay.setAllowFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
-        filterTextField = new TextField(new Vector2f(0.25f, 0.1f), new Vector2f(0.375f, 0.9f), UiMessage.STRUCTURE_NAME, this::reloadStructureButtons);
+        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessage.STRUCTURE_NAME, this::reloadStructureButtons);
 
         long start = System.nanoTime();
         for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {
@@ -62,7 +62,7 @@ public final class Inventory extends UiElement {
     }
 
     public void handleInput(int button, int action, Vector2i pixelCoordinate) {
-        if (action != GLFW.GLFW_PRESS || !isVisible()) return;
+        if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
 
         if (button == KeySetting.HOTBAR_SLOT_1.value()) hotbar.setContent(0, getSelectedPlaceable(pixelCoordinate));
@@ -77,7 +77,7 @@ public final class Inventory extends UiElement {
     }
 
     public void moveStructureButtons(float movement) {
-        Vector2f offset = new Vector2f(0.0f, movement);
+        Vector2f offset = new Vector2f(0.0F, movement);
         for (StructureSelectionButton button : structureButtons) button.move(offset);
     }
 
@@ -121,8 +121,8 @@ public final class Inventory extends UiElement {
         for (CubeDisplay display : cubeDisplays) {
             int index = display.material & 0xFF;
             int row = index / itemsPerRow, column = index % itemsPerRow;
-            float x = 1.0f - itemSize * (column + 1);
-            float y = 1.0f - itemSize * 2 * (row + 1);
+            float x = 1.0F - itemSize * (column + 1);
+            float y = 1.0F - itemSize * 2 * (row + 1);
 
             display.display.setOffsetToParent(x, y);
             display.display.setSizeToParent(sizeToParent.x, sizeToParent.y);
@@ -134,17 +134,17 @@ public final class Inventory extends UiElement {
         structureButtons.clear();
 
         int structureCount = 0;
-        Vector2f sizeToParent = new Vector2f(0.25f, 0.05f);
+        Vector2f sizeToParent = new Vector2f(0.25F, 0.05F);
         File[] structureFiles = FileManager.getChildren(new File("assets/structures"));
         String filterText = filterTextField.getText().toLowerCase();
 
         for (File structureFile : structureFiles) {
             if (structureFile == null || !structureFile.getName().toLowerCase().contains(filterText)) continue;
             String structureName = structureFile.getName();
-            Vector2f offsetToParent = new Vector2f(0.05f, 1.0f - ++structureCount * 0.065f + input.getScroll());
+            Vector2f offsetToParent = new Vector2f(0.05F, 1.0F - ++structureCount * 0.065F + input.getScroll());
 
             StructureSelectionButton button = new StructureSelectionButton(sizeToParent, offsetToParent, structureName);
-            button.setRimThicknessMultiplier(0.5f);
+            button.setRimThicknessMultiplier(0.5F);
             structureButtons.add(button);
             addRenderable(button);
         }

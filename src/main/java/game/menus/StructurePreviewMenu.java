@@ -13,7 +13,8 @@ import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class StructurePreviewMenu extends UiBackgroundElement {
 
@@ -39,7 +40,7 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
         super.renderSelf(position, size);
 
         Vector2i cursorMovement = input.getCursorMovement();
-        if (Input.isKeyPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) display.rotate(cursorMovement);
+        if (Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) display.rotate(cursorMovement);
 
         display.setSizeToParent(1.0F, Window.getAspectRatio());
         display.setOffsetToParent(0.0F, 0.5F - Window.getAspectRatio() * 0.5F);
@@ -51,8 +52,8 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
     }
 
     private static Clickable getBackButtonAction() {
-        return (Vector2i cursorPos, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return;
             Window.popRenderable();
         };
     }

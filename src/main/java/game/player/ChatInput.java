@@ -7,9 +7,10 @@ import game.server.ChatMessage;
 import game.server.Game;
 
 import game.server.Sender;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class ChatInput extends TextFieldInput {
 
@@ -26,7 +27,7 @@ public final class ChatInput extends TextFieldInput {
         setStandardInputMode();
         skipNextInput = true;
         messageIndex = 0;
-        scroll = 0;
+        scroll = 0.0F;
     }
 
     @Override
@@ -52,17 +53,17 @@ public final class ChatInput extends TextFieldInput {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (action != GLFW.GLFW_PRESS && action != GLFW.GLFW_REPEAT) return;
+        if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
 
-        if (key == GLFW.GLFW_KEY_BACKSPACE) handleBackspace();
-        if (key == GLFW.GLFW_KEY_ESCAPE) Game.getPlayer().toggleChat();
-        if (key == GLFW.GLFW_KEY_ENTER) {
+        if (key == GLFW_KEY_BACKSPACE) handleBackspace();
+        if (key == GLFW_KEY_ESCAPE) Game.getPlayer().toggleChat();
+        if (key == GLFW_KEY_ENTER) {
             Game.getServer().sendPlayerMessage(field.getText());
             field.setText("");
             Game.getPlayer().toggleChat();
         }
-        if (key == GLFW.GLFW_KEY_UP) field.setText(nextPlayerMessage(1));
-        if (key == GLFW.GLFW_KEY_DOWN) field.setText(nextPlayerMessage(-1));
+        if (key == GLFW_KEY_UP) field.setText(nextPlayerMessage(1));
+        if (key == GLFW_KEY_DOWN) field.setText(nextPlayerMessage(-1));
     }
 
     private String nextPlayerMessage(int increment) {
@@ -80,5 +81,5 @@ public final class ChatInput extends TextFieldInput {
 
     private boolean skipNextInput = false;
     int messageIndex = 0;
-    private float scroll = 0;
+    private float scroll = 0.0F;
 }

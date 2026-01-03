@@ -15,46 +15,48 @@ import game.server.Game;
 import game.player.rendering.ObjectLoader;
 
 import org.joml.Vector2f;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 public final class PauseMenu extends Renderable {
+
     public PauseMenu() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
 
-        UiButton quitButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.3f), getQuitButtonAction());
-        quitButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.QUIT_WORLD));
+        UiButton quitButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.3F), getQuitButtonAction());
+        quitButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.QUIT_WORLD));
 
-        UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.45f), getSettingsButtonAction());
-        settingsButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.SETTINGS));
+        UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.45F), getSettingsButtonAction());
+        settingsButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.SETTINGS));
 
-        UiButton playButton = new UiButton(sizeToParent, new Vector2f(0.2f, 0.6f), getPlayButtonAction());
-        playButton.addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.CONTINUE_PLAYING));
+        UiButton playButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.6F), getPlayButtonAction());
+        playButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.CONTINUE_PLAYING));
 
         addRenderable(quitButton);
         addRenderable(settingsButton);
         addRenderable(playButton);
 
-        int backGroundWidth = Math.max(1, (int) (Window.getWidth() / (1.0f + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
-        int backGroundHeight = Math.max(1, (int) (Window.getHeight() / (1.0f + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
+        int backGroundWidth = Math.max(1, (int) (Window.getWidth() / (1.0F + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
+        int backGroundHeight = Math.max(1, (int) (Window.getHeight() / (1.0F + FloatSetting.PAUSE_MENU_BACKGROUND_BLUR.value())));
 
-        int backGround = ObjectLoader.createTexture2D(GL46.GL_RGB, backGroundWidth, backGroundHeight, GL46.GL_RGB, GL46.GL_UNSIGNED_BYTE, GL46.GL_LINEAR);
-        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_R, GL46.GL_CLAMP_TO_EDGE);
-        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_S, GL46.GL_CLAMP_TO_EDGE);
-        GL46.glTexParameteri(GL46.GL_TEXTURE_2D, GL46.GL_TEXTURE_WRAP_T, GL46.GL_CLAMP_TO_EDGE);
-        int frameBuffer = GL46.glCreateFramebuffers();
+        int backGround = ObjectLoader.createTexture2D(GL_RGB, backGroundWidth, backGroundHeight, GL_RGB, GL_UNSIGNED_BYTE, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        int frameBuffer = glCreateFramebuffers();
 
-        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, frameBuffer);
-        GL46.glFramebufferTexture2D(GL46.GL_FRAMEBUFFER, GL46.GL_COLOR_ATTACHMENT0, GL46.GL_TEXTURE_2D, backGround, 0);
-        if (GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER) != GL46.GL_FRAMEBUFFER_COMPLETE)
-            throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(GL46.glCheckFramebufferStatus(GL46.GL_FRAMEBUFFER)));
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, backGround, 0);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 
-        GL46.glBlitNamedFramebuffer(0, frameBuffer, 0, 0, Window.getWidth(), Window.getHeight(), 0, 0, backGroundWidth, backGroundHeight, GL46.GL_COLOR_BUFFER_BIT, GL46.GL_LINEAR);
+        glBlitNamedFramebuffer(0, frameBuffer, 0, 0, Window.getWidth(), Window.getHeight(), 0, 0, backGroundWidth, backGroundHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
         this.backGround = new Texture(backGround);
 
-        GL46.glBindFramebuffer(GL46.GL_FRAMEBUFFER, 0);
-        GL46.glDeleteFramebuffers(frameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(frameBuffer);
     }
 
     @Override

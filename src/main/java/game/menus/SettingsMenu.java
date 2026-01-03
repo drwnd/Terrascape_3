@@ -14,9 +14,10 @@ import game.player.rendering.DebugScreenLine;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class SettingsMenu extends UiBackgroundElement {
 
@@ -185,7 +186,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return;
             Window.popRenderable();
         };
     }
@@ -203,7 +204,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return;
             Window.pushRenderable(sectionCreator.getSection());
         };
     }

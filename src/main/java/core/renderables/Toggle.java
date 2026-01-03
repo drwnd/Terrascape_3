@@ -10,7 +10,8 @@ import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class Toggle extends UiButton {
 
@@ -21,7 +22,7 @@ public final class Toggle extends UiButton {
         this.setting = setting;
 
         matchSetting();
-        addRenderable(new TextElement(new Vector2f(0.05f, 0.5f), settingName));
+        addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), settingName));
     }
 
     public void setToDefault() {
@@ -40,8 +41,8 @@ public final class Toggle extends UiButton {
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
 
-        position = new Vector2f(position).add(0.785f * size.x, 0.15f * size.y);
-        size = new Vector2f(size).mul(0.2f, 0.7f);
+        position = new Vector2f(position).add(0.785F * size.x, 0.15F * size.y);
+        size = new Vector2f(size).mul(0.2F, 0.7F);
 
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
         Texture texture = AssetManager.get(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED);
@@ -55,8 +56,8 @@ public final class Toggle extends UiButton {
 
 
     private Clickable getAction() {
-        return (Vector2i cursorPos, int button, int action) -> {
-            if (action == GLFW.GLFW_PRESS) value = !value;
+        return (Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) value = !value;
         };
     }
 

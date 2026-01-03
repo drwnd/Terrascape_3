@@ -1,6 +1,6 @@
 package core.assets;
 
-import org.lwjgl.opengl.GL46;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class Buffer extends Asset {
 
@@ -10,7 +10,7 @@ public final class Buffer extends Asset {
 
     @Override
     public void delete() {
-        GL46.glDeleteBuffers(id);
+        glDeleteBuffers(id);
     }
 
     public int getID() {

@@ -9,7 +9,8 @@ import core.settings.OptionSetting;
 import core.settings.optionSettings.FontOption;
 
 import org.joml.Vector2f;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 import java.awt.*;
 
@@ -22,11 +23,11 @@ public class TextShader extends Shader {
 
     @Override
     public void bind() {
-        GL46.glUseProgram(programID);
-        GL46.glDisable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
-        GL46.glEnable(GL46.GL_BLEND);
-        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
+        glUseProgram(programID);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
@@ -39,13 +40,13 @@ public class TextShader extends Shader {
         setUniform("textAtlas", 0);
         setUniform("addTransparentBackground", addTransparentBackground);
 
-        GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, AssetManager.get((TextureIdentifier) OptionSetting.FONT.value()).getID());
-        GL46.glBindVertexArray(AssetManager.get(CoreVertexArrays.TEXT_ROW).getID());
-        GL46.glEnableVertexAttribArray(0);
-        GL46.glBindBuffer(GL46.GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, AssetManager.get((TextureIdentifier) OptionSetting.FONT.value()).getID());
+        glBindVertexArray(AssetManager.get(CoreVertexArrays.TEXT_ROW).getID());
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
 
-        GL46.glDrawElements(GL46.GL_TRIANGLES, 6 * MAX_TEXT_LENGTH, GL46.GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6 * MAX_TEXT_LENGTH, GL_UNSIGNED_INT, 0);
     }
 
     public static int getMaxLength(String text, float maxAllowedLength, float charWidth, boolean scalesWithGuiSize) {

@@ -1,6 +1,6 @@
 package core.assets;
 
-import org.lwjgl.opengl.GL46;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class VertexArray extends Asset {
 
@@ -10,7 +10,7 @@ public final class VertexArray extends Asset {
 
     @Override
     public void delete() {
-        GL46.glDeleteVertexArrays(id);
+        glDeleteVertexArrays(id);
     }
 
     public int getID() {

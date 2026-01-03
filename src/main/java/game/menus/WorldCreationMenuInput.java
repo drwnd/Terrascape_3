@@ -1,7 +1,8 @@
 package game.menus;
 
-import org.lwjgl.glfw.GLFW;
 import core.rendering_api.Input;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenuInput extends Input {
 
@@ -23,7 +24,7 @@ public final class WorldCreationMenuInput extends Input {
 
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
-        if (action != GLFW.GLFW_PRESS) return;
+        if (action != GLFW_PRESS) return;
 
         menu.clickOn(cursorPos, button, action);
     }

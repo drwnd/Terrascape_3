@@ -8,19 +8,20 @@ import game.menus.PauseMenu;
 import game.server.Game;
 
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class PlayerInput extends Input {
     @Override
     public void setInputMode() {
         cursorPos.set(getCursorPos());
         lastCursorPos.set(cursorPos);
-        GLFW.glfwSetInputMode(Window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
-        if (GLFW.glfwRawMouseMotionSupported()) {
+        glfwSetInputMode(Window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (glfwRawMouseMotionSupported()) {
             if (ToggleSetting.RAW_MOUSE_INPUT.value())
-                GLFW.glfwSetInputMode(Window.getWindow(), GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_TRUE);
+                glfwSetInputMode(Window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
             else
-                GLFW.glfwSetInputMode(Window.getWindow(), GLFW.GLFW_RAW_MOUSE_MOTION, GLFW.GLFW_FALSE);
+                glfwSetInputMode(Window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
         }
     }
 
@@ -42,7 +43,7 @@ public final class PlayerInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) Window.pushRenderable(new PauseMenu());
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Window.pushRenderable(new PauseMenu());
         Game.getPlayer().handleActiveButtonInput(key, action);
         Game.getPlayer().handleInactiveKeyInput(key, action);
     }

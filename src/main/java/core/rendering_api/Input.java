@@ -4,7 +4,8 @@ import core.renderables.Renderable;
 import core.settings.KeySetting;
 
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class Input {
 
@@ -23,11 +24,11 @@ public abstract class Input {
     }
 
     public static boolean isKeyPressed(int keycode) {
-        if (keycode == GLFW.GLFW_KEY_UNKNOWN) return false;
+        if (keycode == GLFW_KEY_UNKNOWN) return false;
         if ((keycode & Input.IS_MOUSE_BUTTON) == 0)
-            return GLFW.glfwGetKey(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW.GLFW_PRESS;
+            return glfwGetKey(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW_PRESS;
         else
-            return GLFW.glfwGetMouseButton(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW.GLFW_PRESS;
+            return glfwGetMouseButton(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW_PRESS;
     }
 
     public static boolean isKeyPressed(KeySetting setting) {
@@ -37,12 +38,12 @@ public abstract class Input {
     public static Vector2i getCursorPos() {
         double[] cursorX = new double[1];
         double[] cursorY = new double[1];
-        GLFW.glfwGetCursorPos(Window.getWindow(), cursorX, cursorY);
+        glfwGetCursorPos(Window.getWindow(), cursorX, cursorY);
         return new Vector2i((int) cursorX[0], Window.getHeight() - (int) cursorY[0]);
     }
 
     public static void setStandardInputMode() {
-        GLFW.glfwSetInputMode(Window.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(Window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     public void standardCursorPosCallBack(double xPos, double yPos) {

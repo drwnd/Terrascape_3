@@ -7,12 +7,11 @@ import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 
-import org.lwjgl.opengl.GL46;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class ParticleCollector {
 
@@ -31,14 +30,14 @@ public final class ParticleCollector {
             ParticleEffect particleEffect = iterator.next();
             if (currentTick - particleEffect.spawnTick() >= particleEffect.lifeTimeTicks()) {
                 iterator.remove();
-                GL46.glDeleteBuffers(particleEffect.buffer());
+                glDeleteBuffers(particleEffect.buffer());
             }
         }
     }
 
     public void cleanUp() {
         synchronized (particleEffects) {
-            for (ParticleEffect particleEffect : particleEffects) GL46.glDeleteBuffers(particleEffect.buffer());
+            for (ParticleEffect particleEffect : particleEffects) glDeleteBuffers(particleEffect.buffer());
             particleEffects.clear();
         }
     }
@@ -164,8 +163,8 @@ public final class ParticleCollector {
     }
 
     private static ParticleEffect loadParticleEffect(ToBufferParticleEffect particleEffect) {
-        int particlesBuffer = GL46.glCreateBuffers();
-        GL46.glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL46.GL_STATIC_DRAW);
+        int particlesBuffer = glCreateBuffers();
+        glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL_STATIC_DRAW);
 
         return new ParticleEffect(particlesBuffer, particleEffect.spawnTick(),
                 particleEffect.lifeTimeTicks(), particleEffect.particlesData().length / SHADER_PARTICLE_INT_SIZE,

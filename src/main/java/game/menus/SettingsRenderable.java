@@ -9,20 +9,21 @@ import game.player.rendering.DebugScreenLine;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class SettingsRenderable extends CoreSettingsRenderable {
 
     public void addDebugLineSetting(DebugScreenLine debugLine) {
         settingsCount++;
 
-        Vector2f sizeToParent = new Vector2f(0.15f, 0.1f);
-        float yOffset = 1.0f - 0.15f * settingsCount;
+        Vector2f sizeToParent = new Vector2f(0.15F, 0.1F);
+        float yOffset = 1.0F - 0.15F * settingsCount;
 
-        TextElement nameDisplay = new TextElement(new Vector2f(0.225f, 0), new Vector2f(0.375f, yOffset + 0.05f), new Message(debugLine.name()));
+        TextElement nameDisplay = new TextElement(new Vector2f(0.225F, 0), new Vector2f(0.375F, yOffset + 0.05F), new Message(debugLine.name()));
         nameDisplay.setAllowFocusScaling(false);
-        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6f, yOffset), debugLine.color(), null);
-        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8f, yOffset), debugLine.visibility(), null);
+        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6F, yOffset), debugLine.color(), null);
+        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8F, yOffset), debugLine.visibility(), null);
 
         addRenderable(nameDisplay);
         addRenderable(colorOption);
@@ -32,8 +33,8 @@ public class SettingsRenderable extends CoreSettingsRenderable {
         options.add(colorOption);
         options.add(visibilityOption);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return;
             colorOption.setToDefault();
             visibilityOption.setToDefault();
         });

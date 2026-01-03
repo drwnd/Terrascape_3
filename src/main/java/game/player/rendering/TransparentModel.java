@@ -2,7 +2,8 @@ package game.player.rendering;
 
 import core.utils.IntArrayList;
 import org.joml.Vector3i;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.CHUNK_SIZE_BITS;
 
@@ -55,7 +56,7 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
     }
 
     public void delete() {
-        GL46.glDeleteBuffers(bufferOrStart);
+        glDeleteBuffers(bufferOrStart);
     }
 
     public int chunkX() {

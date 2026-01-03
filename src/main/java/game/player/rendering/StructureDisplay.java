@@ -14,7 +14,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 public final class StructureDisplay extends Renderable {
 
@@ -51,12 +52,12 @@ public final class StructureDisplay extends Renderable {
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0F;
         Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ, zoom, rotation);
-        GL46.glViewport(
+        glViewport(
                 (int) ((position.x + size.x * 0.5F * (1.0F - guiSize)) * Window.getWidth()),
                 (int) ((position.y + size.y * 0.5F * (1.0F - guiSize)) * Window.getHeight()),
                 (int) (size.x * guiSize * Window.getWidth()),
                 (int) (size.y * guiSize * Window.getHeight()));
-        GL46.glClear(GL46.GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
         Renderer.setupOpaqueRendering(shader, matrix, 0, 0, 0, 1.0F);
@@ -72,9 +73,9 @@ public final class StructureDisplay extends Renderable {
         shader = AssetManager.get(Shaders.GLASS);
         Renderer.setUpGlassRendering(shader, matrix, 0, 0, 0);
         renderGlassModel(transparentModel, shader);
-        GL46.glDepthMask(true);
+        glDepthMask(true);
 
-        GL46.glViewport(0, 0, Window.getWidth(), Window.getHeight());
+        glViewport(0, 0, Window.getWidth(), Window.getHeight());
     }
 
     @Override
@@ -87,8 +88,8 @@ public final class StructureDisplay extends Renderable {
         if (model.isEmpty()) return;
 
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
-        GL46.glMultiDrawArrays(GL46.GL_TRIANGLES, model.indices(), model.vertexCounts());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
+        glMultiDrawArrays(GL_TRIANGLES, model.indices(), model.vertexCounts());
     }
 
     private static void renderWaterModel(TransparentModel model, Shader shader) {
@@ -96,16 +97,16 @@ public final class StructureDisplay extends Renderable {
 
         shader.setUniform("cameraPosition", 3000.0F, 4000.0F, 2000.0F);
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, model.waterVertexCount());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
+        glDrawArrays(GL_TRIANGLES, 0, model.waterVertexCount());
     }
 
     private static void renderGlassModel(TransparentModel model, Shader shader) {
         if (model.isGlassEmpty()) return;
 
         shader.setUniform("lodSize", 1);
-        GL46.glBindBufferBase(GL46.GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, model.waterVertexCount(), model.glassVertexCount());
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
+        glDrawArrays(GL_TRIANGLES, model.waterVertexCount(), model.glassVertexCount());
     }
 
     private final OpaqueModel opaqueModel;

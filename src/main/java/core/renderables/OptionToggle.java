@@ -7,7 +7,8 @@ import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class OptionToggle extends UiButton {
     public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName) {
@@ -17,7 +18,7 @@ public final class OptionToggle extends UiButton {
         this.setting = setting;
         this.settingName = settingName;
 
-        textElement = new TextElement(new Vector2f(0.05f, 0.5f));
+        textElement = new TextElement(new Vector2f(0.05F, 0.5F));
         addRenderable(textElement);
 
         matchSetting();
@@ -48,10 +49,10 @@ public final class OptionToggle extends UiButton {
     }
 
     private Clickable getAction() {
-        return (Vector2i cursorPos, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) setValue(value.next());
-            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) setValue(value.previous());
+        return (Vector2i _, int button, int action) -> {
+            if (action != GLFW_PRESS) return;
+            if (button == GLFW_MOUSE_BUTTON_LEFT) setValue(value.next());
+            if (button == GLFW_MOUSE_BUTTON_RIGHT) setValue(value.previous());
         };
     }
 

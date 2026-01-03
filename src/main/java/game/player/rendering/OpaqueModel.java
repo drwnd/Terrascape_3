@@ -4,7 +4,8 @@ import core.utils.IntArrayList;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
@@ -51,7 +52,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
     public void delete() {
-        GL46.glDeleteBuffers(bufferOrStart);
+        glDeleteBuffers(bufferOrStart);
     }
 
     public int chunkX() {

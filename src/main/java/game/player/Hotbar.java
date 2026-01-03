@@ -13,7 +13,8 @@ import game.player.interaction.Target;
 
 import game.server.generation.Structure;
 import org.joml.Vector2f;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class Hotbar extends UiElement {
 
@@ -32,7 +33,7 @@ public final class Hotbar extends UiElement {
 
 
     public void handleInput(int button, int action) {
-        if (action != GLFW.GLFW_PRESS) return;
+        if (action != GLFW_PRESS) return;
 
         if (button == KeySetting.HOTBAR_SLOT_1.value()) setSelectedSlot(0);
         if (button == KeySetting.HOTBAR_SLOT_2.value()) setSelectedSlot(1);

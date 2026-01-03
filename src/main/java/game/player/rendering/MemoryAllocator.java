@@ -1,15 +1,15 @@
 package game.player.rendering;
 
-import org.lwjgl.opengl.GL46;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class MemoryAllocator {
 
     public MemoryAllocator(int initialCapacity) {
         capacity = initialCapacity;
 
-        buffer = GL46.glGenBuffers();
-        GL46.glBindBuffer(GL46.GL_SHADER_STORAGE_BUFFER, buffer);
-        GL46.glBufferData(GL46.GL_SHADER_STORAGE_BUFFER, capacity, GL46.GL_DYNAMIC_DRAW);
+        buffer = glGenBuffers();
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, capacity, GL_DYNAMIC_DRAW);
         free = new MemoryRegion(0, capacity);
     }
 
@@ -110,7 +110,7 @@ public final class MemoryAllocator {
     }
 
     public void cleanUp() {
-        GL46.glDeleteBuffers(buffer);
+        glDeleteBuffers(buffer);
     }
 
 
@@ -118,12 +118,12 @@ public final class MemoryAllocator {
         int oldCapacity = capacity;
         capacity = Math.max(capacity << 1, capacity + size);
 
-        int newBuffer = GL46.glGenBuffers();
-        GL46.glBindBuffer(GL46.GL_COPY_READ_BUFFER, buffer);
-        GL46.glBindBuffer(GL46.GL_COPY_WRITE_BUFFER, newBuffer);
-        GL46.glBufferData(GL46.GL_COPY_WRITE_BUFFER, capacity, GL46.GL_DYNAMIC_DRAW);
-        GL46.glCopyBufferSubData(GL46.GL_COPY_READ_BUFFER, GL46.GL_COPY_WRITE_BUFFER, 0, 0, oldCapacity);
-        GL46.glDeleteBuffers(buffer);
+        int newBuffer = glGenBuffers();
+        glBindBuffer(GL_COPY_READ_BUFFER, buffer);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, newBuffer);
+        glBufferData(GL_COPY_WRITE_BUFFER, capacity, GL_DYNAMIC_DRAW);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, oldCapacity);
+        glDeleteBuffers(buffer);
         buffer = newBuffer;
 
         if (free == null) free = new MemoryRegion(oldCapacity, 0);

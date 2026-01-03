@@ -1,8 +1,10 @@
 package game.player;
 
-import org.lwjgl.glfw.GLFW;
 import core.rendering_api.Input;
+
 import game.server.Game;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class InventoryInput extends Input {
 
@@ -34,7 +36,7 @@ public final class InventoryInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0f);
+        float newScroll = Math.max((float) (scroll - yScroll * 0.05), 0.0F);
         inventory.moveStructureButtons(newScroll - scroll);
         scroll = newScroll;
 
@@ -43,7 +45,7 @@ public final class InventoryInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) Game.getPlayer().toggleInventory();
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Game.getPlayer().toggleInventory();
         Game.getPlayer().handleInactiveKeyInput(key, action);
         inventory.handleInput(key, action, cursorPos);
     }

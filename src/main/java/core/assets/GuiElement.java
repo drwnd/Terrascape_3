@@ -1,6 +1,6 @@
 package core.assets;
 
-import org.lwjgl.opengl.GL46;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class GuiElement extends Asset {
 
@@ -19,7 +19,7 @@ public final class GuiElement extends Asset {
 
     @Override
     public void delete() {
-        GL46.glDeleteVertexArrays(vao);
+        glDeleteVertexArrays(vao);
     }
 
     private final int vao, vertexCount;

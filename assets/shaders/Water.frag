@@ -3,6 +3,7 @@
 in vec3 totalPosition;
 flat in vec3 normal;
 flat in int textureData;
+layout(early_fragment_tests) in;
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out int side;

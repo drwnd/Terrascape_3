@@ -8,7 +8,8 @@ import core.assets.CoreGuiElements;
 import core.settings.FloatSetting;
 
 import org.joml.Vector2f;
-import org.lwjgl.opengl.GL46;
+
+import static org.lwjgl.opengl.GL46.*;
 
 public final class GuiShader extends Shader {
     public GuiShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
@@ -17,12 +18,12 @@ public final class GuiShader extends Shader {
 
     @Override
     public void bind() {
-        GL46.glUseProgram(programID);
-        GL46.glDisable(GL46.GL_DEPTH_TEST);
-        GL46.glDisable(GL46.GL_CULL_FACE);
-        GL46.glEnable(GL46.GL_BLEND);
-        GL46.glBlendFunc(GL46.GL_SRC_ALPHA, GL46.GL_ONE_MINUS_SRC_ALPHA);
-        GL46.glDepthMask(true);
+        glUseProgram(programID);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(true);
     }
 
     public void flipNextDrawVertically() {
@@ -38,8 +39,8 @@ public final class GuiShader extends Shader {
     }
 
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
-        GL46.glActiveTexture(GL46.GL_TEXTURE0);
-        GL46.glBindTexture(GL46.GL_TEXTURE_2D, texture.getID());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture.getID());
 
         setUniform("image", 0);
         if (flipNextDrawVertically) {
@@ -69,11 +70,11 @@ public final class GuiShader extends Shader {
     private void draw() {
         GuiElement quad = AssetManager.get(CoreGuiElements.QUAD);
 
-        GL46.glBindVertexArray(quad.getVao());
-        GL46.glEnableVertexAttribArray(0);
-        GL46.glEnableVertexAttribArray(1);
+        glBindVertexArray(quad.getVao());
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
 
-        GL46.glDrawArrays(GL46.GL_TRIANGLES, 0, quad.getVertexCount());
+        glDrawArrays(GL_TRIANGLES, 0, quad.getVertexCount());
         flipNextDrawVertically = false;
     }
 

@@ -7,9 +7,10 @@ import core.utils.StringGetter;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class TextField extends UiButton {
 
@@ -83,8 +84,8 @@ public class TextField extends UiButton {
     }
 
     private Clickable getAction() {
-        return (Vector2i cursorPos, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return;
             this.setOnTop();
         };
     }

@@ -18,9 +18,9 @@ import game.utils.Position;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.lwjgl.glfw.GLFW;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class Player {
 
@@ -86,15 +86,15 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveKeyInput(int button, int action) {
-        if (button == KeySetting.ZOOM.value() && action != GLFW.GLFW_REPEAT) camera.setZoomed(action == GLFW.GLFW_PRESS);
-        if (button == KeySetting.INVENTORY.value() && action == GLFW.GLFW_PRESS) toggleInventory();
-        if (button == KeySetting.OPEN_CHAT.value() && action == GLFW.GLFW_PRESS) toggleChat();
-        if (button == KeySetting.START_COMMAND.value() && action == GLFW.GLFW_PRESS) startCommand();
+        if (button == KeySetting.ZOOM.value() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
+        if (button == KeySetting.INVENTORY.value() && action == GLFW_PRESS) toggleInventory();
+        if (button == KeySetting.OPEN_CHAT.value() && action == GLFW_PRESS) toggleChat();
+        if (button == KeySetting.START_COMMAND.value() && action == GLFW_PRESS) startCommand();
 
-        if (button == KeySetting.DEBUG_MENU.value() && action == GLFW.GLFW_PRESS) renderer.toggleDebugScreen();
-        if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW.GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySetting.NO_CLIP.value() && action == GLFW.GLFW_PRESS) noClip = !noClip;
-        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.value() && action == GLFW.GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == KeySetting.DEBUG_MENU.value() && action == GLFW_PRESS) renderer.toggleDebugScreen();
+        if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW_PRESS) Material.loadMaterials();
+        if (button == KeySetting.NO_CLIP.value() && action == GLFW_PRESS) noClip = !noClip;
+        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.value() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {

@@ -7,27 +7,28 @@ import core.languages.UiMessage;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class CoreSettingsRenderable extends UiBackgroundElement {
 
     public CoreSettingsRenderable() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         input = new SettingsRenderableInput(this);
-        Vector2f sizeToParent = new Vector2f(0.1f, 0.1f);
+        Vector2f sizeToParent = new Vector2f(0.1F, 0.1F);
 
-        UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), getBackButtonAction());
-        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.BACK);
+        UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), getBackButtonAction());
+        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.BACK);
         backButton.addRenderable(text);
 
-        UiButton applyChangesButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.7f), getApplyChangesButtonAction());
-        text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.APPLY_SETTINGS);
+        UiButton applyChangesButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7f), getApplyChangesButtonAction());
+        text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.APPLY_SETTINGS);
         applyChangesButton.addRenderable(text);
 
-        UiButton resetButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.55f), getResetSettingsButtonAction());
-        text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.RESET_ALL_SETTINGS);
+        UiButton resetButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.55F), getResetSettingsButtonAction());
+        text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.RESET_ALL_SETTINGS);
         resetButton.addRenderable(text);
 
         addRenderable(backButton);
@@ -61,67 +62,67 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     public void addSlider(FloatSetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         Slider slider = new Slider(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(slider);
         sliders.add(slider);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action == GLFW.GLFW_PRESS) slider.setToDefault();
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) slider.setToDefault();
         });
     }
 
     public void addKeySelector(KeySetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(keySelector);
         keySelectors.add(keySelector);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action == GLFW.GLFW_PRESS) keySelector.setToDefault();
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) keySelector.setToDefault();
         });
     }
 
     public void addToggle(ToggleSetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(toggle);
         toggles.add(toggle);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action == GLFW.GLFW_PRESS) toggle.setToDefault();
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) toggle.setToDefault();
         });
     }
 
     public void addOption(OptionSetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.35f, 1.0f - 0.15f * settingsCount);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(option);
         options.add(option);
 
-        createResetButton(settingsCount).setAction((Vector2i cursorPos, int button, int action) -> {
-            if (action == GLFW.GLFW_PRESS) option.setToDefault();
+        createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) option.setToDefault();
         });
     }
 
 
     protected UiButton createResetButton(int counter) {
-        Vector2f sizeToParent = new Vector2f(0.1f, 0.1f);
-        Vector2f offsetToParent = new Vector2f(0.225f, 1.0f - 0.15f * counter);
+        Vector2f sizeToParent = new Vector2f(0.1F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.225F, 1.0F - 0.15F * counter);
         UiButton resetButton = new UiButton(sizeToParent, offsetToParent);
 
-        TextElement text = new TextElement(new Vector2f(0.15f, 0.5f), UiMessage.RESET_SETTING);
+        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.RESET_SETTING);
         resetButton.addRenderable(text);
 
         addRenderable(resetButton);
@@ -131,7 +132,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     @Override
     public void setOnTop() {
-        float scroll = input == null ? 0.0f : input.getScroll();
+        float scroll = input == null ? 0.0F : input.getScroll();
         input = new SettingsRenderableInput(this);
         input.setScroll(scroll);
         Window.setInput(input);
@@ -159,8 +160,8 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
     private Clickable getApplyChangesButtonAction() {
-        return (Vector2i pixelCoordinate, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return;
 
             for (Slider slider : sliders) Settings.update(slider.getSetting(), slider.getValue());
             for (KeySelector keySelector : keySelectors) Settings.update(keySelector.getSetting(), keySelector.getValue());
@@ -174,14 +175,14 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     private Clickable getResetSettingsButtonAction() {
         return (Vector2i pixelCoordinate, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return;
             for (UiButton resetButton : resetButtons) resetButton.clickOn(pixelCoordinate, button, action);
         };
     }
 
     private Clickable getBackButtonAction() {
-        return (Vector2i pixelCoordinate, int button, int action) -> {
-            if (action != GLFW.GLFW_PRESS) return;
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return;
 
             for (Slider slider : sliders) slider.matchSetting();
             for (KeySelector keySelector : keySelectors) keySelector.matchSetting();

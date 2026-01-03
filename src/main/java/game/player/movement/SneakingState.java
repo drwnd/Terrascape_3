@@ -8,7 +8,8 @@ import game.utils.Utils;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class SneakingState extends MovementState {
 
@@ -34,7 +35,7 @@ public final class SneakingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.value() && action == GLFW.GLFW_PRESS) {
+        if (key == KeySetting.JUMP.value() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

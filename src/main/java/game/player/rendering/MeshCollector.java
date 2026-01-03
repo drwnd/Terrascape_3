@@ -4,12 +4,12 @@ import game.server.Game;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
-import org.lwjgl.opengl.GL46;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.opengl.GL46.*;
 
 public final class MeshCollector {
 
@@ -168,7 +168,7 @@ public final class MeshCollector {
         int start = allocator.memAlloc(mesh.getOpaqueByteSize());
         if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
 
-        GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
+        glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
         return new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
     }
 
@@ -176,7 +176,7 @@ public final class MeshCollector {
         int start = allocator.memAlloc(mesh.getTransparentByteSize());
         if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
 
-        GL46.glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
+        glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
         return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
     }
 

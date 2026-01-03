@@ -7,25 +7,25 @@ import core.settings.KeySetting;
 import game.server.Game;
 
 import org.joml.Vector3i;
-import org.lwjgl.glfw.GLFW;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW.GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
-        if (action == GLFW.GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.max(0, placeBreakSize - 1);
-        if (action == GLFW.GLFW_PRESS && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW.GLFW_RELEASE && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = null;
+        if (action == GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
+        if (action == GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.max(0, placeBreakSize - 1);
+        if (action == GLFW_PRESS && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = Target.getPlayerTarget();
+        if (action == GLFW_RELEASE && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = null;
 
         if (button == KeySetting.DESTROY.value()) updateInfo(action, destroyInfo);
         if (button == KeySetting.USE.value()) updateInfo(action, useInfo);
     }
 
     public void updateGameTick() {
-        if (!Input.isKeyPressed(KeySetting.DESTROY)) updateInfo(GLFW.GLFW_RELEASE, destroyInfo);
-        if (!Input.isKeyPressed(KeySetting.USE)) updateInfo(GLFW.GLFW_RELEASE, useInfo);
+        if (!Input.isKeyPressed(KeySetting.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
+        if (!Input.isKeyPressed(KeySetting.USE)) updateInfo(GLFW_RELEASE, useInfo);
 
         handleDestroy();
         handleUse();
@@ -75,7 +75,7 @@ public final class InteractionHandler {
     }
 
     private static void updateInfo(int action, PlaceDestroyInfo info) {
-        info.buttonIsHeld = action == GLFW.GLFW_PRESS;
+        info.buttonIsHeld = action == GLFW_PRESS;
         if (info.buttonIsHeld) info.forceAction = true;
     }
 

@@ -3,7 +3,8 @@ package game.menus;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 import org.joml.Vector2i;
-import org.lwjgl.glfw.GLFW;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class StructurePreviewMenuInput extends Input {
 
@@ -27,7 +28,7 @@ public final class StructurePreviewMenuInput extends Input {
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
         menu.hoverOver(cursorPos);
-        if (Input.isKeyPressed(GLFW.GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON))
+        if (Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON))
             menu.dragOver(cursorPos);
     }
 
@@ -43,7 +44,7 @@ public final class StructurePreviewMenuInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) Window.popRenderable();
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Window.popRenderable();
     }
 
     @Override
