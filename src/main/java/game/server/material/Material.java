@@ -22,10 +22,6 @@ public final class Material {
         System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
-    public static byte getTextureIndex(byte material) {
-        return MATERIAL_TEXTURE_INDICES[material & 0xFF];
-    }
-
     public static int getMaterialProperties(byte material) {
         return MATERIAL_PROPERTIES[material & 0xFF];
     }
@@ -39,27 +35,23 @@ public final class Material {
         return MaterialIdentifier.values()[material & 0xFF].name();
     }
 
-    private static void setMaterialData(byte material, byte properties, byte texture) {
-        MATERIAL_TEXTURE_INDICES[material & 0xFF] = texture;
+    private static void setMaterialData(byte material, byte properties) {
         MATERIAL_PROPERTIES[material & 0xFF] = properties;
     }
 
     private static void loadMaterial(MaterialIdentifier identifier, Gson gson) {
-        String json = FileManager.loadFileContents("assets/materials/%s.json".formatted(identifier.name()));
+        String json = FileManager.loadJson("assets/materials/%s.json".formatted(identifier.name()));
         Material material = gson.fromJson(json, Material.class);
-        setMaterialData((byte) identifier.ordinal(), Properties.getCombinedValue(material.properties), material.textureIndex);
+        setMaterialData((byte) identifier.ordinal(), Properties.getCombinedValue(material.properties));
         System.out.println("Loaded Material " + identifier.name());
     }
 
-    private static final byte[] MATERIAL_TEXTURE_INDICES = new byte[AMOUNT_OF_MATERIALS];
     private static final byte[] MATERIAL_PROPERTIES = new byte[AMOUNT_OF_MATERIALS];
 
     private Material() {
     }
 
     // Assigned with json-magic
-    @SuppressWarnings("unused")
-    private byte textureIndex;
     @SuppressWarnings("unused")
     private ArrayList<String> properties;
 }

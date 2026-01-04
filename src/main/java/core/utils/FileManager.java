@@ -77,11 +77,11 @@ public final class FileManager {
         file.delete();
     }
 
-    public static String loadFileContents(String filePath) {
+    public static String loadFileContents(String filepath) {
         String result;
 
         try {
-            InputStream in = new FileInputStream(filePath);
+            InputStream in = new FileInputStream(filepath);
             Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
             result = scanner.useDelimiter("\\A").next();
 
@@ -90,5 +90,19 @@ public final class FileManager {
         }
 
         return result;
+    }
+
+    public static String loadJson(String filepath) {
+        File file = new File(filepath);
+        if (!file.exists()) return "{}";
+
+        InputStream in;
+        try {
+            in = new FileInputStream(filepath);
+        } catch (FileNotFoundException _) {
+            return "{}";
+        }
+        Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
+        return scanner.useDelimiter("\\A").next();
     }
 }
