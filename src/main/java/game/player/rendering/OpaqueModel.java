@@ -20,9 +20,9 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
     public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
+        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_MASK + 1 >> LOD);
         boolean notNull = !isEmpty();
 
         addData(commands, notNull && cameraChunkZ >= modelChunkZ, NORTH);
@@ -35,9 +35,9 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
 
     public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         if (isEmpty()) return;
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_Y_MASK + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_XZ_MASK + 1 >> LOD);
+        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_MASK + 1 >> LOD);
 
         if (cameraChunkZ >= modelChunkZ) addData(commands, NORTH);
         if (cameraChunkY >= modelChunkY) addData(commands, TOP);

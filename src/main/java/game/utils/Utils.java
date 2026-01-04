@@ -9,32 +9,24 @@ import static game.utils.Constants.*;
 
 public final class Utils {
 
-    public static long getChunkId(int chunkX, int chunkY, int chunkZ, int lod) {
-        chunkX &= MAX_CHUNKS_XZ_MASK >> lod;
-        chunkY &= MAX_CHUNKS_Y_MASK >> lod;
-        chunkZ &= MAX_CHUNKS_XZ_MASK >> lod;
-
-        return (long) chunkX << 40 | (long) chunkY << 24 | chunkZ;
-    }
-
     public static int getChunkIndex(int chunkX, int chunkY, int chunkZ, int lod) {
-        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ_MASK >> lod;
-        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_Y_MASK >> lod;
-        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_XZ_MASK >> lod;
+        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
+        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_MASK >> lod;
+        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
 
         return ((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY;
     }
 
     public static boolean outsideChunkKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(chunkX - playerChunkX, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
+        return distance(chunkX - playerChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkY - playerChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
     }
 
     public static boolean outsideRenderKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(playerChunkX - chunkX, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_XZ_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_Y_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
+        return distance(playerChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkY - playerChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
     }
 
     public static boolean isInteger(String string, int radix) {
@@ -48,14 +40,6 @@ public final class Utils {
             if (Character.digit(character, radix) < 0) return false;
         }
         return true;
-    }
-
-    public static int makeEven(int value) {
-        return value & 0xFFFFFFFE;
-    }
-
-    public static int makeOdd(int value) {
-        return value | 1;
     }
 
     public static int min(int a, int b, int c) {
@@ -113,19 +97,24 @@ public final class Utils {
     }
 
     public static int getWrappedPosition(int actualPosition, int reference, int wrappingDistance) {
-        if (actualPosition - reference > wrappingDistance >> 1) return actualPosition - wrappingDistance;
-        if (reference - actualPosition > wrappingDistance >> 1) return actualPosition + wrappingDistance;
+        if (actualPosition - reference > wrappingDistance >>> 1) return actualPosition - wrappingDistance;
+        if (reference - actualPosition > wrappingDistance >>> 1) return actualPosition + wrappingDistance;
         return actualPosition;
     }
 
-    public static int toDisplayXZ(int xz) {
-        if (ToggleSetting.FAKE_COORDINATES.value()) return xz - WORLD_SIZE_XZ / 2;
-        return xz;
+    public static int getWrappedMin(int a, int b, int wrappingDistance) {
+        if (Math.abs(a - b) < wrappingDistance >>> 1) return Math.min(a, b);
+        return Math.max(a, b);
     }
 
-    public static int toDisplayY(int y) {
-        if (ToggleSetting.FAKE_COORDINATES.value()) return y - WORLD_SIZE_Y / 2;
-        return y;
+    public static int getWrappedMax(int a, int b, int wrappingDistance) {
+        if (Math.abs(a - b) < wrappingDistance >>> 1) return Math.max(a, b);
+        return Math.min(a, b);
+    }
+
+    public static int toDisplayCoordinate(int coordinate) {
+        if (ToggleSetting.FAKE_COORDINATES.value()) return coordinate - (WORLD_SIZE >>> 1);
+        return coordinate;
     }
 
     public static Vector3i offsetByNormal(Vector3i value, int side) {
@@ -168,17 +157,17 @@ public final class Utils {
 
     public static Vector3i min(Vector3i a, Vector3i b) {
         return new Vector3i(
-                Math.min(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                Math.min(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                Math.min(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+                getWrappedMin(a.x & WORLD_SIZE_MASK, b.x & WORLD_SIZE_MASK, WORLD_SIZE),
+                getWrappedMin(a.y & WORLD_SIZE_MASK, b.y & WORLD_SIZE_MASK, WORLD_SIZE),
+                getWrappedMin(a.z & WORLD_SIZE_MASK, b.z & WORLD_SIZE_MASK, WORLD_SIZE)
         );
     }
 
     public static Vector3i max(Vector3i a, Vector3i b) {
         return new Vector3i(
-                Math.max(a.x, Utils.getWrappedPosition(b.x, a.x, WORLD_SIZE_XZ)),
-                Math.max(a.y, Utils.getWrappedPosition(b.y, a.y, WORLD_SIZE_Y)),
-                Math.max(a.z, Utils.getWrappedPosition(b.z, a.z, WORLD_SIZE_XZ))
+                getWrappedMax(a.x & WORLD_SIZE_MASK, b.x & WORLD_SIZE_MASK, WORLD_SIZE),
+                getWrappedMax(a.y & WORLD_SIZE_MASK, b.y & WORLD_SIZE_MASK, WORLD_SIZE),
+                getWrappedMax(a.z & WORLD_SIZE_MASK, b.z & WORLD_SIZE_MASK, WORLD_SIZE)
         );
     }
 

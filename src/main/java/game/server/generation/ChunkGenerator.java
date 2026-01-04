@@ -186,13 +186,13 @@ public final class ChunkGenerator {
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y; chunkY < playerChunkY + RENDER_DISTANCE_Y + 1; chunkY++) {
                 try {
                     int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-                    long expectedId = Utils.getChunkId(chunkX, chunkY, chunkZ, lod);
+                    ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
                     Chunk chunk = world.getChunk(chunkIndex, lod);
                     if (chunk == null) {
                         System.err.println("to mesh chunk is null" + chunkX + " " + chunkY + " " + chunkZ + " " + lod);
                         continue;
                     }
-                    if (chunk.ID != expectedId) {
+                    if (!chunk.ID.equals(expectedId)) {
                         System.err.println("Chunk has wrong ID" + chunkX + " " + chunkY + " " + chunkZ + " " + lod + " is " + chunk.ID + " should be " + expectedId);
                         continue;
                     }

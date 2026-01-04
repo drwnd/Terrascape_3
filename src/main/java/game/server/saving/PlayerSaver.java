@@ -58,7 +58,7 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player getDefault() {
-        Vector3i worldCenter = new Vector3i(WORLD_SIZE_XZ / 2, WORLD_SIZE_Y / 2, WORLD_SIZE_XZ / 2);
+        Vector3i worldCenter = new Vector3i(WORLD_SIZE >>> 1, WORLD_SIZE >>> 1, WORLD_SIZE >>> 1);
         return new Player(new Position(worldCenter, new Vector3f()));
     }
 

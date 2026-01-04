@@ -10,16 +10,16 @@ import static game.utils.Constants.*;
 public final class Chunk {
 
     public final int X, Y, Z, LOD;
-    public final long ID;
+    public final ChunkID ID;
     public final int INDEX;
 
     public Chunk(int chunkX, int chunkY, int chunkZ, int lod) {
         materials = new MaterialsData(CHUNK_SIZE_BITS, AIR);
-        X = chunkX & MAX_CHUNKS_XZ_MASK >> lod;
-        Y = chunkY & MAX_CHUNKS_Y_MASK >> lod;
-        Z = chunkZ & MAX_CHUNKS_XZ_MASK >> lod;
+        X = chunkX & MAX_CHUNKS_MASK >> lod;
+        Y = chunkY & MAX_CHUNKS_MASK >> lod;
+        Z = chunkZ & MAX_CHUNKS_MASK >> lod;
         INDEX = Utils.getChunkIndex(X, Y, Z, lod);
-        ID = Utils.getChunkId(X, Y, Z, lod);
+        ID = new ChunkID(X, Y, Z, lod);
         LOD = lod;
     }
 

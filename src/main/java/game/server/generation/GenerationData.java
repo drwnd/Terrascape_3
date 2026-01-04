@@ -28,8 +28,8 @@ public final class GenerationData {
     public GenerationData(int chunkX, int chunkZ, int lod) {
         this.LOD = lod;
 
-        chunkX &= MAX_CHUNKS_XZ_MASK >> lod;
-        chunkZ &= MAX_CHUNKS_XZ_MASK >> lod;
+        chunkX &= MAX_CHUNKS_MASK >> lod;
+        chunkZ &= MAX_CHUNKS_MASK >> lod;
 
         featureMap = featureMap(chunkX, chunkZ, lod);
         treeMap = treeMap(chunkX, chunkZ, lod);
@@ -81,6 +81,9 @@ public final class GenerationData {
 
 
     public static double heightMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double height;
         height = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x08D2BCC9BD98BBF5L, totalX * HEIGHT_MAP_FREQUENCY, totalZ * HEIGHT_MAP_FREQUENCY, 0);
         height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCEC793764665EF7DL, totalX * HEIGHT_MAP_FREQUENCY * 2, totalZ * HEIGHT_MAP_FREQUENCY * 2, 0) * 0.5;
@@ -94,6 +97,9 @@ public final class GenerationData {
     }
 
     public static double continentalMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double continental;
         continental = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCF71B60E764BFC2CL, totalX * CONTINENTAL_FREQUENCY, totalZ * CONTINENTAL_FREQUENCY, 0) * 0.9588;
         continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8EF1C1F90DA10C0AL, totalX * CONTINENTAL_FREQUENCY * 6, totalZ * CONTINENTAL_FREQUENCY * 6, 0) * 0.0411;
@@ -105,6 +111,9 @@ public final class GenerationData {
     }
 
     public static double riverMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double river;
         river = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0) * 0.9588;
         river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7C46A6B469AC4A05L, totalX * RIVER_FREQUENCY * 50, totalZ * RIVER_FREQUENCY * 50, 0) * 0.0411;
@@ -115,6 +124,9 @@ public final class GenerationData {
     }
 
     public static double ridgeMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double ridge;
         ridge = (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0))) * 0.5;
         ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8A3E12DE957E78C5L, totalX * RIDGE_FREQUENCY * 2, totalZ * RIDGE_FREQUENCY * 2, 0))) * 0.25;
@@ -126,6 +138,9 @@ public final class GenerationData {
     }
 
     public static double erosionMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double erosion;
         erosion = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBEF86CF6C75F708DL, totalX * EROSION_FREQUENCY, totalZ * EROSION_FREQUENCY, 0) * 0.9588;
         erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x60E4A215EA2087BCL, totalX * EROSION_FREQUENCY * 40, totalZ * EROSION_FREQUENCY * 40, 0) * 0.0411;
@@ -136,6 +151,9 @@ public final class GenerationData {
     }
 
     public static double temperatureMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double temperature;
         temperature = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xADA1CE5C24C4A44FL, totalX * TEMPERATURE_FREQUENCY, totalZ * TEMPERATURE_FREQUENCY, 0) * 0.8888;
         temperature += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEEA0CB5D51C0A447L, totalX * TEMPERATURE_FREQUENCY * 50, totalZ * TEMPERATURE_FREQUENCY * 50, 0) * 0.1111;
@@ -143,6 +161,9 @@ public final class GenerationData {
     }
 
     public static double humidityMapValue(int totalX, int totalZ) {
+        totalX = clamp(totalX);
+        totalZ = clamp(totalZ);
+
         double humidity;
         humidity = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x41C8F1921D50DF82L, totalX * HUMIDITY_FREQUENCY, totalZ * HUMIDITY_FREQUENCY, 0) * 0.8888;
         humidity += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xB935E00850C8416EL, totalX * HUMIDITY_FREQUENCY * 50, totalZ * HUMIDITY_FREQUENCY * 50, 0) * 0.1111;
@@ -192,9 +213,9 @@ public final class GenerationData {
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
 
-        int treeMinX = Utils.getWrappedPosition(tree.getMinX() & WORLD_SIZE_XZ_MASK, chunkStartX, WORLD_SIZE_XZ);
-        int treeMinY = Utils.getWrappedPosition(tree.getMinY() & WORLD_SIZE_Y_MASK, chunkStartY, WORLD_SIZE_Y);
-        int treeMinZ = Utils.getWrappedPosition(tree.getMinZ() & WORLD_SIZE_XZ_MASK, chunkStartZ, WORLD_SIZE_XZ);
+        int treeMinX = Utils.getWrappedPosition(tree.getMinX() & WORLD_SIZE_MASK, chunkStartX, WORLD_SIZE);
+        int treeMinY = Utils.getWrappedPosition(tree.getMinY() & WORLD_SIZE_MASK, chunkStartY, WORLD_SIZE);
+        int treeMinZ = Utils.getWrappedPosition(tree.getMinZ() & WORLD_SIZE_MASK, chunkStartZ, WORLD_SIZE);
 
         int chunkMaxY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
         if (chunkStartY > tree.getMaxY() || chunkMaxY < treeMinY) return;
@@ -235,7 +256,7 @@ public final class GenerationData {
     public boolean chunkContainsBiome() {
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         int chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
-        return chunkStartY < maxSpecialHeight && chunkEndY > minHeight || chunkStartY < WATER_LEVEL;
+        return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
     }
 
 
@@ -542,8 +563,8 @@ public final class GenerationData {
 
         for (int x = 0; x < sideLength; x++)
             for (int z = 0; z < sideLength; z++) {
-                int totalX = treeStartX + (x << CHUNK_SIZE_BITS) & WORLD_SIZE_XZ_MASK;
-                int totalZ = treeStartZ + (z << CHUNK_SIZE_BITS) & WORLD_SIZE_XZ_MASK;
+                int totalX = treeStartX + (x << CHUNK_SIZE_BITS) & WORLD_SIZE_MASK;
+                int totalZ = treeStartZ + (z << CHUNK_SIZE_BITS) & WORLD_SIZE_MASK;
 
                 treeMap[x * sideLength + z] = treeMapValue(totalX, totalZ);
             }
@@ -608,6 +629,11 @@ public final class GenerationData {
                 max = Math.max(max, height + specialHeightMap[mapX << CHUNK_SIZE_BITS | mapZ]);
             }
         return max;
+    }
+
+    private static int clamp(int coordinate) {
+        if (coordinate < Integer.MIN_VALUE / 2) return Integer.MAX_VALUE;
+        return Math.max(0, coordinate);
     }
 
 

@@ -29,9 +29,9 @@ public final class StructurePlaceable implements Placeable {
         int chunkStartX = position.x >> lod + CHUNK_SIZE_BITS;
         int chunkStartY = position.y >> lod + CHUNK_SIZE_BITS;
         int chunkStartZ = position.z >> lod + CHUNK_SIZE_BITS;
-        int chunkEndX = position.x + structure.sizeX() >> lod + CHUNK_SIZE_BITS;
-        int chunkEndY = position.y + structure.sizeY() >> lod + CHUNK_SIZE_BITS;
-        int chunkEndZ = position.z + structure.sizeZ() >> lod + CHUNK_SIZE_BITS;
+        int chunkEndX = Utils.getWrappedPosition(position.x + structure.sizeX() >> lod + CHUNK_SIZE_BITS, chunkStartX, MAX_CHUNKS_MASK + 1 >> lod);
+        int chunkEndY = Utils.getWrappedPosition(position.y + structure.sizeY() >> lod + CHUNK_SIZE_BITS, chunkStartY, MAX_CHUNKS_MASK + 1 >> lod);
+        int chunkEndZ = Utils.getWrappedPosition(position.z + structure.sizeZ() >> lod + CHUNK_SIZE_BITS, chunkStartZ, MAX_CHUNKS_MASK + 1 >> lod);
         ChunkSaver saver = new ChunkSaver();
 
         for (int chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
@@ -55,9 +55,9 @@ public final class StructurePlaceable implements Placeable {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
 
-        position.x &= WORLD_SIZE_XZ_MASK;
-        position.y &= WORLD_SIZE_Y_MASK;
-        position.z &= WORLD_SIZE_XZ_MASK;
+        position.x &= WORLD_SIZE_MASK;
+        position.y &= WORLD_SIZE_MASK;
+        position.z &= WORLD_SIZE_MASK;
     }
 
     @Override
@@ -85,17 +85,17 @@ public final class StructurePlaceable implements Placeable {
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int positionX = Utils.getWrappedPosition(position.x, chunkStartX, WORLD_SIZE_XZ);
-        int positionY = Utils.getWrappedPosition(position.y, chunkStartY, WORLD_SIZE_Y);
-        int positionZ = Utils.getWrappedPosition(position.z, chunkStartZ, WORLD_SIZE_XZ);
+        int positionX = Utils.getWrappedPosition(position.x, chunkStartX, WORLD_SIZE);
+        int positionY = Utils.getWrappedPosition(position.y, chunkStartY, WORLD_SIZE);
+        int positionZ = Utils.getWrappedPosition(position.z, chunkStartZ, WORLD_SIZE);
 
         int inChunkX = Math.max(chunkStartX, positionX) >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkY = Math.max(chunkStartY, positionY) >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkZ = Math.max(chunkStartZ, positionZ) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int startX = chunkStartX + (inChunkX << chunk.LOD) - positionX;
-        int startY = chunkStartY + (inChunkY << chunk.LOD) - positionY;
-        int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - positionZ;
+        int startX = chunkStartX + (inChunkX << chunk.LOD) - positionX & WORLD_SIZE_MASK >> chunk.LOD;
+        int startY = chunkStartY + (inChunkY << chunk.LOD) - positionY & WORLD_SIZE_MASK >> chunk.LOD;
+        int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - positionZ & WORLD_SIZE_MASK >> chunk.LOD;
 
         int lengthX = Utils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
         int lengthY = Utils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());

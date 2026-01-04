@@ -500,7 +500,9 @@ public final class Renderer extends Renderable {
         Vector3i minPosition = Utils.min(startPositon, endPosition);
         Vector3i maxPosition = Utils.max(startPositon, endPosition);
         CuboidPlaceable.offsetPositions(minPosition, maxPosition);
+
         maxPosition.add(1, 1, 1);
+        maxPosition.set(maxPosition.x & WORLD_SIZE_MASK, maxPosition.y & WORLD_SIZE_MASK, maxPosition.z & WORLD_SIZE_MASK);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);

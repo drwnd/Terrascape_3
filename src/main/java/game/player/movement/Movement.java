@@ -82,8 +82,8 @@ public final class Movement {
         int depth = hitboxSize.z + 1;
         int y = position.intY - 1;
 
-        for (int x = minX; x < minX + width; x++)
-            for (int z = minZ; z < minZ + depth; z++) {
+        for (int x = minX; x != minX + width; x++)
+            for (int z = minZ; z != minZ + depth; z++) {
                 byte material = world.getMaterial(x, y, z, 0);
                 if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
             }
@@ -163,9 +163,9 @@ public final class Movement {
         int height = hitboxSize.y;
         int depth = component == Z_COMPONENT ? 1 : hitboxSize.z + 1;
 
-        for (int y = startY + height - 1; y >= startY; y--)
-            for (int x = startX; x < startX + width; x++)
-                for (int z = startZ; z < startZ + depth; z++) {
+        for (int y = startY + height - 1; y != startY - 1; y--)
+            for (int x = startX; x != startX + width; x++)
+                for (int z = startZ; z != startZ + depth; z++) {
                     byte material = world.getMaterial(x, y, z, 0);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return (y - position.intY + 1) - position.fractionY;
                 }
@@ -273,9 +273,9 @@ public final class Movement {
     private static boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
         World world = Game.getWorld();
 
-        for (int x = startX; x < startX + width; x++)
-            for (int y = startY; y < startY + height; y++)
-                for (int z = startZ; z < startZ + depth; z++) {
+        for (int x = startX; x != startX + width; x++)
+            for (int y = startY; y != startY + height; y++)
+                for (int z = startZ; z != startZ + depth; z++) {
                     byte material = world.getMaterial(x, y, z, 0);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }

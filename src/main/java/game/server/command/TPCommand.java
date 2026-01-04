@@ -64,14 +64,14 @@ final class TPCommand {
 
         if (tokens.getIncrementKeyword() instanceof KeywordToken(String keyword)) {
             if ("fake".equalsIgnoreCase(keyword)) {
-                if (xAbsolute) intX = toFakeXZ(intX);
-                if (yAbsolute) intY = toFakeY(intY);
-                if (zAbsolute) intZ = toFakeXZ(intZ);
+                if (xAbsolute) intX = toFakeCoordinate(intX);
+                if (yAbsolute) intY = toFakeCoordinate(intY);
+                if (zAbsolute) intZ = toFakeCoordinate(intZ);
             } else if (!"real".equalsIgnoreCase(keyword)) return CommandResult.fail("Unrecognized Coordinate type " + keyword);
         } else if (ToggleSetting.FAKE_COORDINATES.value()) {
-            if (xAbsolute) intX = toFakeXZ(intX);
-            if (yAbsolute) intY = toFakeY(intY);
-            if (zAbsolute) intZ = toFakeXZ(intZ);
+            if (xAbsolute) intX = toFakeCoordinate(intX);
+            if (yAbsolute) intY = toFakeCoordinate(intY);
+            if (zAbsolute) intZ = toFakeCoordinate(intZ);
         }
 
         tokens.expectFinishedLessEqual();
@@ -82,11 +82,7 @@ final class TPCommand {
         return CommandResult.success();
     }
 
-    private static int toFakeXZ(int xz) {
-        return xz - WORLD_SIZE_XZ / 2;
-    }
-
-    private static int toFakeY(int y) {
-        return y - WORLD_SIZE_Y / 2;
+    private static int toFakeCoordinate(int coordinate) {
+        return coordinate - (WORLD_SIZE >>> 1);
     }
 }

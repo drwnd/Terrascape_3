@@ -84,17 +84,17 @@ vec3 getFacePositions(int side, int currentVertexId) {
     return vec3(0, 0, 0);
 }
 
-int getWrappedPosition(int actualPosition, int reference, int wrappingDistance) {
-    if (actualPosition - reference > wrappingDistance >> 1) return actualPosition - wrappingDistance;
-    if (reference - actualPosition > wrappingDistance >> 1) return actualPosition + wrappingDistance;
+int getWrappedPosition(int actualPosition, int reference) {
+    if (actualPosition - reference > 1 << 30) return actualPosition - (1 << 31);
+    if (reference - actualPosition > 1 << 30) return actualPosition + (1 << 31);
     return actualPosition;
 }
 
 ivec3 getWrappedPosition(ivec3 worldPos) {
     return ivec3(
-    getWrappedPosition(worldPos.x, iCameraPosition.x, 1 << 30),
-    getWrappedPosition(worldPos.y, iCameraPosition.y, 1 << 22),
-    getWrappedPosition(worldPos.z, iCameraPosition.z, 1 << 30)
+    getWrappedPosition(worldPos.x, iCameraPosition.x),
+    getWrappedPosition(worldPos.y, iCameraPosition.y),
+    getWrappedPosition(worldPos.z, iCameraPosition.z)
     ) - iCameraPosition;
 }
 

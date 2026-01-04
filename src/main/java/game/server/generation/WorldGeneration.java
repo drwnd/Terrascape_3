@@ -10,7 +10,8 @@ import static game.utils.Constants.*;
 
 public final class WorldGeneration {
 
-    public static final int WATER_LEVEL = 1 << 21;
+    public static final int WATER_LEVEL = WORLD_SIZE >>> 1;
+    public static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
     public static long SEED;
 
     public static void generate(Chunk chunk) {
@@ -218,7 +219,6 @@ public final class WorldGeneration {
     }
 
 
-    private static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
     private static final int OCEAN_FLOOR_OFFSET = -480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
     private static final int FLATLAND_OFFSET = 130;

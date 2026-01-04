@@ -58,17 +58,17 @@ public record Target(Vector3i position, int side, byte material) {
                 return new Target(new Vector3i(x, y, z), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {
-                x = x + xDir & WORLD_SIZE_XZ_MASK;
+                x = x + xDir & WORLD_SIZE_MASK;
                 length = lengthX;
                 lengthX += xUnit;
                 intersectedSide = xSide;
             } else if (lengthZ < lengthX && lengthZ < lengthY) {
-                z = z + zDir & WORLD_SIZE_XZ_MASK;
+                z = z + zDir & WORLD_SIZE_MASK;
                 length = lengthZ;
                 lengthZ += zUnit;
                 intersectedSide = zSide;
             } else {
-                y = y + yDir & WORLD_SIZE_Y_MASK;
+                y = y + yDir & WORLD_SIZE_MASK;
                 length = lengthY;
                 lengthY += yUnit;
                 intersectedSide = ySide;
@@ -79,13 +79,20 @@ public record Target(Vector3i position, int side, byte material) {
 
 
     public Vector3i offsetPosition() {
-        return Utils.offsetByNormal(new Vector3i(position), side);
+        return Utils.offsetByNormal(position(), side);
+    }
+
+    public Vector3i position() {
+        return new Vector3i(
+                position.x & WORLD_SIZE_MASK,
+                position.y & WORLD_SIZE_MASK,
+                position.z & WORLD_SIZE_MASK);
     }
 
     public String string() {
         return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s".formatted(
-                Utils.toDisplayXZ(position.x),
-                Utils.toDisplayY(position.y),
-                Utils.toDisplayXZ(position.z), side, Material.getSystemName(material));
+                Utils.toDisplayCoordinate(position.x),
+                Utils.toDisplayCoordinate(position.y),
+                Utils.toDisplayCoordinate(position.z), side, Material.getSystemName(material));
     }
 }

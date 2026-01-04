@@ -247,9 +247,9 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs((cameraChunkX >> lod) - lodModelX);
-        int distanceY = Math.abs((cameraChunkY >> lod) - lodModelY);
-        int distanceZ = Math.abs((cameraChunkZ >> lod) - lodModelZ);
+        int distanceX = Math.abs(Utils.getWrappedPosition(lodModelX, cameraChunkX >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkX >> lod));
+        int distanceY = Math.abs(Utils.getWrappedPosition(lodModelY, cameraChunkY >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkY >> lod));
+        int distanceZ = Math.abs(Utils.getWrappedPosition(lodModelZ, cameraChunkZ >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkZ >> lod));
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
