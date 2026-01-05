@@ -118,6 +118,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addOption(OptionSetting.LANGUAGE, UiMessage.LANGUAGE);
         section.addOption(OptionSetting.FONT, UiMessage.FONT);
+        section.addOption(OptionSetting.TEXTURE_PACK, UiMessage.TEXTURE_PACK);
 
         section.addSlider(FloatSetting.GUI_SIZE, UiMessage.GUI_SIZE);
         section.addSlider(FloatSetting.TEXT_SIZE, UiMessage.TEXT_SIZE);

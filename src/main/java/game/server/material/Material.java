@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import core.assets.AssetManager;
 import core.utils.FileManager;
 
-import game.assets.TextureArrays;
-
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
@@ -14,8 +12,7 @@ public final class Material {
 
     public static void loadMaterials() {
         long start = System.nanoTime();
-        AssetManager.reload(TextureArrays.MATERIALS);
-        AssetManager.reload(TextureArrays.PROPERTIES);
+        AssetManager.reload();
 
         Gson gson = new Gson();
         for (MaterialIdentifier identifier : MaterialIdentifier.values()) loadMaterial(identifier, gson);

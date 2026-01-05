@@ -40,7 +40,8 @@ public enum OptionSetting {
     BUFFER_STORAGE_COLOR(ColorOption.ORANGE),
 
     FONT(new FontOption("Default")),
-    LANGUAGE(new Language("English"));
+    LANGUAGE(new Language("English")),
+    TEXTURE_PACK(new TexturePack("Default"));
 
     public static void setIfPresent(String name, String value) {
         try {

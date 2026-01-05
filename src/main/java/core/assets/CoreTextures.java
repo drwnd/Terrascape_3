@@ -4,10 +4,10 @@ import core.assets.identifiers.TextureIdentifier;
 
 public enum CoreTextures implements TextureIdentifier {
 
-    GUI_ELEMENT_BACKGROUND("assets/textures/GuiElementBackground.png"),
-    TOGGLE_ACTIVATED("assets/textures/ToggleActivated.png"),
-    TOGGLE_DEACTIVATED("assets/textures/ToggleDeactivated.png"),
-    OVERLAY("assets/textures/InventoryOverlay.png");
+    GUI_ELEMENT_BACKGROUND("GuiElementBackground.png"),
+    TOGGLE_ACTIVATED("ToggleActivated.png"),
+    TOGGLE_DEACTIVATED("ToggleDeactivated.png"),
+    OVERLAY("InventoryOverlay.png");
 
 
     CoreTextures(String filepath) {
@@ -15,7 +15,7 @@ public enum CoreTextures implements TextureIdentifier {
     }
 
     @Override
-    public String filepath() {
+    public String fileName() {
         return filepath;
     }
 

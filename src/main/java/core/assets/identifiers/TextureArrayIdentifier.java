@@ -1,14 +1,10 @@
 package core.assets.identifiers;
 
-import core.assets.AssetGenerator;
-import core.assets.TextureArray;
-import core.assets.TextureArrayGenerator;
+import core.utils.FileIndexSet;
 
-public interface TextureArrayIdentifier extends AssetIdentifier<TextureArray> {
+public interface TextureArrayIdentifier {
 
-    TextureArrayGenerator getGenerator();
+    String folderName();
 
-    default AssetGenerator<TextureArray> getAssetGenerator() {
-        return () -> getGenerator().generate();
-    }
+    FileIndexSet indexSet();
 }

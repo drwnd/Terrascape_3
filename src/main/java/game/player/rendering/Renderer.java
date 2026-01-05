@@ -17,6 +17,7 @@ import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.FontOption;
 
+import core.settings.optionSettings.TexturePack;
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
@@ -87,7 +88,7 @@ public final class Renderer extends Renderable {
 
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
-        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
+        TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -108,11 +109,11 @@ public final class Renderer extends Renderable {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.getID());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.PROPERTIES).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.PROPERTIES)).getID());
     }
 
     public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
-        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
+        TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -135,7 +136,7 @@ public final class Renderer extends Renderable {
     }
 
     public static void setUpGlassRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
-        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
+        TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
@@ -320,8 +321,8 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
-        shader.setUniform("textureAtlas1", 0);
-        shader.setUniform("textureAtlas2", 1);
+        shader.setUniform("dayTexture", 0);
+        shader.setUniform("nightTexture", 1);
         shader.setUniform("time", getRenderTime());
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
 
@@ -330,9 +331,9 @@ public final class Renderer extends Renderable {
         glEnableVertexAttribArray(1);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get(Textures.NIGHT_SKY).getID());
+        glBindTexture(GL_TEXTURE_2D, AssetManager.get(TexturePack.get(Textures.DAY_SKY)).getID());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get(Textures.DAY_SKY).getID());
+        glBindTexture(GL_TEXTURE_2D, AssetManager.get(TexturePack.get(Textures.NIGHT_SKY)).getID());
 
         glDepthMask(false);
         glDisable(GL_DEPTH_TEST);
@@ -510,7 +511,7 @@ public final class Renderer extends Renderable {
         glEnable(GL_BLEND);
         glDepthMask(false);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.MATERIALS)).getID());
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
         shader.bind();
@@ -638,7 +639,7 @@ public final class Renderer extends Renderable {
         glEnable(GL_BLEND);
         glDepthMask(false);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).getID());
+        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.MATERIALS)).getID());
 
         shader.setUniform("iCameraPosition",
                 cameraPositon.intX & ~CHUNK_SIZE_MASK,

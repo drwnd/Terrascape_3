@@ -1,6 +1,9 @@
 package core.settings.optionSettings;
 
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.AssetGenerator;
+import core.assets.AssetLoader;
+import core.assets.Texture;
+import core.assets.identifiers.AssetIdentifier;
 import core.utils.FileManager;
 
 import org.joml.Vector2f;
@@ -8,7 +11,7 @@ import org.joml.Vector2f;
 import java.io.File;
 import java.util.Arrays;
 
-public final class FontOption implements Option, TextureIdentifier {
+public final class FontOption implements Option, AssetIdentifier<Texture> {
 
     public FontOption(String fontName) {
         this(new File("assets/fonts/" + fontName));
@@ -76,15 +79,18 @@ public final class FontOption implements Option, TextureIdentifier {
     }
 
     @Override
-    public String filepath() {
-        return fontFile.getPath() + "/Atlas.png";
-    }
-
-    @Override
     public String toString() {
         return name();
     }
 
+    @Override
+    public AssetGenerator<Texture> getAssetGenerator() {
+        return () -> AssetLoader.loadTexture2D(filepath());
+    }
+
+    private String filepath() {
+        return fontFile.getPath() + "/Atlas.png";
+    }
 
     private final byte[] charSizes = new byte[256];
     private final Vector2f defaultTextSize = new Vector2f();

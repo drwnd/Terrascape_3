@@ -6,6 +6,7 @@ import core.assets.CoreShaders;
 import core.assets.CoreTextures;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.ToggleSetting;
+import core.settings.optionSettings.TexturePack;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -45,7 +46,7 @@ public final class Toggle extends UiButton {
         size = new Vector2f(size).mul(0.2F, 0.7F);
 
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
-        Texture texture = AssetManager.get(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED);
+        Texture texture = AssetManager.get(TexturePack.get(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED));
         shader.bind();
         shader.drawQuad(position, size, texture);
     }

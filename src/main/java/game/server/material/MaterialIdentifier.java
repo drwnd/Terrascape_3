@@ -1,6 +1,8 @@
 package game.server.material;
 
-public enum MaterialIdentifier {
+import core.utils.StringGetter;
+
+public enum MaterialIdentifier implements StringGetter {
 
     AIR,
     OUT_OF_WORLD,
@@ -141,6 +143,10 @@ public enum MaterialIdentifier {
     YELLOW_LIGHT,
     MAGENTA_LIGHT,
     CYAN_LIGHT,
-    WHITE_LIGHT
-    
+    WHITE_LIGHT;
+
+    @Override
+    public String get() {
+        return name();
+    }
 }

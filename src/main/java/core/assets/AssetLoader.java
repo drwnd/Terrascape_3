@@ -1,7 +1,6 @@
 package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
-import core.assets.identifiers.TextureIdentifier;
 import core.rendering_api.shaders.TextShader;
 
 import org.lwjgl.stb.STBImage;
@@ -29,7 +28,10 @@ public final class AssetLoader {
             IntBuffer c = stack.mallocInt(1);
 
             buffer = STBImage.stbi_load(filepath, w, h, c, 4);
-            if (buffer == null) throw new RuntimeException("Image File " + filepath + " not loaded " + STBImage.stbi_failure_reason());
+            if (buffer == null) {
+                System.err.println("Image File " + filepath + " not loaded " + STBImage.stbi_failure_reason());
+                return new Texture(0);
+            }
 
             width = w.get();
             height = h.get();
@@ -44,10 +46,6 @@ public final class AssetLoader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         STBImage.stbi_image_free(buffer);
         return new Texture(id, width, height);
-    }
-
-    public static Texture loadTexture2D(TextureIdentifier identifier) {
-        return loadTexture2D(identifier.filepath());
     }
 
     public static GuiElement loadGuiElement(GuiElementIdentifier identifier) {

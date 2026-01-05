@@ -112,8 +112,13 @@ final class SettingCommand {
     }
 
     private static CommandResult set(OptionSetting setting, Token value) {
-        if (!(value instanceof KeywordToken(String keyword))) return CommandResult.fail("Value must be a keyword for that setting");
-        Option option = setting.value().value(keyword);
+        String optionValue;
+
+        if (value instanceof KeywordToken(String keyword)) optionValue = keyword;
+        else if (value instanceof StringToken(String string)) optionValue = string;
+        else return CommandResult.fail("Value must be a keyword or a string for that setting");
+
+        Option option = setting.value().value(optionValue);
         Settings.update(setting, option);
         return CommandResult.success();
     }

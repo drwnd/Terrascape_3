@@ -1,8 +1,6 @@
 package core.rendering_api.shaders;
 
-import core.assets.AssetManager;
-import core.assets.CoreBuffers;
-import core.assets.CoreVertexArrays;
+import core.assets.*;
 import core.assets.identifiers.*;
 import core.settings.FloatSetting;
 import core.settings.OptionSetting;
@@ -30,6 +28,7 @@ public class TextShader extends Shader {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    @SuppressWarnings("unchecked")
     public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
         float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
 
@@ -41,7 +40,7 @@ public class TextShader extends Shader {
         setUniform("addTransparentBackground", addTransparentBackground);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get((TextureIdentifier) OptionSetting.FONT.value()).getID());
+        glBindTexture(GL_TEXTURE_2D, AssetManager.get((AssetIdentifier<Texture>) OptionSetting.FONT.value()).getID());
         glBindVertexArray(AssetManager.get(CoreVertexArrays.TEXT_ROW).getID());
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).getID());
