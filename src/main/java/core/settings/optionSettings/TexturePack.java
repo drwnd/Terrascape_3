@@ -76,10 +76,10 @@ public final class TexturePack implements Option {
 
         for (int index = 0; index < textures.length; index++) {
             String fileName = indexSet.getFileName(index);
-            String template = basepath;
-            if (!new File(template + fileName).exists()) template = DEFAULT_PATH_TEMPLATE + folderName + '/';
+            String filepath = basepath + fileName;
+            if (!new File(filepath).exists()) filepath = DEFAULT_PATH_TEMPLATE + folderName + '/' + fileName;
 
-            textures[index] = AssetManager.get(new TextureAssetIdentifier(fileName, template));
+            textures[index] = AssetLoader.loadTexture2D(filepath);
         }
         return textures;
     }
