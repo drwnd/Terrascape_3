@@ -10,7 +10,7 @@ import static game.utils.Constants.*;
 
 public final class WorldGeneration {
 
-    public static final int WATER_LEVEL = WORLD_SIZE >>> 1;
+    public static final int WATER_LEVEL = 0;
     public static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
     public static long SEED;
 

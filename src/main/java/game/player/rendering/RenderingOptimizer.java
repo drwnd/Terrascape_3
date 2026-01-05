@@ -66,9 +66,9 @@ public final class RenderingOptimizer {
         meshCollector = player.getMeshCollector();
         Vector3i position = cameraPosition.intPosition();
 
-        cameraChunkX = position.x >> CHUNK_SIZE_BITS;
-        cameraChunkY = position.y >> CHUNK_SIZE_BITS;
-        cameraChunkZ = position.z >> CHUNK_SIZE_BITS;
+        cameraChunkX = position.x >>> CHUNK_SIZE_BITS;
+        cameraChunkY = position.y >>> CHUNK_SIZE_BITS;
+        cameraChunkZ = position.z >>> CHUNK_SIZE_BITS;
         cameraX = position.x;
         cameraY = position.y;
         cameraZ = position.z;
@@ -247,9 +247,9 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs(Utils.getWrappedPosition(lodModelX, cameraChunkX >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkX >> lod));
-        int distanceY = Math.abs(Utils.getWrappedPosition(lodModelY, cameraChunkY >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkY >> lod));
-        int distanceZ = Math.abs(Utils.getWrappedPosition(lodModelZ, cameraChunkZ >> lod, MAX_CHUNKS_MASK + 1 >> lod) - (cameraChunkZ >> lod));
+        int distanceX = Math.abs(Utils.getWrappedChunkCoordinate(lodModelX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod));
+        int distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
+        int distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }

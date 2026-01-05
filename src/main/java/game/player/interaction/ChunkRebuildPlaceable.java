@@ -20,13 +20,13 @@ public final class ChunkRebuildPlaceable implements Placeable {
     public void place(Vector3i position, int lod) {
         affectedChunks.clear();
         if (lod == 0) {
-            Chunk toPlaceChunk = new Chunk(position.x >> CHUNK_SIZE_BITS, position.y >> CHUNK_SIZE_BITS, position.z >> CHUNK_SIZE_BITS, 0);
+            Chunk toPlaceChunk = new Chunk(position.x >>> CHUNK_SIZE_BITS, position.y >>> CHUNK_SIZE_BITS, position.z >>> CHUNK_SIZE_BITS, 0);
             WorldGeneration.generate(toPlaceChunk);
             this.toPlaceChunk = new Structure(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, toPlaceChunk.getMaterials());
         }
-        int chunkX = position.x >> CHUNK_SIZE_BITS + lod;
-        int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
-        int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
+        int chunkX = position.x >>> CHUNK_SIZE_BITS + lod;
+        int chunkY = position.y >>> CHUNK_SIZE_BITS + lod;
+        int chunkZ = position.z >>> CHUNK_SIZE_BITS + lod;
 
         Chunk chunk = new ChunkSaver().loadAndGenerate(chunkX, chunkY, chunkZ, lod);
 

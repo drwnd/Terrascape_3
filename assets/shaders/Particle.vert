@@ -84,20 +84,6 @@ vec3 getFacePositions(int side, int currentVertexId) {
     return vec3(0, 0, 0);
 }
 
-int getWrappedPosition(int actualPosition, int reference) {
-    if (actualPosition - reference > 1 << 30) return actualPosition - (1 << 31);
-    if (reference - actualPosition > 1 << 30) return actualPosition + (1 << 31);
-    return actualPosition;
-}
-
-ivec3 getWrappedPosition(ivec3 worldPos) {
-    return ivec3(
-    getWrappedPosition(worldPos.x, iCameraPosition.x),
-    getWrappedPosition(worldPos.y, iCameraPosition.y),
-    getWrappedPosition(worldPos.z, iCameraPosition.z)
-    ) - iCameraPosition;
-}
-
 vec3 rotate(vec3 vector, Particle currentParticle, float aliveTime) {
     vec2 rotation = getRotationSpeed(currentParticle) * aliveTime;
 
@@ -123,7 +109,7 @@ void main() {
     float aliveTime = getAliveTime(currentParticle);
     float timeScaler = getTimeScaler(currentParticle);
 
-    ivec3 wrappedPositon = getWrappedPosition(ivec3(x, y, z));
+    ivec3 wrappedPositon = ivec3(x, y, z) - iCameraPosition;
     vec3 facePosition = getFacePositions(side, currentVertexId);
     vec3 position = vec3(wrappedPositon) + rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime) + vec3(timeScaler * 0.5);
     position += getVelocity(currentParticle) * aliveTime;

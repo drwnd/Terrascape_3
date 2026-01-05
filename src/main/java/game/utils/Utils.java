@@ -1,7 +1,5 @@
 package game.utils;
 
-import core.settings.ToggleSetting;
-
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -96,25 +94,11 @@ public final class Utils {
         return powOf2;
     }
 
-    public static int getWrappedPosition(int actualPosition, int reference, int wrappingDistance) {
-        if (actualPosition - reference > wrappingDistance >>> 1) return actualPosition - wrappingDistance;
-        if (reference - actualPosition > wrappingDistance >>> 1) return actualPosition + wrappingDistance;
+    public static int getWrappedChunkCoordinate(int actualPosition, int reference, int lod) {
+        int maxChunks = MAX_CHUNKS_MASK + 1 >> lod;
+        if (actualPosition - reference > maxChunks >>> 1) return actualPosition - maxChunks;
+        if (reference - actualPosition > maxChunks >>> 1) return actualPosition + maxChunks;
         return actualPosition;
-    }
-
-    public static int getWrappedMin(int a, int b, int wrappingDistance) {
-        if (Math.abs(a - b) < wrappingDistance >>> 1) return Math.min(a, b);
-        return Math.max(a, b);
-    }
-
-    public static int getWrappedMax(int a, int b, int wrappingDistance) {
-        if (Math.abs(a - b) < wrappingDistance >>> 1) return Math.max(a, b);
-        return Math.min(a, b);
-    }
-
-    public static int toDisplayCoordinate(int coordinate) {
-        if (ToggleSetting.FAKE_COORDINATES.value()) return coordinate - (WORLD_SIZE >>> 1);
-        return coordinate;
     }
 
     public static Vector3i offsetByNormal(Vector3i value, int side) {
@@ -157,17 +141,17 @@ public final class Utils {
 
     public static Vector3i min(Vector3i a, Vector3i b) {
         return new Vector3i(
-                getWrappedMin(a.x & WORLD_SIZE_MASK, b.x & WORLD_SIZE_MASK, WORLD_SIZE),
-                getWrappedMin(a.y & WORLD_SIZE_MASK, b.y & WORLD_SIZE_MASK, WORLD_SIZE),
-                getWrappedMin(a.z & WORLD_SIZE_MASK, b.z & WORLD_SIZE_MASK, WORLD_SIZE)
+                getWrappedMin(a.x, b.x),
+                getWrappedMin(a.y, b.y),
+                getWrappedMin(a.z, b.z)
         );
     }
 
     public static Vector3i max(Vector3i a, Vector3i b) {
         return new Vector3i(
-                getWrappedMax(a.x & WORLD_SIZE_MASK, b.x & WORLD_SIZE_MASK, WORLD_SIZE),
-                getWrappedMax(a.y & WORLD_SIZE_MASK, b.y & WORLD_SIZE_MASK, WORLD_SIZE),
-                getWrappedMax(a.z & WORLD_SIZE_MASK, b.z & WORLD_SIZE_MASK, WORLD_SIZE)
+                getWrappedMax(a.x, b.x),
+                getWrappedMax(a.y, b.y),
+                getWrappedMax(a.z, b.z)
         );
     }
 
@@ -224,6 +208,16 @@ public final class Utils {
     private static int distance(int distance, int maxMask) {
         distance = Math.abs(distance) & maxMask;
         return Math.min(distance, maxMask + 1 - distance);
+    }
+
+    private static int getWrappedMin(int a, int b) {
+        if (Math.abs((long) a - b) > 1L << 31) return Math.max(a, b);
+        return Math.min(a, b);
+    }
+
+    private static int getWrappedMax(int a, int b) {
+        if (Math.abs((long) a - b) > 1L << 31) return Math.min(a, b);
+        return Math.max(a, b);
     }
 
     private Utils() {

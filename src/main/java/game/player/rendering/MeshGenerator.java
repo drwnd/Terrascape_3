@@ -65,9 +65,9 @@ public final class MeshGenerator {
         for (xStart = 0; xStart < endX; xStart += CHUNK_SIZE)
             for (yStart = 0; yStart < endY; yStart += CHUNK_SIZE)
                 for (zStart = 0; zStart < endZ; zStart += CHUNK_SIZE) {
-                    int chunkX = xStart >> CHUNK_SIZE_BITS;
-                    int chunkY = yStart >> CHUNK_SIZE_BITS;
-                    int chunkZ = zStart >> CHUNK_SIZE_BITS;
+                    int chunkX = xStart >>> CHUNK_SIZE_BITS;
+                    int chunkY = yStart >>> CHUNK_SIZE_BITS;
+                    int chunkZ = zStart >>> CHUNK_SIZE_BITS;
                     structure.materials().fillUncompressedMaterialsInto(materials,
                             0, 0, 0,
                             xStart, yStart, zStart,

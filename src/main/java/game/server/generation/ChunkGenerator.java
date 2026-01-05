@@ -24,9 +24,9 @@ public final class ChunkGenerator {
     public static void loadImmediateSurroundings() {
         Vector3i playerPosition = Game.getPlayer().getPosition().intPosition();
 
-        int playerChunkX = playerPosition.x >> CHUNK_SIZE_BITS;
-        int playerChunkY = playerPosition.y >> CHUNK_SIZE_BITS;
-        int playerChunkZ = playerPosition.z >> CHUNK_SIZE_BITS;
+        int playerChunkX = playerPosition.x >>> CHUNK_SIZE_BITS;
+        int playerChunkY = playerPosition.y >>> CHUNK_SIZE_BITS;
+        int playerChunkZ = playerPosition.z >>> CHUNK_SIZE_BITS;
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
         executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0));

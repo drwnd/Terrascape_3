@@ -20,36 +20,36 @@ public final class Position {
     }
 
     public Position(int intX, int intY, int intZ, float fractionX, float fractionY, float fractionZ) {
-        this.intX = intX & WORLD_SIZE_MASK;
-        this.intY = intY & WORLD_SIZE_MASK;
-        this.intZ = intZ & WORLD_SIZE_MASK;
+        this.intX = intX;
+        this.intY = intY;
+        this.intZ = intZ;
         this.fractionX = fractionX;
         this.fractionY = fractionY;
         this.fractionZ = fractionZ;
     }
 
     public Position(Vector3i intPosition, Vector3f fractionPosition) {
-        this.intX = intPosition.x & WORLD_SIZE_MASK;
-        this.intY = intPosition.y & WORLD_SIZE_MASK;
-        this.intZ = intPosition.z & WORLD_SIZE_MASK;
+        this.intX = intPosition.x;
+        this.intY = intPosition.y;
+        this.intZ = intPosition.z;
         this.fractionX = fractionPosition.x;
         this.fractionY = fractionPosition.y;
         this.fractionZ = fractionPosition.z;
     }
 
     public Position(Position position) {
-        this.intX = position.intX & WORLD_SIZE_MASK;
-        this.intY = position.intY & WORLD_SIZE_MASK;
-        this.intZ = position.intZ & WORLD_SIZE_MASK;
+        this.intX = position.intX;
+        this.intY = position.intY;
+        this.intZ = position.intZ;
         this.fractionX = position.fractionX;
         this.fractionY = position.fractionY;
         this.fractionZ = position.fractionZ;
     }
 
     public Position set(Position position) {
-        this.intX = position.intX & WORLD_SIZE_MASK;
-        this.intY = position.intY & WORLD_SIZE_MASK;
-        this.intZ = position.intZ & WORLD_SIZE_MASK;
+        this.intX = position.intX;
+        this.intY = position.intY;
+        this.intZ = position.intZ;
         this.fractionX = position.fractionX;
         this.fractionY = position.fractionY;
         this.fractionZ = position.fractionZ;
@@ -62,9 +62,9 @@ public final class Position {
         fractionY += y;
         fractionZ += z;
 
-        intX = intX + Utils.floor(fractionX) & WORLD_SIZE_MASK;
-        intY = intY + Utils.floor(fractionY) & WORLD_SIZE_MASK;
-        intZ = intZ + Utils.floor(fractionZ) & WORLD_SIZE_MASK;
+        intX = intX + Utils.floor(fractionX);
+        intY = intY + Utils.floor(fractionY);
+        intZ = intZ + Utils.floor(fractionZ);
 
         fractionX = Utils.fraction(fractionX);
         fractionY = Utils.fraction(fractionY);
@@ -78,17 +78,17 @@ public final class Position {
         switch (component) {
             case X_COMPONENT -> {
                 fractionX += value;
-                intX = intX + Utils.floor(fractionX) & WORLD_SIZE_MASK;
+                intX = intX + Utils.floor(fractionX);
                 fractionX = Utils.fraction(fractionX);
             }
             case Y_COMPONENT -> {
                 fractionY += value;
-                intY = intY + Utils.floor(fractionY) & WORLD_SIZE_MASK;
+                intY = intY + Utils.floor(fractionY);
                 fractionY = Utils.fraction(fractionY);
             }
             case Z_COMPONENT -> {
                 fractionZ += value;
-                intZ = intZ + Utils.floor(fractionZ) & WORLD_SIZE_MASK;
+                intZ = intZ + Utils.floor(fractionZ);
                 fractionZ = Utils.fraction(fractionZ);
             }
         }
@@ -98,9 +98,9 @@ public final class Position {
 
     public Vector3f vectorFrom(Position position) {
         return new Vector3f(
-                (Utils.getWrappedPosition(intX, position.intX, WORLD_SIZE) - position.intX) + (fractionX - position.fractionX),
-                (Utils.getWrappedPosition(intY, position.intY, WORLD_SIZE) - position.intY) + (fractionY - position.fractionY),
-                (Utils.getWrappedPosition(intZ, position.intZ, WORLD_SIZE) - position.intZ) + (fractionZ - position.fractionZ)
+                (intX - position.intX) + (fractionX - position.fractionX),
+                (intY - position.intY) + (fractionY - position.fractionY),
+                (intZ - position.intZ) + (fractionZ - position.fractionZ)
         );
     }
 
@@ -109,7 +109,7 @@ public final class Position {
     }
 
     public Vector3i getChunkCoordinate() {
-        return new Vector3i(intX >> CHUNK_SIZE_BITS, intY >> CHUNK_SIZE_BITS, intZ >> CHUNK_SIZE_BITS);
+        return new Vector3i(intX >>> CHUNK_SIZE_BITS, intY >>> CHUNK_SIZE_BITS, intZ >>> CHUNK_SIZE_BITS);
     }
 
     public Vector3i intPosition() {
@@ -121,16 +121,16 @@ public final class Position {
     }
 
     public boolean sharesChunkWith(Position position) {
-        return intX >> CHUNK_SIZE_BITS == position.intX >> CHUNK_SIZE_BITS
-                && intY >> CHUNK_SIZE_BITS == position.intY >> CHUNK_SIZE_BITS
-                && intZ >> CHUNK_SIZE_BITS == position.intZ >> CHUNK_SIZE_BITS;
+        return intX >>> CHUNK_SIZE_BITS == position.intX >>> CHUNK_SIZE_BITS
+                && intY >>> CHUNK_SIZE_BITS == position.intY >>> CHUNK_SIZE_BITS
+                && intZ >>> CHUNK_SIZE_BITS == position.intZ >>> CHUNK_SIZE_BITS;
     }
 
     public String intPositionToString() {
         return "[X:%s, Y:%s, Z:%s]".formatted(
-                Utils.toDisplayCoordinate(intX),
-                Utils.toDisplayCoordinate(intY),
-                Utils.toDisplayCoordinate(intZ));
+                intX,
+                intY,
+                intZ);
     }
 
     public String fractionToString() {

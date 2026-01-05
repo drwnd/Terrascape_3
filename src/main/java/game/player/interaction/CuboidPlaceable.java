@@ -33,17 +33,16 @@ public class CuboidPlaceable implements Placeable {
         maxPosition.x = (maxPosition.x & mask) + (1 << breakPlaceSize) - 1;
         maxPosition.y = (maxPosition.y & mask) + (1 << breakPlaceSize) - 1;
         maxPosition.z = (maxPosition.z & mask) + (1 << breakPlaceSize) - 1;
-        maxPosition.set(maxPosition.x & WORLD_SIZE_MASK, maxPosition.y & WORLD_SIZE_MASK, maxPosition.z & WORLD_SIZE_MASK);
     }
 
     @Override
     public void place(Vector3i position, int lod) {
-        int chunkStartX = minPosition.x >> lod + CHUNK_SIZE_BITS;
-        int chunkStartY = minPosition.y >> lod + CHUNK_SIZE_BITS;
-        int chunkStartZ = minPosition.z >> lod + CHUNK_SIZE_BITS;
-        int chunkEndX = Utils.getWrappedPosition(maxPosition.x >> lod + CHUNK_SIZE_BITS, chunkStartX, MAX_CHUNKS_MASK + 1 >> lod);
-        int chunkEndY = Utils.getWrappedPosition(maxPosition.y >> lod + CHUNK_SIZE_BITS, chunkStartY, MAX_CHUNKS_MASK + 1 >> lod);
-        int chunkEndZ = Utils.getWrappedPosition(maxPosition.z >> lod + CHUNK_SIZE_BITS, chunkStartZ, MAX_CHUNKS_MASK + 1 >> lod);
+        int chunkStartX = minPosition.x >>> CHUNK_SIZE_BITS + lod;
+        int chunkStartY = minPosition.y >>> CHUNK_SIZE_BITS + lod;
+        int chunkStartZ = minPosition.z >>> CHUNK_SIZE_BITS + lod;
+        int chunkEndX = Utils.getWrappedChunkCoordinate(maxPosition.x >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
+        int chunkEndY = Utils.getWrappedChunkCoordinate(maxPosition.y >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
+        int chunkEndZ = Utils.getWrappedChunkCoordinate(maxPosition.z >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
         for (int chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
@@ -93,13 +92,13 @@ public class CuboidPlaceable implements Placeable {
         int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         int chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int inChunkStartX = Math.max(chunkStartX, Utils.getWrappedPosition(minPosition.x, chunkStartX, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartY = Math.max(chunkStartY, Utils.getWrappedPosition(minPosition.y, chunkStartY, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartZ = Math.max(chunkStartZ, Utils.getWrappedPosition(minPosition.z, chunkStartZ, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartX = Math.max(chunkStartX, minPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartY = Math.max(chunkStartY, minPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartZ = Math.max(chunkStartZ, minPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int inChunkEndX = Math.min(chunkStartX + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.x, chunkStartX, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndY = Math.min(chunkStartY + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.y, chunkStartY, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndZ = Math.min(chunkStartZ + (CHUNK_SIZE << chunk.LOD) - 1, Utils.getWrappedPosition(maxPosition.z, chunkStartZ, WORLD_SIZE)) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndX = Math.min(chunkStartX + (CHUNK_SIZE << chunk.LOD) - 1, maxPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndY = Math.min(chunkStartY + (CHUNK_SIZE << chunk.LOD) - 1, maxPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndZ = Math.min(chunkStartZ + (CHUNK_SIZE << chunk.LOD) - 1, maxPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
         chunk.storeMaterial(
                 inChunkStartX, inChunkStartY, inChunkStartZ,

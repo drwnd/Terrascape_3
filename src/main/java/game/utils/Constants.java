@@ -11,9 +11,7 @@ public final class Constants {
     public static final int CHUNK_SIZE = 1 << CHUNK_SIZE_BITS;
     public static final int CHUNK_SIZE_PADDED = CHUNK_SIZE + 2;
     public static final int CHUNK_SIZE_MASK = CHUNK_SIZE - 1;
-    public static final int MAX_CHUNKS_MASK = 0x1FFFFFF;
-    public static final int WORLD_SIZE_MASK = MAX_CHUNKS_MASK * CHUNK_SIZE + CHUNK_SIZE_MASK;
-    public static final int WORLD_SIZE = WORLD_SIZE_MASK + 1;
+    public static final int MAX_CHUNKS_MASK = 0x3FFFFFF;
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;

@@ -117,9 +117,9 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         lines.add(new DebugScreenLine(OptionSetting.CHUNK_POSITION_VISIBILITY, OptionSetting.CHUNK_POSITION_COLOR, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
             Chunk chunk = Game.getWorld().getChunk(
-                    playerPosition.intX >> CHUNK_SIZE_BITS,
-                    playerPosition.intY >> CHUNK_SIZE_BITS,
-                    playerPosition.intZ >> CHUNK_SIZE_BITS, 0);
+                    playerPosition.intX >>> CHUNK_SIZE_BITS,
+                    playerPosition.intY >>> CHUNK_SIZE_BITS,
+                    playerPosition.intZ >>> CHUNK_SIZE_BITS, 0);
             if (chunk == null) return "Chunk is null";
             return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
         }, "Chunk Position"));

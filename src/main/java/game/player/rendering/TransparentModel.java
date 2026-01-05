@@ -5,7 +5,7 @@ import org.joml.Vector3i;
 
 import static org.lwjgl.opengl.GL46.*;
 
-import static game.utils.Constants.CHUNK_SIZE_BITS;
+import static game.utils.Constants.*;
 
 public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
 
@@ -60,15 +60,15 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
     }
 
     public int chunkX() {
-        return totalX >> CHUNK_SIZE_BITS + LOD;
+        return totalX >>> CHUNK_SIZE_BITS + LOD;
     }
 
     public int chunkY() {
-        return totalY >> CHUNK_SIZE_BITS + LOD;
+        return totalY >>> CHUNK_SIZE_BITS + LOD;
     }
 
     public int chunkZ() {
-        return totalZ >> CHUNK_SIZE_BITS + LOD;
+        return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 }
 

@@ -1,8 +1,8 @@
 package game.player.rendering;
 
 import core.utils.IntArrayList;
-import game.utils.Utils;
 
+import game.utils.Utils;
 import org.joml.Vector3i;
 
 import static org.lwjgl.opengl.GL46.*;
@@ -20,31 +20,31 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
     public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_MASK + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_MASK + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkX = chunkX();
+        int modelChunkY = chunkY();
+        int modelChunkZ = chunkZ();
         boolean notNull = !isEmpty();
 
-        addData(commands, notNull && cameraChunkZ >= modelChunkZ, NORTH);
-        addData(commands, notNull && cameraChunkY >= modelChunkY, TOP);
-        addData(commands, notNull && cameraChunkX >= modelChunkX, WEST);
-        addData(commands, notNull && cameraChunkZ <= modelChunkZ, SOUTH);
-        addData(commands, notNull && cameraChunkY <= modelChunkY, BOTTOM);
-        addData(commands, notNull && cameraChunkX <= modelChunkX, EAST);
+        addData(commands, notNull && isVisibleGE(cameraChunkZ, modelChunkZ), NORTH);
+        addData(commands, notNull && isVisibleGE(cameraChunkY, modelChunkY), TOP);
+        addData(commands, notNull && isVisibleGE(cameraChunkX, modelChunkX), WEST);
+        addData(commands, notNull && isVisibleLE(cameraChunkZ, modelChunkZ), SOUTH);
+        addData(commands, notNull && isVisibleLE(cameraChunkY, modelChunkY), BOTTOM);
+        addData(commands, notNull && isVisibleLE(cameraChunkX, modelChunkX), EAST);
     }
 
     public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
         if (isEmpty()) return;
-        int modelChunkX = Utils.getWrappedPosition(chunkX(), cameraChunkX, MAX_CHUNKS_MASK + 1 >> LOD);
-        int modelChunkY = Utils.getWrappedPosition(chunkY(), cameraChunkY, MAX_CHUNKS_MASK + 1 >> LOD);
-        int modelChunkZ = Utils.getWrappedPosition(chunkZ(), cameraChunkZ, MAX_CHUNKS_MASK + 1 >> LOD);
+        int modelChunkX = chunkX();
+        int modelChunkY = chunkY();
+        int modelChunkZ = chunkZ();
 
-        if (cameraChunkZ >= modelChunkZ) addData(commands, NORTH);
-        if (cameraChunkY >= modelChunkY) addData(commands, TOP);
-        if (cameraChunkX >= modelChunkX) addData(commands, WEST);
-        if (cameraChunkZ <= modelChunkZ) addData(commands, SOUTH);
-        if (cameraChunkY <= modelChunkY) addData(commands, BOTTOM);
-        if (cameraChunkX <= modelChunkX) addData(commands, EAST);
+        if (isVisibleGE(cameraChunkZ, modelChunkZ)) addData(commands, NORTH);
+        if (isVisibleGE(cameraChunkY, modelChunkY)) addData(commands, TOP);
+        if (isVisibleGE(cameraChunkX, modelChunkX)) addData(commands, WEST);
+        if (isVisibleLE(cameraChunkZ, modelChunkZ)) addData(commands, SOUTH);
+        if (isVisibleLE(cameraChunkY, modelChunkY)) addData(commands, BOTTOM);
+        if (isVisibleLE(cameraChunkX, modelChunkX)) addData(commands, EAST);
     }
 
     public boolean isEmpty() {
@@ -56,15 +56,15 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
     public int chunkX() {
-        return totalX >> CHUNK_SIZE_BITS + LOD;
+        return totalX >>> CHUNK_SIZE_BITS + LOD;
     }
 
     public int chunkY() {
-        return totalY >> CHUNK_SIZE_BITS + LOD;
+        return totalY >>> CHUNK_SIZE_BITS + LOD;
     }
 
     public int chunkZ() {
-        return totalZ >> CHUNK_SIZE_BITS + LOD;
+        return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 
 
@@ -80,6 +80,14 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         commands.add(1);
         commands.add(indices[side]);
         commands.add(0);
+    }
+
+    private boolean isVisibleLE(int cameraChunk, int modelChunk) {
+        return cameraChunk <= Utils.getWrappedChunkCoordinate(modelChunk, cameraChunk, LOD);
+    }
+
+    private boolean isVisibleGE(int cameraChunk, int modelChunk) {
+        return cameraChunk >= Utils.getWrappedChunkCoordinate(modelChunk, cameraChunk, LOD);
     }
 
     private static int[] getIndices(int[] vertexCounts, int bufferOrStart, boolean isBuffer) {

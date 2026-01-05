@@ -13,7 +13,7 @@ public final class StructureCollection extends Asset {
     }
 
     public Structure getRandom(int x, int y, int z) {
-        return structures[Math.abs(x + y + z >> CHUNK_SIZE_BITS) % structures.length];
+        return structures[(x + y + z >>> CHUNK_SIZE_BITS) % structures.length];
     }
 
     @Override

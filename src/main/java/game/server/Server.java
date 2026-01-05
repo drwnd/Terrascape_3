@@ -2,7 +2,9 @@ package game.server;
 
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
+import core.rendering_api.Input;
 import core.settings.FloatSetting;
+import core.settings.KeySetting;
 import core.settings.optionSettings.ColorOption;
 
 import game.player.Player;
@@ -226,7 +228,7 @@ public final class Server implements CrashCallback {
         }
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
-            if (!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) {
+            if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && !Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) {
                 generator.restart();
                 generatorRestartScheduled = false;
             }

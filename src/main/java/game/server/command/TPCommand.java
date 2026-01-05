@@ -1,14 +1,11 @@
 package game.server.command;
 
-import core.settings.ToggleSetting;
 import game.server.Game;
 import game.utils.Position;
 
-import static game.utils.Constants.*;
-
 final class TPCommand {
 
-    static final String SYNTAX = "[~]X-Coordinate [~]Y-Coordinate [~]Z-Coordinate [{real, fake}]// Adding ~ before a Coordinate adds that Coordinate to the Players Position. real and fake specifies, whether real or fake coordinates are used.";
+    static final String SYNTAX = "[~]X-Coordinate [~]Y-Coordinate [~]Z-Coordinate [abs] // Adding ~ before a Coordinate adds that Coordinate to the Players Position. Adding \"abs\" moves the origin to the corner of the world";
     static final String EXPLANATION = "Teleports the Player to a specified Position";
 
     private TPCommand() {
@@ -63,15 +60,11 @@ final class TPCommand {
         }
 
         if (tokens.getIncrementKeyword() instanceof KeywordToken(String keyword)) {
-            if ("fake".equalsIgnoreCase(keyword)) {
-                if (xAbsolute) intX = toFakeCoordinate(intX);
-                if (yAbsolute) intY = toFakeCoordinate(intY);
-                if (zAbsolute) intZ = toFakeCoordinate(intZ);
-            } else if (!"real".equalsIgnoreCase(keyword)) return CommandResult.fail("Unrecognized Coordinate type " + keyword);
-        } else if (ToggleSetting.FAKE_COORDINATES.value()) {
-            if (xAbsolute) intX = toFakeCoordinate(intX);
-            if (yAbsolute) intY = toFakeCoordinate(intY);
-            if (zAbsolute) intZ = toFakeCoordinate(intZ);
+            if ("abs".equalsIgnoreCase(keyword)) {
+                if (xAbsolute) intX = intX - Integer.MAX_VALUE;
+                if (yAbsolute) intY = intY - Integer.MAX_VALUE;
+                if (zAbsolute) intZ = intZ - Integer.MAX_VALUE;
+            } else return CommandResult.fail("Unrecognized Coordinate type " + keyword);
         }
 
         tokens.expectFinishedLessEqual();
@@ -80,9 +73,5 @@ final class TPCommand {
         Game.getPlayer().setPosition(new Position(intX, intY, intZ, fractionX, fractionY, fractionZ));
         Game.getServer().scheduleGeneratorRestart();
         return CommandResult.success();
-    }
-
-    private static int toFakeCoordinate(int coordinate) {
-        return coordinate - (WORLD_SIZE >>> 1);
     }
 }

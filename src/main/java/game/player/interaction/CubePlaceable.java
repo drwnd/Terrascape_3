@@ -33,9 +33,9 @@ public final class CubePlaceable implements Placeable {
                 || Integer.numberOfTrailingZeros(position.y & mask) < lod
                 || Integer.numberOfTrailingZeros(position.z & mask) < lod) return;
 
-        int chunkX = position.x >> CHUNK_SIZE_BITS + lod;
-        int chunkY = position.y >> CHUNK_SIZE_BITS + lod;
-        int chunkZ = position.z >> CHUNK_SIZE_BITS + lod;
+        int chunkX = position.x >>> CHUNK_SIZE_BITS + lod;
+        int chunkY = position.y >>> CHUNK_SIZE_BITS + lod;
+        int chunkZ = position.z >>> CHUNK_SIZE_BITS + lod;
 
         int inChunkX = position.x >> lod & CHUNK_SIZE_MASK;
         int inChunkY = position.y >> lod & CHUNK_SIZE_MASK;

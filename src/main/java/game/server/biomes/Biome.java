@@ -33,7 +33,7 @@ public abstract class Biome {
     }
 
     protected static Tree getRandomTree(int x, int y, int z, StructureCollectionIdentifier trees) {
-        byte transform = (byte) (Utils.hash(x >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, (int) WorldGeneration.SEED ^ 0xEB0A8449) & Structure.ALL_TRANSFORMS);
+        byte transform = (byte) (Utils.hash(x >>> CHUNK_SIZE_BITS, z >>> CHUNK_SIZE_BITS, (int) WorldGeneration.SEED ^ 0xEB0A8449) & Structure.ALL_TRANSFORMS);
         return new Tree(x, y, z, AssetManager.get(trees).getRandom(x, y, z), transform);
     }
 
