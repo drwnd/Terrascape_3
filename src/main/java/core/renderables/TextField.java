@@ -2,7 +2,10 @@ package core.renderables;
 
 import core.assets.CoreTextures;
 import core.rendering_api.Window;
+import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
+import core.settings.OptionSetting;
+import core.settings.optionSettings.FontOption;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -29,7 +32,11 @@ public class TextField extends UiButton {
         nameElement.setText(name);
         nameElement.setColor(Color.GRAY);
 
+        cursorIndicator = new UiElement(new Vector2f(), new Vector2f(), CoreTextures.CURSOR_INDICATOR);
+        cursorIndicator.setAllowFocusScaling(false);
+
         blackBox = new UiElement(new Vector2f(), new Vector2f(), CoreTextures.OVERLAY);
+        blackBox.addRenderable(cursorIndicator);
         blackBox.addRenderable(textElement);
         blackBox.addRenderable(nameElement);
         blackBox.setAllowFocusScaling(false);
@@ -76,6 +83,26 @@ public class TextField extends UiButton {
             nameElement.setOffsetToParent(0.05F, 0.5F);
             textElement.setOffsetToParent(0.05F, 0.5F);
         }
+
+        boolean indicatorVisible = !text.isEmpty() && Window.getInput() instanceof TextFieldInput input && input.field == this;
+        cursorIndicator.setVisible(indicatorVisible);
+        if (indicatorVisible) {
+            int cursorIndex = ((TextFieldInput) Window.getInput()).getCursorIndex();
+            Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+
+            float cursorIndexOffset = TextShader.getTextLength(text.substring(0, cursorIndex), defaultTextSize.x, scalesWithGuiSize());
+            cursorIndexOffset /= getSizeToParent().x * blackBox.getSizeToParent().x;
+            if (allowsFocusScaling() && isFocused()) cursorIndexOffset /= getScalingFactor();
+            cursorIndexOffset += textElement.getOffsetToParent().x;
+
+            float textSize = FloatSetting.TEXT_SIZE.value();
+            float charHeight = Window.getHeight() * defaultTextSize.y * textSize;
+            float indicatorHeight = textSize * charHeight / (blackBox.getSize().y * Window.getHeight());
+            float indicatorWidth = TextShader.getTextLength("|", defaultTextSize.x, scalesWithGuiSize()) * 0.5F / blackBoxSize;
+
+            cursorIndicator.setOffsetToParent(cursorIndexOffset, 0.5F - indicatorHeight * 0.5F);
+            cursorIndicator.setSizeToParent(indicatorWidth, indicatorHeight);
+        }
     }
 
     @Override
@@ -94,6 +121,6 @@ public class TextField extends UiButton {
     private final Runnable onTextChange;
     private final TextElement textElement;
     private final TextElement nameElement;
-    private final UiElement blackBox;
+    private final UiElement blackBox, cursorIndicator;
     private boolean centerText = true;
 }

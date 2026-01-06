@@ -23,6 +23,7 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
         display = new StructureDisplay(new Vector2f(), new Vector2f(), structure);
         display.setAllowFocusScaling(false);
         display.setScaleWithGuiSize(false);
+        setScaleWithGuiSize(false);
 
         UiButton backButton = new UiButton(new Vector2f(0.25F, 0.1F), new Vector2f(0.05F, 0.85F), getBackButtonAction());
         backButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.BACK));

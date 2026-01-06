@@ -163,6 +163,10 @@ public final class Window {
         return renderablesStack.getLast();
     }
 
+    public static Input getInput() {
+        return input;
+    }
+
     public static void setInput(Input input) {
         Window.input.unset();
         Window.input = input;

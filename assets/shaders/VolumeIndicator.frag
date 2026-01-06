@@ -26,7 +26,7 @@ void main() {
         vec3 textureCoord = vec3(getUVOffset(side), material & 0xFF);
         color = texture(textures, textureCoord);
     } else {
-        float sum = totalPosition.x + totalPosition.y + totalPosition.z;
+        float sum = floor(totalPosition.x + 0.5) + floor(totalPosition.y + 0.5) + floor(totalPosition.z + 0.5);
         color = vec4(sin(sum * 6.283185307 * 0.125), 0, 0, 0.5);
     }
     fragColor = vec4(color.rgb, color.a * 0.5);

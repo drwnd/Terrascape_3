@@ -17,6 +17,11 @@ public final class DummyRenderable extends Renderable {
 
     @Override
     public Vector2f getSize() {
-        return new Vector2f(1.0f, 1.0f);
+        return new Vector2f(1.0F, 1.0F);
+    }
+
+    @Override
+    public boolean scalesWithGuiSize() {
+        return true;
     }
 }

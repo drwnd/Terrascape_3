@@ -7,17 +7,18 @@ public enum CoreTextures implements TextureIdentifier {
     GUI_ELEMENT_BACKGROUND("GuiElementBackground.png"),
     TOGGLE_ACTIVATED("ToggleActivated.png"),
     TOGGLE_DEACTIVATED("ToggleDeactivated.png"),
-    OVERLAY("InventoryOverlay.png");
+    OVERLAY("InventoryOverlay.png"),
+    CURSOR_INDICATOR("CursorIndicator.png");
 
 
-    CoreTextures(String filepath) {
-        this.filepath = filepath;
+    CoreTextures(String fileName) {
+        this.fileName = fileName;
     }
 
     @Override
     public String fileName() {
-        return filepath;
+        return fileName;
     }
 
-    private final String filepath;
+    private final String fileName;
 }

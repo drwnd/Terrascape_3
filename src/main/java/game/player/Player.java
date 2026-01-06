@@ -196,8 +196,8 @@ public final class Player {
     void startCommand() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
-        setInput();
         chat.setText("/");
+        setInput();
     }
 
     void toggleChat() {

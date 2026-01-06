@@ -28,6 +28,7 @@ public final class ChatInput extends TextFieldInput {
         skipNextInput = true;
         messageIndex = 0;
         scroll = 0.0F;
+        cursorIndex = field.getText().length();
     }
 
     @Override
@@ -59,11 +60,13 @@ public final class ChatInput extends TextFieldInput {
         if (key == GLFW_KEY_ESCAPE) Game.getPlayer().toggleChat();
         if (key == GLFW_KEY_ENTER) {
             Game.getServer().sendPlayerMessage(field.getText());
-            field.setText("");
+            replaceText("");
             Game.getPlayer().toggleChat();
         }
-        if (key == GLFW_KEY_UP) field.setText(nextPlayerMessage(1));
-        if (key == GLFW_KEY_DOWN) field.setText(nextPlayerMessage(-1));
+        if (key == GLFW_KEY_UP) replaceText(nextPlayerMessage(1));
+        if (key == GLFW_KEY_DOWN) replaceText(nextPlayerMessage(-1));
+        if (key == GLFW_KEY_LEFT) handleMoveLeft();
+        if (key == GLFW_KEY_RIGHT) handleMoveRight();
     }
 
     private String nextPlayerMessage(int increment) {
@@ -77,6 +80,11 @@ public final class ChatInput extends TextFieldInput {
         }
         while (messages.get(messages.size() - messageIndex).sender() != Sender.PLAYER);
         return messages.get(messages.size() - messageIndex).message();
+    }
+
+    private void replaceText(String text) {
+        cursorIndex = text.length();
+        field.setText(text);
     }
 
     private boolean skipNextInput = false;
