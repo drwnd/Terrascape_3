@@ -95,6 +95,7 @@ public final class Player {
         if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW_PRESS) Material.loadMaterials();
         if (button == KeySetting.NO_CLIP.value() && action == GLFW_PRESS) noClip = !noClip;
         if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.value() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == KeySetting.TOGGLE_CULLING_COMPUTATION.value() && action == GLFW_PRESS) renderer.toggleCullingCalculation();
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {

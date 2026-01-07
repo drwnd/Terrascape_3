@@ -6,13 +6,11 @@ import core.assets.Texture;
 import core.assets.TextureArray;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
-import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
 import core.rendering_api.shaders.TextShader;
 import core.settings.FloatSetting;
-import core.settings.KeySetting;
 import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.FontOption;
@@ -69,6 +67,14 @@ public final class Renderer extends Renderable {
 
     public void toggleDebugScreen() {
         debugScreenOpen = !debugScreenOpen;
+    }
+
+    public void toggleCullingCalculation() {
+        calculateCulling = !calculateCulling;
+    }
+
+    public boolean isCalculateCulling() {
+        return calculateCulling;
     }
 
     public ArrayList<Long> getFrameTimes() {
@@ -162,7 +168,7 @@ public final class Renderer extends Renderable {
         player.updateFrame();
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
-        if (!Input.isKeyPressed(KeySetting.SKIP_COMPUTING_VISIBILITY)) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        if (calculateCulling) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
 
         setupRenderState();
 
@@ -574,37 +580,43 @@ public final class Renderer extends Renderable {
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
         if (!ToggleSetting.RENDER_OCCLUDERS.value()) return;
+        int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
+        if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
         shader.bind();
         setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
         MeshCollector meshCollector = player.getMeshCollector();
 
-        for (Chunk chunk : Game.getWorld().getLod(0)) {
-            if (chunk == null || meshCollector.isIsolated(chunk.X, chunk.Y, chunk.Z, 0)) continue;
+        for (Chunk chunk : Game.getWorld().getLod(lod)) {
+            if (chunk == null || meshCollector.isIsolated(chunk.X, chunk.Y, chunk.Z, lod)) continue;
+            if ((renderingOptimizer.getVisibilityBits(lod)[chunk.INDEX >> 6] & 1L << chunk.INDEX) == 0) continue;
 
             AABB occluder = meshCollector.getOccluder(chunk.INDEX, chunk.LOD);
             if (occluder == null) continue;
-            renderVolume(shader, chunk, occluder);
+            renderVolume(shader, chunk, occluder, lod);
         }
     }
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
         if (!ToggleSetting.RENDER_OCCLUDEES.value()) return;
+        int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
+        if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
         shader.bind();
         setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
         MeshCollector meshCollector = player.getMeshCollector();
 
-        for (Chunk chunk : Game.getWorld().getLod(0)) {
+        for (Chunk chunk : Game.getWorld().getLod(lod)) {
             if (chunk == null) continue;
-            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, 0);
+            if ((renderingOptimizer.getVisibilityBits(lod)[chunk.INDEX >> 6] & 1L << chunk.INDEX) == 0) continue;
+            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunk.INDEX, lod);
             if (opaqueModel == null || opaqueModel.isEmpty()) continue;
 
             AABB occludee = meshCollector.getOccludee(chunk.INDEX, chunk.LOD);
             if (occludee == null) continue;
-            renderVolume(shader, chunk, occludee);
+            renderVolume(shader, chunk, occludee, lod);
         }
     }
 
@@ -618,15 +630,15 @@ public final class Renderer extends Renderable {
         shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), texture);
     }
 
-    private static void renderVolume(Shader shader, Chunk chunk, AABB aabb) {
+    private static void renderVolume(Shader shader, Chunk chunk, AABB aabb, int lod) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
-        int x = chunk.X << CHUNK_SIZE_BITS;
-        int y = chunk.Y << CHUNK_SIZE_BITS;
-        int z = chunk.Z << CHUNK_SIZE_BITS;
+        int x = chunk.X << CHUNK_SIZE_BITS + lod;
+        int y = chunk.Y << CHUNK_SIZE_BITS + lod;
+        int z = chunk.Z << CHUNK_SIZE_BITS + lod;
 
-        shader.setUniform("minPosition", x + aabb.minX, y + aabb.minY, z + aabb.minZ);
-        shader.setUniform("maxPosition", x + aabb.maxX, y + aabb.maxY, z + aabb.maxZ);
+        shader.setUniform("minPosition", x + (aabb.minX << lod), y + (aabb.minY << lod) - (1 << lod) + 1, z + (aabb.minZ << lod));
+        shader.setUniform("maxPosition", x + (aabb.maxX << lod), y + (aabb.maxY << lod) - (1 << lod) + 1, z + (aabb.maxZ << lod));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
@@ -668,7 +680,7 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private boolean debugScreenOpen = false, vSync = true;
+    private boolean debugScreenOpen = false, calculateCulling = true, vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;

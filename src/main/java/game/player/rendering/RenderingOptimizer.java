@@ -134,6 +134,9 @@ public final class RenderingOptimizer {
         glDeleteFramebuffers(framebuffer);
     }
 
+    public long[] getVisibilityBits(int lod) {
+        return visibilityBits[lod];
+    }
 
     private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
         aabbs.clear();
@@ -184,18 +187,16 @@ public final class RenderingOptimizer {
     }
 
     private void fillVisibleChunks(int chunkX, int chunkY, int chunkZ, byte traveledDirections, int lod, FrustumIntersection intersection) {
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-
         int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0) return;
+        if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0 || Game.getWorld().getChunk(chunkIndex, lod) == null) return;
 
-        if (Game.getWorld().getChunk(chunkIndex, lod) == null) return;
+        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         if (!intersection.testAab(
                 (chunkX << chunkSizeBits) - cameraX,
-                (chunkY << chunkSizeBits) - cameraY,
+                (chunkY << chunkSizeBits) - cameraY - (1 << lod) + 1,
                 (chunkZ << chunkSizeBits) - cameraZ,
                 (chunkX + 1 << chunkSizeBits) - cameraX,
-                (chunkY + 1 << chunkSizeBits) - cameraY,
+                (chunkY + 1 << chunkSizeBits) - cameraY - (1 << lod) + 1,
                 (chunkZ + 1 << chunkSizeBits) - cameraZ)) return;
 
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;

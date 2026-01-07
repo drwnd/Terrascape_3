@@ -47,7 +47,7 @@ void main() {
     int lengthY = currentAABB.packedSize >> 7 & 0x7F;
     int lengthZ = currentAABB.packedSize & 0x7F;
 
-    ivec3 minPosition = ivec3(currentAABB.x, currentAABB.y, currentAABB.z);
+    ivec3 minPosition = ivec3(currentAABB.x, currentAABB.y - (1 << lod) + 1, currentAABB.z);
     ivec3 maxPosition = minPosition + ivec3(lengthX << lod, lengthY << lod, lengthZ << lod);
 
     ivec3 totalPosition = getFacePositions(side, currentVertexId, minPosition, maxPosition) - iCameraPosition;

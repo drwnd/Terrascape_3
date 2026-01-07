@@ -159,7 +159,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.RELOAD_FONT, new Message("Reload Font"));
         section.addKeySelector(KeySetting.RELOAD_MATERIALS, new Message("Reload Materials"));
         section.addKeySelector(KeySetting.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));
-        section.addKeySelector(KeySetting.SKIP_COMPUTING_VISIBILITY, new Message("Skip Computing Visibility"));
+        section.addKeySelector(KeySetting.TOGGLE_CULLING_COMPUTATION, new Message("Toggle Culling Computation"));
         section.addKeySelector(KeySetting.START_COMMAND, new Message("Start Command"));
 
         section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
@@ -172,6 +172,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
         section.addSlider(FloatSetting.TIME_SPEED, new Message("Time Speed"));
         section.addSlider(FloatSetting.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
+        section.addSlider(FloatSetting.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
 
         return section;
     }
