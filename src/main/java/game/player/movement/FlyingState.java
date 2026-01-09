@@ -2,8 +2,8 @@ package game.player.movement;
 
 import core.rendering_api.Input;
 import core.settings.KeySetting;
+import core.settings.ToggleSetting;
 
-import game.server.Game;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -37,12 +37,12 @@ public final class FlyingState extends MovementState {
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
-        if (movement.isGrounded() && !Game.getPlayer().isNoClip()) next = new WalkingState();
+        if (movement.isGrounded() && !ToggleSetting.NO_CLIP.value()) next = new WalkingState();
     }
 
     @Override
     protected void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.value() && action == GLFW_PRESS) {
+        if (key == KeySetting.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new WalkingState();
             lastJumpTime = System.nanoTime();
         }

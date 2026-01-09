@@ -4,7 +4,7 @@ import core.rendering_api.Input;
 
 import org.lwjgl.glfw.GLFW;
 
-public enum KeySetting {
+public enum KeySetting implements KeyBound {
 
     MOVE_FORWARD(GLFW.GLFW_KEY_W),
     MOVE_BACK(GLFW.GLFW_KEY_S),
@@ -28,8 +28,6 @@ public enum KeySetting {
     USE(GLFW.GLFW_MOUSE_BUTTON_RIGHT | Input.IS_MOUSE_BUTTON),
     PICK_BLOCK(GLFW.GLFW_MOUSE_BUTTON_MIDDLE | Input.IS_MOUSE_BUTTON),
     INVENTORY(GLFW.GLFW_KEY_E),
-    DEBUG_MENU(GLFW.GLFW_KEY_F3),
-    NO_CLIP(GLFW.GLFW_KEY_P),
     ZOOM(GLFW.GLFW_KEY_V),
     INCREASE_BREAK_PLACE_SIZE(GLFW.GLFW_KEY_UP),
     DECREASE_BREAK_PLACE_SIZE(GLFW.GLFW_KEY_DOWN),
@@ -43,34 +41,37 @@ public enum KeySetting {
     RELOAD_FONT(GLFW.GLFW_KEY_F7),
     RELOAD_MATERIALS(GLFW.GLFW_KEY_F6),
     GET_CHUNK_REBUILD_PLACEABLE(GLFW.GLFW_KEY_F5),
-    TOGGLE_CULLING_COMPUTATION(GLFW.GLFW_KEY_L),
     LOCK_PLACE_POSITION(GLFW.GLFW_KEY_TAB);
 
     public static void setIfPresent(String name, String value) {
         try {
-            valueOf(name).value = Integer.parseInt(value);
+            valueOf(name).keybind = Integer.parseInt(value);
         } catch (IllegalArgumentException ignore) {
 
         }
     }
 
     KeySetting(int defaultValue) {
-        this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        this.defaultKeybind = defaultValue;
+        this.keybind = defaultValue;
     }
 
-    void setValue(int value) {
-        this.value = value;
+
+    @Override
+    public void setKeybind(int keybind) {
+        this.keybind = keybind;
     }
 
-    public int value() {
-        return value;
+    @Override
+    public int keybind() {
+        return keybind;
     }
 
-    public int defaultValue() {
-        return defaultValue;
+    @Override
+    public int defaultKeybind() {
+        return defaultKeybind;
     }
 
-    private final int defaultValue;
-    private int value;
+    private final int defaultKeybind;
+    private int keybind;
 }

@@ -150,8 +150,6 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addKeySelector(KeySetting.DEBUG_MENU, new Message("Open Debug Screen"));
-        section.addKeySelector(KeySetting.NO_CLIP, new Message("Toggle No-Clip"));
         section.addKeySelector(KeySetting.RESIZE_WINDOW, UiMessage.RESIZE_WINDOW);
         section.addKeySelector(KeySetting.RELOAD_SETTINGS, new Message("Reload Settings"));
         section.addKeySelector(KeySetting.RELOAD_ASSETS, new Message("Reload Assets"));
@@ -159,9 +157,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySetting.RELOAD_FONT, new Message("Reload Font"));
         section.addKeySelector(KeySetting.RELOAD_MATERIALS, new Message("Reload Materials"));
         section.addKeySelector(KeySetting.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));
-        section.addKeySelector(KeySetting.TOGGLE_CULLING_COMPUTATION, new Message("Toggle Culling Computation"));
         section.addKeySelector(KeySetting.START_COMMAND, new Message("Start Command"));
 
+        section.addToggle(ToggleSetting.DEBUG_MENU, new Message("Open Debug Screen"));
+        section.addToggle(ToggleSetting.NO_CLIP, new Message("No-Clip"));
+        section.addToggle(ToggleSetting.CULLING_COMPUTATION, new Message("Culling Computation"));
         section.addToggle(ToggleSetting.X_RAY, new Message("X-Ray"));
         section.addToggle(ToggleSetting.V_SYNC, new Message("Use V-Sync"));
         section.addToggle(ToggleSetting.RENDER_OCCLUDERS, new Message("Render Occluders"));

@@ -28,7 +28,7 @@ final class SettingCommand {
 
             String value = switch (setting) {
                 case FloatSetting floatSetting -> Float.toString(floatSetting.value());
-                case KeySetting keySetting -> KeySelector.getDisplayString(keySetting.value());
+                case KeySetting keySetting -> KeySelector.getDisplayString(keySetting.keybind());
                 case ToggleSetting toggleSetting -> Boolean.toString(toggleSetting.value());
                 case OptionSetting optionSetting -> optionSetting.value().name();
 

@@ -3,6 +3,7 @@ package game.server;
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
 import core.settings.FloatSetting;
+import core.settings.ToggleSetting;
 import core.settings.optionSettings.ColorOption;
 
 import game.player.Player;
@@ -107,7 +108,7 @@ public final class Server implements CrashCallback {
         placeable.offsetPosition(position);
 
         Player player = Game.getPlayer();
-        if (!player.isNoClip() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
+        if (!ToggleSetting.NO_CLIP.value() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
 
         if (placeable instanceof CubePlaceable cubePlaceable) {
             int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
@@ -226,7 +227,7 @@ public final class Server implements CrashCallback {
         }
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
-            if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && Game.getPlayer().getRenderer().isCalculateCulling()) {
+            if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSetting.CULLING_COMPUTATION.value()) {
                 generator.restart();
                 generatorRestartScheduled = false;
             }

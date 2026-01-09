@@ -14,13 +14,13 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
-        if (action == GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.value()) placeBreakSize = Math.max(0, placeBreakSize - 1);
-        if (action == GLFW_PRESS && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW_RELEASE && button == KeySetting.LOCK_PLACE_POSITION.value()) startTarget = null;
+        if (action == GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
+        if (action == GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
+        if (action == GLFW_PRESS && button == KeySetting.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
+        if (action == GLFW_RELEASE && button == KeySetting.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
-        if (button == KeySetting.DESTROY.value()) updateInfo(action, destroyInfo);
-        if (button == KeySetting.USE.value()) updateInfo(action, useInfo);
+        if (button == KeySetting.DESTROY.keybind()) updateInfo(action, destroyInfo);
+        if (button == KeySetting.USE.keybind()) updateInfo(action, useInfo);
     }
 
     public void updateGameTick() {

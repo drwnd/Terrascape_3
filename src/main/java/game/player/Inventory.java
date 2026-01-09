@@ -65,15 +65,15 @@ public final class Inventory extends UiElement {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
 
-        if (button == KeySetting.HOTBAR_SLOT_1.value()) hotbar.setContent(0, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_2.value()) hotbar.setContent(1, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_3.value()) hotbar.setContent(2, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_4.value()) hotbar.setContent(3, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_5.value()) hotbar.setContent(4, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_6.value()) hotbar.setContent(5, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_7.value()) hotbar.setContent(6, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_8.value()) hotbar.setContent(7, getSelectedPlaceable(pixelCoordinate));
-        if (button == KeySetting.HOTBAR_SLOT_9.value()) hotbar.setContent(8, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_1.keybind()) hotbar.setContent(0, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_2.keybind()) hotbar.setContent(1, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_3.keybind()) hotbar.setContent(2, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_4.keybind()) hotbar.setContent(3, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_5.keybind()) hotbar.setContent(4, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_6.keybind()) hotbar.setContent(5, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_7.keybind()) hotbar.setContent(6, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_8.keybind()) hotbar.setContent(7, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySetting.HOTBAR_SLOT_9.keybind()) hotbar.setContent(8, getSelectedPlaceable(pixelCoordinate));
     }
 
     public void moveStructureButtons(float movement) {

@@ -86,16 +86,13 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveKeyInput(int button, int action) {
-        if (button == KeySetting.ZOOM.value() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
-        if (button == KeySetting.INVENTORY.value() && action == GLFW_PRESS) toggleInventory();
-        if (button == KeySetting.OPEN_CHAT.value() && action == GLFW_PRESS) toggleChat();
-        if (button == KeySetting.START_COMMAND.value() && action == GLFW_PRESS) startCommand();
+        if (button == KeySetting.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
+        if (button == KeySetting.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
+        if (button == KeySetting.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
+        if (button == KeySetting.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
-        if (button == KeySetting.DEBUG_MENU.value() && action == GLFW_PRESS) renderer.toggleDebugScreen();
-        if (button == KeySetting.RELOAD_MATERIALS.value() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySetting.NO_CLIP.value() && action == GLFW_PRESS) noClip = !noClip;
-        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.value() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
-        if (button == KeySetting.TOGGLE_CULLING_COMPUTATION.value() && action == GLFW_PRESS) renderer.toggleCullingCalculation();
+        if (button == KeySetting.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
+        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {
@@ -177,14 +174,6 @@ public final class Player {
         return !inventory.isVisible() && !chat.isVisible();
     }
 
-    public boolean isNoClip() {
-        return noClip;
-    }
-
-    public void setNoClip(boolean noClip) {
-        this.noClip = noClip;
-    }
-
     public boolean isChatOpen() {
         return chat.isVisible();
     }
@@ -224,6 +213,5 @@ public final class Player {
     private final Inventory inventory;
     private final ChatTextField chat;
 
-    private boolean noClip = false;
     private Position position; // Center of the players feet
 }

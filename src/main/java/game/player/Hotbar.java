@@ -35,18 +35,18 @@ public final class Hotbar extends UiElement {
     public void handleInput(int button, int action) {
         if (action != GLFW_PRESS) return;
 
-        if (button == KeySetting.HOTBAR_SLOT_1.value()) setSelectedSlot(0);
-        if (button == KeySetting.HOTBAR_SLOT_2.value()) setSelectedSlot(1);
-        if (button == KeySetting.HOTBAR_SLOT_3.value()) setSelectedSlot(2);
-        if (button == KeySetting.HOTBAR_SLOT_4.value()) setSelectedSlot(3);
-        if (button == KeySetting.HOTBAR_SLOT_5.value()) setSelectedSlot(4);
-        if (button == KeySetting.HOTBAR_SLOT_6.value()) setSelectedSlot(5);
-        if (button == KeySetting.HOTBAR_SLOT_7.value()) setSelectedSlot(6);
-        if (button == KeySetting.HOTBAR_SLOT_8.value()) setSelectedSlot(7);
-        if (button == KeySetting.HOTBAR_SLOT_9.value()) setSelectedSlot(8);
+        if (button == KeySetting.HOTBAR_SLOT_1.keybind()) setSelectedSlot(0);
+        if (button == KeySetting.HOTBAR_SLOT_2.keybind()) setSelectedSlot(1);
+        if (button == KeySetting.HOTBAR_SLOT_3.keybind()) setSelectedSlot(2);
+        if (button == KeySetting.HOTBAR_SLOT_4.keybind()) setSelectedSlot(3);
+        if (button == KeySetting.HOTBAR_SLOT_5.keybind()) setSelectedSlot(4);
+        if (button == KeySetting.HOTBAR_SLOT_6.keybind()) setSelectedSlot(5);
+        if (button == KeySetting.HOTBAR_SLOT_7.keybind()) setSelectedSlot(6);
+        if (button == KeySetting.HOTBAR_SLOT_8.keybind()) setSelectedSlot(7);
+        if (button == KeySetting.HOTBAR_SLOT_9.keybind()) setSelectedSlot(8);
 
-        if (button == KeySetting.DROP.value()) setContent(selectedSlot, null);
-        if (button == KeySetting.PICK_BLOCK.value()) handlePickBlock();
+        if (button == KeySetting.DROP.keybind()) setContent(selectedSlot, null);
+        if (button == KeySetting.PICK_BLOCK.keybind()) handlePickBlock();
     }
 
     public Placeable getSelectedMaterial() {

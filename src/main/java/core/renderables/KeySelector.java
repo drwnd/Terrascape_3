@@ -3,7 +3,7 @@ package core.renderables;
 import core.assets.CoreTextures;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
-import core.settings.KeySetting;
+import core.settings.KeyBound;
 import core.utils.Message;
 import core.utils.StringGetter;
 
@@ -14,7 +14,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class KeySelector extends UiButton {
 
-    public KeySelector(Vector2f sizeToParent, Vector2f offsetToParent, KeySetting setting, StringGetter settingName) {
+    public KeySelector(Vector2f sizeToParent, Vector2f offsetToParent, KeyBound setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
         this.setting = setting;
@@ -30,10 +30,10 @@ public final class KeySelector extends UiButton {
     }
 
     public void setToDefault() {
-        setValue(setting.defaultValue());
+        setValue(setting.defaultKeybind());
     }
 
-    public KeySetting getSetting() {
+    public KeyBound getSetting() {
         return setting;
     }
 
@@ -47,7 +47,7 @@ public final class KeySelector extends UiButton {
     }
 
     public void matchSetting() {
-        setValue(setting.value());
+        setValue(setting.keybind());
     }
 
 
@@ -104,7 +104,7 @@ public final class KeySelector extends UiButton {
         };
     }
 
-    private final KeySetting setting;
+    private final KeyBound setting;
     private final TextElement display;
     private int value;
 }

@@ -65,18 +65,6 @@ public final class Renderer extends Renderable {
         createFrameBuffers();
     }
 
-    public void toggleDebugScreen() {
-        debugScreenOpen = !debugScreenOpen;
-    }
-
-    public void toggleCullingCalculation() {
-        calculateCulling = !calculateCulling;
-    }
-
-    public boolean isCalculateCulling() {
-        return calculateCulling;
-    }
-
     public ArrayList<Long> getFrameTimes() {
         return frameTimes;
     }
@@ -168,7 +156,7 @@ public final class Renderer extends Renderable {
         player.updateFrame();
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
-        if (calculateCulling) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        if (ToggleSetting.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
 
         setupRenderState();
 
@@ -574,6 +562,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderDebugInfo() {
+        boolean debugScreenOpen = ToggleSetting.DEBUG_MENU.value();
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
@@ -680,7 +669,7 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private boolean debugScreenOpen = false, calculateCulling = true, vSync = true;
+    private boolean vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;

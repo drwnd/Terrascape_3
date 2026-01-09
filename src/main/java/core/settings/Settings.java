@@ -11,8 +11,8 @@ public final class Settings {
         setting.setValue(value);
     }
 
-    public static void update(KeySetting setting, int value) {
-        setting.setValue(value);
+    public static void update(KeyBound setting, int value) {
+        setting.setKeybind(value);
     }
 
     public static void update(ToggleSetting setting, boolean value) {
@@ -45,8 +45,8 @@ public final class Settings {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()));
 
             for (FloatSetting setting : FloatSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
-            for (KeySetting setting : KeySetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
-            for (ToggleSetting setting : ToggleSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
+            for (KeySetting setting : KeySetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.keybind()));
+            for (ToggleSetting setting : ToggleSetting.values()) writer.write("%s:%s_%s%n".formatted(setting.name(), setting.value(), setting.keybind()));
             for (OptionSetting setting : OptionSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
 
             writer.close();

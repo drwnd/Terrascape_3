@@ -1,7 +1,7 @@
 package core.rendering_api;
 
 import core.renderables.Renderable;
-import core.settings.KeySetting;
+import core.settings.KeyBound;
 
 import org.joml.Vector2i;
 
@@ -31,8 +31,8 @@ public abstract class Input {
             return glfwGetMouseButton(Window.getWindow(), keycode & Input.BUTTON_MASK) == GLFW_PRESS;
     }
 
-    public static boolean isKeyPressed(KeySetting setting) {
-        return isKeyPressed(setting.value());
+    public static boolean isKeyPressed(KeyBound setting) {
+        return isKeyPressed(setting.keybind());
     }
 
     public static Vector2i getCursorPos() {

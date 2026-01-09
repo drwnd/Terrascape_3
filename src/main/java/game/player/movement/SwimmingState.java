@@ -48,7 +48,7 @@ public final class SwimmingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.value() && action == GLFW_PRESS) {
+        if (key == KeySetting.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

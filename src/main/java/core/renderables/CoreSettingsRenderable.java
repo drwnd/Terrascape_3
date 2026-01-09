@@ -90,15 +90,21 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     public void addToggle(ToggleSetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
-        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
+        Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
+        Vector2f offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
 
         Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(toggle);
         toggles.add(toggle);
 
+        offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
+        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, UiMessage.KEYBIND);
+        addRenderable(keySelector);
+        keySelectors.add(keySelector);
+
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
             if (action == GLFW_PRESS) toggle.setToDefault();
+            if (action == GLFW_PRESS) keySelector.setToDefault();
         });
     }
 

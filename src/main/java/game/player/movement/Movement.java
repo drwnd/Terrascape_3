@@ -1,5 +1,6 @@
 package game.player.movement;
 
+import core.settings.ToggleSetting;
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
@@ -29,7 +30,7 @@ public final class Movement {
         velocity.set(move(position));
         renderVelocity = position.vectorFrom(lastPosition);
 
-        if (Game.getPlayer().isNoClip() || !collides(position, state.next)) state = state.next;
+        if (ToggleSetting.NO_CLIP.value() || !collides(position, state.next)) state = state.next;
         state.movement = this;
         return position;
     }
@@ -91,7 +92,7 @@ public final class Movement {
     }
 
     private Vector3f move(Position position) {
-        if (Game.getPlayer().isNoClip()) {
+        if (ToggleSetting.NO_CLIP.value()) {
             position.add(velocity.x, velocity.y, velocity.z);
             return velocity;
         }

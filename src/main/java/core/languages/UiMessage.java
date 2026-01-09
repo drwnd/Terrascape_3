@@ -92,7 +92,8 @@ public enum UiMessage implements StringGetter {
     LOCK_PLACE_POSITION,
     AMBIENT_OCCLUSION_SAMPLES,
     USE_OCCLUSION_CULLING,
-    TEXTURE_PACK;
+    TEXTURE_PACK,
+    KEYBIND;
 
     @Override
     public String get() {
