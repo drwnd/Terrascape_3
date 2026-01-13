@@ -209,7 +209,7 @@ public final class ParticleCollector {
         int packedRotationSpeedX = (int) (rotationSpeedX * ROTATION_PACKING_FACTOR) & 0xFF;
         int packedRotationSpeedY = (int) (rotationSpeedY * ROTATION_PACKING_FACTOR) & 0xFF;
 
-        return packedRotationSpeedX << 16 | packedRotationSpeedY << 8 | material & 0xFF;
+        return Material.getMaterialProperties(material) << MeshGenerator.PROPERTIES_OFFSET | packedRotationSpeedX << 16 | packedRotationSpeedY << 8 | material & 0xFF;
     }
 
 

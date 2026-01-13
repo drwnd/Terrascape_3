@@ -30,8 +30,8 @@ public final class ShaderLoader {
             case Shaders.VOLUME_INDICATOR -> new Shader("VolumeIndicator.vert", "VolumeIndicator.frag", identifier);
             case Shaders.AABB -> new Shader("AABB.vert", "Null.frag", identifier);
             case Shaders.OCCLUSION_CULLING -> new Shader("AABB.vert", "OcclusionCulling.frag", identifier);
-            case Shaders.CHUNK_SHADOW -> new Shader("Material.vert", "Null.frag", identifier);
-            case Shaders.PARTICLE_SHADOW -> new Shader("Particle.vert", "Null.frag", identifier);
+            case Shaders.CHUNK_SHADOW -> new Shader("Material.vert", "Shadow.frag", identifier);
+            case Shaders.PARTICLE_SHADOW -> new Shader("Particle.vert", "Shadow.frag", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

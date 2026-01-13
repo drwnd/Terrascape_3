@@ -1,4 +1,10 @@
 #version 460 core
+#define VELOCITY_PACKING_FACTOR 0.25     // Inverse in ParticleCollector.java
+#define GRAVITY_PACKING_FACTOR 0.5       // Inverse in ParticleCollector.java
+#define ROTATION_PACKING_FACTOR 0.0625   // Inverse in ParticleCollector.java
+#define PARTICLE_OFFSET 512              // Same in ParticleCollector.java
+#define TARGET_TPS 20.0
+#define NANOSECONDS_PER_SECOND 1000000000
 
 out vec3 texturePosition;
 out vec3 voxelPosition;
@@ -8,7 +14,7 @@ flat out int textureData;
 struct Particle {
     int packedOffset;
     int packedVelocityGravity;
-    int packedLifeTimeRotationMaterial;
+    int packedRotationMaterial;
 };
 
 layout (std430, binding = 0) restrict readonly buffer particleBuffer {
@@ -25,12 +31,6 @@ uniform ivec3 startPosition;
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const vec2[6] FACE_POSITIONS = vec2[6](vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1), vec2(1, 0), vec2(0, 1));
 
-const float VELOCITY_PACKING_FACTOR = 0.25;     // Inverse in ParticleCollector.java
-const float GRAVITY_PACKING_FACTOR = 0.5;       // Inverse in ParticleCollector.java
-const float ROTATION_PACKING_FACTOR = 0.0625;   // Inverse in ParticleCollector.java
-const int PARTICLE_OFFSET = 512;                // Same in ParticleCollector.java
-const float TARGET_TPS = 20.0;
-const float NANOSECONDS_PER_SECOND = 1000000000;
 
 float getTimeScaler(Particle currentParticle) {
     if ((currentParticle.packedOffset & (1 << 30)) != 0) return 1;
@@ -56,8 +56,8 @@ float getAliveTime(Particle currentParticle) {
 }
 
 vec2 getRotationSpeed(Particle currentParticle) {
-    float rotationSpeedX = (currentParticle.packedLifeTimeRotationMaterial >> 16 & 0xFF) * ROTATION_PACKING_FACTOR;
-    float rotationSpeedY = (currentParticle.packedLifeTimeRotationMaterial >> 8 & 0xFF) * ROTATION_PACKING_FACTOR;
+    float rotationSpeedX = (currentParticle.packedRotationMaterial >> 16 & 0xFF) * ROTATION_PACKING_FACTOR;
+    float rotationSpeedY = (currentParticle.packedRotationMaterial >> 8 & 0xFF) * ROTATION_PACKING_FACTOR;
 
     return vec2(rotationSpeedX, rotationSpeedY);
 }
@@ -118,7 +118,7 @@ void main() {
 
     gl_Position = projectionViewMatrix * vec4(voxelPosition, 1.0);
 
-    textureData = side << 8 | currentParticle.packedLifeTimeRotationMaterial & 0xFF;
+    textureData = side << 8 | currentParticle.packedRotationMaterial & 0xFF0000FF;
     texturePosition = wrappedPositon + facePosition;
     normal = rotate(NORMALS[side], currentParticle, aliveTime);
 }

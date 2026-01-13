@@ -13,6 +13,10 @@ import static game.utils.Constants.*;
 
 public final class MeshGenerator {
 
+    public static final int INTS_PER_VERTEX = 4;
+    public static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
+    public static final int PROPERTIES_OFFSET = 24;
+
     public static boolean isVisible(byte toTestMaterial, byte occludingMaterial) {
         if (toTestMaterial == AIR) return false;
         if (occludingMaterial == AIR) return true;
@@ -279,7 +283,7 @@ public final class MeshGenerator {
         vertices.add(xStart | materialX);
         vertices.add(yStart | materialY);
         vertices.add(zStart | materialZ);
-        vertices.add(faceSize1 << 24 | faceSize2 << 18 | side << 8 | material & 0xFF);
+        vertices.add(Material.getMaterialProperties(material) << PROPERTIES_OFFSET | faceSize1 << 17 | faceSize2 << 11 | side << 8 | material & 0xFF);
     }
 
     private int xStart, yStart, zStart;
@@ -292,8 +296,6 @@ public final class MeshGenerator {
             new ByteArrayList(64), new ByteArrayList(64), new ByteArrayList(64)
     };
 
-    public static final int INTS_PER_VERTEX = 4;
-    public static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
     private final IntArrayList waterVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{

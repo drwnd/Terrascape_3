@@ -69,6 +69,7 @@ public final class Constants {
     public static final byte TRANSPARENT = Properties.TRANSPARENT.getValue();
     public static final byte OCCLUDES_SELF_ONLY = Properties.OCCLUDES_SELF_ONLY.getValue();
     public static final byte STRUCTURE_REPLACEABLE = Properties.STRUCTURE_REPLACEABLE.getValue();
+    public static final byte SHADOW_TRANSPARENT = Properties.SHADOW_TRANSPARENT.getValue();
 
     // All materials
     public static final byte AIR = 0;

@@ -7,7 +7,8 @@ public enum Properties {
     NO_COLLISION,
     TRANSPARENT,
     OCCLUDES_SELF_ONLY(TRANSPARENT),
-    STRUCTURE_REPLACEABLE;
+    STRUCTURE_REPLACEABLE,
+    SHADOW_TRANSPARENT;
 
 
     Properties(Properties... properties) {

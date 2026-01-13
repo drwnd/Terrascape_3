@@ -1,6 +1,7 @@
 {
   "properties": [
     "TRANSPARENT",
-    "OCCLUDES_SELF_ONLY"
+    "OCCLUDES_SELF_ONLY",
+    "SHADOW_TRANSPARENT"
   ]
 }
