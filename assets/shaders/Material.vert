@@ -1,6 +1,7 @@
 #version 460 core
 
-out vec3 totalPosition;
+out vec3 texturePosition;
+out vec3 voxelPosition;
 flat out vec3 normal;
 flat out int textureData;
 
@@ -53,9 +54,10 @@ void main() {
     int faceSize1 = (currentVertex.textureData >> 24 & 63) + 1;
     int faceSize2 = (currentVertex.textureData >> 18 & 63) + 1;
     vec3 inChunkPosition = (getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * lodSize;
-    totalPosition = ivec3(x, y, z) * lodSize - iCameraPosition + ivec3(0, -lodSize + 1, 0) + inChunkPosition;
+    texturePosition = ivec3(x, y, z) * lodSize - iCameraPosition + ivec3(0, -lodSize + 1, 0) + inChunkPosition;
+    voxelPosition = texturePosition;
 
-    gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
+    gl_Position = projectionViewMatrix * vec4(texturePosition, 1.0);
 
     textureData = currentVertex.textureData;
     normal = NORMALS[side];

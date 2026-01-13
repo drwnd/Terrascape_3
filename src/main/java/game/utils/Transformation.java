@@ -5,6 +5,8 @@ import game.player.rendering.Camera;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import static game.utils.Constants.*;
+
 public final class Transformation {
 
     public static Matrix4f createViewMatrix(Camera camera) {
@@ -55,6 +57,26 @@ public final class Transformation {
         matrix.translate(-cameraPosition.fractionX, -cameraPosition.fractionY, -cameraPosition.fractionZ);
 
         return matrix;
+    }
+
+    public static Matrix4f getSunMatrix(float renderTime) {
+        Vector3f sunDirection = getSunDirection(renderTime);
+        Matrix4f matrix = new Matrix4f();
+        matrix.ortho(-SHADOW_RANGE, SHADOW_RANGE, -SHADOW_RANGE, SHADOW_RANGE, 100, SHADOW_RANGE * 2);
+        matrix.lookAt(-sunDirection.x * SHADOW_RANGE, -sunDirection.y * SHADOW_RANGE, -sunDirection.z * SHADOW_RANGE,
+                0.0F, 0.0F, 0.0F,
+                0.0F, 1.0F, 0.0F);
+        return matrix;
+    }
+
+    public static Vector3f getSunDirection(float renderTime) {
+        float alpha = (float) (renderTime * Math.PI);
+
+        return new Vector3f(
+                (float) Math.sin(alpha),
+                (float) Math.min(Math.cos(alpha), -0.3),
+                (float) Math.cos(alpha)
+        ).normalize();
     }
 
     private Transformation() {

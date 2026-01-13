@@ -18,8 +18,8 @@ public class Shader extends Asset {
     public Shader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
         uniforms = new HashMap<>();
 
-        String vertexShaderCode = FileManager.loadFileContents(vertexShaderFilePath);
-        String fragmentShaderCode = FileManager.loadFileContents(fragmentShaderFilePath);
+        String vertexShaderCode = FileManager.loadFileContents(SHADER_FOLDER_PATH + vertexShaderFilePath);
+        String fragmentShaderCode = FileManager.loadFileContents(SHADER_FOLDER_PATH + fragmentShaderFilePath);
         try {
             programID = createProgram();
             int vertexShaderID = createVertexShader(vertexShaderCode, programID);
@@ -181,6 +181,7 @@ public class Shader extends Asset {
     private static final Pattern REMOVE_SEMICOLON = Pattern.compile(";");
     private static final Pattern REMOVE_ARRAY_DECLARATION = Pattern.compile("\\[.*]");
     private static final Pattern REMOVE_UNNECESSARY_WHITESPACE = Pattern.compile(" +");
+    private static final String SHADER_FOLDER_PATH = "assets/shaders/";
 
     protected final int programID;
     private final HashMap<String, Integer> uniforms;

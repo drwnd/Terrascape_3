@@ -80,12 +80,14 @@ Nachricht Dauer (Sekunden)
 Nachricht
 Höchste Nachrichtenanzahl
 Benutze Ambient Occlusion
-Zeige Particle beim Zerstören
-Zeige Particle beim Würfel Platzieren
-Zeige Particle beim Struktur Platzieren
-Zeige Platscherparticle
+Zeige Partikel beim Zerstören
+Zeige Partikel beim Würfel Platzieren
+Zeige Partikel beim Struktur Platzieren
+Zeige Platscherpartikel
 Fixiere Patzierungsposition
 Umgebungsverdeckungsproben
 Benutzte Umgebungsverdeckung
 Texturenpacket
 Tastenkürzel
+Chunks werfen Schatten
+Partikel werfen Schatten

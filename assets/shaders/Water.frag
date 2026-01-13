@@ -1,7 +1,7 @@
 #version 400 core
 #define MAX_AMOUNT_OF_MATERIALS 256
 
-in vec3 totalPosition;
+in vec3 texturePosition;
 flat in vec3 normal;
 flat in int textureData;
 layout(early_fragment_tests) in;
@@ -10,6 +10,8 @@ layout (location = 0) out vec4 fragColor;
 layout (location = 1) out int side;
 
 uniform sampler2DArray textures;
+uniform sampler2D shadowMap;
+uniform mat4 sunMatrix;
 
 uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
 uniform int maxTextureSize;
@@ -21,7 +23,7 @@ uniform vec3 sunDirection;
 uniform vec3 cameraPosition;
 
 const int HEAD_UNDER_WATER_BIT = 1;
-const int CALCULATE_SHADOWS_BIT = 2;
+const int DO_SHADOW_MAPPING_BIT = 2;
 
 int isFlag(int bit) {
     return int((flags & bit) != 0);
@@ -34,8 +36,18 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-float getSkyLight() {
-    return 1.0;
+float getSkyLight(vec3 position, vec3 normal) {
+    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return 1.0;
+    //    if (dot(normal, sunDirection) < 0.0) return 0.0;
+    vec4 shadowCoord = sunMatrix * vec4(floor(position + normal * 5.5), 1);
+    shadowCoord.xyz /= shadowCoord.w;
+    shadowCoord = shadowCoord * 0.5 + 0.5;
+
+    float closestDepth = texture(shadowMap, shadowCoord.xy).r;
+    if (closestDepth == 1.0) return 1.0;
+    float currentDepth = shadowCoord.z;
+
+    return currentDepth - 0.001 > closestDepth ? 0.5 : 1.0;
 }
 
 float getBlockLight() {
@@ -44,7 +56,7 @@ float getBlockLight() {
 
 vec2 getUVOffset(int side, int textureSize) {
     float invTextureSize = 1.0 / textureSize;
-    vec3 textureCoordinate = fract(totalPosition * invTextureSize);
+    vec3 textureCoordinate = fract(texturePosition * invTextureSize);
     float normalizer = float(textureSize) / maxTextureSize;
 
     switch (side) {
@@ -66,12 +78,12 @@ void main() {
 
     vec4 color = texture(textures, vec3(getUVOffset(side, textureSize), textureData & 0xFF));
 
-    float distance = length(cameraPosition - totalPosition);
-    float angle = abs(dot((totalPosition - cameraPosition) / distance, normal));
+    float distance = length(cameraPosition - texturePosition);
+    float angle = abs(dot((texturePosition - cameraPosition) / distance, normal));
 
 
     float absTime = abs(time);
-    float skyLight = getSkyLight();
+    float skyLight = getSkyLight(texturePosition, normal);
     float blockLight = getBlockLight();
 
     float sunIllumination = dot(normal, sunDirection) * nightBrightness * skyLight * absTime;

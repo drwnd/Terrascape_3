@@ -2,7 +2,7 @@
 #define MAX_AMOUNT_OF_MATERIALS 256
 
 flat in int textureData;
-in vec3 totalPosition;
+in vec3 texturePosition;
 layout(early_fragment_tests) in;
 
 layout (location = 0) out vec4 fragColor;
@@ -15,7 +15,7 @@ uniform int maxTextureSize;
 
 vec2 getUVOffset(int side, int textureSize) {
     float invTextureSize = 1.0 / textureSize;
-    vec3 textureCoordinate = fract(totalPosition * invTextureSize);
+    vec3 textureCoordinate = fract(texturePosition * invTextureSize);
     float normalizer = float(textureSize) / maxTextureSize;
 
     switch (side) {

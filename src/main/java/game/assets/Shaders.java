@@ -14,6 +14,8 @@ public enum Shaders implements ShaderIdentifier {
     TRANSPARENT_PARTICLE,
     VOLUME_INDICATOR,
     AABB,
-    OCCLUSION_CULLING
+    OCCLUSION_CULLING,
+    CHUNK_SHADOW,
+    PARTICLE_SHADOW
 
 }

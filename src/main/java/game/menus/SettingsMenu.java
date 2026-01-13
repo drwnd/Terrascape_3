@@ -103,6 +103,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSetting.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
 
         section.addToggle(ToggleSetting.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
+        section.addToggle(ToggleSetting.CHUNKS_CAST_SHADOWS, UiMessage.CHUNKS_CAST_SHADOWS);
+        section.addToggle(ToggleSetting.PARTICLES_CAST_SHADOWS, UiMessage.PARTICLES_CAST_SHADOWS);
         section.addToggle(ToggleSetting.USE_AMBIENT_OCCLUSION, UiMessage.USE_AMBIENT_OCCLUSION);
         section.addToggle(ToggleSetting.SHOW_BREAK_PARTICLES, UiMessage.SHOW_BREAK_PARTICLES);
         section.addToggle(ToggleSetting.SHOW_CUBE_PLACE_PARTICLES, UiMessage.SHOW_CUBE_PLACE_PARTICLES);
@@ -167,6 +169,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSetting.RENDER_OCCLUDERS, new Message("Render Occluders"));
         section.addToggle(ToggleSetting.RENDER_OCCLUDEES, new Message("Render Occludees"));
         section.addToggle(ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
+        section.addToggle(ToggleSetting.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
 
         section.addSlider(FloatSetting.REACH, new Message("Reach"));
         section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));

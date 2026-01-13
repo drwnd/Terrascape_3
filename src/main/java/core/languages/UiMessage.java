@@ -93,7 +93,9 @@ public enum UiMessage implements StringGetter {
     AMBIENT_OCCLUSION_SAMPLES,
     USE_OCCLUSION_CULLING,
     TEXTURE_PACK,
-    KEYBIND;
+    KEYBIND,
+    CHUNKS_CAST_SHADOWS,
+    PARTICLES_CAST_SHADOWS;
 
     @Override
     public String get() {

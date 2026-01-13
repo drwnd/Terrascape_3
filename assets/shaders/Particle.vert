@@ -1,6 +1,7 @@
 #version 460 core
 
-out vec3 totalPosition;
+out vec3 texturePosition;
+out vec3 voxelPosition;
 flat out vec3 normal;
 flat out int textureData;
 
@@ -111,13 +112,13 @@ void main() {
 
     ivec3 wrappedPositon = ivec3(x, y, z) - iCameraPosition;
     vec3 facePosition = getFacePositions(side, currentVertexId);
-    vec3 position = vec3(wrappedPositon) + rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime) + vec3(timeScaler * 0.5);
-    position += getVelocity(currentParticle) * aliveTime;
-    position.y -= 0.5 * getGravity(currentParticle) * aliveTime * aliveTime;
+    voxelPosition = vec3(wrappedPositon) + rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime) + vec3(timeScaler * 0.5);
+    voxelPosition += getVelocity(currentParticle) * aliveTime;
+    voxelPosition.y -= 0.5 * getGravity(currentParticle) * aliveTime * aliveTime;
 
-    gl_Position = projectionViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionViewMatrix * vec4(voxelPosition, 1.0);
 
     textureData = side << 8 | currentParticle.packedLifeTimeRotationMaterial & 0xFF;
-    totalPosition = wrappedPositon + facePosition;
+    texturePosition = wrappedPositon + facePosition;
     normal = rotate(NORMALS[side], currentParticle, aliveTime);
 }

@@ -15,6 +15,7 @@ import game.utils.Utils;
 
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.Arrays;
@@ -27,6 +28,10 @@ public final class RenderingOptimizer {
     public static final int INDIRECT_COMMAND_SIZE = 16;
 
     public RenderingOptimizer() {
+        shadowIndirectBuffer = glGenBuffers();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
+
         opaqueIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
@@ -137,6 +142,17 @@ public final class RenderingOptimizer {
     public long[] getVisibilityBits(int lod) {
         return visibilityBits[lod];
     }
+
+
+    public int getShadowIndirectBuffer(float renderTime) {
+        populateShadowIndirectBuffer(renderTime);
+        return shadowIndirectBuffer;
+    }
+
+    public int getShadowDrawCount() {
+        return shadowDrawCount;
+    }
+
 
     private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
         aabbs.clear();
@@ -415,18 +431,40 @@ public final class RenderingOptimizer {
     }
 
 
+    private void populateShadowIndirectBuffer(float renderTime) {
+        Vector3f sunDirection = Transformation.getSunDirection(renderTime);
+        int xOffset = sunDirection.x < 0 ? 1 : -1;
+        int yOffset = sunDirection.y < 0 ? 1 : -1;
+        int zOffset = sunDirection.z < 0 ? 1 : -1;
+
+        opaqueCommands.clear();
+        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+            OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, SHADOW_LOD);
+            if (model == null || model.isEmpty()) continue;
+
+            model.addDataWithoutOcclusionCulling(opaqueCommands,
+                    model.chunkX() + xOffset,
+                    model.chunkY() + yOffset,
+                    model.chunkZ() + zOffset);
+        }
+        shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
+        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
+    }
+
+
     private long[] lodVisibilityBits;
     private MeshCollector meshCollector;
     private int cameraChunkX, cameraChunkY, cameraChunkZ;
     private int cameraX, cameraY, cameraZ;
 
-    private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer;
+    private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
     private final int framebuffer, depthTexture;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][LONGS_PER_LOD_BITS];
     private final long[] lodStarts = new long[LOD_COUNT * 3];
     private final int[] lodDrawCounts = new int[LOD_COUNT * 3];
+    private int shadowDrawCount;
 
     private final IntArrayList opaqueCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 256);
     private final IntArrayList waterCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);

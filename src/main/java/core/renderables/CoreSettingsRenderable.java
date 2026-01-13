@@ -91,13 +91,14 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     public void addToggle(ToggleSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
-        Vector2f offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
+        Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(toggle);
         toggles.add(toggle);
 
-        offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
+        offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
+        sizeToParent = new Vector2f(sizeToParent);
         KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, UiMessage.KEYBIND);
         addRenderable(keySelector);
         keySelectors.add(keySelector);

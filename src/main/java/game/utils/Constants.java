@@ -30,6 +30,10 @@ public final class Constants {
     public static final int LOD_COUNT = 10;
     public static final int MAX_TREE_LOD = 4;
 
+    public static final int SHADOW_MAP_SIZE = 2048;
+    public static final int SHADOW_RANGE = 1024;
+    public static final int SHADOW_LOD = 1;
+
     // Indices for the sides of blocks
     /**
      * Positive Z.
