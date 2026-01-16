@@ -26,7 +26,7 @@ public final class ShaderLoader {
             case Shaders.SSAO -> new GuiShader("Gui.vert", "SSAO.frag", identifier);
             case Shaders.AO_APPLIER -> new GuiShader("Gui.vert", "AO_Applier.frag", identifier);
             case Shaders.OPAQUE_PARTICLE -> new Shader("Particle.vert", "Opaque.frag", identifier);
-            case Shaders.TRANSPARENT_PARTICLE -> new Shader("Particle.vert", "Glass.frag", identifier);
+            case Shaders.GLASS_PARTICLE -> new Shader("Particle.vert", "Glass.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new Shader("VolumeIndicator.vert", "VolumeIndicator.frag", identifier);
             case Shaders.AABB -> new Shader("AABB.vert", "Null.frag", identifier);
             case Shaders.OCCLUSION_CULLING -> new Shader("AABB.vert", "OcclusionCulling.frag", identifier);

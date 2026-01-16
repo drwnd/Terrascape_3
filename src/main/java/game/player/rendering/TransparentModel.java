@@ -28,19 +28,22 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
     }
 
     public void addDataWithoutOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {
-        if (!isWaterEmpty()) {
-            waterCommands.add(waterVertexCount);
-            waterCommands.add(1);
-            waterCommands.add(index);
-            waterCommands.add(0);
-        }
+        if (!isWaterEmpty()) addWaterData(waterCommands);
+        if (!isGlassEmpty()) addGlassData(glassCommands);
+    }
 
-        if (!isGlassEmpty()) {
-            glassCommands.add(glassVertexCount);
-            glassCommands.add(1);
-            glassCommands.add(index + waterVertexCount);
-            glassCommands.add(0);
-        }
+    public void addGlassData(IntArrayList glassCommands) {
+        glassCommands.add(glassVertexCount);
+        glassCommands.add(1);
+        glassCommands.add(index + waterVertexCount);
+        glassCommands.add(0);
+    }
+
+    public void addWaterData(IntArrayList waterCommands) {
+        waterCommands.add(waterVertexCount);
+        waterCommands.add(1);
+        waterCommands.add(index);
+        waterCommands.add(0);
     }
 
     public boolean isWaterEmpty() {

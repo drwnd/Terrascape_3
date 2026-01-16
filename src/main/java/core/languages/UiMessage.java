@@ -95,7 +95,8 @@ public enum UiMessage implements StringGetter {
     TEXTURE_PACK,
     KEYBIND,
     CHUNKS_CAST_SHADOWS,
-    PARTICLES_CAST_SHADOWS;
+    PARTICLES_CAST_SHADOWS,
+    GLASS_CASTS_SHADOWS;
 
     @Override
     public String get() {

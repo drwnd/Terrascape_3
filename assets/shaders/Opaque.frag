@@ -1,5 +1,8 @@
 #version 400 core
 #define MAX_AMOUNT_OF_MATERIALS 256
+#define HEAD_UNDER_WATER_BIT 1
+#define DO_SHADOW_MAPPING_BIT 2
+#define DO_GLASS_SHADOWS_BIT 4
 
 flat in int textureData;
 flat in vec3 normal;
@@ -12,6 +15,7 @@ layout (location = 1) out int side;
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
 uniform sampler2D shadowMap;
+uniform sampler2D shadowColor;
 uniform mat4 sunMatrix;
 
 uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
@@ -22,9 +26,6 @@ uniform float nightBrightness;
 uniform float time;
 uniform vec3 sunDirection;
 uniform vec3 cameraPosition;
-
-const int HEAD_UNDER_WATER_BIT = 1;
-const int DO_SHADOW_MAPPING_BIT = 2;
 
 vec2 getUVOffset(int side, int textureSize) {
     float invTextureSize = 1.0 / textureSize;
@@ -53,18 +54,23 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-float getSkyLight(vec3 position, vec3 normal) {
-    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return 1.0;
-//    if (dot(normal, sunDirection) < 0.0) return 0.0;
+vec3 getLightColor(vec2 shadowCoord) {
+    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
+    return max(texture(shadowColor, shadowCoord).rgb, vec3(0.5));
+}
+
+vec3 getSkyLight(vec3 position, vec3 normal) {
+    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1.0);
+    //    if (dot(normal, sunDirection) < 0.0) return 0.0;
     vec4 shadowCoord = sunMatrix * vec4(floor(position + normal * 2.5), 1);
     shadowCoord.xyz /= shadowCoord.w;
     shadowCoord = shadowCoord * 0.5 + 0.5;
 
     float closestDepth = texture(shadowMap, shadowCoord.xy).r;
-    if (closestDepth == 1.0) return 1.0;
+    if (closestDepth == 1.0) return getLightColor(shadowCoord.xy);
     float currentDepth = shadowCoord.z;
 
-    return currentDepth - 0.005 > closestDepth ? 0.5 : 1.0;
+    return currentDepth - 0.005 > closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
 }
 
 float getBlockLight(vec3 position, vec3 normal) {
@@ -74,18 +80,23 @@ float getBlockLight(vec3 position, vec3 normal) {
 vec3 getColor(vec3 color, vec3 textureCoord) {
     float emissivness = texture(propertiesTextures, textureCoord).r;
     float absTime = abs(time);
-    float skyLight = getSkyLight(voxelPosition, normal);
     float blockLight = getBlockLight(texturePosition, normal);
-
-    float sunIllumination = dot(normal, sunDirection) * 0.2 * skyLight * absTime;
     float timeLight = max(nightBrightness, easeInOutQuart(absTime));
     float nightLight = 0.6 * (1 - absTime) * (1 - absTime);
-    float light = max(blockLight + nightBrightness, max(nightBrightness, skyLight) * timeLight + sunIllumination);
     float distance = length(cameraPosition - texturePosition);
     float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
     float fogMultiplier = 1 - exp(-distance * 0.000005);
 
-    vec3 fragLight = max(vec3(emissivness), vec3(light, light, max(nightBrightness, max(nightBrightness, skyLight + nightLight) * timeLight + sunIllumination)));
+    vec3 nightLightVec = vec3(nightLight, nightLight, nightLight);
+    vec3 nightBrightnessVec = vec3(nightBrightness);
+    vec3 skyLight = getSkyLight(voxelPosition, normal);
+    vec3 sunIllumination = dot(normal, sunDirection) * 0.2 * absTime * skyLight;
+    vec3 light = max(nightBrightnessVec, skyLight) * timeLight + sunIllumination;
+
+    light = max(nightBrightnessVec, light);
+    light.b = max(nightBrightness, max(nightBrightness, skyLight.b + nightLight) * timeLight + sunIllumination.b);
+
+    vec3 fragLight = max(vec3(emissivness), light);
     vec3 baseColor = color * fragLight * (1 - waterFogMultiplier) * (1 - fogMultiplier);
     vec3 waterColor = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
     vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight;
@@ -97,11 +108,10 @@ void main() {
     side = textureData >> 8 & 7;
     int material = textureData & 0xFF;
     int textureSize = textureSizes[material];
-
     vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
-    vec4 color = texture(textures, textureCoord);
-    if (color.a == 0) discard;
 
-    color.rgb = getColor(color.rgb, textureCoord);
-    fragColor = vec4(color);
+    fragColor = texture(textures, textureCoord);
+    if (fragColor.a == 0) discard;
+
+    fragColor.rgb = getColor(fragColor.rgb, textureCoord);
 }

@@ -65,6 +65,7 @@ public final class RenderingOptimizer {
             throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
     }
 
+    // Occlusion culling for normal rendering
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
         FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
 
@@ -125,6 +126,48 @@ public final class RenderingOptimizer {
         return glassIndirectBuffer;
     }
 
+    // Shadow mapping interface
+    public void populateOpaqueShadowIndirectBuffer(float renderTime) {
+        Vector3f sunDirection = Transformation.getSunDirection(renderTime);
+        int xOffset = sunDirection.x < 0 ? 1 : -1;
+        int yOffset = sunDirection.y < 0 ? 1 : -1;
+        int zOffset = sunDirection.z < 0 ? 1 : -1;
+
+        opaqueCommands.clear();
+        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+            OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, SHADOW_LOD);
+            if (model == null || model.isEmpty()) continue;
+
+            model.addDataWithoutOcclusionCulling(opaqueCommands,
+                    model.chunkX() + xOffset,
+                    model.chunkY() + yOffset,
+                    model.chunkZ() + zOffset);
+        }
+        shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
+        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
+    }
+
+    public void populateGlassShadowIndirectBuffer() {
+        opaqueCommands.clear();
+        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+            TransparentModel model = meshCollector.getTransparentModel(chunkIndex, SHADOW_LOD);
+            if (model == null || model.isGlassEmpty()) continue;
+
+            model.addGlassData(opaqueCommands);
+        }
+        shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
+        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
+    }
+
+    public int getShadowIndirectBuffer() {
+        return shadowIndirectBuffer;
+    }
+
+    public int getShadowDrawCount() {
+        return shadowDrawCount;
+    }
+
+    // Other
     public int getDepthTexture() {
         return depthTexture;
     }
@@ -141,16 +184,6 @@ public final class RenderingOptimizer {
 
     public long[] getVisibilityBits(int lod) {
         return visibilityBits[lod];
-    }
-
-
-    public int getShadowIndirectBuffer(float renderTime) {
-        populateShadowIndirectBuffer(renderTime);
-        return shadowIndirectBuffer;
-    }
-
-    public int getShadowDrawCount() {
-        return shadowDrawCount;
     }
 
 
@@ -428,27 +461,6 @@ public final class RenderingOptimizer {
         glDisable(GL_BLEND);
         glCullFace(GL_BACK);
         glDepthFunc(GL_LESS);
-    }
-
-
-    private void populateShadowIndirectBuffer(float renderTime) {
-        Vector3f sunDirection = Transformation.getSunDirection(renderTime);
-        int xOffset = sunDirection.x < 0 ? 1 : -1;
-        int yOffset = sunDirection.y < 0 ? 1 : -1;
-        int zOffset = sunDirection.z < 0 ? 1 : -1;
-
-        opaqueCommands.clear();
-        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
-            OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, SHADOW_LOD);
-            if (model == null || model.isEmpty()) continue;
-
-            model.addDataWithoutOcclusionCulling(opaqueCommands,
-                    model.chunkX() + xOffset,
-                    model.chunkY() + yOffset,
-                    model.chunkZ() + zOffset);
-        }
-        shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
-        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
     }
 
 

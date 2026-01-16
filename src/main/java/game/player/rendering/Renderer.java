@@ -151,9 +151,12 @@ public final class Renderer extends Renderable {
 
     private void setUpShadowMappedRendering(Matrix4f sunMatrix, Shader shader) {
         shader.setUniform("shadowMap", 2);
+        shader.setUniform("shadowColor", 3);
         shader.setUniform("sunMatrix", sunMatrix);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, shadowTexture);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, shadowColorTexture);
     }
 
 
@@ -243,6 +246,7 @@ public final class Renderer extends Renderable {
     private void createTextures(int width, int height) {
         colorTexture = ObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
         sideTexture = ObjectLoader.createTexture2D(GL_R8I, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, GL_NEAREST);
+        shadowColorTexture = ObjectLoader.createTexture2D(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST);
 
         ssaoTexture = ObjectLoader.createTexture2D(GL_RED, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -293,6 +297,8 @@ public final class Renderer extends Renderable {
         shadowFramebuffer = glCreateFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowColorTexture, 0);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw new IllegalStateException("Shadow Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 
@@ -306,6 +312,7 @@ public final class Renderer extends Renderable {
         glDeleteTextures(ssaoTexture);
         glDeleteTextures(sideTexture);
         glDeleteTextures(shadowTexture);
+        glDeleteTextures(shadowColorTexture);
     }
 
     private void deleteFrameBuffers() {
@@ -366,7 +373,11 @@ public final class Renderer extends Renderable {
     private void computeShadowMap(Position cameraPosition, Matrix4f sunMatrix) {
         glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClearColor(1.0F, 1.0F, 1.0F, 0.0F);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        glColorMask(false, false, false, false);
+        glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+        glDepthMask(true);
 
         if (ToggleSetting.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.CHUNK_SHADOW);
@@ -381,10 +392,11 @@ public final class Renderer extends Renderable {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             glDisable(GL_BLEND);
-            glDepthMask(true);
+
+            renderingOptimizer.populateOpaqueShadowIndirectBuffer(getRenderTime());
 
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
-            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getShadowIndirectBuffer(getRenderTime()));
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getShadowIndirectBuffer());
 
             int drawCount = renderingOptimizer.getShadowDrawCount();
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
@@ -404,12 +416,58 @@ public final class Renderer extends Renderable {
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
             glDisable(GL_BLEND);
-            glDepthMask(true);
             glDisable(GL_STENCIL_TEST);
 
             renderParticles(shader, currentTick, true);
         }
 
+        glColorMask(true, true, true, true);
+        glDepthMask(false);
+
+        if (ToggleSetting.GLASS_CASTS_SHADOWS.value() && ToggleSetting.CHUNKS_CAST_SHADOWS.value()) {
+            Shader shader = AssetManager.get(Shaders.GLASS);
+            shader.bind();
+            shader.setUniform("lodSize", 1 << SHADOW_LOD);
+            shader.setUniform("projectionViewMatrix", sunMatrix);
+            shader.setUniform("iCameraPosition",
+                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+
+            renderingOptimizer.populateGlassShadowIndirectBuffer();
+
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getShadowIndirectBuffer());
+
+            int drawCount = renderingOptimizer.getShadowDrawCount();
+            glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
+        }
+
+        if (ToggleSetting.GLASS_CASTS_SHADOWS.value() && ToggleSetting.PARTICLES_CAST_SHADOWS.value()) {
+            long currentTick = Game.getServer().getCurrentGameTick();
+            Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
+            shader.bind();
+            shader.setUniform("projectionViewMatrix", sunMatrix);
+            shader.setUniform("iCameraPosition",
+                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+            shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+
+            renderParticles(shader, currentTick, false);
+        }
+
+        glDepthMask(true);
         glViewport(0, 0, Window.getWidth(), Window.getHeight());
     }
 
@@ -424,10 +482,11 @@ public final class Renderer extends Renderable {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getOpaqueIndirectBuffer());
 
+        int flags = getFlags(cameraPosition);
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
-            shader.setUniform("flags", getFlags(cameraPosition) & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
+            shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 
             long start = renderingOptimizer.getOpaqueLodStart(lod);
             int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
@@ -503,10 +562,11 @@ public final class Renderer extends Renderable {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getWaterIndirectBuffer());
 
+        int flags = getFlags(cameraPosition);
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
-            shader.setUniform("flags", getFlags(cameraPosition) & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
+            shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 
             long start = renderingOptimizer.getWaterLodStart(lod);
             int drawCount = renderingOptimizer.getWaterLodDrawCount(lod);
@@ -537,7 +597,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderGlassParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
-        Shader shader = AssetManager.get(Shaders.TRANSPARENT_PARTICLE);
+        Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
         glDisable(GL_STENCIL_TEST);
         long currentTick = Game.getServer().getCurrentGameTick();
@@ -728,7 +788,8 @@ public final class Renderer extends Renderable {
     private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
         boolean useShadowMapping = ToggleSetting.USE_SHADOW_MAPPING.value();
-        return (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);
+        boolean doGlassShadows = ToggleSetting.GLASS_CASTS_SHADOWS.value();
+        return (doGlassShadows ? DO_GLASS_SHADOWS_BIT : 0) | (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);
     }
 
     private static Vector3f getSunDirection(float renderTime) {
@@ -754,8 +815,9 @@ public final class Renderer extends Renderable {
 
     private int framebuffer, colorTexture, depthTexture, sideTexture;
     private int ssaoFramebuffer, ssaoTexture, noiseTexture;
-    private int shadowFramebuffer, shadowTexture;
+    private int shadowFramebuffer, shadowTexture, shadowColorTexture;
 
     private static final int HEAD_UNDER_WATER_BIT = 1;
     private static final int DO_SHADOW_MAPPING_BIT = 2;
+    private static final int DO_GLASS_SHADOWS_BIT = 4;
 }
