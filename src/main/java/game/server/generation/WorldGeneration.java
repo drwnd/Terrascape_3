@@ -1,6 +1,7 @@
 package game.server.generation;
 
 import game.server.Chunk;
+import game.server.MaterialsData;
 import game.server.biomes.Biome;
 import game.server.biomes.*;
 import game.utils.Status;
@@ -24,18 +25,24 @@ public final class WorldGeneration {
         chunk.setGenerationStatus(Status.IN_PROGRESS);
 
         data.setChunk(chunk);
+        boolean chunkContainsVoxels = false;
 
-        if (data.chunkContainsGround()) generateStone(data);
-        if (data.chunkContainsBiome())
+        if (data.chunkContainsGround()) {
+            generateStone(data);
+            chunkContainsVoxels = true;
+        }
+        if (data.chunkContainsBiome()) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
                     data.set(inChunkX, inChunkZ);
                     generateBiome(inChunkX, inChunkZ, data);
                 }
+            chunkContainsVoxels = true;
+        }
 
-        generateTrees(data);
+        chunkContainsVoxels |= generateTrees(data);
 
-        chunk.setMaterials(data.getCompressedMaterials());
+        chunk.setMaterials(chunkContainsVoxels ? data.getCompressedMaterials() : new MaterialsData(CHUNK_SIZE_BITS, AIR));
         chunk.setGenerationStatus(Status.DONE);
     }
 
@@ -165,8 +172,9 @@ public final class WorldGeneration {
         }
     }
 
-    private static void generateTrees(GenerationData data) {
-        if (!data.hasTrees()) return;
+    private static boolean generateTrees(GenerationData data) {
+        if (!data.hasTrees()) return false;
+        boolean hasGeneratedTree = false;
 
         int sideLength = (1 << data.LOD) + 2;
         for (int x = 0; x < sideLength; x++)
@@ -174,8 +182,9 @@ public final class WorldGeneration {
                 Tree tree = data.treeMapValue(x * sideLength + z);
                 if (tree == null) continue;
 
-                data.storeTree(tree);
+                hasGeneratedTree |= data.storeTree(tree);
             }
+        return hasGeneratedTree;
     }
 
     private static double getContinentalModifier(double continental, double ridge) {

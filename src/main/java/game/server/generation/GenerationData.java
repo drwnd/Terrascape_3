@@ -10,8 +10,7 @@ import org.joml.Vector3i;
 
 import java.util.Arrays;
 
-import static game.server.generation.WorldGeneration.SEED;
-import static game.server.generation.WorldGeneration.WATER_LEVEL;
+import static game.server.generation.WorldGeneration.*;
 import static game.utils.Constants.*;
 
 public final class GenerationData {
@@ -187,13 +186,13 @@ public final class GenerationData {
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
-    public void storeTree(Tree tree) {
+    public boolean storeTree(Tree tree) {
         int chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
         int chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         int chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
 
         int chunkMaxY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
-        if (chunkStartY > tree.getMaxY() || chunkMaxY < tree.getMinY()) return;
+        if (chunkStartY > tree.getMaxY() || chunkMaxY < tree.getMinY()) return false;
 
         int inChunkX = Math.max(chunkStartX, tree.getMinX()) >> LOD & CHUNK_SIZE_MASK;
         int inChunkY = Math.max(chunkStartY, tree.getMinY()) >> LOD & CHUNK_SIZE_MASK;
@@ -206,13 +205,14 @@ public final class GenerationData {
         int lengthX = Utils.min(tree.sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.sizeX());
         int lengthY = Utils.min(tree.sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.sizeY());
         int lengthZ = Utils.min(tree.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.sizeZ());
-        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return false;
 
         Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
         MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), tree.transform(), LOD, targetStart, sourceStart, size);
+        return true;
     }
 
     public MaterialsData getCompressedMaterials() {

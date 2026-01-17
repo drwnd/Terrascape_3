@@ -49,6 +49,7 @@ public final class WorldOptimizer {
 
     private static boolean deleteIfRedundant(ChunkSaver saver, File chunkFile) {
         Chunk savedChunk = saver.load(chunkFile.getPath());
+        if (savedChunk == null) return delete(chunkFile);
         Chunk worldChunk = new Chunk(savedChunk.X, savedChunk.Y, savedChunk.Z, savedChunk.LOD);
 
         WorldGeneration.generate(worldChunk);
@@ -59,8 +60,12 @@ public final class WorldOptimizer {
 
         if (!Arrays.equals(savedData, worldData)) return false;
 
-        FileManager.delete(chunkFile);
         Game.getWorld().setNull(worldChunk.INDEX, worldChunk.LOD);
+        return delete(chunkFile);
+    }
+
+    private static boolean delete(File chunkFile) {
+        FileManager.delete(chunkFile);
         return true;
     }
 }

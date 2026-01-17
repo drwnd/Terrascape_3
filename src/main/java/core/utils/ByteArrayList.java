@@ -33,6 +33,12 @@ public final class ByteArrayList {
         return data;
     }
 
+    public byte[] toArray() {
+        byte[] data = new byte[size];
+        copyInto(data, 0);
+        return data;
+    }
+
     public void setData(byte[] data) {
         this.data = data;
         size = data.length;

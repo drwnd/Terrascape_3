@@ -147,6 +147,6 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
     }
 }
