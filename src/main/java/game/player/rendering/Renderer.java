@@ -205,10 +205,11 @@ public final class Renderer extends Renderable {
                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        renderOccluders(cameraPosition, projectionViewMatrix);
-        renderOccludees(cameraPosition, projectionViewMatrix);
+        if (ToggleSetting.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
+        if (ToggleSetting.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
         if (ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
         if (ToggleSetting.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
+        if (ToggleSetting.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
 
         renderChat();
         renderDebugInfo();
@@ -704,7 +705,6 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        if (!ToggleSetting.RENDER_OCCLUDERS.value()) return;
         int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
@@ -724,7 +724,6 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        if (!ToggleSetting.RENDER_OCCLUDEES.value()) return;
         int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 

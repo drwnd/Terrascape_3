@@ -17,6 +17,7 @@ public enum ToggleSetting implements KeyBound {
     RENDER_OCCLUDEES(false),
     RENDER_OCCLUDER_DEPTH_MAP(false),
     RENDER_SHADOW_MAP(false),
+    RENDER_SHADOW_COLORS(false),
     CHUNKS_CAST_SHADOWS(true),
     PARTICLES_CAST_SHADOWS(true),
     GLASS_CASTS_SHADOWS(true),

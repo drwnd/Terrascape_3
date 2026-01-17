@@ -171,6 +171,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSetting.RENDER_OCCLUDEES, new Message("Render Occludees"));
         section.addToggle(ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
         section.addToggle(ToggleSetting.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
+        section.addToggle(ToggleSetting.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
 
         section.addSlider(FloatSetting.REACH, new Message("Reach"));
         section.addSlider(FloatSetting.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
