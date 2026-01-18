@@ -138,7 +138,7 @@ public final class WorldGeneration {
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
         int height = data.height;
-        int start = Math.clamp((data.height - MAX_SURFACE_MATERIALS_DEPTH >> data.LOD) - ((long) data.chunkY << CHUNK_SIZE_BITS), 0, CHUNK_SIZE);
+        int start = Math.clamp((height - data.floorMaterialDepth >> data.LOD) - ((long) data.chunkY << CHUNK_SIZE_BITS), 0, CHUNK_SIZE);
 
         for (int inChunkY = start; inChunkY < CHUNK_SIZE; inChunkY++) {
             data.computeTotalY(inChunkY);

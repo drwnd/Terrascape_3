@@ -22,7 +22,7 @@ public final class ColdOcean extends Biome {
         if (data.isAboveSurface(totalY)) return false;
 
         int sandHeight = (int) (data.feature * 64.0) + WATER_LEVEL - 80;
-        int floorMaterialDepth = 48 + data.getFloorMaterialDepthMod();
+        int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) return false;   // Stone placed by caller
         if (totalY > sandHeight) data.store(inChunkX, inChunkY, inChunkZ, SAND);

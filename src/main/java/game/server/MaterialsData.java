@@ -170,9 +170,7 @@ public final class MaterialsData {
 
     public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers) {
         MaterialsData surfaceEquivalent = getSurfaceEquivalent();
-        synchronized (surfaceEquivalent) {
-            surfaceEquivalent.generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayers, totalSizeBits, 0, 0, 0, 0);
-        }
+        surfaceEquivalent.generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayers, totalSizeBits, 0, 0, 0, 0);
     }
 
     public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, int chunkX, int chunkY, int chunkZ) {
@@ -751,6 +749,62 @@ public final class MaterialsData {
     }
 
     // Mesh generation for chunks
+    private MaterialsData getSurfaceEquivalent() {
+        ByteArrayList dataList = new ByteArrayList(1000);
+        synchronized (this) {
+            getSurfaceEquivalent(dataList, totalSizeBits, 0);
+        }
+        return new MaterialsData(totalSizeBits, dataList.toArray());
+    }
+
+    private int getSurfaceEquivalent(ByteArrayList data, int sizeBits, int startIndex) {
+        byte types = (byte) (this.data[startIndex] & TYPE_MASK);
+
+        if (types == CONTAINS_TRANSPARENT) {
+            data.add(HOMOGENOUS);
+            data.add(AIR);
+            return HOMOGENOUS_BYTE_SIZE;
+        }
+        if (types == CONTAINS_OPAQUE) {
+            data.add(HOMOGENOUS);
+            data.add(MeshGenerator.OPAQUE);
+            return HOMOGENOUS_BYTE_SIZE;
+        }
+        if (types == CONTAINS_SELF_OCCLUDING && getIdentifier(startIndex) == HOMOGENOUS) {
+            data.add(HOMOGENOUS);
+            data.add(this.data[startIndex + 1]);
+            return HOMOGENOUS_BYTE_SIZE;
+        }
+
+        if (sizeBits == 1) {
+            data.pad(DETAIL_BYTE_SIZE);
+            System.arraycopy(this.data, startIndex, data.getData(), data.size() - DETAIL_BYTE_SIZE, DETAIL_BYTE_SIZE);
+            return DETAIL_BYTE_SIZE;
+        }
+
+        sizeBits--;
+        int offset = SPLITTER_BYTE_SIZE, size = data.size();
+        data.add(SPLITTER);
+        data.pad(SPLITTER_BYTE_SIZE - 1);
+
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + SPLITTER_BYTE_SIZE);
+        setOffset(data, offset, size + 1);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 1));
+        setOffset(data, offset, size + 4);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 4));
+        setOffset(data, offset, size + 7);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 7));
+        setOffset(data, offset, size + 10);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 10));
+        setOffset(data, offset, size + 13);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 13));
+        setOffset(data, offset, size + 16);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 16));
+        setOffset(data, offset, size + 19);
+        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 19));
+        return offset;
+    }
+
     private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         byte identifier = getIdentifier(startIndex);
 
@@ -1201,63 +1255,6 @@ public final class MaterialsData {
         aabb.max(inChunkX + 2, inChunkY + 2, inChunkZ + 2);
     }
 
-
-    private MaterialsData getSurfaceEquivalent() {
-        ByteArrayList dataList = new ByteArrayList(1000);
-        synchronized (this) {
-            getSurfaceEquivalent(dataList, totalSizeBits, 0);
-        }
-        return new MaterialsData(totalSizeBits, dataList.toArray());
-    }
-
-    private int getSurfaceEquivalent(ByteArrayList data, int sizeBits, int startIndex) {
-        byte types = (byte) (this.data[startIndex] & TYPE_MASK);
-
-        if (types == CONTAINS_TRANSPARENT) {
-            data.add(HOMOGENOUS);
-            data.add(AIR);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-        if (types == CONTAINS_OPAQUE) {
-            data.add(HOMOGENOUS);
-            data.add(GRASS);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-        if (types == CONTAINS_SELF_OCCLUDING && getIdentifier(startIndex) == HOMOGENOUS) {
-            data.add(HOMOGENOUS);
-            data.add(this.data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-
-        if (sizeBits == 1) {
-            data.pad(DETAIL_BYTE_SIZE);
-            System.arraycopy(this.data, startIndex, data.getData(), data.size() - DETAIL_BYTE_SIZE, DETAIL_BYTE_SIZE);
-            return DETAIL_BYTE_SIZE;
-        }
-
-        sizeBits--;
-        int offset = SPLITTER_BYTE_SIZE, size = data.size();
-        data.add(SPLITTER);
-        data.pad(SPLITTER_BYTE_SIZE - 1);
-
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + SPLITTER_BYTE_SIZE);
-        setOffset(data, offset, size + 1);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 1));
-        setOffset(data, offset, size + 4);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 4));
-        setOffset(data, offset, size + 7);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 7));
-        setOffset(data, offset, size + 10);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 10));
-        setOffset(data, offset, size + 13);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 13));
-        setOffset(data, offset, size + 16);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 16));
-        setOffset(data, offset, size + 19);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 19));
-        return offset;
-    }
-
     // Helper functions
     private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
         return Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
@@ -1347,12 +1344,8 @@ public final class MaterialsData {
     }
 
     private static int compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
-        if (isHomogenous(inChunkX, inChunkY, inChunkZ, sizeBits, uncompressedMaterials)) {
-            byte material = uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)];
-            data.add((byte) (getType(material) | HOMOGENOUS));
-            data.add(material);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
+        int homogeneity = getHomogeneity(inChunkX, inChunkY, inChunkZ, sizeBits, uncompressedMaterials);
+        if (homogeneity == FULLY_HOMOGENOUS) return addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY, inChunkZ);
         if (sizeBits <= 1) {
             int uncompressedIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
             data.add((byte) (getDetailTypes(uncompressedMaterials, uncompressedIndex) | DETAIL));
@@ -1372,31 +1365,98 @@ public final class MaterialsData {
         data.add(SPLITTER);
         data.pad(SPLITTER_BYTE_SIZE - 1);
 
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY, inChunkZ);
+        if ((homogeneity & 1) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY, inChunkZ);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY, inChunkZ);
         setOffset(data, offset, startIndex + 1);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY, inChunkZ + nextSize);
-        setOffset(data, offset, startIndex + 4);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY + nextSize, inChunkZ);
-        setOffset(data, offset, startIndex + 7);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        setOffset(data, offset, startIndex + 10);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY, inChunkZ);
-        setOffset(data, offset, startIndex + 13);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        setOffset(data, offset, startIndex + 16);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        setOffset(data, offset, startIndex + 19);
-        offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
 
+        if ((homogeneity & 2) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY, inChunkZ + nextSize);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY, inChunkZ + nextSize);
+        setOffset(data, offset, startIndex + 4);
+
+        if ((homogeneity & 4) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY + nextSize, inChunkZ);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY + nextSize, inChunkZ);
+        setOffset(data, offset, startIndex + 7);
+
+        if ((homogeneity & 8) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        setOffset(data, offset, startIndex + 10);
+
+        if ((homogeneity & 16) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY, inChunkZ);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX + nextSize, inChunkY, inChunkZ);
+        setOffset(data, offset, startIndex + 13);
+
+        if ((homogeneity & 32) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        setOffset(data, offset, startIndex + 16);
+
+        if ((homogeneity & 64) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        setOffset(data, offset, startIndex + 19);
+
+        if ((homogeneity & 128) == 0)
+            offset += compressMaterials(data, uncompressedMaterials, sizeBits, startIndex + offset, inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        else offset += addHomogenous(data, uncompressedMaterials, inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
         data.set((byte) (getSplitterTypes(data, index) | SPLITTER), index);
         return offset;
     }
 
-    private static boolean isHomogenous(int startX, int startY, int startZ, int sizeBits, byte[] uncompressedMaterials) {
+    private static int addHomogenous(ByteArrayList data, byte[] uncompressedMaterials, int inChunkX, int inChunkY, int inChunkZ) {
+        byte material = uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)];
+        data.add((byte) (getType(material) | HOMOGENOUS));
+        data.add(material);
+        return HOMOGENOUS_BYTE_SIZE;
+    }
+
+    private static int getHomogeneity(int startX, int startY, int startZ, int sizeBits, byte[] uncompressedMaterials) {
+        if (sizeBits == 1) return isHomogenous(startX, startY, startZ, uncompressedMaterials) ? FULLY_HOMOGENOUS : 0;
+
+        int homogeneity = 0;
+        int startIndex = getUncompressedIndex(startX, startY, startZ);
+        int length = (1 << --sizeBits * 3);
+
+        if (isHomogenous(startIndex, length, uncompressedMaterials)) homogeneity |= 1;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 2;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 4;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 8;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 16;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 32;
+        if (isHomogenous(startIndex += length, length, uncompressedMaterials)) homogeneity |= 64;
+        if (isHomogenous(startIndex + length, length, uncompressedMaterials)) homogeneity |= 128;
+
+        if (homogeneity == 255) {
+            int size = 1 << sizeBits * 3;
+            startIndex = getUncompressedIndex(startX, startY, startZ);
+            byte material = uncompressedMaterials[startIndex];
+            if (uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex += size] == material
+                    && uncompressedMaterials[startIndex + size] == material) return FULLY_HOMOGENOUS;
+        }
+        return homogeneity;
+    }
+
+    private static boolean isHomogenous(int startIndex, int length, byte[] uncompressedMaterials) {
+        byte material = uncompressedMaterials[startIndex];
+        int endIndex = startIndex + length;
+        for (int index = startIndex + 1; index < endIndex; index++) if (uncompressedMaterials[index] != material) return false;
+        return true;
+    }
+
+    private static boolean isHomogenous(int startX, int startY, int startZ, byte[] uncompressedMaterials) {
         int startIndex = getUncompressedIndex(startX, startY, startZ);
         byte material = uncompressedMaterials[startIndex];
-        int endIndex = startIndex + (1 << sizeBits * 3);
-        for (int index = startIndex; index < endIndex; index++) if (uncompressedMaterials[index] != material) return false;
+        int endIndex = startIndex + 8;
+        for (int index = startIndex + 1; index < endIndex; index++) if (uncompressedMaterials[index] != material) return false;
         return true;
     }
 
@@ -1438,6 +1498,7 @@ public final class MaterialsData {
     private static final byte DETAIL = 1;
     private static final byte SPLITTER = 2;
     private static final byte IDENTIFIER_MASK = 0xF;
+    private static final int FULLY_HOMOGENOUS = 256;
 
     private static final byte HOMOGENOUS_BYTE_SIZE = 2;
     private static final byte DETAIL_BYTE_SIZE = 9;

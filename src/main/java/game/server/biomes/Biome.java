@@ -15,6 +15,9 @@ public abstract class Biome {
 
     public abstract boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data);
 
+    public int getFloorMaterialDepth(GenerationData data) {
+        return 48 + data.floorMaterialDepthMod;
+    }
 
     public int getSpecialHeight(int totalX, int totalZ) {
         return 0;
@@ -42,7 +45,7 @@ public abstract class Biome {
 
         if (data.isAboveSurface(totalY)) return false;
 
-        int floorMaterialDepth = 48 + data.getFloorMaterialDepthMod();
+        int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) return false;   // Stone placed by caller
         data.store(inChunkX, inChunkY, inChunkZ, material);
@@ -54,7 +57,7 @@ public abstract class Biome {
 
         if (data.isAboveSurface(totalY)) return false;
 
-        int floorMaterialDepth = 48 + data.getFloorMaterialDepthMod();
+        int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) return false;   // Stone placed by caller
         if (data.isInsideSurfaceMaterialLevel(totalY, 8)) data.store(inChunkX, inChunkY, inChunkZ, topMaterial);

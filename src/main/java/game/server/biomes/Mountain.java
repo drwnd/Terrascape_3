@@ -15,7 +15,7 @@ public final class Mountain extends Biome {
 
         int snowHeight = Utils.floor(data.feature * 512 + SNOW_LEVEL);
         int grassHeight = Utils.floor(data.feature * 512) + WATER_LEVEL;
-        int floorMaterialDepth = 48 + data.getFloorMaterialDepthMod();
+        int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (totalY > snowHeight && !data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) data.store(inChunkX, inChunkY, inChunkZ, SNOW);
         else if (data.isInsideSurfaceMaterialLevel(totalY, 8) && data.height <= grassHeight) data.store(inChunkX, inChunkY, inChunkZ, GRASS);

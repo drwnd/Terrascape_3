@@ -12,7 +12,7 @@ public final class CorrodedMesa extends Biome {
         int totalY = data.totalY;
 
         int pillarHeight = data.specialHeight;
-        int floorMaterialDepth = 48 + data.getFloorMaterialDepthMod();
+        int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (pillarHeight != 0 && totalY >= data.height - floorMaterialDepth) {
             if (totalY > data.height + pillarHeight) return false;
@@ -33,6 +33,11 @@ public final class CorrodedMesa extends Biome {
         double noise = OpenSimplex2S.noise2(SEED ^ 0xDF860F2E2A604A17L, totalX * MESA_PILLAR_FREQUENCY, totalZ * MESA_PILLAR_FREQUENCY);
         if (Math.abs(noise) > MESA_PILLAR_THRESHOLD) return MESA_PILLAR_HEIGHT;
         return 0;
+    }
+
+    @Override
+    public int getFloorMaterialDepth(GenerationData data) {
+        return 128 + data.floorMaterialDepthMod;
     }
 
     private static byte getGeneratingTerracottaType(int terracottaIndex) {

@@ -17,7 +17,7 @@ public final class GenerationData {
 
     public Biome biome;
     public double feature;
-    public int height, specialHeight;
+    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod;
     public byte steepness;
     public int totalX, totalY, totalZ;
 
@@ -72,6 +72,8 @@ public final class GenerationData {
         biome = biomeMap[index];
         specialHeight = specialHeightMap[index];
         height = resultingHeightMap[mapIndex];
+        floorMaterialDepthMod = (int) (feature * 4.0F) - (steepness << 2);
+        floorMaterialDepth = biome.getFloorMaterialDepth(this);
     }
 
     public void computeTotalY(int inChunkY) {
@@ -163,10 +165,6 @@ public final class GenerationData {
 
     public boolean hasTrees() {
         return treeMap != null;
-    }
-
-    public int getFloorMaterialDepthMod() {
-        return (int) (feature * 4.0F) - (steepness << 2);
     }
 
     public static int getMapIndex(int mapX, int mapZ) {

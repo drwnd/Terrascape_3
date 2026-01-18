@@ -142,8 +142,8 @@ public final class Renderer extends Renderable {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glEnable(GL_STENCIL_TEST);
+        glEnable(GL_CULL_FACE);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        glDisable(GL_CULL_FACE);
         glDepthMask(false);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.getID());
