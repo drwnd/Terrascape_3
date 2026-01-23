@@ -18,6 +18,10 @@ public final class AABB {
         this.maxZ = maxZ;
     }
 
+    public AABB(AABB aabb) {
+        this(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
+    }
+
 
     public static AABB newMinChunkAABB() {
         return new AABB(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 0, 0, 0);
@@ -48,6 +52,14 @@ public final class AABB {
                 && this.minZ <= minZ && maxZ <= this.maxZ;
     }
 
+    public boolean isEmpty() {
+        return maxX <= minX || maxY <= minY || maxZ <= minZ;
+    }
+
+    public boolean isMaxChunk() {
+        return minX == 0 && minY == 0 && minZ == 0 && maxX == CHUNK_SIZE && maxY == CHUNK_SIZE && maxZ == CHUNK_SIZE;
+    }
+
     public void min(int x, int y, int z) {
         minX = Math.min(minX, x);
         minY = Math.min(minY, y);
@@ -61,12 +73,12 @@ public final class AABB {
     }
 
     public void excludeMaximizeSurfaceArea(int x, int y, int z, int size) {
-        int removePosX = halfSurfaceArea(x + size - minX, maxY - minY, maxZ - minZ);
-        int removeNegX = halfSurfaceArea(maxX - x, maxY - minY, maxZ - minZ);
-        int removePosY = halfSurfaceArea(maxX - minX, y + size - minY, maxZ - minZ);
-        int removeNegY = halfSurfaceArea(maxX - minX, maxY - y, maxZ - minZ);
-        int removePosZ = halfSurfaceArea(maxX - minX, maxY - minY, z + size - minZ);
-        int removeNegZ = halfSurfaceArea(maxX - minX, maxY - minY, maxZ - z);
+        int removePosX = halfSurfaceArea(x - minX, maxY - minY, maxZ - minZ);
+        int removeNegX = halfSurfaceArea(maxX - x - size, maxY - minY, maxZ - minZ);
+        int removePosY = halfSurfaceArea(maxX - minX, y - minY, maxZ - minZ);
+        int removeNegY = halfSurfaceArea(maxX - minX, maxY - y - size, maxZ - minZ);
+        int removePosZ = halfSurfaceArea(maxX - minX, maxY - minY, z - minZ);
+        int removeNegZ = halfSurfaceArea(maxX - minX, maxY - minY, maxZ - z - size);
 
         int max = Math.max(removePosX, Math.max(removeNegX, Math.max(removePosY, Math.max(removeNegY, Math.max(removePosZ, removeNegZ)))));
 
@@ -78,14 +90,27 @@ public final class AABB {
         else minZ = z + size;
     }
 
+    public void set(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        this.minX = minX;
+        this.minY = minY;
+        this.minZ = minZ;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.maxZ = maxZ;
+    }
+
     public void setEmpty() {
         maxX = maxY = maxZ = -1;
         minX = minY = minZ = 0;
     }
 
+    public int getHalfSurfaceArea() {
+        return halfSurfaceArea(maxX - minX, maxY - minY, maxZ - minZ);
+    }
+
 
     private static int halfSurfaceArea(int lengthX, int lengthY, int lengthZ) {
-        if (lengthX < 0 || lengthY < 0 || lengthZ < 0) return 0;
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return 0;
         return lengthX * lengthY + lengthX * lengthZ + lengthY * lengthZ;
     }
 }

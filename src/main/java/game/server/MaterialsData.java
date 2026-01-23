@@ -192,19 +192,22 @@ public final class MaterialsData {
         return data[0] == HOMOGENOUS && data[1] == material;
     }
 
-    public AABB getMinSolidAABB() {
-        AABB aabb = AABB.newMaxChunkAABB();
+    public AABB getOccluder() {
+        AABB method1 = AABB.newMaxChunkAABB();
+        AABB method2 = new AABB(0, 0, 0, -1, -1, -1);
         synchronized (this) {
-            minSolidAABB(aabb, totalSizeBits, 0, 0, 0, 0);
+            getOccluder(method1, totalSizeBits, 0, 0, 0, 0);
+            getLargestOpaqueAABB(method2, totalSizeBits, 0, 0, 0, 0);
+            method2 = expand(method2);
         }
-        if (aabb.maxX <= aabb.minX || aabb.maxY <= aabb.minY || aabb.maxZ <= aabb.minZ) aabb.setEmpty();
-        return aabb;
+        if (method1.isEmpty()) method1.setEmpty();
+        return method1.getHalfSurfaceArea() > method2.getHalfSurfaceArea() ? method1 : method2;
     }
 
-    public AABB getMaxSolidAABB() {
+    public AABB getOccludee() {
         AABB aabb = AABB.newMinChunkAABB();
         synchronized (this) {
-            maxSolidAABB(aabb, totalSizeBits, 0, 0, 0, 0);
+            getOccludee(aabb, totalSizeBits, 0, 0, 0, 0);
         }
         return aabb;
     }
@@ -1201,21 +1204,21 @@ public final class MaterialsData {
     }
 
     // AABB generation
-    private void minSolidAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+    private void getOccluder(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int size = 1 << sizeBits;
         if (!aabb.intersects(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size)) return;
         byte identifier = getIdentifier(startIndex);
 
         if (identifier == SPLITTER) {
             int nextSize = 1 << --sizeBits;
-            minSolidAABB(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-            minSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+            getOccluder(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            getOccluder(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
             return;
         }
         if (identifier == HOMOGENOUS) {
@@ -1225,21 +1228,97 @@ public final class MaterialsData {
         }
     }
 
-    private void maxSolidAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+    private void getLargestOpaqueAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int size = 1 << sizeBits;
+        if (size <= aabb.maxX - aabb.minX) return;
+        byte types = (byte) (this.data[startIndex] & TYPE_MASK);
+        if ((types & CONTAINS_OPAQUE) == 0) return;
+
+        if (types == CONTAINS_OPAQUE) {
+            aabb.set(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size);
+            return;
+        }
+
+        byte identifier = getIdentifier(startIndex);
+        int nextSize = 1 << --sizeBits;
+        if (identifier == SPLITTER) {
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            getLargestOpaqueAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        }
+    }
+
+    private AABB expand(AABB aabb) {
+        if (aabb.isEmpty() || aabb.isMaxChunk()) return aabb;
+
+        AABB xExpanded = expandX(aabb);
+        AABB yExpanded = expandY(aabb);
+        AABB zExpanded = expandZ(aabb);
+
+        if (xExpanded.getHalfSurfaceArea() > yExpanded.getHalfSurfaceArea() && xExpanded.getHalfSurfaceArea() > zExpanded.getHalfSurfaceArea())
+            return xExpanded;
+        return yExpanded.getHalfSurfaceArea() > zExpanded.getHalfSurfaceArea() ? yExpanded : zExpanded;
+    }
+
+    private AABB expandX(AABB aabb) {
+        AABB expanded = new AABB(aabb);
+        int size = aabb.maxX - aabb.minX;
+        int sizeBits = Integer.numberOfTrailingZeros(size);
+
+        while (expanded.minX > 0 && (data[startIndexOf(expanded.minX - size, expanded.minY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.minX -= size;
+        while (expanded.maxX < CHUNK_SIZE && (data[startIndexOf(expanded.maxX, expanded.minY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.maxX += size;
+
+        return expanded;
+    }
+
+    private AABB expandY(AABB aabb) {
+        AABB expanded = new AABB(aabb);
+        int size = aabb.maxY - aabb.minY;
+        int sizeBits = Integer.numberOfTrailingZeros(size);
+
+        while (expanded.minY > 0 && (data[startIndexOf(expanded.minX, expanded.minY - size, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.minY -= size;
+        while (expanded.maxY < CHUNK_SIZE && (data[startIndexOf(expanded.minX, expanded.maxY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.maxY += size;
+
+        return expanded;
+    }
+
+    private AABB expandZ(AABB aabb) {
+        AABB expanded = new AABB(aabb);
+        int size = aabb.maxZ - aabb.minZ;
+        int sizeBits = Integer.numberOfTrailingZeros(size);
+
+        while (expanded.minZ > 0 && (data[startIndexOf(expanded.minX, expanded.minY, expanded.minZ - size, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.minZ -= size;
+        while (expanded.maxZ < CHUNK_SIZE && (data[startIndexOf(expanded.minX, expanded.minY, expanded.maxZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
+            expanded.maxZ += size;
+
+        return expanded;
+    }
+
+    private void getOccludee(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int size = 1 << sizeBits;
         if (aabb.includes(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size)) return;
         byte identifier = getIdentifier(startIndex);
 
         if (identifier == SPLITTER) {
             int nextSize = 1 << --sizeBits;
-            maxSolidAABB(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-            maxSolidAABB(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+            getOccludee(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
             return;
         }
         if (identifier == HOMOGENOUS) {

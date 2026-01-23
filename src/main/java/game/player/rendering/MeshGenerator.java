@@ -31,8 +31,8 @@ public final class MeshGenerator {
 
 
     public void generateMesh(Chunk chunk) {
-        AABB occluder = chunk.getMaterials().getMinSolidAABB();
-        AABB occludee = chunk.getMaterials().getMaxSolidAABB();
+        AABB occluder = chunk.getMaterials().getOccluder();
+        AABB occludee = chunk.getMaterials().getOccludee();
 
         if (chunk.isAir()) {
             Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);

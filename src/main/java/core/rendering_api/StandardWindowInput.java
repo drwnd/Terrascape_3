@@ -48,6 +48,11 @@ public final class StandardWindowInput extends Input {
     }
 
     private static void handleToggleKeybinds() {
-        for (ToggleSetting setting : ToggleSetting.values()) if (Input.isKeyPressed(setting)) Settings.update(setting, !setting.value());
+        boolean settingUpdated = false;
+        for (ToggleSetting setting : ToggleSetting.values()) {
+            if (Input.isKeyPressed(setting)) Settings.update(setting, !setting.value());
+            settingUpdated = true;
+        }
+        if (settingUpdated) Settings.writeToFile();
     }
 }
