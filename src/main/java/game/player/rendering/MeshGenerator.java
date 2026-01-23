@@ -31,12 +31,9 @@ public final class MeshGenerator {
 
 
     public void generateMesh(Chunk chunk) {
-        AABB occluder = chunk.getMaterials().getOccluder();
-        AABB occludee = chunk.getMaterials().getOccludee();
-
         if (chunk.isAir()) {
             Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
-            Mesh mesh = new Mesh(new int[0], new int[6], new int[0], 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
+            Mesh mesh = new Mesh(new int[0], new int[6], new int[0], 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
             Game.getPlayer().getMeshCollector().queueMesh(mesh);
             return;
         }
@@ -45,6 +42,8 @@ public final class MeshGenerator {
             return;
         }
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
+        AABB occluder = chunk.getMaterials().getOccluder();
+        AABB occludee = chunk.getMaterials().getOccludee();
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
         xStart = chunk.X << CHUNK_SIZE_BITS;

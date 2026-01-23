@@ -503,8 +503,8 @@ public final class GenerationData {
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
                 int height = heightMapPadded[getMapIndex(mapX + 1, mapZ + 1)];
-                int steepnessX = Math.max(Math.abs(height - heightMapPadded[getMapIndex(mapX, mapZ + 1)]), Math.abs(height - heightMapPadded[getMapIndex(mapX + 2, mapZ + 1)]));
-                int steepnessZ = Math.max(Math.abs(height - heightMapPadded[getMapIndex(mapX + 1, mapZ)]), Math.abs(height - heightMapPadded[getMapIndex(mapX + 1, mapZ + 2)]));
+                int steepnessX = Math.abs(height - heightMapPadded[getMapIndex(mapX, mapZ + 1)]);
+                int steepnessZ = Math.abs(height - heightMapPadded[getMapIndex(mapX + 1, mapZ)]);
                 steepnessMap[mapX << CHUNK_SIZE_BITS | mapZ] = (byte) Math.max(steepnessX >> lod, steepnessZ >> lod);
             }
 
@@ -654,6 +654,6 @@ public final class GenerationData {
     private static final double ICE_TYPE_FREQUENCY = 0.005;
     private static final double HEAVY_ICE_THRESHOLD = 0.6;
 
-    private static final int INTERPOLATION_SIZE = 5;
+    private static final int INTERPOLATION_SIZE = 8;
     private static final double INTERPOLATION_MULTIPLIER = 1.0 / INTERPOLATION_SIZE;
 }

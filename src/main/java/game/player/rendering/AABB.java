@@ -18,11 +18,6 @@ public final class AABB {
         this.maxZ = maxZ;
     }
 
-    public AABB(AABB aabb) {
-        this(aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ);
-    }
-
-
     public static AABB newMinChunkAABB() {
         return new AABB(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE, 0, 0, 0);
     }

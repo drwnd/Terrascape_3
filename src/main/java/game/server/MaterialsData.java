@@ -198,7 +198,7 @@ public final class MaterialsData {
         synchronized (this) {
             getOccluder(method1, totalSizeBits, 0, 0, 0, 0);
             getLargestOpaqueAABB(method2, totalSizeBits, 0, 0, 0, 0);
-            method2 = expand(method2);
+            expand(method2);
         }
         if (method1.isEmpty()) method1.setEmpty();
         return method1.getHalfSurfaceArea() > method2.getHalfSurfaceArea() ? method1 : method2;
@@ -539,21 +539,19 @@ public final class MaterialsData {
     }
 
     private int fillSouthLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 1]);
             materials.add(data[startIndex + 2]);
             materials.add(data[startIndex + 5]);
             materials.add(data[startIndex + 6]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -569,21 +567,19 @@ public final class MaterialsData {
     }
 
     private int fillNorthLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 3]);
             materials.add(data[startIndex + 4]);
             materials.add(data[startIndex + 7]);
             materials.add(data[startIndex + 8]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -599,21 +595,19 @@ public final class MaterialsData {
     }
 
     private int fillBottomLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 1]);
             materials.add(data[startIndex + 3]);
             materials.add(data[startIndex + 5]);
             materials.add(data[startIndex + 7]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -629,21 +623,19 @@ public final class MaterialsData {
     }
 
     private int fillTopLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 2]);
             materials.add(data[startIndex + 4]);
             materials.add(data[startIndex + 6]);
             materials.add(data[startIndex + 8]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -659,21 +651,19 @@ public final class MaterialsData {
     }
 
     private int fillEastLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 1]);
             materials.add(data[startIndex + 2]);
             materials.add(data[startIndex + 3]);
             materials.add(data[startIndex + 4]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -689,21 +679,19 @@ public final class MaterialsData {
     }
 
     private int fillWestLayerInto(ByteArrayList materials, int startIndex) {
-        byte identifier = getIdentifier(startIndex);
-        materials.add(identifier);
+        byte types = getTypes(startIndex);
 
-        if (identifier == HOMOGENOUS) {
-            materials.add(data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE_2D;
-        }
-        if (identifier == DETAIL) {
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE_2D;
+        if (getIdentifier(startIndex) == DETAIL) {
+            materials.add(DETAIL);
             materials.add(data[startIndex + 5]);
             materials.add(data[startIndex + 6]);
             materials.add(data[startIndex + 7]);
             materials.add(data[startIndex + 8]);
             return DETAIL_BYTE_SIZE_2D;
         }
-//        if (identifier == SPLITTER)
+
+        materials.add(SPLITTER);
         int index = materials.size() - 1;
         materials.pad(SPLITTER_BYTE_SIZE_2D - 1);
         int offset = SPLITTER_BYTE_SIZE_2D;
@@ -751,6 +739,10 @@ public final class MaterialsData {
         return (byte) (data[startIndex] & IDENTIFIER_MASK);
     }
 
+    private byte getTypes(int startIndex) {
+        return (byte) (data[startIndex] & TYPE_MASK);
+    }
+
     // Mesh generation for chunks
     private MaterialsData getSurfaceEquivalent() {
         ByteArrayList dataList = new ByteArrayList(1000);
@@ -760,52 +752,63 @@ public final class MaterialsData {
         return new MaterialsData(totalSizeBits, dataList.toArray());
     }
 
-    private int getSurfaceEquivalent(ByteArrayList data, int sizeBits, int startIndex) {
-        byte types = (byte) (this.data[startIndex] & TYPE_MASK);
+    private int getSurfaceEquivalent(ByteArrayList materials, int sizeBits, int startIndex) {
+        byte types = getTypes(startIndex);
 
-        if (types == CONTAINS_TRANSPARENT) {
-            data.add(HOMOGENOUS);
-            data.add(AIR);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-        if (types == CONTAINS_OPAQUE) {
-            data.add(HOMOGENOUS);
-            data.add(MeshGenerator.OPAQUE);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-        if (types == CONTAINS_SELF_OCCLUDING && getIdentifier(startIndex) == HOMOGENOUS) {
-            data.add(HOMOGENOUS);
-            data.add(this.data[startIndex + 1]);
-            return HOMOGENOUS_BYTE_SIZE;
-        }
-
+        if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE;
         if (sizeBits == 1) {
-            data.pad(DETAIL_BYTE_SIZE);
-            System.arraycopy(this.data, startIndex, data.getData(), data.size() - DETAIL_BYTE_SIZE, DETAIL_BYTE_SIZE);
+            materials.add(DETAIL);
+            materials.add(data[startIndex + 1]);
+            materials.add(data[startIndex + 2]);
+            materials.add(data[startIndex + 3]);
+            materials.add(data[startIndex + 4]);
+            materials.add(data[startIndex + 5]);
+            materials.add(data[startIndex + 6]);
+            materials.add(data[startIndex + 7]);
+            materials.add(data[startIndex + 8]);
             return DETAIL_BYTE_SIZE;
         }
 
         sizeBits--;
-        int offset = SPLITTER_BYTE_SIZE, size = data.size();
-        data.add(SPLITTER);
-        data.pad(SPLITTER_BYTE_SIZE - 1);
+        int offset = SPLITTER_BYTE_SIZE, size = materials.size();
+        materials.add(SPLITTER);
+        materials.pad(SPLITTER_BYTE_SIZE - 1);
 
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + SPLITTER_BYTE_SIZE);
-        setOffset(data, offset, size + 1);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 1));
-        setOffset(data, offset, size + 4);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 4));
-        setOffset(data, offset, size + 7);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 7));
-        setOffset(data, offset, size + 10);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 10));
-        setOffset(data, offset, size + 13);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 13));
-        setOffset(data, offset, size + 16);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 16));
-        setOffset(data, offset, size + 19);
-        offset += getSurfaceEquivalent(data, sizeBits, startIndex + getOffset(startIndex + 19));
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + SPLITTER_BYTE_SIZE);
+        setOffset(materials, offset, size + 1);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 1));
+        setOffset(materials, offset, size + 4);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 4));
+        setOffset(materials, offset, size + 7);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 7));
+        setOffset(materials, offset, size + 10);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 10));
+        setOffset(materials, offset, size + 13);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 13));
+        setOffset(materials, offset, size + 16);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 16));
+        setOffset(materials, offset, size + 19);
+        offset += getSurfaceEquivalent(materials, sizeBits, startIndex + getOffset(startIndex + 19));
         return offset;
+    }
+
+    private boolean addSurfaceEquivalentHomogenous(ByteArrayList materials, int startIndex, byte types) {
+        if (types == CONTAINS_TRANSPARENT) {
+            materials.add(HOMOGENOUS);
+            materials.add(AIR);
+            return true;
+        }
+        if (types == CONTAINS_OPAQUE) {
+            materials.add(HOMOGENOUS);
+            materials.add(MeshGenerator.OPAQUE);
+            return true;
+        }
+        if (types == CONTAINS_SELF_OCCLUDING && getIdentifier(startIndex) == HOMOGENOUS) {
+            materials.add(HOMOGENOUS);
+            materials.add(data[startIndex + 1]);
+            return true;
+        }
+        return false;
     }
 
     private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
@@ -1231,7 +1234,7 @@ public final class MaterialsData {
     private void getLargestOpaqueAABB(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int size = 1 << sizeBits;
         if (size <= aabb.maxX - aabb.minX) return;
-        byte types = (byte) (this.data[startIndex] & TYPE_MASK);
+        byte types = getTypes(startIndex);
         if ((types & CONTAINS_OPAQUE) == 0) return;
 
         if (types == CONTAINS_OPAQUE) {
@@ -1253,55 +1256,66 @@ public final class MaterialsData {
         }
     }
 
-    private AABB expand(AABB aabb) {
-        if (aabb.isEmpty() || aabb.isMaxChunk()) return aabb;
-
-        AABB xExpanded = expandX(aabb);
-        AABB yExpanded = expandY(aabb);
-        AABB zExpanded = expandZ(aabb);
-
-        if (xExpanded.getHalfSurfaceArea() > yExpanded.getHalfSurfaceArea() && xExpanded.getHalfSurfaceArea() > zExpanded.getHalfSurfaceArea())
-            return xExpanded;
-        return yExpanded.getHalfSurfaceArea() > zExpanded.getHalfSurfaceArea() ? yExpanded : zExpanded;
-    }
-
-    private AABB expandX(AABB aabb) {
-        AABB expanded = new AABB(aabb);
+    private void expand(AABB aabb) {
+        if (aabb.isEmpty() || aabb.isMaxChunk()) return;
         int size = aabb.maxX - aabb.minX;
-        int sizeBits = Integer.numberOfTrailingZeros(size);
 
-        while (expanded.minX > 0 && (data[startIndexOf(expanded.minX - size, expanded.minY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.minX -= size;
-        while (expanded.maxX < CHUNK_SIZE && (data[startIndexOf(expanded.maxX, expanded.minY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.maxX += size;
-
-        return expanded;
+        expandY(aabb, size);
+        expandX(aabb, size);
+        expandZ(aabb, size);
     }
 
-    private AABB expandY(AABB aabb) {
-        AABB expanded = new AABB(aabb);
-        int size = aabb.maxY - aabb.minY;
+    private void expandY(AABB aabb, int size) {
         int sizeBits = Integer.numberOfTrailingZeros(size);
 
-        while (expanded.minY > 0 && (data[startIndexOf(expanded.minX, expanded.minY - size, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.minY -= size;
-        while (expanded.maxY < CHUNK_SIZE && (data[startIndexOf(expanded.minX, expanded.maxY, expanded.minZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.maxY += size;
-
-        return expanded;
+        while (aabb.maxY < CHUNK_SIZE && getTypes(startIndexOf(aabb.minX, aabb.maxY, aabb.minZ, sizeBits)) == CONTAINS_OPAQUE)
+            aabb.maxY += size;
+        while (aabb.minY > 0 && getTypes(startIndexOf(aabb.minX, aabb.minY - size, aabb.minZ, sizeBits)) == CONTAINS_OPAQUE)
+            aabb.minY -= size;
     }
 
-    private AABB expandZ(AABB aabb) {
-        AABB expanded = new AABB(aabb);
-        int size = aabb.maxZ - aabb.minZ;
+    private void expandX(AABB aabb, int size) {
         int sizeBits = Integer.numberOfTrailingZeros(size);
 
-        while (expanded.minZ > 0 && (data[startIndexOf(expanded.minX, expanded.minY, expanded.minZ - size, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.minZ -= size;
-        while (expanded.maxZ < CHUNK_SIZE && (data[startIndexOf(expanded.minX, expanded.minY, expanded.maxZ, sizeBits)] & TYPE_MASK) == CONTAINS_OPAQUE)
-            expanded.maxZ += size;
+        while (aabb.maxX < CHUNK_SIZE && canExpandPosX(aabb, size, sizeBits))
+            aabb.maxX += size;
+        while (aabb.minX > 0 && canExpandNegX(aabb, size, sizeBits))
+            aabb.minX -= size;
+    }
 
-        return expanded;
+    private boolean canExpandPosX(AABB aabb, int size, int sizeBits) {
+        for (int y = aabb.minY; y < aabb.maxY; y += size)
+            if (getTypes((startIndexOf(aabb.maxX, y, aabb.minZ, sizeBits))) != CONTAINS_OPAQUE) return false;
+        return true;
+    }
+
+    private boolean canExpandNegX(AABB aabb, int size, int sizeBits) {
+        for (int y = aabb.minY; y < aabb.maxY; y += size)
+            if (getTypes((startIndexOf(aabb.minX - size, y, aabb.minZ, sizeBits))) != CONTAINS_OPAQUE) return false;
+        return true;
+    }
+
+    private void expandZ(AABB aabb, int size) {
+        int sizeBits = Integer.numberOfTrailingZeros(size);
+
+        while (aabb.maxZ < CHUNK_SIZE && canExpandPosZ(aabb, size, sizeBits))
+            aabb.maxZ += size;
+        while (aabb.minZ > 0 && canExpandNegZ(aabb, size, sizeBits))
+            aabb.minZ -= size;
+    }
+
+    private boolean canExpandPosZ(AABB aabb, int size, int sizeBits) {
+        for (int x = aabb.minX; x < aabb.maxX; x += size)
+            for (int y = aabb.minY; y < aabb.maxY; y += size)
+                if (getTypes((startIndexOf(x, y, aabb.maxZ, sizeBits))) != CONTAINS_OPAQUE) return false;
+        return true;
+    }
+
+    private boolean canExpandNegZ(AABB aabb, int size, int sizeBits) {
+        for (int x = aabb.minX; x < aabb.maxX; x += size)
+            for (int y = aabb.minY; y < aabb.maxY; y += size)
+                if (getTypes((startIndexOf(x, y, aabb.minZ - size, sizeBits))) != CONTAINS_OPAQUE) return false;
+        return true;
     }
 
     private void getOccludee(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
