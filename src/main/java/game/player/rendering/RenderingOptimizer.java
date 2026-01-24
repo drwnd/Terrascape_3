@@ -355,6 +355,17 @@ public final class RenderingOptimizer {
                 opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
                 transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
                 occludee.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
+
+                if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod) <= 1) {
+                    opaqueCommands.set(opaqueCommands.size() - 3, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 7, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 11, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 15, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 19, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 23, 1);
+                    waterCommands.set(waterCommands.size() - 3, 1);
+                    glassCommands.set(glassCommands.size() - 3, 1);
+                }
             }
         lodDrawCounts[lod * 3 + 0] = drawCount * 6;
         lodDrawCounts[lod * 3 + 1] = drawCount;
@@ -446,7 +457,7 @@ public final class RenderingOptimizer {
                 cameraPosition.intY & ~CHUNK_SIZE_MASK,
                 cameraPosition.intZ & ~CHUNK_SIZE_MASK);
 
-        glDepthFunc(GL_LEQUAL);
+        glCullFace(GL_BACK);
         glDepthMask(false);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
@@ -459,8 +470,6 @@ public final class RenderingOptimizer {
         glColorMask(true, true, true, true);
         glViewport(0, 0, Window.getWidth(), Window.getHeight());
         glDisable(GL_BLEND);
-        glCullFace(GL_BACK);
-        glDepthFunc(GL_LESS);
     }
 
 
@@ -485,5 +494,5 @@ public final class RenderingOptimizer {
 
     private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
-    private static final int width = 400, height = 225;
+    private static final int width = 1920, height = 1080;
 }

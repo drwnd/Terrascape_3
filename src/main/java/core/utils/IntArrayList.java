@@ -9,6 +9,10 @@ public final class IntArrayList {
         data = new int[Math.max(1, initialCapacity)];
     }
 
+    public void set(int index, int value) {
+        data[index] = value;
+    }
+
     public void add(int value) {
         if (size == data.length) grow();
         data[size] = value;

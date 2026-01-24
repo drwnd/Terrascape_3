@@ -15,16 +15,24 @@ public final class Utils {
         return ((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY;
     }
 
-    public static boolean outsideChunkKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(chunkX - playerChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
+    public static boolean outsideChunkKeepDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
+        return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
     }
 
-    public static boolean outsideRenderKeepDistance(int playerChunkX, int playerChunkY, int playerChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        return distance(playerChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkZ - playerChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
-                || distance(chunkY - playerChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
+    public static boolean outsideRenderKeepDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
+        return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
+    }
+
+    public static int chunkDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
+        int distanceX = distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod);
+        int distanceY = distance(cameraChunkY - chunkY, MAX_CHUNKS_MASK >> lod);
+        int distanceZ = distance(cameraChunkZ - chunkZ, MAX_CHUNKS_MASK >> lod);
+
+        return Math.max(distanceX, Math.max(distanceY, distanceZ));
     }
 
     public static boolean isInteger(String string, int radix) {
