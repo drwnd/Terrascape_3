@@ -28,15 +28,15 @@ const int BOTTOM = 4;
 const int EAST = 5;
 
 vec3 getFacePositions(int side, int currentVertexId, int faceSize1, int faceSize2) {
-    vec3 currentVertexOffset = vec3(FACE_POSITIONS[currentVertexId].xy, 0);
+    vec3 currentVertexOffset = vec3(FACE_POSITIONS[currentVertexId].xy, 1);
 
     switch (side) {
-        case NORTH: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1) + vec3(0, 0, 1);
-        case TOP: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2) + vec3(0, 1, 0);
-        case WEST: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2) + vec3(1, 0, 0);
-        case SOUTH: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 1);
-        case BOTTOM: return currentVertexOffset.yzx * vec3(faceSize1, 1, faceSize2);
-        case EAST: return currentVertexOffset.zxy * vec3(1, faceSize1, faceSize2);
+        case NORTH: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1);
+        case TOP: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2);
+        case WEST: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2);
+        case SOUTH: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 0);
+        case BOTTOM: return currentVertexOffset.yzx * vec3(faceSize1, 0, faceSize2);
+        case EAST: return currentVertexOffset.zxy * vec3(0, faceSize1, faceSize2);
     }
 
     return vec3(0, 0, 0);
@@ -53,7 +53,7 @@ void main() {
 
     int faceSize1 = (currentVertex.textureData >> 17 & 63) + 1;
     int faceSize2 = (currentVertex.textureData >> 11 & 63) + 1;
-    vec3 inChunkPosition = (getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * lodSize;
+    vec3 inChunkPosition = getFacePositions(side, currentVertexId, faceSize1, faceSize2) * lodSize;
     texturePosition = ivec3(x, y, z) * lodSize - iCameraPosition + inChunkPosition;
     voxelPosition = texturePosition;
 

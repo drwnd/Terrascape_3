@@ -45,7 +45,6 @@ public final class MeshGenerator {
         }
         Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
         AABB occluder = chunk.getMaterials().getOccluder();
-        AABB occludee = chunk.getMaterials().getOccludee();
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
         xStart = chunk.X << CHUNK_SIZE_BITS;
@@ -56,6 +55,7 @@ public final class MeshGenerator {
         addNorthSouthFaces();
         addTopBottomFaces();
         addWestEastFaces();
+        AABB occludee = getOccludee();
         if (chunk.LOD != 0 && hasOpaqueMesh()) addSideLayers();
 
         Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
@@ -131,6 +131,50 @@ public final class MeshGenerator {
     private boolean hasOpaqueMesh() {
         for (IntArrayList verticesList : opaqueVerticesLists) if (!verticesList.isEmpty()) return true;
         return false;
+    }
+
+
+    private AABB getOccludee() {
+        AABB occludee = AABB.newMinChunkAABB();
+
+        for (IntArrayList vertices : opaqueVerticesLists) addToAABB(vertices, occludee);
+        addToAABB(waterVerticesList, occludee);
+        addToAABB(glassVerticesList, occludee);
+
+        return occludee;
+    }
+
+    private static void addToAABB(IntArrayList vertices, AABB aabb) {
+        int[] data = vertices.getData();
+        for (int index = 0; index < vertices.size(); index += INTS_PER_VERTEX) {
+            int x = data[index + 0] & CHUNK_SIZE_MASK;
+            int y = data[index + 1] & CHUNK_SIZE_MASK;
+            int z = data[index + 2] & CHUNK_SIZE_MASK;
+            int faceData = data[index + 3];
+            addToAABB(aabb, x, y, z, faceData);
+        }
+    }
+
+    private static void addToAABB(AABB aabb, int x, int y, int z, int faceData) {
+        int side = faceData >> 8 & 7;
+        int faceSize1 = (faceData >> 17 & 63) + 1, faceSize2 = (faceData >> 11 & 63) + 1;
+
+        int maxX = x + switch (side) {
+            case NORTH, SOUTH -> faceSize2;
+            case TOP, BOTTOM -> faceSize1;
+            default -> 0;
+        };
+        int maxY = y + switch (side) {
+            case NORTH, WEST, SOUTH, EAST -> faceSize1;
+            default -> 0;
+        };
+        int maxZ = z + switch (side) {
+            case TOP, BOTTOM, WEST, EAST -> faceSize2;
+            default -> 0;
+        };
+
+        aabb.min(x, y, z);
+        aabb.max(maxX, maxY, maxZ);
     }
 
 

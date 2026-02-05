@@ -204,14 +204,6 @@ public final class MaterialsData {
         return method1.getHalfSurfaceArea() > method2.getHalfSurfaceArea() ? method1 : method2;
     }
 
-    public AABB getOccludee() {
-        AABB aabb = AABB.newMinChunkAABB();
-        synchronized (this) {
-            getOccludee(aabb, totalSizeBits, 0, 0, 0, 0);
-        }
-        return aabb;
-    }
-
     // Miscellaneous functions
     private void compressIntoData(byte[] uncompressedMaterials) {
         ByteArrayList dataList = new ByteArrayList(1000);
@@ -1316,36 +1308,6 @@ public final class MaterialsData {
             for (int y = aabb.minY; y < aabb.maxY; y += size)
                 if (getTypes((startIndexOf(x, y, aabb.minZ - size, sizeBits))) != CONTAINS_OPAQUE) return false;
         return true;
-    }
-
-    private void getOccludee(AABB aabb, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
-        int size = 1 << sizeBits;
-        if (aabb.includes(inChunkX, inChunkY, inChunkZ, inChunkX + size, inChunkY + size, inChunkZ + size)) return;
-        byte identifier = getIdentifier(startIndex);
-
-        if (identifier == SPLITTER) {
-            int nextSize = 1 << --sizeBits;
-            getOccludee(aabb, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-            getOccludee(aabb, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
-            return;
-        }
-        if (identifier == HOMOGENOUS) {
-            byte material = data[startIndex + 1];
-            if (material == AIR) return;
-
-            aabb.min(inChunkX, inChunkY, inChunkZ);
-            aabb.max(inChunkX + size, inChunkY + size, inChunkZ + size);
-            return;
-        }
-//        if (identifier == DETAIL)
-        aabb.min(inChunkX, inChunkY, inChunkZ);
-        aabb.max(inChunkX + 2, inChunkY + 2, inChunkZ + 2);
     }
 
     // Helper functions
