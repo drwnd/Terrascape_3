@@ -54,7 +54,7 @@ void main() {
     int faceSize1 = (currentVertex.textureData >> 17 & 63) + 1;
     int faceSize2 = (currentVertex.textureData >> 11 & 63) + 1;
     vec3 inChunkPosition = (getFacePositions(side, currentVertexId, faceSize1, faceSize2)) * lodSize;
-    texturePosition = ivec3(x, y, z) * lodSize - iCameraPosition + ivec3(0, -lodSize + 1, 0) + inChunkPosition;
+    texturePosition = ivec3(x, y, z) * lodSize - iCameraPosition + inChunkPosition;
     voxelPosition = texturePosition;
 
     gl_Position = projectionViewMatrix * vec4(texturePosition, 1.0);

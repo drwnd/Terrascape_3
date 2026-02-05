@@ -27,14 +27,15 @@ public final class RenderingOptimizer {
 
     public static final int INDIRECT_COMMAND_SIZE = 16;
 
-    public RenderingOptimizer() {
+    public RenderingOptimizer(MeshCollector meshCollector) {
+        this.meshCollector = meshCollector;
         shadowIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
 
         opaqueIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 7, GL_DYNAMIC_DRAW);
 
         waterIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, waterIndirectBuffer);
@@ -68,8 +69,6 @@ public final class RenderingOptimizer {
     // Occlusion culling for normal rendering
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
         FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
-
-        meshCollector = player.getMeshCollector();
         Vector3i position = cameraPosition.intPosition();
 
         cameraChunkX = position.x >>> CHUNK_SIZE_BITS;
@@ -141,7 +140,7 @@ public final class RenderingOptimizer {
             model.addDataWithoutOcclusionCulling(opaqueCommands,
                     model.chunkX() + xOffset,
                     model.chunkY() + yOffset,
-                    model.chunkZ() + zOffset);
+                    model.chunkZ() + zOffset, false);
         }
         shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
         glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
@@ -315,6 +314,22 @@ public final class RenderingOptimizer {
                 && meshCollector.isModelPresent(lodModelX + 1, lodModelY + 1, lodModelZ + 1, lod);
     }
 
+    private boolean isLodBorderChunk(int chunkX, int chunkY, int chunkZ, int lod) {
+        if (lod == 0) return false;
+        int distanceX = Utils.getWrappedChunkCoordinate(chunkX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod);
+        int distanceY = Utils.getWrappedChunkCoordinate(chunkY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod);
+        int distanceZ = Utils.getWrappedChunkCoordinate(chunkZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod);
+
+        int index = Utils.getChunkIndex(chunkX + (distanceX > 0 ? -1 : 1), chunkY, chunkZ, lod);
+        if ((visibilityBits[lod][index >> 6] & 1L << index) == 0) return true;
+
+        index = Utils.getChunkIndex(chunkX, chunkY, chunkZ + (distanceZ > 0 ? -1 : 1), lod);
+        if ((visibilityBits[lod][index >> 6] & 1L << index) == 0) return true;
+
+        index = Utils.getChunkIndex(chunkX, chunkY + (distanceY > 0 ? -1 : 1), chunkZ, lod);
+        return (visibilityBits[lod][index >> 6] & 1L << index) == 0;
+    }
+
     private void clearModelCubeVisibility(int lodModelX, int lodModelY, int lodModelZ, int lod) {
         long[] lodVisibilityBits = visibilityBits[lod];
         int chunkIndex;
@@ -352,7 +367,8 @@ public final class RenderingOptimizer {
                 if (opaqueModel.isEmpty() && transparentModel.isEmpty()) continue;
 
                 drawCount++;
-                opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+                opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
                 transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
                 occludee.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
 
@@ -363,11 +379,12 @@ public final class RenderingOptimizer {
                     opaqueCommands.set(opaqueCommands.size() - 15, 1);
                     opaqueCommands.set(opaqueCommands.size() - 19, 1);
                     opaqueCommands.set(opaqueCommands.size() - 23, 1);
+                    opaqueCommands.set(opaqueCommands.size() - 27, 1);
                     waterCommands.set(waterCommands.size() - 3, 1);
                     glassCommands.set(glassCommands.size() - 3, 1);
                 }
             }
-        lodDrawCounts[lod * 3 + 0] = drawCount * 6;
+        lodDrawCounts[lod * 3 + 0] = drawCount * 7;
         lodDrawCounts[lod * 3 + 1] = drawCount;
         lodDrawCounts[lod * 3 + 2] = drawCount;
     }
@@ -395,7 +412,8 @@ public final class RenderingOptimizer {
                 TransparentModel transparentModel = meshCollector.getTransparentModel(chunkIndex, lod);
                 if (opaqueModel == null || transparentModel == null) continue;
 
-                opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ);
+                boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+                opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
                 transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
             }
 
@@ -474,7 +492,7 @@ public final class RenderingOptimizer {
 
 
     private long[] lodVisibilityBits;
-    private MeshCollector meshCollector;
+    private final MeshCollector meshCollector;
     private int cameraChunkX, cameraChunkY, cameraChunkZ;
     private int cameraX, cameraY, cameraZ;
 

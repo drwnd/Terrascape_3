@@ -9,6 +9,8 @@ import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 
+import java.util.Arrays;
+
 import static game.utils.Constants.*;
 
 public final class MeshGenerator {
@@ -33,7 +35,7 @@ public final class MeshGenerator {
     public void generateMesh(Chunk chunk) {
         if (chunk.isAir()) {
             Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
-            Mesh mesh = new Mesh(new int[0], new int[6], new int[0], 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
+            Mesh mesh = new Mesh(null, null, null, 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
             Game.getPlayer().getMeshCollector().queueMesh(mesh);
             return;
         }
@@ -54,6 +56,7 @@ public final class MeshGenerator {
         addNorthSouthFaces();
         addTopBottomFaces();
         addWestEastFaces();
+        if (chunk.LOD != 0 && hasOpaqueMesh()) addSideLayers();
 
         Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
         Game.getPlayer().getMeshCollector().queueMesh(mesh);
@@ -116,13 +119,18 @@ public final class MeshGenerator {
         for (IntArrayList vertexList : opaqueVerticesLists) totalVertexCount += vertexList.size();
         int[] opaqueVertices = new int[totalVertexCount];
 
-        for (int index = 0; index < 6; index++) {
+        for (int index = 0; index < opaqueVerticesLists.length; index++) {
             IntArrayList vertexList = opaqueVerticesLists[index];
             vertexCounts[index] = vertexList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX;
             vertexList.copyInto(opaqueVertices, verticesIndex);
             verticesIndex += vertexList.size();
         }
         return opaqueVertices;
+    }
+
+    private boolean hasOpaqueMesh() {
+        for (IntArrayList verticesList : opaqueVerticesLists) if (!verticesList.isEmpty()) return true;
+        return false;
     }
 
 
@@ -245,6 +253,106 @@ public final class MeshGenerator {
     }
 
 
+    private void addSideLayers() {
+        long[] toMeshFacesMap = toMeshFacesMaps[0][0];
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsNorthSouthSideLayer(0);
+        addNorthSouthSideLayer(SOUTH, 0, toMeshFacesMap);
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsNorthSouthSideLayer(CHUNK_SIZE - 1);
+        addNorthSouthSideLayer(NORTH, CHUNK_SIZE - 1, toMeshFacesMap);
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsTopBottomSideLayer(0);
+        addTopBottomSideLayer(BOTTOM, 0, toMeshFacesMap);
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsTopBottomSideLayer(CHUNK_SIZE - 1);
+        addTopBottomSideLayer(TOP, CHUNK_SIZE - 1, toMeshFacesMap);
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsWestEastSideLayer(0);
+        addWestEastSideLayer(EAST, 0, toMeshFacesMap);
+
+        Arrays.fill(toMeshFacesMap, -1L);
+        copyMaterialsWestEastSideLayer(CHUNK_SIZE - 1);
+        addWestEastSideLayer(WEST, CHUNK_SIZE - 1, toMeshFacesMap);
+    }
+
+    private void copyMaterialsNorthSouthSideLayer(int materialZ) {
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
+                materialsLayer[materialX << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+    }
+
+    private void copyMaterialsTopBottomSideLayer(int materialY) {
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+                materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+    }
+
+    private void copyMaterialsWestEastSideLayer(int materialX) {
+        for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+            for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
+                materialsLayer[materialZ << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
+    }
+
+    private void addNorthSouthSideLayer(int side, int materialZ, long[] toMeshFacesMap) {
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
+
+                byte material = materialsLayer[materialX << CHUNK_SIZE_BITS | materialY];
+                int faceEndY = growFace1stDirection(toMeshFacesMap, materialY + 1, materialX, material);
+                long mask = getMask(faceEndY - materialY + 1, materialY);
+                int faceEndX = growFace2ndDirection(toMeshFacesMap, materialX + 1, mask, materialY, faceEndY, material);
+
+                removeFromBitMap(toMeshFacesMap, mask, materialX, faceEndX);
+                addSideFace(side, materialX, materialY, materialZ, material, faceEndY - materialY, faceEndX - materialX);
+            }
+    }
+
+    private void addTopBottomSideLayer(int side, int materialY, long[] toMeshFacesMap) {
+        for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
+            for (int materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
+                 materialZ < CHUNK_SIZE;
+                 materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX])) {
+
+                byte material = materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ];
+                int faceEndZ = growFace1stDirection(toMeshFacesMap, materialZ + 1, materialX, material);
+                long mask = getMask(faceEndZ - materialZ + 1, materialZ);
+                int faceEndX = growFace2ndDirection(toMeshFacesMap, materialX + 1, mask, materialZ, faceEndZ, material);
+
+                removeFromBitMap(toMeshFacesMap, mask, materialX, faceEndX);
+                addSideFace(side, materialX, materialY, materialZ, material, faceEndX - materialX, faceEndZ - materialZ);
+            }
+    }
+
+    private void addWestEastSideLayer(int side, int materialX, long[] toMeshFacesMap) {
+        for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
+            for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ]);
+                 materialY < CHUNK_SIZE;
+                 materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ])) {
+
+                byte material = materialsLayer[materialZ << CHUNK_SIZE_BITS | materialY];
+                int faceEndY = growFace1stDirection(toMeshFacesMap, materialY + 1, materialZ, material);
+                long mask = getMask(faceEndY - materialY + 1, materialY);
+                int faceEndZ = growFace2ndDirection(toMeshFacesMap, materialZ + 1, mask, materialY, faceEndY, material);
+
+                removeFromBitMap(toMeshFacesMap, mask, materialZ, faceEndZ);
+                addSideFace(side, materialX, materialY, materialZ, material, faceEndY - materialY, faceEndZ - materialZ);
+            }
+    }
+
+    private void addSideFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
+        if ((Material.getMaterialProperties(material) & TRANSPARENT) != 0) return;
+        addFace(opaqueVerticesLists[6], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
+    }
+
+
     private void addFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
         if (Material.isGlass(material))
             addFace(glassVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
@@ -300,5 +408,6 @@ public final class MeshGenerator {
     private final IntArrayList waterVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{
             new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE),
-            new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE)};
+            new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE),
+            new IntArrayList(EXPECTED_LIST_SIZE)};
 }

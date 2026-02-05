@@ -48,12 +48,13 @@ public final class Renderer extends Renderable {
 
     public int renderedOpaqueModels, renderedWaterModels, renderedGlassModels;
 
-    public Renderer(Player player) {
+    public Renderer(Player player, MeshCollector meshCollector) {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         this.player = player;
         setAllowFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
+        renderingOptimizer = new RenderingOptimizer(meshCollector);
         crosshair = new UiElement(new Vector2f(), new Vector2f(), Textures.CROSSHAIR);
         crosshair.setScaleWithGuiSize(false);
         crosshair.setAllowFocusScaling(false);
@@ -759,8 +760,8 @@ public final class Renderer extends Renderable {
         int y = chunk.Y << CHUNK_SIZE_BITS + lod;
         int z = chunk.Z << CHUNK_SIZE_BITS + lod;
 
-        shader.setUniform("minPosition", x + (aabb.minX << lod), y + (aabb.minY << lod) - (1 << lod) + 1, z + (aabb.minZ << lod));
-        shader.setUniform("maxPosition", x + (aabb.maxX << lod), y + (aabb.maxY << lod) - (1 << lod) + 1, z + (aabb.maxZ << lod));
+        shader.setUniform("minPosition", x + (aabb.minX << lod), y + (aabb.minY << lod), z + (aabb.minZ << lod));
+        shader.setUniform("maxPosition", x + (aabb.maxX << lod), y + (aabb.maxY << lod), z + (aabb.maxZ << lod));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
@@ -809,7 +810,7 @@ public final class Renderer extends Renderable {
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
-    private final RenderingOptimizer renderingOptimizer = new RenderingOptimizer();
+    private final RenderingOptimizer renderingOptimizer;
     private final Player player;
 
     private int framebuffer, colorTexture, depthTexture, sideTexture;

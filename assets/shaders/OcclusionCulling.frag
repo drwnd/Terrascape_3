@@ -1,13 +1,13 @@
 #version 460 core
 
 flat in int instanceID;
-layout(early_fragment_tests) in;
+layout (early_fragment_tests) in;
 
 struct IndirectCommand {
-uint count;
-uint instanceCount;
-uint first;
-uint baseInstance;
+    uint count;
+    uint instanceCount;
+    uint first;
+    uint baseInstance;
 };
 
 layout (std430, binding = 1) restrict writeonly buffer opaqueIndirectBuffer {
@@ -26,14 +26,16 @@ const int WEST = 2;
 const int SOUTH = 3;
 const int BOTTOM = 4;
 const int EAST = 5;
+const int SIDES = 6;
 
 void main() {
-    opaqueCommands[instanceID * 6 + NORTH].instanceCount = 1;
-    opaqueCommands[instanceID * 6 + TOP].instanceCount = 1;
-    opaqueCommands[instanceID * 6 + WEST].instanceCount = 1;
-    opaqueCommands[instanceID * 6 + SOUTH].instanceCount = 1;
-    opaqueCommands[instanceID * 6 + BOTTOM].instanceCount = 1;
-    opaqueCommands[instanceID * 6 + EAST].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + NORTH].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + TOP].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + WEST].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + SOUTH].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + BOTTOM].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + EAST].instanceCount = 1;
+    opaqueCommands[instanceID * 7 + SIDES].instanceCount = 1;
 
     waterCommands[instanceID].instanceCount = 1;
     glassCommands[instanceID].instanceCount = 1;

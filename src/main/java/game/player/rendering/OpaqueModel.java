@@ -11,7 +11,7 @@ import static game.utils.Constants.*;
 
 public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
-    public static final int FACE_COUNT = 6;
+    public static final int FACE_COUNT = 7;
 
     public OpaqueModel(Vector3i position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
         this(position.x << lod, position.y << lod, position.z << lod,
@@ -19,7 +19,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
-    public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+    public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ, boolean isLodBorderChunk) {
         int modelChunkX = chunkX();
         int modelChunkY = chunkY();
         int modelChunkZ = chunkZ();
@@ -31,9 +31,10 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         addData(commands, notNull && isVisibleLE(cameraChunkZ, modelChunkZ), SOUTH);
         addData(commands, notNull && isVisibleLE(cameraChunkY, modelChunkY), BOTTOM);
         addData(commands, notNull && isVisibleLE(cameraChunkX, modelChunkX), EAST);
+        addData(commands, notNull && isLodBorderChunk, 6);
     }
 
-    public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ) {
+    public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ, boolean isLodBorderChunk) {
         if (isEmpty()) return;
         int modelChunkX = chunkX();
         int modelChunkY = chunkY();
@@ -45,6 +46,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         if (isVisibleLE(cameraChunkZ, modelChunkZ)) addData(commands, SOUTH);
         if (isVisibleLE(cameraChunkY, modelChunkY)) addData(commands, BOTTOM);
         if (isVisibleLE(cameraChunkX, modelChunkX)) addData(commands, EAST);
+        if (isLodBorderChunk) addData(commands, 6);
     }
 
     public boolean isEmpty() {
@@ -91,8 +93,8 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
     }
 
     private static int[] getIndices(int[] vertexCounts, int bufferOrStart, boolean isBuffer) {
+        if (vertexCounts == null) return null;
         int[] indices = new int[FACE_COUNT];
-        if (vertexCounts == null) return indices;
         indices[0] = firstIndex(bufferOrStart, isBuffer);
         for (int index = 1; index < FACE_COUNT; index++)
             indices[index] = indices[index - 1] + vertexCounts[index - 1];

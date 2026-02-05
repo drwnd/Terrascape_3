@@ -30,7 +30,7 @@ public final class Player {
         camera = new Camera();
         input = new PlayerInput();
         movement = new Movement();
-        renderer = new Renderer(this);
+        renderer = new Renderer(this, meshCollector);
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
         inventory = new Inventory();
