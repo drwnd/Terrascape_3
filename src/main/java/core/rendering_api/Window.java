@@ -31,8 +31,10 @@ public final class Window {
         GL.createCapabilities();
 
         glClearColor(0, 0, 0, 1);
+        glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+        glClearDepth(0.0F);
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+        glDepthFunc(GL_GREATER);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
     }

@@ -45,16 +45,15 @@ vec3 getLightColor(vec2 shadowCoord) {
 
 vec3 getSkyLight(vec3 position, vec3 normal) {
     if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1.0);
-    //    if (dot(normal, sunDirection) < 0.0) return 0.0;
     vec4 shadowCoord = sunMatrix * vec4(floor(position + normal * 2.5), 1);
     shadowCoord.xyz /= shadowCoord.w;
-    shadowCoord = shadowCoord * 0.5 + 0.5;
+    shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
 
     float closestDepth = texture(shadowMap, shadowCoord.xy).r;
-    if (closestDepth == 1.0) return getLightColor(shadowCoord.xy);
+    if (closestDepth == 0.0) return getLightColor(shadowCoord.xy);
     float currentDepth = shadowCoord.z;
 
-    return currentDepth - 0.005 > closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
+    return currentDepth + 0.005 < closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
 }
 
 float getBlockLight() {

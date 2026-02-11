@@ -22,7 +22,9 @@ public final class Camera {
     }
 
     public void updateProjectionMatrix() {
-        projectionMatrix.setPerspective((float) Math.toRadians(FloatSetting.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_NEAR, Z_FAR);
+        projectionMatrix
+                .identity()
+                .setPerspective((float) Math.toRadians(FloatSetting.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
     }
 
     public Vector3f getDirection() {

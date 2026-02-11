@@ -45,7 +45,7 @@ public final class Transformation {
         Vector3f direction = Utils.getDirection(rotation).mul(-400.0F);
 
         Matrix4f matrix = new Matrix4f();
-        matrix.ortho(-frustumDistance, frustumDistance, -frustumDistance, frustumDistance, 50.0F, 5000.0F);
+        matrix.ortho(-frustumDistance, frustumDistance, -frustumDistance, frustumDistance, 5000.0F, 50.0F, true);
         matrix.lookAt(centerX + direction.x, centerY + direction.y, centerZ + direction.z, centerX, centerY, centerZ, 0.0F, 1.0F, 0.0F);
 
         return matrix;
@@ -62,7 +62,7 @@ public final class Transformation {
     public static Matrix4f getSunMatrix(float renderTime) {
         Vector3f sunDirection = getSunDirection(renderTime);
         Matrix4f matrix = new Matrix4f();
-        matrix.ortho(-SHADOW_RANGE, SHADOW_RANGE, -SHADOW_RANGE, SHADOW_RANGE, 100, SHADOW_RANGE * 2);
+        matrix.ortho(-SHADOW_RANGE, SHADOW_RANGE, -SHADOW_RANGE, SHADOW_RANGE, SHADOW_RANGE * 2, 100, true);
         matrix.lookAt(-sunDirection.x * SHADOW_RANGE, -sunDirection.y * SHADOW_RANGE, -sunDirection.z * SHADOW_RANGE,
                 0.0F, 0.0F, 0.0F,
                 0.0F, 1.0F, 0.0F);

@@ -456,7 +456,7 @@ public final class RenderingOptimizer {
         glCullFace(GL_FRONT);
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_BLEND);
-        glDepthFunc(GL_LESS);
+        glDepthFunc(GL_GREATER);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDepthMask(true);

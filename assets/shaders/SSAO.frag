@@ -90,7 +90,7 @@ vec3(-0.6765868, 0.17383541, 0.67600274)
 vec3 calcViewPosition(vec2 coords) {
     float fragmentDepth = texture(depthTexture, coords).r;
 
-    vec4 ndc = vec4(coords * 2.0 - 1.0, fragmentDepth * 2.0 - 1.0, 1.0);
+    vec4 ndc = vec4(coords * 2.0 - 1.0, fragmentDepth, 1.0);
 
     vec4 vs_pos = projectionInverse * ndc;
     vs_pos.xyz = vs_pos.xyz / vs_pos.w;
