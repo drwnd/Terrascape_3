@@ -154,7 +154,13 @@ public final class ChunkGenerator {
         @Override
         public void run() {
 
-            GenerationData generationData = new GenerationData(chunkX, chunkZ, lod);
+            GenerationData generationData;
+            try {
+                generationData = new GenerationData(chunkX, chunkZ, lod);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                return;
+            }
             ChunkSaver saver = new ChunkSaver();
 
             for (int chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY < playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++) {

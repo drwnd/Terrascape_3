@@ -41,9 +41,9 @@ public final class GenerationData {
         double[] riverMap = riverMapPadded(chunkX, chunkZ, lod);
         double[] ridgeMap = ridgeMapPadded(chunkX, chunkZ, lod);
 
-        resultingHeightMap = WorldGeneration.getResultingHeightMap(heightMap, erosionMap, continentalMap, riverMap, ridgeMap);
+        resultingHeightMap = getResultingHeightMap(heightMap, erosionMap, continentalMap, riverMap, ridgeMap);
         steepnessMap = steepnessMap(resultingHeightMap, lod);
-        biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, humidityMap, temperatureMap, erosionMap, continentalMap);
+        biomeMap = getBiomes(resultingHeightMap, featureMap, humidityMap, temperatureMap, erosionMap, continentalMap);
         specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
 
         minHeight = getMinHeight(resultingHeightMap);
@@ -334,24 +334,17 @@ public final class GenerationData {
 
 
     private static double[] temperatureMapPadded(int chunkX, int chunkZ, int lod) {
-        double[] temperatureMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
+        double[] temperatureMap = new double[DENSE_MAP_SIZE * DENSE_MAP_SIZE];
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                temperatureMap[getMapIndex(mapX, mapZ)] = temperatureMapValue(totalX, totalZ);
+                temperatureMap[getDenseMapIndex(mapX, mapZ)] = temperatureMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(temperatureMap, mapX, mapZ);
-
         return temperatureMap;
     }
 
@@ -360,20 +353,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                humidityMap[getMapIndex(mapX, mapZ)] = humidityMapValue(totalX, totalZ);
+                humidityMap[getDenseMapIndex(mapX, mapZ)] = humidityMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(humidityMap, mapX, mapZ);
-
         return humidityMap;
     }
 
@@ -382,20 +368,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                heightMap[getMapIndex(mapX, mapZ)] = heightMapValue(totalX, totalZ);
+                heightMap[getDenseMapIndex(mapX, mapZ)] = heightMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(heightMap, mapX, mapZ);
-
         return heightMap;
     }
 
@@ -404,19 +383,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                erosionMap[getMapIndex(mapX, mapZ)] = erosionMapValue(totalX, totalZ);
+                erosionMap[getDenseMapIndex(mapX, mapZ)] = erosionMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(erosionMap, mapX, mapZ);
         return erosionMap;
     }
 
@@ -425,19 +398,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                continentalMap[getMapIndex(mapX, mapZ)] = continentalMapValue(totalX, totalZ);
+                continentalMap[getDenseMapIndex(mapX, mapZ)] = continentalMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(continentalMap, mapX, mapZ);
         return continentalMap;
     }
 
@@ -446,19 +413,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                riverMap[getMapIndex(mapX, mapZ)] = riverMapValue(totalX, totalZ);
+                riverMap[getDenseMapIndex(mapX, mapZ)] = riverMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(riverMap, mapX, mapZ);
         return riverMap;
     }
 
@@ -467,19 +428,13 @@ public final class GenerationData {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize - gapSize;
+        for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
 
-                ridgeMap[getMapIndex(mapX, mapZ)] = ridgeMapValue(totalX, totalZ);
+                ridgeMap[getDenseMapIndex(mapX, mapZ)] = ridgeMapValue(totalX, totalZ);
             }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(ridgeMap, mapX, mapZ);
         return ridgeMap;
     }
 
@@ -553,23 +508,26 @@ public final class GenerationData {
         double river = riverMapValue(totalX, totalZ);
         double ridge = ridgeMapValue(totalX, totalZ);
 
-        int resultingHeight = WorldGeneration.getResultingHeight(height, erosion, continental, river, ridge);
+        int resultingHeight = Utils.floor(WorldGeneration.getResultingHeight(height, erosion, continental, river, ridge));
         int heightPlusX = WorldGeneration.getResultingHeight(totalX + 1, totalZ);
         int heightPlusZ = WorldGeneration.getResultingHeight(totalX, totalZ + 1);
         int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
         if (steepness != 0) return null;
 
-        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental);
+        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental, 0);
 
         if ((Utils.hash(totalX, totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
     }
 
-    private static void interpolate(double[] map, int mapX, int mapZ) {
-        double value1 = map[getMapIndex(mapX, mapZ)];
-        double value2 = map[getMapIndex(mapX + INTERPOLATION_SIZE, mapZ)];
-        double value3 = map[getMapIndex(mapX, mapZ + INTERPOLATION_SIZE)];
-        double value4 = map[getMapIndex(mapX + INTERPOLATION_SIZE, mapZ + INTERPOLATION_SIZE)];
+    private static void interpolateInto(double[] source, int[] target, int mapX, int mapZ) {
+        double value1 = source[getDenseMapIndex(mapX + 0, mapZ + 0)];
+        double value2 = source[getDenseMapIndex(mapX + 1, mapZ + 0)];
+        double value3 = source[getDenseMapIndex(mapX + 0, mapZ + 1)];
+        double value4 = source[getDenseMapIndex(mapX + 1, mapZ + 1)];
+
+        int targetX = mapX * INTERPOLATION_SIZE;
+        int targetZ = mapZ * INTERPOLATION_SIZE;
 
         for (int x = 0; x <= INTERPOLATION_SIZE; x++) {
             double interpolatedLowXValue = (value2 * x + value1 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
@@ -577,7 +535,7 @@ public final class GenerationData {
 
             for (int z = 0; z <= INTERPOLATION_SIZE; z++) {
                 double interpolatedValue = (interpolatedHighXValue * z + interpolatedLowXValue * (INTERPOLATION_SIZE - z)) * INTERPOLATION_MULTIPLIER;
-                map[getMapIndex(mapX + x, mapZ + z)] = interpolatedValue;
+                target[getMapIndex(targetX + x, targetZ + z)] = Utils.floor(interpolatedValue);
             }
         }
     }
@@ -604,6 +562,44 @@ public final class GenerationData {
         return max;
     }
 
+    private static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
+        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
+        double[] resultingHeights = new double[DENSE_MAP_SIZE * DENSE_MAP_SIZE];
+
+        for (int index = 0; index < DENSE_MAP_SIZE * DENSE_MAP_SIZE; index++) {
+                double height = heightMap[index];
+                double erosion = erosionMap[index];
+                double continental = continentalMap[index];
+                double river = riverMap[index];
+                double ridge = ridgeMap[index];
+
+                resultingHeights[index] = getResultingHeight(height, erosion, continental, river, ridge);
+            }
+
+        for (int mapX = 0; mapX < INTERPOLATION_COUNT; mapX++)
+            for (int mapZ = 0; mapZ < INTERPOLATION_COUNT; mapZ++) interpolateInto(resultingHeights, resultingHeightMap, mapX, mapZ);
+
+        return resultingHeightMap;
+    }
+
+    public static Biome[] getBiomes(int[] heightMap, double[] featureMap, double[] humidityMap, double[] temperatureMap, double[] erosionMap, double[] continentalMap) {
+        Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
+        for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
+            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
+                int mapIndex = GenerationData.getDenseMapIndex(mapX / INTERPOLATION_SIZE, mapZ / INTERPOLATION_SIZE);
+                int index = mapX << CHUNK_SIZE_BITS | mapZ;
+                biomes[index] = getBiome(
+                        temperatureMap[mapIndex],
+                        humidityMap[mapIndex],
+                        WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
+                        heightMap[mapIndex],
+                        erosionMap[mapIndex],
+                        continentalMap[mapIndex],
+                        featureMap[index]
+                );
+            }
+        return biomes;
+    }
 
     private int getCompressedIndex(int x, int y, int z) {
         // >> 2 for compression and performance improvement
@@ -612,6 +608,10 @@ public final class GenerationData {
         int compressedZ = (z >> LOD & CHUNK_SIZE_MASK) >> 2;
 
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
+    }
+
+    private static int getDenseMapIndex(int mapX, int mapY) {
+        return mapX * DENSE_MAP_SIZE + mapY;
     }
 
     private final int minHeight, maxHeight, maxSpecialHeight;
@@ -655,5 +655,7 @@ public final class GenerationData {
     private static final double HEAVY_ICE_THRESHOLD = 0.6;
 
     private static final int INTERPOLATION_SIZE = 8;
+    private static final int INTERPOLATION_COUNT = CHUNK_SIZE / INTERPOLATION_SIZE;
+    private static final int DENSE_MAP_SIZE = CHUNK_SIZE / INTERPOLATION_SIZE + 1;
     private static final double INTERPOLATION_MULTIPLIER = 1.0 / INTERPOLATION_SIZE;
 }

@@ -46,14 +46,14 @@ public final class WorldGeneration {
         chunk.setGenerationStatus(Status.DONE);
     }
 
-    public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
+    public static double getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
         height = (height * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
 
         double continentalModifier = getContinentalModifier(continental, ridge);
         double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
         double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
 
-        return Utils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+        return (height + continentalModifier + erosionModifier + riverModifier) * 2 + WATER_LEVEL - 15;
     }
 
     public static int getResultingHeight(int totalX, int totalZ) {
@@ -63,46 +63,14 @@ public final class WorldGeneration {
         double river = GenerationData.riverMapValue(totalX, totalZ);
         double ridge = GenerationData.ridgeMapValue(totalX, totalZ);
 
-        return getResultingHeight(height, erosion, continental, river, ridge);
+        return Utils.floor(getResultingHeight(height, erosion, continental, river, ridge));
     }
 
-    public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
-        int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
+    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental, double feature) {
+        double dither = feature * 0.04 - 0.02;
+        temperature += dither;
+        humidity += dither;
 
-                int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
-                double height = heightMap[mapIndex];
-                double erosion = erosionMap[mapIndex];
-                double continental = continentalMap[mapIndex];
-                double river = riverMap[mapIndex];
-                double ridge = ridgeMap[mapIndex];
-
-                int resultingHeight = getResultingHeight(height, erosion, continental, river, ridge);
-                resultingHeightMap[mapIndex] = resultingHeight;
-            }
-        return resultingHeightMap;
-    }
-
-    public static Biome[] getBiomes(int[] heightMap, double[] featureMap, double[] humidityMap, double[] temperatureMap, double[] erosionMap, double[] continentalMap) {
-        Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
-        for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
-                int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
-                int index = mapX << CHUNK_SIZE_BITS | mapZ;
-                biomes[index] = getBiome(
-                        temperatureMap[mapIndex],
-                        humidityMap[mapIndex],
-                        WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
-                        heightMap[mapIndex],
-                        erosionMap[mapIndex],
-                        continentalMap[mapIndex]
-                );
-            }
-        return biomes;
-    }
-
-    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental) {
         if (height < WATER_LEVEL) {
             if (temperature > 0.33) return WARM_OCEAN;
             else if (temperature < -0.33) return COLD_OCEAN;

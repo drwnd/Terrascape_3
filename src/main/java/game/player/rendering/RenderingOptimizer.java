@@ -373,7 +373,6 @@ public final class RenderingOptimizer {
                 occludee.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
 
                 if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod) <= 1) {
-                    opaqueCommands.set(opaqueCommands.size() - 3, 1);
                     opaqueCommands.set(opaqueCommands.size() - 7, 1);
                     opaqueCommands.set(opaqueCommands.size() - 11, 1);
                     opaqueCommands.set(opaqueCommands.size() - 15, 1);
