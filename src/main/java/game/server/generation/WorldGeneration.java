@@ -67,9 +67,11 @@ public final class WorldGeneration {
     }
 
     public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental, double feature) {
-        double dither = feature * 0.04 - 0.02;
+        double dither = feature * 0.08 - 0.04;
         temperature += dither;
         humidity += dither;
+        continental += dither * 0.25;
+        erosion += dither * 0.25;
 
         if (height < WATER_LEVEL) {
             if (temperature > 0.33) return WARM_OCEAN;

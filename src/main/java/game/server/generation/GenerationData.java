@@ -340,8 +340,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 temperatureMap[getDenseMapIndex(mapX, mapZ)] = temperatureMapValue(totalX, totalZ);
             }
@@ -355,8 +355,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 humidityMap[getDenseMapIndex(mapX, mapZ)] = humidityMapValue(totalX, totalZ);
             }
@@ -370,8 +370,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 heightMap[getDenseMapIndex(mapX, mapZ)] = heightMapValue(totalX, totalZ);
             }
@@ -385,8 +385,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 erosionMap[getDenseMapIndex(mapX, mapZ)] = erosionMapValue(totalX, totalZ);
             }
@@ -400,8 +400,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 continentalMap[getDenseMapIndex(mapX, mapZ)] = continentalMapValue(totalX, totalZ);
             }
@@ -415,8 +415,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 riverMap[getDenseMapIndex(mapX, mapZ)] = riverMapValue(totalX, totalZ);
             }
@@ -430,8 +430,8 @@ public final class GenerationData {
 
         for (int mapX = 0; mapX < DENSE_MAP_SIZE; mapX++)
             for (int mapZ = 0; mapZ < DENSE_MAP_SIZE; mapZ++) {
-                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE - gapSize;
-                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE - gapSize;
+                int totalX = (chunkX << chunkSizeBits) + mapX * gapSize * INTERPOLATION_SIZE;
+                int totalZ = (chunkZ << chunkSizeBits) + mapZ * gapSize * INTERPOLATION_SIZE;
 
                 ridgeMap[getDenseMapIndex(mapX, mapZ)] = ridgeMapValue(totalX, totalZ);
             }
