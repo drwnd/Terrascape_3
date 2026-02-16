@@ -530,14 +530,21 @@ public final class GenerationData {
         int targetZ = mapZ * INTERPOLATION_SIZE;
 
         for (int x = 0; x <= INTERPOLATION_SIZE; x++) {
-            double interpolatedLowXValue = (value2 * x + value1 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
-            double interpolatedHighXValue = (value4 * x + value3 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
+            double xWeight = smoothingFunction(x);
+
+            double interpolatedLowXValue = value2 * xWeight + value1 * (1 - xWeight);
+            double interpolatedHighXValue = value4 * xWeight + value3 * (1 - xWeight);
 
             for (int z = 0; z <= INTERPOLATION_SIZE; z++) {
-                double interpolatedValue = (interpolatedHighXValue * z + interpolatedLowXValue * (INTERPOLATION_SIZE - z)) * INTERPOLATION_MULTIPLIER;
+                double zWeight = smoothingFunction(z);
+                double interpolatedValue = interpolatedHighXValue * zWeight + interpolatedLowXValue * (1 - zWeight);
                 target[getMapIndex(targetX + x, targetZ + z)] = Utils.floor(interpolatedValue);
             }
         }
+    }
+
+    private static double smoothingFunction(int value) {
+        return value * INTERPOLATION_MULTIPLIER;
     }
 
     private static int getMinHeight(int[] resultingHeightMap) {
@@ -567,14 +574,14 @@ public final class GenerationData {
         double[] resultingHeights = new double[DENSE_MAP_SIZE * DENSE_MAP_SIZE];
 
         for (int index = 0; index < DENSE_MAP_SIZE * DENSE_MAP_SIZE; index++) {
-                double height = heightMap[index];
-                double erosion = erosionMap[index];
-                double continental = continentalMap[index];
-                double river = riverMap[index];
-                double ridge = ridgeMap[index];
+            double height = heightMap[index];
+            double erosion = erosionMap[index];
+            double continental = continentalMap[index];
+            double river = riverMap[index];
+            double ridge = ridgeMap[index];
 
-                resultingHeights[index] = getResultingHeight(height, erosion, continental, river, ridge);
-            }
+            resultingHeights[index] = getResultingHeight(height, erosion, continental, river, ridge);
+        }
 
         for (int mapX = 0; mapX < INTERPOLATION_COUNT; mapX++)
             for (int mapZ = 0; mapZ < INTERPOLATION_COUNT; mapZ++) interpolateInto(resultingHeights, resultingHeightMap, mapX, mapZ);
@@ -586,15 +593,16 @@ public final class GenerationData {
         Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
-                int mapIndex = GenerationData.getDenseMapIndex(mapX / INTERPOLATION_SIZE, mapZ / INTERPOLATION_SIZE);
+                int denseMapIndex = GenerationData.getDenseMapIndex(mapX / INTERPOLATION_SIZE, mapZ / INTERPOLATION_SIZE);
+                int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
                 int index = mapX << CHUNK_SIZE_BITS | mapZ;
                 biomes[index] = getBiome(
-                        temperatureMap[mapIndex],
-                        humidityMap[mapIndex],
+                        temperatureMap[denseMapIndex],
+                        humidityMap[denseMapIndex],
                         WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
                         heightMap[mapIndex],
-                        erosionMap[mapIndex],
-                        continentalMap[mapIndex],
+                        erosionMap[denseMapIndex],
+                        continentalMap[denseMapIndex],
                         featureMap[index]
                 );
             }
