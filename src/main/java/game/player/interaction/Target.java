@@ -1,6 +1,6 @@
 package game.player.interaction;
 
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import game.server.Game;
 import game.server.material.Material;
@@ -48,7 +48,7 @@ public record Target(Vector3i position, int side, byte material) {
         double length = 0;
 
         int intersectedSide = 0;
-        float reach = FloatSetting.REACH.value();
+        float reach = CoreFloatSettings.REACH.value();
         while (length < reach) {
 
             byte material = Game.getWorld().getMaterial(x, y, z, 0);

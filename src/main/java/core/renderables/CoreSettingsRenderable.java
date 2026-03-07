@@ -60,7 +60,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Window.popRenderable();
     }
 
-    public void addSlider(FloatSetting setting, StringGetter settingName) {
+    public void addSlider(CoreFloatSettings setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
@@ -74,7 +74,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addKeySelector(KeySetting setting, StringGetter settingName) {
+    public void addKeySelector(CoreKeySettings setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
@@ -88,7 +88,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addToggle(ToggleSetting setting, StringGetter settingName) {
+    public void addToggle(CoreToggleSettings setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
@@ -109,7 +109,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
-    public void addOption(OptionSetting setting, StringGetter settingName) {
+    public void addOption(CoreOptionSettings setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);

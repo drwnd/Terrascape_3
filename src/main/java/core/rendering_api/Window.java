@@ -1,7 +1,7 @@
 package core.rendering_api;
 
 import core.renderables.Renderable;
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -120,12 +120,12 @@ public final class Window {
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
+        float guiSize = scalesWithGuiSize ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
         return position.mul(guiSize).add((1 - guiSize) * 0.5F, (1 - guiSize) * 0.5F).mul(Window.getWidth(), Window.getHeight());
     }
 
     public static Vector2f toPixelSize(Vector2f size, boolean scalesWithGuiSize) {
-        float guiSize = scalesWithGuiSize ? FloatSetting.GUI_SIZE.value() : 1.0F;
+        float guiSize = scalesWithGuiSize ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
         return size.mul(Window.getWidth(), Window.getHeight()).mul(guiSize);
     }
 

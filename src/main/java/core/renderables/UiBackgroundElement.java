@@ -6,7 +6,7 @@ import core.assets.CoreShaders;
 import core.assets.CoreTextures;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import core.settings.optionSettings.TexturePack;
 import org.joml.Vector2f;
@@ -18,12 +18,12 @@ public class UiBackgroundElement extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0f;
 
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI_BACKGROUND);
         Texture background = AssetManager.get(TexturePack.get(CoreTextures.GUI_ELEMENT_BACKGROUND));
         shader.bind();
-        shader.setUniform("rimWidth", FloatSetting.RIM_THICKNESS.value() * rimThicknessMultiplier * guiSize);
+        shader.setUniform("rimWidth", CoreFloatSettings.RIM_THICKNESS.value() * rimThicknessMultiplier * guiSize);
         shader.setUniform("aspectRatio", Window.getAspectRatio());
         shader.drawQuadCustomScale(position, size, background, guiSize);
     }

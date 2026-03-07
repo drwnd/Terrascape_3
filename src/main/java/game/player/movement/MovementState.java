@@ -1,9 +1,9 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.KeySetting;
+import core.settings.CoreKeySettings;
 
-import core.settings.ToggleSetting;
+import core.settings.CoreToggleSettings;
 import game.server.Game;
 import game.server.World;
 import game.utils.Utils;
@@ -111,16 +111,16 @@ public abstract class MovementState {
     }
 
     static void applyXZMovement(Vector3f velocityChange, float speed, float sprintSpeedModifier) {
-        if (Input.isKeyPressed(KeySetting.MOVE_FORWARD))
+        if (Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD))
             velocityChange.x += speed;
-        if (Input.isKeyPressed(KeySetting.SPRINT)) velocityChange.mul(sprintSpeedModifier);
+        if (Input.isKeyPressed(CoreKeySettings.SPRINT)) velocityChange.mul(sprintSpeedModifier);
 
-        if (Input.isKeyPressed(KeySetting.MOVE_BACK))
+        if (Input.isKeyPressed(CoreKeySettings.MOVE_BACK))
             velocityChange.x -= speed;
 
-        if (Input.isKeyPressed(KeySetting.MOVE_RIGHT))
+        if (Input.isKeyPressed(CoreKeySettings.MOVE_RIGHT))
             velocityChange.z -= speed;
-        if (Input.isKeyPressed(KeySetting.MOVE_LEFT))
+        if (Input.isKeyPressed(CoreKeySettings.MOVE_LEFT))
             velocityChange.z += speed;
     }
 
@@ -129,7 +129,7 @@ public abstract class MovementState {
     }
 
     static float intersectedVolume(Position position, MovementState state, byte targetMaterial) {
-        if (ToggleSetting.NO_CLIP.value()) return 0;
+        if (CoreToggleSettings.NO_CLIP.value()) return 0;
 
         World world = Game.getWorld();
         Vector3i hitboxSize = state.getHitboxSize();

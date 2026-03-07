@@ -3,8 +3,8 @@ package core.renderables;
 import core.assets.CoreTextures;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.TextShader;
-import core.settings.FloatSetting;
-import core.settings.OptionSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
 import core.utils.StringGetter;
 
@@ -65,8 +65,8 @@ public class TextField extends UiButton {
         super.renderSelf(position, size);
         textElement.setText(text);
 
-        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0F;
-        float rimThickness = FloatSetting.RIM_THICKNESS.value() * guiSize * getRimThicknessMultiplier();
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
+        float rimThickness = CoreFloatSettings.RIM_THICKNESS.value() * guiSize * getRimThicknessMultiplier();
         size = Window.toPixelSize(getSize(), scalesWithGuiSize());
 
         float thicknessX = rimThickness * Window.getWidth() / (size.x * Window.getAspectRatio());
@@ -88,14 +88,14 @@ public class TextField extends UiButton {
         cursorIndicator.setVisible(indicatorVisible);
         if (indicatorVisible) {
             int cursorIndex = ((TextFieldInput) Window.getInput()).getCursorIndex();
-            Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+            Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
 
             float cursorIndexOffset = TextShader.getTextLength(text.substring(0, cursorIndex), defaultTextSize.x, scalesWithGuiSize());
             cursorIndexOffset /= getSizeToParent().x * blackBox.getSizeToParent().x;
             if (allowsFocusScaling() && isFocused()) cursorIndexOffset /= getScalingFactor();
             cursorIndexOffset += textElement.getOffsetToParent().x;
 
-            float textSize = FloatSetting.TEXT_SIZE.value();
+            float textSize = CoreFloatSettings.TEXT_SIZE.value();
             float charHeight = Window.getHeight() * defaultTextSize.y * textSize;
             float indicatorHeight = textSize * charHeight / (blackBox.getSize().y * Window.getHeight());
             float indicatorWidth = TextShader.getTextLength("|", defaultTextSize.x, scalesWithGuiSize()) * 0.5F / blackBoxSize;

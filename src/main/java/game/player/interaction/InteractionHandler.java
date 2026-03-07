@@ -1,8 +1,8 @@
 package game.player.interaction;
 
 import core.rendering_api.Input;
-import core.settings.FloatSetting;
-import core.settings.KeySetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreKeySettings;
 
 import game.server.Game;
 
@@ -14,18 +14,18 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySetting.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
-        if (action == GLFW_PRESS && button == KeySetting.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
-        if (action == GLFW_PRESS && button == KeySetting.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW_RELEASE && button == KeySetting.LOCK_PLACE_POSITION.keybind()) startTarget = null;
+        if (action == GLFW_PRESS && button == CoreKeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
+        if (action == GLFW_PRESS && button == CoreKeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
+        if (action == GLFW_PRESS && button == CoreKeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
+        if (action == GLFW_RELEASE && button == CoreKeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
-        if (button == KeySetting.DESTROY.keybind()) updateInfo(action, destroyInfo);
-        if (button == KeySetting.USE.keybind()) updateInfo(action, useInfo);
+        if (button == CoreKeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
+        if (button == CoreKeySettings.USE.keybind()) updateInfo(action, useInfo);
     }
 
     public void updateGameTick() {
-        if (!Input.isKeyPressed(KeySetting.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
-        if (!Input.isKeyPressed(KeySetting.USE)) updateInfo(GLFW_RELEASE, useInfo);
+        if (!Input.isKeyPressed(CoreKeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
+        if (!Input.isKeyPressed(CoreKeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
 
         handleDestroy();
         handleUse();
@@ -55,7 +55,7 @@ public final class InteractionHandler {
 
     private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
-        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < FloatSetting.BREAK_PLACE_INTERVALL.value())) return;
+        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < CoreFloatSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
 
         Target target = Target.getPlayerTarget();

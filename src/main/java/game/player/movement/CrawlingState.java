@@ -1,7 +1,7 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.KeySetting;
+import core.settings.CoreKeySettings;
 
 import game.utils.Position;
 import game.utils.Utils;
@@ -15,8 +15,8 @@ public final class CrawlingState extends MovementState {
 
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
-        if (!Input.isKeyPressed(KeySetting.CRAWL)) next = new SneakingState();
-        if (Input.isKeyPressed(KeySetting.SPRINT) && Input.isKeyPressed(KeySetting.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
+        if (!Input.isKeyPressed(CoreKeySettings.CRAWL)) next = new SneakingState();
+        if (Input.isKeyPressed(CoreKeySettings.SPRINT) && Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
@@ -24,7 +24,7 @@ public final class CrawlingState extends MovementState {
 
         applyXZMovement(velocityChange, speed, 1.0F);
 
-        if (Input.isKeyPressed(KeySetting.JUMP)) handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
+        if (Input.isKeyPressed(CoreKeySettings.JUMP)) handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
 
         normalizeXZToMaxComponent(velocityChange);
         toWorldDirection(velocityChange, playerDirection);
@@ -34,7 +34,7 @@ public final class CrawlingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.keybind() && action == GLFW_PRESS) {
+        if (key == CoreKeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

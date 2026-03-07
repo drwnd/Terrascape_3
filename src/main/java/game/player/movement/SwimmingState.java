@@ -1,7 +1,7 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.KeySetting;
+import core.settings.CoreKeySettings;
 
 import game.utils.Position;
 import game.utils.Utils;
@@ -16,7 +16,7 @@ public final class SwimmingState extends MovementState {
 
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
-        if (!Input.isKeyPressed(KeySetting.SPRINT) || !Input.isKeyPressed(KeySetting.MOVE_FORWARD)) next = new CrawlingState();
+        if (!Input.isKeyPressed(CoreKeySettings.SPRINT) || !Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD)) next = new CrawlingState();
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getDirection(playerRotation);
@@ -48,7 +48,7 @@ public final class SwimmingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.keybind() && action == GLFW_PRESS) {
+        if (key == CoreKeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

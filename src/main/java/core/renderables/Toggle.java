@@ -6,8 +6,8 @@ import core.assets.CoreShaders;
 import core.assets.CoreTextures;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
-import core.settings.FloatSetting;
-import core.settings.ToggleSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.TexturePack;
 import core.utils.StringGetter;
 
@@ -18,7 +18,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Toggle extends UiButton {
 
-    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName) {
+    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, CoreToggleSettings setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
@@ -32,7 +32,7 @@ public final class Toggle extends UiButton {
         value = setting.defaultValue();
     }
 
-    public ToggleSetting getSetting() {
+    public CoreToggleSettings getSetting() {
         return setting;
     }
 
@@ -44,8 +44,8 @@ public final class Toggle extends UiButton {
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
 
-        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0F;
-        float rimThickness = FloatSetting.RIM_THICKNESS.value() * guiSize * getRimThicknessMultiplier();
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
+        float rimThickness = CoreFloatSettings.RIM_THICKNESS.value() * guiSize * getRimThicknessMultiplier();
         float thicknessX = rimThickness / (size.x * Window.getAspectRatio());
 
         position = new Vector2f(position).add((0.6F - thicknessX) * size.x, 0.15F * size.y);
@@ -69,5 +69,5 @@ public final class Toggle extends UiButton {
     }
 
     private boolean value;
-    private final ToggleSetting setting;
+    private final CoreToggleSettings setting;
 }

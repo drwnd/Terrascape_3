@@ -4,7 +4,7 @@ import core.assets.*;
 import core.assets.identifiers.AssetIdentifier;
 import core.assets.identifiers.TextureArrayIdentifier;
 import core.assets.identifiers.TextureIdentifier;
-import core.settings.OptionSetting;
+import core.settings.CoreOptionSettings;
 import core.utils.FileIndexSet;
 import core.utils.FileManager;
 import game.player.rendering.ObjectLoader;
@@ -24,12 +24,12 @@ public final class TexturePack implements Option {
 
 
     public static AssetIdentifier<Texture> get(TextureIdentifier identifier) {
-        TexturePack texturePack = (TexturePack) OptionSetting.TEXTURE_PACK.value();
+        TexturePack texturePack = (TexturePack) CoreOptionSettings.TEXTURE_PACK.value();
         return new TextureAssetIdentifier(identifier.fileName(), texturePack.pathTemplate);
     }
 
     public static AssetIdentifier<TextureArray> get(TextureArrayIdentifier identifier) {
-        TexturePack texturePack = (TexturePack) OptionSetting.TEXTURE_PACK.value();
+        TexturePack texturePack = (TexturePack) CoreOptionSettings.TEXTURE_PACK.value();
         return new TextureArrayAssetIdentifier(identifier.folderName(), texturePack.pathTemplate, identifier.indexSet());
     }
 

@@ -1,7 +1,7 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.KeySetting;
+import core.settings.CoreKeySettings;
 
 import game.utils.Position;
 import game.utils.Utils;
@@ -15,9 +15,9 @@ public final class WalkingState extends MovementState {
 
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
-        if (Input.isKeyPressed(KeySetting.SNEAK)) next = new SneakingState();
-        if (Input.isKeyPressed(KeySetting.CRAWL)) next = new CrawlingState();
-        if (Input.isKeyPressed(KeySetting.SPRINT) && Input.isKeyPressed(KeySetting.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
+        if (Input.isKeyPressed(CoreKeySettings.SNEAK)) next = new SneakingState();
+        if (Input.isKeyPressed(CoreKeySettings.CRAWL)) next = new CrawlingState();
+        if (Input.isKeyPressed(CoreKeySettings.SPRINT) && Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
@@ -25,9 +25,9 @@ public final class WalkingState extends MovementState {
 
         applyXZMovement(velocityChange, speed, SPRINT_SPEED_MODIFIER);
 
-        if (Input.isKeyPressed(KeySetting.JUMP)) {
+        if (Input.isKeyPressed(CoreKeySettings.JUMP)) {
             handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
-            if (Input.isKeyPressed(KeySetting.MOVE_FORWARD) && Input.isKeyPressed(KeySetting.SPRINT) && movement.isGrounded())
+            if (Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD) && Input.isKeyPressed(CoreKeySettings.SPRINT) && movement.isGrounded())
                 velocityChange.x += JUMP_SPEED_GAIN;
         }
 
@@ -39,7 +39,7 @@ public final class WalkingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == KeySetting.JUMP.keybind() && action == GLFW_PRESS) {
+        if (key == CoreKeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

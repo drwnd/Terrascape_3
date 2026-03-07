@@ -1,8 +1,8 @@
 package game.player;
 
 import core.rendering_api.Window;
-import core.settings.KeySetting;
-import core.settings.ToggleSetting;
+import core.settings.CoreKeySettings;
+import core.settings.CoreToggleSettings;
 
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.InteractionHandler;
@@ -86,13 +86,13 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveKeyInput(int button, int action) {
-        if (button == KeySetting.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
-        if (button == KeySetting.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
-        if (button == KeySetting.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
-        if (button == KeySetting.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
+        if (button == CoreKeySettings.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
+        if (button == CoreKeySettings.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
+        if (button == CoreKeySettings.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
+        if (button == CoreKeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
-        if (button == KeySetting.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySetting.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == CoreKeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
+        if (button == CoreKeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {
@@ -102,7 +102,7 @@ public final class Player {
             return;
         }
 
-        if (ToggleSetting.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
+        if (CoreToggleSettings.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
     }
 
 

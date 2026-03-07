@@ -5,7 +5,7 @@ import core.assets.GuiElement;
 import core.assets.identifiers.ShaderIdentifier;
 import core.assets.Texture;
 import core.assets.CoreGuiElements;
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import org.joml.Vector2f;
 
@@ -31,7 +31,7 @@ public final class GuiShader extends Shader {
     }
 
     public void drawQuad(Vector2f position, Vector2f size, Texture texture) {
-        drawQuadCustomScale(position, size, texture, FloatSetting.GUI_SIZE.value());
+        drawQuadCustomScale(position, size, texture, CoreFloatSettings.GUI_SIZE.value());
     }
 
     public void drawQuadNoGuiScale(Vector2f position, Vector2f size, Texture texture) {

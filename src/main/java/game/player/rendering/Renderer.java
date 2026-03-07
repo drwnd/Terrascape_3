@@ -10,9 +10,9 @@ import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
 import core.rendering_api.shaders.TextShader;
-import core.settings.FloatSetting;
-import core.settings.OptionSetting;
-import core.settings.ToggleSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreOptionSettings;
+import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.TexturePack;
 
@@ -72,7 +72,7 @@ public final class Renderer extends Renderable {
 
     public static float getRenderTime() {
         Server server = Game.getServer();
-        float renderTime = server.getDayTime() + FloatSetting.TIME_SPEED.value() * server.getCurrentGameTickFraction();
+        float renderTime = server.getDayTime() + CoreFloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
         if (renderTime > 1.0F) renderTime -= 2.0F;
         return renderTime;
     }
@@ -90,7 +90,7 @@ public final class Renderer extends Renderable {
 
         shader.setUniform("textures", 0);
         shader.setUniform("propertiesTextures", 1);
-        shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
+        shader.setUniform("nightBrightness", CoreFloatSettings.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
@@ -114,7 +114,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
-        shader.setUniform("nightBrightness", FloatSetting.NIGHT_BRIGHTNESS.value());
+        shader.setUniform("nightBrightness", CoreFloatSettings.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
@@ -171,8 +171,8 @@ public final class Renderer extends Renderable {
         Matrix4f sunMatrix = Transformation.getSunMatrix(getRenderTime());
         Position cameraPosition = player.getCamera().getPosition();
 
-        if (ToggleSetting.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
-        if (ToggleSetting.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
+        if (CoreToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        if (CoreToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
 
         setupRenderState();
 
@@ -183,7 +183,7 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (ToggleSetting.USE_AMBIENT_OCCLUSION.value()) {
+        if (CoreToggleSettings.USE_AMBIENT_OCCLUSION.value()) {
             glBindFramebuffer(GL_FRAMEBUFFER, ssaoFramebuffer);
             glClear(GL_COLOR_BUFFER_BIT);
             glDisable(GL_STENCIL_TEST);
@@ -208,11 +208,11 @@ public final class Renderer extends Renderable {
                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        if (ToggleSetting.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
-        if (ToggleSetting.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
-        if (ToggleSetting.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
-        if (ToggleSetting.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
-        if (ToggleSetting.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
+        if (CoreToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
+        if (CoreToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
+        if (CoreToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
+        if (CoreToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
+        if (CoreToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
 
         renderChat();
         renderDebugInfo();
@@ -335,13 +335,13 @@ public final class Renderer extends Renderable {
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glDisable(GL_STENCIL_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, ToggleSetting.X_RAY.value() ? GL_LINE : GL_FILL);
-        if (vSync != ToggleSetting.V_SYNC.value()) {
-            vSync = ToggleSetting.V_SYNC.value();
+        glPolygonMode(GL_FRONT_AND_BACK, CoreToggleSettings.X_RAY.value() ? GL_LINE : GL_FILL);
+        if (vSync != CoreToggleSettings.V_SYNC.value()) {
+            vSync = CoreToggleSettings.V_SYNC.value();
             glfwSwapInterval(vSync ? 1 : 0);
         }
 
-        float crosshairSize = FloatSetting.CROSSHAIR_SIZE.value();
+        float crosshairSize = CoreFloatSettings.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
         crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
@@ -383,7 +383,7 @@ public final class Renderer extends Renderable {
         glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         glDepthMask(true);
 
-        if (ToggleSetting.CHUNKS_CAST_SHADOWS.value()) {
+        if (CoreToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.CHUNK_SHADOW);
             shader.bind();
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
@@ -406,7 +406,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (ToggleSetting.PARTICLES_CAST_SHADOWS.value()) {
+        if (CoreToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.PARTICLE_SHADOW);
             shader.bind();
@@ -428,7 +428,7 @@ public final class Renderer extends Renderable {
         glColorMask(true, true, true, true);
         glDepthMask(false);
 
-        if (ToggleSetting.GLASS_CASTS_SHADOWS.value() && ToggleSetting.CHUNKS_CAST_SHADOWS.value()) {
+        if (CoreToggleSettings.GLASS_CASTS_SHADOWS.value() && CoreToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.GLASS);
             shader.bind();
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
@@ -452,7 +452,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (ToggleSetting.GLASS_CASTS_SHADOWS.value() && ToggleSetting.PARTICLES_CAST_SHADOWS.value()) {
+        if (CoreToggleSettings.GLASS_CASTS_SHADOWS.value() && CoreToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             shader.bind();
@@ -526,7 +526,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
-        shader.setUniform("samples", (int) FloatSetting.AMBIENT_OCCLUSION_SAMPLES.value());
+        shader.setUniform("samples", (int) CoreFloatSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -666,12 +666,12 @@ public final class Renderer extends Renderable {
         long currentTime = System.nanoTime();
 
         ChatTextField chatTextField = firstChildOf(ChatTextField.class);
-        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         Vector2f position = new Vector2f();
         TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         shader.bind();
-        float lineSeparation = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
-        float chatMessageDuration = FloatSetting.CHAT_MESSAGE_DURATION.value();
+        float lineSeparation = defaultTextSize.y * CoreFloatSettings.TEXT_SIZE.value();
+        float chatMessageDuration = CoreFloatSettings.CHAT_MESSAGE_DURATION.value();
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
         float scroll = chatTextField == null ? 0.0F : chatTextField.getInput().getScroll();
 
@@ -702,13 +702,13 @@ public final class Renderer extends Renderable {
     }
 
     private void renderDebugInfo() {
-        boolean debugScreenOpen = ToggleSetting.DEBUG_MENU.value();
+        boolean debugScreenOpen = CoreToggleSettings.DEBUG_MENU.value();
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = (int) CoreFloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
@@ -727,7 +727,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) FloatSetting.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = (int) CoreFloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
@@ -789,13 +789,13 @@ public final class Renderer extends Renderable {
 
     private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
-        boolean useShadowMapping = ToggleSetting.USE_SHADOW_MAPPING.value();
-        boolean doGlassShadows = ToggleSetting.GLASS_CASTS_SHADOWS.value();
+        boolean useShadowMapping = CoreToggleSettings.USE_SHADOW_MAPPING.value();
+        boolean doGlassShadows = CoreToggleSettings.GLASS_CASTS_SHADOWS.value();
         return (doGlassShadows ? DO_GLASS_SHADOWS_BIT : 0) | (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);
     }
 
     private static Vector3f getSunDirection(float renderTime) {
-        final float downwardsSunPart = FloatSetting.DOWNWARD_SUN_DIRECTION.value();
+        final float downwardsSunPart = CoreFloatSettings.DOWNWARD_SUN_DIRECTION.value();
         final float normalizer = (float) Math.sqrt(1 - downwardsSunPart * downwardsSunPart);
 
         float alpha = (float) (renderTime * Math.PI);

@@ -3,10 +3,10 @@ package core.rendering_api;
 import core.assets.AssetManager;
 import core.languages.Language;
 import core.renderables.TextFieldInput;
-import core.settings.KeySetting;
-import core.settings.OptionSetting;
+import core.settings.CoreKeySettings;
+import core.settings.CoreOptionSettings;
 import core.settings.Settings;
-import core.settings.ToggleSetting;
+import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.FontOption;
 
 public final class StandardWindowInput extends Input {
@@ -33,11 +33,11 @@ public final class StandardWindowInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (Input.isKeyPressed(KeySetting.RESIZE_WINDOW)) Window.toggleFullScreen();
-        if (Input.isKeyPressed(KeySetting.RELOAD_ASSETS)) AssetManager.reload();
-        if (Input.isKeyPressed(KeySetting.RELOAD_SETTINGS)) Settings.loadFromFile();
-        if (Input.isKeyPressed(KeySetting.RELOAD_LANGUAGE)) ((Language) OptionSetting.LANGUAGE.value()).load();
-        if (Input.isKeyPressed(KeySetting.RELOAD_FONT)) ((FontOption) OptionSetting.FONT.value()).load();
+        if (Input.isKeyPressed(CoreKeySettings.RESIZE_WINDOW)) Window.toggleFullScreen();
+        if (Input.isKeyPressed(CoreKeySettings.RELOAD_ASSETS)) AssetManager.reload();
+        if (Input.isKeyPressed(CoreKeySettings.RELOAD_SETTINGS)) Settings.loadFromFile();
+        if (Input.isKeyPressed(CoreKeySettings.RELOAD_LANGUAGE)) ((Language) CoreOptionSettings.LANGUAGE.value()).load();
+        if (Input.isKeyPressed(CoreKeySettings.RELOAD_FONT)) ((FontOption) CoreOptionSettings.FONT.value()).load();
 
         if (!(Window.getInput() instanceof TextFieldInput)) handleToggleKeybinds();
     }
@@ -49,7 +49,7 @@ public final class StandardWindowInput extends Input {
 
     private static void handleToggleKeybinds() {
         boolean settingUpdated = false;
-        for (ToggleSetting setting : ToggleSetting.values()) {
+        for (CoreToggleSettings setting : CoreToggleSettings.values()) {
             if (Input.isKeyPressed(setting)) Settings.update(setting, !setting.value());
             settingUpdated = true;
         }

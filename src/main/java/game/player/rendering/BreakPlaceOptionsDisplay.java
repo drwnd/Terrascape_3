@@ -3,8 +3,8 @@ package game.player.rendering;
 import core.renderables.TextElement;
 import core.renderables.UiBackgroundElement;
 import core.rendering_api.shaders.TextShader;
-import core.settings.FloatSetting;
-import core.settings.OptionSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
 
 import game.player.Hotbar;
@@ -27,10 +27,10 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
     public void renderSelf(Vector2f position, Vector2f size) {
         breakPlaceSize.setText("%s³ Voxel ".formatted(1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize()));
 
-        float hotbarSize = FloatSetting.HOTBAR_SIZE.value();
-        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        float hotbarSize = CoreFloatSettings.HOTBAR_SIZE.value();
+        Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         float charWidth = defaultTextSize.x;
-        float charHeight = defaultTextSize.y * FloatSetting.TEXT_SIZE.value();
+        float charHeight = defaultTextSize.y * CoreFloatSettings.TEXT_SIZE.value();
         float textLength = TextShader.getTextLength(breakPlaceSize.getText(), charWidth, scalesWithGuiSize());
 
         setOffsetToParent(0.5f + hotbarSize * Hotbar.LENGTH * 0.5f, 0);

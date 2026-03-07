@@ -4,8 +4,8 @@ import core.assets.AssetManager;
 import core.assets.CoreShaders;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.TextShader;
-import core.settings.FloatSetting;
-import core.settings.OptionSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
 import core.utils.Message;
 import core.utils.StringGetter;
@@ -40,11 +40,11 @@ public final class TextElement extends Renderable {
 
     @Override
     protected void renderSelf(Vector2f position, Vector2f size) {
-        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         String text = this.text.get();
 
-        float textSize = FloatSetting.TEXT_SIZE.value();
-        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0f;
+        float textSize = CoreFloatSettings.TEXT_SIZE.value();
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0f;
         float charWidth = Window.getWidth() * defaultTextSize.x * textSize;
         float charHeight = Window.getHeight() * defaultTextSize.y * textSize;
 
@@ -60,7 +60,7 @@ public final class TextElement extends Renderable {
     }
 
     public float getLength() {
-        Vector2f defaultTextSize = ((FontOption) OptionSetting.FONT.value()).getDefaultTextSize();
+        Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         return TextShader.getTextLength(text.get(), defaultTextSize.x, scalesWithGuiSize());
     }
 

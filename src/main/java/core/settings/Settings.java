@@ -7,7 +7,7 @@ import java.io.*;
 
 public final class Settings {
 
-    public static void update(FloatSetting setting, float value) {
+    public static void update(CoreFloatSettings setting, float value) {
         setting.setValue(value);
     }
 
@@ -15,11 +15,11 @@ public final class Settings {
         setting.setKeybind(value);
     }
 
-    public static void update(ToggleSetting setting, boolean value) {
+    public static void update(CoreToggleSettings setting, boolean value) {
         setting.setValue(value);
     }
 
-    public static void update(OptionSetting setting, Option value) {
+    public static void update(CoreOptionSettings setting, Option value) {
         setting.setValue(value);
     }
 
@@ -32,10 +32,10 @@ public final class Settings {
             if (tokens.length != 2) continue;
             String name = tokens[0], value = tokens[1];
 
-            FloatSetting.setIfPresent(name, value);
-            KeySetting.setIfPresent(name, value);
-            ToggleSetting.setIfPresent(name, value);
-            OptionSetting.setIfPresent(name, value);
+            CoreFloatSettings.setIfPresent(name, value);
+            CoreKeySettings.setIfPresent(name, value);
+            CoreToggleSettings.setIfPresent(name, value);
+            CoreOptionSettings.setIfPresent(name, value);
         }
     }
 
@@ -44,10 +44,10 @@ public final class Settings {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()));
 
-            for (FloatSetting setting : FloatSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
-            for (KeySetting setting : KeySetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.keybind()));
-            for (ToggleSetting setting : ToggleSetting.values()) writer.write("%s:%s_%s%n".formatted(setting.name(), setting.value(), setting.keybind()));
-            for (OptionSetting setting : OptionSetting.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
+            for (CoreFloatSettings setting : CoreFloatSettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
+            for (CoreKeySettings setting : CoreKeySettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.keybind()));
+            for (CoreToggleSettings setting : CoreToggleSettings.values()) writer.write("%s:%s_%s%n".formatted(setting.name(), setting.value(), setting.keybind()));
+            for (CoreOptionSettings setting : CoreOptionSettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
 
             writer.close();
 
@@ -58,10 +58,10 @@ public final class Settings {
     }
 
     public static Enum<?> getSettingWithName(String name) {
-        for (Enum<?> setting : FloatSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : KeySetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : ToggleSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : OptionSetting.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : CoreFloatSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : CoreKeySettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : CoreToggleSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+        for (Enum<?> setting : CoreOptionSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
         return null;
     }
 

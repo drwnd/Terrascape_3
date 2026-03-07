@@ -2,7 +2,7 @@ package game.player;
 
 import core.rendering_api.Input;
 import core.rendering_api.Window;
-import core.settings.ToggleSetting;
+import core.settings.CoreToggleSettings;
 
 import game.menus.PauseMenu;
 import game.server.Game;
@@ -18,7 +18,7 @@ public final class PlayerInput extends Input {
         lastCursorPos.set(cursorPos);
         glfwSetInputMode(Window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         if (glfwRawMouseMotionSupported()) {
-            if (ToggleSetting.RAW_MOUSE_INPUT.value())
+            if (CoreToggleSettings.RAW_MOUSE_INPUT.value())
                 glfwSetInputMode(Window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
             else
                 glfwSetInputMode(Window.getWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);

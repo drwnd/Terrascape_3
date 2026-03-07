@@ -1,7 +1,7 @@
 package game.player.rendering;
 
 import core.rendering_api.Window;
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import game.utils.Position;
 import game.utils.Utils;
@@ -24,7 +24,7 @@ public final class Camera {
     public void updateProjectionMatrix() {
         projectionMatrix
                 .identity()
-                .setPerspective((float) Math.toRadians(FloatSetting.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
+                .setPerspective((float) Math.toRadians(CoreFloatSettings.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
     }
 
     public Vector3f getDirection() {
@@ -44,7 +44,7 @@ public final class Camera {
     }
 
     public void rotate(Vector2i cursorMovement) {
-        float sensitivityFactor = FloatSetting.SENSITIVITY.value() * 0.6F + 0.2F;
+        float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 1.2F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;

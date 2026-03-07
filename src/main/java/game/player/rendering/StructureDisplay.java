@@ -4,7 +4,7 @@ import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
-import core.settings.FloatSetting;
+import core.settings.CoreFloatSettings;
 
 import game.assets.Shaders;
 import game.server.generation.Structure;
@@ -36,7 +36,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     public void rotate(Vector2i cursorMovement) {
-        float sensitivityFactor = FloatSetting.SENSITIVITY.value() * 0.6F + 0.2F;
+        float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 5.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;
@@ -50,7 +50,7 @@ public final class StructureDisplay extends Renderable {
 
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
-        float guiSize = scalesWithGuiSize() ? FloatSetting.GUI_SIZE.value() : 1.0F;
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
         Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ, zoom, rotation);
         glViewport(
                 (int) ((position.x + size.x * 0.5F * (1.0F - guiSize)) * Window.getWidth()),

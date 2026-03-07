@@ -1,6 +1,6 @@
 package core.languages;
 
-import core.settings.OptionSetting;
+import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
@@ -43,11 +43,11 @@ public final class Language implements Option {
 
 
     public static String getMaterialName(byte material) {
-        return ((Language) OptionSetting.LANGUAGE.value()).getLanguagesMaterialName(material);
+        return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesMaterialName(material);
     }
 
     public static String getUiMessage(UiMessage message) {
-        return ((Language) OptionSetting.LANGUAGE.value()).getLanguagesUiMessage(message);
+        return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesUiMessage(message);
     }
 
 

@@ -2,8 +2,8 @@ package game.server;
 
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
-import core.settings.FloatSetting;
-import core.settings.ToggleSetting;
+import core.settings.CoreFloatSettings;
+import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.ColorOption;
 
 import game.player.Player;
@@ -108,7 +108,7 @@ public final class Server implements CrashCallback {
         placeable.offsetPosition(position);
 
         Player player = Game.getPlayer();
-        if (!ToggleSetting.NO_CLIP.value() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
+        if (!CoreToggleSettings.NO_CLIP.value() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
 
         if (placeable instanceof CubePlaceable cubePlaceable) {
             int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
@@ -227,16 +227,16 @@ public final class Server implements CrashCallback {
         }
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
-            if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSetting.CULLING_COMPUTATION.value()) {
+            if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && CoreToggleSettings.CULLING_COMPUTATION.value()) {
                 generator.restart();
                 generatorRestartScheduled = false;
             }
         }
-        removeOldChatMessages((int) FloatSetting.MAX_CHAT_MESSAGE_COUNT.value());
+        removeOldChatMessages((int) CoreFloatSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
     private void incrementTime() {
-        dayTime += FloatSetting.TIME_SPEED.value();
+        dayTime += CoreFloatSettings.TIME_SPEED.value();
         if (dayTime > 1.0F) dayTime -= 2.0F;
     }
 
