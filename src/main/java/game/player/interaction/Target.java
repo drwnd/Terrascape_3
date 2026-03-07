@@ -3,7 +3,7 @@ package game.player.interaction;
 import game.server.Game;
 import game.server.material.Material;
 import game.server.material.Properties;
-import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -47,7 +47,7 @@ public record Target(Vector3i position, int side, byte material) {
         double length = 0;
 
         int intersectedSide = 0;
-        float reach = FloatSettings.REACH.value();
+        float reach = IntSettings.REACH.value();
         while (length < reach) {
 
             byte material = Game.getWorld().getMaterial(x, y, z, 0);

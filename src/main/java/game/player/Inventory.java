@@ -18,6 +18,7 @@ import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.settings.KeySettings;
 
 import org.joml.Vector2f;
@@ -114,7 +115,7 @@ public final class Inventory extends UiElement {
 
     private void updateDisplayPositions() {
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
-        int itemsPerRow = (int) FloatSettings.INVENTORY_ITEMS_PER_ROW.value();
+        int itemsPerRow = IntSettings.INVENTORY_ITEMS_PER_ROW.value();
 
         Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio());
 

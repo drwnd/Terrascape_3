@@ -39,7 +39,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     public void scrollSettingButtons(float scroll) {
         Vector2f offset = new Vector2f(0, scroll);
 
-        for (Slider slider : sliders) slider.move(offset);
+        for (Slider<? extends Number> slider : sliders) slider.move(offset);
         for (KeySelector keySelector : keySelectors) keySelector.move(offset);
         for (Toggle toggle : toggles) toggle.move(offset);
         for (OptionToggle option : options) option.move(offset);
@@ -48,7 +48,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         for (Renderable renderable : movingRenderables) renderable.move(offset);
     }
 
-    public void setSelectedSlider(Slider slider) {
+    public void setSelectedSlider(Slider<? extends Number> slider) {
         this.selectedSlider = slider;
     }
 
@@ -60,12 +60,12 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Window.popRenderable();
     }
 
-    public void addSlider(FloatSetting setting, StringGetter settingName) {
+    public <T extends Number> void addSlider(NumberSetting<T> setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
-        Slider slider = new Slider(sizeToParent, offsetToParent, setting, settingName);
+        Slider<T> slider = new Slider<>(sizeToParent, offsetToParent, setting, settingName);
         addRenderable(slider);
         sliders.add(slider);
 
@@ -170,7 +170,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return;
 
-            for (Slider slider : sliders) Settings.update(slider.getSetting(), slider.getValue());
+            for (Slider<? extends Number> slider : sliders) Settings.update(slider.getSetting(), slider.getValue());
             for (KeySelector keySelector : keySelectors) Settings.update(keySelector.getSetting(), keySelector.getValue());
             for (Toggle toggle : toggles) Settings.update(toggle.getSetting(), toggle.getValue());
             for (OptionToggle option : options) Settings.update(option.getSetting(), option.getValue());
@@ -191,7 +191,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return;
 
-            for (Slider slider : sliders) slider.matchSetting();
+            for (Slider<? extends Number> slider : sliders) slider.matchSetting();
             for (KeySelector keySelector : keySelectors) keySelector.matchSetting();
             for (Toggle toggle : toggles) toggle.matchSetting();
             for (OptionToggle option : options) option.matchSetting();
@@ -201,10 +201,10 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
     protected int settingsCount = 0;
-    private Slider selectedSlider;
+    private Slider<? extends Number> selectedSlider;
     private SettingsRenderableInput input;
 
-    protected final ArrayList<Slider> sliders = new ArrayList<>();
+    protected final ArrayList<Slider<? extends Number>> sliders = new ArrayList<>();
     protected final ArrayList<KeySelector> keySelectors = new ArrayList<>();
     protected final ArrayList<Toggle> toggles = new ArrayList<>();
     protected final ArrayList<OptionToggle> options = new ArrayList<>();

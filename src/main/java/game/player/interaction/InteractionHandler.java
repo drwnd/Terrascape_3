@@ -3,7 +3,7 @@ package game.player.interaction;
 import core.rendering_api.Input;
 
 import game.server.Game;
-import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.settings.KeySettings;
 
 import org.joml.Vector3i;
@@ -55,7 +55,7 @@ public final class InteractionHandler {
 
     private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
-        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < FloatSettings.BREAK_PLACE_INTERVALL.value())) return;
+        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
 
         Target target = Target.getPlayerTarget();

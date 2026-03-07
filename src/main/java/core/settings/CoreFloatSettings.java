@@ -37,14 +37,14 @@ public enum CoreFloatSettings implements FloatSetting {
     }
 
     @Override
-    public float valueFromFraction(float fraction) {
+    public Float valueFromFraction(float fraction) {
         float unroundedValue = min + fraction * (max - min);
         float roundingOffset = MathUtils.absMin(-(unroundedValue % accuracy), accuracy - unroundedValue % accuracy);
         return unroundedValue + roundingOffset;
     }
 
     @Override
-    public float fractionFromValue(float value) {
+    public float fractionFromValue(Float value) {
         return (value - min) / (max - min);
     }
 

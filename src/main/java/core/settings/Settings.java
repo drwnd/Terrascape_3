@@ -22,6 +22,10 @@ public final class Settings {
         setting.setValue(value);
     }
 
+    public static void update(IntSetting setting, int value) {
+        setting.setValue(value);
+    }
+
     public static void update(KeySetting setting, int value) {
         setting.setKeybind(value);
     }
@@ -32,6 +36,14 @@ public final class Settings {
 
     public static void update(OptionSetting setting, Option value) {
         setting.setValue(value);
+    }
+
+    public static <T extends Number> void update(NumberSetting<T> setting, Number value) {
+        switch (value) {
+            case Integer intValue -> update((IntSetting) setting, (int) intValue);
+            case Float floatValue -> update((FloatSetting) setting, (float) floatValue);
+            default -> throw new IllegalStateException("Unexpected value: " + value);
+        }
     }
 
     public static void loadFromFile() {

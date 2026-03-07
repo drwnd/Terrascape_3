@@ -15,6 +15,7 @@ import game.server.command.CommandResult;
 import game.server.generation.ChunkGenerator;
 import game.server.saving.ChunkSaver;
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Utils;
@@ -232,7 +233,7 @@ public final class Server implements CrashCallback {
                 generatorRestartScheduled = false;
             }
         }
-        removeOldChatMessages((int) FloatSettings.MAX_CHAT_MESSAGE_COUNT.value());
+        removeOldChatMessages(IntSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
     private void incrementTime() {

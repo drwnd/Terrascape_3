@@ -1,10 +1,10 @@
 package core.settings;
 
-public interface FloatSetting extends Setting, NumberSetting<Float> {
+public interface IntSetting extends Setting, NumberSetting<Integer> {
 
     default boolean setIfPresent(String name, String value) {
         if (!name().equalsIgnoreCase(name)) return false;
-        setValue(Float.parseFloat(value));
+        setValue(Integer.parseInt(value));
         return true;
     }
 
@@ -12,19 +12,19 @@ public interface FloatSetting extends Setting, NumberSetting<Float> {
         return String.valueOf(value());
     }
 
-    void setValue(float value);
+    void setValue(int value);
 
-    float value();
+    int value();
 
-    float defaultValue();
+    int defaultValue();
 
     @Override
-    default Float valueGeneric() {
+    default Integer valueGeneric() {
         return value();
     }
 
     @Override
-    default Float defaultValueGeneric() {
+    default Integer defaultValueGeneric() {
         return defaultValue();
     }
 }

@@ -31,6 +31,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.Server;
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Transformation;
@@ -528,7 +529,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
-        shader.setUniform("samples", (int) FloatSettings.AMBIENT_OCCLUSION_SAMPLES.value());
+        shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -710,7 +711,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) FloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
@@ -729,7 +730,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) FloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);

@@ -1,7 +1,7 @@
 package core.renderables;
 
 import core.rendering_api.Window;
-import core.settings.FloatSetting;
+import core.settings.NumberSetting;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -9,9 +9,9 @@ import org.joml.Vector2i;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public final class Slider extends UiButton {
+public final class Slider<T extends Number> extends UiButton {
 
-    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, FloatSetting setting, StringGetter settingName) {
+    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(this::action);
         setAllowFocusScaling(false);
@@ -28,18 +28,18 @@ public final class Slider extends UiButton {
     }
 
     public void setToDefault() {
-        setValue(setting.defaultValue());
+        setValue(setting.defaultValueGeneric());
     }
 
-    public FloatSetting getSetting() {
+    public NumberSetting<T> getSetting() {
         return setting;
     }
 
-    public float getValue() {
+    public Number getValue() {
         return value;
     }
 
-    public void setValue(float value) {
+    public void setValue(T value) {
         this.value = value;
         textElement.setText("%s %s".formatted(settingName.get(), value));
         slider.setOffsetToParent(setting.fractionFromValue(value) - slider.getSizeToParent().x * 0.5F, 0.0F);
@@ -51,7 +51,7 @@ public final class Slider extends UiButton {
     }
 
     public void matchSetting() {
-        setValue(setting.value());
+        setValue(setting.valueGeneric());
     }
 
 
@@ -68,9 +68,9 @@ public final class Slider extends UiButton {
             ((CoreSettingsRenderable) getParent()).setSelectedSlider(this);
     }
 
-    private final FloatSetting setting;
+    private final NumberSetting<T> setting;
     private final UiBackgroundElement slider;
     private final TextElement textElement;
     private final StringGetter settingName;
-    private float value;
+    private Number value;
 }

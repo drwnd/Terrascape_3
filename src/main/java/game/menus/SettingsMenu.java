@@ -1,9 +1,6 @@
 package game.menus;
 
-import core.settings.CoreFloatSettings;
-import core.settings.CoreKeySettings;
-import core.settings.CoreOptionSettings;
-import core.settings.CoreToggleSettings;
+import core.settings.*;
 import core.utils.Message;
 import core.utils.StringGetter;
 import core.languages.UiMessage;
@@ -13,6 +10,7 @@ import core.rendering_api.Window;
 import game.player.rendering.DebugScreenLine;
 
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
 import org.joml.Vector2f;
@@ -99,11 +97,11 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(FloatSettings.FOV, UiMessage.FOV);
+        section.addSlider(IntSettings.FOV, UiMessage.FOV);
         section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessage.CROSSHAIR_SIZE);
         section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessage.HOTBAR_SIZE);
         section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
-        section.addSlider(FloatSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
 
         section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
         section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessage.CHUNKS_CAST_SHADOWS);
@@ -130,11 +128,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(CoreFloatSettings.TEXT_SIZE, UiMessage.TEXT_SIZE);
         section.addSlider(CoreFloatSettings.RIM_THICKNESS, UiMessage.RIM_THICKNESS);
         section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, UiMessage.CHAT_MESSAGE_DURATION);
-        section.addSlider(FloatSettings.MAX_CHAT_MESSAGE_COUNT, UiMessage.MAX_CHAT_MESSAGE_COUNT);
+        section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT, UiMessage.MAX_CHAT_MESSAGE_COUNT);
         section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessage.HOTBAR_INDICATOR_SCALER);
         section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessage.PAUSE_MENU_BACKGROUND_BLUR);
         section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, UiMessage.INVENTORY_ITEM_SIZE);
-        section.addSlider(FloatSettings.INVENTORY_ITEMS_PER_ROW, UiMessage.INVENTORY_ITEMS_PER_ROW);
+        section.addSlider(IntSettings.INVENTORY_ITEMS_PER_ROW, UiMessage.INVENTORY_ITEMS_PER_ROW);
         section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, UiMessage.INVENTORY_ITEM_SCALING);
 
         return section;
@@ -176,11 +174,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
         section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
 
-        section.addSlider(FloatSettings.REACH, new Message("Reach"));
-        section.addSlider(FloatSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
+        section.addSlider(IntSettings.REACH, new Message("Reach"));
+        section.addSlider(IntSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
         section.addSlider(FloatSettings.TIME_SPEED, new Message("Time Speed"));
         section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
-        section.addSlider(FloatSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
+        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
 
         return section;
     }
