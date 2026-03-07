@@ -1,11 +1,11 @@
 package game.player.movement;
 
-import core.settings.CoreToggleSettings;
 import core.utils.MathUtils;
 
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
+import game.settings.ToggleSettings;
 import game.utils.Position;
 
 import org.joml.Vector3d;
@@ -31,7 +31,7 @@ public final class Movement {
         velocity.set(move(position));
         renderVelocity = position.vectorFrom(lastPosition);
 
-        if (CoreToggleSettings.NO_CLIP.value() || !collides(position, state.next)) state = state.next;
+        if (ToggleSettings.NO_CLIP.value() || !collides(position, state.next)) state = state.next;
         state.movement = this;
         return position;
     }
@@ -93,7 +93,7 @@ public final class Movement {
     }
 
     private Vector3f move(Position position) {
-        if (CoreToggleSettings.NO_CLIP.value()) {
+        if (ToggleSettings.NO_CLIP.value()) {
             position.add(velocity.x, velocity.y, velocity.z);
             return velocity;
         }

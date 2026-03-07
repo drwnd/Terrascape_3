@@ -3,12 +3,12 @@ package game.player.rendering;
 import core.assets.AssetManager;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
-import core.settings.CoreToggleSettings;
 import core.utils.IntArrayList;
 
 import game.assets.Shaders;
 import game.player.Player;
 import game.server.Game;
+import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -84,7 +84,7 @@ public final class RenderingOptimizer {
         opaqueCommands.clear();
         waterCommands.clear();
         glassCommands.clear();
-        if (CoreToggleSettings.USE_OCCLUSION_CULLING.value())
+        if (ToggleSettings.USE_OCCLUSION_CULLING.value())
             generateIndirectCommandsWithOcclusionCulling(cameraPosition, projectionViewMatrix);
         else generateIndirectCommandsWithoutOcclusionCulling();
     }

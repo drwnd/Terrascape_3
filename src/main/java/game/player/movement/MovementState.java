@@ -1,12 +1,12 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.CoreToggleSettings;
 import core.utils.MathUtils;
 
 import game.server.Game;
 import game.server.World;
 import game.settings.KeySettings;
+import game.settings.ToggleSettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -129,7 +129,7 @@ public abstract class MovementState {
     }
 
     static float intersectedVolume(Position position, MovementState state, byte targetMaterial) {
-        if (CoreToggleSettings.NO_CLIP.value()) return 0;
+        if (ToggleSettings.NO_CLIP.value()) return 0;
 
         World world = Game.getWorld();
         Vector3i hitboxSize = state.getHitboxSize();

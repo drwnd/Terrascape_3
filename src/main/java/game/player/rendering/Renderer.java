@@ -31,6 +31,7 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.Server;
 import game.settings.FloatSettings;
+import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -172,8 +173,8 @@ public final class Renderer extends Renderable {
         Matrix4f sunMatrix = Transformation.getSunMatrix(getRenderTime());
         Position cameraPosition = player.getCamera().getPosition();
 
-        if (CoreToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
-        if (CoreToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
+        if (ToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        if (ToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
 
         setupRenderState();
 
@@ -184,7 +185,7 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (CoreToggleSettings.USE_AMBIENT_OCCLUSION.value()) {
+        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value()) {
             glBindFramebuffer(GL_FRAMEBUFFER, ssaoFramebuffer);
             glClear(GL_COLOR_BUFFER_BIT);
             glDisable(GL_STENCIL_TEST);
@@ -209,11 +210,11 @@ public final class Renderer extends Renderable {
                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        if (CoreToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
-        if (CoreToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
-        if (CoreToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
-        if (CoreToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
-        if (CoreToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
+        if (ToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
+        if (ToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
+        if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
+        if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
+        if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
 
         renderChat();
         renderDebugInfo();
@@ -336,7 +337,7 @@ public final class Renderer extends Renderable {
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glDisable(GL_STENCIL_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, CoreToggleSettings.X_RAY.value() ? GL_LINE : GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, ToggleSettings.X_RAY.value() ? GL_LINE : GL_FILL);
         if (vSync != CoreToggleSettings.V_SYNC.value()) {
             vSync = CoreToggleSettings.V_SYNC.value();
             glfwSwapInterval(vSync ? 1 : 0);
@@ -384,7 +385,7 @@ public final class Renderer extends Renderable {
         glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         glDepthMask(true);
 
-        if (CoreToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
+        if (ToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.CHUNK_SHADOW);
             shader.bind();
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
@@ -407,7 +408,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (CoreToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
+        if (ToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.PARTICLE_SHADOW);
             shader.bind();
@@ -429,7 +430,7 @@ public final class Renderer extends Renderable {
         glColorMask(true, true, true, true);
         glDepthMask(false);
 
-        if (CoreToggleSettings.GLASS_CASTS_SHADOWS.value() && CoreToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
+        if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.GLASS);
             shader.bind();
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
@@ -453,7 +454,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (CoreToggleSettings.GLASS_CASTS_SHADOWS.value() && CoreToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
+        if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             shader.bind();
@@ -703,7 +704,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderDebugInfo() {
-        boolean debugScreenOpen = CoreToggleSettings.DEBUG_MENU.value();
+        boolean debugScreenOpen = ToggleSettings.DEBUG_MENU.value();
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
@@ -790,8 +791,8 @@ public final class Renderer extends Renderable {
 
     private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
-        boolean useShadowMapping = CoreToggleSettings.USE_SHADOW_MAPPING.value();
-        boolean doGlassShadows = CoreToggleSettings.GLASS_CASTS_SHADOWS.value();
+        boolean useShadowMapping = ToggleSettings.USE_SHADOW_MAPPING.value();
+        boolean doGlassShadows = ToggleSettings.GLASS_CASTS_SHADOWS.value();
         return (doGlassShadows ? DO_GLASS_SHADOWS_BIT : 0) | (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);
     }
 

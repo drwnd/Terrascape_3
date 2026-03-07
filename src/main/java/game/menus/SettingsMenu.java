@@ -14,6 +14,7 @@ import game.player.rendering.DebugScreenLine;
 
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
+import game.settings.ToggleSettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -57,7 +58,7 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createControlsSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addToggle(CoreToggleSettings.SCROLL_HOTBAR, UiMessage.SCROLL_HOTBAR);
+        section.addToggle(ToggleSettings.SCROLL_HOTBAR, UiMessage.SCROLL_HOTBAR);
         section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT, UiMessage.RAW_MOUSE_INPUT);
 
         section.addSlider(CoreFloatSettings.SENSITIVITY, UiMessage.SENSITIVITY);
@@ -104,16 +105,16 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
         section.addSlider(FloatSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
 
-        section.addToggle(CoreToggleSettings.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
-        section.addToggle(CoreToggleSettings.CHUNKS_CAST_SHADOWS, UiMessage.CHUNKS_CAST_SHADOWS);
-        section.addToggle(CoreToggleSettings.PARTICLES_CAST_SHADOWS, UiMessage.PARTICLES_CAST_SHADOWS);
-        section.addToggle(CoreToggleSettings.GLASS_CASTS_SHADOWS, UiMessage.GLASS_CASTS_SHADOWS);
-        section.addToggle(CoreToggleSettings.USE_AMBIENT_OCCLUSION, UiMessage.USE_AMBIENT_OCCLUSION);
-        section.addToggle(CoreToggleSettings.SHOW_BREAK_PARTICLES, UiMessage.SHOW_BREAK_PARTICLES);
-        section.addToggle(CoreToggleSettings.SHOW_CUBE_PLACE_PARTICLES, UiMessage.SHOW_CUBE_PLACE_PARTICLES);
-        section.addToggle(CoreToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessage.SHOW_STRUCTURE_PLACE_PARTICLES);
-        section.addToggle(CoreToggleSettings.SHOW_SPLASH_PARTICLES, UiMessage.SHOW_SPLASH_PARTICLES);
-        section.addToggle(CoreToggleSettings.USE_OCCLUSION_CULLING, UiMessage.USE_OCCLUSION_CULLING);
+        section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
+        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessage.CHUNKS_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS, UiMessage.PARTICLES_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS, UiMessage.GLASS_CASTS_SHADOWS);
+        section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION, UiMessage.USE_AMBIENT_OCCLUSION);
+        section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES, UiMessage.SHOW_BREAK_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_CUBE_PLACE_PARTICLES, UiMessage.SHOW_CUBE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessage.SHOW_STRUCTURE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, UiMessage.SHOW_SPLASH_PARTICLES);
+        section.addToggle(ToggleSettings.USE_OCCLUSION_CULLING, UiMessage.USE_OCCLUSION_CULLING);
 
         return section;
     }
@@ -164,16 +165,16 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySettings.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));
         section.addKeySelector(KeySettings.START_COMMAND, new Message("Start Command"));
 
-        section.addToggle(CoreToggleSettings.DEBUG_MENU, new Message("Open Debug Screen"));
-        section.addToggle(CoreToggleSettings.NO_CLIP, new Message("No-Clip"));
-        section.addToggle(CoreToggleSettings.CULLING_COMPUTATION, new Message("Culling Computation"));
-        section.addToggle(CoreToggleSettings.X_RAY, new Message("X-Ray"));
+        section.addToggle(ToggleSettings.DEBUG_MENU, new Message("Open Debug Screen"));
+        section.addToggle(ToggleSettings.NO_CLIP, new Message("No-Clip"));
+        section.addToggle(ToggleSettings.CULLING_COMPUTATION, new Message("Culling Computation"));
+        section.addToggle(ToggleSettings.X_RAY, new Message("X-Ray"));
         section.addToggle(CoreToggleSettings.V_SYNC, new Message("Use V-Sync"));
-        section.addToggle(CoreToggleSettings.RENDER_OCCLUDERS, new Message("Render Occluders"));
-        section.addToggle(CoreToggleSettings.RENDER_OCCLUDEES, new Message("Render Occludees"));
-        section.addToggle(CoreToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
-        section.addToggle(CoreToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
-        section.addToggle(CoreToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
+        section.addToggle(ToggleSettings.RENDER_OCCLUDERS, new Message("Render Occluders"));
+        section.addToggle(ToggleSettings.RENDER_OCCLUDEES, new Message("Render Occludees"));
+        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
+        section.addToggle(ToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
+        section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
 
         section.addSlider(FloatSettings.REACH, new Message("Reach"));
         section.addSlider(FloatSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));

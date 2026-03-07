@@ -1,11 +1,11 @@
 package game.player.rendering;
 
-import core.settings.CoreToggleSettings;
 import core.utils.IntArrayList;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
+import game.settings.ToggleSettings;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,7 +47,7 @@ public final class ParticleCollector {
     }
 
     public void addBreakParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte ignoreMaterial) {
-        if (!CoreToggleSettings.SHOW_BREAK_PARTICLES.value()) return;
+        if (!ToggleSettings.SHOW_BREAK_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(lengthX * lengthY * lengthZ);
         IntArrayList transparentParticles = new IntArrayList(lengthX * lengthY * lengthZ);
 
@@ -69,7 +69,7 @@ public final class ParticleCollector {
     }
 
     public void addPlaceParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte material) {
-        if (!CoreToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
+        if (!ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
         IntArrayList particles = new IntArrayList(lengthX * lengthY * lengthZ * SHADER_PARTICLE_INT_SIZE);
 
         for (int xOffset = 0; xOffset < lengthX; xOffset++)
@@ -86,7 +86,7 @@ public final class ParticleCollector {
     }
 
     public void addPlaceParticleEffect(int startX, int startY, int startZ, Structure structure) {
-        if (!CoreToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
+        if (!ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
         IntArrayList transparentParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
         MaterialsData materials = structure.materials();
@@ -117,7 +117,7 @@ public final class ParticleCollector {
     }
 
     public void addSplashParticleEffect(int x, int y, int z, byte material) {
-        if (!CoreToggleSettings.SHOW_SPLASH_PARTICLES.value()) return;
+        if (!ToggleSettings.SHOW_SPLASH_PARTICLES.value()) return;
         IntArrayList particles = new IntArrayList(SPLASH_PARTICLE_COUNT * SHADER_PARTICLE_INT_SIZE);
 
         for (int count = 0; count < SPLASH_PARTICLE_COUNT; count++) {

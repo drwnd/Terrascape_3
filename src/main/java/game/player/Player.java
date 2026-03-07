@@ -1,7 +1,6 @@
 package game.player;
 
 import core.rendering_api.Window;
-import core.settings.CoreToggleSettings;
 
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.InteractionHandler;
@@ -14,6 +13,7 @@ import game.player.rendering.Renderer;
 import game.server.Game;
 import game.server.material.Material;
 import game.settings.KeySettings;
+import game.settings.ToggleSettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -102,7 +102,7 @@ public final class Player {
             return;
         }
 
-        if (CoreToggleSettings.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
+        if (ToggleSettings.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
     }
 
 

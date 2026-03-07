@@ -1,7 +1,7 @@
 package game.server.command;
 
 import core.settings.Settings;
-import core.settings.CoreToggleSettings;
+
 import game.player.Player;
 import game.player.movement.FlyingState;
 import game.player.movement.MovementState;
@@ -9,7 +9,9 @@ import game.server.Function;
 import game.server.Game;
 import game.server.PlayerRecord;
 import game.server.saving.PlayerRecordSaver;
+import game.settings.ToggleSettings;
 import game.utils.Position;
+
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -103,7 +105,7 @@ final class RecordCommand {
                 player.getMovement().setVelocity(movement);
             }
 
-            Settings.update(CoreToggleSettings.NO_CLIP, true);
+            Settings.update(ToggleSettings.NO_CLIP, true);
             player.getMovement().setState(state);
             index++;
             return true;
