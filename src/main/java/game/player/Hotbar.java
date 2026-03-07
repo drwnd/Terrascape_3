@@ -1,6 +1,5 @@
 package game.player;
 
-import core.settings.CoreFloatSettings;
 import core.settings.CoreKeySettings;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
@@ -12,6 +11,8 @@ import game.player.rendering.StructureDisplay;
 import game.player.interaction.Target;
 
 import game.server.generation.Structure;
+import game.settings.FloatSettings;
+
 import org.joml.Vector2f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -77,12 +78,12 @@ public final class Hotbar extends UiElement {
 
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
-        float hotbarSize = CoreFloatSettings.HOTBAR_SIZE.value();
+        float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
         setOffsetToParent(0.5F - hotbarSize * Hotbar.LENGTH * 0.5F, 0);
         setSizeToParent(hotbarSize * Hotbar.LENGTH, hotbarSize * Window.getAspectRatio());
         super.renderSelf(getPosition(), getSize());
 
-        float hotbarIndicatorScaler = CoreFloatSettings.HOTBAR_INDICATOR_SCALER.value();
+        float hotbarIndicatorScaler = FloatSettings.HOTBAR_INDICATOR_SCALER.value();
         float scalingOffset = (1.0F - hotbarIndicatorScaler) * 0.5F;
         hotBarSelectionIndicator.setOffsetToParent((selectedSlot + scalingOffset) / LENGTH, scalingOffset);
         hotBarSelectionIndicator.setSizeToParent(hotbarIndicatorScaler / LENGTH, hotbarIndicatorScaler);

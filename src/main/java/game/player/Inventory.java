@@ -6,7 +6,6 @@ import core.languages.UiMessage;
 import core.renderables.TextElement;
 import core.renderables.TextField;
 import core.rendering_api.Input;
-import core.settings.CoreFloatSettings;
 import core.settings.CoreKeySettings;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
@@ -19,6 +18,7 @@ import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
 import game.server.generation.Structure;
+import game.settings.FloatSettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -50,7 +50,7 @@ public final class Inventory extends UiElement {
             Structure structure = new Structure((byte) index);
 
             StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
-            display.setScalingFactor(CoreFloatSettings.INVENTORY_ITEM_SCALING.value());
+            display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
             display.setScaleWithGuiSize(false);
 
             cubeDisplays.add(new CubeDisplay(display, (byte) index));
@@ -113,8 +113,8 @@ public final class Inventory extends UiElement {
 
 
     private void updateDisplayPositions() {
-        float itemSize = CoreFloatSettings.INVENTORY_ITEM_SIZE.value();
-        int itemsPerRow = (int) CoreFloatSettings.INVENTORY_ITEMS_PER_ROW.value();
+        float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
+        int itemsPerRow = (int) FloatSettings.INVENTORY_ITEMS_PER_ROW.value();
 
         Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio());
 

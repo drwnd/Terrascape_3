@@ -60,7 +60,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Window.popRenderable();
     }
 
-    public void addSlider(CoreFloatSettings setting, StringGetter settingName) {
+    public void addSlider(FloatSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);

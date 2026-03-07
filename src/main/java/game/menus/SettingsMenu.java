@@ -12,6 +12,7 @@ import core.rendering_api.Window;
 
 import game.player.rendering.DebugScreenLine;
 
+import game.settings.FloatSettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -96,11 +97,11 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(CoreFloatSettings.FOV, UiMessage.FOV);
-        section.addSlider(CoreFloatSettings.CROSSHAIR_SIZE, UiMessage.CROSSHAIR_SIZE);
-        section.addSlider(CoreFloatSettings.HOTBAR_SIZE, UiMessage.HOTBAR_SIZE);
-        section.addSlider(CoreFloatSettings.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
-        section.addSlider(CoreFloatSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(FloatSettings.FOV, UiMessage.FOV);
+        section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessage.CROSSHAIR_SIZE);
+        section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessage.HOTBAR_SIZE);
+        section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessage.NIGHT_BRIGHTNESS);
+        section.addSlider(FloatSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessage.AMBIENT_OCCLUSION_SAMPLES);
 
         section.addToggle(CoreToggleSettings.USE_SHADOW_MAPPING, UiMessage.USE_SHADOW_MAPPING);
         section.addToggle(CoreToggleSettings.CHUNKS_CAST_SHADOWS, UiMessage.CHUNKS_CAST_SHADOWS);
@@ -126,13 +127,13 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(CoreFloatSettings.GUI_SIZE, UiMessage.GUI_SIZE);
         section.addSlider(CoreFloatSettings.TEXT_SIZE, UiMessage.TEXT_SIZE);
         section.addSlider(CoreFloatSettings.RIM_THICKNESS, UiMessage.RIM_THICKNESS);
-        section.addSlider(CoreFloatSettings.CHAT_MESSAGE_DURATION, UiMessage.CHAT_MESSAGE_DURATION);
-        section.addSlider(CoreFloatSettings.MAX_CHAT_MESSAGE_COUNT, UiMessage.MAX_CHAT_MESSAGE_COUNT);
-        section.addSlider(CoreFloatSettings.HOTBAR_INDICATOR_SCALER, UiMessage.HOTBAR_INDICATOR_SCALER);
-        section.addSlider(CoreFloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessage.PAUSE_MENU_BACKGROUND_BLUR);
-        section.addSlider(CoreFloatSettings.INVENTORY_ITEM_SIZE, UiMessage.INVENTORY_ITEM_SIZE);
-        section.addSlider(CoreFloatSettings.INVENTORY_ITEMS_PER_ROW, UiMessage.INVENTORY_ITEMS_PER_ROW);
-        section.addSlider(CoreFloatSettings.INVENTORY_ITEM_SCALING, UiMessage.INVENTORY_ITEM_SCALING);
+        section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, UiMessage.CHAT_MESSAGE_DURATION);
+        section.addSlider(FloatSettings.MAX_CHAT_MESSAGE_COUNT, UiMessage.MAX_CHAT_MESSAGE_COUNT);
+        section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessage.HOTBAR_INDICATOR_SCALER);
+        section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessage.PAUSE_MENU_BACKGROUND_BLUR);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, UiMessage.INVENTORY_ITEM_SIZE);
+        section.addSlider(FloatSettings.INVENTORY_ITEMS_PER_ROW, UiMessage.INVENTORY_ITEMS_PER_ROW);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, UiMessage.INVENTORY_ITEM_SCALING);
 
         return section;
     }
@@ -141,10 +142,10 @@ public final class SettingsMenu extends UiBackgroundElement {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addSlider(CoreFloatSettings.MASTER_AUDIO, UiMessage.MASTER_AUDIO);
-        section.addSlider(CoreFloatSettings.FOOTSTEPS_AUDIO, UiMessage.FOOTSTEPS_AUDIO);
-        section.addSlider(CoreFloatSettings.PLACE_AUDIO, UiMessage.PLACE_AUDIO);
-        section.addSlider(CoreFloatSettings.DIG_AUDIO, UiMessage.DIG_AUDIO);
-        section.addSlider(CoreFloatSettings.INVENTORY_AUDIO, UiMessage.INVENTORY_AUDIO);
+        section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessage.FOOTSTEPS_AUDIO);
+        section.addSlider(FloatSettings.PLACE_AUDIO, UiMessage.PLACE_AUDIO);
+        section.addSlider(FloatSettings.DIG_AUDIO, UiMessage.DIG_AUDIO);
+        section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessage.INVENTORY_AUDIO);
         section.addSlider(CoreFloatSettings.MISCELLANEOUS_AUDIO, UiMessage.MISCELLANEOUS_AUDIO);
 
         return section;
@@ -173,11 +174,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(CoreToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
         section.addToggle(CoreToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
 
-        section.addSlider(CoreFloatSettings.REACH, new Message("Reach"));
-        section.addSlider(CoreFloatSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
-        section.addSlider(CoreFloatSettings.TIME_SPEED, new Message("Time Speed"));
-        section.addSlider(CoreFloatSettings.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
-        section.addSlider(CoreFloatSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
+        section.addSlider(FloatSettings.REACH, new Message("Reach"));
+        section.addSlider(FloatSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
+        section.addSlider(FloatSettings.TIME_SPEED, new Message("Time Speed"));
+        section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
+        section.addSlider(FloatSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
 
         return section;
     }

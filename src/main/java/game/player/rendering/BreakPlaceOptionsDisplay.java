@@ -10,6 +10,7 @@ import core.settings.optionSettings.FontOption;
 import game.player.Hotbar;
 import game.server.Game;
 
+import game.settings.FloatSettings;
 import org.joml.Vector2f;
 
 public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
@@ -27,7 +28,7 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
     public void renderSelf(Vector2f position, Vector2f size) {
         breakPlaceSize.setText("%s³ Voxel ".formatted(1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize()));
 
-        float hotbarSize = CoreFloatSettings.HOTBAR_SIZE.value();
+        float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
         Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         float charWidth = defaultTextSize.x;
         float charHeight = defaultTextSize.y * CoreFloatSettings.TEXT_SIZE.value();

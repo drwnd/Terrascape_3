@@ -1,7 +1,7 @@
 package core.renderables;
 
 import core.rendering_api.Window;
-import core.settings.CoreFloatSettings;
+import core.settings.FloatSetting;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -11,7 +11,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Slider extends UiButton {
 
-    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, CoreFloatSettings setting, StringGetter settingName) {
+    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, FloatSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(this::action);
         setAllowFocusScaling(false);
@@ -31,7 +31,7 @@ public final class Slider extends UiButton {
         setValue(setting.defaultValue());
     }
 
-    public CoreFloatSettings getSetting() {
+    public FloatSetting getSetting() {
         return setting;
     }
 
@@ -68,7 +68,7 @@ public final class Slider extends UiButton {
             ((CoreSettingsRenderable) getParent()).setSelectedSlider(this);
     }
 
-    private final CoreFloatSettings setting;
+    private final FloatSetting setting;
     private final UiBackgroundElement slider;
     private final TextElement textElement;
     private final StringGetter settingName;

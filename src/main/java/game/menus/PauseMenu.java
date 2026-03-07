@@ -8,11 +8,11 @@ import core.renderables.TextElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
-import core.settings.CoreFloatSettings;
 import core.assets.CoreShaders;
 
 import game.server.Game;
 import game.player.rendering.ObjectLoader;
+import game.settings.FloatSettings;
 
 import org.joml.Vector2f;
 
@@ -38,8 +38,8 @@ public final class PauseMenu extends Renderable {
         addRenderable(settingsButton);
         addRenderable(playButton);
 
-        int backGroundWidth = Math.max(1, (int) (Window.getWidth() / (1.0F + CoreFloatSettings.PAUSE_MENU_BACKGROUND_BLUR.value())));
-        int backGroundHeight = Math.max(1, (int) (Window.getHeight() / (1.0F + CoreFloatSettings.PAUSE_MENU_BACKGROUND_BLUR.value())));
+        int backGroundWidth = Math.max(1, (int) (Window.getWidth() / (1.0F + FloatSettings.PAUSE_MENU_BACKGROUND_BLUR.value())));
+        int backGroundHeight = Math.max(1, (int) (Window.getHeight() / (1.0F + FloatSettings.PAUSE_MENU_BACKGROUND_BLUR.value())));
 
         int backGround = ObjectLoader.createTexture2D(GL_RGB, backGroundWidth, backGroundHeight, GL_RGB, GL_UNSIGNED_BYTE, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);

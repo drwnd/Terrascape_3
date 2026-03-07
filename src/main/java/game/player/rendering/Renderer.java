@@ -30,6 +30,7 @@ import game.server.ChatMessage;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.Server;
+import game.settings.FloatSettings;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -72,7 +73,7 @@ public final class Renderer extends Renderable {
 
     public static float getRenderTime() {
         Server server = Game.getServer();
-        float renderTime = server.getDayTime() + CoreFloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
+        float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
         if (renderTime > 1.0F) renderTime -= 2.0F;
         return renderTime;
     }
@@ -90,7 +91,7 @@ public final class Renderer extends Renderable {
 
         shader.setUniform("textures", 0);
         shader.setUniform("propertiesTextures", 1);
-        shader.setUniform("nightBrightness", CoreFloatSettings.NIGHT_BRIGHTNESS.value());
+        shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
@@ -114,7 +115,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
-        shader.setUniform("nightBrightness", CoreFloatSettings.NIGHT_BRIGHTNESS.value());
+        shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.getTextureSizes());
@@ -341,7 +342,7 @@ public final class Renderer extends Renderable {
             glfwSwapInterval(vSync ? 1 : 0);
         }
 
-        float crosshairSize = CoreFloatSettings.CROSSHAIR_SIZE.value();
+        float crosshairSize = FloatSettings.CROSSHAIR_SIZE.value();
         crosshair.setOffsetToParent(0.5F - crosshairSize * 0.5F, 0.5F - crosshairSize * 0.5F * Window.getAspectRatio());
         crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
@@ -526,7 +527,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
-        shader.setUniform("samples", (int) CoreFloatSettings.AMBIENT_OCCLUSION_SAMPLES.value());
+        shader.setUniform("samples", (int) FloatSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
@@ -671,7 +672,7 @@ public final class Renderer extends Renderable {
         TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         shader.bind();
         float lineSeparation = defaultTextSize.y * CoreFloatSettings.TEXT_SIZE.value();
-        float chatMessageDuration = CoreFloatSettings.CHAT_MESSAGE_DURATION.value();
+        float chatMessageDuration = FloatSettings.CHAT_MESSAGE_DURATION.value();
         float chatHeight = chatTextField == null || !chatTextField.isVisible() ? 0.0F : chatTextField.getSizeToParent().y + chatTextField.getOffsetToParent().y;
         float scroll = chatTextField == null ? 0.0F : chatTextField.getInput().getScroll();
 
@@ -708,7 +709,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) CoreFloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = (int) FloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
@@ -727,7 +728,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = (int) CoreFloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = (int) FloatSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
@@ -795,7 +796,7 @@ public final class Renderer extends Renderable {
     }
 
     private static Vector3f getSunDirection(float renderTime) {
-        final float downwardsSunPart = CoreFloatSettings.DOWNWARD_SUN_DIRECTION.value();
+        final float downwardsSunPart = FloatSettings.DOWNWARD_SUN_DIRECTION.value();
         final float normalizer = (float) Math.sqrt(1 - downwardsSunPart * downwardsSunPart);
 
         float alpha = (float) (renderTime * Math.PI);

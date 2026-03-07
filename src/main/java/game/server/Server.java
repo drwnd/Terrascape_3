@@ -2,7 +2,6 @@ package game.server;
 
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
-import core.settings.CoreFloatSettings;
 import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.ColorOption;
 
@@ -16,6 +15,7 @@ import game.server.command.Command;
 import game.server.command.CommandResult;
 import game.server.generation.ChunkGenerator;
 import game.server.saving.ChunkSaver;
+import game.settings.FloatSettings;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -232,11 +232,11 @@ public final class Server implements CrashCallback {
                 generatorRestartScheduled = false;
             }
         }
-        removeOldChatMessages((int) CoreFloatSettings.MAX_CHAT_MESSAGE_COUNT.value());
+        removeOldChatMessages((int) FloatSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
     private void incrementTime() {
-        dayTime += CoreFloatSettings.TIME_SPEED.value();
+        dayTime += FloatSettings.TIME_SPEED.value();
         if (dayTime > 1.0F) dayTime -= 2.0F;
     }
 
