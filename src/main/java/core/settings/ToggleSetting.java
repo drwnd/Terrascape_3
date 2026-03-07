@@ -1,6 +1,6 @@
 package core.settings;
 
-public interface ToggleSetting extends KeyBound {
+public interface ToggleSetting extends KeySetting {
 
     void setValue(boolean value);
 

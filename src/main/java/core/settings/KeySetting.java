@@ -1,4 +1,10 @@
 package core.settings;
 
-public interface KeySetting extends KeyBound {
+public interface KeySetting {
+
+    int keybind();
+
+    int defaultKeybind();
+
+    void setKeybind(int keybind);
 }

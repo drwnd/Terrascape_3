@@ -6,7 +6,6 @@ import core.languages.UiMessage;
 import core.renderables.TextElement;
 import core.renderables.TextField;
 import core.rendering_api.Input;
-import core.settings.CoreKeySettings;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
 import core.utils.FileManager;
@@ -19,6 +18,7 @@ import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
+import game.settings.KeySettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -65,15 +65,15 @@ public final class Inventory extends UiElement {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
 
-        if (button == CoreKeySettings.HOTBAR_SLOT_1.keybind()) hotbar.setContent(0, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_2.keybind()) hotbar.setContent(1, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_3.keybind()) hotbar.setContent(2, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_4.keybind()) hotbar.setContent(3, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_5.keybind()) hotbar.setContent(4, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_6.keybind()) hotbar.setContent(5, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_7.keybind()) hotbar.setContent(6, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_8.keybind()) hotbar.setContent(7, getSelectedPlaceable(pixelCoordinate));
-        if (button == CoreKeySettings.HOTBAR_SLOT_9.keybind()) hotbar.setContent(8, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_1.keybind()) hotbar.setContent(0, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_2.keybind()) hotbar.setContent(1, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_3.keybind()) hotbar.setContent(2, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_4.keybind()) hotbar.setContent(3, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_5.keybind()) hotbar.setContent(4, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_6.keybind()) hotbar.setContent(5, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_7.keybind()) hotbar.setContent(6, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_8.keybind()) hotbar.setContent(7, getSelectedPlaceable(pixelCoordinate));
+        if (button == KeySettings.HOTBAR_SLOT_9.keybind()) hotbar.setContent(8, getSelectedPlaceable(pixelCoordinate));
     }
 
     public void moveStructureButtons(float movement) {

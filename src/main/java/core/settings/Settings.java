@@ -7,19 +7,19 @@ import java.io.*;
 
 public final class Settings {
 
-    public static void update(CoreFloatSettings setting, float value) {
+    public static void update(FloatSetting setting, float value) {
         setting.setValue(value);
     }
 
-    public static void update(KeyBound setting, int value) {
+    public static void update(KeySetting setting, int value) {
         setting.setKeybind(value);
     }
 
-    public static void update(CoreToggleSettings setting, boolean value) {
+    public static void update(ToggleSetting setting, boolean value) {
         setting.setValue(value);
     }
 
-    public static void update(CoreOptionSettings setting, Option value) {
+    public static void update(OptionSetting setting, Option value) {
         setting.setValue(value);
     }
 

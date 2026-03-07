@@ -1,7 +1,6 @@
 package game.player;
 
 import core.rendering_api.Window;
-import core.settings.CoreKeySettings;
 import core.settings.CoreToggleSettings;
 
 import game.player.interaction.ChunkRebuildPlaceable;
@@ -14,6 +13,7 @@ import game.player.rendering.ParticleCollector;
 import game.player.rendering.Renderer;
 import game.server.Game;
 import game.server.material.Material;
+import game.settings.KeySettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -86,13 +86,13 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveKeyInput(int button, int action) {
-        if (button == CoreKeySettings.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
-        if (button == CoreKeySettings.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
-        if (button == CoreKeySettings.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
-        if (button == CoreKeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
+        if (button == KeySettings.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
+        if (button == KeySettings.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
+        if (button == KeySettings.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
+        if (button == KeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
-        if (button == CoreKeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == CoreKeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
+        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleInactiveScrollInput(double xScroll, double yScroll) {

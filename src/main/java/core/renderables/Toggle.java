@@ -7,7 +7,7 @@ import core.assets.CoreTextures;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.CoreFloatSettings;
-import core.settings.CoreToggleSettings;
+import core.settings.ToggleSetting;
 import core.settings.optionSettings.TexturePack;
 import core.utils.StringGetter;
 
@@ -18,7 +18,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Toggle extends UiButton {
 
-    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, CoreToggleSettings setting, StringGetter settingName) {
+    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
@@ -32,7 +32,7 @@ public final class Toggle extends UiButton {
         value = setting.defaultValue();
     }
 
-    public CoreToggleSettings getSetting() {
+    public ToggleSetting getSetting() {
         return setting;
     }
 
@@ -69,5 +69,5 @@ public final class Toggle extends UiButton {
     }
 
     private boolean value;
-    private final CoreToggleSettings setting;
+    private final ToggleSetting setting;
 }

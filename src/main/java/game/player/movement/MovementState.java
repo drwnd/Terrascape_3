@@ -1,13 +1,12 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.CoreKeySettings;
-
 import core.settings.CoreToggleSettings;
 import core.utils.MathUtils;
 
 import game.server.Game;
 import game.server.World;
+import game.settings.KeySettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -112,16 +111,16 @@ public abstract class MovementState {
     }
 
     static void applyXZMovement(Vector3f velocityChange, float speed, float sprintSpeedModifier) {
-        if (Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD))
+        if (Input.isKeyPressed(KeySettings.MOVE_FORWARD))
             velocityChange.x += speed;
-        if (Input.isKeyPressed(CoreKeySettings.SPRINT)) velocityChange.mul(sprintSpeedModifier);
+        if (Input.isKeyPressed(KeySettings.SPRINT)) velocityChange.mul(sprintSpeedModifier);
 
-        if (Input.isKeyPressed(CoreKeySettings.MOVE_BACK))
+        if (Input.isKeyPressed(KeySettings.MOVE_BACK))
             velocityChange.x -= speed;
 
-        if (Input.isKeyPressed(CoreKeySettings.MOVE_RIGHT))
+        if (Input.isKeyPressed(KeySettings.MOVE_RIGHT))
             velocityChange.z -= speed;
-        if (Input.isKeyPressed(CoreKeySettings.MOVE_LEFT))
+        if (Input.isKeyPressed(KeySettings.MOVE_LEFT))
             velocityChange.z += speed;
     }
 

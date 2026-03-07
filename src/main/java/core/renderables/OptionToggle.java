@@ -1,6 +1,6 @@
 package core.renderables;
 
-import core.settings.CoreOptionSettings;
+import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
 import core.utils.StringGetter;
@@ -11,7 +11,7 @@ import org.joml.Vector2i;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class OptionToggle extends UiButton {
-    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, CoreOptionSettings setting, StringGetter settingName) {
+    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
@@ -28,7 +28,7 @@ public final class OptionToggle extends UiButton {
         setValue(setting.defaultValue());
     }
 
-    public CoreOptionSettings getSetting() {
+    public OptionSetting getSetting() {
         return setting;
     }
 
@@ -58,6 +58,6 @@ public final class OptionToggle extends UiButton {
 
     private final StringGetter settingName;
     private Option value;
-    private final CoreOptionSettings setting;
+    private final OptionSetting setting;
     private final TextElement textElement;
 }

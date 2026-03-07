@@ -1,9 +1,9 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.CoreKeySettings;
 import core.utils.MathUtils;
 
+import game.settings.KeySettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -15,9 +15,9 @@ public final class SneakingState extends MovementState {
 
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
-        if (!Input.isKeyPressed(CoreKeySettings.SNEAK)) next = new WalkingState();
-        if (Input.isKeyPressed(CoreKeySettings.CRAWL)) next = new CrawlingState();
-        if (Input.isKeyPressed(CoreKeySettings.SPRINT) && Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
+        if (!Input.isKeyPressed(KeySettings.SNEAK)) next = new WalkingState();
+        if (Input.isKeyPressed(KeySettings.CRAWL)) next = new CrawlingState();
+        if (Input.isKeyPressed(KeySettings.SPRINT) && Input.isKeyPressed(KeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
 
         Vector3f velocityChange = new Vector3f();
         Vector3f playerDirection = MathUtils.getHorizontalDirection(playerRotation);
@@ -25,7 +25,7 @@ public final class SneakingState extends MovementState {
 
         applyXZMovement(velocityChange, speed, 1.0F);
 
-        if (Input.isKeyPressed(CoreKeySettings.JUMP)) handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
+        if (Input.isKeyPressed(KeySettings.JUMP)) handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
 
         normalizeXZToMaxComponent(velocityChange);
         toWorldDirection(velocityChange, playerDirection);
@@ -35,7 +35,7 @@ public final class SneakingState extends MovementState {
 
     @Override
     void handleInput(int key, int action) {
-        if (key == CoreKeySettings.JUMP.keybind() && action == GLFW_PRESS) {
+        if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new FlyingState();
             lastJumpTime = System.nanoTime();
         }

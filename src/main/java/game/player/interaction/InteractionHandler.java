@@ -1,10 +1,10 @@
 package game.player.interaction;
 
 import core.rendering_api.Input;
-import core.settings.CoreKeySettings;
 
 import game.server.Game;
 import game.settings.FloatSettings;
+import game.settings.KeySettings;
 
 import org.joml.Vector3i;
 
@@ -14,18 +14,18 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == CoreKeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
-        if (action == GLFW_PRESS && button == CoreKeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
-        if (action == GLFW_PRESS && button == CoreKeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW_RELEASE && button == CoreKeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
+        if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
+        if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
-        if (button == CoreKeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
-        if (button == CoreKeySettings.USE.keybind()) updateInfo(action, useInfo);
+        if (button == KeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
+        if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
     }
 
     public void updateGameTick() {
-        if (!Input.isKeyPressed(CoreKeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
-        if (!Input.isKeyPressed(CoreKeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
+        if (!Input.isKeyPressed(KeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
+        if (!Input.isKeyPressed(KeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
 
         handleDestroy();
         handleUse();

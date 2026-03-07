@@ -1,10 +1,10 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
-import core.settings.CoreKeySettings;
 import core.settings.CoreToggleSettings;
 import core.utils.MathUtils;
 
+import game.settings.KeySettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -22,12 +22,12 @@ public final class FlyingState extends MovementState {
 
         WalkingState.applyXZMovement(velocityChange, HORIZONTAL_FLY_SPEED, SPRINT_SPEED_MODIFIER);
 
-        if (Input.isKeyPressed(CoreKeySettings.SNEAK)) velocityChange.mul(SNEAK_SPEED_MODIFIER);
+        if (Input.isKeyPressed(KeySettings.SNEAK)) velocityChange.mul(SNEAK_SPEED_MODIFIER);
 
-        if (Input.isKeyPressed(CoreKeySettings.JUMP)) velocityChange.y += VERTICAL_FLY_SPEED;
-        if (Input.isKeyPressed(CoreKeySettings.SNEAK)) velocityChange.y -= VERTICAL_FLY_SPEED;
+        if (Input.isKeyPressed(KeySettings.JUMP)) velocityChange.y += VERTICAL_FLY_SPEED;
+        if (Input.isKeyPressed(KeySettings.SNEAK)) velocityChange.y -= VERTICAL_FLY_SPEED;
 
-        if (Input.isKeyPressed(CoreKeySettings.FLY_FAST)) velocityChange.mul(FLY_FAST_SPEED_MODIFIER);
+        if (Input.isKeyPressed(KeySettings.FLY_FAST)) velocityChange.mul(FLY_FAST_SPEED_MODIFIER);
         normalizeToMaxComponent(velocityChange);
         toWorldDirection(velocityChange, playerDirection);
 
@@ -42,7 +42,7 @@ public final class FlyingState extends MovementState {
 
     @Override
     protected void handleInput(int key, int action) {
-        if (key == CoreKeySettings.JUMP.keybind() && action == GLFW_PRESS) {
+        if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = new WalkingState();
             lastJumpTime = System.nanoTime();
         }

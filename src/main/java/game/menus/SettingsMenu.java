@@ -13,6 +13,7 @@ import core.rendering_api.Window;
 import game.player.rendering.DebugScreenLine;
 
 import game.settings.FloatSettings;
+import game.settings.KeySettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -61,34 +62,34 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addSlider(CoreFloatSettings.SENSITIVITY, UiMessage.SENSITIVITY);
 
-        section.addKeySelector(CoreKeySettings.MOVE_FORWARD, UiMessage.MOVE_FORWARD);
-        section.addKeySelector(CoreKeySettings.MOVE_BACK, UiMessage.MOVE_BACK);
-        section.addKeySelector(CoreKeySettings.MOVE_RIGHT, UiMessage.MOVE_RIGHT);
-        section.addKeySelector(CoreKeySettings.MOVE_LEFT, UiMessage.MOVE_LEFT);
-        section.addKeySelector(CoreKeySettings.JUMP, UiMessage.JUMP);
-        section.addKeySelector(CoreKeySettings.SPRINT, UiMessage.SPRINT);
-        section.addKeySelector(CoreKeySettings.SNEAK, UiMessage.SNEAK);
-        section.addKeySelector(CoreKeySettings.CRAWL, UiMessage.CRAWL);
-        section.addKeySelector(CoreKeySettings.FLY_FAST, UiMessage.FLY_FAST);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_1, UiMessage.HOTBAR_SLOT_1);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_2, UiMessage.HOTBAR_SLOT_2);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_3, UiMessage.HOTBAR_SLOT_3);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_4, UiMessage.HOTBAR_SLOT_4);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_5, UiMessage.HOTBAR_SLOT_5);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_6, UiMessage.HOTBAR_SLOT_6);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_7, UiMessage.HOTBAR_SLOT_7);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_8, UiMessage.HOTBAR_SLOT_8);
-        section.addKeySelector(CoreKeySettings.HOTBAR_SLOT_9, UiMessage.HOTBAR_SLOT_9);
-        section.addKeySelector(CoreKeySettings.DESTROY, UiMessage.DESTROY);
-        section.addKeySelector(CoreKeySettings.USE, UiMessage.USE);
-        section.addKeySelector(CoreKeySettings.PICK_BLOCK, UiMessage.PICK_BLOCK);
-        section.addKeySelector(CoreKeySettings.INVENTORY, UiMessage.INVENTORY);
-        section.addKeySelector(CoreKeySettings.LOCK_PLACE_POSITION, UiMessage.LOCK_PLACE_POSITION);
-        section.addKeySelector(CoreKeySettings.ZOOM, UiMessage.ZOOM);
-        section.addKeySelector(CoreKeySettings.INCREASE_BREAK_PLACE_SIZE, UiMessage.INCREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(CoreKeySettings.DECREASE_BREAK_PLACE_SIZE, UiMessage.DECREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(CoreKeySettings.DROP, UiMessage.DROP);
-        section.addKeySelector(CoreKeySettings.OPEN_CHAT, UiMessage.OPEN_CHAT);
+        section.addKeySelector(KeySettings.MOVE_FORWARD, UiMessage.MOVE_FORWARD);
+        section.addKeySelector(KeySettings.MOVE_BACK, UiMessage.MOVE_BACK);
+        section.addKeySelector(KeySettings.MOVE_RIGHT, UiMessage.MOVE_RIGHT);
+        section.addKeySelector(KeySettings.MOVE_LEFT, UiMessage.MOVE_LEFT);
+        section.addKeySelector(KeySettings.JUMP, UiMessage.JUMP);
+        section.addKeySelector(KeySettings.SPRINT, UiMessage.SPRINT);
+        section.addKeySelector(KeySettings.SNEAK, UiMessage.SNEAK);
+        section.addKeySelector(KeySettings.CRAWL, UiMessage.CRAWL);
+        section.addKeySelector(KeySettings.FLY_FAST, UiMessage.FLY_FAST);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_1, UiMessage.HOTBAR_SLOT_1);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_2, UiMessage.HOTBAR_SLOT_2);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_3, UiMessage.HOTBAR_SLOT_3);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_4, UiMessage.HOTBAR_SLOT_4);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_5, UiMessage.HOTBAR_SLOT_5);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_6, UiMessage.HOTBAR_SLOT_6);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_7, UiMessage.HOTBAR_SLOT_7);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_8, UiMessage.HOTBAR_SLOT_8);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_9, UiMessage.HOTBAR_SLOT_9);
+        section.addKeySelector(KeySettings.DESTROY, UiMessage.DESTROY);
+        section.addKeySelector(KeySettings.USE, UiMessage.USE);
+        section.addKeySelector(KeySettings.PICK_BLOCK, UiMessage.PICK_BLOCK);
+        section.addKeySelector(KeySettings.INVENTORY, UiMessage.INVENTORY);
+        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION, UiMessage.LOCK_PLACE_POSITION);
+        section.addKeySelector(KeySettings.ZOOM, UiMessage.ZOOM);
+        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE, UiMessage.INCREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE, UiMessage.DECREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.DROP, UiMessage.DROP);
+        section.addKeySelector(KeySettings.OPEN_CHAT, UiMessage.OPEN_CHAT);
         section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, UiMessage.RESIZE_WINDOW);
 
         return section;
@@ -159,9 +160,9 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(CoreKeySettings.RELOAD_ASSETS, new Message("Reload Assets"));
         section.addKeySelector(CoreKeySettings.RELOAD_LANGUAGE, new Message("Reload Language"));
         section.addKeySelector(CoreKeySettings.RELOAD_FONT, new Message("Reload Font"));
-        section.addKeySelector(CoreKeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
-        section.addKeySelector(CoreKeySettings.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));
-        section.addKeySelector(CoreKeySettings.START_COMMAND, new Message("Start Command"));
+        section.addKeySelector(KeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
+        section.addKeySelector(KeySettings.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));
+        section.addKeySelector(KeySettings.START_COMMAND, new Message("Start Command"));
 
         section.addToggle(CoreToggleSettings.DEBUG_MENU, new Message("Open Debug Screen"));
         section.addToggle(CoreToggleSettings.NO_CLIP, new Message("No-Clip"));
