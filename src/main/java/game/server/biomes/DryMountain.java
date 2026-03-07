@@ -1,7 +1,8 @@
 package game.server.biomes;
 
+import core.utils.MathUtils;
+
 import game.server.generation.GenerationData;
-import game.utils.Utils;
 
 import static game.server.generation.WorldGeneration.WATER_LEVEL;
 
@@ -14,7 +15,7 @@ public final class DryMountain extends Biome {
 
         if (data.isAboveSurface(totalY)) return false;
 
-        int dirtHeight = Utils.floor(data.feature * 512 + WATER_LEVEL);
+        int dirtHeight = MathUtils.floor(data.feature * 512 + WATER_LEVEL);
         int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth) || data.height > dirtHeight) return false;

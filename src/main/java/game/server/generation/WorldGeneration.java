@@ -1,5 +1,6 @@
 package game.server.generation;
 
+import core.utils.MathUtils;
 import game.server.Chunk;
 import game.server.MaterialsData;
 import game.server.biomes.Biome;
@@ -53,7 +54,7 @@ public final class WorldGeneration {
         double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
         double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
 
-        return Utils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+        return MathUtils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
     }
 
     public static int getResultingHeight(int totalX, int totalZ) {
@@ -194,12 +195,12 @@ public final class WorldGeneration {
             continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * ridge * 100000;
             // Normal ocean
         else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
-            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
+            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
         else if (continental <= OCEAN_THRESHOLD - 0.05 && continental > OCEAN_THRESHOLD - 0.2)
             continentalModifier = (continental - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
             // Deep Ocean
         else if (continental <= OCEAN_THRESHOLD - 0.2 && continental > OCEAN_THRESHOLD - 0.25)
-            continentalModifier = Utils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
+            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
         else if (continental <= OCEAN_THRESHOLD - 0.25)
             continentalModifier = (continental - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
         return continentalModifier;
@@ -208,11 +209,11 @@ public final class WorldGeneration {
     private static double getErosionModifier(double height, double erosion, double continentalModifier) {
         double erosionModifier = 0.0;
         // Elevated areas
-        if (erosion < -0.25 && erosion > -0.4) erosionModifier = Utils.smoothInOutQuad(-erosion, 0.25, 0.4) * 55;
+        if (erosion < -0.25 && erosion > -0.4) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0.25, 0.4) * 55;
         else if (erosion <= -0.40) erosionModifier = (erosion + 0.40) * 20 + 55;
             // Flatland
         else if (erosion > FLATLAND_THRESHOLD && erosion < FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_OFFSET) * Utils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
+            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_OFFSET) * MathUtils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
         else if (erosion >= FLATLAND_THRESHOLD + 0.25)
             erosionModifier = -height * 0.75 - continentalModifier + FLATLAND_OFFSET;
         return erosionModifier;
@@ -223,7 +224,7 @@ public final class WorldGeneration {
         if (Math.abs(river) < 0.005)
             riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
         else if (Math.abs(river) < RIVER_THRESHOLD)
-            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - Utils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
+            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - MathUtils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
         return riverModifier;
     }
 

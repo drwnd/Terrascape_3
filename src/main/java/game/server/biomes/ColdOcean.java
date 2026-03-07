@@ -1,8 +1,9 @@
 package game.server.biomes;
 
-import game.server.generation.GenerationData;
+import core.utils.MathUtils;
 import core.utils.OpenSimplex2S;
-import game.utils.Utils;
+
+import game.server.generation.GenerationData;
 
 import static game.server.generation.WorldGeneration.*;
 import static game.utils.Constants.SAND;
@@ -36,7 +37,7 @@ public final class ColdOcean extends Biome {
         double icePlainNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x649C844EA835C9A7L, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
         if (iceBergNoise > ICE_BERG_THRESHOLD + 0.1) return (int) (ICE_BERG_HEIGHT + (icePlainNoise * 4.0));
         if (iceBergNoise > ICE_BERG_THRESHOLD)
-            return (int) (Utils.smoothInOutQuad(iceBergNoise, ICE_BERG_THRESHOLD, ICE_BERG_THRESHOLD + 0.1) * ICE_BERG_HEIGHT + (icePlainNoise * 4.0));
+            return (int) (MathUtils.smoothInOutQuad(iceBergNoise, ICE_BERG_THRESHOLD, ICE_BERG_THRESHOLD + 0.1) * ICE_BERG_HEIGHT + (icePlainNoise * 4.0));
         if (icePlainNoise > ICE_PLANE_THRESHOLD) return 1;
         return 0;
     }

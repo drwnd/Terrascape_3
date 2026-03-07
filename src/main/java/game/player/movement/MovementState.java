@@ -4,9 +4,10 @@ import core.rendering_api.Input;
 import core.settings.CoreKeySettings;
 
 import core.settings.CoreToggleSettings;
+import core.utils.MathUtils;
+
 import game.server.Game;
 import game.server.World;
-import game.utils.Utils;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -134,9 +135,9 @@ public abstract class MovementState {
         World world = Game.getWorld();
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        int startX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        int startZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;

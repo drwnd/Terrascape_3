@@ -2,9 +2,9 @@ package game.player.rendering;
 
 import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
+import core.utils.MathUtils;
 
 import game.utils.Position;
-import game.utils.Utils;
 
 import org.joml.*;
 
@@ -29,7 +29,7 @@ public final class Camera {
 
     public Vector3f getDirection() {
         synchronized (this) {
-            return Utils.getDirection(rotation);
+            return MathUtils.getDirection(rotation);
         }
     }
 

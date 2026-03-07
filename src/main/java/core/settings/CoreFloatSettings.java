@@ -1,5 +1,7 @@
 package core.settings;
 
+import core.utils.MathUtils;
+
 public enum CoreFloatSettings implements FloatSetting {
     FOV(1.0F, 175.0F, 90.0F, 1.0F),
     GUI_SIZE(0.25F, 1.0F, 1.0F, 0.01F),
@@ -53,30 +55,31 @@ public enum CoreFloatSettings implements FloatSetting {
         this.accuracy = 0.00001F;
     }
 
+    @Override
     public void setValue(float value) {
         this.value = value;
     }
 
+    @Override
     public float value() {
         return value;
     }
 
+    @Override
     public float valueFromFraction(float fraction) {
         float unroundedValue = min + fraction * (max - min);
-        float roundingOffset = absMin(-(unroundedValue % accuracy), accuracy - unroundedValue % accuracy);
+        float roundingOffset = MathUtils.absMin(-(unroundedValue % accuracy), accuracy - unroundedValue % accuracy);
         return unroundedValue + roundingOffset;
     }
 
+    @Override
     public float fractionFromValue(float value) {
         return (value - min) / (max - min);
     }
 
+    @Override
     public float defaultValue() {
         return defaultValue;
-    }
-
-    private static float absMin(float a, float b) {
-        return Math.abs(a) < Math.abs(b) ? a : b;
     }
 
     private final float min, max, defaultValue, accuracy;

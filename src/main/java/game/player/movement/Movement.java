@@ -1,11 +1,12 @@
 package game.player.movement;
 
 import core.settings.CoreToggleSettings;
+import core.utils.MathUtils;
+
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
 import game.utils.Position;
-import game.utils.Utils;
 
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -77,8 +78,8 @@ public final class Movement {
         Vector3i hitboxSize = state.getHitboxSize();
         World world = Game.getWorld();
 
-        int minX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        int minZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        int minX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        int minZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
         int width = hitboxSize.x + 1;
         int depth = hitboxSize.z + 1;
         int y = position.intY - 1;
@@ -212,9 +213,9 @@ public final class Movement {
 
         int xOffset = component == X_COMPONENT ? (velocity.x > 0.0F ? -1 : 1) : 0;
         int zOffset = component == Z_COMPONENT ? (velocity.z > 0.0F ? -1 : 1) : 0;
-        int startX = position.intX + Utils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
+        int startX = position.intX + MathUtils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
+        int startZ = position.intZ + MathUtils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
@@ -249,25 +250,25 @@ public final class Movement {
         Vector3i hitboxSize = state.getHitboxSize();
         Vector3f cornerFraction = position.fractionPosition();
         return cornerFraction.set(
-                Utils.fraction(cornerFraction.x + (velocity.x > 0 ? (hitboxSize.x + 1) * 0.5F : -hitboxSize.x * 0.5F)),
-                Utils.fraction(cornerFraction.y + (velocity.y > 0 ? hitboxSize.y : 0)),
-                Utils.fraction(cornerFraction.z + (velocity.z > 0 ? (hitboxSize.z + 1) * 0.5F : -hitboxSize.z * 0.5F))
+                MathUtils.fraction(cornerFraction.x + (velocity.x > 0 ? (hitboxSize.x + 1) * 0.5F : -hitboxSize.x * 0.5F)),
+                MathUtils.fraction(cornerFraction.y + (velocity.y > 0 ? hitboxSize.y : 0)),
+                MathUtils.fraction(cornerFraction.z + (velocity.z > 0 ? (hitboxSize.z + 1) * 0.5F : -hitboxSize.z * 0.5F))
         );
     }
 
     private int getStartX(Position position, Vector3i hitboxSize, int component) {
         float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F + 0.5F : -hitboxSize.x * 0.5F;
-        return position.intX + Utils.floor(position.fractionX + offset);
+        return position.intX + MathUtils.floor(position.fractionX + offset);
     }
 
     private int getStartY(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Y_COMPONENT && velocity.y > 0 ? hitboxSize.y : 0;
-        return position.intY + Utils.floor(position.fractionY + offset);
+        return position.intY + MathUtils.floor(position.fractionY + offset);
     }
 
     private int getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
-        return position.intZ + Utils.floor(position.fractionZ + offset);
+        return position.intZ + MathUtils.floor(position.fractionZ + offset);
     }
 
 
@@ -286,9 +287,9 @@ public final class Movement {
     private static boolean collides(Position position, MovementState state) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + Utils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        int startX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
         int startY = position.intY;
-        int startZ = position.intZ + Utils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        int startZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;

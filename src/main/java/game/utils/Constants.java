@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.utils.MathUtils;
 import game.server.material.Properties;
 
 public final class Constants {
@@ -19,8 +20,8 @@ public final class Constants {
     public static final byte RENDER_DISTANCE_Y = 6;
     public static final byte RENDER_KEEP_DISTANCE = 2;
 
-    public static final int RENDERED_WORLD_WIDTH = Utils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
-    public static final int RENDERED_WORLD_HEIGHT = Utils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
+    public static final int RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
+    public static final int RENDERED_WORLD_HEIGHT = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
     public static final int RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
     public static final int RENDERED_WORLD_HEIGHT_MASK = RENDERED_WORLD_HEIGHT - 1;
     public static final int RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);

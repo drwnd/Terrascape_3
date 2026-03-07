@@ -3,9 +3,9 @@ package game.player.movement;
 import core.rendering_api.Input;
 import core.settings.CoreKeySettings;
 import core.settings.CoreToggleSettings;
+import core.utils.MathUtils;
 
 import game.utils.Position;
-import game.utils.Utils;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -18,7 +18,7 @@ public final class FlyingState extends MovementState {
     protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
 
         Vector3f velocityChange = new Vector3f();
-        Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
+        Vector3f playerDirection = MathUtils.getHorizontalDirection(playerRotation);
 
         WalkingState.applyXZMovement(velocityChange, HORIZONTAL_FLY_SPEED, SPRINT_SPEED_MODIFIER);
 

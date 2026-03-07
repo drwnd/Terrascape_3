@@ -9,6 +9,7 @@ import core.settings.CoreFloatSettings;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
+import core.utils.MathUtils;
 import core.utils.StringGetter;
 
 import game.player.interaction.Target;
@@ -16,9 +17,8 @@ import game.server.Chunk;
 import game.server.Game;
 import game.server.generation.WorldGeneration;
 import game.utils.Position;
-
 import game.utils.Status;
-import game.utils.Utils;
+
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -111,7 +111,7 @@ public record DebugScreenLine(CoreOptionSettings visibility, CoreOptionSettings 
 
         lines.add(new DebugScreenLine(CoreOptionSettings.VELOCITY_VISIBILITY, CoreOptionSettings.VELOCITY_COLOR, () -> {
             Vector3f velocity = Game.getPlayer().getMovement().getVelocity();
-            return "Velocity %sm/s : [X:%s, Y:%s, Z:%s]".formatted(Utils.round(velocity.length() * 20 / 16, 3), Utils.round(velocity.x, 3), Utils.round(velocity.y, 3), Utils.round(velocity.z, 3));
+            return "Velocity %sm/s : [X:%s, Y:%s, Z:%s]".formatted(MathUtils.round(velocity.length() * 20 / 16, 3), MathUtils.round(velocity.x, 3), MathUtils.round(velocity.y, 3), MathUtils.round(velocity.z, 3));
         }, "Player Velocity"));
 
         lines.add(new DebugScreenLine(CoreOptionSettings.CHUNK_POSITION_VISIBILITY, CoreOptionSettings.CHUNK_POSITION_COLOR, () -> {

@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.utils.MathUtils;
 import game.player.rendering.Camera;
 
 import org.joml.Matrix4f;
@@ -42,7 +43,7 @@ public final class Transformation {
     public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom, Vector3f rotation) {
         float centerX = x * 0.5F, centerY = y * 0.5F, centerZ = z * 0.5F;
         float frustumDistance = Math.max(x, Math.max(y, z)) / zoom;
-        Vector3f direction = Utils.getDirection(rotation).mul(-400.0F);
+        Vector3f direction = MathUtils.getDirection(rotation).mul(-400.0F);
 
         Matrix4f matrix = new Matrix4f();
         matrix.ortho(-frustumDistance, frustumDistance, -frustumDistance, frustumDistance, 5000.0F, 50.0F, true);

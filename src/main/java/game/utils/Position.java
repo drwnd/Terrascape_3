@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.utils.MathUtils;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -62,13 +63,13 @@ public final class Position {
         fractionY += y;
         fractionZ += z;
 
-        intX = intX + Utils.floor(fractionX);
-        intY = intY + Utils.floor(fractionY);
-        intZ = intZ + Utils.floor(fractionZ);
+        intX = intX + MathUtils.floor(fractionX);
+        intY = intY + MathUtils.floor(fractionY);
+        intZ = intZ + MathUtils.floor(fractionZ);
 
-        fractionX = Utils.fraction(fractionX);
-        fractionY = Utils.fraction(fractionY);
-        fractionZ = Utils.fraction(fractionZ);
+        fractionX = MathUtils.fraction(fractionX);
+        fractionY = MathUtils.fraction(fractionY);
+        fractionZ = MathUtils.fraction(fractionZ);
 
         return this;
     }
@@ -78,18 +79,18 @@ public final class Position {
         switch (component) {
             case X_COMPONENT -> {
                 fractionX += value;
-                intX = intX + Utils.floor(fractionX);
-                fractionX = Utils.fraction(fractionX);
+                intX = intX + MathUtils.floor(fractionX);
+                fractionX = MathUtils.fraction(fractionX);
             }
             case Y_COMPONENT -> {
                 fractionY += value;
-                intY = intY + Utils.floor(fractionY);
-                fractionY = Utils.fraction(fractionY);
+                intY = intY + MathUtils.floor(fractionY);
+                fractionY = MathUtils.fraction(fractionY);
             }
             case Z_COMPONENT -> {
                 fractionZ += value;
-                intZ = intZ + Utils.floor(fractionZ);
-                fractionZ = Utils.fraction(fractionZ);
+                intZ = intZ + MathUtils.floor(fractionZ);
+                fractionZ = MathUtils.fraction(fractionZ);
             }
         }
 
@@ -134,7 +135,7 @@ public final class Position {
     }
 
     public String fractionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(Utils.round(fractionX, 3), Utils.round(fractionY, 3), Utils.round(fractionZ, 3));
+        return "[X:%s, Y:%s, Z:%s]".formatted(MathUtils.round(fractionX, 3), MathUtils.round(fractionY, 3), MathUtils.round(fractionZ, 3));
     }
 
     public String inChunkPositionToString() {

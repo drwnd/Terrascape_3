@@ -2,9 +2,9 @@ package game.player.movement;
 
 import core.rendering_api.Input;
 import core.settings.CoreKeySettings;
+import core.utils.MathUtils;
 
 import game.utils.Position;
-import game.utils.Utils;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -20,7 +20,7 @@ public final class WalkingState extends MovementState {
         if (Input.isKeyPressed(CoreKeySettings.SPRINT) && Input.isKeyPressed(CoreKeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this)) next = new SwimmingState();
 
         Vector3f velocityChange = new Vector3f();
-        Vector3f playerDirection = Utils.getHorizontalDirection(playerRotation);
+        Vector3f playerDirection = MathUtils.getHorizontalDirection(playerRotation);
         float speed = getMovementSpeed(lastPosition, WALKING_SPEED, IN_AIR_SPEED, SWIM_STRENGTH);
 
         applyXZMovement(velocityChange, speed, SPRINT_SPEED_MODIFIER);

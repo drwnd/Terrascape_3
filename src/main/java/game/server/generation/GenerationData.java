@@ -1,10 +1,11 @@
 package game.server.generation;
 
+import core.utils.MathUtils;
 import core.utils.OpenSimplex2S;
+
 import game.server.Chunk;
 import game.server.MaterialsData;
 import game.server.biomes.Biome;
-import game.utils.Utils;
 
 import org.joml.Vector3i;
 
@@ -200,9 +201,9 @@ public final class GenerationData {
         int startY = chunkStartY + (inChunkY << LOD) - tree.getMinY();
         int startZ = chunkStartZ + (inChunkZ << LOD) - tree.getMinZ();
 
-        int lengthX = Utils.min(tree.sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.sizeX());
-        int lengthY = Utils.min(tree.sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.sizeY());
-        int lengthZ = Utils.min(tree.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.sizeZ());
+        int lengthX = MathUtils.min(tree.sizeX() - startX, CHUNK_SIZE - inChunkX << LOD, tree.sizeX());
+        int lengthY = MathUtils.min(tree.sizeY() - startY, CHUNK_SIZE - inChunkY << LOD, tree.sizeY());
+        int lengthZ = MathUtils.min(tree.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << LOD, tree.sizeZ());
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return false;
 
         Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
@@ -491,7 +492,7 @@ public final class GenerationData {
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
                 int totalX = (chunkX << CHUNK_SIZE_BITS | mapX) << lod;
                 int totalZ = (chunkZ << CHUNK_SIZE_BITS | mapZ) << lod;
-                featureMap[mapX << CHUNK_SIZE_BITS | mapZ] = Utils.hash(totalX, totalZ, (int) SEED ^ 0x5C34A7B3) * inverseMaxValue;
+                featureMap[mapX << CHUNK_SIZE_BITS | mapZ] = MathUtils.hash(totalX, totalZ, (int) SEED ^ 0x5C34A7B3) * inverseMaxValue;
             }
 
         return featureMap;
@@ -561,7 +562,7 @@ public final class GenerationData {
 
         Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental);
 
-        if ((Utils.hash(totalX, totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
+        if ((MathUtils.hash(totalX, totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
     }
 

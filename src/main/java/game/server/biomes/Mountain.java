@@ -1,7 +1,8 @@
 package game.server.biomes;
 
+import core.utils.MathUtils;
+
 import game.server.generation.GenerationData;
-import game.utils.Utils;
 
 import static game.server.generation.WorldGeneration.WATER_LEVEL;
 import static game.utils.Constants.*;
@@ -13,8 +14,8 @@ public final class Mountain extends Biome {
 
         if (data.isAboveSurface(totalY)) return false;
 
-        int snowHeight = Utils.floor(data.feature * 512 + SNOW_LEVEL);
-        int grassHeight = Utils.floor(data.feature * 512) + WATER_LEVEL;
+        int snowHeight = MathUtils.floor(data.feature * 512 + SNOW_LEVEL);
+        int grassHeight = MathUtils.floor(data.feature * 512) + WATER_LEVEL;
         int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (totalY > snowHeight && !data.isBelowFloorMaterialLevel(totalY, floorMaterialDepth)) data.store(inChunkX, inChunkY, inChunkZ, SNOW);

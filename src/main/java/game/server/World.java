@@ -1,6 +1,7 @@
 package game.server;
 
 import core.utils.FileManager;
+import core.utils.MathUtils;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
 import game.utils.Status;
@@ -69,7 +70,7 @@ public final class World {
         File[] lodFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation()));
         for (File file : lodFiles) {
             String fileLod = file.getName();
-            if (!Utils.isInteger(fileLod, 10) || Integer.parseInt(fileLod) > maxKeptLod) FileManager.delete(file);
+            if (!MathUtils.isInteger(fileLod, 10) || Integer.parseInt(fileLod) > maxKeptLod) FileManager.delete(file);
         }
     }
 
