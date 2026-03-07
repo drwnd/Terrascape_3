@@ -3,10 +3,7 @@ package core.rendering_api;
 import core.assets.AssetManager;
 import core.languages.Language;
 import core.renderables.TextFieldInput;
-import core.settings.CoreKeySettings;
-import core.settings.CoreOptionSettings;
-import core.settings.Settings;
-import core.settings.CoreToggleSettings;
+import core.settings.*;
 import core.settings.optionSettings.FontOption;
 
 public final class StandardWindowInput extends Input {
@@ -49,8 +46,9 @@ public final class StandardWindowInput extends Input {
 
     private static void handleToggleKeybinds() {
         boolean settingUpdated = false;
-        for (CoreToggleSettings setting : CoreToggleSettings.values()) {
-            if (Input.isKeyPressed(setting)) Settings.update(setting, !setting.value());
+        for (Setting setting : Settings.getSettings()) {
+            if (!(setting instanceof ToggleSetting toggleSetting)) continue;
+            if (Input.isKeyPressed(toggleSetting)) Settings.update(toggleSetting, !toggleSetting.value());
             settingUpdated = true;
         }
         if (settingUpdated) Settings.writeToFile();

@@ -1,6 +1,7 @@
 package game.player.interaction;
 
 import core.assets.AssetManager;
+import core.utils.MathUtils;
 import game.assets.StructureIdentifier;
 import game.server.Chunk;
 import game.server.Game;
@@ -93,9 +94,9 @@ public final class StructurePlaceable implements Placeable {
         int startY = chunkStartY + (inChunkY << chunk.LOD) - positionY >> chunk.LOD;
         int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - positionZ >> chunk.LOD;
 
-        int lengthX = Utils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
-        int lengthY = Utils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
-        int lengthZ = Utils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
+        int lengthX = MathUtils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
+        int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
+        int lengthZ = MathUtils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
 
         chunk.storeStructureMaterials(

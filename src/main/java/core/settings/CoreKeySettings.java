@@ -9,14 +9,6 @@ public enum CoreKeySettings implements KeySetting {
     RELOAD_LANGUAGE(GLFW.GLFW_KEY_F8),
     RELOAD_FONT(GLFW.GLFW_KEY_F7);
 
-    public static void setIfPresent(String name, String value) {
-        try {
-            valueOf(name).keybind = Integer.parseInt(value);
-        } catch (IllegalArgumentException ignore) {
-
-        }
-    }
-
     CoreKeySettings(int defaultValue) {
         this.defaultKeybind = defaultValue;
         this.keybind = defaultValue;

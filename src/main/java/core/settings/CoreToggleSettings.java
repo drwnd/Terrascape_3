@@ -6,27 +6,10 @@ public enum CoreToggleSettings implements ToggleSetting {
     RAW_MOUSE_INPUT(true),
     V_SYNC(true),;
 
-    public static void setIfPresent(String name, String value) {
-        try {
-            String[] values = value.split("_");
-            valueOf(name).value = Boolean.parseBoolean(values[0]);
-            valueOf(name).keybind = Integer.parseInt(values[1]);
-        } catch (IllegalArgumentException | IndexOutOfBoundsException ignore) {
-
-        }
-    }
-
     CoreToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.defaultKeybind = GLFW_KEY_UNKNOWN;
-        this.keybind = defaultKeybind;
-    }
-
-    CoreToggleSettings(boolean defaultValue, int defaultKeybind) {
-        this.defaultValue = defaultValue;
-        this.value = defaultValue;
-        this.defaultKeybind = defaultKeybind;
         this.keybind = defaultKeybind;
     }
 

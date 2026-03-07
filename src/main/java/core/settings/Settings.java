@@ -4,8 +4,19 @@ import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public final class Settings {
+
+    static {
+        settings = new ArrayList<>();
+        configureSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
+    }
+
+    public static void configureSettingsEnums(Class<?>... settings) {
+        for (Class<?> setting : settings) configureSettingsEnum(setting);
+    }
 
     public static void update(FloatSetting setting, float value) {
         setting.setValue(value);
@@ -27,15 +38,13 @@ public final class Settings {
         File file = new File(SETTINGS_FILE_LOCATION);
         String[] lines = FileManager.readAllLines(file);
 
+        lines:
         for (String line : lines) {
             String[] tokens = line.split(":");
             if (tokens.length != 2) continue;
             String name = tokens[0], value = tokens[1];
 
-            CoreFloatSettings.setIfPresent(name, value);
-            CoreKeySettings.setIfPresent(name, value);
-            CoreToggleSettings.setIfPresent(name, value);
-            CoreOptionSettings.setIfPresent(name, value);
+            for (Setting setting : settings) if (setting.setIfPresent(name, value)) continue lines;
         }
     }
 
@@ -43,12 +52,7 @@ public final class Settings {
         File file = FileManager.loadAndCreateFile(SETTINGS_FILE_LOCATION);
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()));
-
-            for (CoreFloatSettings setting : CoreFloatSettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
-            for (CoreKeySettings setting : CoreKeySettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.keybind()));
-            for (CoreToggleSettings setting : CoreToggleSettings.values()) writer.write("%s:%s_%s%n".formatted(setting.name(), setting.value(), setting.keybind()));
-            for (CoreOptionSettings setting : CoreOptionSettings.values()) writer.write("%s:%s%n".formatted(setting.name(), setting.value()));
-
+            for (Setting setting : settings) writer.write("%s:%s%n".formatted(setting.name(), setting.toSaveValue()));
             writer.close();
 
         } catch (Exception exception) {
@@ -57,13 +61,21 @@ public final class Settings {
         }
     }
 
-    public static Enum<?> getSettingWithName(String name) {
-        for (Enum<?> setting : CoreFloatSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : CoreKeySettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : CoreToggleSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
-        for (Enum<?> setting : CoreOptionSettings.values()) if (setting.name().equalsIgnoreCase(name)) return setting;
+    public static Setting getSettingWithName(String name) {
+        for (Setting setting : settings) if (setting.name().equalsIgnoreCase(name)) return setting;
         return null;
     }
 
+    public static ArrayList<Setting> getSettings() {
+        return settings;
+    }
+
+    private static void configureSettingsEnum(Class<?> settings) {
+        if (!settings.isEnum() || !(settings.getEnumConstants()[0] instanceof Setting))
+            throw new IllegalArgumentException("Argument must be an Enum implementing Setting");
+        Collections.addAll(Settings.settings, (Setting[]) settings.getEnumConstants());
+    }
+
+    private static final ArrayList<Setting> settings;
     private static final String SETTINGS_FILE_LOCATION = "assets/textData/Settings";
 }

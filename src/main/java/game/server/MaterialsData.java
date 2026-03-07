@@ -2,6 +2,7 @@ package game.server;
 
 import core.utils.ByteArrayList;
 
+import core.utils.MathUtils;
 import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
@@ -1312,7 +1313,7 @@ public final class MaterialsData {
 
     // Helper functions
     private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
-        return Utils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
+        return MathUtils.min(Integer.numberOfTrailingZeros(currentX), Integer.numberOfTrailingZeros(currentY), Integer.numberOfTrailingZeros(currentZ)) < lod
                 || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
                 || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY
                 || currentZ + length <= sourceStart.z || sourceStart.z + size.z <= currentZ;

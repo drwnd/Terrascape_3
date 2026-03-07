@@ -8,18 +8,6 @@ public enum CoreOptionSettings implements OptionSetting {
     LANGUAGE(new Language("English")),
     TEXTURE_PACK(new TexturePack("Default"));
 
-    public static void setIfPresent(String name, String value) {
-        try {
-            CoreOptionSettings setting = valueOf(name);
-
-            Option savedValue = setting.defaultValue.value(value);
-
-            if (savedValue != null) setting.value = savedValue;
-        } catch (IllegalArgumentException ignore) {
-
-        }
-    }
-
     CoreOptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;

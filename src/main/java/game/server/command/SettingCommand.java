@@ -23,7 +23,7 @@ final class SettingCommand {
             String settingName = tokens.expectNextKeyWord().keyword();
             tokens.expectFinishedLess();
 
-            Enum<?> setting = Settings.getSettingWithName(settingName);
+            Setting setting = Settings.getSettingWithName(settingName);
             if (setting == null) return CommandResult.fail(settingName + " is not a Setting");
 
             String value = switch (setting) {
@@ -40,7 +40,7 @@ final class SettingCommand {
         } else if ("set".equalsIgnoreCase(keyword)) {
             String settingName = tokens.expectNextKeyWord().keyword();
 
-            Enum<?> setting = Settings.getSettingWithName(settingName);
+            Setting setting = Settings.getSettingWithName(settingName);
             if (setting == null) return CommandResult.fail(settingName + " is not a Setting");
             Token value = tokens.getNext();
             tokens.expectFinishedLess();

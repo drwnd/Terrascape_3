@@ -10,14 +10,6 @@ public enum CoreFloatSettings implements FloatSetting {
     MISCELLANEOUS_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
     RIM_THICKNESS(0.0F, 0.1F, 0.015625F);
 
-    public static void setIfPresent(String name, String value) {
-        try {
-            valueOf(name).value = Float.parseFloat(value);
-        } catch (IllegalArgumentException ignore) {
-
-        }
-    }
-
     CoreFloatSettings(float min, float max, float defaultValue, float accuracy) {
         this.min = min;
         this.max = max;
