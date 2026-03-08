@@ -241,10 +241,10 @@ public final class RenderingOptimizer {
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         if (!intersection.testAab(
                 (chunkX << chunkSizeBits) - cameraX,
-                (chunkY << chunkSizeBits) - cameraY - (1 << lod) + 1,
+                (chunkY << chunkSizeBits) - cameraY,
                 (chunkZ << chunkSizeBits) - cameraZ,
                 (chunkX + 1 << chunkSizeBits) - cameraX,
-                (chunkY + 1 << chunkSizeBits) - cameraY - (1 << lod) + 1,
+                (chunkY + 1 << chunkSizeBits) - cameraY,
                 (chunkZ + 1 << chunkSizeBits) - cameraZ)) return;
 
         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
