@@ -3,7 +3,6 @@ package game.settings;
 import core.settings.IntSetting;
 
 public enum IntSettings implements IntSetting {
-    FOV(1, 175, 90),
     REACH(0, 500, 5),
     BREAK_PLACE_INTERVALL(1, 20, 5),
     INVENTORY_ITEMS_PER_ROW(1, 64, 8),

@@ -4,8 +4,11 @@ import core.renderables.KeySelector;
 import core.settings.*;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
+
 import game.server.Game;
 import game.server.Server;
+
+import java.util.ArrayList;
 
 final class SettingCommand {
 
@@ -27,10 +30,11 @@ final class SettingCommand {
             if (setting == null) return CommandResult.fail(settingName + " is not a Setting");
 
             String value = switch (setting) {
-                case CoreFloatSettings floatSetting -> Float.toString(floatSetting.value());
-                case CoreKeySettings keySetting -> KeySelector.getDisplayString(keySetting.keybind());
-                case CoreToggleSettings toggleSetting -> Boolean.toString(toggleSetting.value());
-                case CoreOptionSettings optionSetting -> optionSetting.value().name();
+                case FloatSetting floatSetting -> Float.toString(floatSetting.value());
+                case IntSetting intSetting -> Integer.toString(intSetting.value());
+                case ToggleSetting toggleSetting -> Boolean.toString(toggleSetting.value());
+                case KeySetting keySetting -> KeySelector.getDisplayString(keySetting.keybind());
+                case OptionSetting optionSetting -> optionSetting.value().name();
 
                 default -> "";
             };
@@ -46,10 +50,11 @@ final class SettingCommand {
             tokens.expectFinishedLess();
 
             CommandResult result = switch (setting) {
-                case CoreFloatSettings floatSetting -> set(floatSetting, value);
-                case CoreKeySettings keySetting -> set(keySetting, value);
-                case CoreToggleSettings toggleSetting -> set(toggleSetting, value);
-                case CoreOptionSettings optionSetting -> set(optionSetting, value);
+                case FloatSetting floatSetting -> set(floatSetting, value);
+                case IntSetting intSetting -> set(intSetting, value);
+                case ToggleSetting toggleSetting -> set(toggleSetting, value);
+                case KeySetting keySetting -> set(keySetting, value);
+                case OptionSetting optionSetting -> set(optionSetting, value);
 
                 default -> CommandResult.fail("Unrecognized Setting type");
             };
@@ -62,27 +67,37 @@ final class SettingCommand {
         } else if ("list".equalsIgnoreCase(keyword)) {
             tokens.expectFinishedLess();
             Server server = Game.getServer();
+            ArrayList<Setting> settings = Settings.getSettings();
 
             server.sendServerMessage("Float settings:", ColorOption.ORANGE);
-            for (CoreFloatSettings setting : CoreFloatSettings.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            for (Setting setting : settings) if (setting instanceof FloatSetting) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            server.sendServerMessage("Int settings:", ColorOption.ORANGE);
+            for (Setting setting : settings) if (setting instanceof IntSetting) server.sendServerMessage(setting.name(), ColorOption.WHITE);
             server.sendServerMessage("Key settings:", ColorOption.ORANGE);
-            for (CoreKeySettings setting : CoreKeySettings.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            for (Setting setting : settings) if (setting instanceof KeySetting) server.sendServerMessage(setting.name(), ColorOption.WHITE);
             server.sendServerMessage("Toggle settings:", ColorOption.ORANGE);
-            for (CoreToggleSettings setting : CoreToggleSettings.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            for (Setting setting : settings) if (setting instanceof ToggleSetting) server.sendServerMessage(setting.name(), ColorOption.WHITE);
             server.sendServerMessage("Option settings:", ColorOption.ORANGE);
-            for (CoreOptionSettings setting : CoreOptionSettings.values()) server.sendServerMessage(setting.name(), ColorOption.WHITE);
+            for (Setting setting : settings) if (setting instanceof OptionSetting) server.sendServerMessage(setting.name(), ColorOption.WHITE);
 
         } else return CommandResult.fail("Unrecognized keyword : " + keyword);
         return CommandResult.success();
     }
 
-    private static CommandResult set(CoreFloatSettings setting, Token value) {
+    private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
         Settings.update(setting, (float) number);
         return CommandResult.success();
     }
 
-    private static CommandResult set(CoreKeySettings setting, Token value) {
+    private static CommandResult set(IntSetting setting, Token value) {
+        if (!(value instanceof NumberToken(double number)) || (int) number != number)
+            return CommandResult.fail("Value must be an Integer for that setting");
+        Settings.update(setting, (int) number);
+        return CommandResult.success();
+    }
+
+    private static CommandResult set(KeySetting setting, Token value) {
         int codePoint;
         switch (value) {
             case KeywordToken(String keyword) -> {
@@ -103,7 +118,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
-    private static CommandResult set(CoreToggleSettings setting, Token value) {
+    private static CommandResult set(ToggleSetting setting, Token value) {
         if (!(value instanceof KeywordToken(String keyword)) || (!"true".equalsIgnoreCase(keyword) && !"false".equalsIgnoreCase(keyword)))
             return CommandResult.fail("Value must be true / false for that setting");
         boolean toggle = Boolean.parseBoolean(keyword);
@@ -111,7 +126,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
-    private static CommandResult set(CoreOptionSettings setting, Token value) {
+    private static CommandResult set(OptionSetting setting, Token value) {
         String optionValue;
 
         if (value instanceof KeywordToken(String keyword)) optionValue = keyword;

@@ -4,7 +4,7 @@ import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
 import core.utils.MathUtils;
 
-import game.settings.IntSettings;
+import game.settings.FloatSettings;
 import game.utils.Position;
 
 import org.joml.*;
@@ -25,7 +25,7 @@ public final class Camera {
     public void updateProjectionMatrix() {
         projectionMatrix
                 .identity()
-                .setPerspective((float) Math.toRadians(IntSettings.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
+                .setPerspective((float) Math.toRadians(FloatSettings.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
     }
 
     public Vector3f getDirection() {
