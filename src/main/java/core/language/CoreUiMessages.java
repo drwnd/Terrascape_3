@@ -1,8 +1,6 @@
 package core.language;
 
-import core.utils.StringGetter;
-
-public enum CoreUiMessages implements StringGetter {
+public enum CoreUiMessages implements Translatable {
     QUIT_GAME,
     NEW_WORLD,
     SETTINGS,
@@ -99,7 +97,7 @@ public enum CoreUiMessages implements StringGetter {
     GLASS_CASTS_SHADOWS;
 
     @Override
-    public String get() {
-        return Language.getUiMessage(this);
+    public String translationFileName() {
+        return "coreUIMessages";
     }
 }

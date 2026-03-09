@@ -25,7 +25,7 @@ public final class Language implements Option {
 
     public void load() {
         String[] thisMaterialNames = FileManager.readAllLines(new File(languageFile.getPath() + "/materials"));
-        String[] thisUiMessages = FileManager.readAllLines(new File(languageFile.getPath() + "/uiMessages"));
+        String[] thisUiMessages = FileManager.readAllLines(new File(languageFile.getPath() + "/coreUIMessages"));
 
         String[] defaultMaterialNames;
         String[] defaultUiMessages;
@@ -34,7 +34,7 @@ public final class Language implements Option {
             defaultUiMessages = thisUiMessages;
         } else {
             defaultMaterialNames = FileManager.readAllLines(new File("assets/languages/English/materials"));
-            defaultUiMessages = FileManager.readAllLines(new File("assets/languages/English/uiMessages"));
+            defaultUiMessages = FileManager.readAllLines(new File("assets/languages/English/coreUIMessages"));
         }
 
         fill(materialNames, thisMaterialNames, defaultMaterialNames);
@@ -48,6 +48,10 @@ public final class Language implements Option {
 
     public static String getUiMessage(CoreUiMessages message) {
         return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesUiMessage(message);
+    }
+
+    public static String getTranslation(Translatable translatable) {
+        return translatable.fallbackTranslation();
     }
 
 
