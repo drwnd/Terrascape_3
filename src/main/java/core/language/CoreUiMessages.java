@@ -2,7 +2,7 @@ package core.language;
 
 import core.utils.StringGetter;
 
-public enum UiMessage implements StringGetter {
+public enum CoreUiMessages implements StringGetter {
     QUIT_GAME,
     NEW_WORLD,
     SETTINGS,

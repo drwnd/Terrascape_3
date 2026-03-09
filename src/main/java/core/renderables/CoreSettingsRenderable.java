@@ -3,7 +3,7 @@ package core.renderables;
 import core.rendering_api.Window;
 import core.settings.*;
 import core.utils.StringGetter;
-import core.language.UiMessage;
+import core.language.CoreUiMessages;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -20,15 +20,15 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.1F, 0.1F);
 
         UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), getBackButtonAction());
-        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.BACK);
+        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), CoreUiMessages.BACK);
         backButton.addRenderable(text);
 
         UiButton applyChangesButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7f), getApplyChangesButtonAction());
-        text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.APPLY_SETTINGS);
+        text = new TextElement(new Vector2f(0.15F, 0.5F), CoreUiMessages.APPLY_SETTINGS);
         applyChangesButton.addRenderable(text);
 
         UiButton resetButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.55F), getResetSettingsButtonAction());
-        text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.RESET_ALL_SETTINGS);
+        text = new TextElement(new Vector2f(0.15F, 0.5F), CoreUiMessages.RESET_ALL_SETTINGS);
         resetButton.addRenderable(text);
 
         addRenderable(backButton);
@@ -99,7 +99,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
         offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
         sizeToParent = new Vector2f(sizeToParent);
-        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, UiMessage.KEYBIND);
+        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, CoreUiMessages.KEYBIND);
         addRenderable(keySelector);
         keySelectors.add(keySelector);
 
@@ -129,7 +129,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Vector2f offsetToParent = new Vector2f(0.225F, 1.0F - 0.15F * counter);
         UiButton resetButton = new UiButton(sizeToParent, offsetToParent);
 
-        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), UiMessage.RESET_SETTING);
+        TextElement text = new TextElement(new Vector2f(0.15F, 0.5F), CoreUiMessages.RESET_SETTING);
         resetButton.addRenderable(text);
 
         addRenderable(resetButton);

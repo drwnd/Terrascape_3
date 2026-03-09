@@ -18,7 +18,7 @@ public final class Language implements Option {
         this.languageFile = languageFile;
 
         materialNames = new String[AMOUNT_OF_MATERIALS];
-        uiMessages = new String[UiMessage.values().length];
+        uiMessages = new String[CoreUiMessages.values().length];
 
        load();
     }
@@ -46,7 +46,7 @@ public final class Language implements Option {
         return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesMaterialName(material);
     }
 
-    public static String getUiMessage(UiMessage message) {
+    public static String getUiMessage(CoreUiMessages message) {
         return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesUiMessage(message);
     }
 
@@ -85,7 +85,7 @@ public final class Language implements Option {
         return materialNames[material & 0xFF];
     }
 
-    private String getLanguagesUiMessage(UiMessage message) {
+    private String getLanguagesUiMessage(CoreUiMessages message) {
         return uiMessages[message.ordinal()];
     }
 
