@@ -1,8 +1,8 @@
-import core.languages.Language;
+import core.language.Language;
 import core.rendering_api.Window;
 import core.settings.Settings;
 
-import game.languages.UiMessages;
+import game.language.UiMessages;
 import game.menus.MainMenu;
 import game.server.material.Materials;
 import game.settings.*;
