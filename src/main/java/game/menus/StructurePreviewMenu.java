@@ -1,6 +1,6 @@
 package game.menus;
 
-import core.languages.UiMessage;
+import core.language.UiMessage;
 import core.renderables.Clickable;
 import core.renderables.TextElement;
 import core.renderables.UiBackgroundElement;

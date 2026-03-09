@@ -1,8 +1,8 @@
 package game.player;
 
 import core.assets.CoreTextures;
-import core.languages.Language;
-import core.languages.UiMessage;
+import core.language.Language;
+import core.language.UiMessage;
 import core.renderables.TextElement;
 import core.renderables.TextField;
 import core.rendering_api.Input;

@@ -5,7 +5,7 @@ import core.renderables.TextField;
 import core.renderables.UiBackgroundElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
-import core.languages.UiMessage;
+import core.language.UiMessage;
 
 import game.server.World;
 import game.server.saving.WorldSaver;

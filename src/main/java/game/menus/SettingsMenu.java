@@ -3,7 +3,7 @@ package game.menus;
 import core.settings.*;
 import core.utils.Message;
 import core.utils.StringGetter;
-import core.languages.UiMessage;
+import core.language.UiMessage;
 import core.renderables.*;
 import core.rendering_api.Window;
 

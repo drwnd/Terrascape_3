@@ -2,8 +2,8 @@ package game.menus;
 
 import core.renderables.*;
 import core.utils.FileManager;
-import core.languages.Language;
-import core.languages.UiMessage;
+import core.language.Language;
+import core.language.UiMessage;
 import core.rendering_api.Window;
 
 import game.server.Game;

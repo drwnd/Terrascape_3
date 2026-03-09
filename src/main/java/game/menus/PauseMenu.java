@@ -2,7 +2,7 @@ package game.menus;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
-import core.languages.UiMessage;
+import core.language.UiMessage;
 import core.renderables.Renderable;
 import core.renderables.TextElement;
 import core.renderables.UiButton;

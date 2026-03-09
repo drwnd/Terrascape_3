@@ -1,4 +1,4 @@
-package core.languages;
+package core.language;
 
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.Option;

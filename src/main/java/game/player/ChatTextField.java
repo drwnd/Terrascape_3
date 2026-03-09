@@ -1,6 +1,6 @@
 package game.player;
 
-import core.languages.UiMessage;
+import core.language.UiMessage;
 import core.renderables.TextField;
 import org.joml.Vector2f;
 

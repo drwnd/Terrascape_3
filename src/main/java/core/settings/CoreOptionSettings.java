@@ -1,7 +1,7 @@
 package core.settings;
 
 import core.settings.optionSettings.*;
-import core.languages.Language;
+import core.language.Language;
 
 public enum CoreOptionSettings implements OptionSetting {
     FONT(new FontOption("Default")),

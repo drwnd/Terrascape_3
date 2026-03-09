@@ -3,7 +3,7 @@ package core.renderables;
 import core.rendering_api.Window;
 import core.settings.*;
 import core.utils.StringGetter;
-import core.languages.UiMessage;
+import core.language.UiMessage;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;

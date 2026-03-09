@@ -1,7 +1,7 @@
 package core.rendering_api;
 
 import core.assets.AssetManager;
-import core.languages.Language;
+import core.language.Language;
 import core.renderables.TextFieldInput;
 import core.settings.*;
 import core.settings.optionSettings.FontOption;
