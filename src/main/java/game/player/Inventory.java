@@ -2,7 +2,6 @@ package game.player;
 
 import core.assets.CoreTextures;
 import core.language.Language;
-import core.language.CoreUiMessages;
 import core.renderables.TextElement;
 import core.renderables.TextField;
 import core.rendering_api.Input;
@@ -10,6 +9,7 @@ import core.renderables.UiElement;
 import core.rendering_api.Window;
 import core.utils.FileManager;
 
+import game.language.UiMessages;
 import game.player.interaction.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
@@ -43,7 +43,7 @@ public final class Inventory extends UiElement {
         itemNameDisplay.setAddTransparentBackground(true);
         itemNameDisplay.setAllowFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
-        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), CoreUiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
+        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
 
         long start = System.nanoTime();
         for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {

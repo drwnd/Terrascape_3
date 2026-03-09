@@ -7,6 +7,7 @@ import core.language.CoreUiMessages;
 import core.renderables.*;
 import core.rendering_api.Window;
 
+import game.language.UiMessages;
 import game.player.rendering.DebugScreenLine;
 
 import game.settings.FloatSettings;
@@ -30,12 +31,12 @@ public final class SettingsMenu extends UiBackgroundElement {
         addRenderable(backButton);
 
         int index = 0;
-        addSection(++index, SettingsMenu::createControlsSection, CoreUiMessages.CONTROLS_SECTION);
-        addSection(++index, SettingsMenu::createRenderingSection, CoreUiMessages.RENDERING_SECTION);
-        addSection(++index, SettingsMenu::createUiSection, CoreUiMessages.UI_CUSTOMIZATION_SECTION);
-        addSection(++index, SettingsMenu::createSoundSection, CoreUiMessages.SOUND_SECTION);
-        addSection(++index, SettingsMenu::createDebugSection, CoreUiMessages.DEBUG_SECTION);
-        addSection(++index, SettingsMenu::createDebugScreenSection, CoreUiMessages.DEBUG_SCREEN_SECTION);
+        addSection(++index, SettingsMenu::createControlsSection, UiMessages.CONTROLS_SECTION);
+        addSection(++index, SettingsMenu::createRenderingSection, UiMessages.RENDERING_SECTION);
+        addSection(++index, SettingsMenu::createUiSection, UiMessages.UI_CUSTOMIZATION_SECTION);
+        addSection(++index, SettingsMenu::createSoundSection, UiMessages.SOUND_SECTION);
+        addSection(++index, SettingsMenu::createDebugSection, UiMessages.DEBUG_SECTION);
+        addSection(++index, SettingsMenu::createDebugScreenSection, UiMessages.DEBUG_SCREEN_SECTION);
     }
 
     public void scrollSectionButtons(float scroll) {
@@ -56,39 +57,39 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createControlsSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addToggle(ToggleSettings.SCROLL_HOTBAR, CoreUiMessages.SCROLL_HOTBAR);
+        section.addToggle(ToggleSettings.SCROLL_HOTBAR, UiMessages.SCROLL_HOTBAR);
         section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT, CoreUiMessages.RAW_MOUSE_INPUT);
 
-        section.addSlider(CoreFloatSettings.SENSITIVITY, CoreUiMessages.SENSITIVITY);
+        section.addSlider(CoreFloatSettings.SENSITIVITY, UiMessages.SENSITIVITY);
 
-        section.addKeySelector(KeySettings.MOVE_FORWARD, CoreUiMessages.MOVE_FORWARD);
-        section.addKeySelector(KeySettings.MOVE_BACK, CoreUiMessages.MOVE_BACK);
-        section.addKeySelector(KeySettings.MOVE_RIGHT, CoreUiMessages.MOVE_RIGHT);
-        section.addKeySelector(KeySettings.MOVE_LEFT, CoreUiMessages.MOVE_LEFT);
-        section.addKeySelector(KeySettings.JUMP, CoreUiMessages.JUMP);
-        section.addKeySelector(KeySettings.SPRINT, CoreUiMessages.SPRINT);
-        section.addKeySelector(KeySettings.SNEAK, CoreUiMessages.SNEAK);
-        section.addKeySelector(KeySettings.CRAWL, CoreUiMessages.CRAWL);
-        section.addKeySelector(KeySettings.FLY_FAST, CoreUiMessages.FLY_FAST);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_1, CoreUiMessages.HOTBAR_SLOT_1);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_2, CoreUiMessages.HOTBAR_SLOT_2);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_3, CoreUiMessages.HOTBAR_SLOT_3);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_4, CoreUiMessages.HOTBAR_SLOT_4);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_5, CoreUiMessages.HOTBAR_SLOT_5);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_6, CoreUiMessages.HOTBAR_SLOT_6);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_7, CoreUiMessages.HOTBAR_SLOT_7);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_8, CoreUiMessages.HOTBAR_SLOT_8);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_9, CoreUiMessages.HOTBAR_SLOT_9);
-        section.addKeySelector(KeySettings.DESTROY, CoreUiMessages.DESTROY);
-        section.addKeySelector(KeySettings.USE, CoreUiMessages.USE);
-        section.addKeySelector(KeySettings.PICK_BLOCK, CoreUiMessages.PICK_BLOCK);
-        section.addKeySelector(KeySettings.INVENTORY, CoreUiMessages.INVENTORY);
-        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION, CoreUiMessages.LOCK_PLACE_POSITION);
-        section.addKeySelector(KeySettings.ZOOM, CoreUiMessages.ZOOM);
-        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE, CoreUiMessages.INCREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE, CoreUiMessages.DECREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(KeySettings.DROP, CoreUiMessages.DROP);
-        section.addKeySelector(KeySettings.OPEN_CHAT, CoreUiMessages.OPEN_CHAT);
+        section.addKeySelector(KeySettings.MOVE_FORWARD, UiMessages.MOVE_FORWARD);
+        section.addKeySelector(KeySettings.MOVE_BACK, UiMessages.MOVE_BACK);
+        section.addKeySelector(KeySettings.MOVE_RIGHT, UiMessages.MOVE_RIGHT);
+        section.addKeySelector(KeySettings.MOVE_LEFT, UiMessages.MOVE_LEFT);
+        section.addKeySelector(KeySettings.JUMP, UiMessages.JUMP);
+        section.addKeySelector(KeySettings.SPRINT, UiMessages.SPRINT);
+        section.addKeySelector(KeySettings.SNEAK, UiMessages.SNEAK);
+        section.addKeySelector(KeySettings.CRAWL, UiMessages.CRAWL);
+        section.addKeySelector(KeySettings.FLY_FAST, UiMessages.FLY_FAST);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_1, UiMessages.HOTBAR_SLOT_1);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_2, UiMessages.HOTBAR_SLOT_2);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_3, UiMessages.HOTBAR_SLOT_3);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_4, UiMessages.HOTBAR_SLOT_4);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_5, UiMessages.HOTBAR_SLOT_5);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_6, UiMessages.HOTBAR_SLOT_6);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_7, UiMessages.HOTBAR_SLOT_7);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_8, UiMessages.HOTBAR_SLOT_8);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_9, UiMessages.HOTBAR_SLOT_9);
+        section.addKeySelector(KeySettings.DESTROY, UiMessages.DESTROY);
+        section.addKeySelector(KeySettings.USE, UiMessages.USE);
+        section.addKeySelector(KeySettings.PICK_BLOCK, UiMessages.PICK_BLOCK);
+        section.addKeySelector(KeySettings.INVENTORY, UiMessages.INVENTORY);
+        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION, UiMessages.LOCK_PLACE_POSITION);
+        section.addKeySelector(KeySettings.ZOOM, UiMessages.ZOOM);
+        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE, UiMessages.INCREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE, UiMessages.DECREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.DROP, UiMessages.DROP);
+        section.addKeySelector(KeySettings.OPEN_CHAT, UiMessages.OPEN_CHAT);
         section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
 
         return section;
@@ -97,22 +98,22 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(FloatSettings.FOV, CoreUiMessages.FOV);
-        section.addSlider(FloatSettings.CROSSHAIR_SIZE, CoreUiMessages.CROSSHAIR_SIZE);
-        section.addSlider(FloatSettings.HOTBAR_SIZE, CoreUiMessages.HOTBAR_SIZE);
-        section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, CoreUiMessages.NIGHT_BRIGHTNESS);
-        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, CoreUiMessages.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(FloatSettings.FOV, UiMessages.FOV);
+        section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessages.CROSSHAIR_SIZE);
+        section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessages.HOTBAR_SIZE);
+        section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessages.NIGHT_BRIGHTNESS);
+        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessages.AMBIENT_OCCLUSION_SAMPLES);
 
-        section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, CoreUiMessages.USE_SHADOW_MAPPING);
-        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, CoreUiMessages.CHUNKS_CAST_SHADOWS);
-        section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS, CoreUiMessages.PARTICLES_CAST_SHADOWS);
-        section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS, CoreUiMessages.GLASS_CASTS_SHADOWS);
-        section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION, CoreUiMessages.USE_AMBIENT_OCCLUSION);
-        section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES, CoreUiMessages.SHOW_BREAK_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_CUBE_PLACE_PARTICLES, CoreUiMessages.SHOW_CUBE_PLACE_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, CoreUiMessages.SHOW_STRUCTURE_PLACE_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, CoreUiMessages.SHOW_SPLASH_PARTICLES);
-        section.addToggle(ToggleSettings.USE_OCCLUSION_CULLING, CoreUiMessages.USE_OCCLUSION_CULLING);
+        section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessages.USE_SHADOW_MAPPING);
+        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessages.CHUNKS_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS, UiMessages.PARTICLES_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS, UiMessages.GLASS_CASTS_SHADOWS);
+        section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION, UiMessages.USE_AMBIENT_OCCLUSION);
+        section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES, UiMessages.SHOW_BREAK_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_CUBE_PLACE_PARTICLES, UiMessages.SHOW_CUBE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessages.SHOW_STRUCTURE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, UiMessages.SHOW_SPLASH_PARTICLES);
+        section.addToggle(ToggleSettings.USE_OCCLUSION_CULLING, UiMessages.USE_OCCLUSION_CULLING);
 
         return section;
     }
@@ -127,13 +128,13 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(CoreFloatSettings.GUI_SIZE, CoreUiMessages.GUI_SIZE);
         section.addSlider(CoreFloatSettings.TEXT_SIZE, CoreUiMessages.TEXT_SIZE);
         section.addSlider(CoreFloatSettings.RIM_THICKNESS, CoreUiMessages.RIM_THICKNESS);
-        section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, CoreUiMessages.CHAT_MESSAGE_DURATION);
-        section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT, CoreUiMessages.MAX_CHAT_MESSAGE_COUNT);
-        section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, CoreUiMessages.HOTBAR_INDICATOR_SCALER);
-        section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, CoreUiMessages.PAUSE_MENU_BACKGROUND_BLUR);
-        section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, CoreUiMessages.INVENTORY_ITEM_SIZE);
-        section.addSlider(IntSettings.INVENTORY_ITEMS_PER_ROW, CoreUiMessages.INVENTORY_ITEMS_PER_ROW);
-        section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, CoreUiMessages.INVENTORY_ITEM_SCALING);
+        section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, UiMessages.CHAT_MESSAGE_DURATION);
+        section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT, UiMessages.MAX_CHAT_MESSAGE_COUNT);
+        section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessages.HOTBAR_INDICATOR_SCALER);
+        section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessages.PAUSE_MENU_BACKGROUND_BLUR);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, UiMessages.INVENTORY_ITEM_SIZE);
+        section.addSlider(IntSettings.INVENTORY_ITEMS_PER_ROW, UiMessages.INVENTORY_ITEMS_PER_ROW);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, UiMessages.INVENTORY_ITEM_SCALING);
 
         return section;
     }
@@ -142,10 +143,10 @@ public final class SettingsMenu extends UiBackgroundElement {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addSlider(CoreFloatSettings.MASTER_AUDIO, CoreUiMessages.MASTER_AUDIO);
-        section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, CoreUiMessages.FOOTSTEPS_AUDIO);
-        section.addSlider(FloatSettings.PLACE_AUDIO, CoreUiMessages.PLACE_AUDIO);
-        section.addSlider(FloatSettings.DIG_AUDIO, CoreUiMessages.DIG_AUDIO);
-        section.addSlider(FloatSettings.INVENTORY_AUDIO, CoreUiMessages.INVENTORY_AUDIO);
+        section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessages.FOOTSTEPS_AUDIO);
+        section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
+        section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
+        section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);
         section.addSlider(CoreFloatSettings.MISCELLANEOUS_AUDIO, CoreUiMessages.MISCELLANEOUS_AUDIO);
 
         return section;
