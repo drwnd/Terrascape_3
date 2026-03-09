@@ -2,7 +2,7 @@ package game.server.material;
 
 import core.language.Translatable;
 
-public enum MaterialIdentifier implements Translatable {
+public enum Materials implements Translatable {
 
     AIR,
     OUT_OF_WORLD,
@@ -148,5 +148,9 @@ public enum MaterialIdentifier implements Translatable {
     @Override
     public String translationFileName() {
         return "materials";
+    }
+
+    public static Translatable getTranslatable(byte material) {
+        return values()[material & 0xFF];
     }
 }

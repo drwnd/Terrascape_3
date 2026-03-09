@@ -17,6 +17,7 @@ import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
 import game.server.generation.Structure;
+import game.server.material.Materials;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
@@ -96,7 +97,7 @@ public final class Inventory extends UiElement {
             StructureDisplay structureDisplay = display.display;
             if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
 
-            itemNameDisplay.setText(Language.getMaterialName(display.material));
+            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material)));
             itemNameDisplay.setOffsetToParent((float) pixelCoordinate.x / Window.getWidth() - itemNameDisplay.getLength(), (float) pixelCoordinate.y / Window.getHeight());
             itemNameDisplay.setVisible(true);
             break;

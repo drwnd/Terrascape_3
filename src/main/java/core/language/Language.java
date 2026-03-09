@@ -5,10 +5,24 @@ import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
 import java.io.File;
-
-import static game.utils.Constants.AMOUNT_OF_MATERIALS;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public final class Language implements Option {
+
+    static {
+        translatables = new ArrayList<>();
+        indexTable = new HashMap<>();
+        registerTranslationEnums(CoreUiMessages.class);
+    }
+
+    public static void registerTranslationEnums(Class<?>... translatables) {
+        for (Class<?> translatable : translatables) registerTranslationEnum(translatable);
+    }
+
+    public static String getTranslation(Translatable translatable) {
+        return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguageTranslation(translatable);
+    }
 
     public Language(String languageName) {
         this(new File("assets/languages/" + languageName));
@@ -16,42 +30,21 @@ public final class Language implements Option {
 
     private Language(File languageFile) {
         this.languageFile = languageFile;
-
-        materialNames = new String[AMOUNT_OF_MATERIALS];
-        uiMessages = new String[CoreUiMessages.values().length];
-
-       load();
+        translations = new String[translatables.size()][0];
+        load();
     }
 
     public void load() {
-        String[] thisMaterialNames = FileManager.readAllLines(new File(languageFile.getPath() + "/materials"));
-        String[] thisUiMessages = FileManager.readAllLines(new File(languageFile.getPath() + "/coreUIMessages"));
-
-        String[] defaultMaterialNames;
-        String[] defaultUiMessages;
-        if ("English".equals(languageFile.getName())) {
-            defaultMaterialNames = thisMaterialNames;
-            defaultUiMessages = thisUiMessages;
-        } else {
-            defaultMaterialNames = FileManager.readAllLines(new File("assets/languages/English/materials"));
-            defaultUiMessages = FileManager.readAllLines(new File("assets/languages/English/coreUIMessages"));
+        for (int index = 0; index < translations.length; index++) {
+            Translatable[] translatables = Language.translatables.get(index);
+            String translationFilePath = languageFile.getPath() + '/' + translatables[0].translationFileName();
+            String[] translations = FileManager.readAllLines(new File(translationFilePath));
+            this.translations[index] = getTranslations(translatables, translations);
         }
-
-        fill(materialNames, thisMaterialNames, defaultMaterialNames);
-        fill(uiMessages, thisUiMessages, defaultUiMessages);
     }
 
-
-    public static String getMaterialName(byte material) {
-        return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesMaterialName(material);
-    }
-
-    public static String getUiMessage(CoreUiMessages message) {
-        return ((Language) CoreOptionSettings.LANGUAGE.value()).getLanguagesUiMessage(message);
-    }
-
-    public static String getTranslation(Translatable translatable) {
-        return translatable.fallbackTranslation();
+    private String getLanguageTranslation(Translatable translatable) {
+        return translations[indexTable.get(translatable.getClass())][translatable.ordinal()];
     }
 
 
@@ -85,25 +78,23 @@ public final class Language implements Option {
     }
 
 
-    private String getLanguagesMaterialName(byte material) {
-        return materialNames[material & 0xFF];
+    private static void registerTranslationEnum(Class<?> translatables) {
+        if (!translatables.isEnum() || !(translatables.getEnumConstants()[0] instanceof Translatable))
+            throw new IllegalArgumentException("Argument must be an Enum implementing Translatable");
+        Language.translatables.add((Translatable[]) translatables.getEnumConstants());
+        indexTable.put(translatables, indexTable.size());
     }
 
-    private String getLanguagesUiMessage(CoreUiMessages message) {
-        return uiMessages[message.ordinal()];
-    }
-
-    private static void fill(String[] destination, String[] source, String[] backUp) {
-        for (int index = 0; index < destination.length; index++) {
-            if (index >= source.length || "".equals(source[index]) || source[index] == null) {
-                destination[index] = backUp.length > index ? backUp[index] : "--Undefined--";
-                continue;
-            }
-            destination[index] = source[index];
-        }
+    private static String[] getTranslations(Translatable[] translatables, String[] storedTranslations) {
+        String[] translations = new String[translatables.length];
+        for (int index = 0; index < translations.length; index++)
+            translations[index] = storedTranslations.length > index ? storedTranslations[index] : translatables[index].fallbackTranslation();
+        return translations;
     }
 
     private final File languageFile;
-    private final String[] materialNames;
-    private final String[] uiMessages;
+    private final String[][] translations;
+
+    private static final ArrayList<Translatable[]> translatables;
+    private static final HashMap<Class<?>, Integer> indexTable;
 }

@@ -3,12 +3,12 @@ package game.assets;
 import core.assets.identifiers.TextureArrayIdentifier;
 import core.utils.FileIndexSet;
 
-import game.server.material.MaterialIdentifier;
+import game.server.material.Materials;
 
 public enum TextureArrays implements TextureArrayIdentifier {
 
-    MATERIALS("albedo", new FileIndexSet(MaterialIdentifier.values(), ".png")),
-    PROPERTIES("properties", new FileIndexSet(MaterialIdentifier.values(), ".png"));
+    MATERIALS("albedo", new FileIndexSet(Materials.values(), ".png")),
+    PROPERTIES("properties", new FileIndexSet(Materials.values(), ".png"));
 
     TextureArrays(String folderName, FileIndexSet indexSet) {
         this.folderName = folderName;
