@@ -2,7 +2,7 @@ package game.menus;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
-import core.languages.UiMessage;
+import core.language.CoreUiMessages;
 import core.renderables.Renderable;
 import core.renderables.TextElement;
 import core.renderables.UiButton;
@@ -10,6 +10,7 @@ import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.assets.CoreShaders;
 
+import game.language.UiMessages;
 import game.server.Game;
 import game.player.rendering.ObjectLoader;
 import game.settings.FloatSettings;
@@ -26,13 +27,13 @@ public final class PauseMenu extends Renderable {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
 
         UiButton quitButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.3F), getQuitButtonAction());
-        quitButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.QUIT_WORLD));
+        quitButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.QUIT_WORLD));
 
         UiButton settingsButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.45F), getSettingsButtonAction());
-        settingsButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.SETTINGS));
+        settingsButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), CoreUiMessages.SETTINGS));
 
         UiButton playButton = new UiButton(sizeToParent, new Vector2f(0.2F, 0.6F), getPlayButtonAction());
-        playButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.CONTINUE_PLAYING));
+        playButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.CONTINUE_PLAYING));
 
         addRenderable(quitButton);
         addRenderable(settingsButton);

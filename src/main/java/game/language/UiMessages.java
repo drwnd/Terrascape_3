@@ -1,18 +1,16 @@
-package core.languages;
+package game.language;
 
-import core.utils.StringGetter;
+import core.language.Translatable;
 
-public enum UiMessage implements StringGetter {
+public enum UiMessages implements Translatable {
     QUIT_GAME,
     NEW_WORLD,
-    SETTINGS,
     CONFIRM_DELETE_WORLD,
     KEEP_WORLD,
     PLAY_WORLD,
     DELETE_WORLD,
     QUIT_WORLD,
     CONTINUE_PLAYING,
-    BACK,
     EVERYTHING_SECTION,
     CONTROLS_SECTION,
     RENDERING_SECTION,
@@ -23,22 +21,12 @@ public enum UiMessage implements StringGetter {
     WORLD_NAME,
     WORLD_SEED,
     CREATE_WORLD,
-    APPLY_SETTINGS,
-    RESET_ALL_SETTINGS,
-    RESET_SETTING,
-    LANGUAGE,
-    FONT,
     FOV,
-    GUI_SIZE,
     SENSITIVITY,
-    TEXT_SIZE,
-    MASTER_AUDIO,
     FOOTSTEPS_AUDIO,
     PLACE_AUDIO,
     DIG_AUDIO,
     INVENTORY_AUDIO,
-    MISCELLANEOUS_AUDIO,
-    RIM_THICKNESS,
     CROSSHAIR_SIZE,
     HOTBAR_SIZE,
     HOTBAR_INDICATOR_SCALER,
@@ -72,9 +60,7 @@ public enum UiMessage implements StringGetter {
     INCREASE_BREAK_PLACE_SIZE,
     DECREASE_BREAK_PLACE_SIZE,
     DROP,
-    RESIZE_WINDOW,
     SCROLL_HOTBAR,
-    RAW_MOUSE_INPUT,
     USE_SHADOW_MAPPING,
     STRUCTURE_NAME,
     NIGHT_BRIGHTNESS,
@@ -92,14 +78,12 @@ public enum UiMessage implements StringGetter {
     LOCK_PLACE_POSITION,
     AMBIENT_OCCLUSION_SAMPLES,
     USE_OCCLUSION_CULLING,
-    TEXTURE_PACK,
-    KEYBIND,
     CHUNKS_CAST_SHADOWS,
     PARTICLES_CAST_SHADOWS,
     GLASS_CASTS_SHADOWS;
 
     @Override
-    public String get() {
-        return Language.getUiMessage(this);
+    public String translationFileName() {
+        return "uiMessages";
     }
 }

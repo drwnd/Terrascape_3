@@ -5,8 +5,9 @@ import core.renderables.TextField;
 import core.renderables.UiBackgroundElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
-import core.languages.UiMessage;
+import core.language.CoreUiMessages;
 
+import game.language.UiMessages;
 import game.server.World;
 import game.server.saving.WorldSaver;
 
@@ -20,16 +21,16 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
 
         Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        TextField nameField = new TextField(sizeToParent, new Vector2f(0.35f, 0.85f), UiMessage.WORLD_NAME);
-        TextField seedField = new TextField(sizeToParent, new Vector2f(0.35f, 0.7f), UiMessage.WORLD_SEED);
+        TextField nameField = new TextField(sizeToParent, new Vector2f(0.35f, 0.85f), UiMessages.WORLD_NAME);
+        TextField seedField = new TextField(sizeToParent, new Vector2f(0.35f, 0.7f), UiMessages.WORLD_SEED);
 
         sizeToParent = new Vector2f(0.25f, 0.1f);
         UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), getBackButtonRunnable());
-        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.BACK);
+        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), CoreUiMessages.BACK);
         backButton.addRenderable(text);
 
         UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.7f), getCreateButtonRunnable(nameField, seedField));
-        text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessage.CREATE_WORLD);
+        text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessages.CREATE_WORLD);
         createButton.addRenderable(text);
 
         addRenderable(backButton);

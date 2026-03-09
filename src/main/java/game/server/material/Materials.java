@@ -1,8 +1,9 @@
 package game.server.material;
 
-import core.utils.StringGetter;
+import core.language.Translatable;
+import core.utils.FileNamer;
 
-public enum MaterialIdentifier implements StringGetter {
+public enum Materials implements Translatable, FileNamer {
 
     AIR,
     OUT_OF_WORLD,
@@ -146,7 +147,11 @@ public enum MaterialIdentifier implements StringGetter {
     WHITE_LIGHT;
 
     @Override
-    public String get() {
-        return name();
+    public String translationFileName() {
+        return "materials";
+    }
+
+    public static Translatable getTranslatable(byte material) {
+        return values()[material & 0xFF];
     }
 }

@@ -1,13 +1,11 @@
 Spiel schließen
 Neue Welt
-Einstellungen
 Welt für immer löschen :(
 Welt behalten :)
 Spiele %s
 Lösche %s
 Speichern und Schließen
 Spielen
-Zurück
 Alles
 Kontrollen
 Grafik
@@ -18,22 +16,12 @@ Debugbildschirm
 Weltname
 Weltsamen
 Welt erstellen
-Anwenden
-Alle zurücksetzen
-Zurücksetzen
-Sprache
-Schriftart
 Sichtfeld
-Gui Größe
 Empfindsamkeit
-Text Größe
-Meisteraudio
 Fußstapfenaudio
 Platzieren Audio
 Grabenaudio
 Inventaraudio
-Verschiedenes Audio
-Randbreite
 Fadenkreuzgröße
 Hotbargröße
 Hotbaranzeigergröße
@@ -67,9 +55,7 @@ Heranzoomen
 Zerstör-, Platziergröße erhöhen
 Zerstör-, Platziergröße verringern
 Gegenstand fallen lassen
-Fenstergröße ändern
 Hotbarscrollen
-Direkte Mauseingabe
 Benutze Shadowmapping
 Strukturname
 Nachthelligkeit
@@ -87,8 +73,6 @@ Zeige Platscherpartikel
 Fixiere Patzierungsposition
 Umgebungsverdeckungsproben
 Benutzte Umgebungsverdeckung
-Texturenpacket
-Tastenkürzel
 Chunks werfen Schatten
 Partikel werfen Schatten
 Glas wirft Schatten

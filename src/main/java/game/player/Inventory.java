@@ -1,8 +1,7 @@
 package game.player;
 
 import core.assets.CoreTextures;
-import core.languages.Language;
-import core.languages.UiMessage;
+import core.language.Language;
 import core.renderables.TextElement;
 import core.renderables.TextField;
 import core.rendering_api.Input;
@@ -10,6 +9,7 @@ import core.renderables.UiElement;
 import core.rendering_api.Window;
 import core.utils.FileManager;
 
+import game.language.UiMessages;
 import game.player.interaction.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
@@ -17,6 +17,7 @@ import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
 import game.server.generation.Structure;
+import game.server.material.Materials;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
@@ -42,7 +43,7 @@ public final class Inventory extends UiElement {
         itemNameDisplay.setAddTransparentBackground(true);
         itemNameDisplay.setAllowFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
-        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessage.STRUCTURE_NAME, this::reloadStructureButtons);
+        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
 
         long start = System.nanoTime();
         for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {
@@ -96,7 +97,7 @@ public final class Inventory extends UiElement {
             StructureDisplay structureDisplay = display.display;
             if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
 
-            itemNameDisplay.setText(Language.getMaterialName(display.material));
+            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material)));
             itemNameDisplay.setOffsetToParent((float) pixelCoordinate.x / Window.getWidth() - itemNameDisplay.getLength(), (float) pixelCoordinate.y / Window.getHeight());
             itemNameDisplay.setVisible(true);
             break;

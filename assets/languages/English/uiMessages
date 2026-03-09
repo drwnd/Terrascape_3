@@ -1,13 +1,11 @@
 Quit Game
 New World
-Settings
 Delete World Forever :(
 Keep World :)
 Play %s
 Delete %s
 Save and Quit
 Play
-Back
 Everything
 Controls
 Rendering
@@ -18,22 +16,12 @@ Debug Screen
 World Name
 World Seed
 Create World
-Apply
-Reset All
-Reset
-Language
-Font
 Field Of View
-Gui Size
 Sensitivity
-Text Size
-Master Audio
 Footsteps Audio
 Place Audio
 Dig Audio
 Inventory Audio
-Miscellaneous Audio
-Rim Thickness
 Crosshair Size
 Hotbar Size
 Hotbar Indicator Size
@@ -67,9 +55,7 @@ Zoom
 Increase Break Place Size
 Decrease Break Place Size
 Drop Item
-Resize Window
 Scroll Hotbar
-Raw Mouse Input
 Use Shadow Mapping
 Structure Name
 Night Brightness
@@ -87,8 +73,6 @@ Show Splash Particles
 Lock Place Position
 Ambient Occlusion Samples
 Use Occlusion Culling
-Texture Pack
-Keybind
 Chunks cast Shadows
 Particles cast Shadows
 Glass casts Shadows

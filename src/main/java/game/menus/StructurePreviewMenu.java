@@ -1,6 +1,6 @@
 package game.menus;
 
-import core.languages.UiMessage;
+import core.language.CoreUiMessages;
 import core.renderables.Clickable;
 import core.renderables.TextElement;
 import core.renderables.UiBackgroundElement;
@@ -26,7 +26,7 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
         setScaleWithGuiSize(false);
 
         UiButton backButton = new UiButton(new Vector2f(0.25F, 0.1F), new Vector2f(0.05F, 0.85F), getBackButtonAction());
-        backButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessage.BACK));
+        backButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), CoreUiMessages.BACK));
 
         addRenderable(backButton);
         addRenderable(display);

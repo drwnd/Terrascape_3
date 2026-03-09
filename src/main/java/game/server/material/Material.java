@@ -15,7 +15,7 @@ public final class Material {
         AssetManager.reload();
 
         Gson gson = new Gson();
-        for (MaterialIdentifier identifier : MaterialIdentifier.values()) loadMaterial(identifier, gson);
+        for (Materials identifier : Materials.values()) loadMaterial(identifier, gson);
         System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
@@ -29,14 +29,14 @@ public final class Material {
 
     public static String getSystemName(byte material) {
         if ((material & 0xFF) >= AMOUNT_OF_MATERIALS) return "UNKNOWN";
-        return MaterialIdentifier.values()[material & 0xFF].name();
+        return Materials.values()[material & 0xFF].name();
     }
 
     private static void setMaterialData(byte material, byte properties) {
         MATERIAL_PROPERTIES[material & 0xFF] = properties;
     }
 
-    private static void loadMaterial(MaterialIdentifier identifier, Gson gson) {
+    private static void loadMaterial(Materials identifier, Gson gson) {
         String json = FileManager.loadJson("assets/materials/%s.json".formatted(identifier.name()));
         Material material = gson.fromJson(json, Material.class);
         setMaterialData((byte) identifier.ordinal(), Properties.getCombinedValue(material.properties));
