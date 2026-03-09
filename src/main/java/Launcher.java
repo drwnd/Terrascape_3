@@ -7,7 +7,7 @@ import game.settings.*;
 public final class Launcher {
 
     public static void main(String[] args) {
-        Settings.configureSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
+        Settings.registerSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
         Settings.loadFromFile();
         Window.init("Terrascape * 4096 remastered");
         Window.pushRenderable(new MainMenu());

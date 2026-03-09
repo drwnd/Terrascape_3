@@ -11,11 +11,11 @@ public final class Settings {
 
     static {
         settings = new ArrayList<>();
-        configureSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
+        registerSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
     }
 
-    public static void configureSettingsEnums(Class<?>... settings) {
-        for (Class<?> setting : settings) configureSettingsEnum(setting);
+    public static void registerSettingsEnums(Class<?>... settings) {
+        for (Class<?> setting : settings) registerSettingsEnum(setting);
     }
 
     public static void update(FloatSetting setting, float value) {
@@ -82,7 +82,7 @@ public final class Settings {
         return settings;
     }
 
-    private static void configureSettingsEnum(Class<?> settings) {
+    private static void registerSettingsEnum(Class<?> settings) {
         if (!settings.isEnum() || !(settings.getEnumConstants()[0] instanceof Setting))
             throw new IllegalArgumentException("Argument must be an Enum implementing Setting");
         Collections.addAll(Settings.settings, (Setting[]) settings.getEnumConstants());
