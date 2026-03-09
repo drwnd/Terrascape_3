@@ -1,8 +1,9 @@
 package game.server.material;
 
 import core.language.Translatable;
+import core.utils.FileNamer;
 
-public enum Materials implements Translatable {
+public enum Materials implements Translatable, FileNamer {
 
     AIR,
     OUT_OF_WORLD,
