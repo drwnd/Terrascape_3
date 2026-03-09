@@ -14,8 +14,9 @@ public final class Settings {
         registerSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
     }
 
-    public static void registerSettingsEnums(Class<?>... settings) {
-        for (Class<?> setting : settings) registerSettingsEnum(setting);
+    @SafeVarargs
+    public static void registerSettingsEnums(Class<? extends Setting>... settings) {
+        for (Class<? extends Setting> setting : settings) registerSettingsEnum(setting);
     }
 
     public static void update(FloatSetting setting, float value) {
@@ -82,10 +83,9 @@ public final class Settings {
         return settings;
     }
 
-    private static void registerSettingsEnum(Class<?> settings) {
-        if (!settings.isEnum() || !(settings.getEnumConstants()[0] instanceof Setting))
-            throw new IllegalArgumentException("Argument must be an Enum implementing Setting");
-        Collections.addAll(Settings.settings, (Setting[]) settings.getEnumConstants());
+    private static void registerSettingsEnum(Class<? extends Setting> settings) {
+        if (!settings.isEnum()) throw new IllegalArgumentException("Argument must be an Enum");
+        Collections.addAll(Settings.settings, settings.getEnumConstants());
     }
 
     private static final ArrayList<Setting> settings;

@@ -16,8 +16,9 @@ public final class Language implements Option {
         registerTranslationEnums(CoreUiMessages.class);
     }
 
-    public static void registerTranslationEnums(Class<?>... translatables) {
-        for (Class<?> translatable : translatables) registerTranslationEnum(translatable);
+    @SafeVarargs
+    public static void registerTranslationEnums(Class<? extends Translatable>... translatables) {
+        for (Class<? extends Translatable> translatable : translatables) registerTranslationEnum(translatable);
     }
 
     public static String getTranslation(Translatable translatable) {
@@ -78,10 +79,9 @@ public final class Language implements Option {
     }
 
 
-    private static void registerTranslationEnum(Class<?> translatables) {
-        if (!translatables.isEnum() || !(translatables.getEnumConstants()[0] instanceof Translatable))
-            throw new IllegalArgumentException("Argument must be an Enum implementing Translatable");
-        Language.translatables.add((Translatable[]) translatables.getEnumConstants());
+    private static void registerTranslationEnum(Class<? extends Translatable> translatables) {
+        if (!translatables.isEnum()) throw new IllegalArgumentException("Argument must be an Enum");
+        Language.translatables.add(translatables.getEnumConstants());
         indexTable.put(translatables, indexTable.size());
     }
 
@@ -96,5 +96,5 @@ public final class Language implements Option {
     private final String[][] translations;
 
     private static final ArrayList<Translatable[]> translatables;
-    private static final HashMap<Class<?>, Integer> indexTable;
+    private static final HashMap<Class<? extends Translatable>, Integer> indexTable;
 }
