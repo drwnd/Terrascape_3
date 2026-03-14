@@ -4,7 +4,7 @@ public interface IntSetting extends Setting, NumberSetting<Integer> {
 
     default boolean setIfPresent(String name, String value) {
         if (!name().equalsIgnoreCase(name)) return false;
-        setValue(Integer.parseInt(value));
+        setValue((int) Double.parseDouble(value));
         return true;
     }
 

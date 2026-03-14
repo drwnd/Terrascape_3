@@ -1,7 +1,6 @@
 package core.rendering_api;
 
 import core.assets.AssetManager;
-import core.language.Language;
 import core.renderables.TextFieldInput;
 import core.settings.*;
 import core.settings.optionSettings.FontOption;
@@ -33,7 +32,6 @@ public final class StandardWindowInput extends Input {
         if (Input.isKeyPressed(CoreKeySettings.RESIZE_WINDOW)) Window.toggleFullScreen();
         if (Input.isKeyPressed(CoreKeySettings.RELOAD_ASSETS)) AssetManager.reload();
         if (Input.isKeyPressed(CoreKeySettings.RELOAD_SETTINGS)) Settings.loadFromFile();
-        if (Input.isKeyPressed(CoreKeySettings.RELOAD_LANGUAGE)) ((Language) CoreOptionSettings.LANGUAGE.value()).load();
         if (Input.isKeyPressed(CoreKeySettings.RELOAD_FONT)) ((FontOption) CoreOptionSettings.FONT.value()).load();
 
         if (!(Window.getInput() instanceof TextFieldInput)) handleToggleKeybinds();
