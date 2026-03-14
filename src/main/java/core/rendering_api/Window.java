@@ -227,5 +227,5 @@ public final class Window {
     private static long frameTime = 0L;
 
     private static Input input = standardInput;
-    private static CrashCallback crashCallback = _ -> CrashAction.PRINT;
+    private static CrashCallback crashCallback = _ -> CrashAction.PRINT_AND_CLOSE;
 }
