@@ -96,7 +96,11 @@ public final class Settings {
         for (String[] tokens : AssetManager.get(fileIdentifier).getTokens())
             for (Setting setting : settings) {
                 if (tokens.length != 2) continue;
-                if (setting.setIfPresent(tokens[0], tokens[1])) break;
+                try {
+                    if (setting.setIfPresent(tokens[0], tokens[1])) break;
+                } catch (Exception _) {
+
+                }
             }
     }
 
