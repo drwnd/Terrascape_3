@@ -19,7 +19,7 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         saveInt(record.positions().size());
         saveInt(record.rotations().size());
 
-        for (Position position : record.positions()) savePosition(position);
+        for (Position position : record.positions()) saveGeneric(position, Position::save);
         for (Vector3f rotation : record.rotations()) saveVector3f(rotation);
     }
 
@@ -31,7 +31,7 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         ArrayList<Position> positions = new ArrayList<>(positionCount);
         ArrayList<Vector3f> rotations = new ArrayList<>(rotationCount);
 
-        for (int count = 0; count < positionCount; count++) positions.add(loadPosition());
+        for (int count = 0; count < positionCount; count++) positions.add(loadGeneric(Position::load));
         for (int count = 0; count < rotationCount; count++) rotations.add(loadVector3f());
 
         return new PlayerRecord(positions, rotations);

@@ -1,6 +1,5 @@
 package core.utils;
 
-import game.utils.Position;
 import org.joml.*;
 
 import java.io.File;
@@ -78,7 +77,7 @@ public abstract class Saver<T> {
     }
 
 
-    protected final void saveLong(long value) {
+    public final void saveLong(long value) {
         data.add((byte) (value >> 56));
         data.add((byte) (value >> 48));
         data.add((byte) (value >> 40));
@@ -89,7 +88,7 @@ public abstract class Saver<T> {
         data.add((byte) value);
     }
 
-    protected final long loadLong() {
+    public final long loadLong() {
         return (long) loadByte() << 56
                 | (loadByte() & 0xFFL) << 48
                 | (loadByte() & 0xFFL) << 40
@@ -100,35 +99,35 @@ public abstract class Saver<T> {
                 | loadByte() & 0xFFL;
     }
 
-    protected final void saveInt(int value) {
+    public final void saveInt(int value) {
         data.add((byte) (value >> 24));
         data.add((byte) (value >> 16));
         data.add((byte) (value >> 8));
         data.add((byte) value);
     }
 
-    protected final int loadInt() {
+    public final int loadInt() {
         return loadByte() << 24
                 | (loadByte() & 0xFF) << 16
                 | (loadByte() & 0xFF) << 8
                 | loadByte() & 0xFF;
     }
 
-    protected final void saveShort(short value) {
+    public final void saveShort(short value) {
         data.add((byte) (value >> 8));
         data.add((byte) value);
     }
 
-    protected final short loadShort() {
+    public final short loadShort() {
         return (short) ((loadByte() & 0xFF) << 8
                 | (loadByte() & 0xFF));
     }
 
-    protected final void saveByte(byte value) {
+    public final void saveByte(byte value) {
         data.add(value);
     }
 
-    protected final byte loadByte() {
+    public final byte loadByte() {
         if (currentIndex >= data.size()) {
             currentIndex++;
             return (byte) 0;
@@ -136,28 +135,28 @@ public abstract class Saver<T> {
         return data.get(currentIndex++);
     }
 
-    protected final void saveBoolean(boolean value) {
+    public final void saveBoolean(boolean value) {
         data.add((byte) (value ? 1 : 0));
     }
 
-    protected final boolean loadBoolean() {
+    public final boolean loadBoolean() {
         return loadByte() != 0;
     }
 
-    protected final void saveFloat(float value) {
+    public final void saveFloat(float value) {
         saveInt(Float.floatToIntBits(value));
     }
 
-    protected final float loadFloat() {
+    public final float loadFloat() {
         return Float.intBitsToFloat(loadInt());
     }
 
-    protected final void saveByteArray(byte[] value) {
+    public final void saveByteArray(byte[] value) {
         saveInt(value.length);
         data.add(value);
     }
 
-    protected final byte[] loadByteArray() {
+    public final byte[] loadByteArray() {
         int length = loadInt();
         byte[] value = new byte[length];
         if (data.size() >= currentIndex + length)
@@ -166,88 +165,94 @@ public abstract class Saver<T> {
         return value;
     }
 
-    protected final void saveVector2i(Vector2i value) {
+    public final void saveVector2i(Vector2i value) {
         saveInt(value.x);
         saveInt(value.y);
     }
 
-    protected final Vector2i loadVector2i() {
+    public final Vector2i loadVector2i() {
         return new Vector2i(loadInt(), loadInt());
     }
 
-    protected final void saveVector3i(Vector3i value) {
+    public final void saveVector3i(Vector3i value) {
         saveInt(value.x);
         saveInt(value.y);
         saveInt(value.z);
     }
 
-    protected final Vector3i loadVector3i() {
+    public final Vector3i loadVector3i() {
         return new Vector3i(loadInt(), loadInt(), loadInt());
     }
 
-    protected final void saveVector4i(Vector4i value) {
+    public final void saveVector4i(Vector4i value) {
         saveInt(value.x);
         saveInt(value.y);
         saveInt(value.z);
         saveInt(value.w);
     }
 
-    protected final Vector4i loadVector4i() {
+    public final Vector4i loadVector4i() {
         return new Vector4i(loadInt(), loadInt(), loadInt(), loadInt());
     }
 
-    protected final void saveVector2f(Vector2f value) {
+    public final void saveVector2f(Vector2f value) {
         saveFloat(value.x);
         saveFloat(value.y);
     }
 
-    protected final Vector2f loadVector2f() {
+    public final Vector2f loadVector2f() {
         return new Vector2f(loadFloat(), loadFloat());
     }
 
-    protected final void saveVector3f(Vector3f value) {
+    public final void saveVector3f(Vector3f value) {
         saveFloat(value.x);
         saveFloat(value.y);
         saveFloat(value.z);
     }
 
-    protected final Vector3f loadVector3f() {
+    public final Vector3f loadVector3f() {
         return new Vector3f(loadFloat(), loadFloat(), loadFloat());
     }
 
-    protected final void saveVector4f(Vector4f value) {
+    public final void saveVector4f(Vector4f value) {
         saveFloat(value.x);
         saveFloat(value.y);
         saveFloat(value.z);
         saveFloat(value.w);
     }
 
-    protected final Vector4f loadVector4f() {
+    public final Vector4f loadVector4f() {
         return new Vector4f(loadFloat(), loadFloat(), loadFloat(), loadFloat());
     }
 
-    protected final void savePosition(Position position) {
-        saveVector3i(position.intPosition());
-        saveVector3f(position.fractionPosition());
-    }
-
-    protected final Position loadPosition() {
-        return new Position(loadVector3i(), loadVector3f());
-    }
-
-    protected final void saveString(String string) {
+    public final void saveString(String string) {
         saveInt(string.length());
         for (char character : string.toCharArray()) saveShort((short) character);
     }
 
-    protected final String loadString() {
+    public final String loadString() {
         int length = loadInt();
         StringBuilder builder = new StringBuilder(length);
         for (int counter = 0; counter < length; counter++) builder.append((char) loadShort());
         return builder.toString();
     }
 
+    public final <V> void saveGeneric(V object, GenericSaver<V> savable) {
+        savable.save(object, this);
+    }
+
+    public final <V> V loadGeneric(GenericLoader<V> loadable) {
+        return loadable.load(this);
+    }
 
     private int currentIndex;
     private final ByteArrayList data;
+
+    public interface GenericLoader<T> {
+        T load(Saver<?> saver);
+    }
+
+    public interface GenericSaver<T> {
+        void save(T object, Saver<?> saver);
+    }
 }

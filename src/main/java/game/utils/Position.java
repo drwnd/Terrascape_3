@@ -1,6 +1,7 @@
 package game.utils;
 
 import core.utils.MathUtils;
+import core.utils.Saver;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -10,6 +11,21 @@ public final class Position {
 
     public int intX, intY, intZ;
     public float fractionX, fractionY, fractionZ;
+
+
+    public static void save(Position position, Saver<?> saver) {
+        saver.saveInt(position.intX);
+        saver.saveInt(position.intY);
+        saver.saveInt(position.intZ);
+        saver.saveFloat(position.fractionX);
+        saver.saveFloat(position.fractionY);
+        saver.saveFloat(position.fractionZ);
+    }
+
+    public static Position load(Saver<?> saver) {
+        return new Position(saver.loadInt(), saver.loadInt(), saver.loadInt(), saver.loadFloat(), saver.loadFloat(), saver.loadFloat());
+    }
+
 
     public Position() {
         this.intX = 0;

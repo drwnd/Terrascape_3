@@ -26,7 +26,7 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected void save(Player player) {
-        savePosition(player.getPosition());
+        saveGeneric(player.getPosition(), Position::save);
         saveVector3f(player.getCamera().getRotation());
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());
@@ -36,7 +36,7 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player load() {
-        Position position = loadPosition();
+        Position position = loadGeneric(Position::load);
         Vector3f rotation = loadVector3f();
         Vector3f velocity = loadVector3f();
         int selectedSlot = loadInt();
