@@ -2,7 +2,7 @@ package core.settings;
 
 import core.assets.AssetManager;
 import core.assets.SettingsFile;
-import core.assets.identifiers.SettingsFileIdentifier;
+import core.assets.identifiers.AssetIdentifier;
 import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
@@ -102,5 +102,5 @@ public final class Settings {
 
     private static final ArrayList<Setting> settings;
     private static final String SETTINGS_FILE_LOCATION = "assets/textData/Settings";
-    private static final SettingsFileIdentifier fileIdentifier;
+    private static final AssetIdentifier<SettingsFile> fileIdentifier;
 }
