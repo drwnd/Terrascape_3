@@ -2,14 +2,14 @@ package core.assets;
 
 public final class SettingsFile extends Asset {
 
-    private final String[][] settings;
+    private final String[][] tokens;
 
-    public SettingsFile(String[][] settings) {
-        this.settings = settings;
+    public SettingsFile(String[][] tokens) {
+        this.tokens = tokens;
     }
 
-    public String[][] getSettings() {
-        return settings;
+    public String[][] getTokens() {
+        return tokens;
     }
 
     @Override

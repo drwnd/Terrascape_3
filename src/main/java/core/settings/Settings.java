@@ -1,15 +1,19 @@
 package core.settings;
 
+import core.assets.AssetManager;
+import core.assets.SettingsFile;
+import core.assets.identifiers.SettingsFileIdentifier;
 import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 public final class Settings {
 
     static {
+        fileIdentifier = () -> Settings::loadSettingsFile;
         settings = new ArrayList<>();
         registerSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
     }
@@ -48,17 +52,8 @@ public final class Settings {
     }
 
     public static void loadFromFile() {
-        File file = new File(SETTINGS_FILE_LOCATION);
-        String[] lines = FileManager.readAllLines(file);
-
-        lines:
-        for (String line : lines) {
-            String[] tokens = line.split(":");
-            if (tokens.length != 2) continue;
-            String name = tokens[0], value = tokens[1];
-
-            for (Setting setting : settings) if (setting.setIfPresent(name, value)) continue lines;
-        }
+        AssetManager.reload(fileIdentifier);
+        initSettings(settings);
     }
 
     public static void writeToFile() {
@@ -83,11 +78,29 @@ public final class Settings {
         return settings;
     }
 
+    private static SettingsFile loadSettingsFile() {
+        String[] settingsFileContents = FileManager.readAllLines(new File(SETTINGS_FILE_LOCATION));
+        String[][] settings = new String[settingsFileContents.length][0];
+        for (int index = 0; index < settingsFileContents.length; index++) settings[index] = settingsFileContents[index].split(":");
+        return new SettingsFile(settings);
+    }
+
     private static void registerSettingsEnum(Class<? extends Setting> settings) {
         if (!settings.isEnum()) throw new IllegalArgumentException("Argument must be an Enum");
-        Collections.addAll(Settings.settings, settings.getEnumConstants());
+        List<Setting> settingList = List.of(settings.getEnumConstants());
+        Settings.settings.addAll(settingList);
+        initSettings(settingList);
+    }
+
+    private static void initSettings(Iterable<Setting> settings) {
+        for (String[] tokens : AssetManager.get(fileIdentifier).getTokens())
+            for (Setting setting : settings) {
+                if (tokens.length != 2) continue;
+                if (setting.setIfPresent(tokens[0], tokens[1])) break;
+            }
     }
 
     private static final ArrayList<Setting> settings;
     private static final String SETTINGS_FILE_LOCATION = "assets/textData/Settings";
+    private static final SettingsFileIdentifier fileIdentifier;
 }
