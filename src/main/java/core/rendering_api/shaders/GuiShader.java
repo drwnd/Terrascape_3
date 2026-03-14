@@ -11,7 +11,7 @@ import org.joml.Vector2f;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public final class GuiShader extends Shader {
+public final class GuiShader extends RenderShader {
     public GuiShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }

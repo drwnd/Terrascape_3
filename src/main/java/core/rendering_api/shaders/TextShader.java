@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL46.*;
 
 import java.awt.*;
 
-public class TextShader extends Shader {
+public class TextShader extends RenderShader {
     public static final int MAX_TEXT_LENGTH = 128;
 
     public TextShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {

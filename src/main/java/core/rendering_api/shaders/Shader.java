@@ -1,8 +1,6 @@
 package core.rendering_api.shaders;
 
 import core.assets.Asset;
-import core.assets.identifiers.ShaderIdentifier;
-import core.utils.FileManager;
 
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
@@ -13,26 +11,9 @@ import java.util.regex.Pattern;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public class Shader extends Asset {
+public abstract class Shader extends Asset {
 
-    public Shader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
-        uniforms = new HashMap<>();
-
-        String vertexShaderCode = FileManager.loadFileContents(SHADER_FOLDER_PATH + vertexShaderFilePath);
-        String fragmentShaderCode = FileManager.loadFileContents(SHADER_FOLDER_PATH + fragmentShaderFilePath);
-        try {
-            programID = createProgram();
-            int vertexShaderID = createVertexShader(vertexShaderCode, programID);
-            int fragmentShaderID = createFragmentShader(fragmentShaderCode, programID);
-            link(programID, vertexShaderID, fragmentShaderID);
-
-            System.out.printf("Creating uniforms for Shader %s%n", identifier);
-            createUniforms(vertexShaderCode);
-            createUniforms(fragmentShaderCode);
-        } catch (Exception exception) {
-            throw new RuntimeException(exception);
-        }
-    }
+    static final String SHADER_FOLDER_PATH = "assets/shaders/";
 
 
     public void bind() {
@@ -112,31 +93,13 @@ public class Shader extends Asset {
     }
 
 
-    private static int createProgram() throws Exception {
+    static int createProgram() throws Exception {
         int programID = glCreateProgram();
         if (programID == 0) throw new Exception("Could not create Shader");
         return programID;
     }
 
-    private static int createVertexShader(String shaderCode, int programID) throws Exception {
-        return createShader(shaderCode, GL_VERTEX_SHADER, programID);
-    }
-
-    private static int createFragmentShader(String shaderCode, int programID) throws Exception {
-        return createShader(shaderCode, GL_FRAGMENT_SHADER, programID);
-    }
-
-    private static void link(int programID, int vertexShaderID, int fragmentShaderID) throws Exception {
-        glLinkProgram(programID);
-
-        if (glGetProgrami(programID, GL_LINK_STATUS) == 0)
-            throw new Exception("Error linking shader code: " + glGetProgramInfoLog(programID, 1024));
-
-        if (vertexShaderID != 0) glDetachShader(programID, vertexShaderID);
-        if (fragmentShaderID != 0) glDetachShader(programID, fragmentShaderID);
-    }
-
-    private static int createShader(String shaderCode, int shaderType, int programID) throws Exception {
+    static int createShader(String shaderCode, int shaderType, int programID) throws Exception {
         int shaderID = glCreateShader(shaderType);
         if (shaderID == 0) throw new Exception("Error creating shader. Type: " + shaderType);
 
@@ -151,7 +114,7 @@ public class Shader extends Asset {
         return shaderID;
     }
 
-    private void createUniforms(String shaderCode) {
+    void createUniforms(String shaderCode) {
         String[] lines = shaderCode.split("\n");
 
         for (String line : lines) {
@@ -181,8 +144,7 @@ public class Shader extends Asset {
     private static final Pattern REMOVE_SEMICOLON = Pattern.compile(";");
     private static final Pattern REMOVE_ARRAY_DECLARATION = Pattern.compile("\\[.*]");
     private static final Pattern REMOVE_UNNECESSARY_WHITESPACE = Pattern.compile(" +");
-    private static final String SHADER_FOLDER_PATH = "assets/shaders/";
 
-    protected final int programID;
-    private final HashMap<String, Integer> uniforms;
+    protected int programID;
+    private final HashMap<String, Integer> uniforms = new HashMap<>();
 }
