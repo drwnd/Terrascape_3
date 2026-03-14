@@ -6,6 +6,7 @@ import core.assets.Texture;
 import core.assets.TextureArray;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
+import core.rendering_api.CoreObjectLoader;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
@@ -251,20 +252,20 @@ public final class Renderer extends Renderable {
 
 
     private void createTextures(int width, int height) {
-        colorTexture = ObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-        sideTexture = ObjectLoader.createTexture2D(GL_R8I, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, GL_NEAREST);
-        shadowColorTexture = ObjectLoader.createTexture2D(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST);
+        colorTexture = CoreObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+        sideTexture = CoreObjectLoader.createTexture2D(GL_R8I, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, GL_NEAREST);
+        shadowColorTexture = CoreObjectLoader.createTexture2D(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST);
 
-        ssaoTexture = ObjectLoader.createTexture2D(GL_RED, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
+        ssaoTexture = CoreObjectLoader.createTexture2D(GL_RED, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-        depthTexture = ObjectLoader.createTexture2D(GL_DEPTH32F_STENCIL8, width, height, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_LINEAR);
+        depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH32F_STENCIL8, width, height, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
 
-        shadowTexture = ObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
+        shadowTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});

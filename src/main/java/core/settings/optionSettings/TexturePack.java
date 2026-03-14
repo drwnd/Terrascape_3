@@ -4,10 +4,10 @@ import core.assets.*;
 import core.assets.identifiers.AssetIdentifier;
 import core.assets.identifiers.TextureArrayIdentifier;
 import core.assets.identifiers.TextureIdentifier;
+import core.rendering_api.CoreObjectLoader;
 import core.settings.CoreOptionSettings;
 import core.utils.FileIndexSet;
 import core.utils.FileManager;
-import game.player.rendering.ObjectLoader;
 
 import java.io.File;
 
@@ -104,7 +104,7 @@ public final class TexturePack implements Option {
         public AssetGenerator<TextureArray> getAssetGenerator() {
             return () -> {
                 Texture[] textures = TexturePack.getTextures(folderName, pathTemplate, indexSet);
-                return ObjectLoader.generateTextureArray(textures);
+                return CoreObjectLoader.generateTextureArray(textures);
             };
         }
     }

@@ -1,6 +1,7 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
+import core.rendering_api.CoreObjectLoader;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
 import core.utils.IntArrayList;
@@ -53,7 +54,7 @@ public final class RenderingOptimizer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, occludeeBuffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
 
-        depthTexture = ObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
+        depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
