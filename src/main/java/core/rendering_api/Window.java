@@ -78,6 +78,7 @@ public final class Window {
 
     public static void renderLoop() {
         while (!glfwWindowShouldClose(window)) {
+            if (renderablesStack.isEmpty()) throw new IllegalStateException("You must push a Renderable to render things.");
             try {
                 long start = System.nanoTime();
 
@@ -198,24 +199,6 @@ public final class Window {
 
     public static void setCrashCallback(CrashCallback crashCallback) {
         Window.crashCallback = crashCallback;
-    }
-
-    public static void checkError(String lastAction) {
-        int error = glGetError();
-        System.out.println(lastAction + " : " + switch (error) {
-            case GL_NO_ERROR -> "No error";
-            case GL_INVALID_ENUM -> "Invalid Enum";
-            case GL_INVALID_VALUE -> "Invalid Value";
-            case GL_INVALID_OPERATION -> "Invalid Operation";
-            case GL_STACK_OVERFLOW -> "Stack Overflow";
-            case GL_STACK_UNDERFLOW -> "Stack Underflow";
-            case GL_OUT_OF_MEMORY -> "Out of Memory";
-            default -> "Unknown 0x" + Integer.toHexString(error).toUpperCase();
-        });
-    }
-
-    public static void clearOldErrors() {
-        while (glGetError() != GL_NO_ERROR) ;
     }
 
     private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
