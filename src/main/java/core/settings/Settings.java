@@ -93,7 +93,7 @@ public final class Settings {
     }
 
     private static void initSettings(Iterable<Setting> settings) {
-        for (String[] tokens : AssetManager.get(fileIdentifier).getTokens())
+        for (String[] tokens : AssetManager.get(fileIdentifier).tokens())
             for (Setting setting : settings) {
                 if (tokens.length != 2) continue;
                 try {

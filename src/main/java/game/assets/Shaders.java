@@ -1,6 +1,8 @@
 package game.assets;
 
+import core.assets.AssetGenerator;
 import core.assets.identifiers.ShaderIdentifier;
+import core.rendering_api.shaders.Shader;
 
 public enum Shaders implements ShaderIdentifier {
 
@@ -16,6 +18,10 @@ public enum Shaders implements ShaderIdentifier {
     AABB,
     OCCLUSION_CULLING,
     CHUNK_SHADOW,
-    PARTICLE_SHADOW
+    PARTICLE_SHADOW;
 
+    @Override
+    public AssetGenerator<Shader> getAssetGenerator() {
+        return () -> ShaderLoader.loadShader(this);
+    }
 }
