@@ -40,7 +40,7 @@ public final class GuiShader extends RenderShader {
 
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.getID());
+        glBindTexture(GL_TEXTURE_2D, texture.id());
 
         setUniform("image", 0);
         if (flipNextDrawVertically) {
@@ -70,11 +70,11 @@ public final class GuiShader extends RenderShader {
     private void draw() {
         GuiElement quad = AssetManager.get(CoreGuiElements.QUAD);
 
-        glBindVertexArray(quad.getVao());
+        glBindVertexArray(quad.vao());
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        glDrawArrays(GL_TRIANGLES, 0, quad.getVertexCount());
+        glDrawArrays(GL_TRIANGLES, 0, quad.vertexCount());
         flipNextDrawVertically = false;
     }
 

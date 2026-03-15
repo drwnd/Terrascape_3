@@ -6,7 +6,7 @@ import game.server.generation.Structure;
 
 import static game.utils.Constants.*;
 
-public final class StructureCollection extends Asset {
+public final class StructureCollection implements Asset {
 
     public StructureCollection(Structure[] structures) {
         this.structures = structures;

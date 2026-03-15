@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public abstract class Shader extends Asset {
+public abstract class Shader implements Asset {
 
     static final String SHADER_FOLDER_PATH = "assets/shaders/";
 

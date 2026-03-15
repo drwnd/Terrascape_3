@@ -1,7 +1,7 @@
 package core.assets;
 
-public abstract class Asset {
+public interface Asset {
 
-    public abstract void delete();
+    void delete();
 
 }

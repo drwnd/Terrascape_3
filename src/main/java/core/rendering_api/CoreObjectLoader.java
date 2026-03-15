@@ -29,7 +29,7 @@ public final class CoreObjectLoader {
 
     public static TextureArray generateTextureArray(Texture[] textures) {
         int textureSize = 0;
-        for (Texture texture : textures) textureSize = Math.max(textureSize, texture.getWidth());
+        for (Texture texture : textures) textureSize = Math.max(textureSize, texture.width());
 
         int textureArray = glGenTextures();
         glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
@@ -42,16 +42,16 @@ public final class CoreObjectLoader {
 
         for (int index = 0; index < textures.length; index++) {
             Texture texture = textures[index];
-            glCopyImageSubData(texture.getID(), GL_TEXTURE_2D, 0, 0, 0, 0,
+            glCopyImageSubData(texture.id(), GL_TEXTURE_2D, 0, 0, 0, 0,
                     textureArray, GL_TEXTURE_2D_ARRAY, 0, 0, 0, index,
-                    texture.getWidth(), texture.getWidth(), 1);
+                    texture.width(), texture.width(), 1);
         }
 
         int[] textureSizes = new int[textures.length];
         for (int index = 0; index < textures.length; index++)
-            textureSizes[index] = textures[index].getWidth();
+            textureSizes[index] = textures[index].width();
 
-        for (Texture texture : textures) glDeleteTextures(texture.getID());
+        for (Texture texture : textures) glDeleteTextures(texture.id());
         return new TextureArray(textureArray, textureSizes);
     }
 
