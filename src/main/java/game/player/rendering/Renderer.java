@@ -98,7 +98,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
-        shader.setUniform("maxTextureSize", materialsTexture.textureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -122,7 +122,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
-        shader.setUniform("maxTextureSize", materialsTexture.textureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -142,7 +142,7 @@ public final class Renderer extends Renderable {
 
         shader.setUniform("textures", 0);
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
-        shader.setUniform("maxTextureSize", materialsTexture.textureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
