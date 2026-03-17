@@ -91,7 +91,7 @@ public final class Renderer extends Renderable {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("propertiesTextures", 1);
@@ -116,7 +116,7 @@ public final class Renderer extends Renderable {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
@@ -139,7 +139,7 @@ public final class Renderer extends Renderable {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("textureSizes", materialsTexture.textureSizes());

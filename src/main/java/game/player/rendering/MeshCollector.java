@@ -90,7 +90,7 @@ public final class MeshCollector {
         return occludees[lod][chunkIndex];
     }
 
-    public boolean isModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
+    public boolean isModelPresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 

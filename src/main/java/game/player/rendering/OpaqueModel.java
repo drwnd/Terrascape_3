@@ -10,20 +10,20 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
+public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
     public static final int FACE_COUNT = 7;
 
     public OpaqueModel(Vector3l position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
-        this((int) position.x << lod, (int) position.y << lod, (int) position.z << lod,
+        this(position.x << lod, position.y << lod, position.z << lod,
                 lod, bufferOrStart, vertexCounts, new int[FACE_COUNT],
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
     public void addDataWithOcclusionCulling(IntArrayList commands, long cameraChunkX, long cameraChunkY, long cameraChunkZ, boolean isLodBorderChunk) {
-        int modelChunkX = chunkX();
-        int modelChunkY = chunkY();
-        int modelChunkZ = chunkZ();
+        long modelChunkX = chunkX();
+        long modelChunkY = chunkY();
+        long modelChunkZ = chunkZ();
         boolean notNull = !isEmpty();
 
         addData(commands, notNull && isVisibleGE(cameraChunkZ, modelChunkZ), NORTH);
@@ -37,9 +37,9 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
 
     public void addDataWithoutOcclusionCulling(IntArrayList commands, long cameraChunkX, long cameraChunkY, long cameraChunkZ, boolean isLodBorderChunk) {
         if (isEmpty()) return;
-        int modelChunkX = chunkX();
-        int modelChunkY = chunkY();
-        int modelChunkZ = chunkZ();
+        long modelChunkX = chunkX();
+        long modelChunkY = chunkY();
+        long modelChunkZ = chunkZ();
 
         if (isVisibleGE(cameraChunkZ, modelChunkZ)) addData(commands, NORTH);
         if (isVisibleGE(cameraChunkY, modelChunkY)) addData(commands, TOP);
@@ -58,15 +58,15 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         glDeleteBuffers(bufferOrStart);
     }
 
-    public int chunkX() {
+    public long chunkX() {
         return totalX >>> CHUNK_SIZE_BITS + LOD;
     }
 
-    public int chunkY() {
+    public long chunkY() {
         return totalY >>> CHUNK_SIZE_BITS + LOD;
     }
 
-    public int chunkZ() {
+    public long chunkZ() {
         return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 

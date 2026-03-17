@@ -129,9 +129,9 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     @Override
     protected Chunk load() {
-        int x = loadInt();
-        int y = loadInt();
-        int z = loadInt();
+        long x = loadLong();
+        long y = loadLong();
+        long z = loadLong();
         int lod = loadInt();
         byte[] materials = loadByteArray();
 

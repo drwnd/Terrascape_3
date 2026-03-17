@@ -7,10 +7,10 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
+public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
 
     public TransparentModel(Vector3l position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
-        this((int) position.x << lod, (int) position.y << lod, (int) position.z << lod,
+        this(position.x << lod, position.y << lod, position.z << lod,
                 lod, bufferOrStart, waterVertexCount, glassVertexCount,
                 (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX);
     }
@@ -62,15 +62,15 @@ public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int 
         glDeleteBuffers(bufferOrStart);
     }
 
-    public int chunkX() {
+    public long chunkX() {
         return totalX >>> CHUNK_SIZE_BITS + LOD;
     }
 
-    public int chunkY() {
+    public long chunkY() {
         return totalY >>> CHUNK_SIZE_BITS + LOD;
     }
 
-    public int chunkZ() {
+    public long chunkZ() {
         return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 }

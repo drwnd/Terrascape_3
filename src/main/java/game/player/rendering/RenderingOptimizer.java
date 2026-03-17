@@ -282,15 +282,15 @@ public final class RenderingOptimizer {
                     continue;
                 }
 
-                int lodModelX = opaqueModel.chunkX();
-                int lodModelY = opaqueModel.chunkY();
-                int lodModelZ = opaqueModel.chunkZ();
+                long lodModelX = opaqueModel.chunkX();
+                long lodModelY = opaqueModel.chunkY();
+                long lodModelZ = opaqueModel.chunkZ();
 
                 if (lod == 0 || modelFarEnoughAway(lodModelX, lodModelY, lodModelZ, lod)) continue;
 
-                int nextLodX = lodModelX << 1;
-                int nextLodY = lodModelY << 1;
-                int nextLodZ = lodModelZ << 1;
+                long nextLodX = lodModelX << 1;
+                long nextLodY = lodModelY << 1;
+                long nextLodZ = lodModelZ << 1;
                 if (modelCubePresent(nextLodX, nextLodY, nextLodZ, lod - 1)) lodVisibilityBits[bitsIndex] &= ~(1L << chunkIndex);
                 else clearModelCubeVisibility(nextLodX, nextLodY, nextLodZ, lod - 1);
             }
@@ -304,7 +304,7 @@ public final class RenderingOptimizer {
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
 
-    private boolean modelCubePresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
+    private boolean modelCubePresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         return meshCollector.isModelPresent(lodModelX, lodModelY, lodModelZ, lod)
                 && meshCollector.isModelPresent(lodModelX, lodModelY, lodModelZ + 1, lod)
                 && meshCollector.isModelPresent(lodModelX, lodModelY + 1, lodModelZ, lod)
@@ -331,7 +331,7 @@ public final class RenderingOptimizer {
         return (visibilityBits[lod][index >> 6] & 1L << index) == 0;
     }
 
-    private void clearModelCubeVisibility(int lodModelX, int lodModelY, int lodModelZ, int lod) {
+    private void clearModelCubeVisibility(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         long[] lodVisibilityBits = visibilityBits[lod];
         int chunkIndex;
         chunkIndex = Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod);
@@ -371,7 +371,7 @@ public final class RenderingOptimizer {
                 boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
                 opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
                 transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
-                occludee.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
+                occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
 
                 if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod) <= 1) {
                     opaqueCommands.set(opaqueCommands.size() - 3, 1);
@@ -437,7 +437,7 @@ public final class RenderingOptimizer {
                 if (meshCollector.isIsolated(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod)) continue;
 
                 AABB occluder = meshCollector.getOccluder(chunkIndex, lod);
-                if (occluder != null) occluder.addData(aabbs, opaqueModel.totalX(), opaqueModel.totalY(), opaqueModel.totalZ(), lod);
+                if (occluder != null) occluder.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
             }
     }
 
