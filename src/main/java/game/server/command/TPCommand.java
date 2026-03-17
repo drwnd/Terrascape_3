@@ -28,7 +28,7 @@ final class TPCommand {
             xAbsolute = false;
         }
         if (tokens.getIncrementNumber() instanceof NumberToken(double x)) {
-            longX += (int) Math.floor(x);
+            longX += (long) Math.floor(x);
             fractionX += (float) (x - Math.floor(x));
             xSet = true;
         }
@@ -41,7 +41,7 @@ final class TPCommand {
             yAbsolute = false;
         }
         if (tokens.getIncrementNumber() instanceof NumberToken(double y)) {
-            longY += (int) Math.floor(y);
+            longY += (long) Math.floor(y);
             fractionY += (float) (y - Math.floor(y));
             ySet = true;
         }
@@ -54,16 +54,16 @@ final class TPCommand {
             zAbsolute = false;
         }
         if (tokens.getIncrementNumber() instanceof NumberToken(double z)) {
-            longZ += (int) Math.floor(z);
+            longZ += (long) Math.floor(z);
             fractionZ += (float) (z - Math.floor(z));
             zSet = true;
         }
 
         if (tokens.getIncrementKeyword() instanceof KeywordToken(String keyword)) {
             if ("abs".equalsIgnoreCase(keyword)) {
-                if (xAbsolute) longX = longX - Integer.MAX_VALUE;
-                if (yAbsolute) longY = longY - Integer.MAX_VALUE;
-                if (zAbsolute) longZ = longZ - Integer.MAX_VALUE;
+                if (xAbsolute) longX = longX - Long.MAX_VALUE;
+                if (yAbsolute) longY = longY - Long.MAX_VALUE;
+                if (zAbsolute) longZ = longZ - Long.MAX_VALUE;
             } else return CommandResult.fail("Unrecognized Coordinate type " + keyword);
         }
 
