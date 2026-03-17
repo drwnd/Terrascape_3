@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public class CuboidPlaceable implements Placeable {
+public final class CuboidPlaceable implements Placeable {
 
     public CuboidPlaceable(byte material, Vector3l position1, Vector3l position2) {
         this.material = material;

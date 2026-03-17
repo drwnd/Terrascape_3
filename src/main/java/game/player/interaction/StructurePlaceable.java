@@ -82,21 +82,17 @@ public final class StructurePlaceable implements Placeable {
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        long positionX = position.x;
-        long positionY = position.y;
-        long positionZ = position.z;
+        int inChunkX = (int) Math.max(chunkStartX, position.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkY = (int) Math.max(chunkStartY, position.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = (int) Math.max(chunkStartZ, position.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int inChunkX = (int) Math.max(chunkStartX, positionX) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkY = (int) Math.max(chunkStartY, positionY) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkZ = (int) Math.max(chunkStartZ, positionZ) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int startX = (int) (chunkStartX + (inChunkX << chunk.LOD) - position.x);
+        int startY = (int) (chunkStartY + (inChunkY << chunk.LOD) - position.y);
+        int startZ = (int) (chunkStartZ + (inChunkZ << chunk.LOD) - position.z);
 
-        int startX = (int) (chunkStartX + (inChunkX << chunk.LOD) - positionX) >> chunk.LOD;
-        int startY = (int) (chunkStartY + (inChunkY << chunk.LOD) - positionY) >> chunk.LOD;
-        int startZ = (int) (chunkStartZ + (inChunkZ << chunk.LOD) - positionZ) >> chunk.LOD;
-
-        int lengthX = (int) MathUtils.min(structure.sizeX() - startX, (long) CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
-        int lengthY = (int) MathUtils.min(structure.sizeY() - startY, (long) CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
-        int lengthZ = (int) MathUtils.min(structure.sizeZ() - startZ, (long) CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
+        int lengthX = MathUtils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
+        int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
+        int lengthZ = MathUtils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
 
         chunk.storeStructureMaterials(

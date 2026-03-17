@@ -25,7 +25,7 @@ public final class MathUtils {
         return true;
     }
 
-    public static long min(long a, long b, long c) {
+    public static int min(int a, int b, int c) {
         return Math.min(a, Math.min(b, c));
     }
 
