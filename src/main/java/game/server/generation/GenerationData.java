@@ -63,7 +63,7 @@ public final class GenerationData {
 
     public void set(int inChunkX, int inChunkZ) {
         int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
-        int mapIndex = getMapIndex(inChunkX + 1, inChunkZ + 1);
+        int mapIndex = getMapIndex(inChunkX, inChunkZ);
 
         totalX = (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
         totalZ = (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
@@ -77,7 +77,7 @@ public final class GenerationData {
         floorMaterialDepth = biome.getFloorMaterialDepth(this);
     }
 
-    public void computeTotalY(long inChunkY) {
+    public void computeTotalY(int inChunkY) {
         totalY = (chunkY << CHUNK_SIZE_BITS | inChunkY) << LOD;
     }
 

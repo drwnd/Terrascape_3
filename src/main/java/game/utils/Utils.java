@@ -120,12 +120,12 @@ public final class Utils {
     }
 
     private static long getWrappedMin(long a, long b) {
-        if (Math.abs(a - b) > 1L << 63) return Math.max(a, b);
+        if (Long.compareUnsigned(Math.abs(a - b), Long.MIN_VALUE) > 0) return Math.max(a, b);
         return Math.min(a, b);
     }
 
     private static long getWrappedMax(long a, long b) {
-        if (Math.abs(a - b) > 1L << 63) return Math.min(a, b);
+        if (Long.compareUnsigned(Math.abs(a - b), Long.MIN_VALUE) > 0) return Math.min(a, b);
         return Math.max(a, b);
     }
 
