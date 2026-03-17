@@ -20,7 +20,7 @@ public abstract class Biome {
         return 48 + data.floorMaterialDepthMod;
     }
 
-    public int getSpecialHeight(int totalX, int totalZ) {
+    public int getSpecialHeight(long totalX, long totalZ) {
         return 0;
     }
 
@@ -28,7 +28,7 @@ public abstract class Biome {
         return 0;
     }
 
-    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+    public Tree getGeneratingTree(long totalX, long height, long totalZ) {
         return null;
     }
 
@@ -36,13 +36,13 @@ public abstract class Biome {
         return getClass().getName();
     }
 
-    protected static Tree getRandomTree(int x, int y, int z, StructureCollectionIdentifier trees) {
-        byte transform = (byte) (MathUtils.hash(x >>> CHUNK_SIZE_BITS, z >>> CHUNK_SIZE_BITS, (int) WorldGeneration.SEED ^ 0xEB0A8449) & Structure.ALL_TRANSFORMS);
-        return new Tree(x, y, z, AssetManager.get(trees).getRandom(x, y, z), transform);
+    protected static Tree getRandomTree(long x, long y, long z, StructureCollectionIdentifier trees) {
+        byte transform = (byte) (MathUtils.hash((int) x >>> CHUNK_SIZE_BITS, (int) z >>> CHUNK_SIZE_BITS, (int) WorldGeneration.SEED ^ 0xEB0A8449) & Structure.ALL_TRANSFORMS);
+        return new Tree(x, y, z, AssetManager.get(trees).getRandom((int) x, (int) y, (int) z), transform);
     }
 
     protected static boolean placeHomogenousSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte material) {
-        int totalY = data.totalY;
+        long totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 
@@ -54,7 +54,7 @@ public abstract class Biome {
     }
 
     protected static boolean placeLayeredSurfaceMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data, byte topMaterial) {
-        int totalY = data.totalY;
+        long totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 

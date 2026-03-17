@@ -4,6 +4,7 @@ package core.utils;
 import org.joml.Options;
 import org.joml.Runtime;
 import org.joml.Vector3dc;
+import org.joml.Vector3i;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -33,8 +34,7 @@ public final class Vector3l {
      * Create a new {@link Vector3l} and initialize all three components with
      * the given value.
      *
-     * @param d
-     *          the value of all three components
+     * @param d the value of all three components
      */
     public Vector3l(long d) {
         this.x = d;
@@ -45,12 +45,9 @@ public final class Vector3l {
     /**
      * Create a new {@link Vector3l} with the given component values.
      *
-     * @param x
-     *          the value of x
-     * @param y
-     *          the value of y
-     * @param z
-     *          the value of z
+     * @param x the value of x
+     * @param y the value of y
+     * @param z the value of z
      */
     public Vector3l(long x, long y, long z) {
         this.x = x;
@@ -61,8 +58,7 @@ public final class Vector3l {
     /**
      * Create a new {@link Vector3l} with the same values as <code>v</code>.
      *
-     * @param v
-     *          the {@link Vector3l} to copy the values from
+     * @param v the {@link Vector3l} to copy the values from
      */
     public Vector3l(Vector3l v) {
         this.x = v.x();
@@ -74,8 +70,7 @@ public final class Vector3l {
      * Create a new {@link Vector3l} and initialize its three components from the first
      * three elements of the given array.
      *
-     * @param xyz
-     *          the array containing at least three elements
+     * @param xyz the array containing at least three elements
      */
     public Vector3l(long[] xyz) {
         this.x = xyz[0];
@@ -98,8 +93,7 @@ public final class Vector3l {
     /**
      * Set the x, y and z components to match the supplied vector.
      *
-     * @param v
-     *          contains the values of x, y and z to set
+     * @param v contains the values of x, y and z to set
      * @return this
      */
     public Vector3l set(Vector3l v) {
@@ -115,8 +109,7 @@ public final class Vector3l {
      * Note that due to the given vector <code>v</code> storing the components
      * in double-precision, there is the possibility to lose precision.
      *
-     * @param v
-     *          the vector to copy from
+     * @param v the vector to copy from
      * @return this
      */
     public Vector3l set(Vector3dc v) {
@@ -129,8 +122,7 @@ public final class Vector3l {
     /**
      * Set the x, y, and z components to the supplied value.
      *
-     * @param d
-     *          the value of all three components
+     * @param d the value of all three components
      * @return this
      */
     public Vector3l set(long d) {
@@ -143,12 +135,9 @@ public final class Vector3l {
     /**
      * Set the x, y and z components to the supplied values.
      *
-     * @param x
-     *          the x component
-     * @param y
-     *          the y component
-     * @param z
-     *          the z component
+     * @param x the x component
+     * @param y the y component
+     * @param z the z component
      * @return this
      */
     public Vector3l set(long x, long y, long z) {
@@ -161,8 +150,7 @@ public final class Vector3l {
     /**
      * Set the three components of this vector to the first three elements of the given array.
      *
-     * @param xyz
-     *          the array containing at least three elements
+     * @param xyz the array containing at least three elements
      * @return this
      */
     public Vector3l set(long[] xyz) {
@@ -184,10 +172,8 @@ public final class Vector3l {
     /**
      * Set the value of the specified component of this vector.
      *
-     * @param component
-     *          the component whose value to set, within <code>[0..2]</code>
-     * @param value
-     *          the value to set
+     * @param component the component whose value to set, within <code>[0..2]</code>
+     * @param value     the value to set
      * @return this
      * @throws IllegalArgumentException if <code>component</code> is not within <code>[0..2]</code>
      */
@@ -212,8 +198,7 @@ public final class Vector3l {
      * Subtract the supplied vector from this one and store the result in
      * <code>this</code>.
      *
-     * @param v
-     *          the vector to subtract
+     * @param v the vector to subtract
      * @return this
      */
     public Vector3l sub(Vector3l v) {
@@ -233,12 +218,9 @@ public final class Vector3l {
     /**
      * Decrement the components of this vector by the given values.
      *
-     * @param x
-     *          the x component to subtract
-     * @param y
-     *          the y component to subtract
-     * @param z
-     *          the z component to subtract
+     * @param x the x component to subtract
+     * @param y the y component to subtract
+     * @param z the z component to subtract
      * @return this
      */
     public Vector3l sub(long x, long y, long z) {
@@ -258,8 +240,7 @@ public final class Vector3l {
     /**
      * Add the supplied vector to this one.
      *
-     * @param v
-     *          the vector to add
+     * @param v the vector to add
      * @return this
      */
     public Vector3l add(Vector3l v) {
@@ -279,12 +260,9 @@ public final class Vector3l {
     /**
      * Increment the components of this vector by the given values.
      *
-     * @param x
-     *          the x component to add
-     * @param y
-     *          the y component to add
-     * @param z
-     *          the z component to add
+     * @param x the x component to add
+     * @param y the y component to add
+     * @param z the z component to add
      * @return this
      */
     public Vector3l add(long x, long y, long z) {
@@ -305,8 +283,7 @@ public final class Vector3l {
      * Multiply all components of this {@link Vector3l} by the given scalar
      * value.
      *
-     * @param scalar
-     *          the scalar to multiply this vector by
+     * @param scalar the scalar to multiply this vector by
      * @return this
      */
     public Vector3l mul(long scalar) {
@@ -326,8 +303,7 @@ public final class Vector3l {
     /**
      * Multiply all components of this {@link Vector3l} by the given vector.
      *
-     * @param v
-     *          the vector to multiply
+     * @param v the vector to multiply
      * @return this
      */
     public Vector3l mul(Vector3l v) {
@@ -347,12 +323,9 @@ public final class Vector3l {
     /**
      * Multiply the components of this vector by the given values.
      *
-     * @param x
-     *          the x component to multiply
-     * @param y
-     *          the y component to multiply
-     * @param z
-     *          the z component to multiply
+     * @param x the x component to multiply
+     * @param y the y component to multiply
+     * @param z the z component to multiply
      * @return this
      */
     public Vector3l mul(long x, long y, long z) {
@@ -372,8 +345,7 @@ public final class Vector3l {
     /**
      * Divide all components of this {@link Vector3l} by the given scalar value.
      *
-     * @param scalar
-     *          the scalar to divide by
+     * @param scalar the scalar to divide by
      * @return this
      */
     public Vector3l div(float scalar) {
@@ -395,8 +367,7 @@ public final class Vector3l {
     /**
      * Divide all components of this {@link Vector3l} by the given scalar value.
      *
-     * @param scalar
-     *          the scalar to divide by
+     * @param scalar the scalar to divide by
      * @return this
      */
     public Vector3l div(long scalar) {
@@ -413,6 +384,10 @@ public final class Vector3l {
         return dest;
     }
 
+    public Vector3i toInt() {
+        return new Vector3i((int) x, (int) y, (int) z);
+    }
+
     public long lengthSquared() {
         return x * x + y * y + z * z;
     }
@@ -423,7 +398,6 @@ public final class Vector3l {
      * @param x The vector's x component
      * @param y The vector's y component
      * @param z The vector's z component
-     *
      * @return the length squared of the given vector
      */
     public static long lengthSquared(long x, long y, long z) {
@@ -440,7 +414,6 @@ public final class Vector3l {
      * @param x The vector's x component
      * @param y The vector's y component
      * @param z The vector's z component
-     *
      * @return the length squared of the given vector
      */
     public static double length(long x, long y, long z) {
@@ -478,18 +451,12 @@ public final class Vector3l {
     /**
      * Return the distance between <code>(x1, y1, z1)</code> and <code>(x2, y2, z2)</code>.
      *
-     * @param x1
-     *          the x component of the first vector
-     * @param y1
-     *          the y component of the first vector
-     * @param z1
-     *          the z component of the first vector
-     * @param x2
-     *          the x component of the second vector
-     * @param y2
-     *          the y component of the second vector
-     * @param z2
-     *          the z component of the second vector
+     * @param x1 the x component of the first vector
+     * @param y1 the y component of the first vector
+     * @param z1 the z component of the first vector
+     * @param x2 the x component of the second vector
+     * @param y2 the y component of the second vector
+     * @param z2 the z component of the second vector
      * @return the euclidean distance
      */
     public static double distance(long x1, long y1, long z1, long x2, long y2, long z2) {
@@ -499,18 +466,12 @@ public final class Vector3l {
     /**
      * Return the squared distance between <code>(x1, y1, z1)</code> and <code>(x2, y2, z2)</code>.
      *
-     * @param x1
-     *          the x component of the first vector
-     * @param y1
-     *          the y component of the first vector
-     * @param z1
-     *          the z component of the first vector
-     * @param x2
-     *          the x component of the second vector
-     * @param y2
-     *          the y component of the second vector
-     * @param z2
-     *          the z component of the second vector
+     * @param x1 the x component of the first vector
+     * @param y1 the y component of the first vector
+     * @param z1 the z component of the first vector
+     * @param x2 the x component of the second vector
+     * @param y2 the y component of the second vector
+     * @param z2 the z component of the second vector
      * @return the euclidean distance squared
      */
     public static long distanceSquared(long x1, long y1, long z1, long x2, long y2, long z2) {
@@ -546,8 +507,7 @@ public final class Vector3l {
     /**
      * Return a string representation of this vector by formatting the vector components with the given {@link NumberFormat}.
      *
-     * @param formatter
-     *          the {@link NumberFormat} used to format the vector components with
+     * @param formatter the {@link NumberFormat} used to format the vector components with
      * @return the string representation
      */
     public String toString(NumberFormat formatter) {
@@ -576,8 +536,7 @@ public final class Vector3l {
     /**
      * Set the components of this vector to be the component-wise minimum of this and the other vector.
      *
-     * @param v
-     *          the other vector
+     * @param v the other vector
      * @return this
      */
     public Vector3l min(Vector3l v) {
@@ -597,8 +556,7 @@ public final class Vector3l {
     /**
      * Set the components of this vector to be the component-wise maximum of this and the other vector.
      *
-     * @param v
-     *          the other vector
+     * @param v the other vector
      * @return this
      */
     public Vector3l max(Vector3l v) {

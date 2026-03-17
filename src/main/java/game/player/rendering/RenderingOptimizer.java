@@ -5,6 +5,7 @@ import core.rendering_api.CoreObjectLoader;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
 import core.utils.IntArrayList;
+import core.utils.Vector3l;
 
 import game.assets.Shaders;
 import game.player.Player;
@@ -17,7 +18,6 @@ import game.utils.Utils;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import java.util.Arrays;
 
@@ -70,7 +70,7 @@ public final class RenderingOptimizer {
     // Occlusion culling for normal rendering
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
         FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
-        Vector3i position = cameraPosition.intPosition();
+        Vector3l position = cameraPosition.longPosition();
 
         cameraChunkX = position.x >>> CHUNK_SIZE_BITS;
         cameraChunkY = position.y >>> CHUNK_SIZE_BITS;
@@ -215,9 +215,9 @@ public final class RenderingOptimizer {
     }
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection, long[][] visibilityBits) {
-        int chunkX = cameraChunkX >> lod;
-        int chunkY = cameraChunkY >> lod;
-        int chunkZ = cameraChunkZ >> lod;
+        long chunkX = cameraChunkX >> lod;
+        long chunkY = cameraChunkY >> lod;
+        long chunkZ = cameraChunkZ >> lod;
 
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
@@ -235,7 +235,7 @@ public final class RenderingOptimizer {
         fillVisibleChunks(chunkX - 1, chunkY, chunkZ, (byte) (1 << EAST), lod, frustumIntersection);
     }
 
-    private void fillVisibleChunks(int chunkX, int chunkY, int chunkZ, byte traveledDirections, int lod, FrustumIntersection intersection) {
+    private void fillVisibleChunks(long chunkX, long chunkY, long chunkZ, byte traveledDirections, int lod, FrustumIntersection intersection) {
         int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
         if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0 || Game.getWorld().getChunk(chunkIndex, lod) == null) return;
 
@@ -296,10 +296,10 @@ public final class RenderingOptimizer {
             }
     }
 
-    private boolean modelFarEnoughAway(int lodModelX, int lodModelY, int lodModelZ, int lod) {
-        int distanceX = Math.abs(Utils.getWrappedChunkCoordinate(lodModelX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod));
-        int distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
-        int distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
+    private boolean modelFarEnoughAway(long lodModelX, long lodModelY, long lodModelZ, int lod) {
+        long distanceX = Math.abs(Utils.getWrappedChunkCoordinate(lodModelX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod));
+        long distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
+        long distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
 
         return distanceX > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceZ > (RENDER_DISTANCE_XZ >> 1) + 1 || distanceY > (RENDER_DISTANCE_Y >> 1) + 1;
     }
@@ -315,11 +315,11 @@ public final class RenderingOptimizer {
                 && meshCollector.isModelPresent(lodModelX + 1, lodModelY + 1, lodModelZ + 1, lod);
     }
 
-    private boolean isLodBorderChunk(int chunkX, int chunkY, int chunkZ, int lod) {
+    private boolean isLodBorderChunk(long chunkX, long chunkY, long chunkZ, int lod) {
         if (lod == 0) return false;
-        int distanceX = Utils.getWrappedChunkCoordinate(chunkX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod);
-        int distanceY = Utils.getWrappedChunkCoordinate(chunkY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod);
-        int distanceZ = Utils.getWrappedChunkCoordinate(chunkZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod);
+        long distanceX = Utils.getWrappedChunkCoordinate(chunkX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod);
+        long distanceY = Utils.getWrappedChunkCoordinate(chunkY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod);
+        long distanceZ = Utils.getWrappedChunkCoordinate(chunkZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod);
 
         int index = Utils.getChunkIndex(chunkX + (distanceX > 0 ? -1 : 1), chunkY, chunkZ, lod);
         if ((visibilityBits[lod][index >> 6] & 1L << index) == 0) return true;
@@ -351,9 +351,9 @@ public final class RenderingOptimizer {
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
         long[] lodVisibilityBits = visibilityBits[lod];
-        int lodCameraChunkX = cameraChunkX >> lod;
-        int lodCameraChunkY = cameraChunkY >> lod;
-        int lodCameraChunkZ = cameraChunkZ >> lod;
+        long lodCameraChunkX = cameraChunkX >> lod;
+        long lodCameraChunkY = cameraChunkY >> lod;
+        long lodCameraChunkZ = cameraChunkZ >> lod;
 
         for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
             for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
@@ -399,9 +399,9 @@ public final class RenderingOptimizer {
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
         long[] lodVisibilityBits = visibilityBits[lod];
-        int lodCameraChunkX = cameraChunkX >> lod;
-        int lodCameraChunkY = cameraChunkY >> lod;
-        int lodCameraChunkZ = cameraChunkZ >> lod;
+        long lodCameraChunkX = cameraChunkX >> lod;
+        long lodCameraChunkY = cameraChunkY >> lod;
+        long lodCameraChunkZ = cameraChunkZ >> lod;
 
         for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
             for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
@@ -446,9 +446,9 @@ public final class RenderingOptimizer {
         shader.bind();
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
         shader.setUniform("iCameraPosition",
-                cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
         glViewport(0, 0, width, height);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -472,9 +472,9 @@ public final class RenderingOptimizer {
         shader.bind();
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
         shader.setUniform("iCameraPosition",
-                cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
         glCullFace(GL_BACK);
         glDepthMask(false);
@@ -494,8 +494,8 @@ public final class RenderingOptimizer {
 
     private long[] lodVisibilityBits;
     private final MeshCollector meshCollector;
-    private int cameraChunkX, cameraChunkY, cameraChunkZ;
-    private int cameraX, cameraY, cameraZ;
+    private long cameraChunkX, cameraChunkY, cameraChunkZ;
+    private long cameraX, cameraY, cameraZ;
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;

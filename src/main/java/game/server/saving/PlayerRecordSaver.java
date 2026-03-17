@@ -44,6 +44,6 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
     }
 }

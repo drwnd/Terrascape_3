@@ -47,9 +47,9 @@ public final class MeshGenerator {
         AABB occluder = chunk.getMaterials().getOccluder();
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
 
-        xStart = chunk.X << CHUNK_SIZE_BITS;
-        yStart = chunk.Y << CHUNK_SIZE_BITS;
-        zStart = chunk.Z << CHUNK_SIZE_BITS;
+        xStart = (int) chunk.X << CHUNK_SIZE_BITS;
+        yStart = (int) chunk.Y << CHUNK_SIZE_BITS;
+        zStart = (int) chunk.Z << CHUNK_SIZE_BITS;
 
         clear();
         addNorthSouthFaces();
@@ -96,7 +96,7 @@ public final class MeshGenerator {
         for (ByteArrayList list : adjacentChunkLayers) list.clear();
     }
 
-    private Mesh loadMesh(int chunkX, int chunkY, int chunkZ, int lod, AABB occluder, AABB occludee) {
+    private Mesh loadMesh(long chunkX, long chunkY, long chunkZ, int lod, AABB occluder, AABB occludee) {
         int[] vertexCounts = new int[opaqueVerticesLists.length];
         int[] opaqueVertices = loadOpaqueVertices(vertexCounts);
         int[] transparentVertices = loadTransparentVertices();

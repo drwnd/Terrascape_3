@@ -13,7 +13,7 @@ public final class BlackWoodForest extends Biome {
     }
 
     @Override
-    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+    public Tree getGeneratingTree(long totalX, long height, long totalZ) {
         return getRandomTree(totalX, height, totalZ, StructureCollectionIdentifier.BLACK_WOOD_TREES);
     }
 

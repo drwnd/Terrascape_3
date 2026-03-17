@@ -1,6 +1,7 @@
 package game.server.saving;
 
 import core.utils.Saver;
+import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
 import game.player.Hotbar;
@@ -12,7 +13,6 @@ import game.player.interaction.StructurePlaceable;
 import game.utils.Position;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 public final class PlayerSaver extends Saver<Player> {
 
@@ -56,13 +56,13 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player getDefault() {
-        Vector3i worldCenter = new Vector3i(0, 0, 0);
+        Vector3l worldCenter = new Vector3l(0, 0, 0);
         return new Player(new Position(worldCenter, new Vector3f()));
     }
 
     @Override
     protected int getVersionNumber() {
-        return 3;
+        return 4;
     }
 
     private void savePlaceable(Placeable placeable) {

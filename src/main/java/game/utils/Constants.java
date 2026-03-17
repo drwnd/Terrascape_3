@@ -12,7 +12,7 @@ public final class Constants {
     public static final int CHUNK_SIZE = 1 << CHUNK_SIZE_BITS;
     public static final int CHUNK_SIZE_PADDED = CHUNK_SIZE + 1;
     public static final int CHUNK_SIZE_MASK = CHUNK_SIZE - 1;
-    public static final int MAX_CHUNKS_MASK = 0x3FFFFFF;
+    public static final long MAX_CHUNKS_MASK = 0x3FFFFFFFFFFFFFFL;
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;

@@ -1,22 +1,22 @@
 package game.player.interaction;
 
+import core.utils.Vector3l;
+
 import game.server.Chunk;
 import game.server.generation.Structure;
-
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
 public interface Placeable {
 
-    void place(Vector3i position, int lod);
+    void place(Vector3l position, int lod);
 
     ArrayList<Chunk> getAffectedChunks();
 
     Structure getStructure();
 
-    boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max);
+    boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
 
-    void offsetPosition(Vector3i position);
+    void offsetPosition(Vector3l position);
 
 }

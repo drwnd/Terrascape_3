@@ -11,6 +11,7 @@ import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
 import core.utils.MathUtils;
 import core.utils.StringGetter;
+import core.utils.Vector3l;
 
 import game.player.interaction.Target;
 import game.server.Chunk;
@@ -22,7 +23,6 @@ import game.utils.Status;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -118,9 +118,9 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
         lines.add(new DebugScreenLine(OptionSettings.CHUNK_POSITION_VISIBILITY, OptionSettings.CHUNK_POSITION_COLOR, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
             Chunk chunk = Game.getWorld().getChunk(
-                    playerPosition.intX >>> CHUNK_SIZE_BITS,
-                    playerPosition.intY >>> CHUNK_SIZE_BITS,
-                    playerPosition.intZ >>> CHUNK_SIZE_BITS, 0);
+                    playerPosition.longX >>> CHUNK_SIZE_BITS,
+                    playerPosition.longY >>> CHUNK_SIZE_BITS,
+                    playerPosition.longZ >>> CHUNK_SIZE_BITS, 0);
             if (chunk == null) return "Chunk is null";
             return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
         }, "Chunk Position"));
@@ -146,7 +146,7 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
                 "Seed"));
 
         lines.add(new DebugScreenLine(OptionSettings.CHUNK_STATUS_VISIBILITY, OptionSettings.CHUNK_STATUS_COLOR, () -> {
-            Vector3i chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
+            Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
@@ -154,7 +154,7 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
         }, "Chunk status"));
 
         lines.add(new DebugScreenLine(OptionSettings.CHUNK_IDENTIFIERS_VISIBILITY, OptionSettings.CHUNK_IDENTIFIERS_COLOR, () -> {
-            Vector3i chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
+            Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";

@@ -23,7 +23,7 @@ public final class World {
         Server.loadImmediateSurroundings();
     }
 
-    public Chunk getChunk(int chunkX, int chunkY, int chunkZ, int lod) {
+    public Chunk getChunk(long chunkX, long chunkY, long chunkZ, int lod) {
         return chunks[lod][Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod)];
     }
 
@@ -39,16 +39,16 @@ public final class World {
         chunks[chunk.LOD][chunk.getIndex()] = chunk;
     }
 
-    public Status getGenerationStatus(int chunkX, int chunkY, int chunkZ, int lod) {
+    public Status getGenerationStatus(long chunkX, long chunkY, long chunkZ, int lod) {
         Chunk chunk = getChunk(chunkX, chunkY, chunkZ, lod);
         if (chunk == null) return Status.NOT_STARTED;
         return chunk.getGenerationStatus();
     }
 
-    public byte getMaterial(int x, int y, int z, int lod) {
+    public byte getMaterial(long x, long y, long z, int lod) {
         Chunk chunk = getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, lod);
         if (chunk == null) return OUT_OF_WORLD;
-        return chunk.getSaveMaterial(x & CHUNK_SIZE_MASK, y & CHUNK_SIZE_MASK, z & CHUNK_SIZE_MASK);
+        return chunk.getSaveMaterial((int) x & CHUNK_SIZE_MASK, (int) y & CHUNK_SIZE_MASK, (int) z & CHUNK_SIZE_MASK);
     }
 
     public void setNull(int chunkIndex, int lod) {

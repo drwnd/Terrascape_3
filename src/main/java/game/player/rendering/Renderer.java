@@ -17,6 +17,7 @@ import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.TexturePack;
 
+import core.utils.Vector3l;
 import game.assets.Shaders;
 import game.assets.TextureArrays;
 import game.assets.Textures;
@@ -86,11 +87,11 @@ public final class Renderer extends Renderable {
     }
 
 
-    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("propertiesTextures", 1);
@@ -111,11 +112,11 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.PROPERTIES)).id());
     }
 
-    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, int x, int y, int z, float time) {
+    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
@@ -134,11 +135,11 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
-    public static void setUpGlassRendering(Shader shader, Matrix4f matrix, int x, int y, int z) {
+    public static void setUpGlassRendering(Shader shader, Matrix4f matrix, long x, long y, long z) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
+        shader.setUniform("iCameraPosition", (int) x & ~CHUNK_SIZE_MASK, (int) y & ~CHUNK_SIZE_MASK, (int) z & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("textures", 0);
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
@@ -393,9 +394,9 @@ public final class Renderer extends Renderable {
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
-                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                    cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
@@ -416,9 +417,9 @@ public final class Renderer extends Renderable {
             shader.bind();
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
-                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                    cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
 
             glEnable(GL_DEPTH_TEST);
@@ -438,9 +439,9 @@ public final class Renderer extends Renderable {
             shader.setUniform("lodSize", 1 << SHADOW_LOD);
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
-                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                    cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
@@ -462,9 +463,9 @@ public final class Renderer extends Renderable {
             shader.bind();
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
-                    cameraPosition.intX & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intY & ~CHUNK_SIZE_MASK,
-                    cameraPosition.intZ & ~CHUNK_SIZE_MASK);
+                    cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                    cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
 
             glEnable(GL_DEPTH_TEST);
@@ -483,7 +484,7 @@ public final class Renderer extends Renderable {
         renderedOpaqueModels = 0;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
         setUpShadowMappedRendering(sunMatrix, shader);
         shader.setUniform("sunMatrix", sunMatrix);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
@@ -506,7 +507,7 @@ public final class Renderer extends Renderable {
 
     private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
         Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
         setUpShadowMappedRendering(sunMatrix, shader);
         glDisable(GL_STENCIL_TEST);
         long currentTick = Game.getServer().getCurrentGameTick();
@@ -564,7 +565,7 @@ public final class Renderer extends Renderable {
         renderedWaterModels = 0;
 
         Shader shader = AssetManager.get(Shaders.WATER);
-        setUpWaterRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, getRenderTime());
+        setUpWaterRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
         setUpShadowMappedRendering(sunMatrix, shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
@@ -588,7 +589,7 @@ public final class Renderer extends Renderable {
         renderedGlassModels = 0;
 
         Shader shader = AssetManager.get(Shaders.GLASS);
-        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
+        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getGlassIndirectBuffer());
 
@@ -606,7 +607,7 @@ public final class Renderer extends Renderable {
 
     private void renderGlassParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
-        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ);
+        setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
         glDisable(GL_STENCIL_TEST);
         long currentTick = Game.getServer().getCurrentGameTick();
         shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
@@ -633,11 +634,11 @@ public final class Renderer extends Renderable {
         Placeable placeable = player.getHeldPlaceable();
         byte material = placeable instanceof CubePlaceable ? ((CubePlaceable) placeable).getMaterial() : AIR;
 
-        Vector3i startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
-        Vector3i endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
+        Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
+        Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
-        Vector3i minPosition = Utils.min(startPositon, endPosition);
-        Vector3i maxPosition = Utils.max(startPositon, endPosition);
+        Vector3l minPosition = Utils.min(startPositon, endPosition);
+        Vector3l maxPosition = Utils.max(startPositon, endPosition);
         CuboidPlaceable.offsetPositions(minPosition, maxPosition);
 
         maxPosition.add(1, 1, 1);
@@ -654,12 +655,12 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
         shader.bind();
         shader.setUniform("iCameraPosition",
-                cameraPositon.intX & ~CHUNK_SIZE_MASK,
-                cameraPositon.intY & ~CHUNK_SIZE_MASK,
-                cameraPositon.intZ & ~CHUNK_SIZE_MASK);
+                cameraPositon.longX & ~CHUNK_SIZE_MASK,
+                cameraPositon.longY & ~CHUNK_SIZE_MASK,
+                cameraPositon.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("minPosition", minPosition);
-        shader.setUniform("maxPosition", maxPosition);
+        shader.setUniform("minPosition", minPosition.toInt());
+        shader.setUniform("maxPosition", maxPosition.toInt());
         shader.setUniform("textures", 0);
         shader.setUniform("material", material);
 
@@ -762,12 +763,12 @@ public final class Renderer extends Renderable {
     private static void renderVolume(Shader shader, Chunk chunk, AABB aabb, int lod) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
-        int x = chunk.X << CHUNK_SIZE_BITS + lod;
-        int y = chunk.Y << CHUNK_SIZE_BITS + lod;
-        int z = chunk.Z << CHUNK_SIZE_BITS + lod;
+        long x = chunk.X << CHUNK_SIZE_BITS + lod;
+        long y = chunk.Y << CHUNK_SIZE_BITS + lod;
+        long z = chunk.Z << CHUNK_SIZE_BITS + lod;
 
-        shader.setUniform("minPosition", x + (aabb.minX << lod), y + (aabb.minY << lod), z + (aabb.minZ << lod));
-        shader.setUniform("maxPosition", x + (aabb.maxX << lod), y + (aabb.maxY << lod), z + (aabb.maxZ << lod));
+        shader.setUniform("minPosition", x + ((long) aabb.minX << lod), y + ((long) aabb.minY << lod), z + ((long) aabb.minZ << lod));
+        shader.setUniform("maxPosition", x + ((long) aabb.maxX << lod), y + ((long) aabb.maxY << lod), z + ((long) aabb.maxZ << lod));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
@@ -783,16 +784,16 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.MATERIALS)).id());
 
         shader.setUniform("iCameraPosition",
-                cameraPositon.intX & ~CHUNK_SIZE_MASK,
-                cameraPositon.intY & ~CHUNK_SIZE_MASK,
-                cameraPositon.intZ & ~CHUNK_SIZE_MASK);
+                cameraPositon.longX & ~CHUNK_SIZE_MASK,
+                cameraPositon.longY & ~CHUNK_SIZE_MASK,
+                cameraPositon.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
         shader.setUniform("material", 0);
         shader.setUniform("textures", 0);
     }
 
     private static int getFlags(Position cameraPosition) {
-        boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.intX, cameraPosition.intY, cameraPosition.intZ, 0) == WATER;
+        boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, 0) == WATER;
         boolean useShadowMapping = ToggleSettings.USE_SHADOW_MAPPING.value();
         boolean doGlassShadows = ToggleSettings.GLASS_CASTS_SHADOWS.value();
         return (doGlassShadows ? DO_GLASS_SHADOWS_BIT : 0) | (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);

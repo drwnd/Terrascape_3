@@ -1,7 +1,7 @@
 package game.player.rendering;
 
 import core.utils.IntArrayList;
-import org.joml.Vector3i;
+import core.utils.Vector3l;
 
 import static org.lwjgl.opengl.GL46.*;
 
@@ -9,8 +9,8 @@ import static game.utils.Constants.*;
 
 public record TransparentModel(int totalX, int totalY, int totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
 
-    public TransparentModel(Vector3i position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
-        this(position.x << lod, position.y << lod, position.z << lod,
+    public TransparentModel(Vector3l position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
+        this((int) position.x << lod, (int) position.y << lod, (int) position.z << lod,
                 lod, bufferOrStart, waterVertexCount, glassVertexCount,
                 (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX);
     }

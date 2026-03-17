@@ -78,14 +78,14 @@ public final class Movement {
         Vector3i hitboxSize = state.getHitboxSize();
         World world = Game.getWorld();
 
-        int minX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        int minZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long minX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        long minZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long y = position.longY - 1;
         int width = hitboxSize.x + 1;
         int depth = hitboxSize.z + 1;
-        int y = position.intY - 1;
 
-        for (int x = minX; x != minX + width; x++)
-            for (int z = minZ; z != minZ + depth; z++) {
+        for (long x = minX; x != minX + width; x++)
+            for (long z = minZ; z != minZ + depth; z++) {
                 byte material = world.getMaterial(x, y, z, 0);
                 if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
             }
@@ -157,19 +157,19 @@ public final class Movement {
         Vector3i hitboxSize = state.getHitboxSize();
         World world = Game.getWorld();
 
-        int startX = getStartX(position, hitboxSize, component);
-        int startY = getStartY(position, hitboxSize, component);
-        int startZ = getStartZ(position, hitboxSize, component);
+        long startX = getStartX(position, hitboxSize, component);
+        long startY = getStartY(position, hitboxSize, component);
+        long startZ = getStartZ(position, hitboxSize, component);
 
         int width = component == X_COMPONENT ? 1 : hitboxSize.x + 1;
         int height = hitboxSize.y;
         int depth = component == Z_COMPONENT ? 1 : hitboxSize.z + 1;
 
-        for (int y = startY + height - 1; y != startY - 1; y--)
-            for (int x = startX; x != startX + width; x++)
-                for (int z = startZ; z != startZ + depth; z++) {
+        for (long y = startY + height - 1; y != startY - 1; y--)
+            for (long x = startX; x != startX + width; x++)
+                for (long z = startZ; z != startZ + depth; z++) {
                     byte material = world.getMaterial(x, y, z, 0);
-                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return (y - position.intY + 1) - position.fractionY;
+                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return (y - position.longY + 1) - position.fractionY;
                 }
         return 0.0F;
     }
@@ -189,9 +189,9 @@ public final class Movement {
     private boolean collides(Position position, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = getStartX(position, hitboxSize, component);
-        int startY = getStartY(position, hitboxSize, component);
-        int startZ = getStartZ(position, hitboxSize, component);
+        long startX = getStartX(position, hitboxSize, component);
+        long startY = getStartY(position, hitboxSize, component);
+        long startZ = getStartZ(position, hitboxSize, component);
 
         int width = component == X_COMPONENT ? 1 : hitboxSize.x + 1;
         int height = component == Y_COMPONENT ? 1 : hitboxSize.y;
@@ -213,9 +213,9 @@ public final class Movement {
 
         int xOffset = component == X_COMPONENT ? (velocity.x > 0.0F ? -1 : 1) : 0;
         int zOffset = component == Z_COMPONENT ? (velocity.z > 0.0F ? -1 : 1) : 0;
-        int startX = position.intX + MathUtils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
-        int startY = position.intY;
-        int startZ = position.intZ + MathUtils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
+        long startX = position.longX + MathUtils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
+        long startY = position.longY;
+        long startZ = position.longZ + MathUtils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
@@ -256,28 +256,28 @@ public final class Movement {
         );
     }
 
-    private int getStartX(Position position, Vector3i hitboxSize, int component) {
+    private long getStartX(Position position, Vector3i hitboxSize, int component) {
         float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F + 0.5F : -hitboxSize.x * 0.5F;
-        return position.intX + MathUtils.floor(position.fractionX + offset);
+        return position.longX + MathUtils.floor(position.fractionX + offset);
     }
 
-    private int getStartY(Position position, Vector3i hitboxSize, int component) {
+    private long getStartY(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Y_COMPONENT && velocity.y > 0 ? hitboxSize.y : 0;
-        return position.intY + MathUtils.floor(position.fractionY + offset);
+        return position.longY + MathUtils.floor(position.fractionY + offset);
     }
 
-    private int getStartZ(Position position, Vector3i hitboxSize, int component) {
+    private long getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
-        return position.intZ + MathUtils.floor(position.fractionZ + offset);
+        return position.longZ + MathUtils.floor(position.fractionZ + offset);
     }
 
 
-    private static boolean collides(int startX, int startY, int startZ, int width, int height, int depth) {
+    private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
         World world = Game.getWorld();
 
-        for (int x = startX; x != startX + width; x++)
-            for (int y = startY; y != startY + height; y++)
-                for (int z = startZ; z != startZ + depth; z++) {
+        for (long x = startX; x != startX + width; x++)
+            for (long y = startY; y != startY + height; y++)
+                for (long z = startZ; z != startZ + depth; z++) {
                     byte material = world.getMaterial(x, y, z, 0);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }
@@ -287,9 +287,9 @@ public final class Movement {
     private static boolean collides(Position position, MovementState state) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        int startY = position.intY;
-        int startZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long startX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        long startY = position.longY;
+        long startZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;

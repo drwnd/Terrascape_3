@@ -46,7 +46,7 @@ public final class ParticleCollector {
         return particleEffects;
     }
 
-    public void addBreakParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte ignoreMaterial) {
+    public void addBreakParticleEffect(long startX, long startY, long startZ, int lengthX, int lengthY, int lengthZ, byte ignoreMaterial) {
         if (!ToggleSettings.SHOW_BREAK_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(lengthX * lengthY * lengthZ);
         IntArrayList transparentParticles = new IntArrayList(lengthX * lengthY * lengthZ);
@@ -68,7 +68,7 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
     }
 
-    public void addPlaceParticleEffect(int startX, int startY, int startZ, int lengthX, int lengthY, int lengthZ, byte material) {
+    public void addPlaceParticleEffect(long startX, long startY, long startZ, int lengthX, int lengthY, int lengthZ, byte material) {
         if (!ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
         IntArrayList particles = new IntArrayList(lengthX * lengthY * lengthZ * SHADER_PARTICLE_INT_SIZE);
 
@@ -85,7 +85,7 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, particles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
     }
 
-    public void addPlaceParticleEffect(int startX, int startY, int startZ, Structure structure) {
+    public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure) {
         if (!ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
         IntArrayList transparentParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
@@ -108,7 +108,7 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, transparentParticles, PLACE_PARTICLE_LIFETIME_TICKS, false);
     }
 
-    private void addParticles(int startX, int startY, int startZ, IntArrayList particles, int lifeTime, boolean isOpaque) {
+    private void addParticles(long startX, long startY, long startZ, IntArrayList particles, int lifeTime, boolean isOpaque) {
         long currentTick = Game.getServer().getCurrentGameTick();
         if (particles.isEmpty()) return;
         int[] particlesData = packParticlesIntoBuffer(particles);
@@ -229,6 +229,6 @@ public final class ParticleCollector {
     private static final int SPLASH_PARTICLE_LIFETIME_TICKS = 20;
     private static final float SPLASH_PARTICLE_GRAVITY = 80;
 
-    public record ToBufferParticleEffect(int[] particlesData, long spawnTick, int lifeTimeTicks, boolean isOpaque, int x, int y, int z) {
+    public record ToBufferParticleEffect(int[] particlesData, long spawnTick, int lifeTimeTicks, boolean isOpaque, long x, long y, long z) {
     }
 }

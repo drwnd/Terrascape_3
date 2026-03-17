@@ -1,5 +1,7 @@
 package game.player.interaction;
 
+import core.utils.Vector3l;
+
 import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
@@ -7,7 +9,6 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 
 import game.server.saving.ChunkSaver;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -24,22 +25,22 @@ public final class CubePlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3i position, int lod) {
+    public void place(Vector3l position, int lod) {
         affectedChunks.clear();
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
 
         int mask = -(1 << breakPlaceSize);
-        if (Integer.numberOfTrailingZeros(position.x & mask) < lod
-                || Integer.numberOfTrailingZeros(position.y & mask) < lod
-                || Integer.numberOfTrailingZeros(position.z & mask) < lod) return;
+        if (Long.numberOfTrailingZeros(position.x & mask) < lod
+                || Long.numberOfTrailingZeros(position.y & mask) < lod
+                || Long.numberOfTrailingZeros(position.z & mask) < lod) return;
 
-        int chunkX = position.x >>> CHUNK_SIZE_BITS + lod;
-        int chunkY = position.y >>> CHUNK_SIZE_BITS + lod;
-        int chunkZ = position.z >>> CHUNK_SIZE_BITS + lod;
+        long chunkX = position.x >>> CHUNK_SIZE_BITS + lod;
+        long chunkY = position.y >>> CHUNK_SIZE_BITS + lod;
+        long chunkZ = position.z >>> CHUNK_SIZE_BITS + lod;
 
-        int inChunkX = position.x >> lod & CHUNK_SIZE_MASK;
-        int inChunkY = position.y >> lod & CHUNK_SIZE_MASK;
-        int inChunkZ = position.z >> lod & CHUNK_SIZE_MASK;
+        int inChunkX = (int) position.x >> lod & CHUNK_SIZE_MASK;
+        int inChunkY = (int) position.y >> lod & CHUNK_SIZE_MASK;
+        int inChunkZ = (int) position.z >> lod & CHUNK_SIZE_MASK;
 
         int lodSize = Math.max(0, breakPlaceSize - lod);
         mask = -(1 << lodSize);
@@ -72,20 +73,20 @@ public final class CubePlaceable implements Placeable {
     }
 
     @Override
-    public boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max) {
+    public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(material, NO_COLLISION)) return false;
 
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
         breakPlaceSize = 1 << breakPlaceSize;
         int mask = -breakPlaceSize;
 
-        int cubeMinX = position.x & mask;
-        int cubeMinY = position.y & mask;
-        int cubeMinZ = position.z & mask;
+        long cubeMinX = position.x & mask;
+        long cubeMinY = position.y & mask;
+        long cubeMinZ = position.z & mask;
 
-        int cubeMaxX = cubeMinX + breakPlaceSize;
-        int cubeMaxY = cubeMinY + breakPlaceSize;
-        int cubeMaxZ = cubeMinZ + breakPlaceSize;
+        long cubeMaxX = cubeMinX + breakPlaceSize;
+        long cubeMaxY = cubeMinY + breakPlaceSize;
+        long cubeMaxZ = cubeMinZ + breakPlaceSize;
 
         return min.x < cubeMaxX && cubeMinX <= max.x
                 && min.y < cubeMaxY && cubeMinY <= max.y
@@ -93,7 +94,7 @@ public final class CubePlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3i position) {
+    public void offsetPosition(Vector3l position) {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
         int mask = -(1 << breakPlaceSize);
         position.x &= mask;

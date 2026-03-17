@@ -2,8 +2,9 @@ package game.player.rendering;
 
 import core.utils.IntArrayList;
 
+import core.utils.Vector3l;
+
 import game.utils.Utils;
-import org.joml.Vector3i;
 
 import static org.lwjgl.opengl.GL46.*;
 
@@ -13,13 +14,13 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
 
     public static final int FACE_COUNT = 7;
 
-    public OpaqueModel(Vector3i position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
-        this(position.x << lod, position.y << lod, position.z << lod,
+    public OpaqueModel(Vector3l position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
+        this((int) position.x << lod, (int) position.y << lod, (int) position.z << lod,
                 lod, bufferOrStart, vertexCounts, new int[FACE_COUNT],
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
-    public void addDataWithOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ, boolean isLodBorderChunk) {
+    public void addDataWithOcclusionCulling(IntArrayList commands, long cameraChunkX, long cameraChunkY, long cameraChunkZ, boolean isLodBorderChunk) {
         int modelChunkX = chunkX();
         int modelChunkY = chunkY();
         int modelChunkZ = chunkZ();
@@ -34,7 +35,7 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         addData(commands, notNull && isLodBorderChunk, 6);
     }
 
-    public void addDataWithoutOcclusionCulling(IntArrayList commands, int cameraChunkX, int cameraChunkY, int cameraChunkZ, boolean isLodBorderChunk) {
+    public void addDataWithoutOcclusionCulling(IntArrayList commands, long cameraChunkX, long cameraChunkY, long cameraChunkZ, boolean isLodBorderChunk) {
         if (isEmpty()) return;
         int modelChunkX = chunkX();
         int modelChunkY = chunkY();
@@ -84,11 +85,11 @@ public record OpaqueModel(int totalX, int totalY, int totalZ, int LOD, int buffe
         commands.add(0);
     }
 
-    private boolean isVisibleLE(int cameraChunk, int modelChunk) {
+    private boolean isVisibleLE(long cameraChunk, long modelChunk) {
         return cameraChunk <= Utils.getWrappedChunkCoordinate(modelChunk, cameraChunk, LOD);
     }
 
-    private boolean isVisibleGE(int cameraChunk, int modelChunk) {
+    private boolean isVisibleGE(long cameraChunk, long modelChunk) {
         return cameraChunk >= Utils.getWrappedChunkCoordinate(modelChunk, cameraChunk, LOD);
     }
 

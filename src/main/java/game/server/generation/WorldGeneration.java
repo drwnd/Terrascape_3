@@ -57,7 +57,7 @@ public final class WorldGeneration {
         return MathUtils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
     }
 
-    public static int getResultingHeight(int totalX, int totalZ) {
+    public static int getResultingHeight(long totalX, long totalZ) {
         double height = GenerationData.heightMapValue(totalX, totalZ);
         double erosion = GenerationData.erosionMapValue(totalX, totalZ);
         double continental = GenerationData.continentalMapValue(totalX, totalZ);
@@ -139,11 +139,11 @@ public final class WorldGeneration {
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
         int height = data.height;
-        int start = Math.clamp((height - data.floorMaterialDepth >> data.LOD) - ((long) data.chunkY << CHUNK_SIZE_BITS), 0, CHUNK_SIZE);
+        int start = Math.clamp((height - data.floorMaterialDepth >> data.LOD) - (data.chunkY << CHUNK_SIZE_BITS), 0, CHUNK_SIZE);
 
         for (int inChunkY = start; inChunkY < CHUNK_SIZE; inChunkY++) {
             data.computeTotalY(inChunkY);
-            int totalY = data.totalY;
+            long totalY = data.totalY;
 
             // Attempting to place biome specific materials and features
             if (biome.placeMaterial(inChunkX, inChunkY, inChunkZ, data)) continue;
@@ -160,9 +160,9 @@ public final class WorldGeneration {
     }
 
     private static void generateStone(GenerationData data) {
-        int chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
-        int chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
-        int chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
 
         for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; index += 8 * 8 * 8) {
             int inChunkX = Utils.getInChunkX(index) << data.LOD;

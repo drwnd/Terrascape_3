@@ -13,7 +13,7 @@ public final class PineForest extends Biome {
     }
 
     @Override
-    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+    public Tree getGeneratingTree(long totalX, long height, long totalZ) {
         return getRandomTree(totalX, height, totalZ, StructureCollectionIdentifier.PINE_TREES);
     }
 

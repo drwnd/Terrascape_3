@@ -2,6 +2,7 @@ package game.player;
 
 import core.rendering_api.Window;
 
+import core.utils.Vector3l;
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.InteractionHandler;
 import game.player.interaction.Placeable;
@@ -106,14 +107,14 @@ public final class Player {
     }
 
 
-    public Vector3i getMinCoordinate() {
+    public Vector3l getMinCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Position(this.position).add(-hitboxSize.x * 0.5F, 0.0F, -hitboxSize.z * 0.5F).intPosition();
+        return new Position(this.position).add(-hitboxSize.x * 0.5F, 0.0F, -hitboxSize.z * 0.5F).longPosition();
     }
 
-    public Vector3i getMaxCoordinate() {
+    public Vector3l getMaxCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Position(this.position).add(hitboxSize.x * 0.5F, hitboxSize.y, hitboxSize.z * 0.5F).intPosition();
+        return new Position(this.position).add(hitboxSize.x * 0.5F, hitboxSize.y, hitboxSize.z * 0.5F).longPosition();
     }
 
     public Placeable getHeldPlaceable() {
