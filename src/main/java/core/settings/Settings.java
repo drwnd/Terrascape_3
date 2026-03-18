@@ -13,7 +13,7 @@ import java.util.List;
 public final class Settings {
 
     static {
-        fileIdentifier = () -> Settings::loadSettingsFile;
+        fileIdentifier = Settings::loadSettingsFile;
         settings = new ArrayList<>();
         registerSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
     }
