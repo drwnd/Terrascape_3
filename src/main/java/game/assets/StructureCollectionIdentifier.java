@@ -1,6 +1,5 @@
 package game.assets;
 
-import core.assets.AssetGenerator;
 import core.assets.AssetManager;
 import core.assets.identifiers.AssetIdentifier;
 import core.utils.FileManager;
@@ -23,24 +22,22 @@ public enum StructureCollectionIdentifier implements AssetIdentifier<StructureCo
     }
 
     @Override
-    public AssetGenerator<StructureCollection> getAssetGenerator() {
-        return () -> {
-            File[] structureFiles = FileManager.getChildren(new File(StructureSaver.getSaveFileLocation()));
-            ArrayList<Structure> structuresList = new ArrayList<>();
+    public StructureCollection generateAsset() {
+        File[] structureFiles = FileManager.getChildren(new File(StructureSaver.getSaveFileLocation()));
+        ArrayList<Structure> structuresList = new ArrayList<>();
 
-            for (File structureFile : structureFiles) {
-                String structureName = structureFile.getName().toLowerCase();
-                if (!structureName.startsWith(structureBaseName)) continue;
-                Structure structure = AssetManager.get(new StructureIdentifier(structureName));
-                structuresList.add(structure);
-            }
+        for (File structureFile : structureFiles) {
+            String structureName = structureFile.getName().toLowerCase();
+            if (!structureName.startsWith(structureBaseName)) continue;
+            Structure structure = AssetManager.get(new StructureIdentifier(structureName));
+            structuresList.add(structure);
+        }
 
-            Structure[] structures = new Structure[structuresList.size()];
-            for (int index = 0; index < structures.length; index++)
-                structures[index] = structuresList.get(index);
+        Structure[] structures = new Structure[structuresList.size()];
+        for (int index = 0; index < structures.length; index++)
+            structures[index] = structuresList.get(index);
 
-            return new StructureCollection(structures);
-        };
+        return new StructureCollection(structures);
     }
 
     private final String structureBaseName;

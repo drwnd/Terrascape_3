@@ -31,7 +31,7 @@ public final class AssetManager {
     public static <ASSET extends Asset> ASSET get(AssetIdentifier<ASSET> identifier) {
         synchronized (assets) {
             if (assets.containsKey(identifier)) return (ASSET) assets.get(identifier);
-            ASSET asset = identifier.getAssetGenerator().generate();
+            ASSET asset = identifier.generateAsset();
             assets.put(identifier, asset);
             return asset;
         }

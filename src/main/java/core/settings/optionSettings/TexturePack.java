@@ -93,19 +93,17 @@ public final class TexturePack implements Option {
     private record TextureAssetIdentifier(String fileName, String pathTemplate) implements AssetIdentifier<Texture> {
 
         @Override
-        public AssetGenerator<Texture> getAssetGenerator() {
-            return () -> TexturePack.getTexture(fileName, pathTemplate);
+        public Texture generateAsset() {
+            return TexturePack.getTexture(fileName, pathTemplate);
         }
     }
 
     private record TextureArrayAssetIdentifier(String folderName, String pathTemplate, FileIndexSet indexSet) implements AssetIdentifier<TextureArray> {
 
         @Override
-        public AssetGenerator<TextureArray> getAssetGenerator() {
-            return () -> {
-                Texture[] textures = TexturePack.getTextures(folderName, pathTemplate, indexSet);
-                return CoreObjectLoader.generateTextureArray(textures);
-            };
+        public TextureArray generateAsset() {
+            Texture[] textures = TexturePack.getTextures(folderName, pathTemplate, indexSet);
+            return CoreObjectLoader.generateTextureArray(textures);
         }
     }
 }

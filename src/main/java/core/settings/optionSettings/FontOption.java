@@ -1,6 +1,5 @@
 package core.settings.optionSettings;
 
-import core.assets.AssetGenerator;
 import core.assets.AssetLoader;
 import core.assets.Texture;
 import core.assets.identifiers.AssetIdentifier;
@@ -84,8 +83,8 @@ public final class FontOption implements Option, AssetIdentifier<Texture> {
     }
 
     @Override
-    public AssetGenerator<Texture> getAssetGenerator() {
-        return () -> AssetLoader.loadTexture2D(filepath());
+    public Texture generateAsset() {
+        return AssetLoader.loadTexture2D(filepath());
     }
 
     private String filepath() {
