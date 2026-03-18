@@ -149,4 +149,20 @@ public final class ChunkSaver extends Saver<Chunk> {
     protected int getVersionNumber() {
         return 2;
     }
+
+    @Override
+    protected Chunk loadOldVersion(int versionNumber) {
+        if (versionNumber == 1) {
+            int x = loadInt();
+            int y = loadInt();
+            int z = loadInt();
+            int lod = loadInt();
+            byte[] materials = loadByteArray();
+
+            Chunk chunk = new Chunk(x, y, z, lod);
+            chunk.setMaterials(new MaterialsData(CHUNK_SIZE_BITS, materials));
+            return chunk;
+        }
+        return getDefault();
+    }
 }

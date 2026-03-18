@@ -21,7 +21,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     public PlayerSaver() {
-        super(52);
+        super(64);
     }
 
     @Override
@@ -63,6 +63,29 @@ public final class PlayerSaver extends Saver<Player> {
     @Override
     protected int getVersionNumber() {
         return 4;
+    }
+
+    @Override
+    protected Player loadOldVersion(int versionNumber) {
+        if (versionNumber == 3) {
+            Position position = new Position(loadInt(), loadInt(), loadInt(), loadFloat(), loadFloat(), loadFloat());
+            Vector3f rotation = loadVector3f();
+            Vector3f velocity = loadVector3f();
+            int selectedSlot = loadInt();
+            byte movementStateIdentifier = loadByte();
+            Placeable[] hotbar = new Placeable[Hotbar.LENGTH];
+            for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadPlaceable();
+
+            Player player = new Player(position);
+            player.getCamera().setRotation(rotation);
+            player.getMovement().setVelocity(velocity);
+            player.getHotbar().setSelectedSlot(selectedSlot);
+            player.getMovement().setState(movementStateIdentifier);
+            player.getHotbar().setContents(hotbar);
+
+            return player;
+        }
+        return getDefault();
     }
 
     private void savePlaceable(Placeable placeable) {
