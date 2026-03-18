@@ -2,6 +2,8 @@ package game.player.interaction;
 
 import core.assets.AssetManager;
 import core.utils.MathUtils;
+import core.utils.Vector3l;
+
 import game.assets.StructureIdentifier;
 import game.server.Chunk;
 import game.server.Game;
@@ -10,8 +12,6 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
-
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -25,19 +25,19 @@ public final class StructurePlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3i position, int lod) {
+    public void place(Vector3l position, int lod) {
         affectedChunks.clear();
-        int chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
-        int chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
-        int chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
-        int chunkEndX = Utils.getWrappedChunkCoordinate(position.x + structure.sizeX() >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
-        int chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY() >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
-        int chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + structure.sizeZ() >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
+        long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
+        long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
+        long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
+        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + structure.sizeX() >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY() >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + structure.sizeZ() >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
-        for (int chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
-            for (int chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
-                for (int chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
+        for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
+            for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
+                for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
                     placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), position);
     }
 
@@ -52,19 +52,19 @@ public final class StructurePlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3i position) {
+    public void offsetPosition(Vector3l position) {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
     }
 
     @Override
-    public boolean intersectsAABB(Vector3i position, Vector3i min, Vector3i max) {
+    public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         min.sub(position);
         max.sub(position);
 
-        for (int structureX = min.x; structureX < max.x; structureX++)
-            for (int structureY = min.y; structureY < max.y; structureY++)
-                for (int structureZ = min.z; structureZ < max.z; structureZ++) {
+        for (long structureX = min.x; structureX < max.x; structureX++)
+            for (long structureY = min.y; structureY < max.y; structureY++)
+                for (long structureZ = min.z; structureZ < max.z; structureZ++) {
                     byte material = structure.getMaterial(structureX, structureY, structureZ);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }
@@ -77,22 +77,18 @@ public final class StructurePlaceable implements Placeable {
     }
 
 
-    private void placeInChunk(Chunk chunk, Vector3i position) {
-        int chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
-        int chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
-        int chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
+    private void placeInChunk(Chunk chunk, Vector3l position) {
+        long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
+        long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
+        long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int positionX = position.x;
-        int positionY = position.y;
-        int positionZ = position.z;
+        int inChunkX = (int) Utils.wrappedMax(chunkStartX, position.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkY = (int) Utils.wrappedMax(chunkStartY, position.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = (int) Utils.wrappedMax(chunkStartZ, position.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int inChunkX = Math.max(chunkStartX, positionX) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkY = Math.max(chunkStartY, positionY) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkZ = Math.max(chunkStartZ, positionZ) >> chunk.LOD & CHUNK_SIZE_MASK;
-
-        int startX = chunkStartX + (inChunkX << chunk.LOD) - positionX >> chunk.LOD;
-        int startY = chunkStartY + (inChunkY << chunk.LOD) - positionY >> chunk.LOD;
-        int startZ = chunkStartZ + (inChunkZ << chunk.LOD) - positionZ >> chunk.LOD;
+        int startX = (int) (chunkStartX + (inChunkX << chunk.LOD) - position.x);
+        int startY = (int) (chunkStartY + (inChunkY << chunk.LOD) - position.y);
+        int startZ = (int) (chunkStartZ + (inChunkZ << chunk.LOD) - position.z);
 
         int lengthX = MathUtils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
         int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());

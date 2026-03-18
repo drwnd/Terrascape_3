@@ -4,6 +4,7 @@ import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
 import core.utils.MathUtils;
 
+import core.utils.Vector3l;
 import game.settings.FloatSettings;
 import game.utils.Position;
 
@@ -17,7 +18,7 @@ import static game.utils.Constants.Z_NEAR;
 public final class Camera {
 
     public Camera() {
-        position = new Position(new Vector3i(), new Vector3f());
+        position = new Position(new Vector3l(), new Vector3f());
         rotation = new Vector3f(0.0F, 0.0F, 0.0F);
         updateProjectionMatrix();
     }

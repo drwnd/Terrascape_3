@@ -55,9 +55,9 @@ public final class ChunkSaver extends Saver<Chunk> {
         for (File chunkFile : lowerLodChunkFiles) {
             Chunk chunk = saver.load(chunkFile.getPath());
             if (chunk == null) continue;
-            int thisLodChunkX = chunk.X >> 1;
-            int thisLodChunkY = chunk.Y >> 1;
-            int thisLodChunkZ = chunk.Z >> 1;
+            long thisLodChunkX = chunk.X >> 1;
+            long thisLodChunkY = chunk.Y >> 1;
+            long thisLodChunkZ = chunk.Z >> 1;
             ChunkID thisLodChunkId = new ChunkID(thisLodChunkX, thisLodChunkY, thisLodChunkZ, lod);
             File thisLodChunkFile = new File(thisLodFile.getPath() + "/" + thisLodChunkId);
             if (thisLodChunkFile.exists()) continue;
@@ -73,9 +73,9 @@ public final class ChunkSaver extends Saver<Chunk> {
         WorldGeneration.generate(chunk);
         Game.getWorld().storeChunk(chunk);
 
-        int lowLODStartX = chunk.X << 1;
-        int lowLODStartY = chunk.Y << 1;
-        int lowLODStartZ = chunk.Z << 1;
+        long lowLODStartX = chunk.X << 1;
+        long lowLODStartY = chunk.Y << 1;
+        long lowLODStartZ = chunk.Z << 1;
         int lowLOD = chunk.LOD - 1;
 
         Chunk chunk0 = saver.load(getSaveFileLocation(new ChunkID(lowLODStartX, lowLODStartY, lowLODStartZ, lowLOD), lowLOD));
@@ -91,13 +91,13 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
 
-    public Chunk loadAndGenerate(int chunkX, int chunkY, int chunkZ, int lod) {
+    public Chunk loadAndGenerate(long chunkX, long chunkY, long chunkZ, int lod) {
         Chunk chunk = load(chunkX, chunkY, chunkZ, lod);
         WorldGeneration.generate(chunk);
         return chunk;
     }
 
-    public Chunk load(int chunkX, int chunkY, int chunkZ, int lod) {
+    public Chunk load(long chunkX, long chunkY, long chunkZ, int lod) {
         ChunkID expectedID = new ChunkID(chunkX, chunkY, chunkZ, lod);
         Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, lod);
 
@@ -109,7 +109,7 @@ public final class ChunkSaver extends Saver<Chunk> {
         return chunk;
     }
 
-    private Chunk load(int chunkX, int chunkY, int chunkZ, int lod, ChunkID id) {
+    private Chunk load(long chunkX, long chunkY, long chunkZ, int lod, ChunkID id) {
         Chunk chunk = load(getSaveFileLocation(id, lod));
         if (chunk == null) chunk = new Chunk(chunkX, chunkY, chunkZ, lod);
         else chunk.setGenerationStatus(Status.DONE);
@@ -120,18 +120,18 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     @Override
     protected void save(Chunk chunk) {
-        saveInt(chunk.X);
-        saveInt(chunk.Y);
-        saveInt(chunk.Z);
+        saveLong(chunk.X);
+        saveLong(chunk.Y);
+        saveLong(chunk.Z);
         saveInt(chunk.LOD);
         saveByteArray(chunk.getMaterials().getBytes());
     }
 
     @Override
     protected Chunk load() {
-        int x = loadInt();
-        int y = loadInt();
-        int z = loadInt();
+        long x = loadLong();
+        long y = loadLong();
+        long z = loadLong();
         int lod = loadInt();
         byte[] materials = loadByteArray();
 
@@ -147,6 +147,22 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     @Override
     protected int getVersionNumber() {
-        return 1;
+        return 2;
+    }
+
+    @Override
+    protected Chunk loadOldVersion(int versionNumber) {
+        if (versionNumber == 1) {
+            int x = loadInt();
+            int y = loadInt();
+            int z = loadInt();
+            int lod = loadInt();
+            byte[] materials = loadByteArray();
+
+            Chunk chunk = new Chunk(x, y, z, lod);
+            chunk.setMaterials(new MaterialsData(CHUNK_SIZE_BITS, materials));
+            return chunk;
+        }
+        return getDefault();
     }
 }

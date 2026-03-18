@@ -9,11 +9,11 @@ import static game.utils.Constants.*;
 
 public final class Chunk {
 
-    public final int X, Y, Z, LOD;
+    public final long X, Y, Z;
     public final ChunkID ID;
-    public final int INDEX;
+    public final int INDEX, LOD;
 
-    public Chunk(int chunkX, int chunkY, int chunkZ, int lod) {
+    public Chunk(long chunkX, long chunkY, long chunkZ, int lod) {
         materials = new MaterialsData(CHUNK_SIZE_BITS, AIR);
         X = chunkX & MAX_CHUNKS_MASK >> lod;
         Y = chunkY & MAX_CHUNKS_MASK >> lod;

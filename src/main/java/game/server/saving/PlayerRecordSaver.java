@@ -44,6 +44,23 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
+    }
+
+    @Override
+    protected PlayerRecord loadOldVersion(int versionNumber) {
+        if (versionNumber == 0) {
+            int positionCount = loadInt();
+            int rotationCount = loadInt();
+
+            ArrayList<Position> positions = new ArrayList<>(positionCount);
+            ArrayList<Vector3f> rotations = new ArrayList<>(rotationCount);
+
+            for (int count = 0; count < positionCount; count++) positions.add(new Position(loadInt(), loadInt(), loadInt(), loadFloat(), loadFloat(), loadFloat()));
+            for (int count = 0; count < rotationCount; count++) rotations.add(loadVector3f());
+
+            return new PlayerRecord(positions, rotations);
+        }
+        return getDefault();
     }
 }

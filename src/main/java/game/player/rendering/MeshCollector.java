@@ -1,9 +1,9 @@
 package game.player.rendering;
 
+import core.utils.Vector3l;
+
 import game.server.Game;
 import game.utils.Utils;
-
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +14,12 @@ import static org.lwjgl.opengl.GL46.*;
 public final class MeshCollector {
 
     public void uploadAllMeshes() {
-        Vector3i playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
+        Vector3l playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (meshQueue) {
             for (Mesh mesh : meshQueue) {
-                int playerChunkX = playerChunkCoordinate.x >> mesh.lod();
-                int playerChunkY = playerChunkCoordinate.y >> mesh.lod();
-                int playerChunkZ = playerChunkCoordinate.z >> mesh.lod();
+                long playerChunkX = playerChunkCoordinate.x >> mesh.lod();
+                long playerChunkY = playerChunkCoordinate.y >> mesh.lod();
+                long playerChunkZ = playerChunkCoordinate.z >> mesh.lod();
                 if (Utils.outsideRenderKeepDistance(playerChunkX, playerChunkY, playerChunkZ, mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod()))
                     continue;
 
@@ -90,7 +90,7 @@ public final class MeshCollector {
         return occludees[lod][chunkIndex];
     }
 
-    public boolean isModelPresent(int lodModelX, int lodModelY, int lodModelZ, int lod) {
+    public boolean isModelPresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 
@@ -118,7 +118,7 @@ public final class MeshCollector {
         }
     }
 
-    public boolean isIsolated(int chunkX, int chunkY, int chunkZ, int lod) {
+    public boolean isIsolated(long chunkX, long chunkY, long chunkZ, int lod) {
         OpaqueModel model;
         return ((model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
                 && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX + 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())

@@ -1,49 +1,48 @@
 package game.utils;
 
-import org.joml.Vector3i;
+import core.utils.Vector3l;
 
 import static game.utils.Constants.*;
 
 public final class Utils {
 
-    public static int getChunkIndex(int chunkX, int chunkY, int chunkZ, int lod) {
+    public static int getChunkIndex(long chunkX, long chunkY, long chunkZ, int lod) {
         chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
         chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_MASK >> lod;
         chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
 
-        return ((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY;
+        return (int) (((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY);
     }
 
-    public static boolean outsideChunkKeepDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
+    public static boolean outsideChunkKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
         return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
                 || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE + 1
                 || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE + 1;
     }
 
-    public static boolean outsideRenderKeepDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
+    public static boolean outsideRenderKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
         return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
                 || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + RENDER_KEEP_DISTANCE
                 || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + RENDER_KEEP_DISTANCE;
     }
 
-    public static int chunkDistance(int cameraChunkX, int cameraChunkY, int cameraChunkZ, int chunkX, int chunkY, int chunkZ, int lod) {
-        int distanceX = distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod);
-        int distanceY = distance(cameraChunkY - chunkY, MAX_CHUNKS_MASK >> lod);
-        int distanceZ = distance(cameraChunkZ - chunkZ, MAX_CHUNKS_MASK >> lod);
+    public static long chunkDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
+        long distanceX = distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod);
+        long distanceY = distance(cameraChunkY - chunkY, MAX_CHUNKS_MASK >> lod);
+        long distanceZ = distance(cameraChunkZ - chunkZ, MAX_CHUNKS_MASK >> lod);
 
         return Math.max(distanceX, Math.max(distanceY, distanceZ));
     }
 
 
-
-    public static int getWrappedChunkCoordinate(int actualPosition, int reference, int lod) {
-        int maxChunks = MAX_CHUNKS_MASK + 1 >> lod;
+    public static long getWrappedChunkCoordinate(long actualPosition, long reference, int lod) {
+        long maxChunks = MAX_CHUNKS_MASK + 1 >> lod;
         if (actualPosition - reference > maxChunks >>> 1) return actualPosition - maxChunks;
         if (reference - actualPosition > maxChunks >>> 1) return actualPosition + maxChunks;
         return actualPosition;
     }
 
-    public static Vector3i offsetByNormal(Vector3i value, int side) {
+    public static Vector3l offsetByNormal(Vector3l value, int side) {
         switch (side) {
             case NORTH -> value.add(0, 0, 1);
             case TOP -> value.add(0, 1, 0);
@@ -55,19 +54,19 @@ public final class Utils {
         return value;
     }
 
-    public static Vector3i min(Vector3i a, Vector3i b) {
-        return new Vector3i(
-                getWrappedMin(a.x, b.x),
-                getWrappedMin(a.y, b.y),
-                getWrappedMin(a.z, b.z)
+    public static Vector3l min(Vector3l a, Vector3l b) {
+        return new Vector3l(
+                wrappedMin(a.x, b.x),
+                wrappedMin(a.y, b.y),
+                wrappedMin(a.z, b.z)
         );
     }
 
-    public static Vector3i max(Vector3i a, Vector3i b) {
-        return new Vector3i(
-                getWrappedMax(a.x, b.x),
-                getWrappedMax(a.y, b.y),
-                getWrappedMax(a.z, b.z)
+    public static Vector3l max(Vector3l a, Vector3l b) {
+        return new Vector3l(
+                wrappedMax(a.x, b.x),
+                wrappedMax(a.y, b.y),
+                wrappedMax(a.z, b.z)
         );
     }
 
@@ -115,18 +114,18 @@ public final class Utils {
         return zOrderValue;
     }
 
-    private static int distance(int distance, int maxMask) {
+    private static long distance(long distance, long maxMask) {
         distance = Math.abs(distance) & maxMask;
         return Math.min(distance, maxMask + 1 - distance);
     }
 
-    private static int getWrappedMin(int a, int b) {
-        if (Math.abs((long) a - b) > 1L << 31) return Math.max(a, b);
+    public static long wrappedMin(long a, long b) {
+        if (Math.abs((float) a - b) > Long.MAX_VALUE) return Math.max(a, b);
         return Math.min(a, b);
     }
 
-    private static int getWrappedMax(int a, int b) {
-        if (Math.abs((long) a - b) > 1L << 31) return Math.min(a, b);
+    public static long wrappedMax(long a, long b) {
+        if (Math.abs((float) a - b) > Long.MAX_VALUE) return Math.min(a, b);
         return Math.max(a, b);
     }
 

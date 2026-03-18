@@ -10,7 +10,7 @@ import static game.utils.Constants.*;
 public final class Mountain extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalY = data.totalY;
+        long totalY = data.totalY;
 
         if (data.isAboveSurface(totalY)) return false;
 

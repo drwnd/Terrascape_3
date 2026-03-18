@@ -2,71 +2,72 @@ package game.utils;
 
 import core.utils.MathUtils;
 import core.utils.Saver;
+import core.utils.Vector3l;
+
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
 public final class Position {
 
-    public int intX, intY, intZ;
+    public long longX, longY, longZ;
     public float fractionX, fractionY, fractionZ;
 
 
     public static void save(Position position, Saver<?> saver) {
-        saver.saveInt(position.intX);
-        saver.saveInt(position.intY);
-        saver.saveInt(position.intZ);
+        saver.saveLong(position.longX);
+        saver.saveLong(position.longY);
+        saver.saveLong(position.longZ);
         saver.saveFloat(position.fractionX);
         saver.saveFloat(position.fractionY);
         saver.saveFloat(position.fractionZ);
     }
 
     public static Position load(Saver<?> saver) {
-        return new Position(saver.loadInt(), saver.loadInt(), saver.loadInt(), saver.loadFloat(), saver.loadFloat(), saver.loadFloat());
+        return new Position(saver.loadLong(), saver.loadLong(), saver.loadLong(), saver.loadFloat(), saver.loadFloat(), saver.loadFloat());
     }
 
 
     public Position() {
-        this.intX = 0;
-        this.intY = 0;
-        this.intZ = 0;
+        this.longX = 0;
+        this.longY = 0;
+        this.longZ = 0;
         this.fractionX = 0.0F;
         this.fractionY = 0.0F;
         this.fractionZ = 0.0F;
     }
 
-    public Position(int intX, int intY, int intZ, float fractionX, float fractionY, float fractionZ) {
-        this.intX = intX;
-        this.intY = intY;
-        this.intZ = intZ;
+    public Position(long intX, long intY, long intZ, float fractionX, float fractionY, float fractionZ) {
+        this.longX = intX;
+        this.longY = intY;
+        this.longZ = intZ;
         this.fractionX = fractionX;
         this.fractionY = fractionY;
         this.fractionZ = fractionZ;
     }
 
-    public Position(Vector3i intPosition, Vector3f fractionPosition) {
-        this.intX = intPosition.x;
-        this.intY = intPosition.y;
-        this.intZ = intPosition.z;
+    public Position(Vector3l intPosition, Vector3f fractionPosition) {
+        this.longX = intPosition.x;
+        this.longY = intPosition.y;
+        this.longZ = intPosition.z;
         this.fractionX = fractionPosition.x;
         this.fractionY = fractionPosition.y;
         this.fractionZ = fractionPosition.z;
     }
 
     public Position(Position position) {
-        this.intX = position.intX;
-        this.intY = position.intY;
-        this.intZ = position.intZ;
+        this.longX = position.longX;
+        this.longY = position.longY;
+        this.longZ = position.longZ;
         this.fractionX = position.fractionX;
         this.fractionY = position.fractionY;
         this.fractionZ = position.fractionZ;
     }
 
     public Position set(Position position) {
-        this.intX = position.intX;
-        this.intY = position.intY;
-        this.intZ = position.intZ;
+        this.longX = position.longX;
+        this.longY = position.longY;
+        this.longZ = position.longZ;
         this.fractionX = position.fractionX;
         this.fractionY = position.fractionY;
         this.fractionZ = position.fractionZ;
@@ -79,9 +80,9 @@ public final class Position {
         fractionY += y;
         fractionZ += z;
 
-        intX = intX + MathUtils.floor(fractionX);
-        intY = intY + MathUtils.floor(fractionY);
-        intZ = intZ + MathUtils.floor(fractionZ);
+        longX = longX + MathUtils.floor(fractionX);
+        longY = longY + MathUtils.floor(fractionY);
+        longZ = longZ + MathUtils.floor(fractionZ);
 
         fractionX = MathUtils.fraction(fractionX);
         fractionY = MathUtils.fraction(fractionY);
@@ -95,17 +96,17 @@ public final class Position {
         switch (component) {
             case X_COMPONENT -> {
                 fractionX += value;
-                intX = intX + MathUtils.floor(fractionX);
+                longX = longX + MathUtils.floor(fractionX);
                 fractionX = MathUtils.fraction(fractionX);
             }
             case Y_COMPONENT -> {
                 fractionY += value;
-                intY = intY + MathUtils.floor(fractionY);
+                longY = longY + MathUtils.floor(fractionY);
                 fractionY = MathUtils.fraction(fractionY);
             }
             case Z_COMPONENT -> {
                 fractionZ += value;
-                intZ = intZ + MathUtils.floor(fractionZ);
+                longZ = longZ + MathUtils.floor(fractionZ);
                 fractionZ = MathUtils.fraction(fractionZ);
             }
         }
@@ -115,22 +116,22 @@ public final class Position {
 
     public Vector3f vectorFrom(Position position) {
         return new Vector3f(
-                (intX - position.intX) + (fractionX - position.fractionX),
-                (intY - position.intY) + (fractionY - position.fractionY),
-                (intZ - position.intZ) + (fractionZ - position.fractionZ)
+                (longX - position.longX) + (fractionX - position.fractionX),
+                (longY - position.longY) + (fractionY - position.fractionY),
+                (longZ - position.longZ) + (fractionZ - position.fractionZ)
         );
     }
 
     public Vector3f getInChunkPosition() {
-        return new Vector3f(intX & CHUNK_SIZE_MASK, intY & CHUNK_SIZE_MASK, intZ & CHUNK_SIZE_MASK).add(fractionX, fractionY, fractionZ);
+        return new Vector3f(longX & CHUNK_SIZE_MASK, longY & CHUNK_SIZE_MASK, longZ & CHUNK_SIZE_MASK).add(fractionX, fractionY, fractionZ);
     }
 
-    public Vector3i getChunkCoordinate() {
-        return new Vector3i(intX >>> CHUNK_SIZE_BITS, intY >>> CHUNK_SIZE_BITS, intZ >>> CHUNK_SIZE_BITS);
+    public Vector3l getChunkCoordinate() {
+        return new Vector3l(longX >>> CHUNK_SIZE_BITS, longY >>> CHUNK_SIZE_BITS, longZ >>> CHUNK_SIZE_BITS);
     }
 
-    public Vector3i intPosition() {
-        return new Vector3i(intX, intY, intZ);
+    public Vector3l longPosition() {
+        return new Vector3l(longX, longY, longZ);
     }
 
     public Vector3f fractionPosition() {
@@ -138,16 +139,16 @@ public final class Position {
     }
 
     public boolean sharesChunkWith(Position position) {
-        return intX >>> CHUNK_SIZE_BITS == position.intX >>> CHUNK_SIZE_BITS
-                && intY >>> CHUNK_SIZE_BITS == position.intY >>> CHUNK_SIZE_BITS
-                && intZ >>> CHUNK_SIZE_BITS == position.intZ >>> CHUNK_SIZE_BITS;
+        return longX >>> CHUNK_SIZE_BITS == position.longX >>> CHUNK_SIZE_BITS
+                && longY >>> CHUNK_SIZE_BITS == position.longY >>> CHUNK_SIZE_BITS
+                && longZ >>> CHUNK_SIZE_BITS == position.longZ >>> CHUNK_SIZE_BITS;
     }
 
     public String intPositionToString() {
         return "[X:%s, Y:%s, Z:%s]".formatted(
-                intX,
-                intY,
-                intZ);
+                longX,
+                longY,
+                longZ);
     }
 
     public String fractionToString() {
@@ -155,6 +156,6 @@ public final class Position {
     }
 
     public String inChunkPositionToString() {
-        return "[X:%s, Y:%s, Z:%s]".formatted(intX & CHUNK_SIZE_MASK, intY & CHUNK_SIZE_MASK, intZ & CHUNK_SIZE_MASK);
+        return "[X:%s, Y:%s, Z:%s]".formatted(longX & CHUNK_SIZE_MASK, longY & CHUNK_SIZE_MASK, longZ & CHUNK_SIZE_MASK);
     }
 }

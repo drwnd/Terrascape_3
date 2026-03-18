@@ -10,9 +10,9 @@ import static game.utils.Constants.SNOW;
 public final class SnowyMountain extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalX = data.totalX;
-        int totalY = data.totalY;
-        int totalZ = data.totalZ;
+        long totalX = data.totalX;
+        long totalY = data.totalY;
+        long totalZ = data.totalZ;
 
         if (data.isAboveSurface(totalY)) return false;
 

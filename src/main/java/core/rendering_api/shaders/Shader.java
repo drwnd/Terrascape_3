@@ -46,6 +46,10 @@ public abstract class Shader implements Asset {
         glUniform3i(uniforms.get(uniformName), x, y, z);
     }
 
+    public void setUniform(String uniformName, long x, long y, long z) {
+        glUniform3i(uniforms.get(uniformName), (int) x, (int) y, (int) z);
+    }
+
     public void setUniform(String uniformName, int x, int y, int z, int w) {
         glUniform4i(uniforms.get(uniformName), x, y, z, w);
     }

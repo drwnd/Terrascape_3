@@ -1,20 +1,20 @@
 package game.server.generation;
 
-public record Tree(int centerX, int baseY, int centerZ, Structure structure, byte transform) {
+public record Tree(long centerX, long baseY, long centerZ, Structure structure, byte transform) {
 
-    public int getMinX() {
+    public long getMinX() {
         return centerX - (sizeX() >> 1);
     }
 
-    public int getMinY() {
+    public long getMinY() {
         return baseY;
     }
 
-    public int getMinZ() {
+    public long getMinZ() {
         return centerZ - (sizeZ() >> 1);
     }
 
-    public int getMaxY() {
+    public long getMaxY() {
         return baseY + structure.sizeY();
     }
 

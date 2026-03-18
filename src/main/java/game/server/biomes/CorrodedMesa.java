@@ -9,14 +9,14 @@ import static game.server.generation.WorldGeneration.SEED;
 public final class CorrodedMesa extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalY = data.totalY;
+        long totalY = data.totalY;
 
         int pillarHeight = data.specialHeight;
         int floorMaterialDepth = 48 + data.floorMaterialDepthMod;
 
         if (pillarHeight != 0 && totalY >= data.height - floorMaterialDepth) {
             if (totalY > data.height + pillarHeight) return false;
-            data.store(inChunkX, inChunkY, inChunkZ, getGeneratingTerracottaType(totalY >> 4 & 15));
+            data.store(inChunkX, inChunkY, inChunkZ, getGeneratingTerracottaType((int) (totalY >> 4 & 15)));
             return true;
         }
 
@@ -29,7 +29,7 @@ public final class CorrodedMesa extends Biome {
     }
 
     @Override
-    public int getSpecialHeight(int totalX, int totalZ) {
+    public int getSpecialHeight(long totalX, long totalZ) {
         double noise = OpenSimplex2S.noise2(SEED ^ 0xDF860F2E2A604A17L, totalX * MESA_PILLAR_FREQUENCY, totalZ * MESA_PILLAR_FREQUENCY);
         if (Math.abs(noise) > MESA_PILLAR_THRESHOLD) return MESA_PILLAR_HEIGHT;
         return 0;

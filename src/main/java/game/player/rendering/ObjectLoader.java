@@ -1,8 +1,7 @@
 package game.player.rendering;
 
 import core.assets.AssetLoader;
-
-import org.joml.Vector3i;
+import core.utils.Vector3l;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
@@ -10,7 +9,7 @@ import static org.lwjgl.opengl.GL46.*;
 public final class ObjectLoader {
 
     public static OpaqueModel loadOpaqueModel(Mesh mesh) {
-        Vector3i position = mesh.getWorldCoordinate();
+        Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod(), true);
         int vertexBuffer = glCreateBuffers();
         glNamedBufferData(vertexBuffer, mesh.opaqueVertices(), GL_STATIC_DRAW);
@@ -18,7 +17,7 @@ public final class ObjectLoader {
     }
 
     public static TransparentModel loadTransparentModel(Mesh mesh) {
-        Vector3i position = mesh.getWorldCoordinate();
+        Vector3l position = mesh.getWorldCoordinate();
         if (mesh.waterVertexCount() + mesh.glassVertexCount() == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod());
         int vertexBuffer = glCreateBuffers();
         glNamedBufferData(vertexBuffer, mesh.transparentVertices(), GL_STATIC_DRAW);

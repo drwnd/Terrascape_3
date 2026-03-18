@@ -1,5 +1,7 @@
 package game.player.interaction;
 
+import core.utils.Vector3l;
+
 import game.server.Game;
 import game.server.material.Material;
 import game.server.material.Properties;
@@ -8,11 +10,10 @@ import game.utils.Position;
 import game.utils.Utils;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
-public record Target(Vector3i position, int side, byte material) {
+public record Target(Vector3l position, int side, byte material) {
 
     public static Target getPlayerTarget() {
         Position playerPosition = Game.getPlayer().getCamera().getPosition();
@@ -22,9 +23,9 @@ public record Target(Vector3i position, int side, byte material) {
 
     public static Target getTarget(Position origin, Vector3f dir) {
 
-        int x = origin.intX;
-        int y = origin.intY;
-        int z = origin.intZ;
+        long x = origin.longX;
+        long y = origin.longY;
+        long z = origin.longZ;
 
         int xDir = dir.x < 0 ? -1 : 1;
         int yDir = dir.y < 0 ? -1 : 1;
@@ -54,7 +55,7 @@ public record Target(Vector3i position, int side, byte material) {
             if (material == OUT_OF_WORLD) return null;
 
             if (Properties.doesntHaveProperties(material, NO_COLLISION))
-                return new Target(new Vector3i(x, y, z), intersectedSide, material);
+                return new Target(new Vector3l(x, y, z), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {
                 x = x + xDir;
@@ -77,12 +78,12 @@ public record Target(Vector3i position, int side, byte material) {
     }
 
 
-    public Vector3i offsetPosition() {
+    public Vector3l offsetPosition() {
         return Utils.offsetByNormal(position(), side);
     }
 
-    public Vector3i position() {
-        return new Vector3i(
+    public Vector3l position() {
+        return new Vector3l(
                 position.x,
                 position.y,
                 position.z);

@@ -134,18 +134,18 @@ public abstract class MovementState {
         World world = Game.getWorld();
         Vector3i hitboxSize = state.getHitboxSize();
 
-        int startX = position.intX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        int startY = position.intY;
-        int startZ = position.intZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long startX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        long startY = position.longY;
+        long startZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
 
         int width = hitboxSize.x + 1;
         int height = hitboxSize.y;
         int depth = hitboxSize.z + 1;
 
         float volumne = 0.0F;
-        for (int x = startX; x < startX + width; x++)
-            for (int y = startY; y < startY + height; y++)
-                for (int z = startZ; z < startZ + depth; z++) {
+        for (long x = startX; x < startX + width; x++)
+            for (long y = startY; y < startY + height; y++)
+                for (long z = startZ; z < startZ + depth; z++) {
                     if (targetMaterial != world.getMaterial(x, y, z, 0)) continue;
                     volumne++;
                 }

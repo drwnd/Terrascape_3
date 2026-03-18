@@ -11,9 +11,9 @@ import static game.utils.Constants.SAND;
 public final class ColdOcean extends Biome {
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
-        int totalX = data.totalX;
-        int totalY = data.totalY;
-        int totalZ = data.totalZ;
+        long totalX = data.totalX;
+        long totalY = data.totalY;
+        long totalZ = data.totalZ;
 
         int iceHeight = Math.min(data.specialHeight, WATER_LEVEL - data.height);
         if (totalY > WATER_LEVEL - iceHeight && totalY <= WATER_LEVEL + (iceHeight >> 1)) {
@@ -32,7 +32,7 @@ public final class ColdOcean extends Biome {
     }
 
     @Override
-    public int getSpecialHeight(int totalX, int totalZ) {
+    public int getSpecialHeight(long totalX, long totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
         double icePlainNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x649C844EA835C9A7L, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
         if (iceBergNoise > ICE_BERG_THRESHOLD + 0.1) return (int) (ICE_BERG_HEIGHT + (icePlainNoise * 4.0));

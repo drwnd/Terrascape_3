@@ -16,9 +16,9 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         this(16, 16, 16, new MaterialsData(4, material));
     }
 
-    public byte getMaterial(int structureX, int structureY, int structureZ) {
-        if (!contains(structureX, structureY, structureZ)) return AIR;
-        return materials.getMaterial(structureX, structureY, structureZ);
+    public byte getMaterial(long structureX, long structureY, long structureZ) {
+        if (!contains((int) structureX, (int) structureY, (int) structureZ)) return AIR;
+        return materials.getMaterial((int) structureX, (int) structureY, (int) structureZ);
     }
 
     public boolean contains(int structureX, int structureY, int structureZ) {

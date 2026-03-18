@@ -1,6 +1,7 @@
 package game.server.saving;
 
 import core.utils.Saver;
+import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
 import game.player.Hotbar;
@@ -12,7 +13,6 @@ import game.player.interaction.StructurePlaceable;
 import game.utils.Position;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 public final class PlayerSaver extends Saver<Player> {
 
@@ -21,7 +21,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     public PlayerSaver() {
-        super(52);
+        super(64);
     }
 
     @Override
@@ -56,13 +56,36 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player getDefault() {
-        Vector3i worldCenter = new Vector3i(0, 0, 0);
+        Vector3l worldCenter = new Vector3l(0, 0, 0);
         return new Player(new Position(worldCenter, new Vector3f()));
     }
 
     @Override
     protected int getVersionNumber() {
-        return 3;
+        return 4;
+    }
+
+    @Override
+    protected Player loadOldVersion(int versionNumber) {
+        if (versionNumber == 3) {
+            Position position = new Position(loadInt(), loadInt(), loadInt(), loadFloat(), loadFloat(), loadFloat());
+            Vector3f rotation = loadVector3f();
+            Vector3f velocity = loadVector3f();
+            int selectedSlot = loadInt();
+            byte movementStateIdentifier = loadByte();
+            Placeable[] hotbar = new Placeable[Hotbar.LENGTH];
+            for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadPlaceable();
+
+            Player player = new Player(position);
+            player.getCamera().setRotation(rotation);
+            player.getMovement().setVelocity(velocity);
+            player.getHotbar().setSelectedSlot(selectedSlot);
+            player.getMovement().setState(movementStateIdentifier);
+            player.getHotbar().setContents(hotbar);
+
+            return player;
+        }
+        return getDefault();
     }
 
     private void savePlaceable(Placeable placeable) {

@@ -1,12 +1,11 @@
 package game.player.interaction;
 
 import core.rendering_api.Input;
+import core.utils.Vector3l;
 
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
-
-import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -65,9 +64,9 @@ public final class InteractionHandler {
             return;
         }
 
-        Vector3i position = offsetPosition ? target.offsetPosition() : target.position();
+        Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
         if (startTarget != null && placeable instanceof CubePlaceable cube) {
-            Vector3i startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
+            Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
             placeable = new CuboidPlaceable(cube.getMaterial(), startPosition, position);
             startTarget = null;
         }

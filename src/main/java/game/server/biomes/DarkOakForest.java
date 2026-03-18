@@ -13,7 +13,7 @@ public final class DarkOakForest extends Biome {
     }
 
     @Override
-    public Tree getGeneratingTree(int totalX, int height, int totalZ) {
+    public Tree getGeneratingTree(long totalX, long height, long totalZ) {
         return getRandomTree(totalX, height, totalZ, StructureCollectionIdentifier.DARK_OAK_TREES);
     }
 

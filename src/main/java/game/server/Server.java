@@ -4,6 +4,7 @@ import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
 import core.settings.optionSettings.ColorOption;
 
+import core.utils.Vector3l;
 import game.player.Player;
 import game.player.interaction.CubePlaceable;
 import game.player.interaction.CuboidPlaceable;
@@ -53,14 +54,14 @@ public final class Server implements CrashCallback {
         ChunkGenerator.loadImmediateSurroundings();
     }
 
-    public static void unloadDistantChunks(Vector3i playerChunkPosition) {
+    public static void unloadDistantChunks(Vector3l playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            int lodPlayerX = playerChunkPosition.x >> lod;
-            int lodPlayerY = playerChunkPosition.y >> lod;
-            int lodPlayerZ = playerChunkPosition.z >> lod;
+            long lodPlayerX = playerChunkPosition.x >> lod;
+            long lodPlayerY = playerChunkPosition.y >> lod;
+            long lodPlayerZ = playerChunkPosition.z >> lod;
 
             for (Chunk chunk : Game.getWorld().getLod(lod)) {
                 if (chunk == null) continue;
@@ -105,7 +106,7 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
-    public boolean requestBreakPlaceInteraction(Vector3i position, Placeable placeable) {
+    public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable) {
         placeable.offsetPosition(position);
 
         Player player = Game.getPlayer();
@@ -117,8 +118,8 @@ public final class Server implements CrashCallback {
             player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, cubePlaceable.getMaterial());
         }
         if (placeable instanceof CuboidPlaceable cuboidPlaceable) {
-            Vector3i minPosition = cuboidPlaceable.getMinPosition();
-            Vector3i length = new Vector3i(cuboidPlaceable.getMaxPosition()).sub(minPosition).add(1, 1, 1);
+            Vector3l minPosition = cuboidPlaceable.getMinPosition();
+            Vector3i length = new Vector3l(cuboidPlaceable.getMaxPosition()).sub(minPosition).add(1, 1, 1).toInt();
             player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
             player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
         }

@@ -5,14 +5,14 @@ import game.server.material.Properties;
 
 public final class Constants {
 
-    public static final float Z_NEAR = 0.8208f; // Just barely can't xRay
+    public static final float Z_NEAR = 0.8208F; // Just barely can't xRay
     public static final float Z_FAR = Float.POSITIVE_INFINITY;
 
     public static final int CHUNK_SIZE_BITS = 6;
     public static final int CHUNK_SIZE = 1 << CHUNK_SIZE_BITS;
     public static final int CHUNK_SIZE_PADDED = CHUNK_SIZE + 1;
     public static final int CHUNK_SIZE_MASK = CHUNK_SIZE - 1;
-    public static final int MAX_CHUNKS_MASK = 0x3FFFFFF;
+    public static final long MAX_CHUNKS_MASK = -1L >>> CHUNK_SIZE_BITS;
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
@@ -233,6 +233,6 @@ public final class Constants {
 
         SKY_BOX_VERTICES = new float[]{-1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, 1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1};
         SKY_BOX_INDICES = new int[]{0, 2, 1, 3, 1, 2, 4, 5, 6, 7, 6, 5, 8, 9, 10, 11, 10, 9, 12, 14, 13, 15, 13, 14, 16, 18, 17, 19, 17, 18, 20, 21, 22, 23, 22, 21};
-        SKY_BOX_TEXTURE_COORDINATES = new float[]{1, 0.6666667f, 0.75f, 0.6666667f, 1, 0.33333334f, 0.75f, 0.33333334f, 0.25f, 0.6666667f, 0.5f, 0.6666667f, 0.25f, 0.33333334f, 0.5f, 0.33333334f, 0.25f, 1, 0.5f, 1, 0.25f, 0.6666667f, 0.5f, 0.6666667f, 0.25f, 0, 0.5f, 0, 0.25f, 0.33333334f, 0.5f, 0.33333334f, 0, 0.6666667f, 0, 0.33333334f, 0.25f, 0.6666667f, 0.25f, 0.33333334f, 0.75f, 0.6666667f, 0.75f, 0.33333334f, 0.5f, 0.6666667f, 0.5f, 0.33333334f};
+        SKY_BOX_TEXTURE_COORDINATES = new float[]{1, 0.6666667F, 0.75F, 0.6666667F, 1, 0.33333334F, 0.75F, 0.33333334F, 0.25F, 0.6666667F, 0.5F, 0.6666667F, 0.25F, 0.33333334F, 0.5F, 0.33333334F, 0.25F, 1, 0.5F, 1, 0.25F, 0.6666667F, 0.5F, 0.6666667F, 0.25F, 0, 0.5F, 0, 0.25F, 0.33333334F, 0.5F, 0.33333334F, 0, 0.6666667F, 0, 0.33333334F, 0.25F, 0.6666667F, 0.25F, 0.33333334F, 0.75F, 0.6666667F, 0.75F, 0.33333334F, 0.5F, 0.6666667F, 0.5F, 0.33333334F};
     }
 }
