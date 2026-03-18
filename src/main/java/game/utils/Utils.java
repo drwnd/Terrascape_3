@@ -56,17 +56,17 @@ public final class Utils {
 
     public static Vector3l min(Vector3l a, Vector3l b) {
         return new Vector3l(
-                getWrappedMin(a.x, b.x),
-                getWrappedMin(a.y, b.y),
-                getWrappedMin(a.z, b.z)
+                wrappedMin(a.x, b.x),
+                wrappedMin(a.y, b.y),
+                wrappedMin(a.z, b.z)
         );
     }
 
     public static Vector3l max(Vector3l a, Vector3l b) {
         return new Vector3l(
-                getWrappedMax(a.x, b.x),
-                getWrappedMax(a.y, b.y),
-                getWrappedMax(a.z, b.z)
+                wrappedMax(a.x, b.x),
+                wrappedMax(a.y, b.y),
+                wrappedMax(a.z, b.z)
         );
     }
 
@@ -119,13 +119,13 @@ public final class Utils {
         return Math.min(distance, maxMask + 1 - distance);
     }
 
-    private static long getWrappedMin(long a, long b) {
-        if (Long.compareUnsigned(Math.abs(a - b), Long.MIN_VALUE) > 0) return Math.max(a, b);
+    public static long wrappedMin(long a, long b) {
+        if (Math.abs((float) a - b) > Long.MAX_VALUE) return Math.max(a, b);
         return Math.min(a, b);
     }
 
-    private static long getWrappedMax(long a, long b) {
-        if (Long.compareUnsigned(Math.abs(a - b), Long.MIN_VALUE) > 0) return Math.min(a, b);
+    public static long wrappedMax(long a, long b) {
+        if (Math.abs((float) a - b) > Long.MAX_VALUE) return Math.min(a, b);
         return Math.max(a, b);
     }
 

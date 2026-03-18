@@ -82,9 +82,9 @@ public final class StructurePlaceable implements Placeable {
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int inChunkX = (int) Math.max(chunkStartX, position.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkY = (int) Math.max(chunkStartY, position.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkZ = (int) Math.max(chunkStartZ, position.z) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkX = (int) Utils.wrappedMax(chunkStartX, position.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkY = (int) Utils.wrappedMax(chunkStartY, position.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkZ = (int) Utils.wrappedMax(chunkStartZ, position.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
         int startX = (int) (chunkStartX + (inChunkX << chunk.LOD) - position.x);
         int startY = (int) (chunkStartY + (inChunkY << chunk.LOD) - position.y);

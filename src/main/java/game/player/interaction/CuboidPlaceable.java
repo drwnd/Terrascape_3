@@ -92,13 +92,13 @@ public final class CuboidPlaceable implements Placeable {
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int inChunkStartX = (int) Math.max(chunkStartX, minPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartY = (int) Math.max(chunkStartY, minPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartZ = (int) Math.max(chunkStartZ, minPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartX = (int) Utils.wrappedMax(chunkStartX, minPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartY = (int) Utils.wrappedMax(chunkStartY, minPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkStartZ = (int) Utils.wrappedMax(chunkStartZ, minPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        int inChunkEndX = (int) Math.min(chunkStartX + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndY = (int) Math.min(chunkStartY + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndZ = (int) Math.min(chunkStartZ + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndX = (int) Utils.wrappedMin(chunkStartX + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndY = (int) Utils.wrappedMin(chunkStartY + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkEndZ = (int) Utils.wrappedMin(chunkStartZ + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
 
         chunk.storeMaterial(
                 inChunkStartX, inChunkStartY, inChunkStartZ,
