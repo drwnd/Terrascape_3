@@ -207,7 +207,7 @@ public final class Inventory extends UiElement {
             super(sizeToParent, offsetToParent);
             setAction(getAction());
             setRimThicknessMultiplier(0.5F);
-            setAllowFocusScaling(false);
+            setDoAutoFocusScaling(false);
             setScalingFactor(1.2F);
             this.placeable = placeable;
 

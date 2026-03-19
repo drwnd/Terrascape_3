@@ -106,7 +106,7 @@ public abstract class ShapePlaceable implements Placeable {
             for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
                  end = bitsIndex + 1 << 6; index < end; index++) {
                 if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterial[index] = STONE;
+                uncompressedMaterial[index] = material;
             }
 
         return new Structure(16, 16, 16, MaterialsData.getCompressedMaterials(4, uncompressedMaterial));
