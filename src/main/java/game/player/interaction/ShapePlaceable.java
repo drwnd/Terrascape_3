@@ -19,7 +19,7 @@ import static game.utils.Constants.*;
 
 public abstract class ShapePlaceable implements Placeable {
 
-    ShapePlaceable(byte material) {
+    protected ShapePlaceable(byte material) {
         this.material = material;
     }
 
@@ -112,7 +112,7 @@ public abstract class ShapePlaceable implements Placeable {
         player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, material);
     }
 
-    abstract void fillBitMap(long[] bitMap, int sideLength);
+    protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
     private long[] getBitMap() {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();

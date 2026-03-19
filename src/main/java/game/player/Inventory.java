@@ -10,7 +10,7 @@ import core.rendering_api.Window;
 import core.utils.FileManager;
 
 import game.language.UiMessages;
-import game.player.interaction.CubePlaceable;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.player.rendering.StructureDisplay;

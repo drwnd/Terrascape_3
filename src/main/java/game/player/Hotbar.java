@@ -4,7 +4,7 @@ import core.renderables.UiElement;
 import core.rendering_api.Window;
 
 import game.assets.Textures;
-import game.player.interaction.CubePlaceable;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.rendering.StructureDisplay;
 import game.player.interaction.Target;

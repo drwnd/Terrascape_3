@@ -5,7 +5,7 @@ import core.utils.MathUtils;
 
 public final class StandAloneFloatSetting implements FloatSetting {
 
-    StandAloneFloatSetting(float min, float max, float defaultValue, float accuracy) {
+    public StandAloneFloatSetting(float min, float max, float defaultValue, float accuracy) {
         this.min = min;
         this.max = max;
         this.defaultValue = defaultValue;
@@ -13,7 +13,7 @@ public final class StandAloneFloatSetting implements FloatSetting {
         this.accuracy = accuracy;
     }
 
-    StandAloneFloatSetting(float min, float max, float defaultValue) {
+    public StandAloneFloatSetting(float min, float max, float defaultValue) {
         this.min = min;
         this.max = max;
         this.defaultValue = defaultValue;

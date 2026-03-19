@@ -6,7 +6,14 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 
 public final class StandAloneToggleSetting implements ToggleSetting {
 
-    StandAloneToggleSetting(boolean defaultValue) {
+    public StandAloneToggleSetting(boolean defaultValue, int defaultKeybind) {
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
+        this.defaultKeybind = defaultKeybind;
+        this.keybind = defaultKeybind;
+    }
+
+    public StandAloneToggleSetting(boolean defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.defaultKeybind = GLFW_KEY_UNKNOWN;

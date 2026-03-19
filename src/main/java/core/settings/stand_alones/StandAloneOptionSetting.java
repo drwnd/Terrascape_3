@@ -5,7 +5,7 @@ import core.settings.optionSettings.Option;
 
 public final class StandAloneOptionSetting implements OptionSetting {
 
-    StandAloneOptionSetting(Option defaultValue) {
+    public StandAloneOptionSetting(Option defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
     }

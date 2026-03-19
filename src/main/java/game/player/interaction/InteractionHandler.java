@@ -3,6 +3,7 @@ package game.player.interaction;
 import core.rendering_api.Input;
 import core.utils.Vector3l;
 
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;

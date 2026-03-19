@@ -1,6 +1,7 @@
-package game.player.interaction;
+package game.player.interaction.placeable_shapes;
 
 import core.settings.Setting;
+import game.player.interaction.ShapePlaceable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,7 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    void fillBitMap(long[] bitMap, int sideLength) {
+    protected void fillBitMap(long[] bitMap, int sideLength) {
         Arrays.fill(bitMap, -1L);
         if (sideLength == 1) bitMap[0] = 0x8L;
         if (sideLength == 2) bitMap[0] = 0xFFL;

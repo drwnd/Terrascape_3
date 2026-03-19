@@ -4,7 +4,7 @@ import core.settings.KeySetting;
 
 public final class StandAloneKeySetting implements KeySetting {
 
-    StandAloneKeySetting(int defaultValue) {
+    public StandAloneKeySetting(int defaultValue) {
         this.defaultKeybind = defaultValue;
         this.keybind = defaultValue;
     }
