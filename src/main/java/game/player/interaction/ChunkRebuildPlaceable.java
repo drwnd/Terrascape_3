@@ -1,6 +1,7 @@
 package game.player.interaction;
 
 import core.assets.AssetManager;
+import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
@@ -16,6 +17,14 @@ import java.util.ArrayList;
 import static game.utils.Constants.*;
 
 public final class ChunkRebuildPlaceable implements Placeable {
+
+    public void save(Placeable placeable, Saver<?> saver) {
+        saver.saveByte((byte) 3);
+    }
+
+    public static ChunkRebuildPlaceable load(Saver<?> saver) {
+        return new ChunkRebuildPlaceable();
+    }
 
     @Override
     public void place(Vector3l position, int lod) {

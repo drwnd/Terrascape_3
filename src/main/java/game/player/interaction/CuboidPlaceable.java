@@ -1,5 +1,6 @@
 package game.player.interaction;
 
+import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.player.Player;
@@ -83,6 +84,11 @@ public final class CuboidPlaceable implements Placeable {
         Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
         player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
         player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
+    }
+
+    @Override
+    public void save(Placeable placeable, Saver<?> saver) {
+        throw new UnsupportedOperationException("This placeable should not be saved");
     }
 
     public byte getMaterial() {

@@ -2,6 +2,7 @@ package game.player.interaction;
 
 import core.assets.AssetManager;
 import core.utils.MathUtils;
+import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
@@ -22,6 +23,15 @@ public final class StructurePlaceable implements Placeable {
     public StructurePlaceable(StructureIdentifier identifier) {
         this.identifier = identifier;
         this.structure = AssetManager.get(identifier);
+    }
+
+    public void save(Placeable placeable, Saver<?> saver) {
+        saver.saveByte((byte) 2);
+        saver.saveString(((StructurePlaceable) placeable).identifier.structureName());
+    }
+
+    public static StructurePlaceable load(Saver<?> saver) {
+        return new StructurePlaceable(new StructureIdentifier(saver.loadString()));
     }
 
     @Override

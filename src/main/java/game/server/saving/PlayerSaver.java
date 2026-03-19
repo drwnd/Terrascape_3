@@ -3,13 +3,13 @@ package game.server.saving;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
-import game.assets.StructureIdentifier;
 import game.player.Hotbar;
 import game.player.Player;
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
+import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -89,29 +89,18 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     private void savePlaceable(Placeable placeable) {
-        if (placeable instanceof CubePlaceable) {
-            saveByte((byte) 1);
-            saveByte(((CubePlaceable) placeable).getMaterial());
-            return;
-        }
-        if (placeable instanceof StructurePlaceable) {
-            saveByte((byte) 2);
-            saveString(((StructurePlaceable) placeable).getIdentifier().structureName());
-            return;
-        }
-        if (placeable instanceof ChunkRebuildPlaceable) {
-            saveByte((byte) 3);
-            return;
-        }
-        saveByte((byte) 0);
+        if (placeable == null)
+            saveByte((byte) 0);
+        else saveGeneric(placeable, placeable::save);
     }
 
     private Placeable loadPlaceable() {
-        byte identifier = loadByte();
-        if (identifier == 0) return null;
-        if (identifier == 1) return new CubePlaceable(loadByte());
-        if (identifier == 2) return new StructurePlaceable(new StructureIdentifier(loadString()));
-        if (identifier == 3) return new ChunkRebuildPlaceable();
-        return null;
+        return switch (loadByte()) {
+            case 1 -> CubePlaceable.load(this);
+            case 2 -> StructurePlaceable.load(this);
+            case 3 -> ChunkRebuildPlaceable.load(this);
+            case 4 -> SpherePlaceable.load(this);
+            default -> null;
+        };
     }
 }

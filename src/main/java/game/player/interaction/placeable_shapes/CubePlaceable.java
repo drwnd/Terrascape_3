@@ -1,7 +1,9 @@
 package game.player.interaction.placeable_shapes;
 
 import core.renderables.Slider;
+import core.utils.Saver;
 
+import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 
 import java.util.Arrays;
@@ -11,6 +13,15 @@ public final class CubePlaceable extends ShapePlaceable {
 
     public CubePlaceable(byte material) {
         super(material);
+    }
+
+    public void save(Placeable placeable, Saver<?> saver) {
+        saver.saveByte((byte) 1);
+        saver.saveByte(((CubePlaceable) placeable).getMaterial());
+    }
+
+    public static CubePlaceable load(Saver<?> saver) {
+        return new CubePlaceable(saver.loadByte());
     }
 
     @Override

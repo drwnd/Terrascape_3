@@ -1,5 +1,6 @@
 package game.player.interaction;
 
+import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.server.Chunk;
@@ -20,4 +21,6 @@ public interface Placeable {
     void offsetPosition(Vector3l position);
 
     void spawnParticles(Vector3l position);
+
+    void save(Placeable placeable, Saver<?> saver);
 }
