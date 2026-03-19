@@ -48,15 +48,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         for (Renderable renderable : movingRenderables) renderable.move(offset);
     }
 
-    public void setSelectedSlider(Slider<? extends Number> slider) {
-        this.selectedSlider = slider;
-    }
-
-    public void cancelSelection() {
-        if (selectedSlider != null) {
-            selectedSlider = null;
-            return;
-        }
+    public static void cancelSelection() {
         Window.popRenderable();
     }
 
@@ -143,27 +135,6 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         input = new SettingsRenderableInput(this);
         input.setScroll(scroll);
         Window.setInput(input);
-        selectedSlider = null;
-    }
-
-    @Override
-    public void dragOver(Vector2i pixelCoordinate) {
-        if (selectedSlider != null)
-            selectedSlider.dragOver(pixelCoordinate);
-        else super.dragOver(pixelCoordinate);
-    }
-
-    @Override
-    public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
-        boolean buttonFound = false;
-        for (Renderable renderable : getChildren())
-            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) {
-                renderable.clickOn(pixelCoordinate, mouseButton, action);
-                buttonFound = true;
-                break;
-            }
-
-        if (!buttonFound) selectedSlider = null;
     }
 
     private Clickable getApplyChangesButtonAction() {
@@ -201,7 +172,6 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
     protected int settingsCount = 0;
-    private Slider<? extends Number> selectedSlider;
     private SettingsRenderableInput input;
 
     protected final ArrayList<Slider<? extends Number>> sliders = new ArrayList<>();

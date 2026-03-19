@@ -48,7 +48,7 @@ public final class SettingsRenderableInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) menu.cancelSelection();
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) CoreSettingsRenderable.cancelSelection();
     }
 
     @Override

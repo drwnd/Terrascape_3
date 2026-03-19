@@ -1,10 +1,14 @@
 package game.player.interaction.placeable_shapes;
 
-import core.settings.Setting;
+import core.renderables.Slider;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
+import core.utils.Message;
+
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
+
+import org.joml.Vector2f;
 
 import java.util.List;
 
@@ -12,13 +16,16 @@ import static game.utils.Constants.CHUNK_SIZE;
 
 public final class SpherePlaceable extends ShapePlaceable {
 
-    SpherePlaceable(byte material) {
+    public SpherePlaceable(byte material) {
         super(material);
     }
 
     @Override
-    public List<Setting> settings() {
-        return List.of(innerRadius, exponent);
+    public List<Slider<?>> settings() {
+        Vector2f zero = new Vector2f();
+        return List.of(
+                new Slider<>(zero, zero, innerRadius, new Message("Inner Radius")),
+                new Slider<>(zero, zero, exponent, new Message("Exponent")));
     }
 
     @Override
@@ -44,5 +51,5 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, CHUNK_SIZE, 0);
-    private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.01F);
+    private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }

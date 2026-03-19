@@ -1,6 +1,6 @@
 package game.player.interaction;
 
-import core.settings.Setting;
+import core.renderables.Slider;
 import core.utils.Vector3l;
 
 import game.player.Player;
@@ -23,7 +23,7 @@ public abstract class ShapePlaceable implements Placeable {
         this.material = material;
     }
 
-    public abstract List<Setting> settings();
+    public abstract List<Slider<?>> settings();
 
     public byte getMaterial() {
         return material;

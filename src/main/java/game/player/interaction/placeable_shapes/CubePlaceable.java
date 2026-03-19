@@ -1,6 +1,7 @@
 package game.player.interaction.placeable_shapes;
 
-import core.settings.Setting;
+import core.renderables.Slider;
+
 import game.player.interaction.ShapePlaceable;
 
 import java.util.Arrays;
@@ -13,7 +14,7 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public List<Setting> settings() {
+    public List<Slider<?>> settings() {
         return List.of();
     }
 

@@ -30,6 +30,8 @@ public final class InventoryInput extends Input {
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
         inventory.hoverOver(cursorPos);
+        if (Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON))
+            inventory.dragOver(cursorPos);
     }
 
     @Override
