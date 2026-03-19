@@ -56,13 +56,13 @@ public final class Renderer extends Renderable {
     public Renderer(Player player, MeshCollector meshCollector) {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         this.player = player;
-        setAllowFocusScaling(false);
+        setDoAutoFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
         renderingOptimizer = new RenderingOptimizer(meshCollector);
         crosshair = new UiElement(new Vector2f(), new Vector2f(), Textures.CROSSHAIR);
         crosshair.setScaleWithGuiSize(false);
-        crosshair.setAllowFocusScaling(false);
+        crosshair.setDoAutoFocusScaling(false);
 
         addRenderable(crosshair);
         addRenderable(new BreakPlaceOptionsDisplay());

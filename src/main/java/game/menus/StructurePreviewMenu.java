@@ -21,7 +21,7 @@ public final class StructurePreviewMenu extends UiBackgroundElement {
     public StructurePreviewMenu(Structure structure) {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         display = new StructureDisplay(new Vector2f(), new Vector2f(), structure);
-        display.setAllowFocusScaling(false);
+        display.setDoAutoFocusScaling(false);
         display.setScaleWithGuiSize(false);
         setScaleWithGuiSize(false);
 

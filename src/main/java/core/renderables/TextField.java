@@ -33,13 +33,13 @@ public class TextField extends UiButton {
         nameElement.setColor(Color.GRAY);
 
         cursorIndicator = new UiElement(new Vector2f(), new Vector2f(), CoreTextures.CURSOR_INDICATOR);
-        cursorIndicator.setAllowFocusScaling(false);
+        cursorIndicator.setDoAutoFocusScaling(false);
 
         blackBox = new UiElement(new Vector2f(), new Vector2f(), CoreTextures.OVERLAY);
         blackBox.addRenderable(cursorIndicator);
         blackBox.addRenderable(textElement);
         blackBox.addRenderable(nameElement);
-        blackBox.setAllowFocusScaling(false);
+        blackBox.setDoAutoFocusScaling(false);
 
         addRenderable(blackBox);
     }

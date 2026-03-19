@@ -145,7 +145,7 @@ public class Renderable {
     }
 
     public boolean allowsFocusScaling() {
-        return isFlag(ALLOW_FOCUS_SCALING_MASK);
+        return isFlag(DO_AUTO_FOCUS_SCALING);
     }
 
     public boolean scalesWithGuiSize() {
@@ -156,9 +156,9 @@ public class Renderable {
         setFlag(scaleWithGuiSize, SCALES_WITH_GUI_SIZE_MASK);
     }
 
-    public void setAllowFocusScaling(boolean allowScaling) {
-        setFlag(allowScaling, ALLOW_FOCUS_SCALING_MASK);
-        if (!isFlag(ALLOW_FOCUS_SCALING_MASK)) setFlag(false, FOCUSSED_MASK);
+    public void setDoAutoFocusScaling(boolean allowScaling) {
+        setFlag(allowScaling, DO_AUTO_FOCUS_SCALING);
+        if (!isFlag(DO_AUTO_FOCUS_SCALING)) setFlag(false, FOCUSSED_MASK);
     }
 
     public void setVisible(boolean visible) {
@@ -166,7 +166,7 @@ public class Renderable {
     }
 
     public void setFocused(boolean focused) {
-        if (!isFlag(ALLOW_FOCUS_SCALING_MASK)) return;
+        if (!isFlag(DO_AUTO_FOCUS_SCALING)) return;
         setFlag(focused, FOCUSSED_MASK);
 
         if (isFocused()) return;
@@ -195,10 +195,10 @@ public class Renderable {
     private final Vector2f offsetToParent;
     private Renderable parent = DummyRenderable.dummy;
     private float scalingFactor = 1.05F;
-    private int flags = VISIBILITY_MASK | ALLOW_FOCUS_SCALING_MASK | SCALES_WITH_GUI_SIZE_MASK;
+    private int flags = VISIBILITY_MASK | DO_AUTO_FOCUS_SCALING | SCALES_WITH_GUI_SIZE_MASK;
 
     private static final int VISIBILITY_MASK = 0x1;
     private static final int FOCUSSED_MASK = 0x2;
-    private static final int ALLOW_FOCUS_SCALING_MASK = 0x4;
+    private static final int DO_AUTO_FOCUS_SCALING = 0x4;
     private static final int SCALES_WITH_GUI_SIZE_MASK = 0x8;
 }

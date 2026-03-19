@@ -14,7 +14,7 @@ public final class Slider<T extends Number> extends UiButton {
     public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(this::action);
-        setAllowFocusScaling(false);
+        setDoAutoFocusScaling(false);
         this.setting = setting;
         this.settingName = settingName;
 

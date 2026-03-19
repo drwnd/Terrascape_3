@@ -21,7 +21,7 @@ public class SettingsRenderable extends CoreSettingsRenderable {
         float yOffset = 1.0F - 0.15F * settingsCount;
 
         TextElement nameDisplay = new TextElement(new Vector2f(0.225F, 0), new Vector2f(0.375F, yOffset + 0.05F), new Message(debugLine.name()));
-        nameDisplay.setAllowFocusScaling(false);
+        nameDisplay.setDoAutoFocusScaling(false);
         OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6F, yOffset), debugLine.color(), null);
         OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8F, yOffset), debugLine.visibility(), null);
 

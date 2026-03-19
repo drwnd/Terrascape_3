@@ -24,11 +24,11 @@ public final class Hotbar extends UiElement {
     public Hotbar() {
         super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
         setScaleWithGuiSize(false);
-        setAllowFocusScaling(false);
+        setDoAutoFocusScaling(false);
 
         hotBarSelectionIndicator = new UiElement(new Vector2f(), new Vector2f(), Textures.HOTBAR_SELECTION_INDICATOR);
         hotBarSelectionIndicator.setScaleWithGuiSize(false);
-        hotBarSelectionIndicator.setAllowFocusScaling(false);
+        hotBarSelectionIndicator.setDoAutoFocusScaling(false);
         addRenderable(hotBarSelectionIndicator);
     }
 

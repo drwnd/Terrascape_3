@@ -37,10 +37,10 @@ public final class Inventory extends UiElement {
         input = new InventoryInput(this);
 
         setVisible(false);
-        setAllowFocusScaling(false);
+        setDoAutoFocusScaling(false);
         setScaleWithGuiSize(false);
         itemNameDisplay.setAddTransparentBackground(true);
-        itemNameDisplay.setAllowFocusScaling(false);
+        itemNameDisplay.setDoAutoFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
         filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
 
