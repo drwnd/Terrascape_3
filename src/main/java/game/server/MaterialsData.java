@@ -248,14 +248,14 @@ public final class MaterialsData {
     private static void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod) {
         int materialStartIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
         int endIndex = sideLength * sideLength * sideLength;
-        int size = lod * 3;
-        int mask = -size;
+        int stride = 1 << lod * 3;
+        int mask = -stride;
 
         for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
             for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask,
-                 end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index++) {
-                if ((bitMap[bitsIndex] & 1L << (index << size)) == 0) continue;
-                uncompressedMaterials[materialStartIndex + index] = material;
+                 end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
+                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
+                uncompressedMaterials[materialStartIndex + (index >> lod * 3)] = material;
             }
     }
 

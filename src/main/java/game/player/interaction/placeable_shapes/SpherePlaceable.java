@@ -30,11 +30,15 @@ public final class SpherePlaceable extends ShapePlaceable {
 
     @Override
     public ShapePlaceable copyWithMaterial(byte material) {
-        return new SpherePlaceable(material);
+        SpherePlaceable placeable = new SpherePlaceable(material);
+        placeable.innerRadius.setValue(innerRadius.value());
+        placeable.exponent.setValue(exponent.value());
+        return placeable;
     }
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
+        System.out.println(exponent.value());
         int outerRadius = sideLength / 2;
 
         for (int x = 0; x < sideLength; x++)
@@ -47,9 +51,9 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, int outerRadius) {
-        double distanceX = Math.pow(x - outerRadius, exponent.value());
-        double distanceY = Math.pow(y - outerRadius, exponent.value());
-        double distanceZ = Math.pow(z - outerRadius, exponent.value());
+        double distanceX = Math.pow(Math.abs(x - outerRadius + 0.5), exponent.value());
+        double distanceY = Math.pow(Math.abs(y - outerRadius + 0.5), exponent.value());
+        double distanceZ = Math.pow(Math.abs(z - outerRadius + 0.5), exponent.value());
         double distance = distanceX + distanceY + distanceZ;
 
         return distance <= Math.pow(outerRadius, exponent.value()) && distance >= Math.pow(innerRadius.value(), exponent.value());

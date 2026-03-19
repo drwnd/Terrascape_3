@@ -94,6 +94,12 @@ public final class Inventory extends UiElement {
 
 
     @Override
+    public void dragOver(Vector2i pixelCoordinate) {
+        for (Slider<?> slider : shapePlaceableSettingSliders) if (slider.isVisible()) slider.getSetting().setValue(slider.getValue());
+        super.dragOver(pixelCoordinate);
+    }
+
+    @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         itemNameDisplay.setVisible(false);

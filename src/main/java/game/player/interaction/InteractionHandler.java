@@ -50,7 +50,10 @@ public final class InteractionHandler {
     }
 
     private void handleDestroy() {
-        handleUseDestroy(destroyInfo, new CubePlaceable(AIR), false);
+        Placeable placeable = Game.getPlayer().getHeldPlaceable();
+        if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR);
+        else placeable = shapePlaceable.copyWithMaterial(AIR);
+        handleUseDestroy(destroyInfo, placeable, false);
     }
 
     private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
