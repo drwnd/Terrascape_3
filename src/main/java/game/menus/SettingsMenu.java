@@ -133,7 +133,6 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessages.HOTBAR_INDICATOR_SCALER);
         section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessages.PAUSE_MENU_BACKGROUND_BLUR);
         section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, UiMessages.INVENTORY_ITEM_SIZE);
-        section.addSlider(IntSettings.INVENTORY_ITEMS_PER_ROW, UiMessages.INVENTORY_ITEMS_PER_ROW);
         section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, UiMessages.INVENTORY_ITEM_SCALING);
 
         return section;

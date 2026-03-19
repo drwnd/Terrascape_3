@@ -5,7 +5,6 @@ import core.settings.IntSetting;
 public enum IntSettings implements IntSetting {
     REACH(0, 500, 5),
     BREAK_PLACE_INTERVALL(1, 20, 5),
-    INVENTORY_ITEMS_PER_ROW(1, 64, 8),
     MAX_CHAT_MESSAGE_COUNT(10, 1000, 100),
     AMBIENT_OCCLUSION_SAMPLES(0, 64, 64),
     OCCLUDERS_OCCLUDEES_LOD(0, 30, 0);

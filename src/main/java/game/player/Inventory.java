@@ -19,7 +19,6 @@ import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Materials;
 import game.settings.FloatSettings;
-import game.settings.IntSettings;
 import game.settings.KeySettings;
 
 import org.joml.Vector2f;
@@ -83,6 +82,11 @@ public final class Inventory extends UiElement {
         for (StructureSelectionButton button : structureButtons) button.move(offset);
     }
 
+    public void moveMaterialButtons(float movement) {
+        Vector2f offset = new Vector2f(0.0F, movement);
+        for (CubeDisplay button : cubeDisplays) button.display.move(offset);
+    }
+
     public Input getInput() {
         return input;
     }
@@ -116,7 +120,7 @@ public final class Inventory extends UiElement {
 
     private void updateDisplayPositions() {
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
-        int itemsPerRow = IntSettings.INVENTORY_ITEMS_PER_ROW.value();
+        int itemsPerRow = Math.max(1, (int) Math.floor(1.0 / (3 * itemSize)));
 
         Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio());
 
@@ -126,7 +130,7 @@ public final class Inventory extends UiElement {
             float x = 1.0F - itemSize * (column + 1);
             float y = 1.0F - itemSize * 2 * (row + 1);
 
-            display.display.setOffsetToParent(x, y);
+            display.display.setOffsetToParent(x, y + input.getMaterialScroll());
             display.display.setSizeToParent(sizeToParent.x, sizeToParent.y);
         }
     }
@@ -143,7 +147,7 @@ public final class Inventory extends UiElement {
         for (File structureFile : structureFiles) {
             if (structureFile == null || !structureFile.getName().toLowerCase().contains(filterText)) continue;
             String structureName = structureFile.getName();
-            Vector2f offsetToParent = new Vector2f(0.05F, 1.0F - ++structureCount * 0.065F + input.getScroll());
+            Vector2f offsetToParent = new Vector2f(0.05F, 1.0F - ++structureCount * 0.065F + input.getStructureScroll());
 
             StructureSelectionButton button = new StructureSelectionButton(sizeToParent, offsetToParent, structureName);
             button.setRimThicknessMultiplier(0.5F);
