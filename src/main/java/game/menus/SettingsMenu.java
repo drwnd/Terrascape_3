@@ -157,7 +157,6 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
         section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS, new Message("Reload Settings"));
         section.addKeySelector(CoreKeySettings.RELOAD_ASSETS, new Message("Reload Assets"));
-        section.addKeySelector(CoreKeySettings.RELOAD_LANGUAGE, new Message("Reload Language"));
         section.addKeySelector(CoreKeySettings.RELOAD_FONT, new Message("Reload Font"));
         section.addKeySelector(KeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
         section.addKeySelector(KeySettings.GET_CHUNK_REBUILD_PLACEABLE, new Message("Get Chunk Rebuilder"));

@@ -129,7 +129,7 @@ public final class Inventory extends UiElement {
         getChildren().removeAll(shapePlaceableSettingSliders);
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
-        Vector2f sizeToParent = new Vector2f(0.05F, 0.05F * Window.getAspectRatio());
+        Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
 
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
@@ -222,6 +222,8 @@ public final class Inventory extends UiElement {
 
             inventory.shapePlaceableSettingSliders.addAll(settingSliders);
             for (Slider<?> slider : settingSliders) inventory.addRenderable(slider);
+
+            addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getStructure()));
         }
 
         @Override

@@ -77,9 +77,9 @@ public abstract class ShapePlaceable implements Placeable {
         int minY = Math.max(0, (int) (min.y - position.y)), maxY = Math.min((int) (max.y - position.y), 1 << size);
         int minZ = Math.max(0, (int) (min.z - position.z)), maxZ = Math.min((int) (max.z - position.z), 1 << size);
 
-        for (int x = minX; x <= maxX; x++)
-            for (int y = minY; y <= maxY; y++)
-                for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x < maxX; x++)
+            for (int y = minY; y < maxY; y++)
+                for (int z = minZ; z < maxZ; z++) {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) != 0) return true;
                 }
@@ -98,7 +98,18 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public Structure getStructure() {
-        return new Structure(material);
+        long[] bitMap = new long[64];
+        fillBitMap(bitMap, 16);
+        byte[] uncompressedMaterial = new byte[4096];
+
+        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
+            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
+                 end = bitsIndex + 1 << 6; index < end; index++) {
+                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
+                uncompressedMaterial[index] = STONE;
+            }
+
+        return new Structure(16, 16, 16, MaterialsData.getCompressedMaterials(4, uncompressedMaterial));
     }
 
     @Override

@@ -3,8 +3,8 @@ package game.player.interaction.placeable_shapes;
 import core.renderables.Slider;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
-import core.utils.Message;
 
+import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
 
@@ -24,8 +24,8 @@ public final class SpherePlaceable extends ShapePlaceable {
     public List<Slider<?>> settings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, innerRadius, new Message("Inner Radius")),
-                new Slider<>(zero, zero, exponent, new Message("Exponent")));
+                new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS),
+                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT));
     }
 
     @Override
@@ -38,7 +38,6 @@ public final class SpherePlaceable extends ShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        System.out.println(exponent.value());
         int outerRadius = sideLength / 2;
 
         for (int x = 0; x < sideLength; x++)
@@ -59,6 +58,6 @@ public final class SpherePlaceable extends ShapePlaceable {
         return distance <= Math.pow(outerRadius, exponent.value()) && distance >= Math.pow(innerRadius.value(), exponent.value());
     }
 
-    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, CHUNK_SIZE, 0);
+    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, CHUNK_SIZE / 2, 0);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }
