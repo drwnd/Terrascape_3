@@ -46,7 +46,7 @@ public final class StandardWindowInput extends Input {
         boolean settingUpdated = false;
         for (Setting setting : Settings.getSettings()) {
             if (!(setting instanceof ToggleSetting toggleSetting)) continue;
-            if (Input.isKeyPressed(toggleSetting)) Settings.update(toggleSetting, !toggleSetting.value());
+            if (Input.isKeyPressed(toggleSetting)) toggleSetting.setValue(!toggleSetting.value());
             settingUpdated = true;
         }
         if (settingUpdated) Settings.writeToFile();

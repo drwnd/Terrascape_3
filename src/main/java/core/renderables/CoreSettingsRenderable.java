@@ -170,10 +170,10 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return;
 
-            for (Slider<? extends Number> slider : sliders) Settings.update(slider.getSetting(), slider.getValue());
-            for (KeySelector keySelector : keySelectors) Settings.update(keySelector.getSetting(), keySelector.getValue());
-            for (Toggle toggle : toggles) Settings.update(toggle.getSetting(), toggle.getValue());
-            for (OptionToggle option : options) Settings.update(option.getSetting(), option.getValue());
+            for (Slider<? extends Number> slider : sliders) slider.getSetting().setValue(slider.getValue());
+            for (KeySelector keySelector : keySelectors) keySelector.getSetting().setKeybind(keySelector.getValue());
+            for (Toggle toggle : toggles) toggle.getSetting().setValue(toggle.getValue());
+            for (OptionToggle option : options) option.getSetting().setValue(option.getValue());
 
             Settings.writeToFile();
             Window.popRenderable();

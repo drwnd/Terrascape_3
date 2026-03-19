@@ -3,7 +3,6 @@ package core.settings;
 import core.assets.AssetManager;
 import core.assets.SettingsFile;
 import core.assets.identifiers.AssetIdentifier;
-import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 
 import java.io.*;
@@ -21,34 +20,6 @@ public final class Settings {
     @SafeVarargs
     public static void registerSettingsEnums(Class<? extends Setting>... settings) {
         for (Class<? extends Setting> setting : settings) registerSettingsEnum(setting);
-    }
-
-    public static void update(FloatSetting setting, float value) {
-        setting.setValue(value);
-    }
-
-    public static void update(IntSetting setting, int value) {
-        setting.setValue(value);
-    }
-
-    public static void update(KeySetting setting, int value) {
-        setting.setKeybind(value);
-    }
-
-    public static void update(ToggleSetting setting, boolean value) {
-        setting.setValue(value);
-    }
-
-    public static void update(OptionSetting setting, Option value) {
-        setting.setValue(value);
-    }
-
-    public static <T extends Number> void update(NumberSetting<T> setting, Number value) {
-        switch (value) {
-            case Integer intValue -> update((IntSetting) setting, (int) intValue);
-            case Float floatValue -> update((FloatSetting) setting, (float) floatValue);
-            default -> throw new IllegalStateException("Unexpected value: " + value);
-        }
     }
 
     public static void loadFromFile() {

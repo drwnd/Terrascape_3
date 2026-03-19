@@ -9,4 +9,12 @@ public interface NumberSetting<T extends Number> {
     T valueGeneric();
 
     T defaultValueGeneric();
+
+    default void setValue(Number value) {
+        switch (value) {
+            case Integer intValue -> ((IntSetting) this).setValue((int) intValue);
+            case Float floatValue -> ((FloatSetting) this).setValue((float) floatValue);
+            default -> throw new IllegalStateException("Unexpected value: " + value);
+        }
+    }
 }

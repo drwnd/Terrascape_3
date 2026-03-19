@@ -86,14 +86,14 @@ final class SettingCommand {
 
     private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
-        Settings.update(setting, (float) number);
+        setting.setValue((float) number);
         return CommandResult.success();
     }
 
     private static CommandResult set(IntSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number)) || (int) number != number)
             return CommandResult.fail("Value must be an Integer for that setting");
-        Settings.update(setting, (int) number);
+        setting.setValue((int) number);
         return CommandResult.success();
     }
 
@@ -114,7 +114,7 @@ final class SettingCommand {
             }
         }
 
-        Settings.update(setting, codePoint);
+        setting.setKeybind(codePoint);
         return CommandResult.success();
     }
 
@@ -122,7 +122,7 @@ final class SettingCommand {
         if (!(value instanceof KeywordToken(String keyword)) || (!"true".equalsIgnoreCase(keyword) && !"false".equalsIgnoreCase(keyword)))
             return CommandResult.fail("Value must be true / false for that setting");
         boolean toggle = Boolean.parseBoolean(keyword);
-        Settings.update(setting, toggle);
+        setting.setValue(toggle);
         return CommandResult.success();
     }
 
@@ -134,7 +134,7 @@ final class SettingCommand {
         else return CommandResult.fail("Value must be a keyword or a string for that setting");
 
         Option option = setting.value().value(optionValue);
-        Settings.update(setting, option);
+        setting.setValue(option);
         return CommandResult.success();
     }
 }

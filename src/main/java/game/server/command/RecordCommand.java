@@ -1,7 +1,5 @@
 package game.server.command;
 
-import core.settings.Settings;
-
 import game.player.Player;
 import game.player.movement.FlyingState;
 import game.player.movement.MovementState;
@@ -105,7 +103,7 @@ final class RecordCommand {
                 player.getMovement().setVelocity(movement);
             }
 
-            Settings.update(ToggleSettings.NO_CLIP, true);
+            ToggleSettings.NO_CLIP.setValue(true);
             player.getMovement().setState(state);
             index++;
             return true;
