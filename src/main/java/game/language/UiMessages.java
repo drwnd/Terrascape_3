@@ -79,7 +79,9 @@ public enum UiMessages implements Translatable {
     USE_OCCLUSION_CULLING,
     CHUNKS_CAST_SHADOWS,
     PARTICLES_CAST_SHADOWS,
-    GLASS_CASTS_SHADOWS;
+    GLASS_CASTS_SHADOWS,
+    INNER_RADIUS,
+    DISTANCE_EXPONENT;
 
     @Override
     public String translationFileName() {

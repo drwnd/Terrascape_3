@@ -6,7 +6,6 @@ public enum CoreKeySettings implements KeySetting {
     RESIZE_WINDOW(GLFW_KEY_F11),
     RELOAD_ASSETS(GLFW_KEY_F10),
     RELOAD_SETTINGS(GLFW_KEY_F9),
-    RELOAD_LANGUAGE(GLFW_KEY_F8),
     RELOAD_FONT(GLFW_KEY_F7);
 
     CoreKeySettings(int defaultValue) {

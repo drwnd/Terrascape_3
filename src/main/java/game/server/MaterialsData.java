@@ -28,7 +28,6 @@ public final class MaterialsData {
 
     // Static API
     public static int getUncompressedIndex(int inChunkX, int inChunkY, int inChunkZ) {
-//        return (inChunkX << totalSizeBits | inChunkZ) << totalSizeBits | inChunkY;
         return Z_ORDER_3D_TABLE_X[inChunkX] | Z_ORDER_3D_TABLE_Y[inChunkY] | T_ORDER_3D_TABLE_Z[inChunkZ];
     }
 
@@ -118,6 +117,24 @@ public final class MaterialsData {
             for (int y = 0; y < lengthY; y++)
                 for (int z = 0; z < lengthZ; z++)
                     uncompressedMaterials[getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z)] = material;
+
+        compressIntoData(uncompressedMaterials);
+    }
+
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod) {
+        if (countX <= 0 || countY <= 0 || countZ <= 0 || sideLength <= 0) return;
+        byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
+        fillUncompressedMaterialsInto(uncompressedMaterials);
+
+        for (int x = 0; x < countX; x++)
+            for (int y = 0; y < countY; y++)
+                for (int z = 0; z < countZ; z++)
+                    storeMaterial(
+                            inChunkX + x * sideLength,
+                            inChunkY + y * sideLength,
+                            inChunkZ + z * sideLength,
+                            material, sideLength, bitMap, uncompressedMaterials, lod
+                    );
 
         compressIntoData(uncompressedMaterials);
     }
@@ -226,6 +243,21 @@ public final class MaterialsData {
         synchronized (chunk.getMaterials()) {
             chunk.getMaterials().fillUncompressedMaterialsInto(uncompressedMaterials, 1, targetStart, sourceStart, size, CHUNK_SIZE_BITS, 0, 0, 0, 0);
         }
+    }
+
+    private static void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod) {
+        int materialStartIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
+        int shiftCount = lod * 3;
+        int stride = 1 << shiftCount;
+        int mask = -stride;
+        int endIndex = sideLength * sideLength * sideLength << shiftCount;
+
+        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
+            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask,
+                 end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
+                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
+                uncompressedMaterials[materialStartIndex + (index >> shiftCount)] = material;
+            }
     }
 
     // Functions to store data into something

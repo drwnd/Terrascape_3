@@ -4,7 +4,7 @@ import core.settings.IntSetting;
 
 public final class StandAloneIntSetting implements IntSetting {
 
-    StandAloneIntSetting(int min, int max, int defaultValue) {
+    public StandAloneIntSetting(int min, int max, int defaultValue) {
         this.min = min;
         this.max = max;
         this.defaultValue = defaultValue;

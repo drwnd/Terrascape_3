@@ -25,7 +25,7 @@ public final class CuboidPlaceable implements Placeable {
     }
 
     public static void offsetPositions(Vector3l minPosition, Vector3l maxPosition) {
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
         int mask = -(1 << breakPlaceSize);
 
         minPosition.x &= mask;

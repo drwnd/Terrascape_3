@@ -2,17 +2,17 @@ package game.player;
 
 import core.assets.CoreTextures;
 import core.language.Language;
-import core.renderables.TextElement;
-import core.renderables.TextField;
+import core.renderables.*;
 import core.rendering_api.Input;
-import core.renderables.UiElement;
 import core.rendering_api.Window;
 import core.utils.FileManager;
 
 import game.language.UiMessages;
-import game.player.interaction.CubePlaceable;
+import game.player.interaction.ShapePlaceable;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
+import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
@@ -45,19 +45,20 @@ public final class Inventory extends UiElement {
         filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
 
         long start = System.nanoTime();
-        for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {
+        for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
             Vector2f sizeToParent = new Vector2f();
             Vector2f offsetToParent = new Vector2f();
-            Structure structure = new Structure((byte) index);
+            Structure structure = new Structure((byte) material);
 
             StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
             display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
             display.setScaleWithGuiSize(false);
 
-            cubeDisplays.add(new CubeDisplay(display, (byte) index));
+            cubeDisplays.add(new CubeDisplay(display, (byte) material));
             addRenderable(display);
         }
         System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        loadShapeDisplays();
         addRenderable(itemNameDisplay);
         addRenderable(filterTextField);
     }
@@ -93,6 +94,12 @@ public final class Inventory extends UiElement {
 
 
     @Override
+    public void dragOver(Vector2i pixelCoordinate) {
+        for (Slider<?> slider : shapePlaceableSettingSliders) if (slider.isVisible()) slider.getSetting().setValue(slider.getValue());
+        super.dragOver(pixelCoordinate);
+    }
+
+    @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         itemNameDisplay.setVisible(false);
@@ -117,6 +124,19 @@ public final class Inventory extends UiElement {
         updateDisplayPositions();
     }
 
+    private void loadShapeDisplays() {
+        getChildren().removeAll(shapeDisplays);
+        getChildren().removeAll(shapePlaceableSettingSliders);
+        shapeDisplays.clear();
+        shapePlaceableSettingSliders.clear();
+        Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
+
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
+
+        for (Renderable renderable : shapeDisplays) addRenderable(renderable);
+        selectedDisplay = shapeDisplays.getFirst();
+    }
 
     private void updateDisplayPositions() {
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
@@ -158,7 +178,10 @@ public final class Inventory extends UiElement {
 
     private Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
-            if (display.display.containsPixelCoordinate(pixelCoordinate)) return new CubePlaceable(display.material);
+            if (display.display.containsPixelCoordinate(pixelCoordinate)) {
+                if (selectedDisplay == null) return new CubePlaceable(display.material);
+                return selectedDisplay.placeable.copyWithMaterial(display.material);
+            }
         for (StructureSelectionButton button : structureButtons)
             if (button.containsPixelCoordinate(pixelCoordinate)) return new StructurePlaceable(button.getStructure());
         return null;
@@ -166,11 +189,60 @@ public final class Inventory extends UiElement {
 
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<StructureSelectionButton> structureButtons = new ArrayList<>();
+    private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
+    private final ArrayList<Slider<?>> shapePlaceableSettingSliders = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final TextField filterTextField;
     private final InventoryInput input;
 
+    private ShapeDisplay selectedDisplay;
+
     private record CubeDisplay(StructureDisplay display, byte material) {
 
+    }
+
+    private static class ShapeDisplay extends UiButton {
+
+        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable, Inventory inventory) {
+            super(sizeToParent, offsetToParent);
+            setAction(getAction());
+            setRimThicknessMultiplier(0.5F);
+            setAllowFocusScaling(false);
+            setScalingFactor(1.2F);
+            this.placeable = placeable;
+
+            int index = 0;
+            for (Slider<?> slider : placeable.settings()) {
+                slider.setSizeToParent(0.3F, 0.075F);
+                slider.setOffsetToParent(0.35F, 0.7F - index++ * 0.08F);
+                slider.setVisible(false);
+                slider.setRimThicknessMultiplier(0.5F);
+                settingSliders.add(slider);
+            }
+
+            inventory.shapePlaceableSettingSliders.addAll(settingSliders);
+            for (Slider<?> slider : settingSliders) inventory.addRenderable(slider);
+
+            addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getStructure()));
+        }
+
+        @Override
+        public void renderSelf(Vector2f position, Vector2f size) {
+            if (Game.getPlayer().getInventory().selectedDisplay == this) scaleForFocused(position, size);
+            super.renderSelf(position, size);
+        }
+
+        private Clickable getAction() {
+            return (Vector2i _, int _, int action) -> {
+                if (action != GLFW_PRESS) return;
+                Inventory inventory = Game.getPlayer().getInventory();
+                inventory.selectedDisplay = this;
+                for (Slider<?> slider : inventory.shapePlaceableSettingSliders) slider.setVisible(false);
+                for (Slider<?> slider : settingSliders) slider.setVisible(true);
+            };
+        }
+
+        private final ArrayList<Slider<?>> settingSliders = new ArrayList<>();
+        private final ShapePlaceable placeable;
     }
 }

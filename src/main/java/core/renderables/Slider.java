@@ -47,7 +47,7 @@ public final class Slider<T extends Number> extends UiButton {
 
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
-        action(pixelCoordinate, GLFW_MOUSE_BUTTON_LEFT, GLFW_PRESS);
+        action(pixelCoordinate, GLFW_MOUSE_BUTTON_LEFT, GLFW_HOVERED);
     }
 
     public void matchSetting() {
@@ -56,16 +56,17 @@ public final class Slider<T extends Number> extends UiButton {
 
 
     private void action(Vector2i cursorPos, int button, int action) {
-        if (action != GLFW_PRESS) return;
+        if (action == GLFW_HOVERED && selected != this) return;
+        if (action == GLFW_PRESS) selected = this;
+        if (action == GLFW_RELEASE)
+            if (selected == this) selected = null;
+            else return;
         Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
         Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
 
         float fraction = (cursorPos.x - position.x) / size.x;
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
         setValue(setting.valueFromFraction(fraction));
-
-        if (getParent() instanceof CoreSettingsRenderable)
-            ((CoreSettingsRenderable) getParent()).setSelectedSlider(this);
     }
 
     private final NumberSetting<T> setting;
@@ -73,4 +74,6 @@ public final class Slider<T extends Number> extends UiButton {
     private final TextElement textElement;
     private final StringGetter settingName;
     private Number value;
+
+    private static Slider<?> selected = null;
 }

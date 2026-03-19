@@ -3,6 +3,7 @@ package game.player.interaction;
 import core.rendering_api.Input;
 import core.utils.Vector3l;
 
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
@@ -13,8 +14,8 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.min(CHUNK_SIZE_BITS, placeBreakSize + 1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) placeBreakSize = Math.max(0, placeBreakSize - 1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.min(CHUNK_SIZE_BITS, breakPlaceSize + 1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.max(0, breakPlaceSize - 1);
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
         if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
@@ -30,8 +31,8 @@ public final class InteractionHandler {
         handleUse();
     }
 
-    public int getPlaceBreakSize() {
-        return placeBreakSize;
+    public int getBreakPlaceSize() {
+        return breakPlaceSize;
     }
 
     public Target getStartTarget() {
@@ -49,7 +50,10 @@ public final class InteractionHandler {
     }
 
     private void handleDestroy() {
-        handleUseDestroy(destroyInfo, new CubePlaceable(AIR), false);
+        Placeable placeable = Game.getPlayer().getHeldPlaceable();
+        if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR);
+        else placeable = shapePlaceable.copyWithMaterial(AIR);
+        handleUseDestroy(destroyInfo, placeable, false);
     }
 
     private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
@@ -81,7 +85,7 @@ public final class InteractionHandler {
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
     private Target startTarget = null;
-    private int placeBreakSize = 4;
+    private int breakPlaceSize = 4;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

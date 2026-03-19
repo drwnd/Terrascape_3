@@ -24,7 +24,7 @@ import game.assets.Textures;
 import game.assets.VertexArrays;
 import game.player.ChatTextField;
 import game.player.Player;
-import game.player.interaction.CubePlaceable;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.CuboidPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.Target;

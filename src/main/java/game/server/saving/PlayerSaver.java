@@ -7,7 +7,7 @@ import game.assets.StructureIdentifier;
 import game.player.Hotbar;
 import game.player.Player;
 import game.player.interaction.ChunkRebuildPlaceable;
-import game.player.interaction.CubePlaceable;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.utils.Position;
