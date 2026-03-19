@@ -26,7 +26,6 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        affectedChunks.clear();
         long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
@@ -69,6 +68,11 @@ public final class StructurePlaceable implements Placeable {
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }
         return false;
+    }
+
+    @Override
+    public void spawnParticles(Vector3l position) {
+        Game.getPlayer().getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structure);
     }
 
 

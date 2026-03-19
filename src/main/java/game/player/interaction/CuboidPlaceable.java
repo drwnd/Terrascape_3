@@ -2,6 +2,7 @@ package game.player.interaction;
 
 import core.utils.Vector3l;
 
+import game.player.Player;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
@@ -9,6 +10,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -75,12 +77,12 @@ public final class CuboidPlaceable implements Placeable {
         offsetPositions(minPosition, maxPosition);
     }
 
-    public Vector3l getMinPosition() {
-        return minPosition;
-    }
-
-    public Vector3l getMaxPosition() {
-        return maxPosition;
+    @Override
+    public void spawnParticles(Vector3l position) {
+        Player player = Game.getPlayer();
+        Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
+        player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
+        player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
     }
 
     public byte getMaterial() {

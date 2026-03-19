@@ -19,7 +19,6 @@ public final class ChunkRebuildPlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        affectedChunks.clear();
         if (lod == 0) {
             Chunk toPlaceChunk = new Chunk(position.x >>> CHUNK_SIZE_BITS, position.y >>> CHUNK_SIZE_BITS, position.z >>> CHUNK_SIZE_BITS, 0);
             WorldGeneration.generate(toPlaceChunk);
@@ -71,6 +70,10 @@ public final class ChunkRebuildPlaceable implements Placeable {
         position.x &= ~CHUNK_SIZE_MASK;
         position.y &= ~CHUNK_SIZE_MASK;
         position.z &= ~CHUNK_SIZE_MASK;
+    }
+
+    @Override
+    public void spawnParticles(Vector3l position) {
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();

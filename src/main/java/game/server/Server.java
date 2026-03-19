@@ -3,13 +3,10 @@ package game.server;
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
 import core.settings.optionSettings.ColorOption;
-
 import core.utils.Vector3l;
+
 import game.player.Player;
-import game.player.interaction.CubePlaceable;
-import game.player.interaction.CuboidPlaceable;
 import game.player.interaction.Placeable;
-import game.player.interaction.StructurePlaceable;
 import game.player.rendering.MeshCollector;
 import game.server.command.Command;
 import game.server.command.CommandResult;
@@ -20,8 +17,6 @@ import game.settings.IntSettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Utils;
-
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,28 +107,13 @@ public final class Server implements CrashCallback {
         Player player = Game.getPlayer();
         if (!ToggleSettings.NO_CLIP.value() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;
 
-        if (placeable instanceof CubePlaceable cubePlaceable) {
-            int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
-            player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, cubePlaceable.getMaterial());
-            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, cubePlaceable.getMaterial());
-        }
-        if (placeable instanceof CuboidPlaceable cuboidPlaceable) {
-            Vector3l minPosition = cuboidPlaceable.getMinPosition();
-            Vector3i length = new Vector3l(cuboidPlaceable.getMaxPosition()).sub(minPosition).add(1, 1, 1).toInt();
-            player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
-            player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, cuboidPlaceable.getMaterial());
-        }
-        if (placeable instanceof StructurePlaceable structurePlaceable) {
-            player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structurePlaceable.getStructure());
-        }
+        placeable.spawnParticles(position);
 
         MeshCollector meshCollector = player.getMeshCollector();
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            placeable.place(position, lod);
-            for (Chunk chunk : placeable.getAffectedChunks()) {
-                if (chunk == null) continue;
-                meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
-            }
+        for (int lod = 0; lod < LOD_COUNT; lod++) placeable.place(position, lod);
+        for (Chunk chunk : placeable.getAffectedChunks()) {
+            if (chunk == null) continue;
+            meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
         }
         synchronized (generator) {
             generatorRestartScheduled = true;

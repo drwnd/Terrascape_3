@@ -19,4 +19,5 @@ public interface Placeable {
 
     void offsetPosition(Vector3l position);
 
+    void spawnParticles(Vector3l position);
 }

@@ -2,6 +2,7 @@ package game.player.interaction;
 
 import core.utils.Vector3l;
 
+import game.player.Player;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
@@ -26,7 +27,6 @@ public final class CubePlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        affectedChunks.clear();
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getPlaceBreakSize();
 
         int mask = -(1 << breakPlaceSize);
@@ -100,6 +100,14 @@ public final class CubePlaceable implements Placeable {
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;
+    }
+
+    @Override
+    public void spawnParticles(Vector3l position) {
+        Player player = Game.getPlayer();
+        int breakPlaceSize = 1 << player.getInteractionHandler().getPlaceBreakSize();
+        player.getParticleCollector().addBreakParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, material);
+        player.getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, breakPlaceSize, breakPlaceSize, breakPlaceSize, material);
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
