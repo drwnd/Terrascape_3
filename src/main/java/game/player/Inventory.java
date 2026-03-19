@@ -58,6 +58,7 @@ public final class Inventory extends UiElement {
             addRenderable(display);
         }
         System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        loadShapeDisplays();
         addRenderable(itemNameDisplay);
         addRenderable(filterTextField);
     }
@@ -115,18 +116,17 @@ public final class Inventory extends UiElement {
 
         reloadStructureButtons();
         updateDisplayPositions();
-        resetShapeDisplays();
     }
 
-    private void resetShapeDisplays() {
+    private void loadShapeDisplays() {
         getChildren().removeAll(shapeDisplays);
         getChildren().removeAll(shapePlaceableSettingSliders);
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
         Vector2f sizeToParent = new Vector2f(0.05F, 0.05F * Window.getAspectRatio());
 
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE)));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE)));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();
@@ -172,7 +172,10 @@ public final class Inventory extends UiElement {
 
     private Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
-            if (display.display.containsPixelCoordinate(pixelCoordinate)) return new CubePlaceable(display.material);
+            if (display.display.containsPixelCoordinate(pixelCoordinate)) {
+                if (selectedDisplay == null) return new CubePlaceable(display.material);
+                return selectedDisplay.placeable.copyWithMaterial(display.material);
+            }
         for (StructureSelectionButton button : structureButtons)
             if (button.containsPixelCoordinate(pixelCoordinate)) return new StructurePlaceable(button.getStructure());
         return null;
@@ -194,11 +197,13 @@ public final class Inventory extends UiElement {
 
     private static class ShapeDisplay extends UiButton {
 
-        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable) {
+        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable, Inventory inventory) {
             super(sizeToParent, offsetToParent);
             setAction(getAction());
-            this.placeable = placeable;
             setRimThicknessMultiplier(0.5F);
+            setAllowFocusScaling(false);
+            setScalingFactor(1.2F);
+            this.placeable = placeable;
 
             int index = 0;
             for (Slider<?> slider : placeable.settings()) {
@@ -209,19 +214,21 @@ public final class Inventory extends UiElement {
                 settingSliders.add(slider);
             }
 
-            Inventory inventory = Game.getPlayer().getInventory();
             inventory.shapePlaceableSettingSliders.addAll(settingSliders);
             for (Slider<?> slider : settingSliders) inventory.addRenderable(slider);
         }
 
-        private ShapePlaceable getPlaceable() {
-            return placeable;
+        @Override
+        public void renderSelf(Vector2f position, Vector2f size) {
+            if (Game.getPlayer().getInventory().selectedDisplay == this) scaleForFocused(position, size);
+            super.renderSelf(position, size);
         }
 
         private Clickable getAction() {
             return (Vector2i _, int _, int action) -> {
                 if (action != GLFW_PRESS) return;
                 Inventory inventory = Game.getPlayer().getInventory();
+                inventory.selectedDisplay = this;
                 for (Slider<?> slider : inventory.shapePlaceableSettingSliders) slider.setVisible(false);
                 for (Slider<?> slider : settingSliders) slider.setVisible(true);
             };

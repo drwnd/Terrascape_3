@@ -19,6 +19,11 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
+    public ShapePlaceable copyWithMaterial(byte material) {
+        return new CubePlaceable(material);
+    }
+
+    @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         Arrays.fill(bitMap, -1L);
         if (sideLength == 1) bitMap[0] = 0x8L;

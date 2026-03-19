@@ -29,6 +29,11 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     @Override
+    public ShapePlaceable copyWithMaterial(byte material) {
+        return new SpherePlaceable(material);
+    }
+
+    @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         int outerRadius = sideLength / 2;
 

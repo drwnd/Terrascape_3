@@ -25,6 +25,8 @@ public abstract class ShapePlaceable implements Placeable {
 
     public abstract List<Slider<?>> settings();
 
+    public abstract ShapePlaceable copyWithMaterial(byte material);
+
     public byte getMaterial() {
         return material;
     }
