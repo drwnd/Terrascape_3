@@ -14,8 +14,10 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.min(CHUNK_SIZE_BITS, breakPlaceSize + 1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.max(0, breakPlaceSize - 1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
         if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
@@ -33,6 +35,10 @@ public final class InteractionHandler {
 
     public int getBreakPlaceSize() {
         return breakPlaceSize;
+    }
+
+    public int getBreakPlaceAlign() {
+        return breakPlaceAlign;
     }
 
     public Target getStartTarget() {
@@ -69,12 +75,22 @@ public final class InteractionHandler {
         }
 
         Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
-        if (startTarget != null && placeable instanceof CubePlaceable cube) {
+        if (startTarget != null && placeable instanceof ShapePlaceable shapePlaceable) {
             Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
-            placeable = new CuboidPlaceable(cube.getMaterial(), startPosition, position);
+            placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
             startTarget = null;
         }
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
+    }
+
+    private void changeBreakPlaceSize(int addend) {
+        breakPlaceSize = Math.clamp(breakPlaceSize + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceAlign = Math.min(breakPlaceSize, breakPlaceAlign);
+    }
+
+    private void changeBreakPlaceAlign(int addend) {
+        breakPlaceAlign = Math.clamp(breakPlaceAlign + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceSize = Math.max(breakPlaceAlign, breakPlaceSize);
     }
 
     private static void updateInfo(int action, PlaceDestroyInfo info) {
@@ -85,7 +101,7 @@ public final class InteractionHandler {
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
     private Target startTarget = null;
-    private int breakPlaceSize = 4;
+    private int breakPlaceSize = 4, breakPlaceAlign = 4;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

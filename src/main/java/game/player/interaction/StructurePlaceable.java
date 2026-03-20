@@ -65,8 +65,8 @@ public final class StructurePlaceable implements Placeable {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
 
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        int mask = -(1 << breakPlaceSize);
+        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int mask = -(1 << breakPlaceAlign);
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;

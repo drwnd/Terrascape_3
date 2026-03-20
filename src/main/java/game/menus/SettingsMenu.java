@@ -88,6 +88,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySettings.ZOOM, UiMessages.ZOOM);
         section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE, UiMessages.INCREASE_BREAK_PLACE_SIZE);
         section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE, UiMessages.DECREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_ALIGN, UiMessages.INCREASE_BREAK_PLACE_ALIGN);
+        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_ALIGN, UiMessages.DECREASE_BREAK_PLACE_ALIGN);
         section.addKeySelector(KeySettings.DROP, UiMessages.DROP);
         section.addKeySelector(KeySettings.OPEN_CHAT, UiMessages.OPEN_CHAT);
         section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);

@@ -17,11 +17,12 @@ public final class ShaderLoader {
             case Shaders.AO_APPLIER -> new GuiShader("Gui.vert", "AO_Applier.frag", identifier);
             case Shaders.OPAQUE_PARTICLE -> new RenderShader("Particle.vert", "Opaque.frag", identifier);
             case Shaders.GLASS_PARTICLE -> new RenderShader("Particle.vert", "Glass.frag", identifier);
-            case Shaders.VOLUME_INDICATOR -> new RenderShader("VolumeIndicator.vert", "VolumeIndicator.frag", identifier);
+            case Shaders.AABB_INDICATOR -> new RenderShader("AABBIndicator.vert", "AABBIndicator.frag", identifier);
             case Shaders.AABB -> new RenderShader("AABB.vert", "Null.frag", identifier);
             case Shaders.OCCLUSION_CULLING -> new RenderShader("AABB.vert", "OcclusionCulling.frag", identifier);
             case Shaders.CHUNK_SHADOW -> new RenderShader("Material.vert", "Shadow.frag", identifier);
             case Shaders.PARTICLE_SHADOW -> new RenderShader("Particle.vert", "Shadow.frag", identifier);
+            case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

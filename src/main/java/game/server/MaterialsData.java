@@ -108,33 +108,23 @@ public final class MaterialsData {
         }
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int lengthX, int lengthY, int lengthZ) {
-        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
-        byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
-        fillUncompressedMaterialsInto(uncompressedMaterials);
-
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++)
-                    uncompressedMaterials[getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z)] = material;
-
-        compressIntoData(uncompressedMaterials);
-    }
-
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod) {
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod, int align) {
         if (countX <= 0 || countY <= 0 || countZ <= 0 || sideLength <= 0) return;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
 
         for (int x = 0; x < countX; x++)
             for (int y = 0; y < countY; y++)
-                for (int z = 0; z < countZ; z++)
-                    storeMaterial(
-                            inChunkX + x * sideLength,
-                            inChunkY + y * sideLength,
-                            inChunkZ + z * sideLength,
-                            material, sideLength, bitMap, uncompressedMaterials, lod
-                    );
+                for (int z = 0; z < countZ; z++) {
+                    int startX = inChunkX + x * sideLength;
+                    int startY = inChunkY + y * sideLength;
+                    int startZ = inChunkZ + z * sideLength;
+
+                    if (startX + sideLength < 0 || startY + sideLength < 0 || startZ + sideLength < 0
+                            || startX >= 1 << totalSizeBits || startY >= 1 << totalSizeBits || startZ >= 1 << totalSizeBits) continue;
+
+                    storeMaterial(startX, startY, startZ, material, sideLength, bitMap, uncompressedMaterials, lod, align);
+                }
 
         compressIntoData(uncompressedMaterials);
     }
@@ -245,18 +235,30 @@ public final class MaterialsData {
         }
     }
 
-    private static void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod) {
-        int materialStartIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
-        int shiftCount = lod * 3;
-        int stride = 1 << shiftCount;
-        int mask = -stride;
-        int endIndex = sideLength * sideLength * sideLength << shiftCount;
+    private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod, int align) {
+        int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
+        int startX = Math.max(0, -inChunkX), endX = Math.min(sideLength, (1 << totalSizeBits) - inChunkX);
+        int startY = Math.max(0, -inChunkY), endY = Math.min(sideLength, (1 << totalSizeBits) - inChunkY);
+        int startZ = Math.max(0, -inChunkZ), endZ = Math.min(sideLength, (1 << totalSizeBits) - inChunkZ);
 
-        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
+        for (int x = startX; x < endX; x += alignLength)
+            for (int y = startY; y < endY; y += alignLength)
+                for (int z = startZ; z < endZ; z += alignLength) {
+                    int materialStartIndex = getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z);
+                    int bitMapStartIndex = getUncompressedIndex(x << lod, y << lod, z << lod);
+                    storeMaterial(materialStartIndex, bitMapStartIndex, material, count, bitMap, uncompressedMaterials, lod);
+                }
+    }
+
+    private static void storeMaterial(int materialStartIndex, int bitMapStartIndex, byte material, int count, long[] bitMap, byte[] uncompressedMaterials, int lod) {
+        int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
+        int endIndex = bitMapStartIndex + count, bitMapEndIndex = bitMapStartIndex + count >> 6;
+
+        for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
             for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask,
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
                 if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterials[materialStartIndex + (index >> shiftCount)] = material;
+                uncompressedMaterials[materialStartIndex + (index - bitMapStartIndex >> shiftCount)] = material;
             }
     }
 
