@@ -38,6 +38,6 @@ void main() {
     int textureSize = textureSizes[material];
     vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
 
-    fragColor = texture(textures, textureCoord);
+    fragColor = texture(textures, textureCoord) * vec4(0.5, 0.8, 1.2, 1);
     if (fragColor.a == 0) discard;
 }
