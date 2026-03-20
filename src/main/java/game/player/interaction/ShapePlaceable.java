@@ -32,6 +32,18 @@ public abstract class ShapePlaceable implements Placeable {
         return material;
     }
 
+    public long[] getBitMap() {
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
+        if (bitMap == null || size != breakPlaceSize) {
+            long[] bitMap = new long[1 << Math.max(breakPlaceSize * 3 - 6, 1)];
+            fillBitMap(bitMap, 1 << breakPlaceSize);
+            this.bitMap = bitMap;
+        }
+        size = breakPlaceSize;
+        return bitMap;
+    }
+
+
     @Override
     public void place(Vector3l position, int lod) {
         int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
@@ -52,31 +64,6 @@ public abstract class ShapePlaceable implements Placeable {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
                     placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), position);
-    }
-
-
-    public void placeInChunk(Chunk chunk, Vector3l position) {
-        int lod = chunk.LOD;
-        long[] bitMap = getBitMap();
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-
-        int inChunkX = (int) (position.x - (chunk.X << CHUNK_SIZE_BITS + lod)) >> lod;
-        int inChunkY = (int) (position.y - (chunk.Y << CHUNK_SIZE_BITS + lod)) >> lod;
-        int inChunkZ = (int) (position.z - (chunk.Z << CHUNK_SIZE_BITS + lod)) >> lod;
-        int lodSize = Math.max(0, breakPlaceSize - lod);
-
-        int length = 1 << lodSize;
-        int align = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1, 1, 1, length, bitMap, lod, align);
-
-        World world = Game.getWorld();
-        affectedChunks.add(chunk);
-        if (inChunkX <= 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, lod));
-        if (inChunkY <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, lod));
-        if (inChunkZ <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, lod));
-        if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
-        if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
-        if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
 
     @Override
@@ -136,15 +123,28 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
-    private long[] getBitMap() {
+    private void placeInChunk(Chunk chunk, Vector3l position) {
+        int lod = chunk.LOD;
+        long[] bitMap = getBitMap();
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        if (bitMap == null || size != breakPlaceSize) {
-            long[] bitMap = new long[1 << Math.max(breakPlaceSize * 3 - 6, 1)];
-            fillBitMap(bitMap, 1 << breakPlaceSize);
-            this.bitMap = bitMap;
-        }
-        size = breakPlaceSize;
-        return bitMap;
+
+        int inChunkX = (int) (position.x - (chunk.X << CHUNK_SIZE_BITS + lod)) >> lod;
+        int inChunkY = (int) (position.y - (chunk.Y << CHUNK_SIZE_BITS + lod)) >> lod;
+        int inChunkZ = (int) (position.z - (chunk.Z << CHUNK_SIZE_BITS + lod)) >> lod;
+        int lodSize = Math.max(0, breakPlaceSize - lod);
+
+        int length = 1 << lodSize;
+        int align = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1, 1, 1, length, bitMap, lod, align);
+
+        World world = Game.getWorld();
+        affectedChunks.add(chunk);
+        if (inChunkX <= 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, lod));
+        if (inChunkY <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, lod));
+        if (inChunkZ <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, lod));
+        if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
+        if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
+        if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
 
     private int size = -1;

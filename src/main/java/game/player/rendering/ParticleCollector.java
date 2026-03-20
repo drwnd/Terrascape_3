@@ -74,29 +74,8 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
     }
 
-    public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int lengthX, int lengthY, int lengthZ, byte material) {
-        if (!ToggleSettings.SHOW_BREAK_PARTICLES.value() && !ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value()) return;
-        if (!ToggleSettings.SHOW_BREAK_PARTICLES.value()) {
-            addPlaceParticleEffect(startX, startY, startZ, lengthX, lengthY, lengthZ, material);
-            return;
-        }
-        if (!ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) {
-            addBreakParticleEffect(startX, startY, startZ, lengthX, lengthY, lengthZ, material);
-            return;
-        }
+    public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int lengthX, int lengthY, int lengthZ, byte material, long[] bitMap, int length) {
 
-        IntArrayList opaqueParticles = new IntArrayList(lengthX * lengthY * lengthZ);
-        IntArrayList transparentParticles = new IntArrayList(lengthX * lengthY * lengthZ);
-        IntArrayList placeParticles = new IntArrayList(lengthX * lengthY * lengthZ * SHADER_PARTICLE_INT_SIZE);
-
-        for (int xOffset = 0; xOffset < lengthX; xOffset++)
-            for (int yOffset = 0; yOffset < lengthY; yOffset++)
-                for (int zOffset = 0; zOffset < lengthZ; zOffset++)
-                    addParticleIfNecessary(startX, startY, startZ, material, opaqueParticles, transparentParticles, placeParticles, xOffset, yOffset, zOffset);
-
-        addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
-        addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
-        addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
     }
 
     private static void addParticleIfNecessary(long startX, long startY, long startZ, byte material,

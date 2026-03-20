@@ -25,7 +25,7 @@ import game.assets.VertexArrays;
 import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.placeable_shapes.CubePlaceable;
-import game.player.interaction.CuboidPlaceable;
+import game.player.interaction.RepeatPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.Target;
 import game.server.ChatMessage;
@@ -639,7 +639,7 @@ public final class Renderer extends Renderable {
 
         Vector3l minPosition = Utils.min(startPositon, endPosition);
         Vector3l maxPosition = Utils.max(startPositon, endPosition);
-        CuboidPlaceable.offsetPositions(minPosition, maxPosition);
+        RepeatPlaceable.offsetPositions(minPosition, maxPosition);
 
         maxPosition.add(1, 1, 1);
 

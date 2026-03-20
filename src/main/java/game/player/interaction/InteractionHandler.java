@@ -75,9 +75,9 @@ public final class InteractionHandler {
         }
 
         Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
-        if (startTarget != null && placeable instanceof CubePlaceable cube) {
+        if (startTarget != null && placeable instanceof ShapePlaceable shapePlaceable) {
             Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
-            placeable = new CuboidPlaceable(cube.getMaterial(), startPosition, position);
+            placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
             startTarget = null;
         }
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;

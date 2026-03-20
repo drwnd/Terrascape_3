@@ -17,10 +17,10 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public final class CuboidPlaceable implements Placeable {
+public final class RepeatPlaceable implements Placeable {
 
-    public CuboidPlaceable(byte material, Vector3l position1, Vector3l position2) {
-        this.material = material;
+    public RepeatPlaceable(ShapePlaceable placeable, Vector3l position1, Vector3l position2) {
+        this.placeable = placeable;
         this.minPosition = Utils.min(position1, position2);
         this.maxPosition = Utils.max(position1, position2);
     }
@@ -28,15 +28,16 @@ public final class CuboidPlaceable implements Placeable {
     public static void offsetPositions(Vector3l minPosition, Vector3l maxPosition) {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
         int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int mask = -(1 << breakPlaceAlign);
+        int minMask = -(1 << breakPlaceAlign);
+        int maxMask = -(1 << breakPlaceSize);
 
-        minPosition.x &= mask;
-        minPosition.y &= mask;
-        minPosition.z &= mask;
+        minPosition.x &= minMask;
+        minPosition.y &= minMask;
+        minPosition.z &= minMask;
 
-        maxPosition.x = (maxPosition.x & mask) + (1L << breakPlaceSize) - 1;
-        maxPosition.y = (maxPosition.y & mask) + (1L << breakPlaceSize) - 1;
-        maxPosition.z = (maxPosition.z & mask) + (1L << breakPlaceSize) - 1;
+        maxPosition.x = (maxPosition.x - minPosition.x & maxMask) + minPosition.x + (1L << breakPlaceSize) - 1;
+        maxPosition.y = (maxPosition.y - minPosition.y & maxMask) + minPosition.y + (1L << breakPlaceSize) - 1;
+        maxPosition.z = (maxPosition.z - minPosition.z & maxMask) + minPosition.z + (1L << breakPlaceSize) - 1;
     }
 
     @Override
@@ -62,12 +63,12 @@ public final class CuboidPlaceable implements Placeable {
 
     @Override
     public Structure getStructure() {
-        return new Structure(material);
+        return placeable.getStructure();
     }
 
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
-        if (Properties.hasProperties(material, NO_COLLISION)) return false;
+        if (Properties.hasProperties(placeable.material, NO_COLLISION)) return false;
 
         return min.x < maxPosition.x && minPosition.x <= max.x
                 && min.y < maxPosition.y && minPosition.y <= max.y
@@ -83,16 +84,15 @@ public final class CuboidPlaceable implements Placeable {
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
         Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
-        player.getParticleCollector().addBreakPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
+        player.getParticleCollector().addBreakPlaceParticleEffect(
+                minPosition.x, minPosition.y, minPosition.z,
+                length.x, length.y, length.z,
+                placeable.material, placeable.getBitMap(), 1 << player.getInteractionHandler().getBreakPlaceSize());
     }
 
     @Override
     public void save(Placeable placeable, Saver<?> saver) {
         throw new UnsupportedOperationException("This placeable should not be saved");
-    }
-
-    public byte getMaterial() {
-        return material;
     }
 
     private void placeInChunk(Chunk chunk) {
@@ -110,7 +110,7 @@ public final class CuboidPlaceable implements Placeable {
 
         chunk.storeMaterial(
                 inChunkStartX, inChunkStartY, inChunkStartZ,
-                material,
+                placeable.material,
                 inChunkEndX - inChunkStartX + 1,
                 inChunkEndY - inChunkStartY + 1,
                 inChunkEndZ - inChunkStartZ + 1
@@ -128,5 +128,5 @@ public final class CuboidPlaceable implements Placeable {
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private final Vector3l minPosition, maxPosition;
-    private final byte material;
+    private final ShapePlaceable placeable;
 }
