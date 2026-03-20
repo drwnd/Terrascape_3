@@ -70,6 +70,13 @@ public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bu
         return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 
+    public int vertexCountSum() {
+        if (vertexCounts == null) return 36;
+        int sum = 0;
+        for (int vertexCount : vertexCounts) sum += vertexCount;
+        return sum;
+    }
+
 
     private void addData(IntArrayList commands, boolean isVisible, int side) {
         commands.add(isVisible ? vertexCounts[side] : 0);

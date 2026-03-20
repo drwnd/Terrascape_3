@@ -43,6 +43,16 @@ public abstract class ShapePlaceable implements Placeable {
         return bitMap;
     }
 
+    public Structure getPlaceBreakSizedStructure() {
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
+        int sideLength = 1 << breakPlaceSize;
+        long[] bitMap = getBitMap();
+
+        byte[] uncompressedMaterial = new byte[1 << breakPlaceSize * 3];
+        populateUncompressedMaterials(bitMap, uncompressedMaterial);
+        return new Structure(sideLength, sideLength, sideLength, MaterialsData.getCompressedMaterials(breakPlaceSize, uncompressedMaterial));
+    }
+
 
     @Override
     public void place(Vector3l position, int lod) {
@@ -98,14 +108,7 @@ public abstract class ShapePlaceable implements Placeable {
         long[] bitMap = new long[64];
         fillBitMap(bitMap, 16);
         byte[] uncompressedMaterial = new byte[4096];
-
-        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
-            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
-                 end = bitsIndex + 1 << 6; index < end; index++) {
-                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterial[index] = material;
-            }
-
+        populateUncompressedMaterials(bitMap, uncompressedMaterial);
         return new Structure(16, 16, 16, MaterialsData.getCompressedMaterials(4, uncompressedMaterial));
     }
 
@@ -145,6 +148,15 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
         if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
+    }
+
+    private void populateUncompressedMaterials(long[] bitMap, byte[] uncompressedMaterial) {
+        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
+            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
+                 end = bitsIndex + 1 << 6; index < end; index++) {
+                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
+                uncompressedMaterial[index] = material;
+            }
     }
 
     private int size = -1;

@@ -13,11 +13,12 @@ public enum Shaders implements ShaderIdentifier {
     AO_APPLIER,
     OPAQUE_PARTICLE,
     GLASS_PARTICLE,
-    VOLUME_INDICATOR,
+    AABB_INDICATOR,
     AABB,
     OCCLUSION_CULLING,
     CHUNK_SHADOW,
-    PARTICLE_SHADOW;
+    PARTICLE_SHADOW,
+    VOLUME_INDICATOR;
 
     @Override
     public Shader generateAsset() {
