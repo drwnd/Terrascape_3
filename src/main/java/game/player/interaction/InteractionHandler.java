@@ -16,6 +16,8 @@ public final class InteractionHandler {
     public void handleInput(int button, int action) {
         if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.min(CHUNK_SIZE_BITS, breakPlaceSize + 1);
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.max(0, breakPlaceSize - 1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) breakPlaceAlign = Math.min(CHUNK_SIZE_BITS, breakPlaceAlign + 1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) breakPlaceAlign = Math.max(0, breakPlaceAlign - 1);
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
         if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
@@ -33,6 +35,10 @@ public final class InteractionHandler {
 
     public int getBreakPlaceSize() {
         return breakPlaceSize;
+    }
+
+    public int getBreakPlaceAlign() {
+        return breakPlaceAlign;
     }
 
     public Target getStartTarget() {
@@ -85,7 +91,7 @@ public final class InteractionHandler {
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
     private Target startTarget = null;
-    private int breakPlaceSize = 4;
+    private int breakPlaceSize = 4, breakPlaceAlign = 4;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

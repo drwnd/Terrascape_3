@@ -77,3 +77,7 @@ Particles cast Shadows
 Glass casts Shadows
 Inner Radius
 Distance Exponent
+Increase Break Place Align
+Decrease Break Place Align
+Size: %s³ Voxel
+Align: %s³ Voxel

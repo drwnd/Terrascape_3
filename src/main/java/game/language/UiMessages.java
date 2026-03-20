@@ -81,7 +81,11 @@ public enum UiMessages implements Translatable {
     PARTICLES_CAST_SHADOWS,
     GLASS_CASTS_SHADOWS,
     INNER_RADIUS,
-    DISTANCE_EXPONENT;
+    DISTANCE_EXPONENT,
+    INCREASE_BREAK_PLACE_ALIGN,
+    DECREASE_BREAK_PLACE_ALIGN,
+    BREAK_PLACE_SIZE_FORMAT,
+    BREAK_PLACE_ALIGN_FORMAT;
 
     @Override
     public String translationFileName() {
