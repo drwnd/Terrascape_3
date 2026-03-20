@@ -5,11 +5,7 @@ import core.utils.Vector3l;
 
 import game.player.Hotbar;
 import game.player.Player;
-import game.player.interaction.ChunkRebuildPlaceable;
-import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
-import game.player.interaction.StructurePlaceable;
-import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -31,7 +27,7 @@ public final class PlayerSaver extends Saver<Player> {
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());
         saveByte(player.getMovement().getState().getIdentifier());
-        for (Placeable placeable : player.getHotbar().getContents()) savePlaceable(placeable);
+        for (Placeable placeable : player.getHotbar().getContents()) saveGeneric(placeable, Placeable::savePlaceable);
     }
 
     @Override
@@ -42,7 +38,7 @@ public final class PlayerSaver extends Saver<Player> {
         int selectedSlot = loadInt();
         byte movementStateIdentifier = loadByte();
         Placeable[] hotbar = new Placeable[Hotbar.LENGTH];
-        for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadPlaceable();
+        for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadGeneric(Placeable::loadPlaceable);
 
         Player player = new Player(position);
         player.getCamera().setRotation(rotation);
@@ -67,40 +63,7 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected Player loadOldVersion(int versionNumber) {
-        if (versionNumber == 3) {
-            Position position = new Position(loadInt(), loadInt(), loadInt(), loadFloat(), loadFloat(), loadFloat());
-            Vector3f rotation = loadVector3f();
-            Vector3f velocity = loadVector3f();
-            int selectedSlot = loadInt();
-            byte movementStateIdentifier = loadByte();
-            Placeable[] hotbar = new Placeable[Hotbar.LENGTH];
-            for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadPlaceable();
-
-            Player player = new Player(position);
-            player.getCamera().setRotation(rotation);
-            player.getMovement().setVelocity(velocity);
-            player.getHotbar().setSelectedSlot(selectedSlot);
-            player.getMovement().setState(movementStateIdentifier);
-            player.getHotbar().setContents(hotbar);
-
-            return player;
-        }
+        if (versionNumber == 3) return load();
         return getDefault();
-    }
-
-    private void savePlaceable(Placeable placeable) {
-        if (placeable == null)
-            saveByte((byte) 0);
-        else saveGeneric(placeable, placeable::save);
-    }
-
-    private Placeable loadPlaceable() {
-        return switch (loadByte()) {
-            case 1 -> CubePlaceable.load(this);
-            case 2 -> StructurePlaceable.load(this);
-            case 3 -> ChunkRebuildPlaceable.load(this);
-            case 4 -> SpherePlaceable.load(this);
-            default -> null;
-        };
     }
 }

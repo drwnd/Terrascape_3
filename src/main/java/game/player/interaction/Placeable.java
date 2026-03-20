@@ -3,12 +3,30 @@ package game.player.interaction;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
+import game.player.interaction.placeable_shapes.CubePlaceable;
+import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.server.Chunk;
 import game.server.generation.Structure;
 
 import java.util.ArrayList;
 
 public interface Placeable {
+
+    static void savePlaceable(Placeable placeable, Saver<?> saver) {
+        if (placeable == null)
+            saver.saveByte((byte) 0);
+        else saver.saveGeneric(placeable, placeable::save);
+    }
+
+    static Placeable loadPlaceable(Saver<?> saver) {
+        return switch (saver.loadByte()) {
+            case 1 -> CubePlaceable.load(saver);
+            case 2 -> StructurePlaceable.load(saver);
+            case 3 -> ChunkRebuildPlaceable.load(saver);
+            case 4 -> SpherePlaceable.load(saver);
+            default -> null;
+        };
+    }
 
     void place(Vector3l position, int lod);
 
