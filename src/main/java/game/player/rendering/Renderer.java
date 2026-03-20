@@ -652,9 +652,9 @@ public final class Renderer extends Renderable {
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
+        RepeatPlaceable.offsetPositions(startPositon, endPosition);
         Vector3l minPosition = Utils.min(startPositon, endPosition);
         Vector3l maxPosition = Utils.max(startPositon, endPosition);
-        RepeatPlaceable.offsetPositions(minPosition, maxPosition);
         maxPosition.add(1, 1, 1);
 
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));

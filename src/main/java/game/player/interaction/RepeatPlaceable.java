@@ -19,25 +19,34 @@ import static game.utils.Constants.*;
 
 public final class RepeatPlaceable implements Placeable {
 
-    public RepeatPlaceable(ShapePlaceable placeable, Vector3l position1, Vector3l position2) {
+    public RepeatPlaceable(ShapePlaceable placeable, Vector3l startPosition, Vector3l endPosition) {
         this.placeable = placeable;
-        this.minPosition = Utils.min(position1, position2);
-        this.maxPosition = Utils.max(position1, position2);
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.minPosition = Utils.min(startPosition, endPosition);
+        this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
-    public static void offsetPositions(Vector3l minPosition, Vector3l maxPosition) {
+    public static void offsetPositions(Vector3l startPosition, Vector3l endPosition) {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
         int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int minMask = -(1 << breakPlaceAlign);
-        int maxMask = -(1 << breakPlaceSize);
+        int startMask = -(1 << breakPlaceAlign);
+        int endMask = -(1 << breakPlaceSize);
 
-        minPosition.x &= minMask;
-        minPosition.y &= minMask;
-        minPosition.z &= minMask;
+        startPosition.x &= startMask;
+        startPosition.y &= startMask;
+        startPosition.z &= startMask;
 
-        maxPosition.x = (maxPosition.x - minPosition.x & maxMask) + minPosition.x + (1L << breakPlaceSize) - 1;
-        maxPosition.y = (maxPosition.y - minPosition.y & maxMask) + minPosition.y + (1L << breakPlaceSize) - 1;
-        maxPosition.z = (maxPosition.z - minPosition.z & maxMask) + minPosition.z + (1L << breakPlaceSize) - 1;
+        endPosition.x = (endPosition.x - startPosition.x & endMask) + startPosition.x;
+        endPosition.y = (endPosition.y - startPosition.y & endMask) + startPosition.y;
+        endPosition.z = (endPosition.z - startPosition.z & endMask) + startPosition.z;
+
+        if (startPosition.x < endPosition.x) endPosition.x += (1L << breakPlaceSize) - 1;
+        else startPosition.x += (1L << breakPlaceSize) - 1;
+        if (startPosition.y < endPosition.y) endPosition.y += (1L << breakPlaceSize) - 1;
+        else startPosition.y += (1L << breakPlaceSize) - 1;
+        if (startPosition.z < endPosition.z) endPosition.z += (1L << breakPlaceSize) - 1;
+        else startPosition.z += (1L << breakPlaceSize) - 1;
     }
 
     @Override
@@ -84,7 +93,9 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position) {
-        offsetPositions(minPosition, maxPosition);
+        offsetPositions(startPosition, endPosition);
+        minPosition.set(Utils.min(startPosition, endPosition));
+        maxPosition.set(Utils.max(startPosition, endPosition));
     }
 
     @Override
@@ -127,5 +138,6 @@ public final class RepeatPlaceable implements Placeable {
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private final Vector3l minPosition, maxPosition;
+    private final Vector3l startPosition, endPosition;
     private final ShapePlaceable placeable;
 }
