@@ -83,8 +83,7 @@ public final class CuboidPlaceable implements Placeable {
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
         Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
-        player.getParticleCollector().addBreakParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
-        player.getParticleCollector().addPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
+        player.getParticleCollector().addBreakPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, length.x, length.y, length.z, material);
     }
 
     @Override
