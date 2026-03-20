@@ -14,10 +14,10 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class InteractionHandler {
 
     public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.min(CHUNK_SIZE_BITS, breakPlaceSize + 1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) breakPlaceSize = Math.max(0, breakPlaceSize - 1);
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) breakPlaceAlign = Math.min(CHUNK_SIZE_BITS, breakPlaceAlign + 1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) breakPlaceAlign = Math.max(0, breakPlaceAlign - 1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
         if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
 
@@ -81,6 +81,16 @@ public final class InteractionHandler {
             startTarget = null;
         }
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
+    }
+
+    private void changeBreakPlaceSize(int addend) {
+        breakPlaceSize = Math.clamp(breakPlaceSize + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceAlign = Math.min(breakPlaceSize, breakPlaceAlign);
+    }
+
+    private void changeBreakPlaceAlign(int addend) {
+        breakPlaceAlign = Math.clamp(breakPlaceAlign + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceSize = Math.max(breakPlaceAlign, breakPlaceSize);
     }
 
     private static void updateInfo(int action, PlaceDestroyInfo info) {

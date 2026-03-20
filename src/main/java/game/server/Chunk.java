@@ -54,8 +54,8 @@ public final class Chunk {
         modified = true;
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, countX, countY, countZ, sideLength, bitMap, lod);
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod, int align) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, countX, countY, countZ, sideLength, bitMap, lod, align);
         modified = true;
     }
 
