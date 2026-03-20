@@ -42,6 +42,12 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
+        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
+        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int countX = (int) (maxPosition.x - minPosition.x + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
+        int countY = (int) (maxPosition.y - minPosition.y + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
+        int countZ = (int) (maxPosition.z - minPosition.z + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
+
         long chunkStartX = minPosition.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = minPosition.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = minPosition.z >>> CHUNK_SIZE_BITS + lod;
@@ -53,7 +59,8 @@ public final class RepeatPlaceable implements Placeable {
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
-                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod));
+                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod),
+                            countX, countY, countZ, breakPlaceSize, breakPlaceAlign);
     }
 
     @Override
@@ -95,35 +102,27 @@ public final class RepeatPlaceable implements Placeable {
         throw new UnsupportedOperationException("This placeable should not be saved");
     }
 
-    private void placeInChunk(Chunk chunk) {
+
+    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int breakPlaceSize, int align) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
 
-        int inChunkStartX = (int) Utils.wrappedMax(chunkStartX, minPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartY = (int) Utils.wrappedMax(chunkStartY, minPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkStartZ = (int) Utils.wrappedMax(chunkStartZ, minPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
+        int inChunkX = (int) (minPosition.x - chunkStartX) >> chunk.LOD;
+        int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
+        int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        int inChunkEndX = (int) Utils.wrappedMin(chunkStartX + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.x) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndY = (int) Utils.wrappedMin(chunkStartY + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.y) >> chunk.LOD & CHUNK_SIZE_MASK;
-        int inChunkEndZ = (int) Utils.wrappedMin(chunkStartZ + ((long) CHUNK_SIZE << chunk.LOD) - 1, maxPosition.z) >> chunk.LOD & CHUNK_SIZE_MASK;
-
-        chunk.storeMaterial(
-                inChunkStartX, inChunkStartY, inChunkStartZ,
-                placeable.material,
-                inChunkEndX - inChunkStartX + 1,
-                inChunkEndY - inChunkStartY + 1,
-                inChunkEndZ - inChunkStartZ + 1
-        );
+        int length = 1 << Math.max(0, breakPlaceSize - chunk.LOD);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material, countX, countY, countZ, length, placeable.getBitMap(), chunk.LOD, align);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
-        if (inChunkStartX == 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD));
-        if (inChunkStartY == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD));
-        if (inChunkStartZ == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD));
-        if (inChunkEndX == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
-        if (inChunkEndY == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
-        if (inChunkEndZ == CHUNK_SIZE - 1) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
+        affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
