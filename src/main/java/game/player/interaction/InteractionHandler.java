@@ -58,7 +58,7 @@ public final class InteractionHandler {
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR);
-        else placeable = shapePlaceable.copyWithMaterial(AIR);
+        else placeable = shapePlaceable.copyWithMaterialUnique(AIR);
         handleUseDestroy(destroyInfo, placeable, false);
     }
 

@@ -1,6 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
+import core.renderables.UiBackgroundElement;
 import core.utils.Saver;
 
 import game.player.interaction.Placeable;
@@ -25,12 +25,12 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public List<Slider<?>> settings() {
+    public List<UiBackgroundElement> uniqueSettings() {
         return List.of();
     }
 
     @Override
-    public ShapePlaceable copyWithMaterial(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         return new CubePlaceable(material);
     }
 

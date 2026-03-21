@@ -57,7 +57,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
-        Slider<T> slider = new Slider<>(sizeToParent, offsetToParent, setting, settingName);
+        Slider<T> slider = new Slider<>(sizeToParent, offsetToParent, setting, settingName, false);
         addRenderable(slider);
         sliders.add(slider);
 
@@ -85,7 +85,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
-        Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName);
+        Toggle toggle = new Toggle(sizeToParent, offsetToParent, setting, settingName, false);
         addRenderable(toggle);
         toggles.add(toggle);
 

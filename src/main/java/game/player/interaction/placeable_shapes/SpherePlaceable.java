@@ -1,6 +1,7 @@
 package game.player.interaction.placeable_shapes;
 
 import core.renderables.Slider;
+import core.renderables.UiBackgroundElement;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -37,15 +38,15 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public List<Slider<?>> settings() {
+    public List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS),
-                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT));
+                new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true),
+                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
 
     @Override
-    public ShapePlaceable copyWithMaterial(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SpherePlaceable placeable = new SpherePlaceable(material);
         placeable.innerRadius.setValue(innerRadius.value());
         placeable.exponent.setValue(exponent.value());

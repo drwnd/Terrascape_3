@@ -1,8 +1,12 @@
 package game.player.interaction;
 
-import core.renderables.Slider;
+import core.renderables.Toggle;
+import core.renderables.UiBackgroundElement;
+import core.settings.ToggleSetting;
+import core.settings.stand_alones.StandAloneToggleSetting;
 import core.utils.Vector3l;
 
+import game.language.UiMessages;
 import game.player.Player;
 import game.server.Chunk;
 import game.server.Game;
@@ -12,6 +16,8 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.utils.Utils;
+
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +30,22 @@ public abstract class ShapePlaceable implements Placeable {
         this.material = material;
     }
 
-    public abstract List<Slider<?>> settings();
+    public final ShapePlaceable copyWithMaterial(byte material) {
+        ShapePlaceable placeable = copyWithMaterialUnique(material);
+        placeable.invert.setValue(invert.value());
+        return placeable;
+    }
 
-    public abstract ShapePlaceable copyWithMaterial(byte material);
+    public final List<UiBackgroundElement> settings() {
+        Vector2f zero = new Vector2f(0.0F, 0.0F);
+        ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
+
+        settingElements.add(new Toggle(zero, zero, invert, UiMessages.INVERT_PLACEABLE, true));
+        settingElements.addAll(uniqueSettings());
+
+        for (UiBackgroundElement element : settingElements) element.setScaleWithGuiSize(false);
+        return settingElements;
+    }
 
     public byte getMaterial() {
         return material;
@@ -38,6 +57,7 @@ public abstract class ShapePlaceable implements Placeable {
             long[] bitMap = new long[1 << Math.max(breakPlaceSize * 3 - 6, 1)];
             fillBitMap(bitMap, 1 << breakPlaceSize);
             this.bitMap = bitMap;
+            if (invert.value()) for (int index = 0; index < bitMap.length; index++) bitMap[index] = ~bitMap[index];
         }
         size = breakPlaceSize;
         return bitMap;
@@ -126,6 +146,10 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
+    protected abstract List<UiBackgroundElement> uniqueSettings();
+
+    protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
+
     private void placeInChunk(Chunk chunk, Vector3l position) {
         int lod = chunk.LOD;
         long[] bitMap = getBitMap();
@@ -163,4 +187,6 @@ public abstract class ShapePlaceable implements Placeable {
     private long[] bitMap;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;
+
+    private final ToggleSetting invert = new StandAloneToggleSetting(false);
 }
