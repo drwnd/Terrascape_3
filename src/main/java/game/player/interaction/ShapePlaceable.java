@@ -99,6 +99,7 @@ public abstract class ShapePlaceable implements Placeable {
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(material, NO_COLLISION)) return false;
+        long[] bitMap = getBitMap();
 
         int minX = Math.max(0, (int) (min.x - position.x)), maxX = Math.min((int) (max.x - position.x), 1 << size);
         int minY = Math.max(0, (int) (min.y - position.y)), maxY = Math.min((int) (max.y - position.y), 1 << size);
@@ -174,12 +175,12 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
 
-    private void populateUncompressedMaterials(long[] bitMap, byte[] uncompressedMaterial) {
+    private void populateUncompressedMaterials(long[] bitMap, byte[] uncompressedMaterials) {
         for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
             for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
-                 end = bitsIndex + 1 << 6; index < end; index++) {
+                 end = Math.min(bitsIndex + 1 << 6, uncompressedMaterials.length); index < end; index++) {
                 if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterial[index] = material;
+                uncompressedMaterials[index] = material;
             }
     }
 

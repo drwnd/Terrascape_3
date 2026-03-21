@@ -7,6 +7,7 @@ import core.assets.TextureArray;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.CoreObjectLoader;
+import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
@@ -32,6 +33,7 @@ import game.server.*;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
+import game.settings.KeySettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Transformation;
@@ -633,21 +635,7 @@ public final class Renderer extends Renderable {
         }
 
         Placeable placeable = player.getHeldPlaceable();
-        byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
-
-        int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
-        if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize) {
-            if (opaqueHologram != null) opaqueHologram.delete();
-            if (transparentHologram != null) transparentHologram.delete();
-
-            Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getPlaceBreakSizedStructure() : new Structure(breakPlaceSize, AIR);
-            Mesh mesh = new MeshGenerator().generateMesh(structure);
-            opaqueHologram = ObjectLoader.loadOpaqueModel(mesh);
-            transparentHologram = ObjectLoader.loadTransparentModel(mesh);
-            hologramSize = structure.sizeX();
-
-            hologramModelsValid = true;
-        }
+        byte material = placeable instanceof ShapePlaceable shapePlaceable && !Input.isKeyPressed(KeySettings.SPRINT) ? shapePlaceable.getMaterial() : AIR;
 
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
@@ -664,7 +652,19 @@ public final class Renderer extends Renderable {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
 
-        if (placeable instanceof ShapePlaceable) {
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
+            if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize) {
+                if (opaqueHologram != null) opaqueHologram.delete();
+
+                Structure structure = shapePlaceable.getPlaceBreakSizedStructure();
+                Mesh mesh = new MeshGenerator().generateMesh(structure);
+                opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
+                hologramSize = structure.sizeX();
+
+                hologramModelsValid = true;
+            }
+
             int countX = (int) (maxPosition.x - minPosition.x) / hologramSize;
             int countY = (int) (maxPosition.y - minPosition.y) / hologramSize;
             int countZ = (int) (maxPosition.z - minPosition.z) / hologramSize;
@@ -682,6 +682,7 @@ public final class Renderer extends Renderable {
             shader.setUniform("textures", 0);
             shader.setUniform("textureSizes", materialsTexture.textureSizes());
             shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
+            shader.setUniform("material", material);
 
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
@@ -859,7 +860,6 @@ public final class Renderer extends Renderable {
     private final Player player;
 
     private OpaqueModel opaqueHologram;
-    private TransparentModel transparentHologram;
     private boolean hologramModelsValid = false;
     private int hologramSize;
 
