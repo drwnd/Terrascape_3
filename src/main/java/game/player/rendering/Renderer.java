@@ -650,6 +650,9 @@ public final class Renderer extends Renderable {
         maxPosition.add(1, 1, 1);
 
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
         glEnable(GL_CULL_FACE);
         glDisable(GL_STENCIL_TEST);
         glDepthMask(true);
@@ -690,8 +693,6 @@ public final class Renderer extends Renderable {
             shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
             shader.setUniform("material", material);
 
-            glEnable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
             glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
         } else {
@@ -705,9 +706,6 @@ public final class Renderer extends Renderable {
             shader.setUniform("minPosition", minPosition.toInt());
             shader.setUniform("maxPosition", maxPosition.toInt());
 
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
     }

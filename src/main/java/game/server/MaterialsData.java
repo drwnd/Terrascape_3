@@ -110,19 +110,9 @@ public final class MaterialsData {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod, int align) {
-        if (countX <= 0 || countY <= 0 || countZ <= 0 || sideLength <= 0 || align == 0 && (bitMap[0] & 1) == 0) return;
+        if (countX <= 0 || countY <= 0 || countZ <= 0 || sideLength <= 0) return;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
-
-        if (align == 0) {
-            storeMaterial(inChunkX, inChunkY, inChunkZ, material,
-                    Math.max(1, sideLength * countX),
-                    Math.max(1, sideLength * countY),
-                    Math.max(1, sideLength * countZ),
-                    uncompressedMaterials);
-            compressIntoData(uncompressedMaterials);
-            return;
-        }
 
         for (int x = 0; x < countX; x++)
             for (int y = 0; y < countY; y++)
@@ -246,19 +236,6 @@ public final class MaterialsData {
         }
     }
 
-    private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int lengthX, int lengthY, int lengthZ, byte[] uncompressedMaterials) {
-        int startX = Math.max(0, inChunkX), endX = Math.min(1 << totalSizeBits, inChunkX + lengthX);
-        int startY = Math.max(0, inChunkY), endY = Math.min(1 << totalSizeBits, inChunkY + lengthY);
-        int startZ = Math.max(0, inChunkZ), endZ = Math.min(1 << totalSizeBits, inChunkZ + lengthZ);
-
-        for (int x = startX; x < endX; x++)
-            for (int y = startY; y < endY; y++)
-                for (int z = startZ; z < endZ; z++) {
-                    int index = getUncompressedIndex(x, y, z);
-                    uncompressedMaterials[index] = material;
-                }
-    }
-
     private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod, int align) {
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
         int startX = Math.max(0, -inChunkX), endX = Math.min(sideLength, (1 << totalSizeBits) - inChunkX);
@@ -279,7 +256,7 @@ public final class MaterialsData {
         int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
 
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
-            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask,
+            for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
                 if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
                 uncompressedMaterials[materialStartIndex + (index - bitMapStartIndex >> shiftCount)] = material;

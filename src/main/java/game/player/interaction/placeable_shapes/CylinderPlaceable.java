@@ -39,7 +39,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        int offset = sideLength / 2;
+        double offset = sideLength / 2.0;
         double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
@@ -70,13 +70,13 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         return placeable;
     }
 
-    private boolean isInside(int x, int y, int z, int offset, double outerThreshold, double innerThreshold) {
+    private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
         if (rotation == Rotation3Way.X) return isInside(y, z, offset, outerThreshold, innerThreshold);
         if (rotation == Rotation3Way.Y) return isInside(x, z, offset, outerThreshold, innerThreshold);
         return isInside(x, y, offset, outerThreshold, innerThreshold);
     }
 
-    private boolean isInside(int a, int b, int offset, double outerThreshold, double innerThreshold) {
+    private boolean isInside(int a, int b, double offset, double outerThreshold, double innerThreshold) {
         double distanceA = Math.pow(Math.abs(a - offset + 0.5), exponent.value());
         double distanceB = Math.pow(Math.abs(b - offset + 0.5), exponent.value());
         double distance = distanceA + distanceB;

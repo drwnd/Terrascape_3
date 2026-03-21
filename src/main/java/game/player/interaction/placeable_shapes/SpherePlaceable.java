@@ -57,7 +57,7 @@ public final class SpherePlaceable extends ShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        int offset = sideLength / 2;
+        double offset = sideLength / 2.0;
         double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
@@ -70,7 +70,7 @@ public final class SpherePlaceable extends ShapePlaceable {
                 }
     }
 
-    private boolean isInside(int x, int y, int z, int offset, double outerThreshold, double innerThreshold) {
+    private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
         double distanceX = Math.pow(Math.abs(x - offset + 0.5), exponent.value());
         double distanceY = Math.pow(Math.abs(y - offset + 0.5), exponent.value());
         double distanceZ = Math.pow(Math.abs(z - offset + 0.5), exponent.value());

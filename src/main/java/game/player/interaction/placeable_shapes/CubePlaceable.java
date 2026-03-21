@@ -51,9 +51,9 @@ public final class CubePlaceable extends ShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        int offset = sideLength / 2;
-        int outerThreshold = offset - radiusReduction.value();
-        int innerThreshold = innerRadius.value();
+        double offset = sideLength / 2.0;
+        double outerThreshold = offset - radiusReduction.value();
+        double innerThreshold = innerRadius.value();
 
         for (int x = 0; x < sideLength; x++)
             for (int y = 0; y < sideLength; y++)
@@ -64,7 +64,7 @@ public final class CubePlaceable extends ShapePlaceable {
                 }
     }
 
-    private static boolean isInside(int x, int y, int z, int offset, int outerThreshold, int innerThreshold) {
+    private static boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
         double distanceX = Math.abs(x - offset + 0.5);
         double distanceY = Math.abs(y - offset + 0.5);
         double distanceZ = Math.abs(z - offset + 0.5);
