@@ -37,8 +37,8 @@ public final class Player {
         inventory = new Inventory();
         chat = new ChatTextField();
 
-        renderer.addRenderable(hotbar);
         renderer.addRenderable(inventory);
+        renderer.addRenderable(hotbar);
         renderer.addRenderable(chat);
         this.position = position;
         Window.pushRenderable(renderer);
