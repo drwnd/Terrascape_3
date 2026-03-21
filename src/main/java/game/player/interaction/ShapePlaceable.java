@@ -53,7 +53,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     public long[] getBitMap() {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        if (bitMap == null || size != breakPlaceSize) {
+        if (isBitMapInValid(breakPlaceSize)) {
             long[] bitMap = new long[1 << Math.max(breakPlaceSize * 3 - 6, 1)];
             fillBitMap(bitMap, 1 << breakPlaceSize);
             this.bitMap = bitMap;
@@ -150,6 +150,10 @@ public abstract class ShapePlaceable implements Placeable {
     protected abstract List<UiBackgroundElement> uniqueSettings();
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
+
+    protected boolean isBitMapInValid(int breakPlaceSize)  {
+        return bitMap == null || size != breakPlaceSize;
+    }
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
         int lod = chunk.LOD;

@@ -86,6 +86,10 @@ public final class Renderer extends Renderable {
         messages = Game.getServer().getMessages();
     }
 
+    public void invalidateHologram() {
+        hologramModelsValid = false;
+    }
+
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
@@ -654,13 +658,15 @@ public final class Renderer extends Renderable {
 
         if (placeable instanceof ShapePlaceable shapePlaceable) {
             int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
-            if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize) {
+            int hologramHash = placeable.hashCode();
+            if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
                 if (opaqueHologram != null) opaqueHologram.delete();
 
                 Structure structure = shapePlaceable.getPlaceBreakSizedStructure();
                 Mesh mesh = new MeshGenerator().generateMesh(structure);
                 opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
                 hologramSize = structure.sizeX();
+                this.hologramHash = hologramHash;
 
                 hologramModelsValid = true;
             }
@@ -861,7 +867,7 @@ public final class Renderer extends Renderable {
 
     private OpaqueModel opaqueHologram;
     private boolean hologramModelsValid = false;
-    private int hologramSize;
+    private int hologramSize, hologramHash;
 
     private int framebuffer, colorTexture, depthTexture, sideTexture;
     private int ssaoFramebuffer, ssaoTexture, noiseTexture;

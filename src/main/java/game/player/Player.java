@@ -1,11 +1,9 @@
 package game.player;
 
 import core.rendering_api.Window;
-
 import core.utils.Vector3l;
-import game.player.interaction.ChunkRebuildPlaceable;
-import game.player.interaction.InteractionHandler;
-import game.player.interaction.Placeable;
+
+import game.player.interaction.*;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
@@ -80,6 +78,14 @@ public final class Player {
         movement.handleInput(button, action);
         interactionHandler.handleInput(button, action);
         hotbar.handleInput(button, action);
+        if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof RotatableShapePlaceable rotatable) {
+            renderer.invalidateHologram();
+            rotatable.rotateForwards();
+        }
+        if (button == KeySettings.ROTATE_SHAPE_BACKWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof RotatableShapePlaceable rotatable) {
+            renderer.invalidateHologram();
+            rotatable.rotateBackwards();
+        }
     }
 
     /**

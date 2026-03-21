@@ -82,3 +82,5 @@ Decrease Break Place Align
 Size: %s³ Voxel
 Align: %s³ Voxel
 Invert
+Rotate Shape Forward
+Rotate Shape Backward

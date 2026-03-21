@@ -4,6 +4,7 @@ import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.player.interaction.placeable_shapes.CubePlaceable;
+import game.player.interaction.placeable_shapes.CylinderPlaceable;
 import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.server.Chunk;
 import game.server.generation.Structure;
@@ -24,6 +25,7 @@ public interface Placeable {
             case 2 -> StructurePlaceable.load(saver);
             case 3 -> ChunkRebuildPlaceable.load(saver);
             case 4 -> SpherePlaceable.load(saver);
+            case 5 -> CylinderPlaceable.load(saver);
             default -> null;
         };
     }
