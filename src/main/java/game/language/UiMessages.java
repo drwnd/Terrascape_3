@@ -88,7 +88,8 @@ public enum UiMessages implements Translatable {
     BREAK_PLACE_ALIGN_FORMAT,
     INVERT_PLACEABLE,
     ROTATE_SHAPE_FORWARD,
-    ROTATE_SHAPE_BACKWARD;
+    ROTATE_SHAPE_BACKWARD,
+    STEP_HEIGHT;
 
     @Override
     public String translationFileName() {
