@@ -15,8 +15,6 @@ import org.joml.Vector2f;
 
 import java.util.List;
 
-import static game.utils.Constants.CHUNK_SIZE;
-
 public final class SpherePlaceable extends ShapePlaceable {
 
     public SpherePlaceable(byte material) {
@@ -77,6 +75,6 @@ public final class SpherePlaceable extends ShapePlaceable {
         return distance <= outerThreshold && distance >= innerThreshold;
     }
 
-    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, CHUNK_SIZE / 2, 0);
+    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }

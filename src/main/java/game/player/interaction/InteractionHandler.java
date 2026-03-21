@@ -84,12 +84,12 @@ public final class InteractionHandler {
     }
 
     private void changeBreakPlaceSize(int addend) {
-        breakPlaceSize = Math.clamp(breakPlaceSize + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceSize = Math.clamp(breakPlaceSize + addend, 0, CHUNK_SIZE_BITS + 2);
         breakPlaceAlign = Math.min(breakPlaceSize, breakPlaceAlign);
     }
 
     private void changeBreakPlaceAlign(int addend) {
-        breakPlaceAlign = Math.clamp(breakPlaceAlign + addend, 0, CHUNK_SIZE_BITS);
+        breakPlaceAlign = Math.clamp(breakPlaceAlign + addend, 0, CHUNK_SIZE_BITS + 2);
         breakPlaceSize = Math.max(breakPlaceAlign, breakPlaceSize);
     }
 

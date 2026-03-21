@@ -41,11 +41,11 @@ public final class RepeatPlaceable implements Placeable {
         endPosition.y = (endPosition.y - startPosition.y & endMask) + startPosition.y;
         endPosition.z = (endPosition.z - startPosition.z & endMask) + startPosition.z;
 
-        if (startPosition.x < endPosition.x) endPosition.x += (1L << breakPlaceSize) - 1;
+        if (startPosition.x <= endPosition.x) endPosition.x += (1L << breakPlaceSize) - 1;
         else startPosition.x += (1L << breakPlaceSize) - 1;
-        if (startPosition.y < endPosition.y) endPosition.y += (1L << breakPlaceSize) - 1;
+        if (startPosition.y <= endPosition.y) endPosition.y += (1L << breakPlaceSize) - 1;
         else startPosition.y += (1L << breakPlaceSize) - 1;
-        if (startPosition.z < endPosition.z) endPosition.z += (1L << breakPlaceSize) - 1;
+        if (startPosition.z <= endPosition.z) endPosition.z += (1L << breakPlaceSize) - 1;
         else startPosition.z += (1L << breakPlaceSize) - 1;
     }
 
@@ -53,9 +53,9 @@ public final class RepeatPlaceable implements Placeable {
     public void place(Vector3l position, int lod) {
         int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
         int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int countX = (int) (maxPosition.x - minPosition.x + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
-        int countY = (int) (maxPosition.y - minPosition.y + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
-        int countZ = (int) (maxPosition.z - minPosition.z + (1 << breakPlaceSize) - 1) >> breakPlaceSize;
+        int countX = (int) (maxPosition.x - minPosition.x + (1 << breakPlaceSize)) >> breakPlaceSize;
+        int countY = (int) (maxPosition.y - minPosition.y + (1 << breakPlaceSize)) >> breakPlaceSize;
+        int countZ = (int) (maxPosition.z - minPosition.z + (1 << breakPlaceSize)) >> breakPlaceSize;
 
         long chunkStartX = minPosition.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = minPosition.y >>> CHUNK_SIZE_BITS + lod;
@@ -124,7 +124,10 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
         int length = 1 << Math.max(0, breakPlaceSize - chunk.LOD);
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material, countX, countY, countZ, length, placeable.getBitMap(), chunk.LOD, align);
+        int countDecrease = Math.max(0, chunk.LOD - breakPlaceSize);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material,
+                Math.max(1, countX >> countDecrease), Math.max(1, countY >> countDecrease), Math.max(1, countZ >> countDecrease),
+                length, placeable.getBitMap(), chunk.LOD, align);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

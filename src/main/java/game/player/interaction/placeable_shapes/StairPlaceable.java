@@ -86,5 +86,5 @@ public final class StairPlaceable extends RotatableShapePlaceable {
         return a / stepHeight.value() + b / stepHeight.value() < sideLength / stepHeight.value();
     }
 
-    private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE, 4);
+    private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);
 }

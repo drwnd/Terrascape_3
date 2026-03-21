@@ -694,7 +694,7 @@ public final class Renderer extends Renderable {
             glDisable(GL_BLEND);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
             glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
-        } else  {
+        } else {
             Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
             shader.bind();
             shader.setUniform("iCameraPosition",
