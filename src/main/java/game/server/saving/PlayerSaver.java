@@ -58,12 +58,6 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected int getVersionNumber() {
-        return 4;
-    }
-
-    @Override
-    protected Player loadOldVersion(int versionNumber) {
-        if (versionNumber == 3) return load();
-        return getDefault();
+        return 5;
     }
 }
