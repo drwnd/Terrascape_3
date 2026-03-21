@@ -15,13 +15,15 @@ import java.util.ArrayList;
 public interface Placeable {
 
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
-        if (placeable == null)
-            saver.saveByte((byte) 0);
-        else saver.saveGeneric(placeable, placeable::save);
+        if (placeable == null) saver.saveByte((byte) 0);
+        else {
+            saver.saveGeneric(placeable, placeable::save);
+            if (placeable instanceof ShapePlaceable shapePlaceable) saver.saveBoolean(shapePlaceable.invert.value());
+        }
     }
 
     static Placeable loadPlaceable(Saver<?> saver) {
-        return switch (saver.loadByte()) {
+        Placeable placeable = switch (saver.loadByte()) {
             case 1 -> CubePlaceable.load(saver);
             case 2 -> StructurePlaceable.load(saver);
             case 3 -> ChunkRebuildPlaceable.load(saver);
@@ -30,6 +32,8 @@ public interface Placeable {
             case 6 -> StairPlaceable.load(saver);
             default -> null;
         };
+        if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());
+        return placeable;
     }
 
     void place(Vector3l position, int lod);

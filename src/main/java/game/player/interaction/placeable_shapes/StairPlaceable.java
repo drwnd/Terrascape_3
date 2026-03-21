@@ -26,19 +26,22 @@ public final class StairPlaceable extends RotatableShapePlaceable {
         saver.saveByte((byte) 6);
         saver.saveByte(((StairPlaceable) placeable).getMaterial());
         saver.saveInt(((StairPlaceable) placeable).stepHeight.value());
+        saver.saveInt(((StairPlaceable) placeable).heightOffset.value());
     }
 
     public static StairPlaceable load(Saver<?> saver) {
         StairPlaceable placeable = new StairPlaceable(saver.loadByte());
         placeable.stepHeight.setValue(saver.loadInt());
+        placeable.heightOffset.setValue(saver.loadInt());
         return placeable;
     }
 
     @Override
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
-        StairPlaceable placeable = new StairPlaceable(material);
-        placeable.stepHeight.setValue(stepHeight.value());
-        return placeable;
+        StairPlaceable copy = new StairPlaceable(material);
+        copy.stepHeight.setValue(stepHeight.value());
+        copy.heightOffset.setValue(heightOffset.value());
+        return copy;
     }
 
     @Override
@@ -54,9 +57,10 @@ public final class StairPlaceable extends RotatableShapePlaceable {
 
     @Override
     protected List<UiBackgroundElement> uniqueSettings() {
-        Vector2f zero = new Vector2f(0.0F, 0.0F);
+        Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true)
+                new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
+                new Slider<>(zero, zero, heightOffset, UiMessages.HEIGHT_OFFSET, true)
         );
     }
 
@@ -83,8 +87,9 @@ public final class StairPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int sideLength, int a, int b) {
-        return a / stepHeight.value() + b / stepHeight.value() < sideLength / stepHeight.value();
+        return a / stepHeight.value() + b / stepHeight.value() < (sideLength + heightOffset.value()) / stepHeight.value();
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);
+    private final StandAloneIntSetting heightOffset = new StandAloneIntSetting(-32, 32, 0);
 }

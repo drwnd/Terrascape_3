@@ -193,5 +193,5 @@ public abstract class ShapePlaceable implements Placeable {
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;
 
-    private final ToggleSetting invert = new StandAloneToggleSetting(false);
+    final ToggleSetting invert = new StandAloneToggleSetting(false);
 }
