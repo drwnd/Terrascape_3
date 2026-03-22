@@ -29,6 +29,8 @@ public interface Placeable {
             case 6 -> StairPlaceable.load(saver);
             case 7 -> SlopedStairPlaceable.load(saver);
             case 8 -> ConePlaceable.load(saver);
+            case 9 -> InsideStairPlaceable.load(saver);
+            case 10 -> OutsideStairPlaceable.load(saver);
             default -> null;
         };
         if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());

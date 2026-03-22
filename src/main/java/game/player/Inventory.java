@@ -122,13 +122,17 @@ public final class Inventory extends UiElement {
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
         Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
+        float firstRowY = 0.8F;
+        float secondRowY = 0.8F - 0.05F * Window.getAspectRatio();
 
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, 0.8F), new CylinderPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, 0.8F), new StairPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, 0.8F), new SlopedStairPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.6F, 0.8F), new ConePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, firstRowY), new CubePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, firstRowY), new SpherePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, firstRowY), new CylinderPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, firstRowY), new StairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, firstRowY), new SlopedStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.6F, firstRowY), new ConePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, secondRowY), new InsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, secondRowY), new OutsideStairPlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();
@@ -211,7 +215,7 @@ public final class Inventory extends UiElement {
             int index = 0;
             for (UiBackgroundElement settingElement : placeable.settings()) {
                 settingElement.setSizeToParent(0.3F, 0.075F);
-                settingElement.setOffsetToParent(0.35F, 0.7F - index++ * 0.08F);
+                settingElement.setOffsetToParent(0.35F, 0.7F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
                 settingElement.setVisible(false);
                 settingElement.setRimThicknessMultiplier(0.5F);
                 settingElements.add(settingElement);
