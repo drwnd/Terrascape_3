@@ -91,7 +91,8 @@ public enum UiMessages implements Translatable {
     ROTATE_SHAPE_BACKWARD,
     STEP_HEIGHT,
     RADIUS_REDUCTION,
-    HEIGHT_OFFSET;
+    HEIGHT_OFFSET,
+    SLOPE;
 
     @Override
     public String translationFileName() {

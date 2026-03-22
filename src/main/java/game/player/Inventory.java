@@ -9,12 +9,9 @@ import core.utils.FileManager;
 
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
-import game.player.interaction.placeable_shapes.CubePlaceable;
+import game.player.interaction.placeable_shapes.*;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
-import game.player.interaction.placeable_shapes.CylinderPlaceable;
-import game.player.interaction.placeable_shapes.SpherePlaceable;
-import game.player.interaction.placeable_shapes.StairPlaceable;
 import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
@@ -130,6 +127,7 @@ public final class Inventory extends UiElement {
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, 0.8F), new CylinderPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, 0.8F), new StairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, 0.8F), new SlopedStairPlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();

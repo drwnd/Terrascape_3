@@ -128,6 +128,7 @@ public abstract class ShapePlaceable implements Placeable {
     public Structure getStructure() {
         long[] bitMap = new long[64];
         fillBitMap(bitMap, 16);
+        if (invert.value()) for (int index = 0; index < 64; index++) bitMap[index] = ~bitMap[index];
         byte[] uncompressedMaterial = new byte[4096];
         populateUncompressedMaterials(bitMap, uncompressedMaterial);
         return new Structure(16, 16, 16, MaterialsData.getCompressedMaterials(4, uncompressedMaterial));
@@ -151,7 +152,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 
-    protected boolean isBitMapInValid(int breakPlaceSize)  {
+    protected boolean isBitMapInValid(int breakPlaceSize) {
         return bitMap == null || size != breakPlaceSize;
     }
 

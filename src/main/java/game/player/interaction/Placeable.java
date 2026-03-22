@@ -3,10 +3,7 @@ package game.player.interaction;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
-import game.player.interaction.placeable_shapes.CubePlaceable;
-import game.player.interaction.placeable_shapes.CylinderPlaceable;
-import game.player.interaction.placeable_shapes.SpherePlaceable;
-import game.player.interaction.placeable_shapes.StairPlaceable;
+import game.player.interaction.placeable_shapes.*;
 import game.server.Chunk;
 import game.server.generation.Structure;
 
@@ -30,6 +27,7 @@ public interface Placeable {
             case 4 -> SpherePlaceable.load(saver);
             case 5 -> CylinderPlaceable.load(saver);
             case 6 -> StairPlaceable.load(saver);
+            case 7 -> SlopedStairPlaceable.load(saver);
             default -> null;
         };
         if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());
