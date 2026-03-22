@@ -124,6 +124,11 @@ public final class Inventory extends UiElement {
         updateDisplayPositions();
     }
 
+    @Override
+    public void resizeSelfTo(int width, int height) {
+        for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio());
+    }
+
     private void loadShapeDisplays() {
         getChildren().removeAll(shapeDisplays);
         getChildren().removeAll(shapePlaceableSettingSliders);
