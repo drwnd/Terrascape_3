@@ -831,8 +831,6 @@ public final class Renderer extends Renderable {
                 cameraPositon.longY & ~CHUNK_SIZE_MASK,
                 cameraPositon.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("material", 0);
-        shader.setUniform("textures", 0);
     }
 
     private static int getFlags(Position cameraPosition) {
