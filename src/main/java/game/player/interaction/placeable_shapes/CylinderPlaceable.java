@@ -30,16 +30,17 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     public static CylinderPlaceable load(Saver<?> saver) {
-        CylinderPlaceable copy = new CylinderPlaceable(saver.loadByte());
-        copy.radiusReduction.setValue(saver.loadInt());
-        copy.innerRadius.setValue(saver.loadInt());
-        copy.exponent.setValue(saver.loadFloat());
-        return copy;
+        CylinderPlaceable placeable = new CylinderPlaceable(saver.loadByte());
+        placeable.radiusReduction.setValue(saver.loadInt());
+        placeable.innerRadius.setValue(saver.loadInt());
+        placeable.exponent.setValue(saver.loadFloat());
+        return placeable;
     }
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
+        if (offset <= radiusReduction.value()) return;
         double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
@@ -63,11 +64,11 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
-        CylinderPlaceable placeable = new CylinderPlaceable(material);
-        placeable.radiusReduction.setValue(radiusReduction.value());
-        placeable.innerRadius.setValue(innerRadius.value());
-        placeable.exponent.setValue(exponent.value());
-        return placeable;
+        CylinderPlaceable copy = new CylinderPlaceable(material);
+        copy.radiusReduction.setValue(radiusReduction.value());
+        copy.innerRadius.setValue(innerRadius.value());
+        copy.exponent.setValue(exponent.value());
+        return copy;
     }
 
     private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {

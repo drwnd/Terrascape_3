@@ -58,6 +58,7 @@ public final class SpherePlaceable extends ShapePlaceable {
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
+        if (offset <= radiusReduction.value()) return;
         double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
