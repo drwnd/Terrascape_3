@@ -7,6 +7,7 @@ import core.assets.TextureArray;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.CoreObjectLoader;
+import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.Shader;
@@ -32,6 +33,7 @@ import game.server.*;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
+import game.settings.KeySettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 import game.utils.Transformation;
@@ -82,6 +84,10 @@ public final class Renderer extends Renderable {
 
     public void updateGameTick() {
         messages = Game.getServer().getMessages();
+    }
+
+    public void invalidateHologram() {
+        hologramModelsValid = false;
     }
 
 
@@ -633,21 +639,7 @@ public final class Renderer extends Renderable {
         }
 
         Placeable placeable = player.getHeldPlaceable();
-        byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
-
-        int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
-        if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize) {
-            if (opaqueHologram != null) opaqueHologram.delete();
-            if (transparentHologram != null) transparentHologram.delete();
-
-            Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getPlaceBreakSizedStructure() : new Structure(breakPlaceSize, AIR);
-            Mesh mesh = new MeshGenerator().generateMesh(structure);
-            opaqueHologram = ObjectLoader.loadOpaqueModel(mesh);
-            transparentHologram = ObjectLoader.loadTransparentModel(mesh);
-            hologramSize = structure.sizeX();
-
-            hologramModelsValid = true;
-        }
+        byte material = placeable instanceof ShapePlaceable shapePlaceable && !Input.isKeyPressed(KeySettings.SPRINT) ? shapePlaceable.getMaterial() : AIR;
 
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
@@ -658,13 +650,30 @@ public final class Renderer extends Renderable {
         maxPosition.add(1, 1, 1);
 
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
         glEnable(GL_CULL_FACE);
         glDisable(GL_STENCIL_TEST);
         glDepthMask(true);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
 
-        if (placeable instanceof ShapePlaceable) {
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
+            int hologramHash = placeable.hashCode();
+            if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
+                if (opaqueHologram != null) opaqueHologram.delete();
+
+                Structure structure = shapePlaceable.getPlaceBreakSizedStructure();
+                Mesh mesh = new MeshGenerator().generateMesh(structure);
+                opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
+                hologramSize = structure.sizeX();
+                this.hologramHash = hologramHash;
+
+                hologramModelsValid = true;
+            }
+
             int countX = (int) (maxPosition.x - minPosition.x) / hologramSize;
             int countY = (int) (maxPosition.y - minPosition.y) / hologramSize;
             int countZ = (int) (maxPosition.z - minPosition.z) / hologramSize;
@@ -682,12 +691,11 @@ public final class Renderer extends Renderable {
             shader.setUniform("textures", 0);
             shader.setUniform("textureSizes", materialsTexture.textureSizes());
             shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
+            shader.setUniform("material", material);
 
-            glEnable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
             glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
-        } else  {
+        } else {
             Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
             shader.bind();
             shader.setUniform("iCameraPosition",
@@ -698,9 +706,6 @@ public final class Renderer extends Renderable {
             shader.setUniform("minPosition", minPosition.toInt());
             shader.setUniform("maxPosition", maxPosition.toInt());
 
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
     }
@@ -826,8 +831,6 @@ public final class Renderer extends Renderable {
                 cameraPositon.longY & ~CHUNK_SIZE_MASK,
                 cameraPositon.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("material", 0);
-        shader.setUniform("textures", 0);
     }
 
     private static int getFlags(Position cameraPosition) {
@@ -859,9 +862,8 @@ public final class Renderer extends Renderable {
     private final Player player;
 
     private OpaqueModel opaqueHologram;
-    private TransparentModel transparentHologram;
     private boolean hologramModelsValid = false;
-    private int hologramSize;
+    private int hologramSize, hologramHash;
 
     private int framebuffer, colorTexture, depthTexture, sideTexture;
     private int ssaoFramebuffer, ssaoTexture, noiseTexture;

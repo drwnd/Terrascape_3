@@ -66,6 +66,7 @@ void main() {
     vec3 inChunkPosition = getFacePositions(side, currentVertexId, faceSize1, faceSize2);
     texturePosition = ivec3(x, y, z) + ivec3(offsetX, offsetY, offsetZ) + startPosition - iCameraPosition + inChunkPosition;
     voxelPosition = texturePosition;
+    texturePosition += NORMALS[side] * 0.01;
 
     gl_Position = projectionViewMatrix * vec4(texturePosition, 1.0);
 

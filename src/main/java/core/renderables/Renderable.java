@@ -99,6 +99,11 @@ public class Renderable {
 
     }
 
+    public float getAspectRatio() {
+        Vector2f size = getSize();
+        return size.x / size.y;
+    }
+
     public Vector2f getPosition() {
         return parent.getPosition().add(parent.getSize().mul(offsetToParent));
     }

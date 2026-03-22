@@ -9,10 +9,9 @@ import core.utils.FileManager;
 
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
-import game.player.interaction.placeable_shapes.CubePlaceable;
+import game.player.interaction.placeable_shapes.*;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
-import game.player.interaction.placeable_shapes.SpherePlaceable;
 import game.player.rendering.StructureDisplay;
 import game.player.rendering.StructureSelectionButton;
 import game.server.Game;
@@ -92,13 +91,6 @@ public final class Inventory extends UiElement {
         return input;
     }
 
-
-    @Override
-    public void dragOver(Vector2i pixelCoordinate) {
-        for (Slider<?> slider : shapePlaceableSettingSliders) if (slider.isVisible()) slider.getSetting().setValue(slider.getValue());
-        super.dragOver(pixelCoordinate);
-    }
-
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
@@ -135,12 +127,25 @@ public final class Inventory extends UiElement {
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
         Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
+        float firstRowY = 0.8F;
+        float secondRowY = 0.8F - 0.05F * Window.getAspectRatio();
 
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, 0.8F), new CubePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, 0.8F), new SpherePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, firstRowY), new CubePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, firstRowY), new SpherePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, firstRowY), new CylinderPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, firstRowY), new ConePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, firstRowY), new SlabPlaceable(STONE), this));
+
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, secondRowY), new StairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, secondRowY), new InsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, secondRowY), new OutsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, secondRowY), new SlopedStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, secondRowY), new InsideSlopedStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.6F, secondRowY), new OutsideSlopedStairPlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();
+        for (Renderable renderable : selectedDisplay.settingElements) renderable.setVisible(true);
     }
 
     private void updateDisplayPositions() {
@@ -195,7 +200,7 @@ public final class Inventory extends UiElement {
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<StructureSelectionButton> structureButtons = new ArrayList<>();
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
-    private final ArrayList<Slider<?>> shapePlaceableSettingSliders = new ArrayList<>();
+    private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final TextField filterTextField;
     private final InventoryInput input;
@@ -217,16 +222,16 @@ public final class Inventory extends UiElement {
             this.placeable = placeable;
 
             int index = 0;
-            for (Slider<?> slider : placeable.settings()) {
-                slider.setSizeToParent(0.3F, 0.075F);
-                slider.setOffsetToParent(0.35F, 0.7F - index++ * 0.08F);
-                slider.setVisible(false);
-                slider.setRimThicknessMultiplier(0.5F);
-                settingSliders.add(slider);
+            for (UiBackgroundElement settingElement : placeable.settings()) {
+                settingElement.setSizeToParent(0.3F, 0.075F);
+                settingElement.setOffsetToParent(0.35F, 0.7F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
+                settingElement.setVisible(false);
+                settingElement.setRimThicknessMultiplier(0.5F);
+                settingElements.add(settingElement);
             }
 
-            inventory.shapePlaceableSettingSliders.addAll(settingSliders);
-            for (Slider<?> slider : settingSliders) inventory.addRenderable(slider);
+            inventory.shapePlaceableSettingSliders.addAll(settingElements);
+            for (UiBackgroundElement settingElement : settingElements) inventory.addRenderable(settingElement);
 
             addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getStructure()));
         }
@@ -242,12 +247,12 @@ public final class Inventory extends UiElement {
                 if (action != GLFW_PRESS) return;
                 Inventory inventory = Game.getPlayer().getInventory();
                 inventory.selectedDisplay = this;
-                for (Slider<?> slider : inventory.shapePlaceableSettingSliders) slider.setVisible(false);
-                for (Slider<?> slider : settingSliders) slider.setVisible(true);
+                for (UiBackgroundElement settingElement : inventory.shapePlaceableSettingSliders) settingElement.setVisible(false);
+                for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
             };
         }
 
-        private final ArrayList<Slider<?>> settingSliders = new ArrayList<>();
+        private final ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
         private final ShapePlaceable placeable;
     }
 }

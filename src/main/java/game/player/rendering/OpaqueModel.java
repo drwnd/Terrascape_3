@@ -71,7 +71,7 @@ public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bu
     }
 
     public int vertexCountSum() {
-        if (vertexCounts == null) return 36;
+        if (vertexCounts == null) return 0;
         int sum = 0;
         for (int vertexCount : vertexCounts) sum += vertexCount;
         return sum;

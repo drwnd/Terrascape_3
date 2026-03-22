@@ -36,6 +36,6 @@ void main() {
     side = gl_VertexID / 6;
     int currentVertexId = gl_VertexID % 6;
 
-    totalPosition = getFacePositions(side, currentVertexId) - iCameraPosition;
+    totalPosition = getFacePositions(side, currentVertexId) - iCameraPosition + NORMALS[side] * 0.01;
     gl_Position = projectionViewMatrix * vec4(totalPosition, 1.0);
 }

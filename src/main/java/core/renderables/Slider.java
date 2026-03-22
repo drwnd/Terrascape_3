@@ -11,12 +11,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Slider<T extends Number> extends UiButton {
 
-    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName) {
+    public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(this::action);
         setDoAutoFocusScaling(false);
         this.setting = setting;
         this.settingName = settingName;
+        this.updateImmediately = updateImmediately;
 
         slider = new UiBackgroundElement(new Vector2f(0.05F, 1.0F), new Vector2f(0.0F, 0.0F));
         textElement = new TextElement(new Vector2f(0.05F, 0.5F), settingName);
@@ -43,6 +44,7 @@ public final class Slider<T extends Number> extends UiButton {
         this.value = value;
         textElement.setText("%s %s".formatted(settingName.get(), value));
         slider.setOffsetToParent(setting.fractionFromValue(value) - slider.getSizeToParent().x * 0.5F, 0.0F);
+        if (updateImmediately) setting.setValue(value);
     }
 
     @Override
@@ -69,6 +71,7 @@ public final class Slider<T extends Number> extends UiButton {
         setValue(setting.valueFromFraction(fraction));
     }
 
+    private final boolean updateImmediately;
     private final NumberSetting<T> setting;
     private final UiBackgroundElement slider;
     private final TextElement textElement;

@@ -32,6 +32,7 @@ public final class MaterialsData {
     }
 
     public static MaterialsData getCompressedMaterials(int sizeBits, byte[] uncompressedMaterials) {
+        if (sizeBits == 0) return new MaterialsData(0, uncompressedMaterials[0]);
         ByteArrayList dataList = new ByteArrayList(1000);
         compressMaterials(dataList, uncompressedMaterials, sizeBits, 0, 0, 0, 0);
         return new MaterialsData(sizeBits, dataList.toArray());
@@ -252,10 +253,10 @@ public final class MaterialsData {
 
     private static void storeMaterial(int materialStartIndex, int bitMapStartIndex, byte material, int count, long[] bitMap, byte[] uncompressedMaterials, int lod) {
         int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
-        int endIndex = bitMapStartIndex + count, bitMapEndIndex = bitMapStartIndex + count >> 6;
+        int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
 
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
-            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask,
+            for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
                 if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
                 uncompressedMaterials[materialStartIndex + (index - bitMapStartIndex >> shiftCount)] = material;

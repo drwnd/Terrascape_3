@@ -18,11 +18,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Toggle extends UiButton {
 
-    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName) {
+    public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
         this.setting = setting;
+        this.updateImmediately = updateImmediately;
 
         matchSetting();
         addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), settingName));
@@ -45,16 +46,18 @@ public final class Toggle extends UiButton {
         super.renderSelf(position, size);
 
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
-        float rimThickness = CoreFloatSettings.RIM_THICKNESS.value() * guiSize * getRimThicknessMultiplier();
-        float thicknessX = rimThickness / (size.x * Window.getAspectRatio());
+        float rimThickness = CoreFloatSettings.RIM_THICKNESS.value() * getRimThicknessMultiplier();
+        float thicknessX = rimThickness / Window.getAspectRatio();
+        float newSizeY = 1.0F - 2 * rimThickness / size.y;
+        float oldSizeX = size.x;
 
-        position = new Vector2f(position).add((0.6F - thicknessX) * size.x, 0.15F * size.y);
-        size = new Vector2f(size).mul(0.4F, 0.7F);
+        size = new Vector2f(size).mul(newSizeY / getAspectRatio(), newSizeY);
+        position = new Vector2f(position).add(oldSizeX - size.x - thicknessX, rimThickness);
 
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
         Texture texture = AssetManager.get(TexturePack.get(value ? CoreTextures.TOGGLE_ACTIVATED : CoreTextures.TOGGLE_DEACTIVATED));
         shader.bind();
-        shader.drawQuad(position, size, texture);
+        shader.drawQuadCustomScale(position, size, texture, guiSize);
     }
 
     public void matchSetting() {
@@ -64,10 +67,13 @@ public final class Toggle extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action == GLFW_PRESS) value = !value;
+            if (action != GLFW_PRESS) return;
+            value = !value;
+            if (updateImmediately) setting.setValue(value);
         };
     }
 
     private boolean value;
     private final ToggleSetting setting;
+    private final boolean updateImmediately;
 }
