@@ -703,7 +703,7 @@ public final class Renderer extends Renderable {
         Placeable placeable = player.getHeldPlaceable();
         if (!Input.isKeyPressed(KeySettings.SPRINT) || placeable == null) return;
         byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
-        Vector3l position = material == AIR ? target.position() : target.offsetPosition();
+        Vector3l position = material == AIR && placeable instanceof ShapePlaceable ? target.position() : target.offsetPosition();
         placeable.offsetPosition(position, target.side());
         synchronizeHologramModel(placeable);
 
