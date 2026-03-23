@@ -257,6 +257,13 @@ public final class Vector3l {
         return dest;
     }
 
+    public Vector3l add(long v) {
+        this.x = this.x + v;
+        this.y = this.y + v;
+        this.z = this.z + v;
+        return this;
+    }
+
     /**
      * Increment the components of this vector by the given values.
      *

@@ -634,7 +634,7 @@ public final class Renderer extends Renderable {
         Target startTarget = player.getInteractionHandler().getStartTarget();
         Target currentTarget = Target.getPlayerTarget();
         if (startTarget == null || currentTarget == null) {
-            hologramModelsValid = false;
+            if (currentTarget != null) renderVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget);
             return;
         }
 
@@ -659,20 +659,8 @@ public final class Renderer extends Renderable {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
 
-        if (placeable instanceof ShapePlaceable shapePlaceable) {
-            int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
-            int hologramHash = placeable.hashCode();
-            if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
-                if (opaqueHologram != null) opaqueHologram.delete();
-
-                Structure structure = shapePlaceable.getPlaceBreakSizedStructure();
-                Mesh mesh = new MeshGenerator().generateMesh(structure);
-                opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
-                hologramSize = structure.sizeX();
-                this.hologramHash = hologramHash;
-
-                hologramModelsValid = true;
-            }
+        if (placeable instanceof ShapePlaceable) {
+            synchronizeHologramModel(placeable);
 
             int countX = (int) (maxPosition.x - minPosition.x) / hologramSize;
             int countY = (int) (maxPosition.y - minPosition.y) / hologramSize;
@@ -708,6 +696,43 @@ public final class Renderer extends Renderable {
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+    }
+
+    private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target) {
+        Placeable placeable = player.getHeldPlaceable();
+        if (!Input.isKeyPressed(KeySettings.SPRINT) || placeable == null) return;
+        byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
+        Vector3l position = material == AIR ? target.position() : target.offsetPosition();
+        placeable.offsetPosition(position);
+        synchronizeHologramModel(placeable);
+
+        TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_STENCIL_TEST);
+        glDepthMask(true);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
+
+        Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
+        shader.bind();
+        shader.setUniform("iCameraPosition",
+                cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                cameraPosition.longZ & ~CHUNK_SIZE_MASK);
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("instanceData", 1, 1, 1, hologramSize);
+        shader.setUniform("startPosition", position.x, position.y, position.z);
+
+        shader.setUniform("textures", 0);
+        shader.setUniform("textureSizes", materialsTexture.textureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
+        shader.setUniform("material", material);
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), 1);
     }
 
     private void renderChat() {
@@ -831,6 +856,22 @@ public final class Renderer extends Renderable {
                 cameraPositon.longY & ~CHUNK_SIZE_MASK,
                 cameraPositon.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+    }
+
+    private void synchronizeHologramModel(Placeable placeable) {
+        int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
+        int hologramHash = placeable.hashCode();
+        if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
+            if (opaqueHologram != null) opaqueHologram.delete();
+
+            Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getPlaceBreakSizedStructure() : placeable.getStructure();
+            Mesh mesh = new MeshGenerator().generateMesh(structure);
+            opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
+            hologramSize = structure.sizeX();
+            this.hologramHash = hologramHash;
+
+            hologramModelsValid = true;
+        }
     }
 
     private static int getFlags(Position cameraPosition) {
