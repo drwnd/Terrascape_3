@@ -36,9 +36,9 @@ public final class RepeatPlaceable implements Placeable {
         int startMask = -breakPlaceAlign;
         int endMask = -preferredSize;
 
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) startPosition.x += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) startPosition.y += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) startPosition.z += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != WEST && targetedSide != EAST)) startPosition.x += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != TOP && targetedSide != BOTTOM)) startPosition.y += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != NORTH && targetedSide != SOUTH)) startPosition.z += breakPlaceAlign - preferredSize >> 1;
 
         startPosition.x &= startMask;
         startPosition.y &= startMask;

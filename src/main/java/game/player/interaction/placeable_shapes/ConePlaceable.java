@@ -12,6 +12,7 @@ import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
 import game.server.MaterialsData;
 
+import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -81,6 +82,11 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     @Override
     public int getPreferredSize() {
         return Math.max(height.value(), baseRadius.value() * 2);
+    }
+
+    @Override
+    public Structure getSmallStructure() {
+        return getStructure();
     }
 
     private boolean isInside(int x, int y, int z, int sideLength, double offset) {

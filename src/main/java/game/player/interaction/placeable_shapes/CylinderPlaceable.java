@@ -9,8 +9,9 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
-import game.player.interaction.Rotation3Way;
+import game.player.interaction.Rotation6Way;
 import game.server.MaterialsData;
+import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
 public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     public CylinderPlaceable(byte material) {
-        super(material, Rotation3Way.Y);
+        super(material, Rotation6Way.BOTTOM);
     }
 
     public void save(Placeable placeable, Saver<?> saver) {
@@ -26,6 +27,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         saver.saveByte(((CylinderPlaceable) placeable).getMaterial());
         saver.saveInt(((CylinderPlaceable) placeable).radius.value());
         saver.saveInt(((CylinderPlaceable) placeable).innerRadius.value());
+        saver.saveInt(((CylinderPlaceable) placeable).height.value());
         saver.saveFloat(((CylinderPlaceable) placeable).exponent.value());
     }
 
@@ -33,6 +35,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         CylinderPlaceable placeable = new CylinderPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
         placeable.innerRadius.setValue(saver.loadInt());
+        placeable.height.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
     }
@@ -46,7 +49,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         for (int x = 0; x < sideLength; x++)
             for (int y = 0; y < sideLength; y++)
                 for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, offset, outerThreshold, innerThreshold)) continue;
+                    if (!isInside(x, y, z, sideLength, offset, outerThreshold, innerThreshold)) continue;
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
@@ -58,6 +61,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         return List.of(
                 new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
                 new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true),
+                new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
 
@@ -71,25 +75,42 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         CylinderPlaceable copy = new CylinderPlaceable(material);
         copy.radius.setValue(radius.value());
         copy.innerRadius.setValue(innerRadius.value());
+        copy.height.setValue(height.value());
         copy.exponent.setValue(exponent.value());
         return copy;
     }
 
-    private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
-        if (rotation == Rotation3Way.X) return isInside(y, z, offset, outerThreshold, innerThreshold);
-        if (rotation == Rotation3Way.Y) return isInside(x, z, offset, outerThreshold, innerThreshold);
-        return isInside(x, y, offset, outerThreshold, innerThreshold);
+    @Override
+    public Structure getSmallStructure() {
+        return getStructure();
     }
 
-    private boolean isInside(int a, int b, double offset, double outerThreshold, double innerThreshold) {
-        double distanceA = Math.pow(Math.abs(a - offset + 0.5), exponent.value());
+    private boolean isInside(int x, int y, int z, int sideLength, double offset, double outerThreshold, double innerThreshold) {
+        int invert = sideLength - 1;
+
+        return switch (rotation) {
+            case Rotation6Way.NORTH -> isInside(invert - z, x, y, offset, outerThreshold, innerThreshold);
+            case Rotation6Way.TOP -> isInside(invert - y, x, z, offset, outerThreshold, innerThreshold);
+            case Rotation6Way.WEST -> isInside(invert - x, y, z, offset, outerThreshold, innerThreshold);
+            case Rotation6Way.SOUTH -> isInside(z, x, y, offset, outerThreshold, innerThreshold);
+            case Rotation6Way.BOTTOM -> isInside(y, x, z, offset, outerThreshold, innerThreshold);
+            case Rotation6Way.EAST -> isInside(x, y, z, offset, outerThreshold, innerThreshold);
+
+            case null, default -> false;
+        };
+    }
+
+    private boolean isInside(int a, int b, int c, double offset, double outerThreshold, double innerThreshold) {
+        if (a >= height.value()) return false;
         double distanceB = Math.pow(Math.abs(b - offset + 0.5), exponent.value());
-        double distance = distanceA + distanceB;
+        double distanceC = Math.pow(Math.abs(c - offset + 0.5), exponent.value());
+        double distance = distanceC + distanceB;
 
         return distance <= outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);
     private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
+    private final StandAloneIntSetting height = new StandAloneIntSetting(0, 256, 16);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }

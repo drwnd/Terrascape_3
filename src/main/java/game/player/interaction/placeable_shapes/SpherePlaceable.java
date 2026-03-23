@@ -11,6 +11,7 @@ import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
 
+import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -73,6 +74,11 @@ public final class SpherePlaceable extends ShapePlaceable {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
+    }
+
+    @Override
+    public Structure getSmallStructure() {
+        return getStructure();
     }
 
     private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {

@@ -120,9 +120,9 @@ public abstract class ShapePlaceable implements Placeable {
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -breakPlaceAlign;
 
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != WEST)) position.x += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != TOP)) position.y += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != NORTH)) position.z += breakPlaceAlign - preferredSize >> 1;
 
         position.x &= mask;
         position.y &= mask;
