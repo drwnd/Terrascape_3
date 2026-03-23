@@ -28,10 +28,12 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition) {
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int startMask = -(1 << breakPlaceAlign);
-        int endMask = -(1 << breakPlaceSize);
+        int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
+        int breakPlaceAlign = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int startMask = -breakPlaceAlign;
+        int endMask = -breakPlaceSize;
+
+        startPosition.add(breakPlaceAlign - breakPlaceSize >> 1);
 
         startPosition.x &= startMask;
         startPosition.y &= startMask;
@@ -41,12 +43,12 @@ public final class RepeatPlaceable implements Placeable {
         endPosition.y = (endPosition.y - startPosition.y & endMask) + startPosition.y;
         endPosition.z = (endPosition.z - startPosition.z & endMask) + startPosition.z;
 
-        if (startPosition.x <= endPosition.x) endPosition.x += (1L << breakPlaceSize) - 1;
-        else startPosition.x += (1L << breakPlaceSize) - 1;
-        if (startPosition.y <= endPosition.y) endPosition.y += (1L << breakPlaceSize) - 1;
-        else startPosition.y += (1L << breakPlaceSize) - 1;
-        if (startPosition.z <= endPosition.z) endPosition.z += (1L << breakPlaceSize) - 1;
-        else startPosition.z += (1L << breakPlaceSize) - 1;
+        if (startPosition.x <= endPosition.x) endPosition.x += breakPlaceSize - 1;
+        else startPosition.x += breakPlaceSize - 1;
+        if (startPosition.y <= endPosition.y) endPosition.y += breakPlaceSize - 1;
+        else startPosition.y += breakPlaceSize - 1;
+        if (startPosition.z <= endPosition.z) endPosition.z += breakPlaceSize - 1;
+        else startPosition.z += breakPlaceSize - 1;
     }
 
     @Override

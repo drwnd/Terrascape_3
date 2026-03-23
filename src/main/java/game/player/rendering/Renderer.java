@@ -867,7 +867,7 @@ public final class Renderer extends Renderable {
             Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getPlaceBreakSizedStructure() : placeable.getStructure();
             Mesh mesh = new MeshGenerator().generateMesh(structure);
             opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
-            hologramSize = structure.sizeX();
+            hologramSize = 1 << breakPlaceSize;
             this.hologramHash = hologramHash;
 
             hologramModelsValid = true;

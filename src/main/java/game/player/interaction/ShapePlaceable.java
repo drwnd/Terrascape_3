@@ -117,8 +117,11 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position) {
-        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int mask = -(1 << breakPlaceAlign);
+        int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
+        int breakPlaceAlign = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int mask = -breakPlaceAlign;
+
+        position.add(breakPlaceAlign - breakPlaceSize >> 1);
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;
