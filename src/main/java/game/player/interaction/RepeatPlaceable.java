@@ -36,9 +36,10 @@ public final class RepeatPlaceable implements Placeable {
         if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += offset;
         if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += offset;
 
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == EAST) position.x -= preferredSize - 1;
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == BOTTOM) position.y -= preferredSize - 1;
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z -= preferredSize - 1;
+        offset = (1 << IntSettings.BREAK_PLACE_ALIGN.value()) - preferredSize;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == EAST) position.x += offset;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == BOTTOM) position.y += offset;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z += offset;
     }
 
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
