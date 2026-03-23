@@ -1,13 +1,14 @@
 package game.server;
 
 import core.utils.ByteArrayList;
-
 import core.utils.MathUtils;
+
 import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.server.material.Properties;
+import game.settings.ToggleSettings;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -254,12 +255,14 @@ public final class MaterialsData {
     private static void storeMaterial(int materialStartIndex, int bitMapStartIndex, byte material, int count, long[] bitMap, byte[] uncompressedMaterials, int lod) {
         int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
         int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
+        boolean paint = ToggleSettings.PAINT.value();
 
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
             for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
-                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterials[materialStartIndex + (index - bitMapStartIndex >> shiftCount)] = material;
+                int materialIndex = materialStartIndex + (index - bitMapStartIndex >> shiftCount);
+                if ((bitMap[bitsIndex] & 1L << index) == 0 || paint && uncompressedMaterials[materialIndex] == AIR) continue;
+                uncompressedMaterials[materialIndex] = material;
             }
     }
 

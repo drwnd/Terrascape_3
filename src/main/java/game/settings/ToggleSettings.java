@@ -25,7 +25,8 @@ public enum ToggleSettings implements ToggleSetting {
     USE_OCCLUSION_CULLING(true),
     NO_CLIP(false, GLFW_KEY_P),
     CULLING_COMPUTATION(true, GLFW_KEY_L),
-    DEBUG_MENU(false, GLFW_KEY_F3);
+    DEBUG_MENU(false, GLFW_KEY_F3),
+    PAINT(false);
 
     ToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;

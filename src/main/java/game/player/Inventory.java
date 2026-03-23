@@ -19,6 +19,7 @@ import game.server.generation.Structure;
 import game.server.material.Materials;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
+import game.settings.ToggleSettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -41,7 +42,12 @@ public final class Inventory extends UiElement {
         itemNameDisplay.setAddTransparentBackground(true);
         itemNameDisplay.setDoAutoFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
-        filterTextField = new TextField(new Vector2f(0.25F, 0.1F), new Vector2f(0.375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
+        filterTextField = new TextField(new Vector2f(0.275F, 0.1F), new Vector2f(0.0375F, 0.9F), UiMessages.STRUCTURE_NAME, this::reloadStructureButtons);
+        structureButtonsContainer = new Renderable(new Vector2f(0.25F, 0.9F), new Vector2f(0.05F, 0.0F));
+        structureButtonsContainer.setDoAutoFocusScaling(false);
+        structureButtonsContainer.setScaleWithGuiSize(false);
+
+        Toggle paintToggle = new Toggle(new Vector2f(0.1F, 0.1F), new Vector2f(0.35F, 0.9F), ToggleSettings.PAINT, UiMessages.PAINT, true);
 
         long start = System.nanoTime();
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
@@ -59,7 +65,9 @@ public final class Inventory extends UiElement {
         System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         loadShapeDisplays();
         addRenderable(itemNameDisplay);
+        addRenderable(structureButtonsContainer);
         addRenderable(filterTextField);
+        addRenderable(paintToggle);
     }
 
     public void handleInput(int button, int action, Vector2i pixelCoordinate) {
@@ -95,6 +103,7 @@ public final class Inventory extends UiElement {
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         itemNameDisplay.setVisible(false);
+        if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) structureButtonsContainer.hoverOver(pixelCoordinate);
 
         for (CubeDisplay display : cubeDisplays) {
             StructureDisplay structureDisplay = display.display;
@@ -166,23 +175,24 @@ public final class Inventory extends UiElement {
     }
 
     private void reloadStructureButtons() {
-        getChildren().removeAll(structureButtons);
+        structureButtonsContainer.getChildren().removeAll(structureButtons);
         structureButtons.clear();
 
         int structureCount = 0;
-        Vector2f sizeToParent = new Vector2f(0.25F, 0.05F);
+        Vector2f sizeToParent = new Vector2f(1.0F, 0.05F);
         File[] structureFiles = FileManager.getChildren(new File("assets/structures"));
         String filterText = filterTextField.getText().toLowerCase();
 
         for (File structureFile : structureFiles) {
             if (structureFile == null || !structureFile.getName().toLowerCase().contains(filterText)) continue;
             String structureName = structureFile.getName();
-            Vector2f offsetToParent = new Vector2f(0.05F, 1.0F - ++structureCount * 0.065F + input.getStructureScroll());
+            Vector2f offsetToParent = new Vector2f(0.0F, 1.0F - ++structureCount * 0.065F + input.getStructureScroll());
 
             StructureSelectionButton button = new StructureSelectionButton(sizeToParent, offsetToParent, structureName);
             button.setRimThicknessMultiplier(0.5F);
+            button.setDoAutoFocusScaling(true);
             structureButtons.add(button);
-            addRenderable(button);
+            structureButtonsContainer.addRenderable(button);
         }
     }
 
@@ -204,6 +214,7 @@ public final class Inventory extends UiElement {
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final TextField filterTextField;
     private final InventoryInput input;
+    private final Renderable structureButtonsContainer;
 
     private ShapeDisplay selectedDisplay;
 
