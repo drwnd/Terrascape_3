@@ -123,7 +123,7 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
     private void createWorldButtons() {
-        getChildren().removeAll(worldButtons);
+        for (Renderable worldButton : worldButtons) removeRenderable(worldButton).delete();
 
         File[] savedWorlds = getSavedWorlds();
         for (int index = 0; index < savedWorlds.length; index++) {

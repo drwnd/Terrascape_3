@@ -10,7 +10,6 @@ import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
 import game.server.MaterialsData;
-import game.settings.IntSettings;
 
 import org.joml.Vector2f;
 
@@ -58,11 +57,6 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
         return List.of(
                 new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
         );
-    }
-
-    @Override
-    protected int getPreferredSize() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     private boolean isInside(int x, int y, int z, int sideLength) {

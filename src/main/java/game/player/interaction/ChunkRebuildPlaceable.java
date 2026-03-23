@@ -75,7 +75,7 @@ public final class ChunkRebuildPlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3l position) {
+    public void offsetPosition(Vector3l position, int targetedSide) {
         position.x &= ~CHUNK_SIZE_MASK;
         position.y &= ~CHUNK_SIZE_MASK;
         position.z &= ~CHUNK_SIZE_MASK;

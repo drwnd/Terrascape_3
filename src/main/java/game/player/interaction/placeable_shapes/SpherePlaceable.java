@@ -56,7 +56,7 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected int getPreferredSize() {
+    public int getPreferredSize() {
         return radius.value() * 2;
     }
 

@@ -644,7 +644,7 @@ public final class Renderer extends Renderable {
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
-        RepeatPlaceable.offsetPositions(startPositon, endPosition);
+        RepeatPlaceable.offsetPositions(startPositon, endPosition, startTarget.side(), placeable);
         Vector3l minPosition = Utils.min(startPositon, endPosition);
         Vector3l maxPosition = Utils.max(startPositon, endPosition);
         maxPosition.add(1, 1, 1);
@@ -703,7 +703,7 @@ public final class Renderer extends Renderable {
         if (!Input.isKeyPressed(KeySettings.SPRINT) || placeable == null) return;
         byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
         Vector3l position = material == AIR ? target.position() : target.offsetPosition();
-        placeable.offsetPosition(position);
+        placeable.offsetPosition(position, target.side());
         synchronizeHologramModel(placeable);
 
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));

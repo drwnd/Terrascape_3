@@ -101,8 +101,8 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
-    public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable) {
-        placeable.offsetPosition(position);
+    public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
+        placeable.offsetPosition(position, side);
 
         Player player = Game.getPlayer();
         if (!ToggleSettings.NO_CLIP.value() && placeable.intersectsAABB(position, player.getMinCoordinate(), player.getMaxCoordinate())) return false;

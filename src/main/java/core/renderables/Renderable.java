@@ -51,6 +51,10 @@ public class Renderable {
         renderable.parent = this;
     }
 
+    public Renderable removeRenderable(Renderable renderable) {
+        return children.remove(renderable) && renderable != null ? renderable : DummyRenderable.dummy;
+    }
+
     public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         for (Renderable renderable : children)
             if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.clickOn(pixelCoordinate, mouseButton, action);

@@ -79,7 +79,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected int getPreferredSize() {
+    public int getPreferredSize() {
         return Math.max(height.value(), baseRadius.value() * 2);
     }
 

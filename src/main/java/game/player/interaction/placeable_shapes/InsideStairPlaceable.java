@@ -10,10 +10,10 @@ import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
 import game.server.MaterialsData;
-import game.settings.IntSettings;
 
 import org.joml.Vector2f;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static game.utils.Constants.CHUNK_SIZE;
@@ -48,6 +48,10 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
+        if (sideLength < stepHeight.value()) {
+            Arrays.fill(bitMap, -1L);
+            return;
+        }
         int threshold = (sideLength + heightOffset.value()) / stepHeight.value();
 
         for (int x = 0; x < sideLength; x++)
@@ -68,10 +72,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable {
         );
     }
 
-    @Override
-    protected int getPreferredSize() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
-    }
+
 
     private boolean isInside(int x, int y, int z, int sideLength, int threshold) {
         int invert = sideLength - 1;

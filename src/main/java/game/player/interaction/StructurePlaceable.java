@@ -62,7 +62,7 @@ public final class StructurePlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3l position) {
+    public void offsetPosition(Vector3l position, int targetedSide) {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
 

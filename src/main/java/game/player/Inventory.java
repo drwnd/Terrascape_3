@@ -47,7 +47,8 @@ public final class Inventory extends UiElement {
         structureButtonsContainer.setDoAutoFocusScaling(false);
         structureButtonsContainer.setScaleWithGuiSize(false);
 
-        Toggle paintToggle = new Toggle(new Vector2f(0.1F, 0.1F), new Vector2f(0.35F, 0.9F), ToggleSettings.PAINT, UiMessages.PAINT, true);
+        Toggle paintToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.35F, 0.9F), ToggleSettings.PAINT, UiMessages.PAINT, true);
+        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.525F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
 
         long start = System.nanoTime();
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
@@ -68,6 +69,7 @@ public final class Inventory extends UiElement {
         addRenderable(structureButtonsContainer);
         addRenderable(filterTextField);
         addRenderable(paintToggle);
+        addRenderable(offsetToggle);
     }
 
     public void handleInput(int button, int action, Vector2i pixelCoordinate) {
@@ -130,9 +132,14 @@ public final class Inventory extends UiElement {
         for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio());
     }
 
+    @Override
+    public void renderSelf(Vector2f position, Vector2f size) {
+        super.renderSelf(position, size);
+    }
+
     private void loadShapeDisplays() {
-        getChildren().removeAll(shapeDisplays);
-        getChildren().removeAll(shapePlaceableSettingSliders);
+        for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
+        for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
         Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
@@ -175,7 +182,7 @@ public final class Inventory extends UiElement {
     }
 
     private void reloadStructureButtons() {
-        structureButtonsContainer.getChildren().removeAll(structureButtons);
+        for (Renderable button : structureButtons) removeRenderable(button).delete();
         structureButtons.clear();
 
         int structureCount = 0;
@@ -244,7 +251,7 @@ public final class Inventory extends UiElement {
             inventory.shapePlaceableSettingSliders.addAll(settingElements);
             for (UiBackgroundElement settingElement : settingElements) inventory.addRenderable(settingElement);
 
-            addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getStructure()));
+            addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getSmallStructure()));
         }
 
         @Override

@@ -4,6 +4,7 @@ import core.renderables.UiElement;
 import core.rendering_api.Window;
 
 import game.assets.Textures;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.rendering.StructureDisplay;
@@ -62,12 +63,11 @@ public final class Hotbar extends UiElement {
         slotIndex = clampSlot(slotIndex);
         contents[slotIndex] = placeable;
 
-        getChildren().remove(displays[slotIndex]);
-        if (displays[slotIndex] != null) displays[slotIndex].delete();
+        removeRenderable(displays[slotIndex]).delete();
         displays[slotIndex] = null;
 
         if (placeable == null) return;
-        Structure structure = placeable.getStructure();
+        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getSmallStructure() : placeable.getStructure();
         if (structure == null) return;
 
         displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);

@@ -17,6 +17,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import game.settings.ToggleSettings;
 import game.utils.Utils;
 
 import org.joml.Vector2f;
@@ -65,6 +66,12 @@ public abstract class ShapePlaceable implements Placeable {
         return bitMap;
     }
 
+    public Structure getSmallStructure() {
+        long[] bitMap = new long[64];
+        fillBitMap(bitMap, 16);
+        return new Structure(4, material, bitMap);
+    }
+
 
     @Override
     public void place(Vector3l position, int lod) {
@@ -108,12 +115,15 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3l position) {
+    public void offsetPosition(Vector3l position, int targetedSide) {
         int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -breakPlaceAlign;
 
-        position.add(breakPlaceAlign - preferredSize >> 1);
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += breakPlaceAlign - preferredSize >> 1;
+
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;
@@ -125,9 +135,7 @@ public abstract class ShapePlaceable implements Placeable {
         int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
         long[] bitMap = getBitMap();
 
-        byte[] uncompressedMaterial = new byte[preferredSize * preferredSize * preferredSize];
-        populateUncompressedMaterials(bitMap, uncompressedMaterial);
-        return new Structure(preferredSize, preferredSize, preferredSize, MaterialsData.getCompressedMaterials(preferredSizeBits, uncompressedMaterial));
+        return new Structure(preferredSizeBits, material, bitMap);
     }
 
     @Override
@@ -147,8 +155,6 @@ public abstract class ShapePlaceable implements Placeable {
     protected abstract List<UiBackgroundElement> uniqueSettings();
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
-
-    protected abstract int getPreferredSize();
 
     protected boolean isBitMapInValid(int preferredSize) {
         return bitMap == null || this.preferredSize != preferredSize;
@@ -178,14 +184,7 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
 
-    private void populateUncompressedMaterials(long[] bitMap, byte[] uncompressedMaterials) {
-        for (int bitsIndex = 0; bitsIndex < bitMap.length; bitsIndex++)
-            for (int index = (bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]),
-                 end = Math.min(bitsIndex + 1 << 6, uncompressedMaterials.length); index < end; index++) {
-                if ((bitMap[bitsIndex] & 1L << index) == 0) continue;
-                uncompressedMaterials[index] = material;
-            }
-    }
+
 
     private int preferredSize = -1;
     private long[] bitMap;

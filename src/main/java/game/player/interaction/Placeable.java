@@ -6,6 +6,7 @@ import core.utils.Vector3l;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Chunk;
 import game.server.generation.Structure;
+import game.settings.IntSettings;
 
 import java.util.ArrayList;
 
@@ -48,9 +49,13 @@ public interface Placeable {
 
     boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
 
-    void offsetPosition(Vector3l position);
+    void offsetPosition(Vector3l position, int targetedSide);
 
     void spawnParticles(Vector3l position);
 
     void save(Placeable placeable, Saver<?> saver);
+
+    default int getPreferredSize() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
 }

@@ -95,7 +95,8 @@ public enum UiMessages implements Translatable {
     SLOPE,
     TOP_RADIUS,
     WALL_THICKNESS,
-    PAINT;
+    PAINT,
+    OFFSET_FROM_GROUND;
 
     @Override
     public String translationFileName() {

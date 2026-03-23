@@ -10,7 +10,6 @@ import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
 import game.server.MaterialsData;
-import game.settings.IntSettings;
 
 import org.joml.Vector2f;
 
@@ -66,11 +65,6 @@ public final class OutsideStairPlaceable extends RotatableShapePlaceable {
                 new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
                 new Slider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true)
         );
-    }
-
-    @Override
-    protected int getPreferredSize() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     private boolean isInside(int x, int y, int z, int sideLength, int threshold) {

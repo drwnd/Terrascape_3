@@ -12,6 +12,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import game.settings.ToggleSettings;
 import game.utils.Utils;
 import org.joml.Vector3i;
 
@@ -29,13 +30,15 @@ public final class RepeatPlaceable implements Placeable {
         this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
-    public static void offsetPositions(Vector3l startPosition, Vector3l endPosition) {
-        int breakPlaceSize = 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
+        int preferredSize = placeable.getPreferredSize();
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int startMask = -breakPlaceAlign;
-        int endMask = -breakPlaceSize;
+        int endMask = -preferredSize;
 
-        startPosition.add(breakPlaceAlign - breakPlaceSize >> 1);
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) startPosition.x += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) startPosition.y += breakPlaceAlign - preferredSize >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) startPosition.z += breakPlaceAlign - preferredSize >> 1;
 
         startPosition.x &= startMask;
         startPosition.y &= startMask;
@@ -45,12 +48,12 @@ public final class RepeatPlaceable implements Placeable {
         endPosition.y = (endPosition.y - startPosition.y & endMask) + startPosition.y;
         endPosition.z = (endPosition.z - startPosition.z & endMask) + startPosition.z;
 
-        if (startPosition.x <= endPosition.x) endPosition.x += breakPlaceSize - 1;
-        else startPosition.x += breakPlaceSize - 1;
-        if (startPosition.y <= endPosition.y) endPosition.y += breakPlaceSize - 1;
-        else startPosition.y += breakPlaceSize - 1;
-        if (startPosition.z <= endPosition.z) endPosition.z += breakPlaceSize - 1;
-        else startPosition.z += breakPlaceSize - 1;
+        if (startPosition.x <= endPosition.x) endPosition.x += preferredSize - 1;
+        else startPosition.x += preferredSize - 1;
+        if (startPosition.y <= endPosition.y) endPosition.y += preferredSize - 1;
+        else startPosition.y += preferredSize - 1;
+        if (startPosition.z <= endPosition.z) endPosition.z += preferredSize - 1;
+        else startPosition.z += preferredSize - 1;
     }
 
     @Override
@@ -98,8 +101,8 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3l position) {
-        offsetPositions(startPosition, endPosition);
+    public void offsetPosition(Vector3l position, int targetedSide) {
+        offsetPositions(startPosition, endPosition, getPreferredSize(), placeable);
         minPosition.set(Utils.min(startPosition, endPosition));
         maxPosition.set(Utils.max(startPosition, endPosition));
     }

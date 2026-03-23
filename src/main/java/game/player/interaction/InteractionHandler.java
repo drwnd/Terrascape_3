@@ -72,7 +72,7 @@ public final class InteractionHandler {
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
             startTarget = null;
         }
-        if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
+        if (Game.getServer().requestBreakPlaceInteraction(position, placeable, target.side())) info.lastAction = currentGameTick;
     }
 
     private static void changeBreakPlaceSize(int addend) {

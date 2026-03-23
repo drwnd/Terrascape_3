@@ -9,7 +9,6 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
-import game.settings.IntSettings;
 
 import org.joml.Vector2f;
 
@@ -49,11 +48,6 @@ public final class CubePlaceable extends ShapePlaceable {
         copy.radiusReduction.setValue(radiusReduction.value());
         copy.innerRadius.setValue(innerRadius.value());
         return copy;
-    }
-
-    @Override
-    protected int getPreferredSize() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override
