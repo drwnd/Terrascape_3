@@ -30,16 +30,24 @@ public final class RepeatPlaceable implements Placeable {
         this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
+    public static void offsetPositionFromGround(Vector3l position, int targetedSide, int preferredSize) {
+        int offset = ((1 << IntSettings.BREAK_PLACE_ALIGN.value()) - preferredSize) / 2;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += offset;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += offset;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += offset;
+
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == EAST) position.x -= preferredSize - 1;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == BOTTOM) position.y -= preferredSize - 1;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z -= preferredSize - 1;
+    }
+
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
-        int preferredSize = placeable.getPreferredSize();
+        int preferredSize = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int startMask = -breakPlaceAlign;
         int endMask = -preferredSize;
 
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != WEST && targetedSide != EAST)) startPosition.x += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != TOP && targetedSide != BOTTOM)) startPosition.y += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != NORTH && targetedSide != SOUTH)) startPosition.z += breakPlaceAlign - preferredSize >> 1;
-
+        offsetPositionFromGround(startPosition, targetedSide, preferredSize);
         startPosition.x &= startMask;
         startPosition.y &= startMask;
         startPosition.z &= startMask;

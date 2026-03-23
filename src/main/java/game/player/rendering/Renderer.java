@@ -17,6 +17,7 @@ import core.settings.CoreOptionSettings;
 import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.TexturePack;
+import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.assets.Shaders;
@@ -644,7 +645,7 @@ public final class Renderer extends Renderable {
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
-        RepeatPlaceable.offsetPositions(startPositon, endPosition, startTarget.side(), placeable);
+        RepeatPlaceable.offsetPositions(startPositon, endPosition, currentTarget.side(), placeable);
         Vector3l minPosition = Utils.min(startPositon, endPosition);
         Vector3l maxPosition = Utils.max(startPositon, endPosition);
         maxPosition.add(1, 1, 1);
@@ -859,15 +860,15 @@ public final class Renderer extends Renderable {
     }
 
     private void synchronizeHologramModel(Placeable placeable) {
-        int breakPlaceSize = IntSettings.BREAK_PLACE_SIZE.value();
+        int preferredSize = MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
         int hologramHash = placeable.hashCode();
-        if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
+        if (!hologramModelsValid || hologramSize != preferredSize || this.hologramHash != hologramHash) {
             if (opaqueHologram != null) opaqueHologram.delete();
 
             Structure structure = placeable.getStructure();
             Mesh mesh = new MeshGenerator().generateMesh(structure);
             opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
-            hologramSize = 1 << breakPlaceSize;
+            hologramSize = preferredSize;
             this.hologramHash = hologramHash;
 
             hologramModelsValid = true;

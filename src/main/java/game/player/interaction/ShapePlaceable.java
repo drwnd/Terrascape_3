@@ -17,7 +17,6 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
-import game.settings.ToggleSettings;
 import game.utils.Utils;
 
 import org.joml.Vector2f;
@@ -99,6 +98,7 @@ public abstract class ShapePlaceable implements Placeable {
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(material, NO_COLLISION)) return false;
         long[] bitMap = getBitMap();
+        int preferredSize = getPreferredSize();
 
         int minX = Math.max(0, (int) (min.x - position.x)), maxX = Math.min((int) (max.x - position.x), preferredSize);
         int minY = Math.max(0, (int) (min.y - position.y)), maxY = Math.min((int) (max.y - position.y), preferredSize);
@@ -116,14 +116,10 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
-        int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -breakPlaceAlign;
 
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != WEST)) position.x += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != TOP)) position.y += breakPlaceAlign - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || (targetedSide != NORTH)) position.z += breakPlaceAlign - preferredSize >> 1;
-
+        RepeatPlaceable.offsetPositionFromGround(position, targetedSide, getPreferredSize());
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;
@@ -183,7 +179,6 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
-
 
 
     private int preferredSize = -1;
