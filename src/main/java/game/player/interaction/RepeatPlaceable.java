@@ -111,7 +111,7 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
-        offsetPositions(startPosition, endPosition, getPreferredSize(), placeable);
+        offsetPositions(startPosition, endPosition, targetedSide, placeable);
         minPosition.set(Utils.min(startPosition, endPosition));
         maxPosition.set(Utils.max(startPosition, endPosition));
     }
