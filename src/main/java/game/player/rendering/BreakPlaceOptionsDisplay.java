@@ -9,9 +9,9 @@ import core.settings.optionSettings.FontOption;
 
 import game.language.UiMessages;
 import game.player.Hotbar;
-import game.server.Game;
-
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
+
 import org.joml.Vector2f;
 
 public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
@@ -29,8 +29,8 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
 
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
-        breakPlaceSize.setText(UiMessages.BREAK_PLACE_SIZE_FORMAT.get().formatted(1 << Game.getPlayer().getInteractionHandler().getBreakPlaceSize()));
-        breakPlaceAlign.setText(UiMessages.BREAK_PLACE_ALIGN_FORMAT.get().formatted(1 << Game.getPlayer().getInteractionHandler().getBreakPlaceAlign()));
+        breakPlaceSize.setText(UiMessages.BREAK_PLACE_SIZE_FORMAT.get().formatted(1 << IntSettings.BREAK_PLACE_SIZE.value()));
+        breakPlaceAlign.setText(UiMessages.BREAK_PLACE_ALIGN_FORMAT.get().formatted(1 << IntSettings.BREAK_PLACE_ALIGN.value()));
 
         float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
         Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();

@@ -33,14 +33,6 @@ public final class InteractionHandler {
         handleUse();
     }
 
-    public int getBreakPlaceSize() {
-        return breakPlaceSize;
-    }
-
-    public int getBreakPlaceAlign() {
-        return breakPlaceAlign;
-    }
-
     public Target getStartTarget() {
         return startTarget;
     }
@@ -83,14 +75,14 @@ public final class InteractionHandler {
         if (Game.getServer().requestBreakPlaceInteraction(position, placeable)) info.lastAction = currentGameTick;
     }
 
-    private void changeBreakPlaceSize(int addend) {
-        breakPlaceSize = Math.clamp(breakPlaceSize + addend, 0, CHUNK_SIZE_BITS + 2);
-        breakPlaceAlign = Math.min(breakPlaceSize, breakPlaceAlign);
+    private static void changeBreakPlaceSize(int addend) {
+        IntSettings.BREAK_PLACE_SIZE.setValue(Math.clamp(IntSettings.BREAK_PLACE_SIZE.value() + addend, 0, CHUNK_SIZE_BITS + 2));
+        IntSettings.BREAK_PLACE_ALIGN.setValue(Math.min(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));
     }
 
-    private void changeBreakPlaceAlign(int addend) {
-        breakPlaceAlign = Math.clamp(breakPlaceAlign + addend, 0, CHUNK_SIZE_BITS + 2);
-        breakPlaceSize = Math.max(breakPlaceAlign, breakPlaceSize);
+    private static void changeBreakPlaceAlign(int addend) {
+        IntSettings.BREAK_PLACE_ALIGN.setValue(Math.clamp(IntSettings.BREAK_PLACE_ALIGN.value() + addend, 0, CHUNK_SIZE_BITS + 2));
+        IntSettings.BREAK_PLACE_SIZE.setValue(Math.max(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));
     }
 
     private static void updateInfo(int action, PlaceDestroyInfo info) {
@@ -101,7 +93,6 @@ public final class InteractionHandler {
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
     private Target startTarget = null;
-    private int breakPlaceSize = 4, breakPlaceAlign = 4;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

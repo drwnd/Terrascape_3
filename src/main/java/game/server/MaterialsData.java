@@ -238,6 +238,7 @@ public final class MaterialsData {
     }
 
     private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int sideLength, long[] bitMap, byte[] uncompressedMaterials, int lod, int align) {
+        align = Math.min(align, Integer.numberOfTrailingZeros(sideLength));
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
         int startX = Math.max(0, -inChunkX), endX = Math.min(sideLength, (1 << totalSizeBits) - inChunkX);
         int startY = Math.max(0, -inChunkY), endY = Math.min(sideLength, (1 << totalSizeBits) - inChunkY);

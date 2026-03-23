@@ -1,5 +1,6 @@
 package game.player.interaction;
 
+import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
@@ -10,6 +11,7 @@ import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
+import game.settings.IntSettings;
 import game.utils.Utils;
 import org.joml.Vector3i;
 
@@ -28,8 +30,8 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition) {
-        int breakPlaceSize = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        int breakPlaceAlign = 1 << Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int breakPlaceSize = 1 << IntSettings.BREAK_PLACE_SIZE.value();
+        int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int startMask = -breakPlaceAlign;
         int endMask = -breakPlaceSize;
 
@@ -53,11 +55,13 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        int breakPlaceSize = Game.getPlayer().getInteractionHandler().getBreakPlaceSize();
-        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
-        int countX = (int) (maxPosition.x - minPosition.x + (1 << breakPlaceSize)) >> breakPlaceSize;
-        int countY = (int) (maxPosition.y - minPosition.y + (1 << breakPlaceSize)) >> breakPlaceSize;
-        int countZ = (int) (maxPosition.z - minPosition.z + (1 << breakPlaceSize)) >> breakPlaceSize;
+        int preferredSize = MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
+        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
+        int breakPlaceAlign = IntSettings.BREAK_PLACE_ALIGN.value();
+
+        int countX = (int) (maxPosition.x - minPosition.x + preferredSize) >> preferredSizeBits;
+        int countY = (int) (maxPosition.y - minPosition.y + preferredSize) >> preferredSizeBits;
+        int countZ = (int) (maxPosition.z - minPosition.z + preferredSize) >> preferredSizeBits;
 
         long chunkStartX = minPosition.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = minPosition.y >>> CHUNK_SIZE_BITS + lod;
@@ -71,7 +75,7 @@ public final class RepeatPlaceable implements Placeable {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
                     placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod),
-                            countX, countY, countZ, breakPlaceSize, breakPlaceAlign);
+                            countX, countY, countZ, preferredSizeBits, breakPlaceAlign);
     }
 
     @Override
@@ -107,7 +111,7 @@ public final class RepeatPlaceable implements Placeable {
         player.getParticleCollector().addBreakPlaceParticleEffect(
                 minPosition.x, minPosition.y, minPosition.z,
                 length.x, length.y, length.z,
-                placeable.material, placeable.getBitMap(), 1 << player.getInteractionHandler().getBreakPlaceSize());
+                placeable.material, placeable.getBitMap(), placeable.getPreferredSize());
     }
 
     @Override
@@ -116,7 +120,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
-    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int breakPlaceSize, int align) {
+    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int preferredSizeBits, int align) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -125,8 +129,8 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        int length = 1 << Math.max(0, breakPlaceSize - chunk.LOD);
-        int countDecrease = Math.max(0, chunk.LOD - breakPlaceSize);
+        int length = 1 << Math.max(0, preferredSizeBits - chunk.LOD);
+        int countDecrease = Math.max(0, chunk.LOD - preferredSizeBits);
         chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material,
                 Math.max(1, countX >> countDecrease), Math.max(1, countY >> countDecrease), Math.max(1, countZ >> countDecrease),
                 length, placeable.getBitMap(), chunk.LOD, align);

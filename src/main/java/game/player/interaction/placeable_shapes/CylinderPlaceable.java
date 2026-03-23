@@ -24,14 +24,14 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     public void save(Placeable placeable, Saver<?> saver) {
         saver.saveByte((byte) 5);
         saver.saveByte(((CylinderPlaceable) placeable).getMaterial());
-        saver.saveInt(((CylinderPlaceable) placeable).radiusReduction.value());
+        saver.saveInt(((CylinderPlaceable) placeable).radius.value());
         saver.saveInt(((CylinderPlaceable) placeable).innerRadius.value());
         saver.saveFloat(((CylinderPlaceable) placeable).exponent.value());
     }
 
     public static CylinderPlaceable load(Saver<?> saver) {
         CylinderPlaceable placeable = new CylinderPlaceable(saver.loadByte());
-        placeable.radiusReduction.setValue(saver.loadInt());
+        placeable.radius.setValue(saver.loadInt());
         placeable.innerRadius.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
@@ -40,8 +40,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
-        if (offset <= radiusReduction.value()) return;
-        double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
+        double outerThreshold = Math.pow(radius.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
         for (int x = 0; x < sideLength; x++)
@@ -57,15 +56,20 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     protected List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, radiusReduction, UiMessages.RADIUS_REDUCTION, true),
+                new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
                 new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
 
     @Override
+    protected int getPreferredSize() {
+        return radius.value() * 2;
+    }
+
+    @Override
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
         CylinderPlaceable copy = new CylinderPlaceable(material);
-        copy.radiusReduction.setValue(radiusReduction.value());
+        copy.radius.setValue(radius.value());
         copy.innerRadius.setValue(innerRadius.value());
         copy.exponent.setValue(exponent.value());
         return copy;
@@ -85,7 +89,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         return distance <= outerThreshold && distance >= innerThreshold;
     }
 
-    private final StandAloneIntSetting radiusReduction = new StandAloneIntSetting(0, 64, 0);
+    private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);
     private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }

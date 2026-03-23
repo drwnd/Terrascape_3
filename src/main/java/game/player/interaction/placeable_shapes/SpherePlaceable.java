@@ -24,14 +24,14 @@ public final class SpherePlaceable extends ShapePlaceable {
     public void save(Placeable placeable, Saver<?> saver) {
         saver.saveByte((byte) 4);
         saver.saveByte(((SpherePlaceable) placeable).getMaterial());
-        saver.saveInt(((SpherePlaceable) placeable).radiusReduction.value());
+        saver.saveInt(((SpherePlaceable) placeable).radius.value());
         saver.saveInt(((SpherePlaceable) placeable).innerRadius.value());
         saver.saveFloat(((SpherePlaceable) placeable).exponent.value());
     }
 
     public static SpherePlaceable load(Saver<?> saver) {
         SpherePlaceable placeable = new SpherePlaceable(saver.loadByte());
-        placeable.radiusReduction.setValue(saver.loadInt());
+        placeable.radius.setValue(saver.loadInt());
         placeable.innerRadius.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
@@ -41,7 +41,7 @@ public final class SpherePlaceable extends ShapePlaceable {
     public List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, radiusReduction, UiMessages.RADIUS_REDUCTION, true),
+                new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
                 new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
@@ -49,17 +49,21 @@ public final class SpherePlaceable extends ShapePlaceable {
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SpherePlaceable copy = new SpherePlaceable(material);
-        copy.radiusReduction.setValue(radiusReduction.value());
+        copy.radius.setValue(radius.value());
         copy.innerRadius.setValue(innerRadius.value());
         copy.exponent.setValue(exponent.value());
         return copy;
     }
 
     @Override
+    protected int getPreferredSize() {
+        return radius.value() * 2;
+    }
+
+    @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
-        if (offset <= radiusReduction.value()) return;
-        double outerThreshold = Math.pow(offset - radiusReduction.value(), exponent.value());
+        double outerThreshold = Math.pow(radius.value(), exponent.value());
         double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
 
         for (int x = 0; x < sideLength; x++)
@@ -80,7 +84,7 @@ public final class SpherePlaceable extends ShapePlaceable {
         return distance <= outerThreshold && distance >= innerThreshold;
     }
 
-    private final StandAloneIntSetting radiusReduction = new StandAloneIntSetting(0, 64, 0);
+    private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);
     private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }

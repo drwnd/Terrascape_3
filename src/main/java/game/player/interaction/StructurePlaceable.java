@@ -12,6 +12,7 @@ import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
+import game.settings.IntSettings;
 import game.utils.Utils;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public final class StructurePlaceable implements Placeable {
         position.x -= structure.sizeX() >> 1;
         position.z -= structure.sizeZ() >> 1;
 
-        int breakPlaceAlign = Game.getPlayer().getInteractionHandler().getBreakPlaceAlign();
+        int breakPlaceAlign = IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -(1 << breakPlaceAlign);
         position.x &= mask;
         position.y &= mask;

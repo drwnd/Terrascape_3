@@ -9,6 +9,8 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
+import game.settings.IntSettings;
+
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -37,7 +39,7 @@ public final class CubePlaceable extends ShapePlaceable {
     public List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, radiusReduction, UiMessages.RADIUS_REDUCTION, true),
+                new Slider<>(zero, zero, radiusReduction, UiMessages.RADIUS, true),
                 new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true));
     }
 
@@ -47,6 +49,11 @@ public final class CubePlaceable extends ShapePlaceable {
         copy.radiusReduction.setValue(radiusReduction.value());
         copy.innerRadius.setValue(innerRadius.value());
         return copy;
+    }
+
+    @Override
+    protected int getPreferredSize() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override

@@ -859,12 +859,12 @@ public final class Renderer extends Renderable {
     }
 
     private void synchronizeHologramModel(Placeable placeable) {
-        int breakPlaceSize = player.getInteractionHandler().getBreakPlaceSize();
+        int breakPlaceSize = IntSettings.BREAK_PLACE_SIZE.value();
         int hologramHash = placeable.hashCode();
         if (!hologramModelsValid || hologramSize != 1 << breakPlaceSize || this.hologramHash != hologramHash) {
             if (opaqueHologram != null) opaqueHologram.delete();
 
-            Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getPlaceBreakSizedStructure() : placeable.getStructure();
+            Structure structure = placeable.getStructure();
             Mesh mesh = new MeshGenerator().generateMesh(structure);
             opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
             hologramSize = 1 << breakPlaceSize;
