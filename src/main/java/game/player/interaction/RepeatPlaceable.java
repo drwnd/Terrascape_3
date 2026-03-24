@@ -14,7 +14,6 @@ import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.settings.ToggleSettings;
 import game.utils.Utils;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -114,11 +113,11 @@ public final class RepeatPlaceable implements Placeable {
     @Override
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
-        Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
-        player.getParticleCollector().addBreakPlaceParticleEffect(
-                minPosition.x, minPosition.y, minPosition.z,
-                length.x, length.y, length.z,
-                placeable.material, placeable.getBitMap(), placeable.getPreferredSize());
+        int countX = (int) (maxPosition.x - minPosition.x + placeable.getLengthX()) / placeable.getLengthX();
+        int countY = (int) (maxPosition.y - minPosition.y + placeable.getLengthY()) / placeable.getLengthY();
+        int countZ = (int) (maxPosition.z - minPosition.z + placeable.getLengthZ()) / placeable.getLengthZ();
+
+        player.getParticleCollector().addBreakPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, countX, countY, countZ, placeable);
     }
 
     @Override
