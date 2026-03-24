@@ -112,7 +112,10 @@ public final class MaterialsData {
         }
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, int countX, int countY, int countZ, int lod, ShapePlaceable placeable) {
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
+                              int startX, int startY, int startZ,
+                              int countX, int countY, int countZ,
+                              int lod, ShapePlaceable placeable) {
         if (countX <= 0 || countY <= 0 || countZ <= 0) return;
         long[] bitMap = placeable.getBitMap();
         byte material = placeable.getMaterial();
@@ -124,16 +127,16 @@ public final class MaterialsData {
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
 
-        int startX = Math.max(0, inChunkX), endX = Math.min(inChunkX + (countX * lengthX >> lod), 1 << totalSizeBits);
-        int startY = Math.max(0, inChunkY), endY = Math.min(inChunkY + (countY * lengthY >> lod), 1 << totalSizeBits);
-        int startZ = Math.max(0, inChunkZ), endZ = Math.min(inChunkZ + (countZ * lengthZ >> lod), 1 << totalSizeBits);
+        int inChunkStartX = Math.max(0, inChunkX), endX = Math.min(inChunkX + (countX * lengthX >> lod), 1 << totalSizeBits);
+        int inChunkStartY = Math.max(0, inChunkY), endY = Math.min(inChunkY + (countY * lengthY >> lod), 1 << totalSizeBits);
+        int inChunkStartZ = Math.max(0, inChunkZ), endZ = Math.min(inChunkZ + (countZ * lengthZ >> lod), 1 << totalSizeBits);
 
-        for (int x = startX; x < endX; x++)
-            for (int y = startY; y < endY; y++)
-                for (int z = startZ; z < endZ; z++) {
-                    int bitMapX = (x - startX << lod) % lengthX;
-                    int bitMapY = (y - startY << lod) % lengthY;
-                    int bitMapZ = (z - startZ << lod) % lengthZ;
+        for (int x = inChunkStartX; x < endX; x++)
+            for (int y = inChunkStartY; y < endY; y++)
+                for (int z = inChunkStartZ; z < endZ; z++) {
+                    int bitMapX = ((x << lod) + startX) % lengthX;
+                    int bitMapY = ((y << lod) + startY) % lengthY;
+                    int bitMapZ = ((z << lod) + startZ) % lengthZ;
                     int bitMapIndex = getUncompressedIndex(bitMapX, bitMapY, bitMapZ);
                     int materialIndex = getUncompressedIndex(x, y, z);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0 || paint && uncompressedMaterials[materialIndex] == AIR) continue;

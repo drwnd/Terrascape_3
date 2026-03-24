@@ -135,7 +135,11 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, chunk.LOD, placeable);
+        int startX = MathUtils.mod(-startPosition.x + chunkStartX - (startPosition.x > endPosition.x ? 1 : 0), placeable.getLengthX());
+        int startY = MathUtils.mod(-startPosition.y + chunkStartY - (startPosition.y > endPosition.y ? 1 : 0), placeable.getLengthY());
+        int startZ = MathUtils.mod(-startPosition.z + chunkStartZ - (startPosition.z > endPosition.z ? 1 : 0), placeable.getLengthZ());
+
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, startX, startY, startZ, countX, countY, countZ, chunk.LOD, placeable);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
