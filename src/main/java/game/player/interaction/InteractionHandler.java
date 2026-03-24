@@ -66,13 +66,15 @@ public final class InteractionHandler {
             return;
         }
 
+        int targetedSide = target.side();
         Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
         if (startTarget != null && placeable instanceof ShapePlaceable shapePlaceable) {
             Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
+            targetedSide = startTarget.side();
             startTarget = null;
         }
-        if (Game.getServer().requestBreakPlaceInteraction(position, placeable, target.side())) info.lastAction = currentGameTick;
+        if (Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) info.lastAction = currentGameTick;
     }
 
     private static void changeBreakPlaceSize(int addend) {

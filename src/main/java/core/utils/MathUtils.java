@@ -79,6 +79,11 @@ public final class MathUtils {
         return powOf2;
     }
 
+    public static int mod(long base, int modulo) {
+        int value = (int) (base % modulo);
+        return value < 0 ? value + modulo : value;
+    }
+
     public static Vector3f getDirection(Vector3f rotation) {
 
         float rotationXRadians = (float) Math.toRadians(rotation.y);

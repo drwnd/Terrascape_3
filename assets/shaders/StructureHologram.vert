@@ -16,7 +16,8 @@ layout (std430, binding = 0) restrict readonly buffer vertexBuffer {
 
 uniform mat4 projectionViewMatrix;
 uniform ivec3 iCameraPosition;
-uniform ivec4 instanceData;
+uniform ivec3 instanceCount;
+uniform ivec3 instanceSize;
 uniform ivec3 startPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
@@ -47,14 +48,13 @@ void main() {
     Vertex currentVertex = vertices[gl_VertexID / 6];
     int currentVertexId = gl_VertexID % 6;
 
-    int structureSize = instanceData.w;
-    int countX = instanceData.x;
-    int countY = instanceData.y;
-    int countZ = instanceData.z;
+    int countX = instanceCount.x;
+    int countY = instanceCount.y;
+    int countZ = instanceCount.z;
 
-    int offsetX = (gl_InstanceID % countX) * structureSize;
-    int offsetY = (gl_InstanceID / countX % countY) * structureSize;
-    int offsetZ = (gl_InstanceID / countX / countY % countZ) * structureSize;
+    int offsetX = (gl_InstanceID % countX);
+    int offsetY = (gl_InstanceID / countX % countY);
+    int offsetZ = (gl_InstanceID / countX / countY % countZ);
 
     int x = currentVertex.x;
     int y = currentVertex.y;
@@ -64,7 +64,7 @@ void main() {
     int faceSize1 = (currentVertex.textureData >> 17 & 63) + 1;
     int faceSize2 = (currentVertex.textureData >> 11 & 63) + 1;
     vec3 inChunkPosition = getFacePositions(side, currentVertexId, faceSize1, faceSize2);
-    texturePosition = ivec3(x, y, z) + ivec3(offsetX, offsetY, offsetZ) + startPosition - iCameraPosition + inChunkPosition;
+    texturePosition = ivec3(x, y, z) + ivec3(offsetX, offsetY, offsetZ) * instanceSize + startPosition - iCameraPosition + inChunkPosition;
     voxelPosition = texturePosition;
     texturePosition += NORMALS[side] * 0.01;
 

@@ -1,5 +1,6 @@
 package game.player.interaction;
 
+import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
@@ -55,7 +56,23 @@ public interface Placeable {
 
     void save(Placeable placeable, Saver<?> saver);
 
-    default int getPreferredSize() {
+    default int getLengthX() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    default int getLengthY() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    default int getLengthZ() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    default int getPreferredSizePowOf2() {
+        return MathUtils.nextLargestPowOf2(getPreferredSize());
+    }
+
+    default int getPreferredSize() {
+        return Math.max(getLengthX(), Math.max(getLengthY(), getLengthZ()));
     }
 }

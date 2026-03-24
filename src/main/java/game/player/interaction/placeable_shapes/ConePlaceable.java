@@ -11,8 +11,8 @@ import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
 import game.server.MaterialsData;
-
 import game.server.generation.Structure;
+
 import org.joml.Vector2f;
 
 import java.util.List;
@@ -80,8 +80,30 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    public int getPreferredSize() {
-        return Math.max(height.value(), baseRadius.value() * 2);
+    public int getLengthX() {
+        return switch (rotation) {
+            case Rotation6Way.NORTH, Rotation6Way.SOUTH, Rotation6Way.TOP, Rotation6Way.BOTTOM -> baseRadius.value() * 2;
+            case Rotation6Way.WEST, Rotation6Way.EAST -> height.value();
+            case null, default -> super.getLengthX();
+        };
+    }
+
+    @Override
+    public int getLengthY() {
+        return switch (rotation) {
+            case Rotation6Way.NORTH, Rotation6Way.SOUTH, Rotation6Way.WEST, Rotation6Way.EAST -> baseRadius.value() * 2;
+            case Rotation6Way.TOP, Rotation6Way.BOTTOM -> height.value();
+            case null, default -> super.getLengthY();
+        };
+    }
+
+    @Override
+    public int getLengthZ() {
+        return switch (rotation) {
+            case Rotation6Way.NORTH, Rotation6Way.SOUTH -> height.value();
+            case Rotation6Way.TOP, Rotation6Way.BOTTOM, Rotation6Way.WEST, Rotation6Way.EAST -> baseRadius.value() * 2;
+            case null, default -> super.getLengthZ();
+        };
     }
 
     @Override

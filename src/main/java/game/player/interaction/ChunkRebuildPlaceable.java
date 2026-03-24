@@ -85,6 +85,11 @@ public final class ChunkRebuildPlaceable implements Placeable {
     public void spawnParticles(Vector3l position) {
     }
 
+    @Override
+    public int getPreferredSize() {
+        return CHUNK_SIZE;
+    }
+
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private Structure toPlaceChunk;
 }

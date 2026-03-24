@@ -1,6 +1,7 @@
 package game.server;
 
 import core.utils.ByteArrayList;
+import game.player.interaction.ShapePlaceable;
 import game.server.generation.Structure;
 import game.utils.Status;
 import game.utils.Utils;
@@ -49,8 +50,15 @@ public final class Chunk {
                 && world.getGenerationStatus(X - 1, Y, Z, LOD) == Status.DONE;
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte material, int countX, int countY, int countZ, int sideLength, long[] bitMap, int lod, int align) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, material, countX, countY, countZ, sideLength, bitMap, lod, align);
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
+                              int startX, int startY, int startZ,
+                              int countX, int countY, int countZ, int lod, ShapePlaceable placeable) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, startX, startY, startZ, countX, countY, countZ, lod, placeable);
+        modified = true;
+    }
+
+    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, int lod, ShapePlaceable placeable) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, lod, placeable);
         modified = true;
     }
 

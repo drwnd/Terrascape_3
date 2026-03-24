@@ -92,6 +92,11 @@ public final class StructurePlaceable implements Placeable {
         Game.getPlayer().getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structure);
     }
 
+    @Override
+    public int getPreferredSize() {
+        return Math.max(structure.sizeX(), Math.max(structure.sizeY(), structure.sizeZ()));
+    }
+
 
     public StructureIdentifier getIdentifier() {
         return identifier;

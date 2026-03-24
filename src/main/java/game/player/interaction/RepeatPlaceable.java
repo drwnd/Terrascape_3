@@ -14,7 +14,6 @@ import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.settings.ToggleSettings;
 import game.utils.Utils;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -30,50 +29,46 @@ public final class RepeatPlaceable implements Placeable {
         this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
-    public static void offsetPositionFromGround(Vector3l position, int targetedSide, int preferredSize) {
-        int offset = (1 << IntSettings.BREAK_PLACE_ALIGN.value()) - preferredSize >> 1;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += offset;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += offset;
-        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += offset;
+    public static void offsetPositionFromGround(Vector3l position, int targetedSide, int lengthX, int lengthY, int lengthZ) {
+        int offset = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += offset - lengthX >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != TOP && targetedSide != BOTTOM) position.y += offset - lengthY >> 1;
+        if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != NORTH && targetedSide != SOUTH) position.z += offset - lengthZ >> 1;
 
-        offset = (1 << IntSettings.BREAK_PLACE_ALIGN.value()) - preferredSize;
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == EAST) position.x += offset;
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == BOTTOM) position.y += offset;
-        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z += offset;
+        offset = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == EAST) position.x += offset - lengthX;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == BOTTOM) position.y += offset - lengthY;
+        if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z += offset - lengthZ;
     }
 
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
-        int preferredSize = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
-        int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
-        int startMask = -breakPlaceAlign;
-        int endMask = -preferredSize;
+        int lengthX = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthX();
+        int lengthY = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthY();
+        int lengthZ = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthZ();
+        int startMask = -(1 << IntSettings.BREAK_PLACE_ALIGN.value());
 
-        offsetPositionFromGround(startPosition, targetedSide, preferredSize);
+        offsetPositionFromGround(startPosition, targetedSide, lengthX, lengthY, lengthZ);
         startPosition.x &= startMask;
         startPosition.y &= startMask;
         startPosition.z &= startMask;
 
-        endPosition.x = (endPosition.x - startPosition.x & endMask) + startPosition.x;
-        endPosition.y = (endPosition.y - startPosition.y & endMask) + startPosition.y;
-        endPosition.z = (endPosition.z - startPosition.z & endMask) + startPosition.z;
+        endPosition.x -= MathUtils.mod(endPosition.x - startPosition.x, lengthX);
+        endPosition.y -= MathUtils.mod(endPosition.y - startPosition.y, lengthY);
+        endPosition.z -= MathUtils.mod(endPosition.z - startPosition.z, lengthZ);
 
-        if (startPosition.x <= endPosition.x) endPosition.x += preferredSize - 1;
-        else startPosition.x += preferredSize - 1;
-        if (startPosition.y <= endPosition.y) endPosition.y += preferredSize - 1;
-        else startPosition.y += preferredSize - 1;
-        if (startPosition.z <= endPosition.z) endPosition.z += preferredSize - 1;
-        else startPosition.z += preferredSize - 1;
+        if (startPosition.x <= endPosition.x) endPosition.x += lengthX - 1;
+        else startPosition.x += lengthX - 1;
+        if (startPosition.y <= endPosition.y) endPosition.y += lengthY - 1;
+        else startPosition.y += lengthY - 1;
+        if (startPosition.z <= endPosition.z) endPosition.z += lengthZ - 1;
+        else startPosition.z += lengthZ - 1;
     }
 
     @Override
     public void place(Vector3l position, int lod) {
-        int preferredSize = MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
-        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
-        int breakPlaceAlign = IntSettings.BREAK_PLACE_ALIGN.value();
-
-        int countX = (int) (maxPosition.x - minPosition.x + preferredSize) >> preferredSizeBits;
-        int countY = (int) (maxPosition.y - minPosition.y + preferredSize) >> preferredSizeBits;
-        int countZ = (int) (maxPosition.z - minPosition.z + preferredSize) >> preferredSizeBits;
+        int countX = (int) (maxPosition.x - minPosition.x + placeable.getLengthX()) / placeable.getLengthX();
+        int countY = (int) (maxPosition.y - minPosition.y + placeable.getLengthY()) / placeable.getLengthY();
+        int countZ = (int) (maxPosition.z - minPosition.z + placeable.getLengthZ()) / placeable.getLengthZ();
 
         long chunkStartX = minPosition.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = minPosition.y >>> CHUNK_SIZE_BITS + lod;
@@ -86,8 +81,7 @@ public final class RepeatPlaceable implements Placeable {
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
-                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod),
-                            countX, countY, countZ, preferredSizeBits, breakPlaceAlign);
+                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), countX, countY, countZ);
     }
 
     @Override
@@ -119,11 +113,11 @@ public final class RepeatPlaceable implements Placeable {
     @Override
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
-        Vector3i length = new Vector3l(maxPosition).sub(minPosition).add(1, 1, 1).toInt();
-        player.getParticleCollector().addBreakPlaceParticleEffect(
-                minPosition.x, minPosition.y, minPosition.z,
-                length.x, length.y, length.z,
-                placeable.material, placeable.getBitMap(), placeable.getPreferredSize());
+        int countX = (int) (maxPosition.x - minPosition.x + placeable.getLengthX()) / placeable.getLengthX();
+        int countY = (int) (maxPosition.y - minPosition.y + placeable.getLengthY()) / placeable.getLengthY();
+        int countZ = (int) (maxPosition.z - minPosition.z + placeable.getLengthZ()) / placeable.getLengthZ();
+
+        player.getParticleCollector().addBreakPlaceParticleEffect(minPosition.x, minPosition.y, minPosition.z, countX, countY, countZ, placeable);
     }
 
     @Override
@@ -132,7 +126,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
-    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int preferredSizeBits, int align) {
+    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -141,11 +135,11 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        int length = 1 << Math.max(0, preferredSizeBits - chunk.LOD);
-        int countDecrease = Math.max(0, chunk.LOD - preferredSizeBits);
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material,
-                Math.max(1, countX >> countDecrease), Math.max(1, countY >> countDecrease), Math.max(1, countZ >> countDecrease),
-                length, placeable.getBitMap(), chunk.LOD, align);
+        int startX = MathUtils.mod(-startPosition.x + chunkStartX - (startPosition.x > endPosition.x ? 1 : 0), placeable.getLengthX());
+        int startY = MathUtils.mod(-startPosition.y + chunkStartY - (startPosition.y > endPosition.y ? 1 : 0), placeable.getLengthY());
+        int startZ = MathUtils.mod(-startPosition.z + chunkStartZ - (startPosition.z > endPosition.z ? 1 : 0), placeable.getLengthZ());
+
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, startX, startY, startZ, countX, countY, countZ, chunk.LOD, placeable);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

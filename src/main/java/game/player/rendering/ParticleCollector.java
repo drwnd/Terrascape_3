@@ -1,6 +1,7 @@
 package game.player.rendering;
 
 import core.utils.IntArrayList;
+import game.player.interaction.ShapePlaceable;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
@@ -89,29 +90,33 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
     }
 
-    public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int lengthX, int lengthY, int lengthZ, byte material, long[] bitMap, int length) {
+    public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int countX, int countY, int countZ, ShapePlaceable placeable) {
         boolean addBreakEffect = ToggleSettings.SHOW_BREAK_PARTICLES.value();
-        boolean addPlaceEffect = ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() && material != AIR;
+        boolean addPlaceEffect = ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() && placeable.getMaterial() != AIR;
         if (!addBreakEffect && !addPlaceEffect) return;
 
-        IntArrayList opaqueParticles = new IntArrayList(length * length * length);
-        IntArrayList transparentParticles = new IntArrayList(length * length * length);
-        IntArrayList placeParticles = new IntArrayList(length * length * length);
+        int lengthX = placeable.getLengthX();
+        int lengthY = placeable.getLengthY();
+        int lengthZ = placeable.getLengthZ();
 
-        for (long x = startX; x < startX + lengthX; x += length)
-            for (long y = startY; y < startY + lengthY; y += length)
-                for (long z = startZ; z < startZ + lengthZ; z += length) {
+        IntArrayList opaqueParticles = new IntArrayList(placeable.getPreferredSize() * countX * countY * countZ);
+        IntArrayList transparentParticles = new IntArrayList(placeable.getPreferredSize() * countX * countY * countZ);
+        IntArrayList placeParticles = new IntArrayList(placeable.getPreferredSize() * countX * countY * countZ);
+
+        for (long x = startX; x < startX + (long) countX * lengthX; x += lengthX)
+            for (long y = startY; y < startY + (long) countY * lengthY; y += lengthY)
+                for (long z = startZ; z < startZ + (long) countZ * lengthZ; z += lengthZ) {
                     if (addBreakEffect && !addPlaceEffect)
-                        addBreakEffectLoop(startX, startY, startZ, material, bitMap, length, x, y, z, transparentParticles, opaqueParticles);
+                        addBreakEffectLoop(startX, startY, startZ, x, y, z, transparentParticles, opaqueParticles,placeable);
                     else if (addBreakEffect)
-                        addBreakPlaceEffectLoop(startX, startY, startZ, material, bitMap, length, x, y, z, placeParticles, transparentParticles, opaqueParticles);
+                        addBreakPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles, transparentParticles, opaqueParticles,placeable);
                     else if (addPlaceEffect)
-                        addPlaceEffectLoop(startX, startY, startZ, material, bitMap, length, x, y, z, placeParticles);
+                        addPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles,placeable);
                 }
 
         addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
         addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
-        addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
+        addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(placeable.getMaterial()));
     }
 
     public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure) {
@@ -225,12 +230,19 @@ public final class ParticleCollector {
         }
     }
 
-    private static void addBreakPlaceEffectLoop(long startX, long startY, long startZ, byte material, long[] bitMap, int length, long x, long y, long z, IntArrayList placeParticles, IntArrayList transparentParticles, IntArrayList opaqueParticles) {
+    private static void addBreakPlaceEffectLoop(long startX, long startY, long startZ,
+                                                long x, long y, long z,
+                                                IntArrayList placeParticles, IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
         boolean paint = ToggleSettings.PAINT.value();
+        int lengthX = placeable.getLengthX();
+        int lengthY = placeable.getLengthY();
+        int lengthZ = placeable.getLengthZ();
+        long[] bitMap = placeable.getBitMap();
+        byte material = placeable.getMaterial();
 
-        for (int xOffset = 0; xOffset < length; xOffset++)
-            for (int yOffset = 0; yOffset < length; yOffset++)
-                for (int zOffset = 0; zOffset < length; zOffset++) {
+        for (int xOffset = 0; xOffset < lengthX; xOffset++)
+            for (int yOffset = 0; yOffset < lengthY; yOffset++)
+                for (int zOffset = 0; zOffset < lengthZ; zOffset++) {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
@@ -251,12 +263,19 @@ public final class ParticleCollector {
                 }
     }
 
-    private static void addPlaceEffectLoop(long startX, long startY, long startZ, byte material, long[] bitMap, int length, long x, long y, long z, IntArrayList placeParticles) {
+    private static void addPlaceEffectLoop(long startX, long startY, long startZ,
+                                          long x, long y, long z,
+                                           IntArrayList placeParticles, ShapePlaceable placeable) {
         boolean paint = ToggleSettings.PAINT.value();
+        int lengthX = placeable.getLengthX();
+        int lengthY = placeable.getLengthY();
+        int lengthZ = placeable.getLengthZ();
+        long[] bitMap = placeable.getBitMap();
+        byte material = placeable.getMaterial();
 
-        for (int xOffset = 0; xOffset < length; xOffset++)
-            for (int yOffset = 0; yOffset < length; yOffset++)
-                for (int zOffset = 0; zOffset < length; zOffset++) {
+        for (int xOffset = 0; xOffset < lengthX; xOffset++)
+            for (int yOffset = 0; yOffset < lengthY; yOffset++)
+                for (int zOffset = 0; zOffset < lengthZ; zOffset++) {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
@@ -269,10 +288,18 @@ public final class ParticleCollector {
                 }
     }
 
-    private static void addBreakEffectLoop(long startX, long startY, long startZ, byte material, long[] bitMap, int length, long x, long y, long z, IntArrayList transparentParticles, IntArrayList opaqueParticles) {
-        for (int xOffset = 0; xOffset < length; xOffset++)
-            for (int yOffset = 0; yOffset < length; yOffset++)
-                for (int zOffset = 0; zOffset < length; zOffset++) {
+    private static void addBreakEffectLoop(long startX, long startY, long startZ,
+                                           long x, long y, long z,
+                                           IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
+        int lengthX = placeable.getLengthX();
+        int lengthY = placeable.getLengthY();
+        int lengthZ = placeable.getLengthZ();
+        long[] bitMap = placeable.getBitMap();
+        byte material = placeable.getMaterial();
+
+        for (int xOffset = 0; xOffset < lengthX; xOffset++)
+            for (int yOffset = 0; yOffset < lengthY; yOffset++)
+                for (int zOffset = 0; zOffset < lengthZ; zOffset++) {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
