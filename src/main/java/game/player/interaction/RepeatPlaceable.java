@@ -67,9 +67,8 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        int preferredSize = MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
+        int preferredSize = placeable.getPreferredSizePowOf2();
         int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
-        int breakPlaceAlign = IntSettings.BREAK_PLACE_ALIGN.value();
 
         int countX = (int) (maxPosition.x - minPosition.x + preferredSize) >> preferredSizeBits;
         int countY = (int) (maxPosition.y - minPosition.y + preferredSize) >> preferredSizeBits;
@@ -87,7 +86,7 @@ public final class RepeatPlaceable implements Placeable {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
                     placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod),
-                            countX, countY, countZ, preferredSizeBits, breakPlaceAlign);
+                            countX, countY, countZ, preferredSizeBits);
     }
 
     @Override
@@ -132,7 +131,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
-    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int preferredSizeBits, int align) {
+    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, int preferredSizeBits) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -141,11 +140,10 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        int length = 1 << Math.max(0, preferredSizeBits - chunk.LOD);
         int countDecrease = Math.max(0, chunk.LOD - preferredSizeBits);
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, placeable.material,
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ,
                 Math.max(1, countX >> countDecrease), Math.max(1, countY >> countDecrease), Math.max(1, countZ >> countDecrease),
-                length, placeable.getBitMap(), chunk.LOD, align);
+                chunk.LOD, placeable);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

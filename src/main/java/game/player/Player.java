@@ -27,7 +27,7 @@ public final class Player {
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
         camera = new Camera();
-        input = new PlayerInput();
+        input = new PlayerInput(this);
         movement = new Movement();
         renderer = new Renderer(this, meshCollector);
         interactionHandler = new InteractionHandler();

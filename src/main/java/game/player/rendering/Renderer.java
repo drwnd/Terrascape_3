@@ -645,7 +645,7 @@ public final class Renderer extends Renderable {
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
-        RepeatPlaceable.offsetPositions(startPositon, endPosition, currentTarget.side(), placeable);
+        RepeatPlaceable.offsetPositions(startPositon, endPosition, startTarget.side(), placeable);
         Vector3l minPosition = Utils.min(startPositon, endPosition);
         Vector3l maxPosition = Utils.max(startPositon, endPosition);
         maxPosition.add(1, 1, 1);

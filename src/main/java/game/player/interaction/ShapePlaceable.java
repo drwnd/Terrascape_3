@@ -54,12 +54,13 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public long[] getBitMap() {
-        int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
+        int preferredSizePowOf2 = getPreferredSizePowOf2();
+        int preferredSize = getPreferredSize();
         if (isBitMapInValid(preferredSize)) {
-            long[] bitMap = new long[Math.max(preferredSize * preferredSize * preferredSize >> 6, 1)];
-            fillBitMap(bitMap, preferredSize);
+            long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
+            fillBitMap(bitMap, getPreferredSize());
             this.bitMap = bitMap;
-            if (invert.value()) for (int index = 0; index < bitMap.length; index++) bitMap[index] = ~bitMap[index];
+            if (invert.value()) invertBitMap(bitMap);
         }
         this.preferredSize = preferredSize;
         return bitMap;
@@ -71,10 +72,31 @@ public abstract class ShapePlaceable implements Placeable {
         return new Structure(4, material, bitMap);
     }
 
+    public int getLengthX() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    public int getLengthY() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    public int getLengthZ() {
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    public final int getPreferredSizePowOf2() {
+        return MathUtils.nextLargestPowOf2(getPreferredSize());
+    }
+
+
+    @Override
+    public final int getPreferredSize() {
+        return Math.max(getLengthX(), Math.max(getLengthY(), getLengthZ()));
+    }
 
     @Override
     public void place(Vector3l position, int lod) {
-        int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
+        int preferredSize = getPreferredSizePowOf2();
         int mask = -preferredSize;
         if (Long.numberOfTrailingZeros(position.x & mask) < lod
                 || Long.numberOfTrailingZeros(position.y & mask) < lod
@@ -127,7 +149,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public Structure getStructure() {
-        int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
+        int preferredSize = getPreferredSizePowOf2();
         int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
         long[] bitMap = getBitMap();
 
@@ -142,9 +164,10 @@ public abstract class ShapePlaceable implements Placeable {
     @Override
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
-        int preferredSize = MathUtils.nextLargestPowOf2(getPreferredSize());
+        int preferredSize = getPreferredSizePowOf2();
         player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, getBitMap());
     }
+
 
     protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
@@ -156,19 +179,17 @@ public abstract class ShapePlaceable implements Placeable {
         return bitMap == null || this.preferredSize != preferredSize;
     }
 
+
     private void placeInChunk(Chunk chunk, Vector3l position) {
         int lod = chunk.LOD;
-        long[] bitMap = getBitMap();
-        int preferredSizeBits = Integer.numberOfTrailingZeros(MathUtils.nextLargestPowOf2(getPreferredSize()));
+        int preferredSizeBits = Integer.numberOfTrailingZeros(getPreferredSizePowOf2());
 
         int inChunkX = (int) (position.x - (chunk.X << CHUNK_SIZE_BITS + lod)) >> lod;
         int inChunkY = (int) (position.y - (chunk.Y << CHUNK_SIZE_BITS + lod)) >> lod;
         int inChunkZ = (int) (position.z - (chunk.Z << CHUNK_SIZE_BITS + lod)) >> lod;
         int lodSize = Math.max(0, preferredSizeBits - lod);
 
-        int length = 1 << lodSize;
-        int align = IntSettings.BREAK_PLACE_ALIGN.value();
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, material, 1, 1, 1, length, bitMap, lod, align);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, 1, 1, 1, lod, this);
 
         World world = Game.getWorld();
         affectedChunks.add(chunk);
@@ -178,6 +199,16 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
         if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
+    }
+
+    private void invertBitMap(long[] bitMap) {
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++) {
+                    int index = MaterialsData.getUncompressedIndex(x, y, z);
+                    bitMap[index >> 6] ^= 1L << index;
+                }
     }
 
 
