@@ -17,7 +17,6 @@ import core.settings.CoreOptionSettings;
 import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.TexturePack;
-import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.assets.Shaders;
@@ -663,9 +662,9 @@ public final class Renderer extends Renderable {
         if (placeable instanceof ShapePlaceable) {
             synchronizeHologramModel(placeable);
 
-            int countX = (int) (maxPosition.x - minPosition.x) / hologramSize;
-            int countY = (int) (maxPosition.y - minPosition.y) / hologramSize;
-            int countZ = (int) (maxPosition.z - minPosition.z) / hologramSize;
+            int countX = (int) (maxPosition.x - minPosition.x) / placeable.getLengthX();
+            int countY = (int) (maxPosition.y - minPosition.y) / placeable.getLengthY();
+            int countZ = (int) (maxPosition.z - minPosition.z) / placeable.getLengthZ();
 
             Shader shader = AssetManager.get(Shaders.VOLUME_INDICATOR);
             shader.bind();
@@ -674,7 +673,8 @@ public final class Renderer extends Renderable {
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-            shader.setUniform("instanceData", countX, countY, countZ, hologramSize);
+            shader.setUniform("instanceCount", countX, countY, countZ);
+            shader.setUniform("instanceSize", placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
             shader.setUniform("startPosition", minPosition.x, minPosition.y, minPosition.z);
 
             shader.setUniform("textures", 0);
@@ -724,7 +724,8 @@ public final class Renderer extends Renderable {
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("instanceData", 1, 1, 1, hologramSize);
+        shader.setUniform("instanceCount", 1, 1, 1);
+        shader.setUniform("instanceSize", hologramSize, hologramSize, hologramSize);
         shader.setUniform("startPosition", position.x, position.y, position.z);
 
         shader.setUniform("textures", 0);
@@ -860,7 +861,7 @@ public final class Renderer extends Renderable {
     }
 
     private void synchronizeHologramModel(Placeable placeable) {
-        int preferredSize = MathUtils.nextLargestPowOf2(placeable.getPreferredSize());
+        int preferredSize = placeable.getPreferredSizePowOf2();
         int hologramHash = placeable.hashCode();
         if (!hologramModelsValid || hologramSize != preferredSize || this.hologramHash != hologramHash) {
             if (opaqueHologram != null) opaqueHologram.delete();

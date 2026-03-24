@@ -4,7 +4,6 @@ import core.renderables.Toggle;
 import core.renderables.UiBackgroundElement;
 import core.settings.ToggleSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
-import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.language.UiMessages;
@@ -72,28 +71,6 @@ public abstract class ShapePlaceable implements Placeable {
         return new Structure(4, material, bitMap);
     }
 
-    public int getLengthX() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
-    }
-
-    public int getLengthY() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
-    }
-
-    public int getLengthZ() {
-        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
-    }
-
-    public final int getPreferredSizePowOf2() {
-        return MathUtils.nextLargestPowOf2(getPreferredSize());
-    }
-
-
-    @Override
-    public final int getPreferredSize() {
-        return Math.max(getLengthX(), Math.max(getLengthY(), getLengthZ()));
-    }
-
     @Override
     public void place(Vector3l position, int lod) {
         int preferredSize = getPreferredSizePowOf2();
@@ -141,7 +118,7 @@ public abstract class ShapePlaceable implements Placeable {
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -breakPlaceAlign;
 
-        RepeatPlaceable.offsetPositionFromGround(position, targetedSide, getPreferredSize());
+        RepeatPlaceable.offsetPositionFromGround(position, targetedSide, getLengthX(), getLengthY(), getLengthZ());
         position.x &= mask;
         position.y &= mask;
         position.z &= mask;
@@ -189,7 +166,7 @@ public abstract class ShapePlaceable implements Placeable {
         int inChunkZ = (int) (position.z - (chunk.Z << CHUNK_SIZE_BITS + lod)) >> lod;
         int lodSize = Math.max(0, preferredSizeBits - lod);
 
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, 1, 1, 1, lod, this);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, lod, this);
 
         World world = Game.getWorld();
         affectedChunks.add(chunk);
