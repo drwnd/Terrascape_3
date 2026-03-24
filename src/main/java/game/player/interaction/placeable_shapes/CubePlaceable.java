@@ -23,14 +23,14 @@ public final class CubePlaceable extends ShapePlaceable {
     public void save(Placeable placeable, Saver<?> saver) {
         saver.saveByte((byte) 1);
         saver.saveByte(((CubePlaceable) placeable).getMaterial());
-        saver.saveInt(((CubePlaceable) placeable).radiusReduction.value());
-        saver.saveInt(((CubePlaceable) placeable).innerRadius.value());
+        saver.saveInt(((CubePlaceable) placeable).sizeReduction.value());
+        saver.saveInt(((CubePlaceable) placeable).thickness.value());
     }
 
     public static CubePlaceable load(Saver<?> saver) {
         CubePlaceable placeable = new CubePlaceable(saver.loadByte());
-        placeable.radiusReduction.setValue(saver.loadInt());
-        placeable.innerRadius.setValue(saver.loadInt());
+        placeable.sizeReduction.setValue(saver.loadInt());
+        placeable.thickness.setValue(saver.loadInt());
         return placeable;
     }
 
@@ -38,23 +38,23 @@ public final class CubePlaceable extends ShapePlaceable {
     public List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, radiusReduction, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true));
+                new Slider<>(zero, zero, sizeReduction, UiMessages.SIZE_REDUCTION, true),
+                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true));
     }
 
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CubePlaceable copy = new CubePlaceable(material);
-        copy.radiusReduction.setValue(radiusReduction.value());
-        copy.innerRadius.setValue(innerRadius.value());
+        copy.sizeReduction.setValue(sizeReduction.value());
+        copy.thickness.setValue(thickness.value());
         return copy;
     }
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
-        double outerThreshold = offset - radiusReduction.value();
-        double innerThreshold = innerRadius.value();
+        double outerThreshold = offset - sizeReduction.value();
+        double innerThreshold = outerThreshold - thickness.value();
 
         for (int x = 0; x < sideLength; x++)
             for (int y = 0; y < sideLength; y++)
@@ -74,6 +74,6 @@ public final class CubePlaceable extends ShapePlaceable {
         return distance <= outerThreshold && distance >= innerThreshold;
     }
 
-    private final StandAloneIntSetting radiusReduction = new StandAloneIntSetting(0, 64, 0);
-    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
+    private final StandAloneIntSetting sizeReduction = new StandAloneIntSetting(0, 64, 0);
+    private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
 }
