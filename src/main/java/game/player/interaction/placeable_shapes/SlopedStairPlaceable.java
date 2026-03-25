@@ -29,6 +29,7 @@ public final class SlopedStairPlaceable extends RotatableShapePlaceable {
         saver.saveByte(((SlopedStairPlaceable) placeable).getMaterial());
         saver.saveInt(((SlopedStairPlaceable) placeable).stepHeight.value());
         saver.saveInt(((SlopedStairPlaceable) placeable).heightOffset.value());
+        saver.saveInt(((SlopedStairPlaceable) placeable).thickness.value());
         saver.saveFloat(((SlopedStairPlaceable) placeable).slope.value());
     }
 
@@ -36,6 +37,7 @@ public final class SlopedStairPlaceable extends RotatableShapePlaceable {
         SlopedStairPlaceable placeable = new SlopedStairPlaceable(saver.loadByte());
         placeable.stepHeight.setValue(saver.loadInt());
         placeable.heightOffset.setValue(saver.loadInt());
+        placeable.thickness.setValue(saver.loadInt());
         placeable.slope.setValue(saver.loadFloat());
         return placeable;
     }
@@ -46,15 +48,19 @@ public final class SlopedStairPlaceable extends RotatableShapePlaceable {
         copy.stepHeight.setValue(stepHeight.value());
         copy.heightOffset.setValue(heightOffset.value());
         copy.slope.setValue(slope.value());
+        copy.thickness.setValue(thickness.value());
         return copy;
     }
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
+        int outerThreshold = (sideLength + heightOffset.value()) / stepHeight.value();
+        int innerThreshold = Math.min(outerThreshold - 1, outerThreshold - thickness.value() / stepHeight.value());
+
         for (int x = 0; x < sideLength; x++)
             for (int y = 0; y < sideLength; y++)
                 for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, sideLength)) continue;
+                    if (!isInside(x, y, z, sideLength, outerThreshold, innerThreshold)) continue;
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
@@ -66,52 +72,55 @@ public final class SlopedStairPlaceable extends RotatableShapePlaceable {
         return List.of(
                 new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
                 new Slider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true),
+                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new Slider<>(zero, zero, slope, UiMessages.SLOPE, true)
         );
     }
 
-    private boolean isInside(int x, int y, int z, int sideLength) {
+    private boolean isInside(int x, int y, int z, int sideLength, int outerThreshold, int innerThreshold) {
         int invert = sideLength - 1;
         return switch (rotation) {
-            case Rotation24Way.NORTH_1 -> isInside(sideLength, invert - z, y);
-            case Rotation24Way.NORTH_2 -> isInside(sideLength, invert - z, x);
-            case Rotation24Way.NORTH_3 -> isInside(sideLength, invert - z, invert - y);
-            case Rotation24Way.NORTH_4 -> isInside(sideLength, invert - z, invert - x);
+            case Rotation24Way.NORTH_1 -> isInside(outerThreshold, innerThreshold, invert - z, y);
+            case Rotation24Way.NORTH_2 -> isInside(outerThreshold, innerThreshold, invert - z, x);
+            case Rotation24Way.NORTH_3 -> isInside(outerThreshold, innerThreshold, invert - z, invert - y);
+            case Rotation24Way.NORTH_4 -> isInside(outerThreshold, innerThreshold, invert - z, invert - x);
 
-            case Rotation24Way.TOP_1 -> isInside(sideLength, invert - y, z);
-            case Rotation24Way.TOP_2 -> isInside(sideLength, invert - y, x);
-            case Rotation24Way.TOP_3 -> isInside(sideLength, invert - y, invert - z);
-            case Rotation24Way.TOP_4 -> isInside(sideLength, invert - y, invert - x);
+            case Rotation24Way.TOP_1 -> isInside(outerThreshold, innerThreshold, invert - y, z);
+            case Rotation24Way.TOP_2 -> isInside(outerThreshold, innerThreshold, invert - y, x);
+            case Rotation24Way.TOP_3 -> isInside(outerThreshold, innerThreshold, invert - y, invert - z);
+            case Rotation24Way.TOP_4 -> isInside(outerThreshold, innerThreshold, invert - y, invert - x);
 
-            case Rotation24Way.WEST_1 -> isInside(sideLength, invert - x, z);
-            case Rotation24Way.WEST_2 -> isInside(sideLength, invert - x, y);
-            case Rotation24Way.WEST_3 -> isInside(sideLength, invert - x, invert - z);
-            case Rotation24Way.WEST_4 -> isInside(sideLength, invert - x, invert - y);
+            case Rotation24Way.WEST_1 -> isInside(outerThreshold, innerThreshold, invert - x, z);
+            case Rotation24Way.WEST_2 -> isInside(outerThreshold, innerThreshold, invert - x, y);
+            case Rotation24Way.WEST_3 -> isInside(outerThreshold, innerThreshold, invert - x, invert - z);
+            case Rotation24Way.WEST_4 -> isInside(outerThreshold, innerThreshold, invert - x, invert - y);
 
-            case Rotation24Way.SOUTH_1 -> isInside(sideLength, z, y);
-            case Rotation24Way.SOUTH_2 -> isInside(sideLength, z, x);
-            case Rotation24Way.SOUTH_3 -> isInside(sideLength, z, invert - y);
-            case Rotation24Way.SOUTH_4 -> isInside(sideLength, z, invert - x);
+            case Rotation24Way.SOUTH_1 -> isInside(outerThreshold, innerThreshold, z, y);
+            case Rotation24Way.SOUTH_2 -> isInside(outerThreshold, innerThreshold, z, x);
+            case Rotation24Way.SOUTH_3 -> isInside(outerThreshold, innerThreshold, z, invert - y);
+            case Rotation24Way.SOUTH_4 -> isInside(outerThreshold, innerThreshold, z, invert - x);
 
-            case Rotation24Way.BOTTOM_1 -> isInside(sideLength, y, z);
-            case Rotation24Way.BOTTOM_2 -> isInside(sideLength, y, x);
-            case Rotation24Way.BOTTOM_3 -> isInside(sideLength, y, invert - z);
-            case Rotation24Way.BOTTOM_4 -> isInside(sideLength, y, invert - x);
+            case Rotation24Way.BOTTOM_1 -> isInside(outerThreshold, innerThreshold, y, z);
+            case Rotation24Way.BOTTOM_2 -> isInside(outerThreshold, innerThreshold, y, x);
+            case Rotation24Way.BOTTOM_3 -> isInside(outerThreshold, innerThreshold, y, invert - z);
+            case Rotation24Way.BOTTOM_4 -> isInside(outerThreshold, innerThreshold, y, invert - x);
 
-            case Rotation24Way.EAST_1 -> isInside(sideLength, x, z);
-            case Rotation24Way.EAST_2 -> isInside(sideLength, x, y);
-            case Rotation24Way.EAST_3 -> isInside(sideLength, x, invert - z);
-            case Rotation24Way.EAST_4 -> isInside(sideLength, x, invert - y);
+            case Rotation24Way.EAST_1 -> isInside(outerThreshold, innerThreshold, x, z);
+            case Rotation24Way.EAST_2 -> isInside(outerThreshold, innerThreshold, x, y);
+            case Rotation24Way.EAST_3 -> isInside(outerThreshold, innerThreshold, x, invert - z);
+            case Rotation24Way.EAST_4 -> isInside(outerThreshold, innerThreshold, x, invert - y);
 
             case null, default -> false;
         };
     }
 
-    private boolean isInside(int sideLength, int a, int b) {
-        return (a / stepHeight.value()) * slope.value() + b / stepHeight.value() < (sideLength + heightOffset.value()) / stepHeight.value();
+    private boolean isInside(int outerThreshold, int innerThreshold, int a, int b) {
+        float distance = (a / stepHeight.value()) * slope.value() + b / stepHeight.value();
+        return distance < outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);
     private final StandAloneIntSetting heightOffset = new StandAloneIntSetting(-32, 32, 0);
     private final StandAloneFloatSetting slope = new StandAloneFloatSetting(1.0F, 16.0F, 2.0F, 0.1F);
+    private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
 }
