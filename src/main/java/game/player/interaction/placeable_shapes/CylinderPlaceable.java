@@ -27,7 +27,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         saver.saveByte((byte) 5);
         saver.saveByte(((CylinderPlaceable) placeable).getMaterial());
         saver.saveInt(((CylinderPlaceable) placeable).radius.value());
-        saver.saveInt(((CylinderPlaceable) placeable).innerRadius.value());
+        saver.saveInt(((CylinderPlaceable) placeable).thickness.value());
         saver.saveInt(((CylinderPlaceable) placeable).height.value());
         saver.saveFloat(((CylinderPlaceable) placeable).exponent.value());
     }
@@ -35,7 +35,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     public static CylinderPlaceable load(Saver<?> saver) {
         CylinderPlaceable placeable = new CylinderPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
-        placeable.innerRadius.setValue(saver.loadInt());
+        placeable.thickness.setValue(saver.loadInt());
         placeable.height.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
@@ -46,7 +46,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
         double offset = (rotation == Rotation3Way.X ? lengthY : lengthX) / 2.0;
         double outerThreshold = Math.pow(radius.value(), exponent.value());
-        double innerThreshold = Math.pow(innerRadius.value(), exponent.value());
+        double innerThreshold = Math.pow(Math.max(0, radius.value() - thickness.value()), exponent.value());
 
         for (int x = 0; x < lengthX; x++)
             for (int y = 0; y < lengthY; y++)
@@ -62,7 +62,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         Vector2f zero = new Vector2f();
         return List.of(
                 new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, innerRadius, UiMessages.INNER_RADIUS, true),
+                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
@@ -98,7 +98,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
         CylinderPlaceable copy = new CylinderPlaceable(material);
         copy.radius.setValue(radius.value());
-        copy.innerRadius.setValue(innerRadius.value());
+        copy.thickness.setValue(thickness.value());
         copy.height.setValue(height.value());
         copy.exponent.setValue(exponent.value());
         return copy;
@@ -129,7 +129,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);
-    private final StandAloneIntSetting innerRadius = new StandAloneIntSetting(0, 128, 0);
+    private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
     private final StandAloneIntSetting height = new StandAloneIntSetting(0, 256, 16);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
 }
