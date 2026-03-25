@@ -4,6 +4,6 @@ import core.settings.optionSettings.Option;
 
 public enum Rotation3Way implements Option {
 
-    X, Y, Z
+    ROTATION_1, ROTATION_2, ROTATION_3
 
 }

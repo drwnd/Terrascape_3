@@ -21,7 +21,7 @@ import static game.utils.Constants.CHUNK_SIZE;
 public final class OutsideSlopedStairPlaceable extends RotatableShapePlaceable implements ConerStairPlaceable {
 
     public OutsideSlopedStairPlaceable(byte material) {
-        super(material, Rotation24Way.BOTTOM_1);
+        super(material, Rotation24Way.ROTATION_17);
     }
 
     public void save(Placeable placeable, Saver<?> saver) {

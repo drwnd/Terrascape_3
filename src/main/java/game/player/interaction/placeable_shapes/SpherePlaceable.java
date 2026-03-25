@@ -56,14 +56,17 @@ public final class SpherePlaceable extends ShapePlaceable {
         return copy;
     }
 
+    @Override
     public int getLengthX() {
         return radius.value() * 2;
     }
 
+    @Override
     public int getLengthY() {
         return radius.value() * 2;
     }
 
+    @Override
     public int getLengthZ() {
         return radius.value() * 2;
     }

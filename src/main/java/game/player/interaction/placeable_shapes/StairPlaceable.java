@@ -20,7 +20,7 @@ import static game.utils.Constants.CHUNK_SIZE;
 public final class StairPlaceable extends RotatableShapePlaceable {
 
     public StairPlaceable(byte material) {
-        super(material, Rotation12Way.BOTTOM_NORTH);
+        super(material, Rotation12Way.ROTATION_01);
     }
 
     public void save(Placeable placeable, Saver<?> saver) {
@@ -75,20 +75,20 @@ public final class StairPlaceable extends RotatableShapePlaceable {
     private boolean isInside(int x, int y, int z, int sideLength, int outerThreshold, int innerThreshold) {
         int invert = sideLength - 1;
         return switch (rotation) {
-            case Rotation12Way.BOTTOM_NORTH -> isInside(outerThreshold, innerThreshold, z, y);
-            case Rotation12Way.BOTTOM_WEST -> isInside(outerThreshold, innerThreshold, x, y);
-            case Rotation12Way.BOTTOM_SOUTH -> isInside(outerThreshold, innerThreshold, invert - z, y);
-            case Rotation12Way.BOTTOM_EAST -> isInside(outerThreshold, innerThreshold, invert - x, y);
+            case Rotation12Way.ROTATION_01 -> isInside(outerThreshold, innerThreshold, z, y);
+            case Rotation12Way.ROTATION_02 -> isInside(outerThreshold, innerThreshold, x, y);
+            case Rotation12Way.ROTATION_03 -> isInside(outerThreshold, innerThreshold, invert - z, y);
+            case Rotation12Way.ROTATION_04 -> isInside(outerThreshold, innerThreshold, invert - x, y);
 
-            case Rotation12Way.NORTH_WEST -> isInside(outerThreshold, innerThreshold, x, z);
-            case Rotation12Way.SOUTH_WEST -> isInside(outerThreshold, innerThreshold, invert - z, x);
-            case Rotation12Way.SOUTH_EAST -> isInside(outerThreshold, innerThreshold, invert - x, invert - z);
-            case Rotation12Way.NORTH_EAST -> isInside(outerThreshold, innerThreshold, invert - x, z);
+            case Rotation12Way.ROTATION_05 -> isInside(outerThreshold, innerThreshold, x, z);
+            case Rotation12Way.ROTATION_06 -> isInside(outerThreshold, innerThreshold, invert - z, x);
+            case Rotation12Way.ROTATION_07 -> isInside(outerThreshold, innerThreshold, invert - x, invert - z);
+            case Rotation12Way.ROTATION_08 -> isInside(outerThreshold, innerThreshold, invert - x, z);
 
-            case Rotation12Way.TOP_NORTH -> isInside(outerThreshold, innerThreshold, z, invert - y);
-            case Rotation12Way.TOP_WEST -> isInside(outerThreshold, innerThreshold, x, invert - y);
-            case Rotation12Way.TOP_SOUTH -> isInside(outerThreshold, innerThreshold, invert - z, invert - y);
-            case Rotation12Way.TOP_EAST -> isInside(outerThreshold, innerThreshold, invert - x, invert - y);
+            case Rotation12Way.ROTATION_09 -> isInside(outerThreshold, innerThreshold, z, invert - y);
+            case Rotation12Way.ROTATION_10 -> isInside(outerThreshold, innerThreshold, x, invert - y);
+            case Rotation12Way.ROTATION_11 -> isInside(outerThreshold, innerThreshold, invert - z, invert - y);
+            case Rotation12Way.ROTATION_12 -> isInside(outerThreshold, innerThreshold, invert - x, invert - y);
 
             case null, default -> false;
         };

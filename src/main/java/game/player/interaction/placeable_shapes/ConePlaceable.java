@@ -40,7 +40,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     public ConePlaceable(byte material) {
-        super(material, Rotation6Way.BOTTOM);
+        super(material, Rotation6Way.ROTATION_5);
     }
 
     @Override
@@ -83,8 +83,8 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     @Override
     public int getLengthX() {
         return switch (rotation) {
-            case Rotation6Way.NORTH, Rotation6Way.SOUTH, Rotation6Way.TOP, Rotation6Way.BOTTOM -> baseRadius.value() * 2;
-            case Rotation6Way.WEST, Rotation6Way.EAST -> height.value();
+            case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> baseRadius.value() * 2;
+            case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> height.value();
             case null, default -> super.getLengthX();
         };
     }
@@ -92,8 +92,8 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     @Override
     public int getLengthY() {
         return switch (rotation) {
-            case Rotation6Way.NORTH, Rotation6Way.SOUTH, Rotation6Way.WEST, Rotation6Way.EAST -> baseRadius.value() * 2;
-            case Rotation6Way.TOP, Rotation6Way.BOTTOM -> height.value();
+            case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;
+            case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> height.value();
             case null, default -> super.getLengthY();
         };
     }
@@ -101,8 +101,8 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     @Override
     public int getLengthZ() {
         return switch (rotation) {
-            case Rotation6Way.NORTH, Rotation6Way.SOUTH -> height.value();
-            case Rotation6Way.TOP, Rotation6Way.BOTTOM, Rotation6Way.WEST, Rotation6Way.EAST -> baseRadius.value() * 2;
+            case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4 -> height.value();
+            case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;
             case null, default -> super.getLengthZ();
         };
     }
@@ -114,12 +114,12 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ, double offset) {
         return switch (rotation) {
-            case Rotation6Way.NORTH -> isInside(offset, lengthZ - 1 - z, x, y);
-            case Rotation6Way.TOP -> isInside(offset, lengthY - 1 - y, x, z);
-            case Rotation6Way.WEST -> isInside(offset, lengthX  - 1- x, y, z);
-            case Rotation6Way.SOUTH -> isInside(offset, z, x, y);
-            case Rotation6Way.BOTTOM -> isInside(offset, y, x, z);
-            case Rotation6Way.EAST -> isInside(offset, x, y, z);
+            case Rotation6Way.ROTATION_1 -> isInside(offset, lengthZ - 1 - z, x, y);
+            case Rotation6Way.ROTATION_2 -> isInside(offset, lengthY - 1 - y, x, z);
+            case Rotation6Way.ROTATION_3 -> isInside(offset, lengthX  - 1- x, y, z);
+            case Rotation6Way.ROTATION_4 -> isInside(offset, z, x, y);
+            case Rotation6Way.ROTATION_5 -> isInside(offset, y, x, z);
+            case Rotation6Way.ROTATION_6 -> isInside(offset, x, y, z);
             case null, default -> false;
         };
     }
