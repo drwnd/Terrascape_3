@@ -182,7 +182,7 @@ public final class Inventory extends UiElement {
     }
 
     private void reloadStructureButtons() {
-        for (Renderable button : structureButtons) removeRenderable(button).delete();
+        for (Renderable button : structureButtons) structureButtonsContainer.removeRenderable(button).delete();
         structureButtons.clear();
 
         int structureCount = 0;

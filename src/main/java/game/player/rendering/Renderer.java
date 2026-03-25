@@ -25,10 +25,8 @@ import game.assets.Textures;
 import game.assets.VertexArrays;
 import game.player.ChatTextField;
 import game.player.Player;
-import game.player.interaction.ShapePlaceable;
-import game.player.interaction.RepeatPlaceable;
-import game.player.interaction.Placeable;
-import game.player.interaction.Target;
+import game.player.interaction.*;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.*;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
@@ -633,11 +631,39 @@ public final class Renderer extends Renderable {
     private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Target startTarget = player.getInteractionHandler().getStartTarget();
         Target currentTarget = Target.getPlayerTarget();
-        if (startTarget == null || currentTarget == null) {
-            if (currentTarget != null) renderVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget);
-            return;
-        }
+        Placeable placeable = player.getHeldPlaceable();
+        if (currentTarget == null) return;
 
+        if (startTarget != null) renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
+        else if (Input.isKeyPressed(KeySettings.SHOW_PLACEABLE_PREVIEW)) {
+            if (placeable instanceof ShapePlaceable shapePlaceable)
+                renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, shapePlaceable, Input.isKeyPressed(KeySettings.SPRINT));
+            else if (Input.isKeyPressed(KeySettings.SPRINT) || placeable == null)
+                renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, breakHologram, true);
+            else if (placeable instanceof StructurePlaceable structurePlaceable)
+                renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, structurePlaceable);
+        }
+    }
+
+    private void renderShapeVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, ShapePlaceable placeable, boolean showBreakVolume) {
+        byte material = showBreakVolume ? AIR : placeable.getMaterial();
+        Vector3l position = showBreakVolume ? target.position() : target.offsetPosition();
+
+        placeable.offsetPosition(position, target.side());
+        synchronizeHologramModel(placeable);
+
+        renderHologram(cameraPosition, projectionViewMatrix, position, material);
+    }
+
+    private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, StructurePlaceable placeable) {
+        Vector3l position = target.offsetPosition();
+        placeable.offsetPosition(position, target.side());
+        synchronizeHologramModel(placeable);
+
+        renderHologram(cameraPosition, projectionViewMatrix, position, OUT_OF_WORLD);
+    }
+
+    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget) {
         Placeable placeable = player.getHeldPlaceable();
         byte material = placeable instanceof ShapePlaceable shapePlaceable && !Input.isKeyPressed(KeySettings.SPRINT) ? shapePlaceable.getMaterial() : AIR;
 
@@ -699,19 +725,12 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target) {
-        Placeable placeable = player.getHeldPlaceable();
-        if (!Input.isKeyPressed(KeySettings.SPRINT) || placeable == null) return;
-        byte material = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getMaterial() : AIR;
-        Vector3l position = material == AIR && placeable instanceof ShapePlaceable ? target.position() : target.offsetPosition();
-        placeable.offsetPosition(position, target.side());
-        synchronizeHologramModel(placeable);
-
+    private void renderHologram(Position cameraPosition, Matrix4f projectionViewMatrix, Vector3l position, byte material) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
         glDisable(GL_STENCIL_TEST);
         glDepthMask(true);
         glActiveTexture(GL_TEXTURE0);
@@ -915,4 +934,5 @@ public final class Renderer extends Renderable {
     private static final int HEAD_UNDER_WATER_BIT = 1;
     private static final int DO_SHADOW_MAPPING_BIT = 2;
     private static final int DO_GLASS_SHADOWS_BIT = 4;
+    private static final CubePlaceable breakHologram = new CubePlaceable(OUT_OF_WORLD);
 }

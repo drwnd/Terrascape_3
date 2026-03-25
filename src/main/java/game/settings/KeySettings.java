@@ -40,7 +40,8 @@ public enum KeySettings implements KeySetting {
     GET_CHUNK_REBUILD_PLACEABLE(GLFW_KEY_F5),
     LOCK_PLACE_POSITION(GLFW_KEY_TAB),
     ROTATE_SHAPE_FORWARD(GLFW_KEY_F1),
-    ROTATE_SHAPE_BACKWARD(GLFW_KEY_F2);
+    ROTATE_SHAPE_BACKWARD(GLFW_KEY_F2),
+    SHOW_PLACEABLE_PREVIEW(GLFW_KEY_X);
 
     KeySettings(int defaultValue) {
         this.defaultKeybind = defaultValue;

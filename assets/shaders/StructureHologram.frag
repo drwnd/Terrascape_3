@@ -35,9 +35,10 @@ vec2 getUVOffset(int side, int textureSize) {
 
 void main() {
     if (material != 0) {
+        int textureMaterial = textureData & 0xFF;
         int side = textureData >> 8 & 7;
-        int textureSize = textureSizes[material];
-        vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
+        int textureSize = textureSizes[textureMaterial];
+        vec3 textureCoord = vec3(getUVOffset(side, textureSize), textureMaterial);
         fragColor = texture(textures, textureCoord) * vec4(0.5, 0.8, 1.2, 1);
     } else {
         float sum = floor(texturePosition.x + 0.5) + floor(texturePosition.y + 0.5) + floor(texturePosition.z + 0.5);
