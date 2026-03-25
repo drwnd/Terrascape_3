@@ -9,6 +9,7 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.server.MaterialsData;
+import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 
@@ -35,6 +36,21 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
+    public int getLengthX() {
+        return super.getLengthX() - 2 * sizeReduction.value();
+    }
+
+    @Override
+    public int getLengthY() {
+        return super.getLengthY() - 2 * sizeReduction.value();
+    }
+
+    @Override
+    public int getLengthZ() {
+        return super.getLengthZ() - 2 * sizeReduction.value();
+    }
+
+    @Override
     public List<UiBackgroundElement> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
@@ -53,25 +69,30 @@ public final class CubePlaceable extends ShapePlaceable {
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
-        double outerThreshold = offset - sizeReduction.value();
-        double innerThreshold = outerThreshold - thickness.value();
+        double innerThreshold = offset - thickness.value();
 
-        for (int x = 0; x < sideLength; x++)
-            for (int y = 0; y < sideLength; y++)
-                for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, offset, outerThreshold, innerThreshold)) continue;
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++) {
+                    if (!isInside(x, y, z, offset, innerThreshold)) continue;
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
     }
 
-    private static boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
+    @Override
+    public Structure getSmallStructure() {
+        return new Structure(4, getMaterial());
+    }
+
+    private static boolean isInside(int x, int y, int z, double offset, double innerThreshold) {
         double distanceX = Math.abs(x - offset + 0.5);
         double distanceY = Math.abs(y - offset + 0.5);
         double distanceZ = Math.abs(z - offset + 0.5);
         double distance = Math.max(distanceX, Math.max(distanceY, distanceZ));
 
-        return distance <= outerThreshold && distance >= innerThreshold;
+        return distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting sizeReduction = new StandAloneIntSetting(0, 64, 0);

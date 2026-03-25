@@ -8,8 +8,9 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
-import game.player.interaction.Rotation6Way;
+import game.player.interaction.Rotation3Way;
 import game.server.MaterialsData;
+import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 
@@ -18,7 +19,7 @@ import java.util.List;
 public final class SlabPlaceable extends RotatableShapePlaceable {
 
     public SlabPlaceable(byte material) {
-        super(material, Rotation6Way.BOTTOM);
+        super(material, Rotation3Way.Y);
     }
 
     public void save(Placeable placeable, Saver<?> saver) {
@@ -34,21 +35,25 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
+    public int getLengthX() {
+        return rotation == Rotation3Way.X ? thickness.value() : super.getLengthX();
+    }
+
+    @Override
+    public int getLengthY() {
+        return rotation == Rotation3Way.Y ? thickness.value() : super.getLengthY();
+    }
+
+    @Override
+    public int getLengthZ() {
+        return rotation == Rotation3Way.Z ? thickness.value() : super.getLengthZ();
+    }
+
+    @Override
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
         SlabPlaceable copy = new SlabPlaceable(material);
         copy.thickness.setValue(thickness.value());
         return copy;
-    }
-
-    @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        for (int x = 0; x < sideLength; x++)
-            for (int y = 0; y < sideLength; y++)
-                for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, sideLength)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
     }
 
     @Override
@@ -59,20 +64,30 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
         );
     }
 
-    private boolean isInside(int x, int y, int z, int sideLength) {
-        int invert = sideLength - 1;
+    @Override
+    protected void fillBitMap(long[] bitMap, int sideLength) {
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++) {
+                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
+                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
+                }
+    }
 
-        return switch (rotation) {
-
-            case Rotation6Way.NORTH -> invert - z < thickness.value();
-            case Rotation6Way.TOP -> invert - y < thickness.value();
-            case Rotation6Way.WEST -> invert - x < thickness.value();
-            case Rotation6Way.SOUTH -> z < thickness.value();
-            case Rotation6Way.BOTTOM -> y < thickness.value();
-            case Rotation6Way.EAST -> x < thickness.value();
-
-            case null, default -> false;
-        };
+    @Override
+    public Structure getSmallStructure() {
+        long[] bitMap = new long[64];
+        int lengthX = rotation == Rotation3Way.X ? thickness.value() : 16;
+        int lengthY = rotation == Rotation3Way.Y ? thickness.value() : 16;
+        int lengthZ = rotation == Rotation3Way.Z ? thickness.value() : 16;
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++) {
+                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
+                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
+                }
+        return new Structure(4, getMaterial(), bitMap);
     }
 
     private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 8);

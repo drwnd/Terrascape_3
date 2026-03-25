@@ -58,10 +58,11 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     protected void fillBitMap(long[] bitMap, int sideLength) {
         double offset = sideLength / 2.0;
 
-        for (int x = 0; x < sideLength; x++)
-            for (int y = 0; y < sideLength; y++)
-                for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, sideLength, offset)) continue;
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        for (int x = 0; x < lengthX; x++)
+            for (int y = 0; y < lengthY; y++)
+                for (int z = 0; z < lengthZ; z++) {
+                    if (!isInside(x, y, z, lengthX, lengthY, lengthZ, offset)) continue;
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
@@ -111,12 +112,11 @@ public final class ConePlaceable extends RotatableShapePlaceable {
         return getStructure();
     }
 
-    private boolean isInside(int x, int y, int z, int sideLength, double offset) {
-        int invert = sideLength - 1;
+    private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ, double offset) {
         return switch (rotation) {
-            case Rotation6Way.NORTH -> isInside(offset, invert - z, x, y);
-            case Rotation6Way.TOP -> isInside(offset, invert - y, x, z);
-            case Rotation6Way.WEST -> isInside(offset, invert - x, y, z);
+            case Rotation6Way.NORTH -> isInside(offset, lengthZ - 1 - z, x, y);
+            case Rotation6Way.TOP -> isInside(offset, lengthY - 1 - y, x, z);
+            case Rotation6Way.WEST -> isInside(offset, lengthX  - 1- x, y, z);
             case Rotation6Way.SOUTH -> isInside(offset, z, x, y);
             case Rotation6Way.BOTTOM -> isInside(offset, y, x, z);
             case Rotation6Way.EAST -> isInside(offset, x, y, z);
