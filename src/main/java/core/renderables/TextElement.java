@@ -2,7 +2,6 @@ package core.renderables;
 
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
-import core.rendering_api.Window;
 import core.rendering_api.shaders.TextShader;
 import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
@@ -17,12 +16,12 @@ import java.awt.*;
 public final class TextElement extends Renderable {
 
     public TextElement(Vector2f offsetToParent) {
-        super(new Vector2f(1.0f, 1.0f), offsetToParent);
+        super(new Vector2f(1.0F, 1.0F), offsetToParent);
         text = new Message("");
     }
 
     public TextElement(Vector2f offsetToParent, StringGetter text) {
-        super(new Vector2f(1.0f, 1.0f), offsetToParent);
+        super(new Vector2f(1.0F, 1.0F), offsetToParent);
         this.text = text;
     }
 
@@ -32,7 +31,7 @@ public final class TextElement extends Renderable {
     }
 
     public TextElement(Vector2f offsetToParent, StringGetter text, Color color) {
-        super(new Vector2f(1.0f, 1.0f), offsetToParent);
+        super(new Vector2f(1.0F, 1.0F), offsetToParent);
         this.text = text;
         this.color = color;
     }
@@ -44,17 +43,16 @@ public final class TextElement extends Renderable {
         String text = this.text.get();
 
         float textSize = CoreFloatSettings.TEXT_SIZE.value();
-        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0f;
-        float charWidth = Window.getWidth() * defaultTextSize.x * textSize;
-        float charHeight = Window.getHeight() * defaultTextSize.y * textSize;
+        float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
+        float charWidth = defaultTextSize.x * textSize;
+        float charHeight = defaultTextSize.y * textSize;
 
         float maxAllowedLength = getParent().getPosition().x + getParent().getSize().x - position.x;
         int maxLength = TextShader.getMaxLength(text, maxAllowedLength, defaultTextSize.x, scalesWithGuiSize());
 
-        position = new Vector2f(position.x, position.y - defaultTextSize.y * textSize / guiSize * 0.5f);
+        position = new Vector2f(position.x, position.y - defaultTextSize.y * 0.5F * textSize / guiSize);
         TextShader textShader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         textShader.bind();
-        textShader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
         textShader.setUniform("charSize", charWidth, charHeight);
         textShader.drawText(position, text.substring(0, maxLength), color, addTransparentBackground, scalesWithGuiSize());
     }

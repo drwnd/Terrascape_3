@@ -2,6 +2,7 @@ package core.rendering_api.shaders;
 
 import core.assets.*;
 import core.assets.identifiers.*;
+import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
@@ -12,7 +13,7 @@ import static org.lwjgl.opengl.GL46.*;
 
 import java.awt.*;
 
-public class TextShader extends RenderShader {
+public final class TextShader extends RenderShader {
     public static final int MAX_TEXT_LENGTH = 128;
 
     public TextShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
@@ -49,11 +50,11 @@ public class TextShader extends RenderShader {
     }
 
     public static int getMaxLength(String text, float maxAllowedLength, float charWidth, boolean scalesWithGuiSize) {
-        int[] offsets = getOffsets(text);
+        float[] offsets = getOffsets(text);
 
         float textSize = CoreFloatSettings.TEXT_SIZE.value();
         float guiSize = scalesWithGuiSize ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
-        float factor = textSize * charWidth / (guiSize * 7);
+        float factor = textSize * charWidth / guiSize;
 
         for (int index = 0, max = Math.min(text.length(), MAX_TEXT_LENGTH); index < max; index++)
             if (offsets[index + 1] * factor > maxAllowedLength) return index;
@@ -61,11 +62,11 @@ public class TextShader extends RenderShader {
     }
 
     public static float getTextLength(String text, float charWidth, boolean scalesWithGuiSize) {
-        int[] offsets = getOffsets(text);
+        float[] offsets = getOffsets(text);
 
         float textSize = CoreFloatSettings.TEXT_SIZE.value();
         float guiSize = scalesWithGuiSize ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
-        float factor = textSize * charWidth / (guiSize * 7);
+        float factor = textSize * charWidth / guiSize;
 
         return offsets[Math.min(MAX_TEXT_LENGTH, text.length())] * factor;
     }
@@ -80,15 +81,16 @@ public class TextShader extends RenderShader {
         return array;
     }
 
-    private static int[] getOffsets(String text) {
-        int[] array = new int[MAX_TEXT_LENGTH + 1];
+    private static float[] getOffsets(String text) {
+        float[] array = new float[MAX_TEXT_LENGTH + 1];
         char[] chars = text.toCharArray();
         byte[] charSizes = ((FontOption) CoreOptionSettings.FONT.value()).getCharSizes();
+        float normalizer = 2 / ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize().x / Window.getWidth();
         array[0] = 0;
         int max = Math.min(text.length(), MAX_TEXT_LENGTH);
 
         for (int index = 0; index < max; index++)
-            array[index + 1] = array[index] + getCharWidth(chars[index], charSizes) + CHAR_PADDING;
+            array[index + 1] = array[index] + (getCharWidth(chars[index], charSizes) + CHAR_PADDING) * normalizer;
         for (int index = max; index < MAX_TEXT_LENGTH; index++) array[index + 1] = array[index];
 
         return array;

@@ -30,6 +30,10 @@ public abstract class Shader implements Asset {
         glUniform1iv(uniforms.get(uniformName), data);
     }
 
+    public void setUniform(String uniformName, float[] data) {
+        glUniform1fv(uniforms.get(uniformName), data);
+    }
+
     public void setUniform(String uniformName, int x, int y) {
         glUniform2i(uniforms.get(uniformName), x, y);
     }
@@ -87,7 +91,7 @@ public abstract class Shader implements Asset {
     }
 
     public void setUniform(String uniformName, Color color) {
-        glUniform3f(uniforms.get(uniformName), color.getRed() * 0.003921569f, color.getGreen() * 0.003921569f, color.getBlue() * 0.003921569f);
+        glUniform3f(uniforms.get(uniformName), color.getRed() * 0.003921569F, color.getGreen() * 0.003921569F, color.getBlue() * 0.003921569F);
     }
 
     @Override

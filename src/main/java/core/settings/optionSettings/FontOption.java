@@ -3,6 +3,7 @@ package core.settings.optionSettings;
 import core.assets.AssetLoader;
 import core.assets.Texture;
 import core.assets.identifiers.AssetIdentifier;
+import core.rendering_api.Window;
 import core.utils.FileManager;
 
 import org.joml.Vector2f;
@@ -33,7 +34,7 @@ public final class FontOption implements Option, AssetIdentifier<Texture> {
                 int separatorIndex = line.indexOf('|');
                 int x = Integer.parseInt(line.substring(10, separatorIndex));
                 int y = Integer.parseInt(line.substring(separatorIndex + 1));
-                defaultTextSize.set(x, y).mul(5.2083336E-4f, 9.259259E-4f);
+                defaultTextSize.set(x, y).mul(2);
                 continue;
             }
             int colonIndex = line.indexOf(':');
@@ -49,7 +50,7 @@ public final class FontOption implements Option, AssetIdentifier<Texture> {
     }
 
     public Vector2f getDefaultTextSize() {
-        return defaultTextSize;
+        return new Vector2f(defaultTextSize).div(Window.getWidth(), Window.getHeight());
     }
 
 
