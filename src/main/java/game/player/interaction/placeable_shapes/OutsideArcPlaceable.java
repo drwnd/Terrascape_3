@@ -27,7 +27,6 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
         saver.saveByte((byte) 17);
         saver.saveByte(((OutsideArcPlaceable) placeable).getMaterial());
         saver.saveInt(((OutsideArcPlaceable) placeable).radius.value());
-        saver.saveInt(((OutsideArcPlaceable) placeable).height.value());
         saver.saveInt(((OutsideArcPlaceable) placeable).thickness.value());
         saver.saveFloat(((OutsideArcPlaceable) placeable).exponent.value());
     }
@@ -35,7 +34,6 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     public static OutsideArcPlaceable load(Saver<?> saver) {
         OutsideArcPlaceable placeable = new OutsideArcPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
-        placeable.height.setValue(saver.loadInt());
         placeable.thickness.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
@@ -45,7 +43,6 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
         OutsideArcPlaceable copy = new OutsideArcPlaceable(material);
         copy.radius.setValue(radius.value());
-        copy.height.setValue(height.value());
         copy.exponent.setValue(exponent.value());
         copy.thickness.setValue(thickness.value());
         return copy;
@@ -56,7 +53,6 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
         Vector2f zero = new Vector2f();
         return List.of(
                 new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
                 new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true)
         );
@@ -120,7 +116,6 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 16);
-    private final StandAloneIntSetting height = new StandAloneIntSetting(0, 256, 8);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.1F, 16.0F, 2.0F, 0.1F);
     private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
 }

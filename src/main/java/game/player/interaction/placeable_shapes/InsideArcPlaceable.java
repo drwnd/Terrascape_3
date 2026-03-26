@@ -27,7 +27,6 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
         saver.saveByte((byte) 16);
         saver.saveByte(((InsideArcPlaceable) placeable).getMaterial());
         saver.saveInt(((InsideArcPlaceable) placeable).radius.value());
-        saver.saveInt(((InsideArcPlaceable) placeable).height.value());
         saver.saveInt(((InsideArcPlaceable) placeable).thickness.value());
         saver.saveFloat(((InsideArcPlaceable) placeable).exponent.value());
     }
@@ -35,7 +34,6 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
     public static InsideArcPlaceable load(Saver<?> saver) {
         InsideArcPlaceable placeable = new InsideArcPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
-        placeable.height.setValue(saver.loadInt());
         placeable.thickness.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
@@ -45,7 +43,6 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
     protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
         InsideArcPlaceable copy = new InsideArcPlaceable(material);
         copy.radius.setValue(radius.value());
-        copy.height.setValue(height.value());
         copy.exponent.setValue(exponent.value());
         copy.thickness.setValue(thickness.value());
         return copy;
@@ -56,7 +53,6 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
         Vector2f zero = new Vector2f();
         return List.of(
                 new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
                 new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true)
         );
@@ -115,14 +111,11 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
         double distanceX = Math.pow(x + 0.5, exponent.value());
         double distanceY = Math.pow(y + 0.5, exponent.value());
         double distanceZ = Math.pow(z + 0.5, exponent.value());
-
-        return distanceX + distanceY < outerThreshold && distanceX + distanceY >= innerThreshold
-                || distanceX + distanceZ < outerThreshold && distanceX + distanceZ >= innerThreshold
-                || distanceY + distanceZ < outerThreshold && distanceY + distanceZ >= innerThreshold;
+        double distance = Math.min(distanceX + distanceY, Math.min(distanceX + distanceZ, distanceY + distanceZ));
+        return distance < outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 16);
-    private final StandAloneIntSetting height = new StandAloneIntSetting(0, 256, 8);
     private final StandAloneFloatSetting exponent = new StandAloneFloatSetting(0.1F, 16.0F, 2.0F, 0.1F);
     private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
 }
