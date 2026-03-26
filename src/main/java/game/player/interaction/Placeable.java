@@ -29,12 +29,9 @@ public interface Placeable {
             case 4 -> SpherePlaceable.load(saver);
             case 5 -> CylinderPlaceable.load(saver);
             case 6 -> StairPlaceable.load(saver);
-            case 7 -> SlopedStairPlaceable.load(saver);
             case 8 -> ConePlaceable.load(saver);
             case 9 -> InsideStairPlaceable.load(saver);
             case 10 -> OutsideStairPlaceable.load(saver);
-            case 11 -> InsideSlopedStairPlaceable.load(saver);
-            case 12 -> OutsideSlopedStairPlaceable.load(saver);
             case 13 -> SlabPlaceable.load(saver);
             case 14 -> EllipsoidPlaceable.load(saver);
             default -> null;

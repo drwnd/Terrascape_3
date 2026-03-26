@@ -3,6 +3,7 @@ package game.player.interaction.placeable_shapes;
 import core.renderables.Slider;
 import core.renderables.UiBackgroundElement;
 import core.settings.optionSettings.Option;
+import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
@@ -29,6 +30,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
         saver.saveInt(((InsideStairPlaceable) placeable).stepHeight.value());
         saver.saveInt(((InsideStairPlaceable) placeable).heightOffset.value());
         saver.saveInt(((InsideStairPlaceable) placeable).thickness.value());
+        saver.saveFloat(((InsideStairPlaceable) placeable).slope.value());
     }
 
     public static InsideStairPlaceable load(Saver<?> saver) {
@@ -36,6 +38,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
         placeable.stepHeight.setValue(saver.loadInt());
         placeable.heightOffset.setValue(saver.loadInt());
         placeable.thickness.setValue(saver.loadInt());
+        placeable.slope.setValue(saver.loadFloat());
         return placeable;
     }
 
@@ -45,6 +48,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
         copy.stepHeight.setValue(stepHeight.value());
         copy.heightOffset.setValue(heightOffset.value());
         copy.thickness.setValue(thickness.value());
+        copy.slope.setValue(slope.value());
         return copy;
     }
 
@@ -61,13 +65,9 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
         return List.of(
                 new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
                 new Slider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
+                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
+                new Slider<>(zero, zero, slope, UiMessages.SLOPE, true)
         );
-    }
-
-    public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {
-        int distance = a / stepHeight.value() + Math.min(b, c) / stepHeight.value();
-        return distance < outerThreshold && distance >= innerThreshold;
     }
 
     @Override
@@ -75,7 +75,13 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
         return rotation;
     }
 
+    public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {
+        float distance = a / stepHeight.value() * slope.value() + Math.min(b, c) / stepHeight.value();
+        return distance < outerThreshold && distance >= innerThreshold;
+    }
+
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);
     private final StandAloneIntSetting heightOffset = new StandAloneIntSetting(-32, 32, 0);
+    private final StandAloneFloatSetting slope = new StandAloneFloatSetting(1.0F, 16.0F, 1.0F, 0.1F);
     private final StandAloneIntSetting thickness = new StandAloneIntSetting(0, 128, 128);
 }

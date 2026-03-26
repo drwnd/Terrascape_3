@@ -25,6 +25,10 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
                 MaterialsData.getCompressedMaterials(sizeBits, populateUncompressedMaterials(bitMap, material, sizeBits)));
     }
 
+    public Structure(int sizeX, int sizeY, int sizeZ, int sizeBits, byte material, long[] bitMap) {
+        this(sizeX, sizeY, sizeZ, MaterialsData.getCompressedMaterials(sizeBits, populateUncompressedMaterials(bitMap, material, sizeBits)));
+    }
+
     public byte getMaterial(long structureX, long structureY, long structureZ) {
         if (!contains((int) structureX, (int) structureY, (int) structureZ)) return AIR;
         return materials.getMaterial((int) structureX, (int) structureY, (int) structureZ);

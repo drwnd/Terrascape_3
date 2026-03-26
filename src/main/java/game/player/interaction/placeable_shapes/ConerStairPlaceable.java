@@ -18,7 +18,7 @@ interface ConerStairPlaceable  {
 
     default boolean isInside(int x, int y, int z, int sideLength, int outerThreshold, int innerThreshold) {
         int invert = sideLength - 1;
-        return switch (getRotation()) {
+        return switch ((Rotation24Way) getRotation()) {
             case Rotation24Way.ROTATION_01 -> isInside(outerThreshold, innerThreshold, invert - z, x, y);
             case Rotation24Way.ROTATION_02 -> isInside(outerThreshold, innerThreshold, invert - z, x, invert - y);
             case Rotation24Way.ROTATION_03 -> isInside(outerThreshold, innerThreshold, invert - z, invert - x, invert - y);
@@ -48,8 +48,6 @@ interface ConerStairPlaceable  {
             case Rotation24Way.ROTATION_22 -> isInside(outerThreshold, innerThreshold, x, y, invert - z);
             case Rotation24Way.ROTATION_23 -> isInside(outerThreshold, innerThreshold, x, invert - y, invert - z);
             case Rotation24Way.ROTATION_24 -> isInside(outerThreshold, innerThreshold, x, invert - y, z);
-
-            case null, default -> false;
         };
     }
 
