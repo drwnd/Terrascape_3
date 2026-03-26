@@ -156,6 +156,7 @@ public final class Inventory extends UiElement {
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, secondRowY), new StairPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, secondRowY), new InsideStairPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, secondRowY), new OutsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, secondRowY), new ArcPlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();
