@@ -5,35 +5,39 @@ import org.joml.Vector2i;
 
 public class UiButton extends UiBackgroundElement implements Clickable {
 
-    public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Runnable action) {
+    public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Runnable runnable) {
         super(sizeToParent, offsetToParent);
-        this.action = (cursorPos, button, buttonAction) -> action.run();
+        this.clickable = (_, _, _) -> runnable.run();
     }
 
-    public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Clickable action) {
+    public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Clickable clickable) {
         super(sizeToParent, offsetToParent);
-        this.action = action;
+        this.clickable = clickable;
     }
 
     public UiButton(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
-        this.action = (cursorPos, button, action) -> System.err.printf("No action set for this button %s%n", this);
+        this.clickable = (_, _, _) -> System.err.printf("No action set for this button %s%n", this);
     }
 
-    public void setAction(Clickable action) {
-        if (action == null) return;
-        this.action = action;
+    public void setAction(Clickable clickable) {
+        if (clickable == null) return;
+        this.clickable = clickable;
     }
 
     public void setAction(Runnable action) {
         if (action == null) return;
-        this.action = (cursorPos, button, buttonAction) -> action.run();
+        this.clickable = (_, _, _) -> action.run();
+    }
+
+    public Clickable getClickable() {
+        return clickable;
     }
 
     @Override
     public void clickOn(Vector2i cursorPos, int button, int action) {
-        this.action.clickOn(cursorPos, button, action);
+        this.clickable.clickOn(cursorPos, button, action);
     }
 
-    private Clickable action;
+    private Clickable clickable;
 }

@@ -1,13 +1,13 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
+import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
@@ -51,11 +51,11 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public List<UiBackgroundElement> uniqueSettings() {
+    public List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, sizeReduction, UiMessages.SIZE_REDUCTION, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true));
+                new CallbackSlider<>(zero, zero, sizeReduction, UiMessages.SIZE_REDUCTION, true),
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true));
     }
 
     @Override

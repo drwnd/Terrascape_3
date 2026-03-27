@@ -1,7 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -10,6 +9,7 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
+import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 import org.joml.Vector2f;
@@ -95,16 +95,16 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiBackgroundElement> uniqueSettings() {
+    protected List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new Slider<>(zero, zero, radiusA, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, radiusB, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, radiusC, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, exponentA, UiMessages.DISTANCE_EXPONENT, true),
-                new Slider<>(zero, zero, exponentB, UiMessages.DISTANCE_EXPONENT, true),
-                new Slider<>(zero, zero, exponentC, UiMessages.DISTANCE_EXPONENT, true)
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
+                new CallbackSlider<>(zero, zero, radiusA, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, radiusB, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, radiusC, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, exponentA, UiMessages.DISTANCE_EXPONENT, true),
+                new CallbackSlider<>(zero, zero, exponentB, UiMessages.DISTANCE_EXPONENT, true),
+                new CallbackSlider<>(zero, zero, exponentC, UiMessages.DISTANCE_EXPONENT, true)
         );
     }
 

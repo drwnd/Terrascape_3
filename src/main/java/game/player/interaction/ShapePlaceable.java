@@ -1,7 +1,7 @@
 package game.player.interaction;
 
 import core.renderables.Toggle;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.ToggleSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
 import core.utils.Vector3l;
@@ -37,14 +37,14 @@ public abstract class ShapePlaceable implements Placeable {
         return placeable;
     }
 
-    public final List<UiBackgroundElement> settings() {
+    public final List<UiButton> settings() {
         Vector2f zero = new Vector2f(0.0F, 0.0F);
-        ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
+        ArrayList<UiButton> settingElements = new ArrayList<>();
 
         settingElements.add(new Toggle(zero, zero, invert, UiMessages.INVERT_PLACEABLE, true));
         settingElements.addAll(uniqueSettings());
 
-        for (UiBackgroundElement element : settingElements) element.setScaleWithGuiSize(false);
+        for (UiButton element : settingElements) element.setScaleWithGuiSize(false);
         return settingElements;
     }
 
@@ -148,7 +148,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
-    protected abstract List<UiBackgroundElement> uniqueSettings();
+    protected abstract List<UiButton> uniqueSettings();
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 

@@ -1,7 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -10,6 +9,7 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
+import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
@@ -69,14 +69,14 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiBackgroundElement> uniqueSettings() {
+    protected List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, baseRadius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, topRadius, UiMessages.TOP_RADIUS, true),
-                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true),
-                new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
+                new CallbackSlider<>(zero, zero, baseRadius, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, topRadius, UiMessages.TOP_RADIUS, true),
+                new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true),
+                new CallbackSlider<>(zero, zero, height, UiMessages.HEIGHT, true),
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
         );
     }
 

@@ -1,9 +1,6 @@
 package game.player.inventory;
 
-import core.renderables.Clickable;
-import core.renderables.Renderable;
-import core.renderables.UiBackgroundElement;
-import core.renderables.UiButton;
+import core.renderables.*;
 import core.rendering_api.Window;
 
 import game.player.interaction.ShapePlaceable;
@@ -29,7 +26,15 @@ public final class ShapeDisplay extends UiButton {
         setScalingFactor(1.2F);
 
         index = 0;
-        for (UiBackgroundElement settingElement : placeable.settings()) {
+        for (UiButton settingElement : placeable.settings()) {
+            if (settingElement instanceof CallbackSlider<?> slider) slider.setSlidingCallback(shapesTab::refreshShapePreview);
+            if (settingElement instanceof UiButton settingButton) {
+                Clickable clickable = settingButton.getClickable();
+                settingButton.setAction((Vector2i pixelCoordinate, int button, int action) -> {
+                    clickable.clickOn(pixelCoordinate, button, action);
+                    if (action == GLFW_PRESS) shapesTab.refreshShapePreview();
+                });
+            }
             settingElement.setSizeToParent(0.3F, 0.075F);
             settingElement.setOffsetToParent(0.35F, 0.7F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
             settingElement.setVisible(false);
@@ -72,6 +77,7 @@ public final class ShapeDisplay extends UiButton {
             ((ShapesTab) getParent()).setSelectedDisplay(this);
             for (UiBackgroundElement settingElement : ((ShapesTab) getParent()).getShapePlaceableSettingSliders()) settingElement.setVisible(false);
             for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
+            ((ShapesTab) getParent()).refreshShapePreview();
         };
     }
 

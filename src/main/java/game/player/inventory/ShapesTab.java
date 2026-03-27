@@ -61,6 +61,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     public void resizeSelfTo(int width, int height) {
         updateDisplayPositions();
         for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio() * getAspectRatio());
+
+        if (shapePreview != null) {
+            float sizeToParentY = 0.3F * Window.getAspectRatio() * getAspectRatio();
+            shapePreview.setSizeToParent(0.3F, sizeToParentY);
+            shapePreview.setOffsetToParent(0.0F, 0.5F - sizeToParentY * 0.5F);
+        }
     }
 
     @Override
@@ -100,6 +106,24 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         }
     }
 
+    @Override
+    public void renderSelf(Vector2f position, Vector2f size) {
+        super.renderSelf(position, size);
+        if (!refreshShapePreview) return;
+
+        refreshShapePreview = false;
+        removeRenderable(shapePreview).delete();
+
+        Vector2f sizeToParent = new Vector2f(0.3F, 0.3F * Window.getAspectRatio() * getAspectRatio());
+        Vector2f offsetToParent = new Vector2f(0.0F, 0.5F - sizeToParent.y * 0.5F);
+        shapePreview = new StructureDisplay(sizeToParent, offsetToParent, selectedDisplay.getPlaceable().getStructure());
+        addRenderable(shapePreview);
+    }
+
+    void refreshShapePreview() {
+        refreshShapePreview = true;
+    }
+
     void updateDisplayPositions() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
@@ -136,7 +160,6 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
 
-
         shapeDisplays.add(new ShapeDisplay(0, new CubePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(1, new SpherePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(2, new CylinderPlaceable(STONE), this));
@@ -166,6 +189,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
 
     private ShapeDisplay selectedDisplay;
+    private StructureDisplay shapePreview;
+    private boolean refreshShapePreview = true;
 
     private record CubeDisplay(StructureDisplay display, byte material) {
 
