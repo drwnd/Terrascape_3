@@ -76,6 +76,10 @@ public final class Inventory extends UiElement {
         if (button == KeySettings.HOTBAR_SLOT_9.keybind()) hotbar.setContent(8, openInventoryTab.getSelectedPlaceable(pixelCoordinate));
     }
 
+    void handleScroll(Vector2i pixelCoordinate, double yScroll) {
+        openInventoryTab.handleScroll(pixelCoordinate, yScroll);
+    }
+
     private Clickable getTabOpenerButtonAction(InventoryTab toOpenTab) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return;

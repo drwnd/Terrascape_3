@@ -1,4 +1,4 @@
-package game.player.rendering;
+package game.player.inventory;
 
 import core.assets.AssetManager;
 import core.renderables.Renderable;
@@ -7,6 +7,7 @@ import core.rendering_api.shaders.Shader;
 import core.settings.CoreFloatSettings;
 
 import game.assets.Shaders;
+import game.player.rendering.*;
 import game.server.generation.Structure;
 import game.utils.Transformation;
 
@@ -44,7 +45,7 @@ public final class StructureDisplay extends Renderable {
         rotation.x -= rotationPitch;
         rotation.y += rotationYaw;
 
-        rotation.x = Math.max(-89.9F, Math.min(rotation.x, 89.9F)); // Looking directly up or down breaks the lookAt transform
+        rotation.x = Math.clamp(rotation.x, -89.9F, 89.9F); // Looking directly up or down breaks the lookAt transform
         rotation.y %= 360.0F;
     }
 

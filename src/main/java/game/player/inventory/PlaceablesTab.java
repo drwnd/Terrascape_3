@@ -8,7 +8,6 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.*;
-import game.player.rendering.StructureDisplay;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Materials;
@@ -67,6 +66,24 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
+        for (CubeDisplay display : cubeDisplays)
+            if (display.display.containsPixelCoordinate(pixelCoordinate)) {
+                if (selectedDisplay == null) return new CubePlaceable(display.material);
+                return selectedDisplay.placeable.copyWithMaterial(display.material);
+            }
+        return null;
+    }
+
+    @Override
+    public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
+        InventoryInput input = Game.getPlayer().getInventory().getInput();
+        float newScroll = Math.max((float) (input.materialScroll - yScroll * 0.05), 0.0F);
+        moveMaterialButtons(newScroll - input.materialScroll);
+        input.materialScroll = newScroll;
+    }
+
+    @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         itemNameDisplay.setVisible(false);
         for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
@@ -79,11 +96,6 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
             itemNameDisplay.setVisible(true);
             break;
         }
-    }
-
-    void moveMaterialButtons(float movement) {
-        Vector2f offset = new Vector2f(0.0F, movement);
-        for (CubeDisplay button : cubeDisplays) button.display.move(offset);
     }
 
     void updateDisplayPositions() {
@@ -132,22 +144,17 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
         for (Renderable renderable : selectedDisplay.settingElements) renderable.setVisible(true);
     }
 
+    private void moveMaterialButtons(float movement) {
+        Vector2f offset = new Vector2f(0.0F, movement);
+        for (CubeDisplay button : cubeDisplays) button.display.move(offset);
+    }
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
     private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
+
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
 
     private ShapeDisplay selectedDisplay;
-
-    @Override
-    public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
-        for (CubeDisplay display : cubeDisplays)
-            if (display.display.containsPixelCoordinate(pixelCoordinate)) {
-                if (selectedDisplay == null) return new CubePlaceable(display.material);
-                return selectedDisplay.placeable.copyWithMaterial(display.material);
-            }
-        return null;
-    }
 
     private record CubeDisplay(StructureDisplay display, byte material) {
 

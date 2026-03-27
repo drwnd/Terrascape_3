@@ -9,4 +9,5 @@ public interface InventoryTab {
 
     void setVisible(boolean visible);
 
+    void handleScroll(Vector2i pixelCoordinate, double yScroll);
 }

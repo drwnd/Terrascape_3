@@ -2,7 +2,6 @@ package game.player.inventory;
 
 import core.rendering_api.Input;
 
-import core.rendering_api.Window;
 import game.server.Game;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -43,16 +42,7 @@ public final class InventoryInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-        if (cursorPos.x < Window.getWidth() / 3) {
-            float newScroll = Math.max((float) (structureScroll - yScroll * 0.05), 0.0F);
-            inventory.structureTab.moveStructureButtons(newScroll - structureScroll);
-            structureScroll = newScroll;
-        } else if (cursorPos.x > Window.getWidth() * 2 / 3) {
-            float newScroll = Math.max((float) (materialScroll - yScroll * 0.05), 0.0F);
-            inventory.placeablesTab.moveMaterialButtons(newScroll - materialScroll);
-            materialScroll = newScroll;
-        } else return;
-
+        inventory.handleScroll(cursorPos, yScroll);
         inventory.hoverOver(cursorPos); // Fixes buttons being selected even if the cursor isn't hovered over them
     }
 
@@ -68,6 +58,6 @@ public final class InventoryInput extends Input {
 
     }
 
-    private final Inventory inventory;
-    private float structureScroll = 0, materialScroll =  0;
+    final Inventory inventory;
+    float structureScroll = 0, materialScroll = 0;
 }

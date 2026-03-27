@@ -20,4 +20,9 @@ public final class MiscellaneousTab extends Renderable implements InventoryTab {
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         return null;
     }
+
+    @Override
+    public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
+
+    }
 }
