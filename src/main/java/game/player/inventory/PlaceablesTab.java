@@ -69,6 +69,7 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         itemNameDisplay.setVisible(false);
+        for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
         for (CubeDisplay display : cubeDisplays) {
             StructureDisplay structureDisplay = display.display;
             if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;

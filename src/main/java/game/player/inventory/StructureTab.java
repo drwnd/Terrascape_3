@@ -35,6 +35,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
+        filterTextField.setFocused(filterTextField.containsPixelCoordinate(pixelCoordinate));
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) structureButtonsContainer.hoverOver(pixelCoordinate);
     }
 
