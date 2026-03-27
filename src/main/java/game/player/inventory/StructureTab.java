@@ -48,6 +48,8 @@ public final class StructureTab extends Renderable implements InventoryTab {
         Vector2f sizeToParent = new Vector2f(0.7F, 1.0F);
         Vector2f offsetToParent = new Vector2f(0.3F, 0.0F);
         selectedStructure = new StructureDisplay(sizeToParent, offsetToParent, AssetManager.get(toLoadStructureButton.getStructure()));
+        selectedStructure.setDoAutoFocusScaling(false);
+        selectedStructure.setScaleWithGuiSize(false);
         addRenderable(selectedStructure);
     }
 
@@ -80,7 +82,8 @@ public final class StructureTab extends Renderable implements InventoryTab {
             float newScroll = Math.max((float) (input.structureScroll - yScroll * 0.05), 0.0F);
             moveStructureButtons(newScroll - input.structureScroll);
             input.structureScroll = newScroll;
-        } else if (selectedStructure != null) selectedStructure.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
+        } else if (selectedStructure != null && selectedStructure.containsPixelCoordinate(pixelCoordinate))
+            selectedStructure.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
     }
 
     void reloadStructureButtons() {
@@ -96,7 +99,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
         for (File structureFile : structureFiles) {
             if (structureFile == null || !structureFile.getName().toLowerCase().contains(filterText)) continue;
             String structureName = structureFile.getName();
-            Vector2f offsetToParent = new Vector2f(0.0F, 1.0F - ++structureCount * 0.065F + input.getStructureScroll());
+            Vector2f offsetToParent = new Vector2f(0.0F, 1.0F - ++structureCount * 0.065F + input.structureScroll);
 
             StructureSelectionButton button = new StructureSelectionButton(sizeToParent, offsetToParent, structureName);
             button.setAction(getButtonAction(button));

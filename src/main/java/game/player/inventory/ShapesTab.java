@@ -24,9 +24,9 @@ import static game.utils.Constants.AMOUNT_OF_MATERIALS;
 import static game.utils.Constants.STONE;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
-public final class PlaceablesTab extends Renderable implements InventoryTab {
+public final class ShapesTab extends Renderable implements InventoryTab {
 
-    public PlaceablesTab(Vector2f sizeToParent, Vector2f offsetToParent) {
+    public ShapesTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
         setDoAutoFocusScaling(false);
@@ -111,7 +111,7 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
             float x = 1.0F - itemSize * (column + 1);
             float y = 1.0F - itemSize * 2 * (row + 1);
 
-            display.display.setOffsetToParent(x, y + input.getMaterialScroll());
+            display.display.setOffsetToParent(x, y + input.materialScroll);
             display.display.setSizeToParent(sizeToParent.x, sizeToParent.y);
         }
     }
@@ -162,7 +162,7 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
 
     private static class ShapeDisplay extends UiButton {
 
-        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable, PlaceablesTab placeablesTab) {
+        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable, ShapesTab placeablesTab) {
             super(sizeToParent, offsetToParent);
             setAction(getAction());
             setRimThicknessMultiplier(0.5F);
@@ -187,7 +187,7 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
 
         @Override
         public void renderSelf(Vector2f position, Vector2f size) {
-            if (Game.getPlayer().getInventory().placeablesTab.selectedDisplay == this) scaleForFocused(position, size);
+            if (Game.getPlayer().getInventory().shapesTab.selectedDisplay == this) scaleForFocused(position, size);
             super.renderSelf(position, size);
         }
 
@@ -195,8 +195,8 @@ public final class PlaceablesTab extends Renderable implements InventoryTab {
             return (Vector2i _, int _, int action) -> {
                 if (action != GLFW_PRESS) return;
                 Inventory inventory = Game.getPlayer().getInventory();
-                inventory.placeablesTab.selectedDisplay = this;
-                for (UiBackgroundElement settingElement : inventory.placeablesTab.shapePlaceableSettingSliders) settingElement.setVisible(false);
+                inventory.shapesTab.selectedDisplay = this;
+                for (UiBackgroundElement settingElement : inventory.shapesTab.shapePlaceableSettingSliders) settingElement.setVisible(false);
                 for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
             };
         }

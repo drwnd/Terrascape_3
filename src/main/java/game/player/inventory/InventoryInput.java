@@ -12,14 +12,6 @@ public final class InventoryInput extends Input {
         this.inventory = inventory;
     }
 
-    public float getStructureScroll() {
-        return structureScroll;
-    }
-
-    public float getMaterialScroll() {
-        return materialScroll;
-    }
-
     @Override
     public void setInputMode() {
         setStandardInputMode();
@@ -58,6 +50,6 @@ public final class InventoryInput extends Input {
 
     }
 
-    final Inventory inventory;
+    private final Inventory inventory;
     float structureScroll = 0, materialScroll = 0;
 }

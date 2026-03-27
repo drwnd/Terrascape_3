@@ -38,7 +38,7 @@ public final class StructureDisplay extends Renderable {
 
     public void rotate(Vector2i cursorMovement) {
         float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
-        sensitivityFactor = 5.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
+        sensitivityFactor = 7.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;
 

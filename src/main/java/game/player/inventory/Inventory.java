@@ -26,20 +26,16 @@ public final class Inventory extends UiElement {
         Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE, 1.0F);
         Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE, 0.0F);
 
-        structureTab = new StructureTab(sizeToParent, offsetToParent);
-        placeablesTab = new PlaceablesTab(sizeToParent, offsetToParent);
-        miscellaneousTab = new MiscellaneousTab(sizeToParent, offsetToParent);
+        addRenderable(structureTab = new StructureTab(sizeToParent, offsetToParent));
+        addRenderable(shapesTab = new ShapesTab(sizeToParent, offsetToParent));
+        addRenderable(miscellaneousTab = new MiscellaneousTab(sizeToParent, offsetToParent));
 
-        addRenderable(structureTab);
-        addRenderable(placeablesTab);
-        addRenderable(miscellaneousTab);
+        addRenderable(openTabButton = new TabOpenerButton(this, 0, shapesTab, UiMessages.SHAPES_TAB_NAME));
+        addRenderable(new TabOpenerButton(this, 1, structureTab, UiMessages.STRUCTURE_TAB_NAME));
+        addRenderable(new TabOpenerButton(this, 2, miscellaneousTab, UiMessages.MISCELLANEOUS_TAB_NAME));
 
-        openInventoryTab = placeablesTab;
+        openInventoryTab = shapesTab;
         openInventoryTab.setVisible(true);
-
-        addRenderable(new TabOpenerButton(0, getTabOpenerButtonAction(placeablesTab), UiMessages.PLACEABLE_TAB_NAME));
-        addRenderable(new TabOpenerButton(1, getTabOpenerButtonAction(structureTab), UiMessages.STRUCTURE_TAB_NAME));
-        addRenderable(new TabOpenerButton(2, getTabOpenerButtonAction(miscellaneousTab), UiMessages.MISCELLANEOUS_TAB_NAME));
     }
 
     public InventoryInput getInput() {
@@ -58,7 +54,7 @@ public final class Inventory extends UiElement {
         if (!isVisible()) return;
 
         structureTab.reloadStructureButtons();
-        placeablesTab.updateDisplayPositions();
+        shapesTab.updateDisplayPositions();
     }
 
     void handleInput(int button, int action, Vector2i pixelCoordinate) {
@@ -80,23 +76,12 @@ public final class Inventory extends UiElement {
         openInventoryTab.handleScroll(pixelCoordinate, yScroll);
     }
 
-    private Clickable getTabOpenerButtonAction(InventoryTab toOpenTab) {
-        return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
-            structureTab.setVisible(false);
-            placeablesTab.setVisible(false);
-            miscellaneousTab.setVisible(false);
-
-            openInventoryTab = toOpenTab;
-            openInventoryTab.setVisible(true);
-        };
-    }
-
     final StructureTab structureTab;
-    final PlaceablesTab placeablesTab;
+    final ShapesTab shapesTab;
     final MiscellaneousTab miscellaneousTab;
 
     private final InventoryInput input;
 
-    private InventoryTab openInventoryTab;
+    InventoryTab openInventoryTab;
+    TabOpenerButton openTabButton;
 }
