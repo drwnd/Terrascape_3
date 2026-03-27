@@ -4,6 +4,7 @@ import core.rendering_api.Window;
 import core.utils.Vector3l;
 
 import game.player.interaction.*;
+import game.player.inventory.Inventory;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
@@ -203,7 +204,7 @@ public final class Player {
         setInput();
     }
 
-    void toggleInventory() {
+    public void toggleInventory() {
         if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());
         setInput();

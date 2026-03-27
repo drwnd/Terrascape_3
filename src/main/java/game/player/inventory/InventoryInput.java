@@ -1,4 +1,4 @@
-package game.player;
+package game.player.inventory;
 
 import core.rendering_api.Input;
 
@@ -45,11 +45,11 @@ public final class InventoryInput extends Input {
     public void scrollCallback(long window, double xScroll, double yScroll) {
         if (cursorPos.x < Window.getWidth() / 3) {
             float newScroll = Math.max((float) (structureScroll - yScroll * 0.05), 0.0F);
-            inventory.moveStructureButtons(newScroll - structureScroll);
+            inventory.structureTab.moveStructureButtons(newScroll - structureScroll);
             structureScroll = newScroll;
         } else if (cursorPos.x > Window.getWidth() * 2 / 3) {
             float newScroll = Math.max((float) (materialScroll - yScroll * 0.05), 0.0F);
-            inventory.moveMaterialButtons(newScroll - materialScroll);
+            inventory.placeablesTab.moveMaterialButtons(newScroll - materialScroll);
             materialScroll = newScroll;
         } else return;
 
