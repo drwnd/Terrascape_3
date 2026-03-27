@@ -6,7 +6,6 @@ import core.rendering_api.Window;
 
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
-import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
 import game.server.generation.Structure;
@@ -20,9 +19,7 @@ import org.joml.Vector2i;
 
 import java.util.ArrayList;
 
-import static game.utils.Constants.AMOUNT_OF_MATERIALS;
-import static game.utils.Constants.STONE;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static game.utils.Constants.*;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
@@ -62,7 +59,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @Override
     public void resizeSelfTo(int width, int height) {
-        for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio());
+        updateDisplayPositions();
+        for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio() * getAspectRatio());
     }
 
     @Override
@@ -70,7 +68,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (CubeDisplay display : cubeDisplays)
             if (display.display.containsPixelCoordinate(pixelCoordinate)) {
                 if (selectedDisplay == null) return new CubePlaceable(display.material);
-                return selectedDisplay.placeable.copyWithMaterial(display.material);
+                return selectedDisplay.getPlaceable().copyWithMaterial(display.material);
             }
         return null;
     }
@@ -91,8 +89,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
             StructureDisplay structureDisplay = display.display;
             if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
 
+            Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
+            Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
             itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material)));
-            itemNameDisplay.setOffsetToParent((float) pixelCoordinate.x / Window.getWidth() - itemNameDisplay.getLength(), (float) pixelCoordinate.y / Window.getHeight());
+            itemNameDisplay.setOffsetToParent(
+                    (pixelCoordinate.x - position.x) / size.x - itemNameDisplay.getLength(),
+                    (pixelCoordinate.y - position.y) / size.y);
             itemNameDisplay.setVisible(true);
             break;
         }
@@ -101,19 +103,31 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     void updateDisplayPositions() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
-        int itemsPerRow = Math.max(1, (int) Math.floor(1.0 / (3 * itemSize)));
+        int itemsPerRow = Math.max(1, (int) Math.floor(0.33333334F / itemSize));
 
-        Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio());
+        Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio() * getAspectRatio());
 
         for (CubeDisplay display : cubeDisplays) {
             int index = display.material & 0xFF;
             int row = index / itemsPerRow, column = index % itemsPerRow;
-            float x = 1.0F - itemSize * (column + 1);
-            float y = 1.0F - itemSize * 2 * (row + 1);
+            float offsetX = 1.0F - sizeToParent.x * (column + 1);
+            float offsetY = 1.0F - sizeToParent.y * (row + 1);
 
-            display.display.setOffsetToParent(x, y + input.materialScroll);
+            display.display.setOffsetToParent(offsetX, offsetY + input.materialScroll);
             display.display.setSizeToParent(sizeToParent.x, sizeToParent.y);
         }
+    }
+
+    ShapeDisplay getSelectedDisplay() {
+        return selectedDisplay;
+    }
+
+    void setSelectedDisplay(ShapeDisplay selectedDisplay) {
+        this.selectedDisplay = selectedDisplay;
+    }
+
+    ArrayList<UiBackgroundElement> getShapePlaceableSettingSliders() {
+        return shapePlaceableSettingSliders;
     }
 
     private void loadShapeDisplays() {
@@ -121,87 +135,39 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
         shapeDisplays.clear();
         shapePlaceableSettingSliders.clear();
-        Vector2f sizeToParent = new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio());
-        float firstRowY = 0.8F;
-        float secondRowY = 0.8F - 0.05F * Window.getAspectRatio();
 
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, firstRowY), new CubePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, firstRowY), new SpherePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, firstRowY), new CylinderPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, firstRowY), new ConePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, firstRowY), new SlabPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.6F, firstRowY), new EllipsoidPlaceable(STONE), this));
 
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.35F, secondRowY), new StairPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.4F, secondRowY), new InsideStairPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.45F, secondRowY), new OutsideStairPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.5F, secondRowY), new ArcPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.55F, secondRowY), new InsideArcPlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(sizeToParent, new Vector2f(0.6F, secondRowY), new OutsideArcPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(0, new CubePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(1, new SpherePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(2, new CylinderPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(3, new ConePlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(4, new SlabPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(5, new EllipsoidPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(6, new StairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(7, new InsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(8, new OutsideStairPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(9, new ArcPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(10, new InsideArcPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(11, new OutsideArcPlaceable(STONE), this));
 
         for (Renderable renderable : shapeDisplays) addRenderable(renderable);
         selectedDisplay = shapeDisplays.getFirst();
-        for (Renderable renderable : selectedDisplay.settingElements) renderable.setVisible(true);
+        for (Renderable renderable : selectedDisplay.getSettingElements()) renderable.setVisible(true);
     }
 
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (CubeDisplay button : cubeDisplays) button.display.move(offset);
     }
+
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
     private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
-
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
 
     private ShapeDisplay selectedDisplay;
 
     private record CubeDisplay(StructureDisplay display, byte material) {
 
-    }
-
-    private static class ShapeDisplay extends UiButton {
-
-        private ShapeDisplay(Vector2f sizeToParent, Vector2f offsetToParent, ShapePlaceable placeable, ShapesTab placeablesTab) {
-            super(sizeToParent, offsetToParent);
-            setAction(getAction());
-            setRimThicknessMultiplier(0.5F);
-            setDoAutoFocusScaling(false);
-            setScalingFactor(1.2F);
-            this.placeable = placeable;
-
-            int index = 0;
-            for (UiBackgroundElement settingElement : placeable.settings()) {
-                settingElement.setSizeToParent(0.3F, 0.075F);
-                settingElement.setOffsetToParent(0.35F, 0.7F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
-                settingElement.setVisible(false);
-                settingElement.setRimThicknessMultiplier(0.5F);
-                settingElements.add(settingElement);
-            }
-
-            placeablesTab.shapePlaceableSettingSliders.addAll(settingElements);
-            for (UiBackgroundElement settingElement : settingElements) placeablesTab.addRenderable(settingElement);
-
-            addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.getSmallStructure()));
-        }
-
-        @Override
-        public void renderSelf(Vector2f position, Vector2f size) {
-            if (Game.getPlayer().getInventory().shapesTab.selectedDisplay == this) scaleForFocused(position, size);
-            super.renderSelf(position, size);
-        }
-
-        private Clickable getAction() {
-            return (Vector2i _, int _, int action) -> {
-                if (action != GLFW_PRESS) return;
-                Inventory inventory = Game.getPlayer().getInventory();
-                inventory.shapesTab.selectedDisplay = this;
-                for (UiBackgroundElement settingElement : inventory.shapesTab.shapePlaceableSettingSliders) settingElement.setVisible(false);
-                for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
-            };
-        }
-
-        private final ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
-        private final ShapePlaceable placeable;
     }
 }

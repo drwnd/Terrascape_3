@@ -5,6 +5,7 @@ import core.renderables.Clickable;
 import core.renderables.Renderable;
 import core.renderables.TextField;
 import core.rendering_api.Input;
+import core.rendering_api.Window;
 import core.utils.FileManager;
 
 import game.language.UiMessages;
@@ -43,29 +44,37 @@ public final class StructureTab extends Renderable implements InventoryTab {
         if (!reloadDisplay || toLoadStructureButton == null) return;
 
         reloadDisplay = false;
-        removeRenderable(selectedStructure).delete();
+        removeRenderable(selectedStructureDisplay).delete();
 
-        Vector2f sizeToParent = new Vector2f(0.7F, 1.0F);
-        Vector2f offsetToParent = new Vector2f(0.3F, 0.0F);
-        selectedStructure = new StructureDisplay(sizeToParent, offsetToParent, AssetManager.get(toLoadStructureButton.getStructure()));
-        selectedStructure.setDoAutoFocusScaling(false);
-        selectedStructure.setScaleWithGuiSize(false);
-        addRenderable(selectedStructure);
+        Vector2f sizeToParent = new Vector2f(0.7F, 0.7F * Window.getAspectRatio());
+        Vector2f offsetToParent = new Vector2f(0.3F, 0.5F - sizeToParent.y * 0.5F);
+        selectedStructureDisplay = new StructureDisplay(sizeToParent, offsetToParent, AssetManager.get(toLoadStructureButton.getStructure()));
+        selectedStructureDisplay.setDoAutoFocusScaling(false);
+        selectedStructureDisplay.setScaleWithGuiSize(false);
+        addRenderable(selectedStructureDisplay);
     }
 
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         filterTextField.setFocused(filterTextField.containsPixelCoordinate(pixelCoordinate));
-        if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) structureButtonsContainer.hoverOver(pixelCoordinate);
+        structureButtonsContainer.hoverOver(pixelCoordinate);
     }
 
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
-        if (selectedStructure == null) return;
+        if (selectedStructureDisplay == null) return;
 
-        selectedStructure.rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
+        selectedStructureDisplay.rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
         lastCursorPos.set(pixelCoordinate);
+    }
+
+    @Override
+    public void resizeSelfTo(int width, int height) {
+        if (selectedStructureDisplay == null) return;
+
+        selectedStructureDisplay.setSizeToParent(0.7F, 0.7F * Window.getAspectRatio());
+        selectedStructureDisplay.setOffsetToParent(0.3F, 0.5F - 0.7F * Window.getAspectRatio() * 0.5F);
     }
 
     @Override
@@ -82,8 +91,8 @@ public final class StructureTab extends Renderable implements InventoryTab {
             float newScroll = Math.max((float) (input.structureScroll - yScroll * 0.05), 0.0F);
             moveStructureButtons(newScroll - input.structureScroll);
             input.structureScroll = newScroll;
-        } else if (selectedStructure != null && selectedStructure.containsPixelCoordinate(pixelCoordinate))
-            selectedStructure.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
+        } else if (selectedStructureDisplay != null && selectedStructureDisplay.containsPixelCoordinate(pixelCoordinate))
+            selectedStructureDisplay.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
     }
 
     void reloadStructureButtons() {
@@ -128,7 +137,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     private final Vector2i lastCursorPos = new Vector2i();
 
     private final TextField filterTextField;
-    private StructureDisplay selectedStructure;
+    private StructureDisplay selectedStructureDisplay;
 
     private boolean reloadDisplay = false;
     private StructureSelectionButton toLoadStructureButton;

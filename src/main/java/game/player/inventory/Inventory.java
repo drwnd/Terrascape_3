@@ -57,6 +57,21 @@ public final class Inventory extends UiElement {
         shapesTab.updateDisplayPositions();
     }
 
+    public TabOpenerButton getOpenTabButton() {
+        return openTabButton;
+    }
+
+    void setOpenTab(InventoryTab toOpenTab, TabOpenerButton button) {
+        structureTab.setVisible(false);
+        shapesTab.setVisible(false);
+        miscellaneousTab.setVisible(false);
+
+        openInventoryTab = toOpenTab;
+        openInventoryTab.setVisible(true);
+
+        openTabButton = button;
+    }
+
     void handleInput(int button, int action, Vector2i pixelCoordinate) {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
@@ -76,12 +91,12 @@ public final class Inventory extends UiElement {
         openInventoryTab.handleScroll(pixelCoordinate, yScroll);
     }
 
-    final StructureTab structureTab;
-    final ShapesTab shapesTab;
-    final MiscellaneousTab miscellaneousTab;
+    private final StructureTab structureTab;
+    private final ShapesTab shapesTab;
+    private final MiscellaneousTab miscellaneousTab;
 
     private final InventoryInput input;
 
-    InventoryTab openInventoryTab;
-    TabOpenerButton openTabButton;
+    private InventoryTab openInventoryTab;
+    private TabOpenerButton openTabButton;
 }
