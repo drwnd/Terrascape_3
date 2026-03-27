@@ -3,6 +3,7 @@ package game.player.inventory;
 import core.assets.CoreTextures;
 import core.renderables.*;
 
+import core.rendering_api.Window;
 import game.language.UiMessages;
 import game.player.Hotbar;
 import game.server.Game;
@@ -23,8 +24,8 @@ public final class Inventory extends UiElement {
         setDoAutoFocusScaling(false);
         setScaleWithGuiSize(false);
 
-        Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE, 1.0F);
-        Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE, 0.0F);
+        Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE / Window.getAspectRatio(), 1.0F);
+        Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE / Window.getAspectRatio(), 0.0F);
 
         addRenderable(structureTab = new StructureTab(sizeToParent, offsetToParent));
         addRenderable(shapesTab = new ShapesTab(sizeToParent, offsetToParent));

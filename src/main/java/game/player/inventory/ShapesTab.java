@@ -2,6 +2,7 @@ package game.player.inventory;
 
 import core.language.Language;
 import core.renderables.*;
+import core.rendering_api.Input;
 import core.rendering_api.Window;
 
 import game.language.UiMessages;
@@ -16,10 +17,12 @@ import game.settings.ToggleSettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
@@ -63,8 +66,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio() * getAspectRatio());
 
         if (shapePreview != null) {
-            float sizeToParentY = 0.3F * Window.getAspectRatio() * getAspectRatio();
-            shapePreview.setSizeToParent(0.3F, sizeToParentY);
+            float sizeToParentY = 0.325F * Window.getAspectRatio() * getAspectRatio();
+            shapePreview.setSizeToParent(0.325F, sizeToParentY);
             shapePreview.setOffsetToParent(0.0F, 0.5F - sizeToParentY * 0.5F);
         }
     }
@@ -81,6 +84,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
+        if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
+            shapePreview.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
+            return;
+        }
+
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float newScroll = Math.max((float) (input.materialScroll - yScroll * 0.05), 0.0F);
         moveMaterialButtons(newScroll - input.materialScroll);
@@ -89,6 +97,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
+        if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         itemNameDisplay.setVisible(false);
         for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
         for (CubeDisplay display : cubeDisplays) {
@@ -107,16 +116,32 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    public void dragOver(Vector2i pixelCoordinate) {
+        super.dragOver(pixelCoordinate);
+        if (shapePreview == null || pixelCoordinate.x > Window.getWidth() * (shapePreview.getPosition().x + shapePreview.getSize().x)) return;
+
+        shapePreview.rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
+        lastCursorPos.set(pixelCoordinate);
+    }
+
+    @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         if (!refreshShapePreview) return;
 
         refreshShapePreview = false;
+        Vector3f rotation = shapePreview != null ? shapePreview.getRotation() : null;
         removeRenderable(shapePreview).delete();
 
-        Vector2f sizeToParent = new Vector2f(0.3F, 0.3F * Window.getAspectRatio() * getAspectRatio());
+        Vector2f sizeToParent = new Vector2f(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
         Vector2f offsetToParent = new Vector2f(0.0F, 0.5F - sizeToParent.y * 0.5F);
-        shapePreview = new StructureDisplay(sizeToParent, offsetToParent, selectedDisplay.getPlaceable().getStructure());
+        Structure structure = selectedDisplay.getPlaceable().getStructure();
+
+        shapePreview = new StructureDisplay(sizeToParent, offsetToParent, structure);
+        shapePreview.setRotation(rotation);
+        shapePreview.setDoAutoFocusScaling(false);
+        shapePreview.setScaleWithGuiSize(false);
+
         addRenderable(shapePreview);
     }
 
@@ -187,6 +212,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
     private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
+    private final Vector2i lastCursorPos = new Vector2i();
 
     private ShapeDisplay selectedDisplay;
     private StructureDisplay shapePreview;

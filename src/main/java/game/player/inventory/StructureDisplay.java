@@ -49,6 +49,15 @@ public final class StructureDisplay extends Renderable {
         rotation.y %= 360.0F;
     }
 
+    public Vector3f getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(Vector3f rotation) {
+        if (rotation == null) return;
+        this.rotation.set(rotation);
+    }
+
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
