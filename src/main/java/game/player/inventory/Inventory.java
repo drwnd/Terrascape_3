@@ -2,8 +2,8 @@ package game.player.inventory;
 
 import core.assets.CoreTextures;
 import core.renderables.*;
-import core.rendering_api.Window;
 
+import game.language.UiMessages;
 import game.player.Hotbar;
 import game.server.Game;
 import game.settings.KeySettings;
@@ -23,8 +23,8 @@ public final class Inventory extends UiElement {
         setDoAutoFocusScaling(false);
         setScaleWithGuiSize(false);
 
-        Vector2f sizeToParent = new Vector2f(0.95F, 1.0F);
-        Vector2f offsetToParent = new Vector2f(0.05F, 0.0F);
+        Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE, 1.0F);
+        Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE, 0.0F);
 
         structureTab = new StructureTab(sizeToParent, offsetToParent);
         placeablesTab = new PlaceablesTab(sizeToParent, offsetToParent);
@@ -37,11 +37,9 @@ public final class Inventory extends UiElement {
         openInventoryTab = placeablesTab;
         openInventoryTab.setVisible(true);
 
-        float buttonSizeY = 0.05F * Window.getAspectRatio();
-        sizeToParent = new Vector2f(0.05F, buttonSizeY);
-        addRenderable(new UiButton(sizeToParent, new Vector2f(0.0F, 1.0F - 1 * buttonSizeY), getTabOpenerButtonAction(placeablesTab)));
-        addRenderable(new UiButton(sizeToParent, new Vector2f(0.0F, 1.0F - 2 * buttonSizeY), getTabOpenerButtonAction(structureTab)));
-        addRenderable(new UiButton(sizeToParent, new Vector2f(0.0F, 1.0F - 3 * buttonSizeY), getTabOpenerButtonAction(miscellaneousTab)));
+        addRenderable(new TabOpenerButton(0, getTabOpenerButtonAction(placeablesTab), UiMessages.PLACEABLE_TAB_NAME));
+        addRenderable(new TabOpenerButton(1, getTabOpenerButtonAction(structureTab), UiMessages.STRUCTURE_TAB_NAME));
+        addRenderable(new TabOpenerButton(2, getTabOpenerButtonAction(miscellaneousTab), UiMessages.MISCELLANEOUS_TAB_NAME));
     }
 
     public InventoryInput getInput() {
