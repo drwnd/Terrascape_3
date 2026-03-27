@@ -106,7 +106,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
-        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, settingName);
+        OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, settingName, false);
         addRenderable(option);
         options.add(option);
 

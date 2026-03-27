@@ -1,11 +1,13 @@
 package game.player.rendering;
 
 import core.utils.IntArrayList;
+import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
+import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 
 import java.util.ArrayList;
@@ -61,7 +63,8 @@ public final class ParticleCollector {
         IntArrayList opaqueParticles = new IntArrayList(length * length * length);
         IntArrayList transparentParticles = new IntArrayList(length * length * length);
         IntArrayList placeParticles = new IntArrayList(length * length * length);
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
 
         for (int xOffset = 0; xOffset < length; xOffset++)
             for (int yOffset = 0; yOffset < length; yOffset++)
@@ -69,7 +72,7 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
-                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR) continue;
+                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
 
                     add(placeParticles,
                             xOffset, yOffset, zOffset,
@@ -172,7 +175,7 @@ public final class ParticleCollector {
 
 
     private void addBreakParticleEffect(long startX, long startY, long startZ, int length, byte ignoreMaterial, long[] bitMap) {
-        if (!ToggleSettings.SHOW_BREAK_PARTICLES.value()) return;
+        if (!ToggleSettings.SHOW_BREAK_PARTICLES.value() || OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
         IntArrayList opaqueParticles = new IntArrayList(length * length * length);
         IntArrayList transparentParticles = new IntArrayList(length * length * length);
 
@@ -198,7 +201,8 @@ public final class ParticleCollector {
     private void addPlaceParticleEffect(long startX, long startY, long startZ, int length, byte material, long[] bitMap) {
         if (!ToggleSettings.SHOW_CUBE_PLACE_PARTICLES.value() || material == AIR) return;
         IntArrayList particles = new IntArrayList(length * length * length);
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
 
         for (int xOffset = 0; xOffset < length; xOffset++)
             for (int yOffset = 0; yOffset < length; yOffset++)
@@ -206,7 +210,7 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
-                    if (previousMaterial == material || paint && previousMaterial == AIR) continue;
+                    if (previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
                     add(particles,
                             xOffset, yOffset, zOffset,
                             getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
@@ -233,7 +237,8 @@ public final class ParticleCollector {
     private static void addBreakPlaceEffectLoop(long startX, long startY, long startZ,
                                                 long x, long y, long z,
                                                 IntArrayList placeParticles, IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
@@ -246,7 +251,7 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR) continue;
+                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
 
                     add(placeParticles,
                             xOffset + (int) (x - startX), yOffset + (int) (y - startY), zOffset + (int) (z - startZ),
@@ -266,7 +271,8 @@ public final class ParticleCollector {
     private static void addPlaceEffectLoop(long startX, long startY, long startZ,
                                           long x, long y, long z,
                                            IntArrayList placeParticles, ShapePlaceable placeable) {
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
@@ -279,7 +285,7 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == material || paint && previousMaterial == AIR) continue;
+                    if (previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
                     add(placeParticles,
                             xOffset + (int) (x - startX), yOffset + (int) (y - startY), zOffset + (int) (z - startZ),
                             getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
@@ -291,6 +297,7 @@ public final class ParticleCollector {
     private static void addBreakEffectLoop(long startX, long startY, long startZ,
                                            long x, long y, long z,
                                            IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
+        if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();

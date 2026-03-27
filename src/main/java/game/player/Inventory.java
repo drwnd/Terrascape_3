@@ -19,6 +19,7 @@ import game.server.generation.Structure;
 import game.server.material.Materials;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
+import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 
 import org.joml.Vector2f;
@@ -47,7 +48,7 @@ public final class Inventory extends UiElement {
         structureButtonsContainer.setDoAutoFocusScaling(false);
         structureButtonsContainer.setScaleWithGuiSize(false);
 
-        Toggle paintToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.35F, 0.9F), ToggleSettings.PAINT, UiMessages.PAINT, true);
+        OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.35F, 0.9F), OptionSettings.PLACE_MODE, null, true);
         Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.525F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
 
         long start = System.nanoTime();
@@ -68,7 +69,7 @@ public final class Inventory extends UiElement {
         addRenderable(itemNameDisplay);
         addRenderable(structureButtonsContainer);
         addRenderable(filterTextField);
-        addRenderable(paintToggle);
+        addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
     }
 

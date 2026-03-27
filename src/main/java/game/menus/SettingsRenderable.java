@@ -22,8 +22,8 @@ public class SettingsRenderable extends CoreSettingsRenderable {
 
         TextElement nameDisplay = new TextElement(new Vector2f(0.225F, 0), new Vector2f(0.375F, yOffset + 0.05F), new Message(debugLine.name()));
         nameDisplay.setDoAutoFocusScaling(false);
-        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6F, yOffset), debugLine.color(), null);
-        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8F, yOffset), debugLine.visibility(), null);
+        OptionToggle colorOption = new OptionToggle(sizeToParent, new Vector2f(0.6F, yOffset), debugLine.color(), null, false);
+        OptionToggle visibilityOption = new OptionToggle(sizeToParent, new Vector2f(0.8F, yOffset), debugLine.visibility(), null, false);
 
         addRenderable(nameDisplay);
         addRenderable(colorOption);

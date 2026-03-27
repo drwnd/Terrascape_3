@@ -1,5 +1,6 @@
 package core.renderables;
 
+import core.language.Translatable;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
@@ -11,12 +12,13 @@ import org.joml.Vector2i;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class OptionToggle extends UiButton {
-    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName) {
+    public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
 
         this.setting = setting;
         this.settingName = settingName;
+        this.updateImmediately = updateImmediately;
 
         textElement = new TextElement(new Vector2f(0.05F, 0.5F));
         addRenderable(textElement);
@@ -44,8 +46,9 @@ public final class OptionToggle extends UiButton {
     private void setValue(Option value) {
         this.value = value;
         if (settingName != null) textElement.setText(settingName.get() + " " + value.name());
-        else textElement.setText(value.name());
-        if (value instanceof ColorOption) textElement.setColor(((ColorOption) value).getColor());
+        else textElement.setText(value instanceof Translatable translatable ? translatable.get() : value.name());
+        if (value instanceof ColorOption colorOption) textElement.setColor(colorOption.getColor());
+        if (updateImmediately) setting.setValue(value);
     }
 
     private Clickable getAction() {
@@ -60,4 +63,5 @@ public final class OptionToggle extends UiButton {
     private Option value;
     private final OptionSetting setting;
     private final TextElement textElement;
+    private final boolean updateImmediately;
 }

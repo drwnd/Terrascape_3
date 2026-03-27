@@ -4,6 +4,7 @@ import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
 import core.settings.optionSettings.Visibility;
+import game.player.interaction.PlaceMode;
 
 public enum OptionSettings implements OptionSetting {
     WORLD_NAME_VISIBILITY(Visibility.WHEN_SCREEN_OPEN),
@@ -38,7 +39,9 @@ public enum OptionSettings implements OptionSetting {
     VELOCITY_COLOR(ColorOption.WHITE),
     CHUNK_MEMORY_COLOR(ColorOption.RED),
     TOTAL_MEMORY_COLOR(ColorOption.RED),
-    BUFFER_STORAGE_COLOR(ColorOption.ORANGE);
+    BUFFER_STORAGE_COLOR(ColorOption.ORANGE),
+
+    PLACE_MODE(PlaceMode.REPLACE);
 
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;

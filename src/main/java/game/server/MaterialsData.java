@@ -3,6 +3,7 @@ package game.server;
 import core.utils.ByteArrayList;
 import core.utils.MathUtils;
 
+import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
@@ -10,7 +11,7 @@ import game.server.generation.Structure;
 import game.server.material.Material;
 import game.server.material.Properties;
 import game.settings.IntSettings;
-import game.settings.ToggleSettings;
+import game.settings.OptionSettings;
 import game.utils.Utils;
 
 import org.joml.Vector3i;
@@ -119,7 +120,8 @@ public final class MaterialsData {
         if (countX <= 0 || countY <= 0 || countZ <= 0) return;
         long[] bitMap = placeable.getBitMap();
         byte material = placeable.getMaterial();
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
 
@@ -139,7 +141,9 @@ public final class MaterialsData {
                     int bitMapZ = ((z << lod) + startZ) % lengthZ;
                     int bitMapIndex = getUncompressedIndex(bitMapX, bitMapY, bitMapZ);
                     int materialIndex = getUncompressedIndex(x, y, z);
-                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0 || paint && uncompressedMaterials[materialIndex] == AIR) continue;
+                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0
+                            || paint && uncompressedMaterials[materialIndex] == AIR
+                            || replaceAir && uncompressedMaterials[materialIndex] != AIR) continue;
                     uncompressedMaterials[materialIndex] = material;
                 }
 
@@ -264,9 +268,9 @@ public final class MaterialsData {
         long[] bitMap = placeable.getBitMap();
         int align = Math.min(totalSizeBits, Math.min(IntSettings.BREAK_PLACE_ALIGN.value(), Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2())));
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
-        int startX = Math.max(0, -inChunkX), endX = Math.min(Math.max(1, placeable.getLengthX() >> lod), (1 << totalSizeBits) - inChunkX);
-        int startY = Math.max(0, -inChunkY), endY = Math.min(Math.max(1, placeable.getLengthY() >> lod), (1 << totalSizeBits) - inChunkY);
-        int startZ = Math.max(0, -inChunkZ), endZ = Math.min(Math.max(1, placeable.getLengthZ() >> lod), (1 << totalSizeBits) - inChunkZ);
+        int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);
+        int startY = Math.max(0, -inChunkY), endY = Math.clamp(placeable.getLengthY() >> lod, 1, (1 << totalSizeBits) - inChunkY);
+        int startZ = Math.max(0, -inChunkZ), endZ = Math.clamp(placeable.getLengthZ() >> lod, 1, (1 << totalSizeBits) - inChunkZ);
 
         for (int x = startX; x < endX; x += alignLength)
             for (int y = startY; y < endY; y += alignLength)
@@ -280,13 +284,16 @@ public final class MaterialsData {
     private static void storeMaterial(int materialStartIndex, int bitMapStartIndex, byte material, int count, long[] bitMap, byte[] uncompressedMaterials, int lod) {
         int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
         int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
-        boolean paint = ToggleSettings.PAINT.value();
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
 
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
             for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
                 int materialIndex = materialStartIndex + (index - bitMapStartIndex >> shiftCount);
-                if ((bitMap[bitsIndex] & 1L << index) == 0 || paint && uncompressedMaterials[materialIndex] == AIR) continue;
+                if ((bitMap[bitsIndex] & 1L << index) == 0
+                        || paint && uncompressedMaterials[materialIndex] == AIR
+                        || replaceAir && uncompressedMaterials[materialIndex] != AIR) continue;
                 uncompressedMaterials[materialIndex] = material;
             }
     }
