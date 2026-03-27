@@ -16,6 +16,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ConePlaceable extends RotatableShapePlaceable {
 
@@ -78,6 +79,11 @@ public final class ConePlaceable extends RotatableShapePlaceable {
                 new CallbackSlider<>(zero, zero, height, UiMessages.HEIGHT, true),
                 new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(baseRadius.value(), topRadius.value(), exponent.value(), height.value(), thickness.value());
     }
 
     @Override

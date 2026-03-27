@@ -18,10 +18,10 @@ public abstract class RotatableShapePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected boolean isBitMapInValid(int preferedSize) {
+    protected boolean isBitMapInValid(int settingsHash) {
         boolean isInvalid = lastrotation != rotation;
         lastrotation = rotation;
-        return super.isBitMapInValid(preferedSize) || isInvalid;
+        return super.isBitMapInValid(settingsHash) || isInvalid;
     }
 
     @Override

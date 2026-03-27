@@ -16,6 +16,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class InsideArcPlaceable extends RotatableShapePlaceable {
 
@@ -56,6 +57,11 @@ public final class InsideArcPlaceable extends RotatableShapePlaceable {
                 new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(radius.value(), thickness.value(), exponent.value());
     }
 
     @Override

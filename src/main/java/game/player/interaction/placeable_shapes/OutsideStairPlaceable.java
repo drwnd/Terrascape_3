@@ -15,6 +15,7 @@ import game.player.inventory.CallbackSlider;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
@@ -68,6 +69,11 @@ public final class OutsideStairPlaceable extends RotatableShapePlaceable impleme
                 new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
                 new CallbackSlider<>(zero, zero, slope, UiMessages.SLOPE, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(stepHeight.value(), heightOffset.value(), thickness.value(), slope.value());
     }
 
     public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {

@@ -15,6 +15,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
@@ -106,6 +107,11 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
                 new CallbackSlider<>(zero, zero, exponentB, UiMessages.DISTANCE_EXPONENT, true),
                 new CallbackSlider<>(zero, zero, exponentC, UiMessages.DISTANCE_EXPONENT, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(thickness.value(), radiusA.value(), radiusB.value(), radiusC.value(), exponentA.value(), exponentB.value(), exponentC.value());
     }
 
     @Override

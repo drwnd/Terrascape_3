@@ -4,7 +4,8 @@ import core.renderables.Slider;
 import core.settings.NumberSetting;
 import core.utils.StringGetter;
 import org.joml.Vector2f;
-import org.joml.Vector2i;
+
+import java.util.Objects;
 
 public final class CallbackSlider<T extends Number> extends Slider<T> {
 
@@ -17,9 +18,9 @@ public final class CallbackSlider<T extends Number> extends Slider<T> {
     }
 
     @Override
-    public void dragOver(Vector2i pixelCoordinate) {
-        super.dragOver(pixelCoordinate);
-        if (callback != null) callback.run();
+    public void setValue(T value) {
+        if (callback != null && !Objects.equals(getValue(), value)) callback.run();
+        super.setValue(value);
     }
 
     private Runnable callback;

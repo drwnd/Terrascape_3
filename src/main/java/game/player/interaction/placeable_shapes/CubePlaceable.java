@@ -14,6 +14,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class CubePlaceable extends ShapePlaceable {
 
@@ -64,6 +65,11 @@ public final class CubePlaceable extends ShapePlaceable {
         copy.sizeReduction.setValue(sizeReduction.value());
         copy.thickness.setValue(thickness.value());
         return copy;
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(sizeReduction.value(), thickness.value());
     }
 
     @Override

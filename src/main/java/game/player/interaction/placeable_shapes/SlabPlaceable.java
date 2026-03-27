@@ -15,6 +15,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class SlabPlaceable extends RotatableShapePlaceable {
 
@@ -62,6 +63,11 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
         return List.of(
                 new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(thickness.value());
     }
 
     @Override

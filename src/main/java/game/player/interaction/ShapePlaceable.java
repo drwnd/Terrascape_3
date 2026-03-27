@@ -54,14 +54,15 @@ public abstract class ShapePlaceable implements Placeable {
 
     public long[] getBitMap() {
         int preferredSizePowOf2 = getPreferredSizePowOf2();
-        int preferredSize = getPreferredSize();
-        if (isBitMapInValid(preferredSize)) {
+        int settingsHash = settingsHash();
+        if (isBitMapInValid(settingsHash)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
             this.bitMap = bitMap;
             if (invert.value()) invertBitMap(bitMap);
         }
-        this.preferredSize = preferredSize;
+        this.invertValue = invert.value();
+        this.settingsHash = settingsHash;
         return bitMap;
     }
 
@@ -152,9 +153,11 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 
-    protected boolean isBitMapInValid(int preferredSize) {
-        return bitMap == null || this.preferredSize != preferredSize;
+    protected boolean isBitMapInValid(int settingsHash) {
+        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash;
     }
+
+    protected abstract int settingsHash();
 
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
@@ -189,7 +192,8 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private int preferredSize = -1;
+    private int settingsHash;
+    boolean invertValue;
     private long[] bitMap;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;

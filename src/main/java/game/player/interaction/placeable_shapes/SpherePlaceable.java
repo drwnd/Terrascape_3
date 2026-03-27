@@ -15,6 +15,7 @@ import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class SpherePlaceable extends ShapePlaceable {
 
@@ -54,6 +55,11 @@ public final class SpherePlaceable extends ShapePlaceable {
         copy.thickness.setValue(thickness.value());
         copy.exponent.setValue(exponent.value());
         return copy;
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(radius.value(), thickness.value(), exponent.value());
     }
 
     @Override
