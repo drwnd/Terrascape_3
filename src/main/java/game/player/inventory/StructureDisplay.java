@@ -58,6 +58,10 @@ public final class StructureDisplay extends Renderable {
         this.rotation.set(rotation);
     }
 
+    public float getZoom() {
+        return zoom;
+    }
+
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;

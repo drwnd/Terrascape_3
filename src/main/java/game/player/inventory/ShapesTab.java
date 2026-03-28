@@ -131,6 +131,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
         refreshShapePreview = false;
         Vector3f rotation = shapePreview != null ? shapePreview.getRotation() : null;
+        float zoom = shapePreview != null ? shapePreview.getZoom() : 1.0F;
         removeRenderable(shapePreview).delete();
 
         Vector2f sizeToParent = new Vector2f(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
@@ -139,6 +140,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
         shapePreview = new StructureDisplay(sizeToParent, offsetToParent, structure);
         shapePreview.setRotation(rotation);
+        shapePreview.changeZoom(zoom);
         shapePreview.setDoAutoFocusScaling(false);
         shapePreview.setScaleWithGuiSize(false);
 
