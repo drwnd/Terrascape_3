@@ -4,6 +4,7 @@ import core.renderables.Toggle;
 import core.renderables.UiButton;
 import core.settings.ToggleSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
+import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.language.UiMessages;
@@ -53,9 +54,9 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public long[] getBitMap() {
-        int preferredSizePowOf2 = getPreferredSizePowOf2();
+        int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
         int settingsHash = settingsHash();
-        if (isBitMapInValid(settingsHash)) {
+        if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
             this.bitMap = bitMap;
@@ -63,6 +64,7 @@ public abstract class ShapePlaceable implements Placeable {
         }
         this.invertValue = invert.value();
         this.settingsHash = settingsHash;
+        this.preferredSize = preferredSize;
         return bitMap;
     }
 
@@ -153,8 +155,8 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 
-    protected boolean isBitMapInValid(int settingsHash) {
-        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash;
+    protected boolean isBitMapInValid(int settingsHash, int preferredSize) {
+        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
     }
 
     protected abstract int settingsHash();
@@ -192,7 +194,7 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private int settingsHash;
+    private int settingsHash, preferredSize;
     boolean invertValue;
     private long[] bitMap;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
