@@ -30,7 +30,7 @@ public final class StandardWindowInput extends Input {
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (Input.isKeyPressed(CoreKeySettings.RESIZE_WINDOW)) Window.toggleFullScreen();
-        if (Input.isKeyPressed(CoreKeySettings.RELOAD_ASSETS)) AssetManager.reload();
+        if (Input.isKeyPressed(CoreKeySettings.RELOAD_ASSETS)) AssetManager.deleteAll();
         if (Input.isKeyPressed(CoreKeySettings.RELOAD_SETTINGS)) Settings.loadFromFile();
         if (Input.isKeyPressed(CoreKeySettings.RELOAD_FONT)) ((FontOption) CoreOptionSettings.FONT.value()).load();
 

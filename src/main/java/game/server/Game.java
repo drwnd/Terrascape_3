@@ -36,6 +36,7 @@ public final class Game {
     }
 
     public static void cleanUp() {
+        if (world == null) return;
         String worldName = world.getName();
         new PlayerSaver().save(player, PlayerSaver.getSaveFileLocation(worldName));
         new ServerSaver().save(server, ServerSaver.getSaveFileLocation(worldName));

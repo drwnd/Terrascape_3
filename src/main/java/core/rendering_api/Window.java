@@ -1,5 +1,6 @@
 package core.rendering_api;
 
+import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.settings.CoreFloatSettings;
 
@@ -117,6 +118,7 @@ public final class Window {
     }
 
     public static void cleanUp() {
+        AssetManager.deleteAll();
         glfwDestroyWindow(window);
     }
 

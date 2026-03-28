@@ -23,7 +23,7 @@ public final class Settings {
     }
 
     public static void loadFromFile() {
-        AssetManager.reload(fileIdentifier);
+        AssetManager.delete(fileIdentifier);
         initSettings(settings);
     }
 

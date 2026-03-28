@@ -12,7 +12,7 @@ public final class Material {
 
     public static void loadMaterials() {
         long start = System.nanoTime();
-        AssetManager.reload();
+        AssetManager.deleteAll();
 
         Gson gson = new Gson();
         for (Materials identifier : Materials.values()) loadMaterial(identifier, gson);

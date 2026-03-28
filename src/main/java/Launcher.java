@@ -2,6 +2,7 @@ import core.rendering_api.Window;
 import core.settings.Settings;
 
 import game.menus.MainMenu;
+import game.server.Game;
 import game.settings.*;
 
 public final class Launcher {
@@ -12,5 +13,6 @@ public final class Launcher {
         Window.pushRenderable(new MainMenu());
         Window.renderLoop();
         Window.cleanUp();
+        Game.cleanUp();
     }
 }

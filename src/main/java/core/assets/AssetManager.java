@@ -10,7 +10,7 @@ public final class AssetManager {
     }
 
 
-    public static void reload() {
+    public static void deleteAll() {
         System.out.println("---Deleting old Assets---");
         synchronized (assets) {
             for (Asset asset : assets.values()) asset.delete();
@@ -18,7 +18,7 @@ public final class AssetManager {
         }
     }
 
-    public static void reload(AssetIdentifier<?> identifier) {
+    public static void delete(AssetIdentifier<?> identifier) {
         synchronized (assets) {
             if (!assets.containsKey(identifier)) return;
             Asset asset = assets.get(identifier);
