@@ -7,7 +7,7 @@ import game.assets.Textures;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
-import game.player.rendering.StructureDisplay;
+import game.player.inventory.StructureDisplay;
 import game.player.interaction.Target;
 
 import game.server.generation.Structure;

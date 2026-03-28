@@ -1,4 +1,4 @@
-package game.player.rendering;
+package game.player.inventory;
 
 import core.assets.AssetManager;
 import core.renderables.Renderable;
@@ -7,6 +7,7 @@ import core.rendering_api.shaders.Shader;
 import core.settings.CoreFloatSettings;
 
 import game.assets.Shaders;
+import game.player.rendering.*;
 import game.server.generation.Structure;
 import game.utils.Transformation;
 
@@ -37,15 +38,28 @@ public final class StructureDisplay extends Renderable {
 
     public void rotate(Vector2i cursorMovement) {
         float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
-        sensitivityFactor = 5.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
+        sensitivityFactor = 7.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;
 
         rotation.x -= rotationPitch;
         rotation.y += rotationYaw;
 
-        rotation.x = Math.max(-89.9F, Math.min(rotation.x, 89.9F)); // Looking directly up or down breaks the lookAt transform
+        rotation.x = Math.clamp(rotation.x, -89.9F, 89.9F); // Looking directly up or down breaks the lookAt transform
         rotation.y %= 360.0F;
+    }
+
+    public Vector3f getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(Vector3f rotation) {
+        if (rotation == null) return;
+        this.rotation.set(rotation);
+    }
+
+    public float getZoom() {
+        return zoom;
     }
 
     @Override

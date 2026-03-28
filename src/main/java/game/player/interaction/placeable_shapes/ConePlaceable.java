@@ -1,7 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -10,12 +9,14 @@ import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
+import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ConePlaceable extends RotatableShapePlaceable {
 
@@ -56,28 +57,31 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        double offset = sideLength / 2.0;
-
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
         for (int x = 0; x < lengthX; x++)
             for (int y = 0; y < lengthY; y++)
                 for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(x, y, z, lengthX, lengthY, lengthZ, offset)) continue;
+                    if (!isInside(x, y, z, lengthX, lengthY, lengthZ)) continue;
                     int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
                 }
     }
 
     @Override
-    protected List<UiBackgroundElement> uniqueSettings() {
+    protected List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, baseRadius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, topRadius, UiMessages.TOP_RADIUS, true),
-                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true),
-                new Slider<>(zero, zero, height, UiMessages.HEIGHT, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
+                new CallbackSlider<>(zero, zero, baseRadius, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, topRadius, UiMessages.TOP_RADIUS, true),
+                new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true),
+                new CallbackSlider<>(zero, zero, height, UiMessages.HEIGHT, true),
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(baseRadius.value(), topRadius.value(), exponent.value(), height.value(), thickness.value());
     }
 
     @Override
@@ -112,19 +116,19 @@ public final class ConePlaceable extends RotatableShapePlaceable {
         return getStructure();
     }
 
-    private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ, double offset) {
+    private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ) {
         return switch (rotation) {
-            case Rotation6Way.ROTATION_1 -> isInside(offset, lengthZ - 1 - z, x, y);
-            case Rotation6Way.ROTATION_2 -> isInside(offset, lengthY - 1 - y, x, z);
-            case Rotation6Way.ROTATION_3 -> isInside(offset, lengthX  - 1- x, y, z);
-            case Rotation6Way.ROTATION_4 -> isInside(offset, z, x, y);
-            case Rotation6Way.ROTATION_5 -> isInside(offset, y, x, z);
-            case Rotation6Way.ROTATION_6 -> isInside(offset, x, y, z);
+            case Rotation6Way.ROTATION_1 -> isInside(lengthZ - 1 - z, x - (lengthX >> 1), y - (lengthY >> 1));
+            case Rotation6Way.ROTATION_2 -> isInside(lengthY - 1 - y, x - (lengthX >> 1), z - (lengthZ >> 1));
+            case Rotation6Way.ROTATION_3 -> isInside(lengthX  - 1- x, y - (lengthY >> 1), z - (lengthZ >> 1));
+            case Rotation6Way.ROTATION_4 -> isInside(z, x - (lengthX >> 1), y - (lengthY >> 1));
+            case Rotation6Way.ROTATION_5 -> isInside(y, x - (lengthX >> 1), z - (lengthZ >> 1));
+            case Rotation6Way.ROTATION_6 -> isInside(x, y - (lengthY >> 1), z - (lengthZ >> 1));
             case null, default -> false;
         };
     }
 
-    private boolean isInside(double offset, int a, int b, int c) {
+    private boolean isInside(int a, int b, int c) {
         double heightFraction = (double) a / height.value();
         if (heightFraction > 1) return false;
         double outerRadius = (1 - heightFraction) * baseRadius.value() + heightFraction * topRadius.value();
@@ -133,8 +137,8 @@ public final class ConePlaceable extends RotatableShapePlaceable {
         double outerThreshold = Math.pow(outerRadius, exponent.value());
         double innerThreshold = Math.pow(innerRadius, exponent.value());
 
-        double distanceB = Math.pow(Math.abs(b - offset + 0.5), exponent.value());
-        double distanceC = Math.pow(Math.abs(c - offset + 0.5), exponent.value());
+        double distanceB = Math.pow(Math.abs(b + 0.5), exponent.value());
+        double distanceC = Math.pow(Math.abs(c + 0.5), exponent.value());
         return distanceB + distanceC <= outerThreshold && distanceB + distanceC >= innerThreshold;
     }
 

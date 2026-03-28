@@ -1,7 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.optionSettings.Option;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
@@ -12,9 +11,11 @@ import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
 
+import game.player.inventory.CallbackSlider;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
@@ -60,14 +61,19 @@ public final class OutsideStairPlaceable extends RotatableShapePlaceable impleme
     }
 
     @Override
-    protected List<UiBackgroundElement> uniqueSettings() {
+    protected List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
-                new Slider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new Slider<>(zero, zero, slope, UiMessages.SLOPE, true)
+                new CallbackSlider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
+                new CallbackSlider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true),
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
+                new CallbackSlider<>(zero, zero, slope, UiMessages.SLOPE, true)
         );
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(stepHeight.value(), heightOffset.value(), thickness.value(), slope.value());
     }
 
     public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {

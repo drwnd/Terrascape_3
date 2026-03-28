@@ -97,7 +97,10 @@ public enum UiMessages implements Translatable {
     PAINT,
     OFFSET_FROM_GROUND,
     SIZE_REDUCTION,
-    SHOW_PLACEABLE_PREVIEW;
+    SHOW_PLACEABLE_PREVIEW,
+    SHAPES_TAB_NAME,
+    STRUCTURE_TAB_NAME,
+    MISCELLANEOUS_TAB_NAME;
 
     @Override
     public String translationFileName() {

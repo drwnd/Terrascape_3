@@ -9,7 +9,7 @@ import org.joml.Vector2i;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public final class Slider<T extends Number> extends UiButton {
+public class Slider<T extends Number> extends UiButton {
 
     public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);

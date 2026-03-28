@@ -1,9 +1,10 @@
 package game.player.interaction;
 
 import core.renderables.Toggle;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.ToggleSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
+import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.language.UiMessages;
@@ -37,14 +38,14 @@ public abstract class ShapePlaceable implements Placeable {
         return placeable;
     }
 
-    public final List<UiBackgroundElement> settings() {
+    public final List<UiButton> settings() {
         Vector2f zero = new Vector2f(0.0F, 0.0F);
-        ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
+        ArrayList<UiButton> settingElements = new ArrayList<>();
 
         settingElements.add(new Toggle(zero, zero, invert, UiMessages.INVERT_PLACEABLE, true));
         settingElements.addAll(uniqueSettings());
 
-        for (UiBackgroundElement element : settingElements) element.setScaleWithGuiSize(false);
+        for (UiButton element : settingElements) element.setScaleWithGuiSize(false);
         return settingElements;
     }
 
@@ -53,14 +54,16 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public long[] getBitMap() {
-        int preferredSizePowOf2 = getPreferredSizePowOf2();
-        int preferredSize = getPreferredSize();
-        if (isBitMapInValid(preferredSize)) {
+        int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
+        int settingsHash = settingsHash();
+        if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
             this.bitMap = bitMap;
             if (invert.value()) invertBitMap(bitMap);
         }
+        this.invertValue = invert.value();
+        this.settingsHash = settingsHash;
         this.preferredSize = preferredSize;
         return bitMap;
     }
@@ -148,13 +151,15 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract void fillBitMap(long[] bitMap, int sideLength);
 
-    protected abstract List<UiBackgroundElement> uniqueSettings();
+    protected abstract List<UiButton> uniqueSettings();
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 
-    protected boolean isBitMapInValid(int preferredSize) {
-        return bitMap == null || this.preferredSize != preferredSize;
+    protected boolean isBitMapInValid(int settingsHash, int preferredSize) {
+        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
     }
+
+    protected abstract int settingsHash();
 
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
@@ -189,7 +194,8 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private int preferredSize = -1;
+    private int settingsHash, preferredSize;
+    boolean invertValue;
     private long[] bitMap;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;

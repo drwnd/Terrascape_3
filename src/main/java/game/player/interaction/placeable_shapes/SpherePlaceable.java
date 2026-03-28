@@ -1,7 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.Slider;
-import core.renderables.UiBackgroundElement;
+import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -9,12 +8,14 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
+import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
 
 import game.server.generation.Structure;
 import org.joml.Vector2f;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class SpherePlaceable extends ShapePlaceable {
 
@@ -39,12 +40,12 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public List<UiBackgroundElement> uniqueSettings() {
+    public List<UiButton> uniqueSettings() {
         Vector2f zero = new Vector2f();
         return List.of(
-                new Slider<>(zero, zero, radius, UiMessages.RADIUS, true),
-                new Slider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new Slider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
+                new CallbackSlider<>(zero, zero, radius, UiMessages.RADIUS, true),
+                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
+                new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
     }
 
     @Override
@@ -54,6 +55,11 @@ public final class SpherePlaceable extends ShapePlaceable {
         copy.thickness.setValue(thickness.value());
         copy.exponent.setValue(exponent.value());
         return copy;
+    }
+
+    @Override
+    protected int settingsHash() {
+        return Objects.hash(radius.value(), thickness.value(), exponent.value());
     }
 
     @Override

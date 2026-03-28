@@ -68,7 +68,7 @@ public class Renderable {
 
     public void dragOver(Vector2i pixelCoordinate) {
         hoverOver(pixelCoordinate);
-        for (Renderable renderable : children) if (renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
+        for (Renderable renderable : children) if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
     }
 
     public void move(Vector2f offset) {
