@@ -162,14 +162,17 @@ public final class MeshGenerator {
         int maxX = x + switch (side) {
             case NORTH, SOUTH -> faceSize2;
             case TOP, BOTTOM -> faceSize1;
+            case WEST -> 1;
             default -> 0;
         };
         int maxY = y + switch (side) {
             case NORTH, WEST, SOUTH, EAST -> faceSize1;
+            case TOP -> 1;
             default -> 0;
         };
         int maxZ = z + switch (side) {
             case TOP, BOTTOM, WEST, EAST -> faceSize2;
+            case NORTH -> 1;
             default -> 0;
         };
 
