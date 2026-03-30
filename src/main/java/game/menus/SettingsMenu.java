@@ -84,7 +84,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySettings.USE, UiMessages.USE);
         section.addKeySelector(KeySettings.PICK_BLOCK, UiMessages.PICK_BLOCK);
         section.addKeySelector(KeySettings.INVENTORY, UiMessages.INVENTORY);
-        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION, UiMessages.LOCK_PLACE_POSITION);
+        section.addKeySelector(KeySettings.SET_PLACE_START_POSITION, UiMessages.SET_PLACE_START_POSITION);
         section.addKeySelector(KeySettings.SHOW_PLACEABLE_PREVIEW, UiMessages.SHOW_PLACEABLE_PREVIEW);
         section.addKeySelector(KeySettings.ROTATE_SHAPE_FORWARD, UiMessages.ROTATE_SHAPE_FORWARD);
         section.addKeySelector(KeySettings.ROTATE_SHAPE_BACKWARD, UiMessages.ROTATE_SHAPE_BACKWARD);

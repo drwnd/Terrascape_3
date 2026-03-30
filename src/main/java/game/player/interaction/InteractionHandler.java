@@ -18,8 +18,8 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
         if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
-        if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
+        if (action == GLFW_PRESS && button == KeySettings.SET_PLACE_START_POSITION.keybind()) startTarget = Target.getPlayerTarget();
+        if (action == GLFW_RELEASE && button == KeySettings.SET_PLACE_START_POSITION.keybind()) startTarget = null;
 
         if (button == KeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
         if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
