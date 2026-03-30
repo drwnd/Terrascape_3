@@ -7,6 +7,7 @@ import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
+import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -18,11 +19,25 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
         if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
-        if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = Target.getPlayerTarget();
-        if (action == GLFW_RELEASE && button == KeySettings.LOCK_PLACE_POSITION.keybind()) startTarget = null;
+
+        if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) handleLockPlacePosition();
+        if (action == GLFW_PRESS && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleSetPlaceStartPosition();
+        if (action == GLFW_RELEASE && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleReleasePlaceStartPosition();
 
         if (button == KeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
         if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
+    }
+
+    public void handleScroll(double yScroll) {
+        int primaryDirection = Game.getPlayer().getCamera().getPrimaryDirection();
+        Vector3i movement = new Vector3i(
+                (primaryDirection == WEST ? 1 : 0) + (primaryDirection == EAST ? -1 : 0),
+                (primaryDirection == TOP ? 1 : 0) + (primaryDirection == BOTTOM ? -1 : 0),
+                (primaryDirection == NORTH ? 1 : 0) + (primaryDirection == SOUTH ? -1 : 0)
+        ).mul(1 << IntSettings.BREAK_PLACE_ALIGN.value()).mul(yScroll > 0 ? 1 : -1);
+
+        if (startTarget != null && Input.isKeyPressed(KeySettings.SNEAK)) startTarget.shiftPosition(movement);
+        if (lockedTarget != null) lockedTarget.shiftPosition(movement);
     }
 
     public void updateGameTick() {
@@ -36,6 +51,33 @@ public final class InteractionHandler {
     public Target getStartTarget() {
         return startTarget;
     }
+
+    public Target getLockedTarget() {
+        return lockedTarget;
+    }
+
+    public PlacingState getState(Target currentTarget) {
+        Placeable placeable = Game.getPlayer().getHeldPlaceable();
+        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT) || placeable == null;
+        boolean isLocked = lockedTarget != null;
+        boolean isRepeat = startTarget != null;
+
+        if (placeable instanceof ChunkRebuildPlaceable) return PlacingState.NONE;
+        if (placeable instanceof StructurePlaceable && !isBreak) {
+            if (currentTarget == null && !isLocked) return PlacingState.NONE;
+            return isLocked ? PlacingState.STRUCTURE_PLACE_LOCKED : PlacingState.STRUCTURE_PLACE;
+        }
+
+        if (isRepeat) {
+            if (isLocked) return isBreak ? PlacingState.REPEAT_BREAK_LOCKED : PlacingState.REPEAT_PLACE_LOCKED;
+            if (currentTarget == null) return PlacingState.NONE;
+            return isBreak ? PlacingState.REPEAT_BREAK : PlacingState.REPEAT_PLACE;
+        }
+        if (isLocked) return isBreak ? PlacingState.SHAPE_BREAK_LOCKED : PlacingState.SHAPE_PLACE_LOCKED;
+        if (currentTarget == null) return PlacingState.NONE;
+        return isBreak ? PlacingState.SHAPE_BREAK : PlacingState.SHAPE_PLACE;
+    }
+
 
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
@@ -59,7 +101,10 @@ public final class InteractionHandler {
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
 
-        Target target = Target.getPlayerTarget();
+        Target currentTarget = Target.getPlayerTarget();
+        PlacingState state = getState(currentTarget);
+        Target target = state.isLocked() ? lockedTarget : currentTarget;
+
         if (target == null) {
             info.lastAction = currentGameTick;
             info.forceAction = false;
@@ -74,7 +119,29 @@ public final class InteractionHandler {
             targetedSide = startTarget.side();
             startTarget = null;
         }
-        if (Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) info.lastAction = currentGameTick;
+
+        if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) return;
+        info.lastAction = currentGameTick;
+        startTarget = lockedTarget = null;
+    }
+
+    private void handleLockPlacePosition() {
+        Target currentTarget = Target.getPlayerTarget();
+        PlacingState state = getState(currentTarget);
+        if (state.isLocked()) lockedTarget = startTarget = null;
+        else lockedTarget = currentTarget;
+    }
+
+    private void handleSetPlaceStartPosition() {
+        Target currentTarget = Target.getPlayerTarget();
+        PlacingState state = getState(currentTarget);
+        if (state == PlacingState.NONE || state.isLocked()) return;
+        startTarget = currentTarget;
+    }
+
+    private void handleReleasePlaceStartPosition() {
+        if (getState(Target.getPlayerTarget()).isLocked()) return;
+        startTarget = null;
     }
 
     private static void changeBreakPlaceSize(int addend) {
@@ -92,9 +159,10 @@ public final class InteractionHandler {
         if (info.buttonIsHeld) info.forceAction = true;
     }
 
+
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
-    private Target startTarget = null;
+    private Target startTarget = null, lockedTarget = null;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;
