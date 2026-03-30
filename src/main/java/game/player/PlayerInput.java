@@ -42,7 +42,7 @@ public final class PlayerInput extends Input {
 
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
-       player.handleInactiveScrollInput(xScroll, yScroll);
+       player.handleScrollInput(yScroll);
     }
 
     @Override

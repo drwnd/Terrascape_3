@@ -10,6 +10,7 @@ import game.utils.Position;
 import game.utils.Utils;
 
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
@@ -77,6 +78,9 @@ public record Target(Vector3l position, int side, byte material) {
         return null;
     }
 
+    public void shiftPosition(Vector3i movement) {
+        position.add(movement.x, movement.y, movement.z);
+    }
 
     public Vector3l offsetPosition() {
         return Utils.offsetByNormal(position(), side);

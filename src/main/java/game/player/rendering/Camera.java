@@ -12,8 +12,7 @@ import org.joml.*;
 
 import java.lang.Math;
 
-import static game.utils.Constants.Z_FAR;
-import static game.utils.Constants.Z_NEAR;
+import static game.utils.Constants.*;
 
 public final class Camera {
 
@@ -23,25 +22,16 @@ public final class Camera {
         updateProjectionMatrix();
     }
 
+
     public void updateProjectionMatrix() {
         projectionMatrix
                 .identity()
                 .setPerspective((float) Math.toRadians(FloatSettings.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
     }
 
-    public Vector3f getDirection() {
+    public void setPosition(Position position) {
         synchronized (this) {
-            return MathUtils.getDirection(rotation);
-        }
-    }
-
-    private void moveRotation(float yaw, float pitch) {
-        synchronized (this) {
-            rotation.x += pitch;
-            rotation.y += yaw;
-
-            rotation.x = Math.max(-90.0F, Math.min(rotation.x, 90.0F));
-            rotation.y %= 360.0F;
+            this.position = new Position(position);
         }
     }
 
@@ -52,28 +42,6 @@ public final class Camera {
         float rotationPitch = cursorMovement.y * sensitivityFactor;
 
         moveRotation(rotationYaw, -rotationPitch);
-    }
-
-    public Matrix4f getProjectionMatrix() {
-        return projectionMatrix;
-    }
-
-    public Position getPosition() {
-        synchronized (this) {
-            return new Position(position);
-        }
-    }
-
-    public void setPosition(Position position) {
-        synchronized (this) {
-            this.position = new Position(position);
-        }
-    }
-
-    public Vector3f getRotation() {
-        synchronized (this) {
-            return new Vector3f(rotation);
-        }
     }
 
     public void setRotation(Vector3f rotation) {
@@ -95,6 +63,50 @@ public final class Camera {
     public boolean isZoomed() {
         return zoomed;
     }
+
+    public Vector3f getDirection() {
+        synchronized (this) {
+            return MathUtils.getDirection(rotation);
+        }
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
+
+    public Position getPosition() {
+        synchronized (this) {
+            return new Position(position);
+        }
+    }
+
+    public Vector3f getRotation() {
+        synchronized (this) {
+            return new Vector3f(rotation);
+        }
+    }
+
+    public int getPrimaryDirection() {
+        Vector3f direction = getDirection();
+        int component = direction.maxComponent();
+
+        if (component == X_COMPONENT) return direction.x > 0.0F ? WEST : EAST;
+        if (component == Y_COMPONENT) return direction.y > 0.0F ? TOP : BOTTOM;
+        if (component == Z_COMPONENT) return direction.z > 0.0F ? NORTH : SOUTH;
+        throw new IllegalStateException(component + " is not a valid Component");
+    }
+
+
+    private void moveRotation(float yaw, float pitch) {
+        synchronized (this) {
+            rotation.x += pitch;
+            rotation.y += yaw;
+
+            rotation.x = Math.clamp(rotation.x, -90.0F, 90.0F);
+            rotation.y %= 360.0F;
+        }
+    }
+
 
     private boolean zoomed = false;
     private float zoomFactor = 1.0F;

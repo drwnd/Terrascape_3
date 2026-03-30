@@ -103,10 +103,14 @@ public final class Player {
         if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
-    public void handleInactiveScrollInput(double xScroll, double yScroll) {
+    public void handleScrollInput(double yScroll) {
         if (camera.isZoomed()) {
             final float zoomFactorChange = 0.9F;
             camera.changeZoom(yScroll > 0 ? zoomFactorChange : 1 / zoomFactorChange);
+            return;
+        }
+        if (interactionHandler.getState(Target.getPlayerTarget()).isLocked()) {
+            interactionHandler.handleScroll(yScroll);
             return;
         }
 

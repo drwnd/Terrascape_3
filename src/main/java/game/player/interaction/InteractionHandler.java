@@ -7,6 +7,7 @@ import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
+import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -27,6 +28,18 @@ public final class InteractionHandler {
         if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
     }
 
+    public void handleScroll(double yScroll) {
+        int primaryDirection = Game.getPlayer().getCamera().getPrimaryDirection();
+        Vector3i movement = new Vector3i(
+                (primaryDirection == WEST ? 1 : 0) + (primaryDirection == EAST ? -1 : 0),
+                (primaryDirection == TOP ? 1 : 0) + (primaryDirection == BOTTOM ? -1 : 0),
+                (primaryDirection == NORTH ? 1 : 0) + (primaryDirection == SOUTH ? -1 : 0)
+        ).mul(1 << IntSettings.BREAK_PLACE_ALIGN.value()).mul(yScroll > 0 ? 1 : -1);
+
+        if (startTarget != null && Input.isKeyPressed(KeySettings.SNEAK)) startTarget.shiftPosition(movement);
+        if (lockedTarget != null) lockedTarget.shiftPosition(movement);
+    }
+
     public void updateGameTick() {
         if (!Input.isKeyPressed(KeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
         if (!Input.isKeyPressed(KeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
@@ -45,7 +58,7 @@ public final class InteractionHandler {
 
     public PlacingState getState(Target currentTarget) {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT);
+        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT) || placeable == null;
         boolean isLocked = lockedTarget != null;
         boolean isRepeat = startTarget != null;
 
