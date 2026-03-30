@@ -629,28 +629,34 @@ public final class Renderer extends Renderable {
     }
 
     private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix) {
-        Target startTarget = player.getInteractionHandler().getStartTarget();
         Target currentTarget = Target.getPlayerTarget();
+        Target lockedTarget = player.getInteractionHandler().getLockedTarget();
+        Target startTarget = player.getInteractionHandler().getStartTarget();
+        PlacingState state = player.getInteractionHandler().getState(currentTarget);
         Placeable placeable = player.getHeldPlaceable();
-        if (currentTarget == null) return;
 
-        if (startTarget != null) renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
-        else if (Input.isKeyPressed(KeySettings.SHOW_PLACEABLE_PREVIEW)) {
-            if (placeable instanceof ShapePlaceable shapePlaceable)
-                renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, shapePlaceable, Input.isKeyPressed(KeySettings.SPRINT));
-            else if (Input.isKeyPressed(KeySettings.SPRINT) || placeable == null)
-                renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, breakHologram, true);
-            else if (placeable instanceof StructurePlaceable structurePlaceable)
-                renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, structurePlaceable);
+        if (!state.shouldRender()) return;
+        switch (state) {
+            case SHAPE_PLACE -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, placeable, false);
+            case SHAPE_BREAK -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, placeable, true);
+            case SHAPE_PLACE_LOCKED -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, placeable, false);
+            case SHAPE_BREAK_LOCKED -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, placeable, true);
+
+            case REPEAT_PLACE, REPEAT_BREAK -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
+            case REPEAT_PLACE_LOCKED, REPEAT_BREAK_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget);
+
+            case STRUCTURE_PLACE -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, (StructurePlaceable) placeable);
+            case STRUCTURE_PLACE_LOCKED -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, (StructurePlaceable) placeable);
         }
     }
 
-    private void renderShapeVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, ShapePlaceable placeable, boolean showBreakVolume) {
-        byte material = showBreakVolume ? AIR : placeable.getMaterial();
+    private void renderShapeVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, Placeable placeable, boolean showBreakVolume) {
+        ShapePlaceable shapePlaceable = placeable instanceof ShapePlaceable ? (ShapePlaceable) placeable : breakHologram;
+        byte material = showBreakVolume ? AIR : shapePlaceable.getMaterial();
         Vector3l position = showBreakVolume ? target.position() : target.offsetPosition();
 
-        placeable.offsetPosition(position, target.side());
-        synchronizeHologramModel(placeable);
+        shapePlaceable.offsetPosition(position, target.side());
+        synchronizeHologramModel(shapePlaceable);
 
         renderHologram(cameraPosition, projectionViewMatrix, position, material);
     }
