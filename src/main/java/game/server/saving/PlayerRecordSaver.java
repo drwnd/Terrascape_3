@@ -19,7 +19,7 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         saveInt(record.positions().size());
         saveInt(record.rotations().size());
 
-        for (Position position : record.positions()) saveGeneric(position, Position::save);
+        for (Position position : record.positions()) saveGeneric(position::save);
         for (Vector3f rotation : record.rotations()) saveVector3f(rotation);
     }
 

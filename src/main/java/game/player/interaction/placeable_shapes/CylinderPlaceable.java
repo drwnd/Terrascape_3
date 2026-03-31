@@ -6,7 +6,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
 import game.player.inventory.CallbackSlider;
@@ -24,13 +23,13 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
         super(material, Rotation3Way.ROTATION_2);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 5);
-        saver.saveByte(((CylinderPlaceable) placeable).getMaterial());
-        saver.saveInt(((CylinderPlaceable) placeable).radius.value());
-        saver.saveInt(((CylinderPlaceable) placeable).thickness.value());
-        saver.saveInt(((CylinderPlaceable) placeable).height.value());
-        saver.saveFloat(((CylinderPlaceable) placeable).exponent.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(radius.value());
+        saver.saveInt(thickness.value());
+        saver.saveInt(height.value());
+        saver.saveFloat(exponent.value());
     }
 
     public static CylinderPlaceable load(Saver<?> saver) {
@@ -75,28 +74,25 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch (rotation) {
+        return switch ((Rotation3Way) rotation) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_2 -> radius.value() * 2;
             case Rotation3Way.ROTATION_1 -> height.value();
-            case null, default -> super.getLengthX();
         };
     }
 
     @Override
     public int getLengthY() {
-        return switch (rotation) {
+        return switch ((Rotation3Way) rotation) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_1 -> radius.value() * 2;
             case Rotation3Way.ROTATION_2 -> height.value();
-            case null, default -> super.getLengthY();
         };
     }
 
     @Override
     public int getLengthZ() {
-        return switch (rotation) {
+        return switch ((Rotation3Way) rotation) {
             case Rotation3Way.ROTATION_3 -> height.value();
             case Rotation3Way.ROTATION_2, Rotation3Way.ROTATION_1 -> radius.value() * 2;
-            case null, default -> super.getLengthZ();
         };
     }
 
@@ -116,12 +112,10 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
-        return switch (rotation) {
+        return switch ((Rotation3Way) rotation) {
             case Rotation3Way.ROTATION_3 -> isInsideRotated(z, x, y, offset, outerThreshold, innerThreshold);
             case Rotation3Way.ROTATION_2 -> isInsideRotated(y, x, z, offset, outerThreshold, innerThreshold);
             case Rotation3Way.ROTATION_1 -> isInsideRotated(x, y, z, offset, outerThreshold, innerThreshold);
-
-            case null, default -> false;
         };
     }
 

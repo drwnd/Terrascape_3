@@ -237,8 +237,8 @@ public abstract class Saver<T> {
         return builder.toString();
     }
 
-    public final <V> void saveGeneric(V object, GenericSaver<V> savable) {
-        savable.save(object, this);
+    public final <V> void saveGeneric(GenericSaver<V> savable) {
+        savable.save(this);
     }
 
     public final <V> V loadGeneric(GenericLoader<V> loadable) {
@@ -253,6 +253,6 @@ public abstract class Saver<T> {
     }
 
     public interface GenericSaver<T> {
-        void save(T object, Saver<?> saver);
+        void save(Saver<?> saver);
     }
 }

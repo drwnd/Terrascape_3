@@ -5,7 +5,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
@@ -22,11 +21,11 @@ public final class CubePlaceable extends ShapePlaceable {
         super(material);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 1);
-        saver.saveByte(((CubePlaceable) placeable).getMaterial());
-        saver.saveInt(((CubePlaceable) placeable).sizeReduction.value());
-        saver.saveInt(((CubePlaceable) placeable).thickness.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(sizeReduction.value());
+        saver.saveInt(thickness.value());
     }
 
     public static CubePlaceable load(Saver<?> saver) {

@@ -6,7 +6,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
 import game.player.inventory.CallbackSlider;
@@ -23,16 +22,16 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
         super(material, Rotation6Way.ROTATION_2);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 14);
-        saver.saveByte(((EllipsoidPlaceable) placeable).getMaterial());
-        saver.saveInt(((EllipsoidPlaceable) placeable).thickness.value());
-        saver.saveInt(((EllipsoidPlaceable) placeable).radiusA.value());
-        saver.saveInt(((EllipsoidPlaceable) placeable).radiusB.value());
-        saver.saveInt(((EllipsoidPlaceable) placeable).radiusC.value());
-        saver.saveFloat(((EllipsoidPlaceable) placeable).exponentA.value());
-        saver.saveFloat(((EllipsoidPlaceable) placeable).exponentB.value());
-        saver.saveFloat(((EllipsoidPlaceable) placeable).exponentC.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(thickness.value());
+        saver.saveInt(radiusA.value());
+        saver.saveInt(radiusB.value());
+        saver.saveInt(radiusC.value());
+        saver.saveFloat(exponentA.value());
+        saver.saveFloat(exponentB.value());
+        saver.saveFloat(exponentC.value());
     }
 
     public static EllipsoidPlaceable load(Saver<?> saver) {
@@ -62,31 +61,28 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch (rotation) {
+        return switch ((Rotation6Way) rotation) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_2 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_5 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_6 -> radiusC.value() * 2;
-            case null, default -> super.getLengthX();
         };
     }
 
     @Override
     public int getLengthY() {
-        return switch (rotation) {
+        return switch ((Rotation6Way) rotation) {
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_4 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_6 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> radiusC.value() * 2;
-            case null, default -> super.getLengthY();
         };
     }
 
     @Override
     public int getLengthZ() {
-        return switch (rotation) {
+        return switch ((Rotation6Way) rotation) {
             case Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_6 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_4 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_3 -> radiusC.value() * 2;
-            case null, default -> super.getLengthX();
         };
     }
 
@@ -118,6 +114,13 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     protected void fillBitMap(long[] bitMap, int sideLength) {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
 
+        invOuterRadiusA = 1.0 / radiusA.value();
+        invOuterRadiusB = 1.0 / radiusB.value();
+        invOuterRadiusC = 1.0 / radiusC.value();
+        invInnerRadiusA = 1.0 / Math.max(0, radiusA.value() - thickness.value());
+        invInnerRadiusB = 1.0 / Math.max(0, radiusB.value() - thickness.value());
+        invInnerRadiusC = 1.0 / Math.max(0, radiusC.value() - thickness.value());
+
         for (int x = 0; x < lengthX; x++)
             for (int y = 0; y < lengthY; y++)
                 for (int z = 0; z < lengthZ; z++) {
@@ -146,14 +149,14 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     private boolean isInsideRotated(double a, double b, double c) {
         double distanceA, distanceB, distanceC;
 
-        distanceA = Math.pow(Math.abs(a / radiusA.value()), exponentA.value());
-        distanceB = Math.pow(Math.abs(b / radiusB.value()), exponentB.value());
-        distanceC = Math.pow(Math.abs(c / radiusC.value()), exponentC.value());
+        distanceA = Math.pow(Math.abs(a * invOuterRadiusA), exponentA.value());
+        distanceB = Math.pow(Math.abs(b * invOuterRadiusB), exponentB.value());
+        distanceC = Math.pow(Math.abs(c * invOuterRadiusC), exponentC.value());
         double outerDistance = distanceA + distanceB + distanceC;
 
-        distanceA = Math.pow(Math.abs(a / Math.max(0, radiusA.value() - thickness.value())), exponentA.value());
-        distanceB = Math.pow(Math.abs(b / Math.max(0, radiusB.value() - thickness.value())), exponentB.value());
-        distanceC = Math.pow(Math.abs(c / Math.max(0, radiusC.value() - thickness.value())), exponentC.value());
+        distanceA = Math.pow(Math.abs(a * invInnerRadiusA), exponentA.value());
+        distanceB = Math.pow(Math.abs(b * invInnerRadiusB), exponentB.value());
+        distanceC = Math.pow(Math.abs(c * invInnerRadiusC), exponentC.value());
         double innerDistance = distanceA + distanceB + distanceC;
 
         return outerDistance <= 1.0 && innerDistance >= 1;
@@ -166,4 +169,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     private final StandAloneFloatSetting exponentA = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
     private final StandAloneFloatSetting exponentB = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
     private final StandAloneFloatSetting exponentC = new StandAloneFloatSetting(0.0F, 20.0F, 2.0F, 0.1F);
+
+    private double invOuterRadiusA, invOuterRadiusB, invOuterRadiusC;
+    private double invInnerRadiusA, invInnerRadiusB, invInnerRadiusC;
 }

@@ -26,9 +26,9 @@ public final class StructurePlaceable implements Placeable {
         this.structure = AssetManager.get(identifier);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 2);
-        saver.saveString(((StructurePlaceable) placeable).identifier.structureName());
+        saver.saveString(identifier.structureName());
     }
 
     public static StructurePlaceable load(Saver<?> saver) {

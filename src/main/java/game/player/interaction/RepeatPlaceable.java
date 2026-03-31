@@ -121,7 +121,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     @Override
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         throw new UnsupportedOperationException("This placeable should not be saved");
     }
 

@@ -14,13 +14,13 @@ public final class Position {
     public float fractionX, fractionY, fractionZ;
 
 
-    public static void save(Position position, Saver<?> saver) {
-        saver.saveLong(position.longX);
-        saver.saveLong(position.longY);
-        saver.saveLong(position.longZ);
-        saver.saveFloat(position.fractionX);
-        saver.saveFloat(position.fractionY);
-        saver.saveFloat(position.fractionZ);
+    public void save(Saver<?> saver) {
+        saver.saveLong(longX);
+        saver.saveLong(longY);
+        saver.saveLong(longZ);
+        saver.saveFloat(fractionX);
+        saver.saveFloat(fractionY);
+        saver.saveFloat(fractionZ);
     }
 
     public static Position load(Saver<?> saver) {

@@ -6,7 +6,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
 import game.player.inventory.CallbackSlider;
 import game.server.MaterialsData;
@@ -23,12 +22,12 @@ public final class SpherePlaceable extends ShapePlaceable {
         super(material);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 4);
-        saver.saveByte(((SpherePlaceable) placeable).getMaterial());
-        saver.saveInt(((SpherePlaceable) placeable).radius.value());
-        saver.saveInt(((SpherePlaceable) placeable).thickness.value());
-        saver.saveFloat(((SpherePlaceable) placeable).exponent.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(radius.value());
+        saver.saveInt(thickness.value());
+        saver.saveFloat(exponent.value());
     }
 
     public static SpherePlaceable load(Saver<?> saver) {

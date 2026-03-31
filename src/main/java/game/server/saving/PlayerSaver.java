@@ -22,12 +22,12 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected void save(Player player) {
-        saveGeneric(player.getPosition(), Position::save);
+        saveGeneric(player.getPosition()::save);
         saveVector3f(player.getCamera().getRotation());
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());
         saveByte(player.getMovement().getState().getIdentifier());
-        for (Placeable placeable : player.getHotbar().getContents()) saveGeneric(placeable, Placeable::savePlaceable);
+        for (Placeable placeable : player.getHotbar().getContents()) Placeable.savePlaceable(placeable, this);
     }
 
     @Override

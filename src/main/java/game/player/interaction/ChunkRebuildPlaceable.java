@@ -18,7 +18,7 @@ import static game.utils.Constants.*;
 
 public final class ChunkRebuildPlaceable implements Placeable {
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 3);
     }
 

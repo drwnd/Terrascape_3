@@ -6,7 +6,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation12Way;
 import game.player.inventory.CallbackSlider;
@@ -24,13 +23,13 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
         super(material, Rotation12Way.ROTATION_01);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 15);
-        saver.saveByte(((ArcPlaceable) placeable).getMaterial());
-        saver.saveInt(((ArcPlaceable) placeable).radius.value());
-        saver.saveInt(((ArcPlaceable) placeable).height.value());
-        saver.saveInt(((ArcPlaceable) placeable).thickness.value());
-        saver.saveFloat(((ArcPlaceable) placeable).exponent.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(radius.value());
+        saver.saveInt(height.value());
+        saver.saveInt(thickness.value());
+        saver.saveFloat(exponent.value());
     }
 
     public static ArcPlaceable load(Saver<?> saver) {

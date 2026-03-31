@@ -6,7 +6,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
 import game.player.inventory.CallbackSlider;
@@ -25,13 +24,13 @@ public final class StairPlaceable extends RotatableShapePlaceable {
         super(material, Rotation24Way.ROTATION_01);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 6);
-        saver.saveByte(((StairPlaceable) placeable).getMaterial());
-        saver.saveInt(((StairPlaceable) placeable).stepHeight.value());
-        saver.saveInt(((StairPlaceable) placeable).heightOffset.value());
-        saver.saveInt(((StairPlaceable) placeable).thickness.value());
-        saver.saveFloat(((StairPlaceable) placeable).slope.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(stepHeight.value());
+        saver.saveInt(heightOffset.value());
+        saver.saveInt(thickness.value());
+        saver.saveFloat(slope.value());
     }
 
     public static StairPlaceable load(Saver<?> saver) {

@@ -16,7 +16,7 @@ public interface Placeable {
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
         if (placeable == null) saver.saveByte((byte) 0);
         else {
-            saver.saveGeneric(placeable, placeable::save);
+            saver.saveGeneric(placeable::save);
             if (placeable instanceof ShapePlaceable shapePlaceable) saver.saveBoolean(shapePlaceable.invert.value());
         }
     }
@@ -55,7 +55,7 @@ public interface Placeable {
 
     void spawnParticles(Vector3l position);
 
-    void save(Placeable placeable, Saver<?> saver);
+    void save(Saver<?> saver);
 
     default int getLengthX() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();

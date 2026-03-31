@@ -5,7 +5,6 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
 import game.player.inventory.CallbackSlider;
@@ -23,10 +22,10 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
         super(material, Rotation3Way.ROTATION_2);
     }
 
-    public void save(Placeable placeable, Saver<?> saver) {
+    public void save(Saver<?> saver) {
         saver.saveByte((byte) 13);
-        saver.saveByte(((SlabPlaceable) placeable).getMaterial());
-        saver.saveInt(((SlabPlaceable) placeable).thickness.value());
+        saver.saveByte(getMaterial());
+        saver.saveInt(thickness.value());
     }
 
     public static SlabPlaceable load(Saver<?> saver) {
