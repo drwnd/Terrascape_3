@@ -1,9 +1,6 @@
 package game.menus;
 
-import core.renderables.TextElement;
-import core.renderables.TextField;
-import core.renderables.UiBackgroundElement;
-import core.renderables.UiButton;
+import core.renderables.*;
 import core.rendering_api.Window;
 import core.language.CoreUiMessages;
 
@@ -12,25 +9,29 @@ import game.server.World;
 import game.server.saving.WorldSaver;
 
 import org.joml.Vector2f;
+import org.joml.Vector2i;
 
 import java.io.*;
+import java.security.SecureRandom;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenu extends UiBackgroundElement {
 
     public WorldCreationMenu() {
-        super(new Vector2f(1.0f, 1.0f), new Vector2f(0.0f, 0.0f));
+        super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
-        Vector2f sizeToParent = new Vector2f(0.6f, 0.1f);
-        TextField nameField = new TextField(sizeToParent, new Vector2f(0.35f, 0.85f), UiMessages.WORLD_NAME);
-        TextField seedField = new TextField(sizeToParent, new Vector2f(0.35f, 0.7f), UiMessages.WORLD_SEED);
+        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        TextField nameField = new TextField(sizeToParent, new Vector2f(0.35F, 0.85F), UiMessages.WORLD_NAME);
+        TextField seedField = new TextField(sizeToParent, new Vector2f(0.35F, 0.7F), UiMessages.WORLD_SEED);
 
-        sizeToParent = new Vector2f(0.25f, 0.1f);
-        UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.85f), getBackButtonRunnable());
-        TextElement text = new TextElement(new Vector2f(0.05f, 0.5f), CoreUiMessages.BACK);
+        sizeToParent = new Vector2f(0.25F, 0.1F);
+        UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), getBackButtonClickable());
+        TextElement text = new TextElement(new Vector2f(0.05F, 0.5F), CoreUiMessages.BACK);
         backButton.addRenderable(text);
 
-        UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05f, 0.7f), getCreateButtonRunnable(nameField, seedField));
-        text = new TextElement(new Vector2f(0.05f, 0.5f), UiMessages.CREATE_WORLD);
+        UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7F), getCreateButtonClickable(nameField, seedField));
+        text = new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.CREATE_WORLD);
         createButton.addRenderable(text);
 
         addRenderable(backButton);
@@ -44,18 +45,21 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         Window.setInput(new WorldCreationMenuInput(this));
     }
 
-    private static Runnable getBackButtonRunnable() {
-        return Window::popRenderable;
+    private static Clickable getBackButtonClickable() {
+        return (Vector2i _, int _, int action) -> {
+            if (action == GLFW_PRESS) Window.popRenderable();
+        };
     }
 
-    private static Runnable getCreateButtonRunnable(TextField nameField, TextField seedField) {
-        return () -> {
-            if (nameField.getText().isEmpty()) return;
+    private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS || nameField.getText().isEmpty()) return;
+            String worldName = sanitizeWorldName(nameField.getText());
             File[] savedWorlds = MainMenu.getSavedWorlds();
-            for (File file : savedWorlds) if (file.getName().equals(nameField.getText())) return;
+            for (File file : savedWorlds) if (file.getName().equals(worldName)) return;
 
             long seed = getSeed(seedField.getText());
-            new WorldSaver().save(new World(seed), WorldSaver.getSaveFileLocation(nameField.getText()));
+            new WorldSaver().save(new World(seed), WorldSaver.getSaveFileLocation(worldName));
 
             Window.popRenderable();
         };
@@ -76,12 +80,10 @@ public final class WorldCreationMenu extends UiBackgroundElement {
     }
 
     private static long getRandomSeed() {
-        long seed = 0;
-        for (int bitCounter = 0; bitCounter < 64; bitCounter++) {
-            seed <<= 1;
-            seed |= Math.random() > 0.5 ? 1 : 0;
-        }
-        return seed;
+        byte[] bytes = new byte[8];
+        new SecureRandom().nextBytes(bytes);    // Complete overkill but funny
+        return (bytes[0] & 0xFFL) << 56 | (bytes[1] & 0xFFL) << 48 | (bytes[2] & 0xFFL) << 40 | (bytes[3] & 0xFFL) << 32
+                | (bytes[4] & 0xFFL) << 24 | (bytes[5] & 0xFFL) << 16 | (bytes[6] & 0xFFL) << 8 | (bytes[7] & 0xFFL);
     }
 
     private static long[] toLongArray(char[] charArray) {
@@ -97,5 +99,18 @@ public final class WorldCreationMenu extends UiBackgroundElement {
             longs[index] = current;
         }
         return longs;
+    }
+
+    private static String sanitizeWorldName(String worldName) {
+        char[] chars = worldName.toCharArray();
+        for (int index = 0; index < chars.length; index++) if (!isAllowedChar(chars[index])) chars[index] = '_';
+        return String.valueOf(chars);
+    }
+
+    private static boolean isAllowedChar(char character) {
+        if (character >= '0' && character <= '9') return true;
+        if (character >= 'a' && character <= 'z') return true;
+        if (character >= 'A' && character <= 'Z') return true;
+        return character == '_' || character == '-' || character == ' ';
     }
 }
