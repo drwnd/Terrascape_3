@@ -51,9 +51,8 @@ public final class Chunk {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
-                              int startX, int startY, int startZ,
                               int countX, int countY, int countZ, int lod, ShapePlaceable placeable) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, startX, startY, startZ, countX, countY, countZ, lod, placeable);
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, lod, placeable);
         modified = true;
     }
 

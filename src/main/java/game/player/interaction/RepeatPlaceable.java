@@ -135,20 +135,16 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        int startX = MathUtils.mod(-startPosition.x + chunkStartX - (startPosition.x > endPosition.x ? 1 : 0), placeable.getLengthX());
-        int startY = MathUtils.mod(-startPosition.y + chunkStartY - (startPosition.y > endPosition.y ? 1 : 0), placeable.getLengthY());
-        int startZ = MathUtils.mod(-startPosition.z + chunkStartZ - (startPosition.z > endPosition.z ? 1 : 0), placeable.getLengthZ());
-
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, startX, startY, startZ, countX, countY, countZ, chunk.LOD, placeable);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, chunk.LOD, placeable);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
-        affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD));
-        affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD));
-        affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD));
-        affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
-        affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
-        affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
+        if (inChunkX == 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, chunk.LOD));
+        if (inChunkY == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, chunk.LOD));
+        if (inChunkZ == 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, chunk.LOD));
+        if (inChunkX + countX * placeable.getLengthX() == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
+        if (inChunkY + countY * placeable.getLengthY() == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
+        if (inChunkZ + countZ * placeable.getLengthZ() == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
     }
 
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();

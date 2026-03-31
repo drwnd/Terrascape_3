@@ -10,7 +10,6 @@ import game.player.rendering.MeshGenerator;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.server.material.Properties;
-import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.utils.Utils;
 
@@ -114,14 +113,9 @@ public final class MaterialsData {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
-                              int startX, int startY, int startZ,
                               int countX, int countY, int countZ,
                               int lod, ShapePlaceable placeable) {
         if (countX <= 0 || countY <= 0 || countZ <= 0) return;
-        long[] bitMap = placeable.getBitMap();
-        byte material = placeable.getMaterial();
-        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
-        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
 
@@ -129,22 +123,17 @@ public final class MaterialsData {
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
 
-        int inChunkStartX = Math.max(0, inChunkX), endX = Math.min(inChunkX + (countX * lengthX >> lod), 1 << totalSizeBits);
-        int inChunkStartY = Math.max(0, inChunkY), endY = Math.min(inChunkY + (countY * lengthY >> lod), 1 << totalSizeBits);
-        int inChunkStartZ = Math.max(0, inChunkZ), endZ = Math.min(inChunkZ + (countZ * lengthZ >> lod), 1 << totalSizeBits);
+        int startX = Math.max(0, -inChunkX / Math.max(1, lengthX >> lod));
+        int startY = Math.max(0, -inChunkY / Math.max(1, lengthY >> lod));
+        int startZ = Math.max(0, -inChunkZ / Math.max(1, lengthZ >> lod));
 
-        for (int x = inChunkStartX; x < endX; x++)
-            for (int y = inChunkStartY; y < endY; y++)
-                for (int z = inChunkStartZ; z < endZ; z++) {
-                    int bitMapX = ((x << lod) + startX) % lengthX;
-                    int bitMapY = ((y << lod) + startY) % lengthY;
-                    int bitMapZ = ((z << lod) + startZ) % lengthZ;
-                    int bitMapIndex = getUncompressedIndex(bitMapX, bitMapY, bitMapZ);
-                    int materialIndex = getUncompressedIndex(x, y, z);
-                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0
-                            || paint && uncompressedMaterials[materialIndex] == AIR
-                            || replaceAir && uncompressedMaterials[materialIndex] != AIR) continue;
-                    uncompressedMaterials[materialIndex] = material;
+        for (int x = startX; x < countX && inChunkX + (x * lengthX >> lod) < 1 << totalSizeBits; x++)
+            for (int y = startY; y < countY && inChunkY + (y * lengthY >> lod) < 1 << totalSizeBits; y++)
+                for (int z = startZ; z < countZ && inChunkZ + (z * lengthZ >> lod) < 1 << totalSizeBits; z++) {
+                    int shapeInChunkX = inChunkX + (x * lengthX >> lod);
+                    int shapeInChunkY = inChunkY + (y * lengthY >> lod);
+                    int shapeInChunkZ = inChunkZ + (z * lengthZ >> lod);
+                    storeMaterial(shapeInChunkX, shapeInChunkY, shapeInChunkZ, uncompressedMaterials, lod, placeable);
                 }
 
         compressIntoData(uncompressedMaterials);
@@ -266,7 +255,11 @@ public final class MaterialsData {
     private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte[] uncompressedMaterials, int lod, ShapePlaceable placeable) {
         byte material = placeable.getMaterial();
         long[] bitMap = placeable.getBitMap();
-        int align = Math.min(totalSizeBits, Math.min(IntSettings.BREAK_PLACE_ALIGN.value(), Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2())));
+
+        int inChunkAlign = Math.min(Math.min(
+                Integer.numberOfTrailingZeros(inChunkX), Integer.numberOfTrailingZeros(inChunkY)), Integer.numberOfTrailingZeros(inChunkZ));
+        int align = Math.min(totalSizeBits, Math.min(inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2())));
+
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
         int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);
         int startY = Math.max(0, -inChunkY), endY = Math.clamp(placeable.getLengthY() >> lod, 1, (1 << totalSizeBits) - inChunkY);

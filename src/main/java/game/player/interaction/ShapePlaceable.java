@@ -76,18 +76,16 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        int preferredSize = getPreferredSizePowOf2();
-        int mask = -preferredSize;
-        if (Long.numberOfTrailingZeros(position.x & mask) < lod
-                || Long.numberOfTrailingZeros(position.y & mask) < lod
-                || Long.numberOfTrailingZeros(position.z & mask) < lod) return;
+        if (Long.numberOfTrailingZeros(position.x & -MathUtils.nextLargestPowOf2(getLengthX())) < lod
+                || Long.numberOfTrailingZeros(position.y & -MathUtils.nextLargestPowOf2(getLengthY())) < lod
+                || Long.numberOfTrailingZeros(position.z & -MathUtils.nextLargestPowOf2(getLengthZ())) < lod) return;
 
         long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + preferredSize >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + preferredSize >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + preferredSize >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + getLengthX() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + getLengthY() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + getLengthZ() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)

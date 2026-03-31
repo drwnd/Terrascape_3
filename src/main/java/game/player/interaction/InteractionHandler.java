@@ -37,6 +37,7 @@ public final class InteractionHandler {
         ).mul(1 << IntSettings.BREAK_PLACE_ALIGN.value()).mul(yScroll > 0 ? 1 : -1);
 
         if (startTarget != null && Input.isKeyPressed(KeySettings.SNEAK)) startTarget.shiftPosition(movement);
+        else if (lockedTarget != null && startTarget == null && !Input.isKeyPressed(KeySettings.SNEAK)) startTarget = new Target(lockedTarget);
         if (lockedTarget != null) lockedTarget.shiftPosition(movement);
     }
 

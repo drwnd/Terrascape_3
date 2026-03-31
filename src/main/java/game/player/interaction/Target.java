@@ -16,6 +16,10 @@ import static game.utils.Constants.*;
 
 public record Target(Vector3l position, int side, byte material) {
 
+    public Target(Target target) {
+        this(new Vector3l(target.position), target.side, target.material);
+    }
+
     public static Target getPlayerTarget() {
         Position playerPosition = Game.getPlayer().getCamera().getPosition();
         Vector3f playerDirection = Game.getPlayer().getCamera().getDirection();
