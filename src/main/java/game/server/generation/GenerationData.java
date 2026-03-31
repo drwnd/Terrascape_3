@@ -141,6 +141,7 @@ public final class GenerationData {
         double temperature;
         temperature = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xADA1CE5C24C4A44FL, totalX * TEMPERATURE_FREQUENCY, totalZ * TEMPERATURE_FREQUENCY, 0) * 0.8888;
         temperature += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEEA0CB5D51C0A447L, totalX * TEMPERATURE_FREQUENCY * 50, totalZ * TEMPERATURE_FREQUENCY * 50, 0) * 0.1111;
+        temperature += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF7C6F9389CEEF1A7L, totalX * 0.03125, totalZ * 0.03125, 0) * 0.02;
         return temperature;
     }
 
@@ -148,6 +149,7 @@ public final class GenerationData {
         double humidity;
         humidity = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x41C8F1921D50DF82L, totalX * HUMIDITY_FREQUENCY, totalZ * HUMIDITY_FREQUENCY, 0) * 0.8888;
         humidity += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xB935E00850C8416EL, totalX * HUMIDITY_FREQUENCY * 50, totalZ * HUMIDITY_FREQUENCY * 50, 0) * 0.1111;
+        humidity += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x9BCC9E0E7A1F3A5CL, totalX * 0.03125, totalZ * 0.03125, 0) * 0.02;
         return humidity;
     }
 
@@ -236,6 +238,7 @@ public final class GenerationData {
 
     public static byte getGeneratingStoneType(long x, long y, long z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCDF7BB51DC497C88L, x * STONE_TYPE_FREQUENCY * 20, y * STONE_TYPE_FREQUENCY * 20, z * STONE_TYPE_FREQUENCY * 20) * 0.05;
         if (Math.abs(noise) < ANDESITE_THRESHOLD) return ANDESITE;
         else if (noise > SLATE_THRESHOLD) return SLATE;
         else if (noise < BLACKSTONE_THRESHOLD) return BLACKSTONE;
@@ -249,6 +252,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x30CD70827706B4C0L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF09AE67E544680FDL, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < SAND_THRESHOLD) material = SAND;
@@ -265,6 +269,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEB26D0A3459AAA03L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x795680A262E2D7BBL, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < MUD_THRESHOLD) material = MUD;
@@ -281,6 +286,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7A182AB93793E000L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDC676EC767E50725L, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < MUD_THRESHOLD) material = MUD;
@@ -297,6 +303,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF88966EA665D953EL, x * DIRT_TYPE_FREQUENCY, y * DIRT_TYPE_FREQUENCY, z * DIRT_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x16A476D46322A4F5L, x * DIRT_TYPE_FREQUENCY * 15, y * DIRT_TYPE_FREQUENCY * 15, z * DIRT_TYPE_FREQUENCY * 15) * 0.1;
         if (Math.abs(noise) < COURSE_DIRT_THRESHOLD) material = COURSE_DIRT;
         else material = DIRT;
 
@@ -311,6 +318,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD6744EFC8D01AEFCL, x * ICE_TYPE_FREQUENCY, y * ICE_TYPE_FREQUENCY, z * ICE_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xB4A5FBFC95B28C81L, x * ICE_TYPE_FREQUENCY * 20, y * ICE_TYPE_FREQUENCY * 20, z * ICE_TYPE_FREQUENCY * 20) * 0.05;
         if (noise > HEAVY_ICE_THRESHOLD) material = HEAVY_ICE;
         else material = ICE;
 
@@ -325,6 +333,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEFB13EFD3B5AC7A7L, x * GRASS_TYPE_FREQUENCY, y * GRASS_TYPE_FREQUENCY, z * GRASS_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x72FFEA6B7F992167L, x * GRASS_TYPE_FREQUENCY * 2, y * GRASS_TYPE_FREQUENCY * 2, z * GRASS_TYPE_FREQUENCY * 2) * 0.05;
         noise += feature * 0.4 - 0.2;
         if (Math.abs(noise) < MOSS_THRESHOLD) material = MOSS;
         else material = GRASS;
@@ -560,7 +569,7 @@ public final class GenerationData {
         int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
         if (steepness != 0) return null;
 
-        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental);
+        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental, 0);
 
         if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
@@ -627,32 +636,32 @@ public final class GenerationData {
 
     private final byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
-    private static final double TEMPERATURE_FREQUENCY = 6.25E-5;
+    private static final double TEMPERATURE_FREQUENCY = 1 / 16000.0;
     private static final double HUMIDITY_FREQUENCY = TEMPERATURE_FREQUENCY;
-    private static final double HEIGHT_MAP_FREQUENCY = 1.5625E-4;
-    private static final double EROSION_FREQUENCY = 6.25E-5;
-    private static final double CONTINENTAL_FREQUENCY = 1.5625E-5;
-    private static final double RIVER_FREQUENCY = 3.125E-5;
-    private static final double RIDGE_FREQUENCY = 6.125E-5;
+    private static final double HEIGHT_MAP_FREQUENCY = 1 / 6400.0;
+    private static final double EROSION_FREQUENCY = 1 / 16000.0;
+    private static final double CONTINENTAL_FREQUENCY = 1 / 64000.0;
+    private static final double RIVER_FREQUENCY = 1 / 32000.0;
+    private static final double RIDGE_FREQUENCY = 1 / 16300.0;
 
-    private static final double STONE_TYPE_FREQUENCY = 0.00125;
+    private static final double STONE_TYPE_FREQUENCY = 1 / 800.0;
     private static final double ANDESITE_THRESHOLD = 0.1;
     private static final double SLATE_THRESHOLD = 0.6;
     private static final double BLACKSTONE_THRESHOLD = -0.6;
 
-    private static final double MUD_TYPE_FREQUENCY = 0.0025;
+    private static final double MUD_TYPE_FREQUENCY = 1 / 400.0;
     private static final double GRAVEL_THRESHOLD = 0.1;
     private static final double CLAY_THRESHOLD = 0.5;
     private static final double SAND_THRESHOLD = -0.5;
     private static final double MUD_THRESHOLD = -0.5;
 
-    private static final double DIRT_TYPE_FREQUENCY = 0.003125;
+    private static final double DIRT_TYPE_FREQUENCY = 1 / 320.0;
     private static final double COURSE_DIRT_THRESHOLD = 0.15;
 
-    private static final double GRASS_TYPE_FREQUENCY = 0.0015625;
+    private static final double GRASS_TYPE_FREQUENCY = 1 / 640.0;
     private static final double MOSS_THRESHOLD = 0.3;
 
-    private static final double ICE_TYPE_FREQUENCY = 0.005;
+    private static final double ICE_TYPE_FREQUENCY = 1 / 200.0;
     private static final double HEAVY_ICE_THRESHOLD = 0.6;
 
     private static final int INTERPOLATION_SIZE = 8;
