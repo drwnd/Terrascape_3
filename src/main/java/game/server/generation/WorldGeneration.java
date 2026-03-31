@@ -97,16 +97,22 @@ public final class WorldGeneration {
                         WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
                         heightMap[mapIndex],
                         erosionMap[mapIndex],
-                        continentalMap[mapIndex]
+                        continentalMap[mapIndex],
+                        featureMap[index]
                 );
             }
         return biomes;
     }
 
-    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental) {
+    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        temperature += dither;
+        humidity += dither;
+
         if (height < WATER_LEVEL) {
             if (temperature > 0.33) return WARM_OCEAN;
-            else if (temperature < -0.33) return COLD_OCEAN;
+            else if (temperature - dither < -0.33) return COLD_OCEAN;
             return OCEAN;
         }
         if (height < beachHeight) return BEACH;
@@ -117,7 +123,7 @@ public final class WorldGeneration {
         }
 
         if (temperature > 0.33) {
-            if (temperature > 0.45 && humidity < -0.3) return CORRODED_MESA;
+            if (temperature - dither > 0.45 && humidity - dither < -0.3 && height > 128) return CORRODED_MESA;
             if (temperature > 0.55 && humidity < 0.15) return MESA;
             if (humidity < 0.15) return DESERT;
             if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;
