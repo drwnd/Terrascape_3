@@ -6,6 +6,7 @@ import core.rendering_api.Window;
 import core.rendering_api.shaders.TextShader;
 import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
+import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
@@ -16,8 +17,9 @@ import core.utils.Vector3l;
 import game.player.interaction.Target;
 import game.server.Chunk;
 import game.server.Game;
+import game.server.generation.MapSample;
 import game.server.generation.WorldGeneration;
-import game.settings.OptionSettings;
+import game.settings.DebugScreenOptions;
 import game.utils.Position;
 import game.utils.Status;
 
@@ -29,7 +31,7 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public record DebugScreenLine(OptionSettings visibility, OptionSettings color, StringGetter string, String name) {
+public record DebugScreenLine(OptionSetting visibility, OptionSetting color, StringGetter string, String name) {
 
     public boolean shouldShow(boolean debugScreenOpen) {
         return visibility.value() == Visibility.ALWAYS || debugScreenOpen && visibility.value() == Visibility.WHEN_SCREEN_OPEN;
@@ -50,14 +52,13 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
     public static ArrayList<DebugScreenLine> getDebugLines() {
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
 
-        lines.add(new DebugScreenLine(OptionSettings.WORLD_NAME_VISIBILITY, OptionSettings.WORLD_NAME_COLOR,
-                () -> Game.getWorld().getName(), "World name"));
+        add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().getName(), "World name");
 
-        lines.add(new DebugScreenLine(OptionSettings.WORLD_TICK_AND_TIME_VISIBILITY, OptionSettings.WORLD_TICK_AND_TIME_COLOR,
+        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME,
                 () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()),
-                "Gametick and time"));
+                "Gametick and time");
 
-        lines.add(new DebugScreenLine(OptionSettings.FPS_VISIBILITY, OptionSettings.FPS_COLOR, () -> {
+        add(lines, DebugScreenOptions.FPS, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
             long maxFrameTime = 0L, minFrameTime = Long.MAX_VALUE, frameTime = Window.getCPUFrameTime();
             for (int index = 0; index < frameTimes.size() - 1; index++) {
@@ -67,17 +68,17 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
 
             return "FPS: %s, lowest: %s, highest: %s, CPU Frame Time: %sµs"
                     .formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime), frameTime / 1_000L);
-        }, "FPS"));
+        }, "FPS");
 
-        lines.add(new DebugScreenLine(OptionSettings.TOTAL_MEMORY_VISIBILITY, OptionSettings.TOTAL_MEMORY_COLOR, () -> {
+        add(lines, DebugScreenOptions.TOTAL_MEMORY, () -> {
             long total = Runtime.getRuntime().totalMemory();
             long free = Runtime.getRuntime().freeMemory();
             long used = total - free;
 
             return "Total Memory: %sMB, used: %sMB, free: %sMB".formatted(total / 1_000_000L, used / 1_000_000L, free / 1_000_000L);
-        }, "Total Memory"));
+        }, "Total Memory");
 
-        lines.add(new DebugScreenLine(OptionSettings.CHUNK_MEMORY_VISIBILITY, OptionSettings.CHUNK_MEMORY_COLOR, () -> {
+        add(lines, DebugScreenOptions.CHUNK_MEMORY, () -> {
             long memory = 0L;
             int chunks = 0;
             for (int lod = 0; lod < LOD_COUNT; lod++)
@@ -88,9 +89,9 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
                 }
             if (chunks == 0) return "No generated Chunks";
             return "Chunk Memory: %sMB, average: %sB".formatted(memory / 1_000_000L, memory / chunks);
-        }, "Chunk Memory"));
+        }, "Chunk Memory");
 
-        lines.add(new DebugScreenLine(OptionSettings.BUFFER_STORAGE_VISIBILITY, OptionSettings.BUFFER_STORAGE_COLOR, () -> {
+        add(lines, DebugScreenOptions.BUFFER_STORAGE, () -> {
             MemoryAllocator allocator = Game.getPlayer().getMeshCollector().getAllocator();
             int used = allocator.getUsed() / 1000;
             int free = allocator.getFree() / 1000;
@@ -98,24 +99,24 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
             int highestAllocated = allocator.getHighestAllocated() / 1000;
 
             return "Capacity:%sKB, Highest Allocated:%sKB, Used: %sKB, Free: %sKB".formatted(capacity, highestAllocated, used, free);
-        }, "Mesh Buffer Storage Info"));
+        }, "Mesh Buffer Storage Info");
 
-        lines.add(new DebugScreenLine(OptionSettings.RENDERED_MODELS_VISIBILITY, OptionSettings.RENDERED_MODELS_COLOR, () -> {
+        add(lines, DebugScreenOptions.RENDERED_MODELS, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
             return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedWaterModels, renderer.renderedGlassModels);
-        }, "Rendered Models Count"));
+        }, "Rendered Models Count");
 
-        lines.add(new DebugScreenLine(OptionSettings.POSITION_VISIBILITY, OptionSettings.POSITION_COLOR, () -> {
+        add(lines, DebugScreenOptions.POSITION, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
             return "Position %s, Fraction %s".formatted(playerPosition.intPositionToString(), playerPosition.fractionToString());
-        }, "Player Position"));
+        }, "Player Position");
 
-        lines.add(new DebugScreenLine(OptionSettings.VELOCITY_VISIBILITY, OptionSettings.VELOCITY_COLOR, () -> {
+        add(lines, DebugScreenOptions.VELOCITY, () -> {
             Vector3f velocity = Game.getPlayer().getMovement().getVelocity();
             return "Velocity %sm/s : [X:%s, Y:%s, Z:%s]".formatted(MathUtils.round(velocity.length() * 20 / 16, 3), MathUtils.round(velocity.x, 3), MathUtils.round(velocity.y, 3), MathUtils.round(velocity.z, 3));
-        }, "Player Velocity"));
+        }, "Player Velocity");
 
-        lines.add(new DebugScreenLine(OptionSettings.CHUNK_POSITION_VISIBILITY, OptionSettings.CHUNK_POSITION_COLOR, () -> {
+        add(lines, DebugScreenOptions.CHUNK_POSITION, () -> {
             Position playerPosition = Game.getPlayer().getPosition();
             Chunk chunk = Game.getWorld().getChunk(
                     playerPosition.longX >>> CHUNK_SIZE_BITS,
@@ -123,45 +124,54 @@ public record DebugScreenLine(OptionSettings visibility, OptionSettings color, S
                     playerPosition.longZ >>> CHUNK_SIZE_BITS, 0);
             if (chunk == null) return "Chunk is null";
             return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
-        }, "Chunk Position"));
+        }, "Chunk Position");
 
-        lines.add(new DebugScreenLine(OptionSettings.DIRECTION_VISIBILITY, OptionSettings.DIRECTION_COLOR, () -> {
+        add(lines, DebugScreenOptions.DIRECTION, () -> {
             Vector3f direction = Game.getPlayer().getCamera().getDirection();
             return "Direction X:%s, Y:%s, Z:%s".formatted(direction.x, direction.y, direction.z);
-        }, "Player Direction"));
+        }, "Player Direction");
 
-        lines.add(new DebugScreenLine(OptionSettings.ROTATION_VISIBILITY, OptionSettings.ROTATION_COLOR, () -> {
+        add(lines, DebugScreenOptions.ROTATION, () -> {
             Vector3f rotation = Game.getPlayer().getCamera().getRotation();
             return "Rotation Pitch:%s, Yaw:%s, Roll:%s".formatted(rotation.x, rotation.y, rotation.z);
-        }, "Player Rotation"));
+        }, "Player Rotation");
 
-        lines.add(new DebugScreenLine(OptionSettings.TARGET_VISIBILITY, OptionSettings.TARGET_COLOR, () -> {
+        add(lines, DebugScreenOptions.TARGET, () -> {
             Target target = Target.getPlayerTarget();
 
             if (target == null) return "Nothing targeted.";
             return target.string();
-        }, "Target Information"));
+        }, "Target Information");
 
-        lines.add(new DebugScreenLine(OptionSettings.SEED_VISIBILITY, OptionSettings.SEED_COLOR, () -> "Seed: %s".formatted(WorldGeneration.SEED),
-                "Seed"));
+        add(lines, DebugScreenOptions.SEED, () -> "Seed: %s".formatted(WorldGeneration.SEED),
+                "Seed");
 
-        lines.add(new DebugScreenLine(OptionSettings.CHUNK_STATUS_VISIBILITY, OptionSettings.CHUNK_STATUS_COLOR, () -> {
+        add(lines, DebugScreenOptions.CHUNK_STATUS, () -> {
             Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
             return "Current Chunk generation status:%s, meshed:%s".formatted(chunk.getGenerationStatus().name(), Game.getPlayer().getMeshCollector().isMeshed(chunk.INDEX, 0));
-        }, "Chunk status"));
+        }, "Chunk status");
 
-        lines.add(new DebugScreenLine(OptionSettings.CHUNK_IDENTIFIERS_VISIBILITY, OptionSettings.CHUNK_IDENTIFIERS_COLOR, () -> {
+        add(lines, DebugScreenOptions.CHUNK_IDENTIFIERS, () -> {
             Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
             return "Chunk Index:%s, Chunk ID:%s".formatted(chunk.INDEX, chunk.ID);
-        }, "Chunk Identifiers"));
+        }, "Chunk Identifiers");
+
+        add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
+            Vector3l coordinate = Game.getPlayer().getPosition().longPosition();
+            return "Temperature: %s".formatted(MapSample.temperatureMapValue(coordinate.x, coordinate.z));
+        }, "Generation Data");
 
         return lines;
+    }
+
+    private static void add(ArrayList<DebugScreenLine> lines, DebugScreenOptions options, StringGetter string, String name) {
+        lines.add(new DebugScreenLine(options.getVisibility(), options.getColor(), string, name));
     }
 }
 
