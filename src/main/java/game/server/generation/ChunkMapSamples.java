@@ -2,11 +2,10 @@ package game.server.generation;
 
 import static game.utils.Constants.*;
 
-public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
-                              double[] heightMap, double[] erosionMap,
-                              double[] continentalBaseMap, double[] continentalAddendMap,
-                              double[] riverBaseMap, double[] riverAddendMap,
-                              double[] ridgeMap) {
+public record ChunkMapSamples(float[] temperatureMap, float[] humidityMap,
+                              float[] heightMap, float[] erosionMap,
+                              float[] continentalBaseMap, float[] continentalAddendMap,
+                              float[] riverBaseMap, float[] ridgeMap) {
 
     public ChunkMapSamples(long chunkX, long chunkZ, int lod) {
         this(
@@ -17,7 +16,6 @@ public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
                 mapPadded(chunkX, chunkZ, lod, MapSample::continentalBaseMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::continentalAddendMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::riverBaseMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::riverAddendMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::ridgeMapValue)
         );
     }
@@ -31,14 +29,13 @@ public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
                 continentalBaseMap[mapIndex],
                 continentalAddendMap[mapIndex],
                 riverBaseMap[mapIndex],
-                riverAddendMap[mapIndex],
                 ridgeMap[mapIndex]
         );
     }
 
 
-    private static double[] mapPadded(long chunkX, long chunkZ, int lod, MapValueFunction function) {
-        double[] map = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
+    private static float[] mapPadded(long chunkX, long chunkZ, int lod, MapValueFunction function) {
+        float[] map = new float[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
         int gapSize = 1 << lod;
 
@@ -47,7 +44,7 @@ public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
                 long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
                 long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
 
-                map[GenerationData.getMapIndex(mapX, mapZ)] = function.mapValue(totalX, totalZ);
+                map[GenerationData.getMapIndex(mapX, mapZ)] = (float) function.mapValue(totalX, totalZ);
             }
 
         for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
@@ -56,25 +53,25 @@ public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
         return map;
     }
 
-    private static void interpolate(double[] map, int mapX, int mapZ) {
-        double value1 = map[GenerationData.getMapIndex(mapX, mapZ)];
-        double value2 = map[GenerationData.getMapIndex(mapX + INTERPOLATION_SIZE, mapZ)];
-        double value3 = map[GenerationData.getMapIndex(mapX, mapZ + INTERPOLATION_SIZE)];
-        double value4 = map[GenerationData.getMapIndex(mapX + INTERPOLATION_SIZE, mapZ + INTERPOLATION_SIZE)];
+    private static void interpolate(float[] map, int mapX, int mapZ) {
+        float value1 = map[GenerationData.getMapIndex(mapX, mapZ)];
+        float value2 = map[GenerationData.getMapIndex(mapX + INTERPOLATION_SIZE, mapZ)];
+        float value3 = map[GenerationData.getMapIndex(mapX, mapZ + INTERPOLATION_SIZE)];
+        float value4 = map[GenerationData.getMapIndex(mapX + INTERPOLATION_SIZE, mapZ + INTERPOLATION_SIZE)];
 
         for (int x = 0; x <= INTERPOLATION_SIZE; x++) {
-            double interpolatedLowXValue = (value2 * x + value1 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
-            double interpolatedHighXValue = (value4 * x + value3 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
+            float interpolatedLowXValue = (value2 * x + value1 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
+            float interpolatedHighXValue = (value4 * x + value3 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
 
             for (int z = 0; z <= INTERPOLATION_SIZE; z++) {
-                double interpolatedValue = (interpolatedHighXValue * z + interpolatedLowXValue * (INTERPOLATION_SIZE - z)) * INTERPOLATION_MULTIPLIER;
+                float interpolatedValue = (interpolatedHighXValue * z + interpolatedLowXValue * (INTERPOLATION_SIZE - z)) * INTERPOLATION_MULTIPLIER;
                 map[GenerationData.getMapIndex(mapX + x, mapZ + z)] = interpolatedValue;
             }
         }
     }
 
     private static final int INTERPOLATION_SIZE = 8;
-    private static final double INTERPOLATION_MULTIPLIER = 1.0 / INTERPOLATION_SIZE;
+    private static final float INTERPOLATION_MULTIPLIER = 1.0F / INTERPOLATION_SIZE;
 
     private interface MapValueFunction {
         double mapValue(long totalX, long totalY);

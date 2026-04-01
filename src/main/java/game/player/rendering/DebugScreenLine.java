@@ -196,11 +196,6 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "River Addend:       %s".formatted(MapSample.riverAddendMapValue(position.longX, position.longZ));
-        });
-
-        add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
-            Position position = Game.getPlayer().getPosition();
             return "Ridge:              %s".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
         });
 
