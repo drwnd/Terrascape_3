@@ -22,6 +22,14 @@ public final class Settings {
         for (Class<? extends Setting> setting : settings) registerSettingsEnum(setting);
     }
 
+    @SafeVarargs
+    public static void registerSettings(List<Setting>... settings) {
+        for (List<Setting> settingList : settings) {
+            Settings.settings.addAll(settingList);
+            initSettings(settingList);
+        }
+    }
+
     public static void loadFromFile() {
         AssetManager.delete(fileIdentifier);
         initSettings(settings);
