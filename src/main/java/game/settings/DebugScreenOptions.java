@@ -27,7 +27,8 @@ public enum DebugScreenOptions {
     CHUNK_MEMORY(ColorOption.RED),
     TOTAL_MEMORY(ColorOption.RED),
     BUFFER_STORAGE(ColorOption.ORANGE),
-    GENERATION_DATA(ColorOption.WHITE);
+    GENERATION_DATA(ColorOption.WHITE),
+    BIOME(ColorOption.GREEN);
 
     DebugScreenOptions(Option color) {
         this.visibility = new DebugOption(Visibility.WHEN_SCREEN_OPEN, this.name() + "_VISIBILITY");

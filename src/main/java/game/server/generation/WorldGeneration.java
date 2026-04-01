@@ -47,19 +47,18 @@ public final class WorldGeneration {
         chunk.setGenerationStatus(Status.DONE);
     }
 
-    public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
-        height = (height * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
+    public static int getResultingHeight(MapSample sample) {
+        double height = (sample.height() * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
 
-        double continentalModifier = getContinentalModifier(continental, ridge);
-        double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
-        double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
+        double continentalModifier = getContinentalModifier(sample.continentalBase(), sample.continentalAddend(), sample.ridge());
+        double erosionModifier = getErosionModifier(height, sample.erosion(), continentalModifier);
+        double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, sample.riverBase(), sample.riverAddend());
 
         return MathUtils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
     }
 
     public static int getResultingHeight(long totalX, long totalZ) {
-        MapSample sample = new MapSample(totalX, totalZ, MapSample.GENERATE_HEIGHT_MAPS);
-        return getResultingHeight(sample.height(), sample.erosion(), sample.continental(), sample.river(), sample.ridge());
+        return getResultingHeight(new MapSample(totalX, totalZ, false, true));
     }
 
     public static int[] getResultingHeightMap(ChunkMapSamples samples) {
@@ -68,13 +67,7 @@ public final class WorldGeneration {
             for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
 
                 int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
-                double height = samples.heightMap()[mapIndex];
-                double erosion = samples.erosionMap()[mapIndex];
-                double continental = samples.continentalMap()[mapIndex];
-                double river = samples.riverMap()[mapIndex];
-                double ridge = samples.ridgeMap()[mapIndex];
-
-                int resultingHeight = getResultingHeight(height, erosion, continental, river, ridge);
+                int resultingHeight = getResultingHeight(samples.getSample(mapIndex));
                 resultingHeightMap[mapIndex] = resultingHeight;
             }
         return resultingHeightMap;
@@ -86,24 +79,17 @@ public final class WorldGeneration {
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
                 int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
                 int index = mapX << CHUNK_SIZE_BITS | mapZ;
-                biomes[index] = getBiome(
-                        samples.temperatureMap()[mapIndex],
-                        samples.humidityMap()[mapIndex],
-                        WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
-                        heightMap[mapIndex],
-                        samples.erosionMap()[mapIndex],
-                        samples.continentalMap()[mapIndex],
-                        featureMap[index]
-                );
+                biomes[index] = getBiome(samples.getSample(mapIndex), heightMap[mapIndex], featureMap[index]);
             }
         return biomes;
     }
 
-    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental, double feature) {
+    public static Biome getBiome(MapSample sample, int height, double feature) {
         double dither = feature * 0.05 - 0.025;
 
-        temperature += dither;
-        humidity += dither;
+        double temperature = sample.temperature() + dither;
+        double humidity = sample.humidity() + dither;
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64);
 
         if (height < WATER_LEVEL) {
             if (temperature > 0.33) return WARM_OCEAN;
@@ -111,7 +97,7 @@ public final class WorldGeneration {
             return OCEAN;
         }
         if (height < beachHeight) return BEACH;
-        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.425) {
+        if (sample.continentalBase() > MOUNTAIN_THRESHOLD && sample.erosion() < 0.425) {
             if (temperature > 0.33) return DRY_MOUNTAIN;
             else if (temperature < -0.33) return SNOWY_MOUNTAIN;
             return MOUNTAIN;
@@ -189,21 +175,21 @@ public final class WorldGeneration {
         return hasGeneratedTree;
     }
 
-    private static double getContinentalModifier(double continental, double ridge) {
+    private static double getContinentalModifier(double base, double addend, double ridge) {
         double continentalModifier = 0.0;
         // Mountains
-        if (continental > MOUNTAIN_THRESHOLD)
-            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * ridge * 100000;
+        if (base > MOUNTAIN_THRESHOLD)
+            continentalModifier = (base - MOUNTAIN_THRESHOLD) * (base - MOUNTAIN_THRESHOLD) * ridge * 100000;
             // Normal ocean
-        else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
-            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
-        else if (continental <= OCEAN_THRESHOLD - 0.05 && continental > OCEAN_THRESHOLD - 0.2)
-            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
+        else if (base < OCEAN_THRESHOLD && base > OCEAN_THRESHOLD - 0.05)
+            continentalModifier = MathUtils.smoothInOutQuad(-base, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
+        else if (base <= OCEAN_THRESHOLD - 0.05 && base > OCEAN_THRESHOLD - 0.2)
+            continentalModifier = (base - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
             // Deep Ocean
-        else if (continental <= OCEAN_THRESHOLD - 0.2 && continental > OCEAN_THRESHOLD - 0.25)
-            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
-        else if (continental <= OCEAN_THRESHOLD - 0.25)
-            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
+        else if (base <= OCEAN_THRESHOLD - 0.2 && base > OCEAN_THRESHOLD - 0.25)
+            continentalModifier = MathUtils.smoothInOutQuad(-base, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
+        else if (base <= OCEAN_THRESHOLD - 0.25)
+            continentalModifier = (base - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
         return continentalModifier;
     }
 
@@ -220,19 +206,19 @@ public final class WorldGeneration {
         return erosionModifier;
     }
 
-    private static double getRiverModifier(double height, double continentalModifier, double erosionModifier, double river) {
+    private static double getRiverModifier(double height, double continentalModifier, double erosionModifier, double base, double addend) {
         double riverModifier = 0.0;
-        if (Math.abs(river) < 0.005)
+        if (Math.abs(base) < 0.005)
             riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
-        else if (Math.abs(river) < RIVER_THRESHOLD)
-            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - MathUtils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
+        else if (Math.abs(base) < RIVER_THRESHOLD)
+            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - MathUtils.smoothInOutQuad(Math.abs(base), 0.005, RIVER_THRESHOLD));
         return riverModifier;
     }
 
 
     private static final int OCEAN_FLOOR_OFFSET = -480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
-    private static final int FLATLAND_OFFSET = 130;
+    private static final int FLATLAND_OFFSET = 330;
     private static final int RIVER_OFFSET = -200;
 
     private static final double HEIGHT_MAP_MULTIPLIER = 250;

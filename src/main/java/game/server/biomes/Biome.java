@@ -33,7 +33,7 @@ public abstract class Biome {
     }
 
     public final String getName() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 
     protected static Tree getRandomTree(long x, long y, long z, StructureCollectionIdentifier trees) {
