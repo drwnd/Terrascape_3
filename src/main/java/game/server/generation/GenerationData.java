@@ -325,15 +325,15 @@ public final class GenerationData {
     }
 
     private static Tree treeMapValue(long totalX, long totalZ) {
-        MapSample sample = new MapSample(totalX, totalZ, MapSample.GENERATE_BIOME_MAPS | MapSample.GENERATE_HEIGHT_MAPS);
+        MapSample sample = new MapSample(totalX, totalZ, true, true);
 
-        int resultingHeight = WorldGeneration.getResultingHeight(sample.height(), sample.erosion(), sample.continental(), sample.river(), sample.ridge());
+        int resultingHeight = WorldGeneration.getResultingHeight(sample);
         int heightPlusX = WorldGeneration.getResultingHeight(totalX + 1, totalZ);
         int heightPlusZ = WorldGeneration.getResultingHeight(totalX, totalZ + 1);
         int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
         if (steepness != 0) return null;
 
-        Biome biome = WorldGeneration.getBiome(sample.temperature(), sample.humidity(), 96, resultingHeight, sample.erosion(), sample.continental(), 0);
+        Biome biome = WorldGeneration.getBiome(sample, resultingHeight, 0);
 
         if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);

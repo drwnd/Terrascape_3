@@ -5,20 +5,23 @@ import core.utils.OpenSimplex2S;
 import static game.server.generation.WorldGeneration.SEED;
 
 public record MapSample(double temperature, double humidity,
-                        double height, double erosion, double continental, double river, double ridge) {
+                        double height, double erosion,
+                        double continentalBase, double continentalAddend,
+                        double riverBase, double riverAddend,
+                        double ridge) {
 
-    public static final int GENERATE_HEIGHT_MAPS = 1;
-    public static final int GENERATE_BIOME_MAPS = 2;
-
-    public MapSample(long totalX, long totalZ, int flags) {
+    public MapSample(long totalX, long totalZ, boolean biomes, boolean height) {
         this(
-                (flags & GENERATE_BIOME_MAPS) == 0 ? 0.0 : temperatureMapValue(totalX, totalZ),
-                (flags & GENERATE_BIOME_MAPS) == 0 ? 0.0 : humidityMapValue(totalX, totalZ),
-                (flags & GENERATE_HEIGHT_MAPS) == 0 ? 0.0 : heightMapValue(totalX, totalZ),
-                (flags & GENERATE_HEIGHT_MAPS) == 0 ? 0.0 : erosionMapValue(totalX, totalZ),
-                (flags & GENERATE_HEIGHT_MAPS) == 0 ? 0.0 : continentalMapValue(totalX, totalZ),
-                (flags & GENERATE_HEIGHT_MAPS) == 0 ? 0.0 : riverMapValue(totalX, totalZ),
-                (flags & GENERATE_HEIGHT_MAPS) == 0 ? 0.0 : ridgeMapValue(totalX, totalZ)
+                !biomes ? 0.0 : temperatureMapValue(totalX, totalZ),
+                !biomes ? 0.0 : humidityMapValue(totalX, totalZ),
+
+                !height ? 0.0 : heightMapValue(totalX, totalZ),
+                !height ? 0.0 : erosionMapValue(totalX, totalZ),
+                !height ? 0.0 : continentalBaseMapValue(totalX, totalZ),
+                !height ? 0.0 : continentalAddendMapValue(totalX, totalZ),
+                !height ? 0.0 : riverBaseMapValue(totalX, totalZ),
+                !height ? 0.0 : riverAddendMapValue(totalX, totalZ),
+                !height ? 0.0 : ridgeMapValue(totalX, totalZ)
         );
     }
 
@@ -36,12 +39,31 @@ public record MapSample(double temperature, double humidity,
         return height;
     }
 
-    public static double continentalMapValue(long totalX, long totalZ) {
+    public static double continentalBaseMapValue(long totalX, long totalZ) {
         return OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCF71B60E764BFC2CL, totalX * CONTINENTAL_FREQUENCY, totalZ * CONTINENTAL_FREQUENCY, 0);
     }
 
-    public static double riverMapValue(long totalX, long totalZ) {
+    public static double continentalAddendMapValue(long totalX, long totalZ) {
+        double continental = 0;
+        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8EF1C1F90DA10C0AL, totalX * CONTINENTAL_FREQUENCY * 6, totalZ * CONTINENTAL_FREQUENCY * 6, 0) * 0.0411;
+        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x608308CA890553E3L, totalX * CONTINENTAL_FREQUENCY * 12, totalZ * CONTINENTAL_FREQUENCY * 12, 0) * 0.0211;
+        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xE29B01A5152C8664L, totalX * CONTINENTAL_FREQUENCY * 24, totalZ * CONTINENTAL_FREQUENCY * 24, 0) * 0.0111;
+        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x27C1986D27551225L, totalX * CONTINENTAL_FREQUENCY * 48, totalZ * CONTINENTAL_FREQUENCY * 48, 0) * 0.00511;
+        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x33382D4F463883B8L, totalX * CONTINENTAL_FREQUENCY * 160, totalZ * CONTINENTAL_FREQUENCY * 160, 0) * 0.00111;
+        return continental;
+    }
+
+    public static double riverBaseMapValue(long totalX, long totalZ) {
         return OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0);
+    }
+
+    public static double riverAddendMapValue(long totalX, long totalZ) {
+        double river = 0;
+        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7C46A6B469AC4A05L, totalX * RIVER_FREQUENCY * 50, totalZ * RIVER_FREQUENCY * 50, 0) * 0.0411;
+        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x14CBFBB4AF4AB8D4L, totalX * RIVER_FREQUENCY * 200, totalZ * RIVER_FREQUENCY * 200, 0) * 0.0111;
+        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBC183CA6F3488FCAL, totalX * RIVER_FREQUENCY * 400, totalZ * RIVER_FREQUENCY * 400, 0) * 0.0051;
+        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x09340E1C502CED3CL, totalX * RIVER_FREQUENCY * 800, totalZ * RIVER_FREQUENCY * 800, 0) * 0.0025;
+        return river;
     }
 
     public static double ridgeMapValue(long totalX, long totalZ) {

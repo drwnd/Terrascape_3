@@ -3,7 +3,10 @@ package game.server.generation;
 import static game.utils.Constants.*;
 
 public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
-                              double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
+                              double[] heightMap, double[] erosionMap,
+                              double[] continentalBaseMap, double[] continentalAddendMap,
+                              double[] riverBaseMap, double[] riverAddendMap,
+                              double[] ridgeMap) {
 
     public ChunkMapSamples(long chunkX, long chunkZ, int lod) {
         this(
@@ -11,11 +14,28 @@ public record ChunkMapSamples(double[] temperatureMap, double[] humidityMap,
                 mapPadded(chunkX, chunkZ, lod, MapSample::humidityMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::heightMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::erosionMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::continentalMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::riverMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::continentalBaseMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::continentalAddendMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::riverBaseMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::riverAddendMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::ridgeMapValue)
         );
     }
+
+    public MapSample getSample(int mapIndex) {
+        return new MapSample(
+                temperatureMap[mapIndex],
+                humidityMap[mapIndex],
+                heightMap[mapIndex],
+                erosionMap[mapIndex],
+                continentalBaseMap[mapIndex],
+                continentalAddendMap[mapIndex],
+                riverBaseMap[mapIndex],
+                riverAddendMap[mapIndex],
+                ridgeMap[mapIndex]
+        );
+    }
+
 
     private static double[] mapPadded(long chunkX, long chunkZ, int lod, MapValueFunction function) {
         double[] map = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];

@@ -54,9 +54,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().getName());
 
-        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME,
-                () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime())
-        );
+        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()));
 
         add(lines, DebugScreenOptions.FPS, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
@@ -143,8 +141,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             return target.string();
         });
 
-        add(lines, DebugScreenOptions.SEED, () -> "Seed: %s".formatted(WorldGeneration.SEED)
-        );
+        add(lines, DebugScreenOptions.SEED, () -> "Seed: %s".formatted(WorldGeneration.SEED));
 
         add(lines, DebugScreenOptions.CHUNK_STATUS, () -> {
             Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
@@ -164,37 +161,54 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Temperature: %s".formatted(MapSample.temperatureMapValue(position.longX, position.longZ));
+            return "Temperature:        %s".formatted(MapSample.temperatureMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Humidity:    %s".formatted(MapSample.humidityMapValue(position.longX, position.longZ));
+            return "Humidity:           %s".formatted(MapSample.humidityMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Height:      %s".formatted(MapSample.heightMapValue(position.longX, position.longZ));
+            return "Height:             %s".formatted(MapSample.heightMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Erosion:     %s".formatted(MapSample.erosionMapValue(position.longX, position.longZ));
+            return "Erosion:            %s".formatted(MapSample.erosionMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Continental: %s".formatted(MapSample.continentalMapValue(position.longX, position.longZ));
+            return "Continental:        %s".formatted(MapSample.continentalBaseMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "River:       %s".formatted(MapSample.riverMapValue(position.longX, position.longZ));
+            return "Continental Addend: %s".formatted(MapSample.continentalAddendMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Ridge:       %s".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
+            return "River:              %s".formatted(MapSample.riverBaseMapValue(position.longX, position.longZ));
+        });
+
+        add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
+            Position position = Game.getPlayer().getPosition();
+            return "River Addend:       %s".formatted(MapSample.riverAddendMapValue(position.longX, position.longZ));
+        });
+
+        add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
+            Position position = Game.getPlayer().getPosition();
+            return "Ridge:              %s".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
+        });
+
+        add(lines, DebugScreenOptions.BIOME, () -> {
+            Position position = Game.getPlayer().getPosition();
+            MapSample sample = new MapSample(position.longX, position.longZ, true, true);
+            int resultingHeight = WorldGeneration.getResultingHeight(sample);
+            return "Biome: %s".formatted(WorldGeneration.getBiome(sample, resultingHeight, 0).getName());
         });
 
         return lines;
