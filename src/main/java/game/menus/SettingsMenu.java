@@ -8,12 +8,8 @@ import core.renderables.*;
 import core.rendering_api.Window;
 
 import game.language.UiMessages;
-import game.player.rendering.DebugScreenLine;
+import game.settings.*;
 
-import game.settings.FloatSettings;
-import game.settings.IntSettings;
-import game.settings.KeySettings;
-import game.settings.ToggleSettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -190,9 +186,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static SettingsRenderable createDebugScreenSection() {
         SettingsRenderable section = new SettingsRenderable();
-
-        for (DebugScreenLine debugLine : DebugScreenLine.getDebugLines()) section.addDebugLineSetting(debugLine);
-
+        for (DebugScreenOptions debugOptions : DebugScreenOptions.values()) section.addDebugLineSetting(debugOptions);
         return section;
     }
 
