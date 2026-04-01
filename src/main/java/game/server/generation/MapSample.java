@@ -37,35 +37,15 @@ public record MapSample(double temperature, double humidity,
     }
 
     public static double continentalMapValue(long totalX, long totalZ) {
-        double continental;
-        continental = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCF71B60E764BFC2CL, totalX * CONTINENTAL_FREQUENCY, totalZ * CONTINENTAL_FREQUENCY, 0) * 0.9588;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8EF1C1F90DA10C0AL, totalX * CONTINENTAL_FREQUENCY * 6, totalZ * CONTINENTAL_FREQUENCY * 6, 0) * 0.0411;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x608308CA890553E3L, totalX * CONTINENTAL_FREQUENCY * 12, totalZ * CONTINENTAL_FREQUENCY * 12, 0) * 0.0211;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xE29B01A5152C8664L, totalX * CONTINENTAL_FREQUENCY * 24, totalZ * CONTINENTAL_FREQUENCY * 24, 0) * 0.0111;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x27C1986D27551225L, totalX * CONTINENTAL_FREQUENCY * 48, totalZ * CONTINENTAL_FREQUENCY * 48, 0) * 0.00511;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x33382D4F463883B8L, totalX * CONTINENTAL_FREQUENCY * 160, totalZ * CONTINENTAL_FREQUENCY * 160, 0) * 0.00111;
-        return continental;
+        return OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCF71B60E764BFC2CL, totalX * CONTINENTAL_FREQUENCY, totalZ * CONTINENTAL_FREQUENCY, 0);
     }
 
     public static double riverMapValue(long totalX, long totalZ) {
-        double river;
-        river = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0) * 0.9588;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7C46A6B469AC4A05L, totalX * RIVER_FREQUENCY * 50, totalZ * RIVER_FREQUENCY * 50, 0) * 0.0411;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x14CBFBB4AF4AB8D4L, totalX * RIVER_FREQUENCY * 200, totalZ * RIVER_FREQUENCY * 200, 0) * 0.0111;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBC183CA6F3488FCAL, totalX * RIVER_FREQUENCY * 400, totalZ * RIVER_FREQUENCY * 400, 0) * 0.0051;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x09340E1C502CED3CL, totalX * RIVER_FREQUENCY * 800, totalZ * RIVER_FREQUENCY * 800, 0) * 0.0025;
-        return river;
+        return OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0);
     }
 
     public static double ridgeMapValue(long totalX, long totalZ) {
-        double ridge;
-        ridge = (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0))) * 0.5;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8A3E12DE957E78C5L, totalX * RIDGE_FREQUENCY * 2, totalZ * RIDGE_FREQUENCY * 2, 0))) * 0.25;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x0A8E80B850A75321L, totalX * RIDGE_FREQUENCY * 4, totalZ * RIDGE_FREQUENCY * 4, 0))) * 0.125;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x6E0744EACB517937L, totalX * RIDGE_FREQUENCY * 8, totalZ * RIDGE_FREQUENCY * 8, 0))) * 0.0625;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBCCFDBF01B87426FL, totalX * RIDGE_FREQUENCY * 64, totalZ * RIDGE_FREQUENCY * 64, 0))) * 0.0390625;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7F36866E4079518BL, totalX * RIDGE_FREQUENCY * 128, totalZ * RIDGE_FREQUENCY * 128, 0))) * 0.01953125;
-        return ridge;
+        return 1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0));
     }
 
     public static double erosionMapValue(long totalX, long totalZ) {
