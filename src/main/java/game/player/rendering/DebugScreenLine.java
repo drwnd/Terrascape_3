@@ -181,17 +181,12 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Continental:        %s".formatted(MapSample.continentalBaseMapValue(position.longX, position.longZ));
+            return "Continental:        %s".formatted(MapSample.continentalMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Continental Addend: %s".formatted(MapSample.continentalAddendMapValue(position.longX, position.longZ));
-        });
-
-        add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
-            Position position = Game.getPlayer().getPosition();
-            return "River:              %s".formatted(MapSample.riverBaseMapValue(position.longX, position.longZ));
+            return "River:              %s".formatted(MapSample.riverMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {

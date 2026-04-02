@@ -3,9 +3,7 @@ package game.server.generation;
 import static game.utils.Constants.*;
 
 public record ChunkMapSamples(float[] temperatureMap, float[] humidityMap,
-                              float[] heightMap, float[] erosionMap,
-                              float[] continentalBaseMap, float[] continentalAddendMap,
-                              float[] riverBaseMap, float[] ridgeMap) {
+                              float[] heightMap, float[] erosionMap, float[] continentalMap, float[] riverMap, float[] ridgeMap) {
 
     public ChunkMapSamples(long chunkX, long chunkZ, int lod) {
         this(
@@ -13,9 +11,8 @@ public record ChunkMapSamples(float[] temperatureMap, float[] humidityMap,
                 mapPadded(chunkX, chunkZ, lod, MapSample::humidityMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::heightMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::erosionMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::continentalBaseMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::continentalAddendMapValue),
-                mapPadded(chunkX, chunkZ, lod, MapSample::riverBaseMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::continentalMapValue),
+                mapPadded(chunkX, chunkZ, lod, MapSample::riverMapValue),
                 mapPadded(chunkX, chunkZ, lod, MapSample::ridgeMapValue)
         );
     }
@@ -26,9 +23,8 @@ public record ChunkMapSamples(float[] temperatureMap, float[] humidityMap,
                 humidityMap[mapIndex],
                 heightMap[mapIndex],
                 erosionMap[mapIndex],
-                continentalBaseMap[mapIndex],
-                continentalAddendMap[mapIndex],
-                riverBaseMap[mapIndex],
+                continentalMap[mapIndex],
+                riverMap[mapIndex],
                 ridgeMap[mapIndex]
         );
     }
