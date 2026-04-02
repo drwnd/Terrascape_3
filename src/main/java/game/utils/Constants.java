@@ -18,10 +18,9 @@ public final class Constants {
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
     public static final byte RENDER_DISTANCE_XZ = 6;
     public static final byte RENDER_DISTANCE_Y = 6;
-    public static final byte RENDER_KEEP_DISTANCE = 2;
 
-    public static final int RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
-    public static final int RENDERED_WORLD_HEIGHT = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3 + RENDER_KEEP_DISTANCE * 2);
+    public static final int RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3);
+    public static final int RENDERED_WORLD_HEIGHT = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3);
     public static final int RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
     public static final int RENDERED_WORLD_HEIGHT_MASK = RENDERED_WORLD_HEIGHT - 1;
     public static final int RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
