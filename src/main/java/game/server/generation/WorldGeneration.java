@@ -48,14 +48,11 @@ public final class WorldGeneration {
     }
 
     public static int getResultingHeight(MapSample sample) {
-        double height = (sample.height() * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
-        double continentalValue = sample.continentalBase() + sample.continentalAddend();
+        double continentalModifier = getContinentalModifier(sample);
+        double erosionModifier = getErosionModifier(continentalModifier, sample);
+        double riverModifier = getRiverModifier(erosionModifier, continentalModifier, sample);
 
-        double continentalModifier = getContinentalModifier(continentalValue, continentalValue, sample.ridge());
-        double erosionModifier = getErosionModifier(height, sample.erosion(), continentalModifier);
-        double riverModifier = getRiverModifier(height, erosionModifier, sample.riverBase(), continentalModifier, sample.continentalBase());
-
-        return MathUtils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+        return MathUtils.floor((sample.height() + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
     }
 
     public static int getResultingHeight(long totalX, long totalZ) {
@@ -90,7 +87,7 @@ public final class WorldGeneration {
 
         double temperature = sample.temperature() + dither;
         double humidity = sample.humidity() + dither;
-        double continental = sample.continentalBase() + sample.continentalAddend() + dither;
+        double continental = sample.continental() + dither;
         double erosion = sample.erosion() + dither;
         int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64);
 
@@ -178,26 +175,26 @@ public final class WorldGeneration {
         return hasGeneratedTree;
     }
 
-    private static double getContinentalModifier(double compare, double value, double ridge) {
-        double continentalModifier = 0.0;
+    private static double getContinentalModifier(MapSample sample) {
+        double continentalModifier = 0.0, continental = sample.continental();
         // Mountains
-        if (compare > MOUNTAIN_THRESHOLD)
-            continentalModifier = (value - MOUNTAIN_THRESHOLD) * (value - MOUNTAIN_THRESHOLD) * ridge * 100000;
+        if (continental > MOUNTAIN_THRESHOLD)
+            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * sample.ridge() * 100000;
             // Normal ocean
-        else if (compare < OCEAN_THRESHOLD && compare > OCEAN_THRESHOLD - 0.05)
-            continentalModifier = MathUtils.smoothInOutQuad(-value, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
-        else if (compare <= OCEAN_THRESHOLD - 0.05 && compare > OCEAN_THRESHOLD - 0.2)
-            continentalModifier = (value - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
+        else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
+            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
+        else if (continental <= OCEAN_THRESHOLD - 0.05 && continental > OCEAN_THRESHOLD - 0.2)
+            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.05)) * 100 + OCEAN_FLOOR_OFFSET;
             // Deep Ocean
-        else if (compare <= OCEAN_THRESHOLD - 0.2 && compare > OCEAN_THRESHOLD - 0.25)
-            continentalModifier = MathUtils.smoothInOutQuad(-value, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
-        else if (compare <= OCEAN_THRESHOLD - 0.25)
-            continentalModifier = (value - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
+        else if (continental <= OCEAN_THRESHOLD - 0.2 && continental > OCEAN_THRESHOLD - 0.25)
+            continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD + 0.2, -OCEAN_THRESHOLD + 0.25) * DEEP_OCEAN_FLOOR_OFFSET + OCEAN_FLOOR_OFFSET - 15;
+        else if (continental <= OCEAN_THRESHOLD - 0.25)
+            continentalModifier = (continental - (OCEAN_THRESHOLD - 0.25)) * 100 + OCEAN_FLOOR_OFFSET + DEEP_OCEAN_FLOOR_OFFSET - 15;
         return continentalModifier;
     }
 
-    private static double getErosionModifier(double height, double erosion, double continentalModifier) {
-        double erosionModifier = 0.0;
+    private static double getErosionModifier(double continentalModifier, MapSample sample) {
+        double erosionModifier = 0.0, erosion = sample.erosion(), height = sample.height();
         // Elevated areas
         if (erosion < -0.25 && erosion > -0.4) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0.25, 0.4) * 55;
         else if (erosion <= -0.40) erosionModifier = (erosion + 0.40) * 20 + 55;
@@ -209,20 +206,23 @@ public final class WorldGeneration {
         return erosionModifier;
     }
 
-    private static double getRiverModifier(double height, double erosionModifier, double river, double continentalModifier, double continentalBase) {
-        continentalModifier = Math.max(0, continentalModifier);
+    private static double getRiverModifier(double erosionModifier, double continentalModifier, MapSample sample) {
+        double height = sample.height(), river = sample.river();
 
-        double riverThinning = MathUtils.smoothInOutQuad(Math.max(continentalBase, MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
-        if (continentalBase > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;
+        double riverThinning = MathUtils.smoothInOutQuad(Math.max(sample.continental(), MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
+        if (sample.continental() > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;
+
         double innerThreshold = (1 - riverThinning) * INNER_RIVER_THRESHOLD;
         double outerThreshold = (1 - riverThinning) * RIVER_THRESHOLD;
+        if (river > outerThreshold) return 0;
 
-        double riverModifier = 0.0;
-        if (Math.abs(river) < innerThreshold)
-            riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
-        else if (Math.abs(river) < outerThreshold)
-            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - MathUtils.smoothInOutQuad(Math.abs(river), innerThreshold, outerThreshold));
-        return riverModifier * (1 - riverThinning);
+        double oceanScale = Math.clamp(-sample.continental(), -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.2);
+        oceanScale = MathUtils.smoothInOutQuad(oceanScale, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.2);
+
+        double riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
+        if (river < outerThreshold && river >= innerThreshold)
+            riverModifier *= (1 - MathUtils.smoothInOutQuad(river, innerThreshold, outerThreshold));
+        return riverModifier * (1 - riverThinning) * (1 - oceanScale);
     }
 
 
@@ -230,8 +230,6 @@ public final class WorldGeneration {
     private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
     private static final int FLATLAND_OFFSET = 330;
     private static final int RIVER_OFFSET = -200;
-
-    private static final double HEIGHT_MAP_MULTIPLIER = 250;
 
     private static final double MOUNTAIN_THRESHOLD = 0.3;
     private static final double OCEAN_THRESHOLD = -0.3;
