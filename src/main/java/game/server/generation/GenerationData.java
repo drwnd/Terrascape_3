@@ -18,7 +18,7 @@ public final class GenerationData {
 
     public Biome biome;
     public double feature;
-    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod;
+    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod, riverDepth;
     public byte steepness;
     public long totalX, totalY, totalZ;
 
@@ -35,11 +35,15 @@ public final class GenerationData {
         treeMap = treeMap(chunkX, chunkZ, lod);
         ChunkMapSamples samples = new ChunkMapSamples(chunkX, chunkZ, lod);
 
+        containsRiver = getMinRiver(samples) < 0.05;
+
         resultingHeightMap = WorldGeneration.getResultingHeightMap(samples);
-        steepnessMap = steepnessMap(resultingHeightMap, lod);
         biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, samples);
+        riverDepthMap = containsRiver ? WorldGeneration.getRiverDepthMap(samples) : null;
+        steepnessMap = steepnessMap(resultingHeightMap, lod);
         specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
 
+        maxRiverDepth = containsRiver ? getMaxRiverDepth(riverDepthMap) : Integer.MIN_VALUE;
         minHeight = getMinHeight(resultingHeightMap);
         maxHeight = getMaxHeight(resultingHeightMap);
         maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
@@ -61,6 +65,7 @@ public final class GenerationData {
         totalX = (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
         totalZ = (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
 
+        riverDepth = containsRiver ? riverDepthMap[mapIndex] : 0;
         feature = featureMap[index];
         steepness = steepnessMap[index];
         biome = biomeMap[index];
@@ -153,6 +158,12 @@ public final class GenerationData {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
         return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
+    }
+
+    public boolean containsUndergroundRiver() {
+        long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
+        long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
+        return containsRiver && chunkStartY < maxRiverDepth && chunkEndY > -maxRiverDepth;
     }
 
 
@@ -351,6 +362,18 @@ public final class GenerationData {
         return max;
     }
 
+    private static float getMinRiver(ChunkMapSamples samples) {
+        float min = Float.POSITIVE_INFINITY;
+        for (float riverValue : samples.riverMap()) min = Math.min(min, riverValue);
+        return min;
+    }
+
+    private static int getMaxRiverDepth(int[] riverDepthMap) {
+        int max = Integer.MIN_VALUE;
+        for (int riverDepth : riverDepthMap) max = Math.max(max, riverDepth);
+        return max;
+    }
+
     private static int getMaxSpecialHeight(int[] resultingHeightMap, int[] specialHeightMap) {
         int max = Integer.MIN_VALUE;
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
@@ -371,11 +394,13 @@ public final class GenerationData {
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 
-    private final int minHeight, maxHeight, maxSpecialHeight;
+    private final int minHeight, maxHeight, maxSpecialHeight, maxRiverDepth;
+    private final boolean containsRiver;
     private final Tree[] treeMap;
     private final double[] featureMap;
     private final Biome[] biomeMap;
 
+    private final int[] riverDepthMap;
     private final int[] resultingHeightMap;
     private final int[] specialHeightMap;
     private final byte[] steepnessMap;

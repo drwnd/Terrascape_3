@@ -40,6 +40,11 @@ public final class WorldGeneration {
                 }
             chunkContainsVoxels = true;
         }
+        if (data.containsUndergroundRiver()) {
+            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
+                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) generateUndergroundRiver(inChunkX, inChunkZ, data);
+            chunkContainsVoxels = true;
+        }
 
         chunkContainsVoxels |= generateTrees(data);
 
@@ -69,6 +74,13 @@ public final class WorldGeneration {
                 resultingHeightMap[mapIndex] = resultingHeight;
             }
         return resultingHeightMap;
+    }
+
+    public static int[] getRiverDepthMap(ChunkMapSamples samples) {
+        float[] riverMap = samples.riverMap();
+        int[] riverDepthMap = new int[riverMap.length];
+        for (int index = 0; index < riverDepthMap.length; index++) riverDepthMap[index] = getRiverDepth(riverMap[index]);
+        return riverDepthMap;
     }
 
     public static Biome[] getBiomes(int[] heightMap, double[] featureMap, ChunkMapSamples samples) {
@@ -124,6 +136,20 @@ public final class WorldGeneration {
     }
 
 
+    private static void generateStone(GenerationData data) {
+        long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
+
+        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; index += 8 * 8 * 8) {
+            int inChunkX = Utils.getInChunkX(index) << data.LOD;
+            int inChunkY = Utils.getInChunkY(index) << data.LOD;
+            int inChunkZ = Utils.getInChunkZ(index) << data.LOD;
+            byte stoneType = GenerationData.getGeneratingStoneType(chunkStartX + inChunkX, chunkStartY + inChunkY, chunkStartZ + inChunkZ);
+            data.storeConsecutive(index, 8 * 8 * 8, stoneType);
+        }
+    }
+
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
         int height = data.height;
@@ -147,17 +173,13 @@ public final class WorldGeneration {
         }
     }
 
-    private static void generateStone(GenerationData data) {
-        long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
-        long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
-        long chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
+    private static void generateUndergroundRiver(int inChunkX, int inChunkZ, GenerationData data) {
+        int start = Math.clamp(-data.riverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int end = Math.clamp(data.riverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
 
-        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; index += 8 * 8 * 8) {
-            int inChunkX = Utils.getInChunkX(index) << data.LOD;
-            int inChunkY = Utils.getInChunkY(index) << data.LOD;
-            int inChunkZ = Utils.getInChunkZ(index) << data.LOD;
-            byte stoneType = GenerationData.getGeneratingStoneType(chunkStartX + inChunkX, chunkStartY + inChunkY, chunkStartZ + inChunkZ);
-            data.storeConsecutive(index, 8 * 8 * 8, stoneType);
+        for (int inChunkY = start; inChunkY < end; inChunkY++) {
+            data.computeTotalY(inChunkY);
+            data.store(inChunkX, inChunkY, inChunkZ, data.totalY < 0 ? WATER : AIR);
         }
     }
 
@@ -224,6 +246,10 @@ public final class WorldGeneration {
         if (river < outerThreshold && river >= innerThreshold)
             riverModifier *= (1 - MathUtils.smoothInOutQuad(river, innerThreshold, outerThreshold));
         return riverModifier * (1 - riverThinning) * (1 - oceanScale);
+    }
+
+    private static int getRiverDepth(double river) {
+        return river < 0.05 ? 100 : 0;
     }
 
 
