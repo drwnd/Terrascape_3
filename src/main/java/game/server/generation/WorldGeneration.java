@@ -172,8 +172,8 @@ public final class WorldGeneration {
     }
 
     private static void generateUndergroundRiver(int inChunkX, int inChunkZ, GenerationData data) {
-        int start = Math.clamp(-data.undergroundRiverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
-        int end = Math.clamp(data.undergroundRiverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int start = Math.clamp(-data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int end = Math.clamp(data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
 
         for (int inChunkY = start; inChunkY < end; inChunkY++) {
             data.computeTotalY(inChunkY);
@@ -229,10 +229,7 @@ public final class WorldGeneration {
 
     private static double getRiverModifier(double erosionModifier, double continentalModifier, MapSample sample) {
         double height = sample.height(), river = sample.river();
-
-        double riverThinning = MathUtils.smoothInOutQuad(Math.max(sample.continental(), MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
-        if (sample.continental() > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;
-
+        double riverThinning = getRiverThinning(sample);
         double innerThreshold = (1 - riverThinning) * INNER_RIVER_THRESHOLD;
         double outerThreshold = (1 - riverThinning) * RIVER_THRESHOLD;
         if (river > outerThreshold) return 0;
@@ -246,8 +243,17 @@ public final class WorldGeneration {
         return riverModifier * (1 - riverThinning) * (1 - oceanScale);
     }
 
+    private static double getRiverThinning(MapSample sample) {
+        double riverThinning = MathUtils.smoothInOutQuad(Math.max(sample.continental(), MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
+        if (sample.continental() > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;
+        if (sample.erosion() > FLATLAND_THRESHOLD && sample.erosion() < FLATLAND_THRESHOLD + 0.25)
+            riverThinning = riverThinning * (1 - MathUtils.smoothInOutQuad(sample.erosion(), FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25));
+        else if (sample.erosion() >= FLATLAND_THRESHOLD + 0.25) riverThinning = 0;
+        return riverThinning;
+    }
+
     private static int getRiverDepth(double river) {
-       return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
+        return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
     }
 
 
