@@ -52,16 +52,18 @@ public record MapSample(float temperature, float humidity,
     }
 
     public static double ridgeMapValue(long totalX, long totalZ) {
-        return 1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0));
+        double ridge;
+        ridge = 1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0));
+        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x691FAA55BF0F52F7L, totalX * RIDGE_FREQUENCY * 20, totalZ * RIDGE_FREQUENCY * 20, 0))) * 0.05;
+        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7D635E3DA74EEFE7L, totalX * RIDGE_FREQUENCY * 400, totalZ * RIDGE_FREQUENCY * 400, 0))) * 0.0025;
+        return ridge;
     }
 
     public static double erosionMapValue(long totalX, long totalZ) {
         double erosion;
         erosion = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBEF86CF6C75F708DL, totalX * EROSION_FREQUENCY, totalZ * EROSION_FREQUENCY, 0) * 0.9588;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x60E4A215EA2087BCL, totalX * EROSION_FREQUENCY * 40, totalZ * EROSION_FREQUENCY * 40, 0) * 0.0411;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x75A0E541F1E10B53L, totalX * EROSION_FREQUENCY * 160, totalZ * EROSION_FREQUENCY * 160, 0) * 0.0111;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD5398D722513F0A3L, totalX * EROSION_FREQUENCY * 320, totalZ * EROSION_FREQUENCY * 320, 0) * 0.0051;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x3084497B496D8532L, totalX * EROSION_FREQUENCY * 640, totalZ * EROSION_FREQUENCY * 640, 0) * 0.0025;
+        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD5398D722513F0A3L, totalX * EROSION_FREQUENCY * 100, totalZ * EROSION_FREQUENCY * 100, 0) * 0.005;
+        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x3084497B496D8532L, totalX * EROSION_FREQUENCY * 1000, totalZ * EROSION_FREQUENCY * 1000, 0) * 0.00025;
         return erosion;
     }
 
@@ -86,7 +88,7 @@ public record MapSample(float temperature, float humidity,
     private static final double HUMIDITY_FREQUENCY = TEMPERATURE_FREQUENCY;
     private static final double HEIGHT_MAP_FREQUENCY = 1 / 6400.0;
     private static final double EROSION_FREQUENCY = 1 / 16000.0;
-    private static final double CONTINENTAL_FREQUENCY = 1 / 64000.0;
+    private static final double CONTINENTAL_FREQUENCY = 1 / 128000.0;
     private static final double RIVER_FREQUENCY = 1 / 32000.0;
     private static final double RIDGE_FREQUENCY = 1 / 16300.0;
 

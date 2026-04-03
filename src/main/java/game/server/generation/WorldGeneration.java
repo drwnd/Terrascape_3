@@ -97,7 +97,7 @@ public final class WorldGeneration {
             return OCEAN;
         }
         if (height < beachHeight) return BEACH;
-        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.425) {
+        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) {
             if (temperature > 0.33) return DRY_MOUNTAIN;
             else if (temperature < -0.33) return SNOWY_MOUNTAIN;
             return MOUNTAIN;
@@ -179,7 +179,7 @@ public final class WorldGeneration {
         double continentalModifier = 0.0, continental = sample.continental();
         // Mountains
         if (continental > MOUNTAIN_THRESHOLD)
-            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * sample.ridge() * 100000;
+            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * 20000 + sample.ridge() * (continental - MOUNTAIN_THRESHOLD) * 10000;
             // Normal ocean
         else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
             continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
