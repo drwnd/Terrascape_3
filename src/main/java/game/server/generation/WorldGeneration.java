@@ -33,7 +33,7 @@ public final class WorldGeneration {
             chunkContainsVoxels = true;
         }
 
-        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsRiver();
+        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
         if (containsBiome || containsRiver) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
@@ -74,7 +74,7 @@ public final class WorldGeneration {
         return resultingHeightMap;
     }
 
-    public static int[] getRiverDepthMap(ChunkMapSamples samples) {
+    public static int[] getUndergroundRiverDepthMap(ChunkMapSamples samples) {
         float[] riverMap = samples.riverMap();
         int[] riverDepthMap = new int[riverMap.length];
         for (int index = 0; index < riverDepthMap.length; index++) riverDepthMap[index] = getRiverDepth(riverMap[index]);
@@ -172,8 +172,8 @@ public final class WorldGeneration {
     }
 
     private static void generateUndergroundRiver(int inChunkX, int inChunkZ, GenerationData data) {
-        int start = Math.clamp(-data.riverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
-        int end = Math.clamp(data.riverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int start = Math.clamp(-data.undergroundRiverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int end = Math.clamp(data.undergroundRiverDepth - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
 
         for (int inChunkY = start; inChunkY < end; inChunkY++) {
             data.computeTotalY(inChunkY);
@@ -247,7 +247,7 @@ public final class WorldGeneration {
     }
 
     private static int getRiverDepth(double river) {
-       return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1000);
+       return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
     }
 
 
@@ -261,7 +261,7 @@ public final class WorldGeneration {
     private static final double FLATLAND_THRESHOLD = 0.3;
     private static final double RIVER_THRESHOLD = 0.1;
     private static final double INNER_RIVER_THRESHOLD = 0.005;
-    static final double UNDERGROUND_RIVER_THRESHOLD = 0.01;
+    static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
 
     private static final Biome DESERT = new Desert();
     private static final Biome WASTELAND = new Wasteland();

@@ -18,7 +18,7 @@ public final class GenerationData {
 
     public Biome biome;
     public double feature;
-    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod, riverDepth;
+    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod, undergroundRiverDepth;
     public byte steepness;
     public long totalX, totalY, totalZ;
 
@@ -35,19 +35,19 @@ public final class GenerationData {
         treeMap = treeMap(chunkX, chunkZ, lod);
         ChunkMapSamples samples = new ChunkMapSamples(chunkX, chunkZ, lod);
 
-        containsRiver = getMinRiver(samples) < UNDERGROUND_RIVER_THRESHOLD;
+        containsUndergroundRiver = getMinRiver(samples) < UNDERGROUND_RIVER_THRESHOLD;
 
         resultingHeightMap = WorldGeneration.getResultingHeightMap(samples);
         biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, samples);
-        riverDepthMap = containsRiver ? WorldGeneration.getRiverDepthMap(samples) : null;
+        undergroundRiverDepthMap = containsUndergroundRiver ? WorldGeneration.getUndergroundRiverDepthMap(samples) : null;
         steepnessMap = steepnessMap(resultingHeightMap, lod);
         specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
 
-        containsRiver = isUndergroundRiverDominant(riverDepthMap, resultingHeightMap);
+        containsUndergroundRiver = isUndergroundRiverDominant(undergroundRiverDepthMap, resultingHeightMap);
 
-        maxRiverDepth = containsRiver ? getMaxRiverDepth(riverDepthMap) : Integer.MIN_VALUE;
+        maxRiverDepth = containsUndergroundRiver ? getMax(undergroundRiverDepthMap) : Integer.MIN_VALUE;
         minHeight = getMinHeight(resultingHeightMap);
-        maxHeight = getMaxHeight(resultingHeightMap);
+        maxHeight = getMax(resultingHeightMap);
         maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
     }
 
@@ -67,7 +67,7 @@ public final class GenerationData {
         totalX = (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
         totalZ = (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
 
-        riverDepth = containsRiver ? riverDepthMap[mapIndex] : 0;
+        undergroundRiverDepth = containsUndergroundRiver ? undergroundRiverDepthMap[mapIndex] : 0;
         feature = featureMap[index];
         steepness = steepnessMap[index];
         biome = biomeMap[index];
@@ -162,10 +162,10 @@ public final class GenerationData {
         return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
     }
 
-    public boolean containsRiver() {
+    public boolean containsUndergroundRiver() {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
-        return containsRiver && chunkStartY < maxRiverDepth && chunkEndY > -maxRiverDepth;
+        return containsUndergroundRiver && chunkStartY < maxRiverDepth && chunkEndY > -maxRiverDepth;
     }
 
 
@@ -357,9 +357,9 @@ public final class GenerationData {
         return min;
     }
 
-    private static int getMaxHeight(int[] resultingHeightMap) {
+    private static int getMax(int[] values) {
         int max = Integer.MIN_VALUE;
-        for (int height : resultingHeightMap) max = Math.max(max, height);
+        for (int value : values) max = Math.max(max, value);
         return max;
     }
 
@@ -367,12 +367,6 @@ public final class GenerationData {
         float min = Float.POSITIVE_INFINITY;
         for (float riverValue : samples.riverMap()) min = Math.min(min, riverValue);
         return min;
-    }
-
-    private static int getMaxRiverDepth(int[] riverDepthMap) {
-        int max = Integer.MIN_VALUE;
-        for (int riverDepth : riverDepthMap) max = Math.max(max, riverDepth);
-        return max;
     }
 
     private static int getMaxSpecialHeight(int[] resultingHeightMap, int[] specialHeightMap) {
@@ -403,12 +397,12 @@ public final class GenerationData {
     }
 
     private final int minHeight, maxHeight, maxSpecialHeight, maxRiverDepth;
-    private boolean containsRiver;
+    private boolean containsUndergroundRiver;
     private final Tree[] treeMap;
     private final double[] featureMap;
     private final Biome[] biomeMap;
 
-    private final int[] riverDepthMap;
+    private final int[] undergroundRiverDepthMap;
     private final int[] resultingHeightMap;
     private final int[] specialHeightMap;
     private final byte[] steepnessMap;

@@ -189,7 +189,7 @@ public final class ChunkGenerator {
                     ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
                     Chunk chunk = world.getChunk(chunkIndex, lod);
                     if (chunk == null) {
-                        System.err.println("to mesh chunk is null" + chunkX + " " + chunkY + " " + chunkZ + " " + lod);
+                        System.err.printf("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
                         continue;
                     }
                     if (!chunk.ID.equals(expectedId)) {
