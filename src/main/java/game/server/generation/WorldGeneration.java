@@ -32,17 +32,15 @@ public final class WorldGeneration {
             generateStone(data);
             chunkContainsVoxels = true;
         }
-        if (data.chunkContainsBiome()) {
+
+        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsRiver();
+        if (containsBiome || containsRiver) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
                     data.set(inChunkX, inChunkZ);
-                    generateBiome(inChunkX, inChunkZ, data);
+                    if (containsBiome) generateBiome(inChunkX, inChunkZ, data);
+                    if (containsRiver) generateUndergroundRiver(inChunkX, inChunkZ, data);
                 }
-            chunkContainsVoxels = true;
-        }
-        if (data.containsUndergroundRiver()) {
-            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
-                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) generateUndergroundRiver(inChunkX, inChunkZ, data);
             chunkContainsVoxels = true;
         }
 
@@ -249,7 +247,7 @@ public final class WorldGeneration {
     }
 
     private static int getRiverDepth(double river) {
-        return river < 0.05 ? 100 : 0;
+       return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1000);
     }
 
 
@@ -263,6 +261,7 @@ public final class WorldGeneration {
     private static final double FLATLAND_THRESHOLD = 0.3;
     private static final double RIVER_THRESHOLD = 0.1;
     private static final double INNER_RIVER_THRESHOLD = 0.005;
+    static final double UNDERGROUND_RIVER_THRESHOLD = 0.01;
 
     private static final Biome DESERT = new Desert();
     private static final Biome WASTELAND = new Wasteland();

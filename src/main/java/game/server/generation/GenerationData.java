@@ -35,13 +35,15 @@ public final class GenerationData {
         treeMap = treeMap(chunkX, chunkZ, lod);
         ChunkMapSamples samples = new ChunkMapSamples(chunkX, chunkZ, lod);
 
-        containsRiver = getMinRiver(samples) < 0.05;
+        containsRiver = getMinRiver(samples) < UNDERGROUND_RIVER_THRESHOLD;
 
         resultingHeightMap = WorldGeneration.getResultingHeightMap(samples);
         biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, samples);
         riverDepthMap = containsRiver ? WorldGeneration.getRiverDepthMap(samples) : null;
         steepnessMap = steepnessMap(resultingHeightMap, lod);
         specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
+
+        containsRiver = isUndergroundRiverDominant(riverDepthMap, resultingHeightMap);
 
         maxRiverDepth = containsRiver ? getMaxRiverDepth(riverDepthMap) : Integer.MIN_VALUE;
         minHeight = getMinHeight(resultingHeightMap);
@@ -160,7 +162,7 @@ public final class GenerationData {
         return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
     }
 
-    public boolean containsUndergroundRiver() {
+    public boolean containsRiver() {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
         return containsRiver && chunkStartY < maxRiverDepth && chunkEndY > -maxRiverDepth;
@@ -169,7 +171,6 @@ public final class GenerationData {
 
     public static byte getGeneratingStoneType(long x, long y, long z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
-        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCDF7BB51DC497C88L, x * STONE_TYPE_FREQUENCY * 20, y * STONE_TYPE_FREQUENCY * 20, z * STONE_TYPE_FREQUENCY * 20) * 0.05;
         if (Math.abs(noise) < ANDESITE_THRESHOLD) return ANDESITE;
         else if (noise > SLATE_THRESHOLD) return SLATE;
         else if (noise < BLACKSTONE_THRESHOLD) return BLACKSTONE;
@@ -384,6 +385,13 @@ public final class GenerationData {
         return max;
     }
 
+    private static boolean isUndergroundRiverDominant(int[] riverDepthMap, int[] resultingHeightMap) {
+        if (riverDepthMap == null) return false;
+        for (int index = 0; index < riverDepthMap.length; index++)
+            if (-riverDepthMap[index] < resultingHeightMap[index]) return true;
+        return false;
+    }
+
 
     private int getCompressedIndex(long x, long y, long z) {
         // >> 2 for compression and performance improvement
@@ -395,7 +403,7 @@ public final class GenerationData {
     }
 
     private final int minHeight, maxHeight, maxSpecialHeight, maxRiverDepth;
-    private final boolean containsRiver;
+    private boolean containsRiver;
     private final Tree[] treeMap;
     private final double[] featureMap;
     private final Biome[] biomeMap;
