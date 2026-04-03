@@ -9,7 +9,7 @@ public final class Launcher {
 
     public static void main(String[] args) {
         Settings.registerSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
-        Window.init("Terrascape 3");
+        Window.init("Terrascape");
         Window.pushRenderable(new MainMenu());
         Window.renderLoop();
         Window.cleanUp();
