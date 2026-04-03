@@ -47,7 +47,10 @@ public record MapSample(float temperature, float humidity,
 
     public static double riverMapValue(long totalX, long totalZ) {
         double riverBase = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0);
+        riverBase += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x344FA574A7E89DF3L, totalX * RIVER_FREQUENCY * 100, totalZ * RIVER_FREQUENCY * 100, 0) * 0.01;
+        riverBase += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x096A85DA8C830521L, totalX * RIVER_FREQUENCY * 500, totalZ * RIVER_FREQUENCY * 500, 0) * 0.002;
         double riverBranch = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x2A1315A298B53255L, totalX * RIVER_FREQUENCY * 5, totalZ * RIVER_FREQUENCY * 5, 0);
+        riverBranch += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8A378F8A598A62FBL, totalX * RIVER_FREQUENCY * 500, totalZ * RIVER_FREQUENCY * 500, 0) * 0.002;
         return Math.min(Math.abs(riverBase), riverBranch * riverBranch + Math.abs(riverBase) * 0.25);
     }
 

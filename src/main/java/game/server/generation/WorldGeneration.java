@@ -87,7 +87,7 @@ public final class WorldGeneration {
 
         double temperature = sample.temperature() + dither;
         double humidity = sample.humidity() + dither;
-        double continental = sample.continental() + dither;
+        double continental = sample.continental() - Math.abs(dither);
         double erosion = sample.erosion() + dither;
         int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64);
 
@@ -104,7 +104,8 @@ public final class WorldGeneration {
         }
 
         if (temperature > 0.33) {
-            if (temperature - dither > 0.45 && humidity - dither < -0.3 && height > 128) return CORRODED_MESA;
+            if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
+                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return CORRODED_MESA;
             if (temperature > 0.55 && humidity < 0.15) return MESA;
             if (humidity < 0.15) return DESERT;
             if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;

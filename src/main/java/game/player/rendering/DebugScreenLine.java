@@ -159,6 +159,20 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             return "Chunk Index:%s, Chunk ID:%s".formatted(chunk.INDEX, chunk.ID);
         });
 
+        add(lines, DebugScreenOptions.BIOME, () -> {
+            Position position = Game.getPlayer().getPosition();
+            MapSample sample = new MapSample(position.longX, position.longZ, true, true);
+            int resultingHeight = WorldGeneration.getResultingHeight(sample);
+            return "Biome: %s".formatted(WorldGeneration.getBiome(sample, resultingHeight, 0).getName());
+        });
+
+        add(lines, DebugScreenOptions.RESULTING_HEIGHT, () -> {
+            Position position = Game.getPlayer().getPosition();
+            MapSample sample = new MapSample(position.longX, position.longZ, true, true);
+            int resultingHeight = WorldGeneration.getResultingHeight(sample);
+            return "Resulting Height: %s".formatted(resultingHeight);
+        });
+
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
             return "Temperature:        %s".formatted(MapSample.temperatureMapValue(position.longX, position.longZ));
@@ -192,13 +206,6 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
             return "Ridge:              %s".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
-        });
-
-        add(lines, DebugScreenOptions.BIOME, () -> {
-            Position position = Game.getPlayer().getPosition();
-            MapSample sample = new MapSample(position.longX, position.longZ, true, true);
-            int resultingHeight = WorldGeneration.getResultingHeight(sample);
-            return "Biome: %s".formatted(WorldGeneration.getBiome(sample, resultingHeight, 0).getName());
         });
 
         return lines;
