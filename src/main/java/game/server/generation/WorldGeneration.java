@@ -81,6 +81,10 @@ public final class WorldGeneration {
         return riverDepthMap;
     }
 
+    public static int getRiverDepth(double river) {
+        return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
+    }
+
     public static Biome[] getBiomes(int[] heightMap, double[] featureMap, ChunkMapSamples samples) {
         Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
@@ -99,38 +103,38 @@ public final class WorldGeneration {
         double humidity = sample.humidity() + dither;
         double continental = sample.continental() - Math.abs(dither);
         double erosion = sample.erosion() + dither;
-        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64);
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
 
         if (height < WATER_LEVEL) {
-            if (temperature > 0.33) return WARM_OCEAN;
-            else if (temperature - dither < -0.33) return COLD_OCEAN;
-            return OCEAN;
+            if (temperature > 0.33) return new WarmOcean();
+            else if (temperature - dither < -0.33) return new ColdOcean();
+            return new Ocean();
         }
-        if (height < beachHeight) return BEACH;
+        if (height < beachHeight) return new Beach();
         if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) {
-            if (temperature > 0.33) return DRY_MOUNTAIN;
-            else if (temperature < -0.33) return SNOWY_MOUNTAIN;
-            return MOUNTAIN;
+            if (temperature > 0.33) return new DryMountain();
+            else if (temperature < -0.33) return new SnowyMountain();
+            return new Mountain();
         }
 
         if (temperature > 0.33) {
             if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
-                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return CORRODED_MESA;
-            if (temperature > 0.55 && humidity < 0.15) return MESA;
-            if (humidity < 0.15) return DESERT;
-            if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;
-            if (humidity > 0.4 && temperature > 0.4) return DARK_OAK_FOREST;
-            return WASTELAND;
+                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return new CorrodedMesa();
+            if (temperature > 0.55 && humidity < 0.15) return new Mesa();
+            if (humidity < 0.15) return new Desert();
+            if (humidity > 0.5 && temperature > 0.5) return new BlackWoodForest();
+            if (humidity > 0.4 && temperature > 0.4) return new DarkOakForest();
+            return new Wasteland();
         }
         if (humidity > 0.33) {
-            if (temperature > -0.1) return REDWOOD_FOREST;
-            if (temperature > -0.4) return SPRUCE_FOREST;
-            return SNOWY_SPRUCE_FOREST;
+            if (temperature > -0.1) return new RedwoodForest();
+            if (temperature > -0.4) return new SpruceForest();
+            return new SnowySpruceForest();
         }
-        if (humidity < 0.0 && temperature > -0.25) return PLAINS;
-        if (humidity > -0.33 && temperature > -0.33) return OAK_FOREST;
-        if (humidity < -0.33 && temperature > -0.5) return PINE_FOREST;
-        return SNOWY_PLAINS;
+        if (humidity < 0.0 && temperature > -0.25) return new Plains();
+        if (humidity > -0.33 && temperature > -0.33) return new OakForest();
+        if (humidity < -0.33 && temperature > -0.5) return new PineForest();
+        return new SnowyPlains();
     }
 
 
@@ -217,13 +221,13 @@ public final class WorldGeneration {
     private static double getErosionModifier(double continentalModifier, MapSample sample) {
         double erosionModifier = 0.0, erosion = sample.erosion(), height = sample.height();
         // Elevated areas
-        if (erosion < -0.25 && erosion > -0.4) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0.25, 0.4) * 55;
-        else if (erosion <= -0.40) erosionModifier = (erosion + 0.40) * 20 + 55;
+        if (erosion < -0 && erosion > -0.5) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0, 0.5) * HIGHLAND_OFFSET;
+        else if (erosion <= -0.50) erosionModifier = -(erosion + 0.50) * 20 + HIGHLAND_OFFSET;
             // Flatland
         else if (erosion > FLATLAND_THRESHOLD && erosion < FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_OFFSET) * MathUtils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
+            erosionModifier = -(continentalModifier + height * 0.85 - FLATLAND_HEIGHT) * MathUtils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
         else if (erosion >= FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -height * 0.75 - continentalModifier + FLATLAND_OFFSET;
+            erosionModifier = -height * 0.85 - continentalModifier + FLATLAND_HEIGHT;
         return erosionModifier;
     }
 
@@ -252,14 +256,11 @@ public final class WorldGeneration {
         return riverThinning;
     }
 
-    private static int getRiverDepth(double river) {
-        return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
-    }
-
 
     private static final int OCEAN_FLOOR_OFFSET = -480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
-    private static final int FLATLAND_OFFSET = 330;
+    private static final int FLATLAND_HEIGHT = 55;
+    private static final int HIGHLAND_OFFSET = 500;
     private static final int RIVER_OFFSET = -200;
 
     private static final double MOUNTAIN_THRESHOLD = 0.3;
@@ -268,27 +269,6 @@ public final class WorldGeneration {
     private static final double RIVER_THRESHOLD = 0.1;
     private static final double INNER_RIVER_THRESHOLD = 0.005;
     static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
-
-    private static final Biome DESERT = new Desert();
-    private static final Biome WASTELAND = new Wasteland();
-    private static final Biome DARK_OAK_FOREST = new DarkOakForest();
-    private static final Biome SNOWY_SPRUCE_FOREST = new SnowySpruceForest();
-    private static final Biome SNOWY_PLAINS = new SnowyPlains();
-    private static final Biome SPRUCE_FOREST = new SpruceForest();
-    private static final Biome PLAINS = new Plains();
-    private static final Biome OAK_FOREST = new OakForest();
-    private static final Biome WARM_OCEAN = new WarmOcean();
-    private static final Biome COLD_OCEAN = new ColdOcean();
-    private static final Biome OCEAN = new Ocean();
-    private static final Biome DRY_MOUNTAIN = new DryMountain();
-    private static final Biome SNOWY_MOUNTAIN = new SnowyMountain();
-    private static final Biome MOUNTAIN = new Mountain();
-    private static final Biome MESA = new Mesa();
-    private static final Biome CORRODED_MESA = new CorrodedMesa();
-    private static final Biome BEACH = new Beach();
-    private static final Biome PINE_FOREST = new PineForest();
-    private static final Biome REDWOOD_FOREST = new RedwoodForest();
-    private static final Biome BLACK_WOOD_FOREST = new BlackWoodForest();
 
     private WorldGeneration() {
     }

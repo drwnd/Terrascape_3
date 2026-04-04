@@ -343,7 +343,8 @@ public final class GenerationData {
         int heightPlusX = WorldGeneration.getResultingHeight(totalX + 1, totalZ);
         int heightPlusZ = WorldGeneration.getResultingHeight(totalX, totalZ + 1);
         int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
-        if (steepness != 0) return null;
+        int riverDepth = WorldGeneration.getRiverDepth(sample.river());
+        if (steepness != 0 || riverDepth >= resultingHeight - 16) return null;
 
         Biome biome = WorldGeneration.getBiome(sample, resultingHeight, 0);
 

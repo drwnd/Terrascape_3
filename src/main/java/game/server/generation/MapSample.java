@@ -87,10 +87,10 @@ public record MapSample(float temperature, float humidity,
     }
 
 
-    private static final double TEMPERATURE_FREQUENCY = 1 / 16000.0;
+    private static final double TEMPERATURE_FREQUENCY = 1 / 32000.0;
     private static final double HUMIDITY_FREQUENCY = TEMPERATURE_FREQUENCY;
     private static final double HEIGHT_MAP_FREQUENCY = 1 / 6400.0;
-    private static final double EROSION_FREQUENCY = 1 / 16000.0;
+    private static final double EROSION_FREQUENCY = 1 / 32000.0;
     private static final double CONTINENTAL_FREQUENCY = 1 / 128000.0;
     private static final double RIVER_FREQUENCY = 1 / 32000.0;
     private static final double RIDGE_FREQUENCY = 1 / 16300.0;
