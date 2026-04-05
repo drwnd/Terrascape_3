@@ -16,7 +16,7 @@ public final class ColdOcean extends Biome {
         long totalZ = data.totalZ;
 
         int iceHeight = Math.min(data.specialHeight, WATER_LEVEL - data.height);
-        if (totalY > WATER_LEVEL - iceHeight && totalY <= WATER_LEVEL + (iceHeight >> 1)) {
+        if (totalY > WATER_LEVEL - iceHeight && totalY <= WATER_LEVEL + (iceHeight >> 3)) {
             data.store(inChunkX, inChunkY, inChunkZ, data.getGeneratingIceType(totalX, totalY, totalZ));
             return true;
         }
@@ -33,16 +33,22 @@ public final class ColdOcean extends Biome {
 
     @Override
     public int getSpecialHeight(long totalX, long totalZ) {
-        double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
-        double icePlainNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x649C844EA835C9A7L, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0.0);
-        if (iceBergNoise > ICE_BERG_THRESHOLD + 0.1) return (int) (ICE_BERG_HEIGHT + (icePlainNoise * 4.0));
-        if (iceBergNoise > ICE_BERG_THRESHOLD)
-            return (int) (MathUtils.smoothInOutQuad(iceBergNoise, ICE_BERG_THRESHOLD, ICE_BERG_THRESHOLD + 0.1) * ICE_BERG_HEIGHT + (icePlainNoise * 4.0));
-        if (icePlainNoise > ICE_PLANE_THRESHOLD) return 1;
-        return 0;
+        double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);
+        iceBergNoise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xFAA4418F549636ABL, totalX * ICE_BERG_FREQUENCY * 10, totalZ * ICE_BERG_FREQUENCY * 10, 0) * 0.03;
+
+        double icePlainNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x649C844EA835C9A7L, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);
+        icePlainNoise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCD9B4E7568B5747CL, totalX * ICE_BERG_FREQUENCY * 40, totalZ * ICE_BERG_FREQUENCY * 40, 0) * 0.05;
+        double iceBergTopHeightOffset = Math.abs(icePlainNoise) * 16;
+
+        if (iceBergNoise > ICE_BERG_THRESHOLD + 0.2) return (int) (ICE_BERG_HEIGHT + iceBergTopHeightOffset);
+        if (iceBergNoise > ICE_BERG_THRESHOLD) {
+            double smoothedNoise = MathUtils.smoothInOutQuad(iceBergNoise, ICE_BERG_THRESHOLD, ICE_BERG_THRESHOLD + 0.2);
+            return Math.max(1, (int) (Math.pow(smoothedNoise, 0.1) * (ICE_BERG_HEIGHT + iceBergTopHeightOffset)));
+        }
+        return icePlainNoise > ICE_PLANE_THRESHOLD ? 1 : 0;
     }
 
-    private static final double ICE_BERG_FREQUENCY = 0.0015625;
+    private static final double ICE_BERG_FREQUENCY = 1 / 640.0;
     private static final double ICE_BERG_THRESHOLD = 0.45;
     private static final double ICE_BERG_HEIGHT = 128;
     private static final double ICE_PLANE_THRESHOLD = 0.3;

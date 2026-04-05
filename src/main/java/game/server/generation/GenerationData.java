@@ -18,7 +18,7 @@ public final class GenerationData {
 
     public Biome biome;
     public double feature;
-    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod;
+    public int height, specialHeight, floorMaterialDepth, floorMaterialDepthMod, undergroundRiverDepth;
     public byte steepness;
     public long totalX, totalY, totalZ;
 
@@ -33,22 +33,21 @@ public final class GenerationData {
 
         featureMap = featureMap(chunkX, chunkZ, lod);
         treeMap = treeMap(chunkX, chunkZ, lod);
+        ChunkMapSamples samples = new ChunkMapSamples(chunkX, chunkZ, lod);
 
-        double[] temperatureMap = temperatureMapPadded(chunkX, chunkZ, lod);
-        double[] humidityMap = humidityMapPadded(chunkX, chunkZ, lod);
-        double[] erosionMap = erosionMapPadded(chunkX, chunkZ, lod);
-        double[] continentalMap = continentalMapPadded(chunkX, chunkZ, lod);
-        double[] heightMap = heightMapPadded(chunkX, chunkZ, lod);
-        double[] riverMap = riverMapPadded(chunkX, chunkZ, lod);
-        double[] ridgeMap = ridgeMapPadded(chunkX, chunkZ, lod);
+        containsUndergroundRiver = getMinRiver(samples) < UNDERGROUND_RIVER_THRESHOLD;
 
-        resultingHeightMap = WorldGeneration.getResultingHeightMap(heightMap, erosionMap, continentalMap, riverMap, ridgeMap);
+        resultingHeightMap = WorldGeneration.getResultingHeightMap(samples);
+        biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, samples);
+        undergroundRiverDepthMap = containsUndergroundRiver ? WorldGeneration.getUndergroundRiverDepthMap(samples) : null;
         steepnessMap = steepnessMap(resultingHeightMap, lod);
-        biomeMap = WorldGeneration.getBiomes(resultingHeightMap, featureMap, humidityMap, temperatureMap, erosionMap, continentalMap);
         specialHeightMap = specialHeightMap(chunkX, chunkZ, lod, biomeMap);
 
+        containsUndergroundRiver = isUndergroundRiverDominant(undergroundRiverDepthMap, resultingHeightMap);
+
+        maxRiverDepth = containsUndergroundRiver ? getMax(undergroundRiverDepthMap) : Integer.MIN_VALUE;
         minHeight = getMinHeight(resultingHeightMap);
-        maxHeight = getMaxHeight(resultingHeightMap);
+        maxHeight = getMax(resultingHeightMap);
         maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
     }
 
@@ -68,6 +67,7 @@ public final class GenerationData {
         totalX = (chunkX << CHUNK_SIZE_BITS | inChunkX) << LOD;
         totalZ = (chunkZ << CHUNK_SIZE_BITS | inChunkZ) << LOD;
 
+        undergroundRiverDepth = containsUndergroundRiver ? undergroundRiverDepthMap[mapIndex] : 0;
         feature = featureMap[index];
         steepness = steepnessMap[index];
         biome = biomeMap[index];
@@ -80,77 +80,6 @@ public final class GenerationData {
     public void computeTotalY(int inChunkY) {
         totalY = (chunkY << CHUNK_SIZE_BITS | inChunkY) << LOD;
     }
-
-
-    public static double heightMapValue(long totalX, long totalZ) {
-        double height;
-        height = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x08D2BCC9BD98BBF5L, totalX * HEIGHT_MAP_FREQUENCY, totalZ * HEIGHT_MAP_FREQUENCY, 0);
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCEC793764665EF7DL, totalX * HEIGHT_MAP_FREQUENCY * 2, totalZ * HEIGHT_MAP_FREQUENCY * 2, 0) * 0.5;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBD4957D70308DEBFL, totalX * HEIGHT_MAP_FREQUENCY * 4, totalZ * HEIGHT_MAP_FREQUENCY * 4, 0) * 0.25;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD68F54787A92D53CL, totalX * HEIGHT_MAP_FREQUENCY * 8, totalZ * HEIGHT_MAP_FREQUENCY * 8, 0) * 0.125;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x574730707031DA54L, totalX * HEIGHT_MAP_FREQUENCY * 16, totalZ * HEIGHT_MAP_FREQUENCY * 16, 0) * 0.0625;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF82698C39EE31D97L, totalX * HEIGHT_MAP_FREQUENCY * 32, totalZ * HEIGHT_MAP_FREQUENCY * 32, 0) * 0.03125;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x6F51382316D4C57FL, totalX * HEIGHT_MAP_FREQUENCY * 64, totalZ * HEIGHT_MAP_FREQUENCY * 64, 0) * 0.015625;
-        height += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x09D355804F5FB2F7L, totalX * HEIGHT_MAP_FREQUENCY * 128, totalZ * HEIGHT_MAP_FREQUENCY * 128, 0) * 0.0078125;
-        return height;
-    }
-
-    public static double continentalMapValue(long totalX, long totalZ) {
-        double continental;
-        continental = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xCF71B60E764BFC2CL, totalX * CONTINENTAL_FREQUENCY, totalZ * CONTINENTAL_FREQUENCY, 0) * 0.9588;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8EF1C1F90DA10C0AL, totalX * CONTINENTAL_FREQUENCY * 6, totalZ * CONTINENTAL_FREQUENCY * 6, 0) * 0.0411;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x608308CA890553E3L, totalX * CONTINENTAL_FREQUENCY * 12, totalZ * CONTINENTAL_FREQUENCY * 12, 0) * 0.0211;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xE29B01A5152C8664L, totalX * CONTINENTAL_FREQUENCY * 24, totalZ * CONTINENTAL_FREQUENCY * 24, 0) * 0.0111;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x27C1986D27551225L, totalX * CONTINENTAL_FREQUENCY * 48, totalZ * CONTINENTAL_FREQUENCY * 48, 0) * 0.00511;
-        continental += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x33382D4F463883B8L, totalX * CONTINENTAL_FREQUENCY * 160, totalZ * CONTINENTAL_FREQUENCY * 160, 0) * 0.00111;
-        return continental;
-    }
-
-    public static double riverMapValue(long totalX, long totalZ) {
-        double river;
-        river = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x84D43603ED399321L, totalX * RIVER_FREQUENCY, totalZ * RIVER_FREQUENCY, 0) * 0.9588;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7C46A6B469AC4A05L, totalX * RIVER_FREQUENCY * 50, totalZ * RIVER_FREQUENCY * 50, 0) * 0.0411;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x14CBFBB4AF4AB8D4L, totalX * RIVER_FREQUENCY * 200, totalZ * RIVER_FREQUENCY * 200, 0) * 0.0111;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBC183CA6F3488FCAL, totalX * RIVER_FREQUENCY * 400, totalZ * RIVER_FREQUENCY * 400, 0) * 0.0051;
-        river += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x09340E1C502CED3CL, totalX * RIVER_FREQUENCY * 800, totalZ * RIVER_FREQUENCY * 800, 0) * 0.0025;
-        return river;
-    }
-
-    public static double ridgeMapValue(long totalX, long totalZ) {
-        double ridge;
-        ridge = (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDD4D88700A5E4D7EL, totalX * RIDGE_FREQUENCY, totalZ * RIDGE_FREQUENCY, 0))) * 0.5;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x8A3E12DE957E78C5L, totalX * RIDGE_FREQUENCY * 2, totalZ * RIDGE_FREQUENCY * 2, 0))) * 0.25;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x0A8E80B850A75321L, totalX * RIDGE_FREQUENCY * 4, totalZ * RIDGE_FREQUENCY * 4, 0))) * 0.125;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x6E0744EACB517937L, totalX * RIDGE_FREQUENCY * 8, totalZ * RIDGE_FREQUENCY * 8, 0))) * 0.0625;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBCCFDBF01B87426FL, totalX * RIDGE_FREQUENCY * 64, totalZ * RIDGE_FREQUENCY * 64, 0))) * 0.0390625;
-        ridge += (1 - Math.abs(OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7F36866E4079518BL, totalX * RIDGE_FREQUENCY * 128, totalZ * RIDGE_FREQUENCY * 128, 0))) * 0.01953125;
-        return ridge;
-    }
-
-    public static double erosionMapValue(long totalX, long totalZ) {
-        double erosion;
-        erosion = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xBEF86CF6C75F708DL, totalX * EROSION_FREQUENCY, totalZ * EROSION_FREQUENCY, 0) * 0.9588;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x60E4A215EA2087BCL, totalX * EROSION_FREQUENCY * 40, totalZ * EROSION_FREQUENCY * 40, 0) * 0.0411;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x75A0E541F1E10B53L, totalX * EROSION_FREQUENCY * 160, totalZ * EROSION_FREQUENCY * 160, 0) * 0.0111;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD5398D722513F0A3L, totalX * EROSION_FREQUENCY * 320, totalZ * EROSION_FREQUENCY * 320, 0) * 0.0051;
-        erosion += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x3084497B496D8532L, totalX * EROSION_FREQUENCY * 640, totalZ * EROSION_FREQUENCY * 640, 0) * 0.0025;
-        return erosion;
-    }
-
-    public static double temperatureMapValue(long totalX, long totalZ) {
-        double temperature;
-        temperature = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xADA1CE5C24C4A44FL, totalX * TEMPERATURE_FREQUENCY, totalZ * TEMPERATURE_FREQUENCY, 0) * 0.8888;
-        temperature += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEEA0CB5D51C0A447L, totalX * TEMPERATURE_FREQUENCY * 50, totalZ * TEMPERATURE_FREQUENCY * 50, 0) * 0.1111;
-        return temperature;
-    }
-
-    public static double humidityMapValue(long totalX, long totalZ) {
-        double humidity;
-        humidity = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x41C8F1921D50DF82L, totalX * HUMIDITY_FREQUENCY, totalZ * HUMIDITY_FREQUENCY, 0) * 0.8888;
-        humidity += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xB935E00850C8416EL, totalX * HUMIDITY_FREQUENCY * 50, totalZ * HUMIDITY_FREQUENCY * 50, 0) * 0.1111;
-        return humidity;
-    }
-
 
     public boolean isBelowFloorMaterialLevel(long totalY, int floorMaterialDepth) {
         return totalY >> LOD < height - floorMaterialDepth >> LOD;
@@ -233,6 +162,12 @@ public final class GenerationData {
         return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
     }
 
+    public boolean containsUndergroundRiver() {
+        long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
+        long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
+        return containsUndergroundRiver && chunkStartY < maxRiverDepth && chunkEndY > -maxRiverDepth;
+    }
+
 
     public static byte getGeneratingStoneType(long x, long y, long z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
@@ -249,6 +184,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x30CD70827706B4C0L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF09AE67E544680FDL, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < SAND_THRESHOLD) material = SAND;
@@ -265,6 +201,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEB26D0A3459AAA03L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x795680A262E2D7BBL, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < MUD_THRESHOLD) material = MUD;
@@ -281,6 +218,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x7A182AB93793E000L, x * MUD_TYPE_FREQUENCY, y * MUD_TYPE_FREQUENCY, z * MUD_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xDC676EC767E50725L, x * MUD_TYPE_FREQUENCY * 10, y * MUD_TYPE_FREQUENCY * 10, z * MUD_TYPE_FREQUENCY * 10) * 0.1;
         if (Math.abs(noise) < GRAVEL_THRESHOLD) material = GRAVEL;
         else if (noise > CLAY_THRESHOLD) material = CLAY;
         else if (noise < MUD_THRESHOLD) material = MUD;
@@ -297,6 +235,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF88966EA665D953EL, x * DIRT_TYPE_FREQUENCY, y * DIRT_TYPE_FREQUENCY, z * DIRT_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x16A476D46322A4F5L, x * DIRT_TYPE_FREQUENCY * 15, y * DIRT_TYPE_FREQUENCY * 15, z * DIRT_TYPE_FREQUENCY * 15) * 0.1;
         if (Math.abs(noise) < COURSE_DIRT_THRESHOLD) material = COURSE_DIRT;
         else material = DIRT;
 
@@ -311,6 +250,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xD6744EFC8D01AEFCL, x * ICE_TYPE_FREQUENCY, y * ICE_TYPE_FREQUENCY, z * ICE_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xB4A5FBFC95B28C81L, x * ICE_TYPE_FREQUENCY * 20, y * ICE_TYPE_FREQUENCY * 20, z * ICE_TYPE_FREQUENCY * 20) * 0.05;
         if (noise > HEAVY_ICE_THRESHOLD) material = HEAVY_ICE;
         else material = ICE;
 
@@ -325,6 +265,7 @@ public final class GenerationData {
 
         // Generate if not yet generated
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xEFB13EFD3B5AC7A7L, x * GRASS_TYPE_FREQUENCY, y * GRASS_TYPE_FREQUENCY, z * GRASS_TYPE_FREQUENCY);
+        noise += OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x72FFEA6B7F992167L, x * GRASS_TYPE_FREQUENCY * 2, y * GRASS_TYPE_FREQUENCY * 2, z * GRASS_TYPE_FREQUENCY * 2) * 0.05;
         noise += feature * 0.4 - 0.2;
         if (Math.abs(noise) < MOSS_THRESHOLD) material = MOSS;
         else material = GRASS;
@@ -333,156 +274,6 @@ public final class GenerationData {
         return material;
     }
 
-
-    private static double[] temperatureMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] temperatureMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                temperatureMap[getMapIndex(mapX, mapZ)] = temperatureMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(temperatureMap, mapX, mapZ);
-
-        return temperatureMap;
-    }
-
-    private static double[] humidityMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] humidityMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                humidityMap[getMapIndex(mapX, mapZ)] = humidityMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(humidityMap, mapX, mapZ);
-
-        return humidityMap;
-    }
-
-    private static double[] heightMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] heightMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                heightMap[getMapIndex(mapX, mapZ)] = heightMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(heightMap, mapX, mapZ);
-
-        return heightMap;
-    }
-
-    private static double[] erosionMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] erosionMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                erosionMap[getMapIndex(mapX, mapZ)] = erosionMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(erosionMap, mapX, mapZ);
-        return erosionMap;
-    }
-
-    private static double[] continentalMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] continentalMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                continentalMap[getMapIndex(mapX, mapZ)] = continentalMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(continentalMap, mapX, mapZ);
-        return continentalMap;
-    }
-
-    private static double[] riverMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] riverMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                riverMap[getMapIndex(mapX, mapZ)] = riverMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(riverMap, mapX, mapZ);
-        return riverMap;
-    }
-
-    private static double[] ridgeMapPadded(long chunkX, long chunkZ, int lod) {
-        double[] ridgeMap = new double[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
-        int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        int gapSize = 1 << lod;
-
-        // Calculate actual values
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ += INTERPOLATION_SIZE) {
-                long totalX = (chunkX << chunkSizeBits) + (long) mapX * gapSize - gapSize;
-                long totalZ = (chunkZ << chunkSizeBits) + (long) mapZ * gapSize - gapSize;
-
-                ridgeMap[getMapIndex(mapX, mapZ)] = ridgeMapValue(totalX, totalZ);
-            }
-
-        // Interpolate values for every point
-        // CHUNK_SIZE_PADDED - 1 to not write out of bounds
-        for (int mapX = 0; mapX < CHUNK_SIZE_PADDED - 1; mapX += INTERPOLATION_SIZE)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED - 1; mapZ += INTERPOLATION_SIZE) interpolate(ridgeMap, mapX, mapZ);
-        return ridgeMap;
-    }
 
     private static double[] featureMap(long chunkX, long chunkZ, int lod) {
         double[] featureMap = new double[CHUNK_SIZE * CHUNK_SIZE];
@@ -546,41 +337,19 @@ public final class GenerationData {
     }
 
     private static Tree treeMapValue(long totalX, long totalZ) {
-        double temperature = temperatureMapValue(totalX, totalZ);
-        double humidity = humidityMapValue(totalX, totalZ);
-        double height = heightMapValue(totalX, totalZ);
-        double erosion = erosionMapValue(totalX, totalZ);
-        double continental = continentalMapValue(totalX, totalZ);
-        double river = riverMapValue(totalX, totalZ);
-        double ridge = ridgeMapValue(totalX, totalZ);
+        MapSample sample = new MapSample(totalX, totalZ, true, true);
 
-        int resultingHeight = WorldGeneration.getResultingHeight(height, erosion, continental, river, ridge);
+        int resultingHeight = WorldGeneration.getResultingHeight(sample);
         int heightPlusX = WorldGeneration.getResultingHeight(totalX + 1, totalZ);
         int heightPlusZ = WorldGeneration.getResultingHeight(totalX, totalZ + 1);
         int steepness = Math.max(Math.abs(resultingHeight - heightPlusX), Math.abs(resultingHeight - heightPlusZ));
-        if (steepness != 0) return null;
+        int riverDepth = WorldGeneration.getRiverDepth(sample.river());
+        if (steepness != 0 || riverDepth >= resultingHeight - 16) return null;
 
-        Biome biome = WorldGeneration.getBiome(temperature, humidity, 96, resultingHeight, erosion, continental);
+        Biome biome = WorldGeneration.getBiome(sample, resultingHeight, 0);
 
         if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & biome.getRequiredTreeZeroBits()) != 0) return null;
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
-    }
-
-    private static void interpolate(double[] map, int mapX, int mapZ) {
-        double value1 = map[getMapIndex(mapX, mapZ)];
-        double value2 = map[getMapIndex(mapX + INTERPOLATION_SIZE, mapZ)];
-        double value3 = map[getMapIndex(mapX, mapZ + INTERPOLATION_SIZE)];
-        double value4 = map[getMapIndex(mapX + INTERPOLATION_SIZE, mapZ + INTERPOLATION_SIZE)];
-
-        for (int x = 0; x <= INTERPOLATION_SIZE; x++) {
-            double interpolatedLowXValue = (value2 * x + value1 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
-            double interpolatedHighXValue = (value4 * x + value3 * (INTERPOLATION_SIZE - x)) * INTERPOLATION_MULTIPLIER;
-
-            for (int z = 0; z <= INTERPOLATION_SIZE; z++) {
-                double interpolatedValue = (interpolatedHighXValue * z + interpolatedLowXValue * (INTERPOLATION_SIZE - z)) * INTERPOLATION_MULTIPLIER;
-                map[getMapIndex(mapX + x, mapZ + z)] = interpolatedValue;
-            }
-        }
     }
 
     private static int getMinHeight(int[] resultingHeightMap) {
@@ -589,10 +358,16 @@ public final class GenerationData {
         return min;
     }
 
-    private static int getMaxHeight(int[] resultingHeightMap) {
+    private static int getMax(int[] values) {
         int max = Integer.MIN_VALUE;
-        for (int height : resultingHeightMap) max = Math.max(max, height);
+        for (int value : values) max = Math.max(max, value);
         return max;
+    }
+
+    private static float getMinRiver(ChunkMapSamples samples) {
+        float min = Float.POSITIVE_INFINITY;
+        for (float riverValue : samples.riverMap()) min = Math.min(min, riverValue);
+        return min;
     }
 
     private static int getMaxSpecialHeight(int[] resultingHeightMap, int[] specialHeightMap) {
@@ -605,6 +380,13 @@ public final class GenerationData {
         return max;
     }
 
+    private static boolean isUndergroundRiverDominant(int[] riverDepthMap, int[] resultingHeightMap) {
+        if (riverDepthMap == null) return false;
+        for (int index = 0; index < riverDepthMap.length; index++)
+            if (-riverDepthMap[index] < resultingHeightMap[index]) return true;
+        return false;
+    }
+
 
     private int getCompressedIndex(long x, long y, long z) {
         // >> 2 for compression and performance improvement
@@ -615,11 +397,13 @@ public final class GenerationData {
         return compressedX << CHUNK_SIZE_BITS * 2 - 4 | compressedZ << CHUNK_SIZE_BITS - 2 | compressedY;
     }
 
-    private final int minHeight, maxHeight, maxSpecialHeight;
+    private final int minHeight, maxHeight, maxSpecialHeight, maxRiverDepth;
+    private boolean containsUndergroundRiver;
     private final Tree[] treeMap;
     private final double[] featureMap;
     private final Biome[] biomeMap;
 
+    private final int[] undergroundRiverDepthMap;
     private final int[] resultingHeightMap;
     private final int[] specialHeightMap;
     private final byte[] steepnessMap;
@@ -627,34 +411,24 @@ public final class GenerationData {
 
     private final byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
 
-    private static final double TEMPERATURE_FREQUENCY = 6.25E-5;
-    private static final double HUMIDITY_FREQUENCY = TEMPERATURE_FREQUENCY;
-    private static final double HEIGHT_MAP_FREQUENCY = 1.5625E-4;
-    private static final double EROSION_FREQUENCY = 6.25E-5;
-    private static final double CONTINENTAL_FREQUENCY = 1.5625E-5;
-    private static final double RIVER_FREQUENCY = 3.125E-5;
-    private static final double RIDGE_FREQUENCY = 6.125E-5;
 
-    private static final double STONE_TYPE_FREQUENCY = 0.00125;
+    private static final double STONE_TYPE_FREQUENCY = 1 / 800.0;
     private static final double ANDESITE_THRESHOLD = 0.1;
     private static final double SLATE_THRESHOLD = 0.6;
     private static final double BLACKSTONE_THRESHOLD = -0.6;
 
-    private static final double MUD_TYPE_FREQUENCY = 0.0025;
+    private static final double MUD_TYPE_FREQUENCY = 1 / 400.0;
     private static final double GRAVEL_THRESHOLD = 0.1;
     private static final double CLAY_THRESHOLD = 0.5;
     private static final double SAND_THRESHOLD = -0.5;
     private static final double MUD_THRESHOLD = -0.5;
 
-    private static final double DIRT_TYPE_FREQUENCY = 0.003125;
+    private static final double DIRT_TYPE_FREQUENCY = 1 / 320.0;
     private static final double COURSE_DIRT_THRESHOLD = 0.15;
 
-    private static final double GRASS_TYPE_FREQUENCY = 0.0015625;
+    private static final double GRASS_TYPE_FREQUENCY = 1 / 640.0;
     private static final double MOSS_THRESHOLD = 0.3;
 
-    private static final double ICE_TYPE_FREQUENCY = 0.005;
+    private static final double ICE_TYPE_FREQUENCY = 1 / 200.0;
     private static final double HEAVY_ICE_THRESHOLD = 0.6;
-
-    private static final int INTERPOLATION_SIZE = 8;
-    private static final double INTERPOLATION_MULTIPLIER = 1.0 / INTERPOLATION_SIZE;
 }

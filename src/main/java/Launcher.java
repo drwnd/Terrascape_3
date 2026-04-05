@@ -9,6 +9,7 @@ public final class Launcher {
 
     public static void main(String[] args) {
         Settings.registerSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
+        Settings.registerSettings(DebugScreenOptions.getVisibilitySettings(), DebugScreenOptions.getColorSettings());
         Window.init("Terrascape");
         Window.pushRenderable(new MainMenu());
         Window.renderLoop();

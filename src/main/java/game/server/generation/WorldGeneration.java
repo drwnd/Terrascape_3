@@ -32,11 +32,14 @@ public final class WorldGeneration {
             generateStone(data);
             chunkContainsVoxels = true;
         }
-        if (data.chunkContainsBiome()) {
+
+        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
+        if (containsBiome || containsRiver) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
                     data.set(inChunkX, inChunkZ);
-                    generateBiome(inChunkX, inChunkZ, data);
+                    if (containsBiome) generateBiome(inChunkX, inChunkZ, data);
+                    if (containsRiver) generateUndergroundRiver(inChunkX, inChunkZ, data);
                 }
             chunkContainsVoxels = true;
         }
@@ -47,94 +50,107 @@ public final class WorldGeneration {
         chunk.setGenerationStatus(Status.DONE);
     }
 
-    public static int getResultingHeight(double height, double erosion, double continental, double river, double ridge) {
-        height = (height * 0.5 + 0.5) * HEIGHT_MAP_MULTIPLIER;
+    public static int getResultingHeight(MapSample sample) {
+        double continentalModifier = getContinentalModifier(sample);
+        double erosionModifier = getErosionModifier(continentalModifier, sample);
+        double riverModifier = getRiverModifier(erosionModifier, continentalModifier, sample);
 
-        double continentalModifier = getContinentalModifier(continental, ridge);
-        double erosionModifier = getErosionModifier(height, erosion, continentalModifier);
-        double riverModifier = getRiverModifier(height, continentalModifier, erosionModifier, river);
-
-        return MathUtils.floor((height + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
+        return MathUtils.floor((sample.height() + continentalModifier + erosionModifier + riverModifier) * 2) + WATER_LEVEL - 15;
     }
 
     public static int getResultingHeight(long totalX, long totalZ) {
-        double height = GenerationData.heightMapValue(totalX, totalZ);
-        double erosion = GenerationData.erosionMapValue(totalX, totalZ);
-        double continental = GenerationData.continentalMapValue(totalX, totalZ);
-        double river = GenerationData.riverMapValue(totalX, totalZ);
-        double ridge = GenerationData.ridgeMapValue(totalX, totalZ);
-
-        return getResultingHeight(height, erosion, continental, river, ridge);
+        return getResultingHeight(new MapSample(totalX, totalZ, false, true));
     }
 
-    public static int[] getResultingHeightMap(double[] heightMap, double[] erosionMap, double[] continentalMap, double[] riverMap, double[] ridgeMap) {
+    public static int[] getResultingHeightMap(ChunkMapSamples samples) {
         int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
         for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE_PADDED; mapZ++) {
 
                 int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
-                double height = heightMap[mapIndex];
-                double erosion = erosionMap[mapIndex];
-                double continental = continentalMap[mapIndex];
-                double river = riverMap[mapIndex];
-                double ridge = ridgeMap[mapIndex];
-
-                int resultingHeight = getResultingHeight(height, erosion, continental, river, ridge);
+                int resultingHeight = getResultingHeight(samples.getSample(mapIndex));
                 resultingHeightMap[mapIndex] = resultingHeight;
             }
         return resultingHeightMap;
     }
 
-    public static Biome[] getBiomes(int[] heightMap, double[] featureMap, double[] humidityMap, double[] temperatureMap, double[] erosionMap, double[] continentalMap) {
+    public static int[] getUndergroundRiverDepthMap(ChunkMapSamples samples) {
+        float[] riverMap = samples.riverMap();
+        int[] riverDepthMap = new int[riverMap.length];
+        for (int index = 0; index < riverDepthMap.length; index++) riverDepthMap[index] = getRiverDepth(riverMap[index]);
+        return riverDepthMap;
+    }
+
+    public static int getRiverDepth(double river) {
+        return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
+    }
+
+    public static Biome[] getBiomes(int[] heightMap, double[] featureMap, ChunkMapSamples samples) {
         Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
             for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
                 int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
                 int index = mapX << CHUNK_SIZE_BITS | mapZ;
-                biomes[index] = getBiome(
-                        temperatureMap[mapIndex],
-                        humidityMap[mapIndex],
-                        WATER_LEVEL + (int) (featureMap[index] * 64.0) + 64,
-                        heightMap[mapIndex],
-                        erosionMap[mapIndex],
-                        continentalMap[mapIndex]
-                );
+                biomes[index] = getBiome(samples.getSample(mapIndex), heightMap[mapIndex], featureMap[index]);
             }
         return biomes;
     }
 
-    public static Biome getBiome(double temperature, double humidity, int beachHeight, int height, double erosion, double continental) {
+    public static Biome getBiome(MapSample sample, int height, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        double temperature = sample.temperature() + dither;
+        double humidity = sample.humidity() + dither;
+        double continental = sample.continental() - Math.abs(dither);
+        double erosion = sample.erosion() + dither;
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
+
         if (height < WATER_LEVEL) {
-            if (temperature > 0.33) return WARM_OCEAN;
-            else if (temperature < -0.33) return COLD_OCEAN;
-            return OCEAN;
+            if (temperature > 0.33) return new WarmOcean();
+            else if (temperature - dither < -0.33) return new ColdOcean();
+            return new Ocean();
         }
-        if (height < beachHeight) return BEACH;
-        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.425) {
-            if (temperature > 0.33) return DRY_MOUNTAIN;
-            else if (temperature < -0.33) return SNOWY_MOUNTAIN;
-            return MOUNTAIN;
+        if (height < beachHeight) return new Beach();
+        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) {
+            if (temperature > 0.33) return new DryMountain();
+            else if (temperature < -0.33) return new SnowyMountain();
+            return new Mountain();
         }
 
         if (temperature > 0.33) {
-            if (temperature > 0.45 && humidity < -0.3) return CORRODED_MESA;
-            if (temperature > 0.55 && humidity < 0.15) return MESA;
-            if (humidity < 0.15) return DESERT;
-            if (humidity > 0.5 && temperature > 0.5) return BLACK_WOOD_FOREST;
-            if (humidity > 0.4 && temperature > 0.4) return DARK_OAK_FOREST;
-            return WASTELAND;
+            if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
+                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return new CorrodedMesa();
+            if (temperature > 0.55 && humidity < 0.15) return new Mesa();
+            if (humidity < 0.15) return new Desert();
+            if (humidity > 0.5 && temperature > 0.5) return new BlackWoodForest();
+            if (humidity > 0.4 && temperature > 0.4) return new DarkOakForest();
+            return new Wasteland();
         }
         if (humidity > 0.33) {
-            if (temperature > -0.1) return REDWOOD_FOREST;
-            if (temperature > -0.4) return SPRUCE_FOREST;
-            return SNOWY_SPRUCE_FOREST;
+            if (temperature > -0.1) return new RedwoodForest();
+            if (temperature > -0.4) return new SpruceForest();
+            return new SnowySpruceForest();
         }
-        if (humidity < 0.0 && temperature > -0.25) return PLAINS;
-        if (humidity > -0.33 && temperature > -0.33) return OAK_FOREST;
-        if (humidity < -0.33 && temperature > -0.5) return PINE_FOREST;
-        return SNOWY_PLAINS;
+        if (humidity < 0.0 && temperature > -0.25) return new Plains();
+        if (humidity > -0.33 && temperature > -0.33) return new OakForest();
+        if (humidity < -0.33 && temperature > -0.5) return new PineForest();
+        return new SnowyPlains();
     }
 
+
+    private static void generateStone(GenerationData data) {
+        long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
+        long chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
+
+        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; index += 8 * 8 * 8) {
+            int inChunkX = Utils.getInChunkX(index) << data.LOD;
+            int inChunkY = Utils.getInChunkY(index) << data.LOD;
+            int inChunkZ = Utils.getInChunkZ(index) << data.LOD;
+            byte stoneType = GenerationData.getGeneratingStoneType(chunkStartX + inChunkX, chunkStartY + inChunkY, chunkStartZ + inChunkZ);
+            data.storeConsecutive(index, 8 * 8 * 8, stoneType);
+        }
+    }
 
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
@@ -159,17 +175,13 @@ public final class WorldGeneration {
         }
     }
 
-    private static void generateStone(GenerationData data) {
-        long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
-        long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
-        long chunkStartZ = data.chunkZ << CHUNK_SIZE_BITS + data.LOD;
+    private static void generateUndergroundRiver(int inChunkX, int inChunkZ, GenerationData data) {
+        int start = Math.clamp(-data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
+        int end = Math.clamp(data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
 
-        for (int index = 0; index < CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE; index += 8 * 8 * 8) {
-            int inChunkX = Utils.getInChunkX(index) << data.LOD;
-            int inChunkY = Utils.getInChunkY(index) << data.LOD;
-            int inChunkZ = Utils.getInChunkZ(index) << data.LOD;
-            byte stoneType = GenerationData.getGeneratingStoneType(chunkStartX + inChunkX, chunkStartY + inChunkY, chunkStartZ + inChunkZ);
-            data.storeConsecutive(index, 8 * 8 * 8, stoneType);
+        for (int inChunkY = start; inChunkY < end; inChunkY++) {
+            data.computeTotalY(inChunkY);
+            data.store(inChunkX, inChunkY, inChunkZ, data.totalY < 0 ? WATER : AIR);
         }
     }
 
@@ -188,11 +200,11 @@ public final class WorldGeneration {
         return hasGeneratedTree;
     }
 
-    private static double getContinentalModifier(double continental, double ridge) {
-        double continentalModifier = 0.0;
+    private static double getContinentalModifier(MapSample sample) {
+        double continentalModifier = 0.0, continental = sample.continental();
         // Mountains
         if (continental > MOUNTAIN_THRESHOLD)
-            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * ridge * 100000;
+            continentalModifier = (continental - MOUNTAIN_THRESHOLD) * (continental - MOUNTAIN_THRESHOLD) * 20000 + sample.ridge() * (continental - MOUNTAIN_THRESHOLD) * 10000;
             // Normal ocean
         else if (continental < OCEAN_THRESHOLD && continental > OCEAN_THRESHOLD - 0.05)
             continentalModifier = MathUtils.smoothInOutQuad(-continental, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.05) * OCEAN_FLOOR_OFFSET;
@@ -206,61 +218,57 @@ public final class WorldGeneration {
         return continentalModifier;
     }
 
-    private static double getErosionModifier(double height, double erosion, double continentalModifier) {
-        double erosionModifier = 0.0;
+    private static double getErosionModifier(double continentalModifier, MapSample sample) {
+        double erosionModifier = 0.0, erosion = sample.erosion(), height = sample.height();
         // Elevated areas
-        if (erosion < -0.25 && erosion > -0.4) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0.25, 0.4) * 55;
-        else if (erosion <= -0.40) erosionModifier = (erosion + 0.40) * 20 + 55;
+        if (erosion < -0 && erosion > -0.5) erosionModifier = MathUtils.smoothInOutQuad(-erosion, 0, 0.5) * HIGHLAND_OFFSET;
+        else if (erosion <= -0.50) erosionModifier = -(erosion + 0.50) * 20 + HIGHLAND_OFFSET;
             // Flatland
         else if (erosion > FLATLAND_THRESHOLD && erosion < FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -(continentalModifier + height * 0.75 - FLATLAND_OFFSET) * MathUtils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
+            erosionModifier = -(continentalModifier + height * 0.85 - FLATLAND_HEIGHT) * MathUtils.smoothInOutQuad(erosion, FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25);
         else if (erosion >= FLATLAND_THRESHOLD + 0.25)
-            erosionModifier = -height * 0.75 - continentalModifier + FLATLAND_OFFSET;
+            erosionModifier = -height * 0.85 - continentalModifier + FLATLAND_HEIGHT;
         return erosionModifier;
     }
 
-    private static double getRiverModifier(double height, double continentalModifier, double erosionModifier, double river) {
-        double riverModifier = 0.0;
-        if (Math.abs(river) < 0.005)
-            riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
-        else if (Math.abs(river) < RIVER_THRESHOLD)
-            riverModifier = -(continentalModifier + erosionModifier + height * 0.85 - RIVER_OFFSET) * (1 - MathUtils.smoothInOutQuad(Math.abs(river), 0.005, RIVER_THRESHOLD));
-        return riverModifier;
+    private static double getRiverModifier(double erosionModifier, double continentalModifier, MapSample sample) {
+        double height = sample.height(), river = sample.river();
+        double riverThinning = getRiverThinning(sample);
+        double innerThreshold = (1 - riverThinning) * INNER_RIVER_THRESHOLD;
+        double outerThreshold = (1 - riverThinning) * RIVER_THRESHOLD;
+        if (river > outerThreshold) return 0;
+
+        double oceanScale = Math.clamp(-sample.continental(), -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.2);
+        oceanScale = MathUtils.smoothInOutQuad(oceanScale, -OCEAN_THRESHOLD, -OCEAN_THRESHOLD + 0.2);
+
+        double riverModifier = -height * 0.85 - continentalModifier - erosionModifier + RIVER_OFFSET;
+        if (river < outerThreshold && river >= innerThreshold)
+            riverModifier *= (1 - MathUtils.smoothInOutQuad(river, innerThreshold, outerThreshold));
+        return riverModifier * (1 - riverThinning) * (1 - oceanScale);
+    }
+
+    private static double getRiverThinning(MapSample sample) {
+        double riverThinning = MathUtils.smoothInOutQuad(Math.max(sample.continental(), MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
+        if (sample.continental() > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;
+        if (sample.erosion() > FLATLAND_THRESHOLD && sample.erosion() < FLATLAND_THRESHOLD + 0.25)
+            riverThinning = riverThinning * (1 - MathUtils.smoothInOutQuad(sample.erosion(), FLATLAND_THRESHOLD, FLATLAND_THRESHOLD + 0.25));
+        else if (sample.erosion() >= FLATLAND_THRESHOLD + 0.25) riverThinning = 0;
+        return riverThinning;
     }
 
 
     private static final int OCEAN_FLOOR_OFFSET = -480;
     private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
-    private static final int FLATLAND_OFFSET = 130;
+    private static final int FLATLAND_HEIGHT = 55;
+    private static final int HIGHLAND_OFFSET = 500;
     private static final int RIVER_OFFSET = -200;
 
-    private static final double HEIGHT_MAP_MULTIPLIER = 250;
-
-    private static final double MOUNTAIN_THRESHOLD = 0.3;    // Continental
-    private static final double OCEAN_THRESHOLD = -0.3;      // Continental
-    private static final double FLATLAND_THRESHOLD = 0.3;    // Erosion
-    private static final double RIVER_THRESHOLD = 0.1;       // Erosion
-
-    private static final Biome DESERT = new Desert();
-    private static final Biome WASTELAND = new Wasteland();
-    private static final Biome DARK_OAK_FOREST = new DarkOakForest();
-    private static final Biome SNOWY_SPRUCE_FOREST = new SnowySpruceForest();
-    private static final Biome SNOWY_PLAINS = new SnowyPlains();
-    private static final Biome SPRUCE_FOREST = new SpruceForest();
-    private static final Biome PLAINS = new Plains();
-    private static final Biome OAK_FOREST = new OakForest();
-    private static final Biome WARM_OCEAN = new WarmOcean();
-    private static final Biome COLD_OCEAN = new ColdOcean();
-    private static final Biome OCEAN = new Ocean();
-    private static final Biome DRY_MOUNTAIN = new DryMountain();
-    private static final Biome SNOWY_MOUNTAIN = new SnowyMountain();
-    private static final Biome MOUNTAIN = new Mountain();
-    private static final Biome MESA = new Mesa();
-    private static final Biome CORRODED_MESA = new CorrodedMesa();
-    private static final Biome BEACH = new Beach();
-    private static final Biome PINE_FOREST = new PineForest();
-    private static final Biome REDWOOD_FOREST = new RedwoodForest();
-    private static final Biome BLACK_WOOD_FOREST = new BlackWoodForest();
+    private static final double MOUNTAIN_THRESHOLD = 0.3;
+    private static final double OCEAN_THRESHOLD = -0.3;
+    private static final double FLATLAND_THRESHOLD = 0.3;
+    private static final double RIVER_THRESHOLD = 0.1;
+    private static final double INNER_RIVER_THRESHOLD = 0.005;
+    static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
 
     private WorldGeneration() {
     }
