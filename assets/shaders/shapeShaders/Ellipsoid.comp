@@ -1,5 +1,5 @@
 #version 460 core
-#extension GL_NV_gpu_shader5 : enable
+#extension GL_NV_gpu_shader5: enable
 
 layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
@@ -8,7 +8,7 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 };
 
 uniform ivec3 size;
-uniform int invert;
+uniform bool invert;
 uniform int rotation;
 
 uniform int thickness;
@@ -41,32 +41,31 @@ void main() {
     int y = int(gl_GlobalInvocationID.y) << 1;
     int z = int(gl_GlobalInvocationID.z) << 1;
 
-    if (isValidCoord(x + 0, y + 0, z + 0) && isInside(x + 0, y + 0, z + 0)) bits |= 1 << 0;
-    if (isValidCoord(x + 0, y + 0, z + 1) && isInside(x + 0, y + 0, z + 1)) bits |= 1 << 1;
-    if (isValidCoord(x + 0, y + 1, z + 0) && isInside(x + 0, y + 1, z + 0)) bits |= 1 << 2;
-    if (isValidCoord(x + 0, y + 1, z + 1) && isInside(x + 0, y + 1, z + 1)) bits |= 1 << 3;
-    if (isValidCoord(x + 1, y + 0, z + 0) && isInside(x + 1, y + 0, z + 0)) bits |= 1 << 4;
-    if (isValidCoord(x + 1, y + 0, z + 1) && isInside(x + 1, y + 0, z + 1)) bits |= 1 << 5;
-    if (isValidCoord(x + 1, y + 1, z + 0) && isInside(x + 1, y + 1, z + 0)) bits |= 1 << 6;
-    if (isValidCoord(x + 1, y + 1, z + 1) && isInside(x + 1, y + 1, z + 1)) bits |= 1 << 7;
+    if (isValidCoord(x + 0, y + 0, z + 0) && isInside(x + 0, y + 0, z + 0) != invert) bits |= 1 << 0;
+    if (isValidCoord(x + 0, y + 0, z + 1) && isInside(x + 0, y + 0, z + 1) != invert) bits |= 1 << 1;
+    if (isValidCoord(x + 0, y + 1, z + 0) && isInside(x + 0, y + 1, z + 0) != invert) bits |= 1 << 2;
+    if (isValidCoord(x + 0, y + 1, z + 1) && isInside(x + 0, y + 1, z + 1) != invert) bits |= 1 << 3;
+    if (isValidCoord(x + 1, y + 0, z + 0) && isInside(x + 1, y + 0, z + 0) != invert) bits |= 1 << 4;
+    if (isValidCoord(x + 1, y + 0, z + 1) && isInside(x + 1, y + 0, z + 1) != invert) bits |= 1 << 5;
+    if (isValidCoord(x + 1, y + 1, z + 0) && isInside(x + 1, y + 1, z + 0) != invert) bits |= 1 << 6;
+    if (isValidCoord(x + 1, y + 1, z + 1) && isInside(x + 1, y + 1, z + 1) != invert) bits |= 1 << 7;
 
-    int index = zOrderCurveValue(x) << 2 | zOrderCurveValue(y) << 1 | zOrderCurveValue(z);
-    bitMap[index] = uint8_t(invert == 1 ? ~bits : bits);
-    bitMap[index] = uint8_t(-1);
+    int index = zOrderCurveValue(x >> 1) << 2 | zOrderCurveValue(y >> 1) << 1 | zOrderCurveValue(z >> 1);
+    bitMap[index] = uint8_t(bits);
 }
 
 bool isInsideRotated(float a, float b, float c) {
-    double distanceA, distanceB, distanceC;
+    float distanceA, distanceB, distanceC;
 
     distanceA = pow(abs(a / radiusA), exponentA);
     distanceB = pow(abs(b / radiusB), exponentB);
     distanceC = pow(abs(c / radiusC), exponentC);
-    double outerDistance = distanceA + distanceB + distanceC;
+    float outerDistance = distanceA + distanceB + distanceC;
 
-    distanceA = pow(abs(a / radiusA), exponentA);
-    distanceB = pow(abs(b / radiusB), exponentB);
-    distanceC = pow(abs(c / radiusC), exponentC);
-    double innerDistance = distanceA + distanceB + distanceC;
+        distanceA = pow(abs(a / max(0, float(radiusA - thickness))), exponentA);
+        distanceB = pow(abs(b / max(0, float(radiusB - thickness))), exponentB);
+        distanceC = pow(abs(c / max(0, float(radiusC - thickness))), exponentC);
+        float innerDistance = distanceA + distanceB + distanceC;
 
     return outerDistance <= 1.0 && innerDistance >= 1;
 }
@@ -77,12 +76,12 @@ bool isInside(int x, int y, int z) {
     float zOff = z + 0.5 - size.z * 0.5;
 
     switch (rotation) {
-        case 0: return isInsideRotated(xOff, yOff, zOff); break;
-        case 1: return isInsideRotated(xOff, zOff, yOff); break;
-        case 2: return isInsideRotated(yOff, xOff, zOff); break;
-        case 3: return isInsideRotated(yOff, zOff, xOff); break;
-        case 4: return isInsideRotated(zOff, xOff, yOff); break;
-        case 5: return isInsideRotated(zOff, yOff, xOff); break;
+        case 0: return isInsideRotated(xOff, yOff, zOff);
+        case 1: return isInsideRotated(xOff, zOff, yOff);
+        case 2: return isInsideRotated(yOff, xOff, zOff);
+        case 3: return isInsideRotated(yOff, zOff, xOff);
+        case 4: return isInsideRotated(zOff, xOff, yOff);
+        case 5: return isInsideRotated(zOff, yOff, xOff);
     }
     return false;
 }

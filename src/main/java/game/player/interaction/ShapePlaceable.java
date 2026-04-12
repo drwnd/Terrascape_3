@@ -3,7 +3,6 @@ package game.player.interaction;
 import core.assets.AssetManager;
 import core.assets.identifiers.ShaderIdentifier;
 import core.renderables.UiButton;
-import core.rendering_api.GLDebug;
 import core.rendering_api.shaders.Shader;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.Option;
@@ -72,7 +71,6 @@ public abstract class ShapePlaceable implements Placeable {
         if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
-            if (invert.value()) invertBitMap(bitMap);
             this.bitMap = bitMap;
         }
         this.settingsHash = settingsHash;
@@ -189,52 +187,34 @@ public abstract class ShapePlaceable implements Placeable {
             settings = new ShapeSetting[baseSettings.length + 2];
             System.arraycopy(baseSettings, 0, settings, 2, baseSettings.length);
             settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
-            settings[1] = new ShapeSetting(rotation, UiMessages.ROTATE_SHAPE_BACKWARD, "rotation");
+            settings[1] = new ShapeSetting(rotation, UiMessages.SHAPE_ROTATION, "rotation");
         }
     }
 
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        GLDebug.clearOldErrors();
-
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
         int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
         int numGroupsY = (lengthY >> 3) + ((lengthY & 7) != 0 ? 1 : 0);
         int numGroupsZ = (lengthZ >> 3) + ((lengthZ & 7) != 0 ? 1 : 0);
         int buffer = genBuffer(bitMap.length << 3);
-        System.out.println(bitMap.length << 3);
-
-        GLDebug.checkError("buffer");
 
         Shader shader = AssetManager.get(shaderIdentifier);
         shader.bind();
-
-        GLDebug.checkError("bind");
-
         for (ShapeSetting setting : settings) setting.setUniform(shader);
         shader.setUniform("size", lengthX, lengthY, lengthZ);
 
-        GLDebug.checkError("uniform");
-
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer);
-        GLDebug.checkError("bindImage");
-
         glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
-        GLDebug.checkError("compute");
-
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
-        GLDebug.checkError("barrier");
 
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
         glDeleteBuffers(buffer);
-//        System.out.println(Arrays.toString(bitMap));
-
-        GLDebug.checkError("read");
     }
 
     private static int genBuffer(int size) {
         int buffer = glGenBuffers();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_DYNAMIC_READ);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_STREAM_READ);
         return buffer;
     }
 
@@ -257,16 +237,6 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
         if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
-    }
-
-    private void invertBitMap(long[] bitMap) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    int index = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[index >> 6] ^= 1L << index;
-                }
     }
 
     private boolean isBitMapInValid(int settingsHash, int preferredSize) {
