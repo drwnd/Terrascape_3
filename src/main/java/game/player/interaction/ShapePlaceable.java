@@ -35,6 +35,7 @@ public abstract class ShapePlaceable implements Placeable {
     public final ShapePlaceable copyWithMaterial(byte material) {
         ShapePlaceable placeable = copyWithMaterialUnique(material);
         placeable.invert.setValue(invert.value());
+        placeable.setBitMap(getBitMap());
         return placeable;
     }
 
@@ -59,8 +60,8 @@ public abstract class ShapePlaceable implements Placeable {
         if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
-            this.bitMap = bitMap;
             if (invert.value()) invertBitMap(bitMap);
+            this.bitMap = bitMap;
         }
         this.invertValue = invert.value();
         this.settingsHash = settingsHash;
@@ -189,6 +190,12 @@ public abstract class ShapePlaceable implements Placeable {
                     int index = MaterialsData.getUncompressedIndex(x, y, z);
                     bitMap[index >> 6] ^= 1L << index;
                 }
+    }
+
+    private void setBitMap(long[] bitMap) {
+        this.bitMap = bitMap;
+        settingsHash = settingsHash();
+        preferredSize = getPreferredSize();
     }
 
 
