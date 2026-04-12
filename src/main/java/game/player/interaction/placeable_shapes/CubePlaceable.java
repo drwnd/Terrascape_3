@@ -3,6 +3,7 @@ package game.player.interaction.placeable_shapes;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
+import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
@@ -12,7 +13,7 @@ import game.server.generation.Structure;
 public final class CubePlaceable extends ShapePlaceable {
 
     public CubePlaceable(byte material) {
-        super(material);
+        super(ComputeShaders.CUBE, material);
         loadSettings();
     }
 
@@ -59,7 +60,7 @@ public final class CubePlaceable extends ShapePlaceable {
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(sizeReduction, UiMessages.SIZE_REDUCTION, "sizeReduction"),
-                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "wallThickness")
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness")
         };
     }
 

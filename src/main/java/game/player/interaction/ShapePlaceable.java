@@ -1,6 +1,10 @@
 package game.player.interaction;
 
+import core.assets.AssetManager;
+import core.assets.identifiers.ShaderIdentifier;
 import core.renderables.UiButton;
+import core.rendering_api.GLDebug;
+import core.rendering_api.shaders.Shader;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.Option;
 import core.settings.stand_alones.StandAloneOptionSetting;
@@ -19,21 +23,27 @@ import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Utils;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static game.utils.Constants.*;
+import static org.lwjgl.opengl.GL46.*;
 
 public abstract class ShapePlaceable implements Placeable {
 
-    protected ShapePlaceable(byte material) {
+    protected ShapePlaceable(ShaderIdentifier identifier, byte material) {
+        this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(null);
     }
 
-    protected ShapePlaceable(byte material, Option defaultRotation) {
+    protected ShapePlaceable(ShaderIdentifier identifier, byte material, Option defaultRotation) {
+        this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(defaultRotation);
     }
@@ -187,7 +197,47 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     protected void fillBitMap(long[] bitMap, int sideLength) {
-        // TODO compute shader stuff
+        GLDebug.clearOldErrors();
+
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
+        int numGroupsY = (lengthY >> 3) + ((lengthY & 7) != 0 ? 1 : 0);
+        int numGroupsZ = (lengthZ >> 3) + ((lengthZ & 7) != 0 ? 1 : 0);
+        int texture = genTexture(bitMap.length << 3);
+        System.out.println(bitMap.length << 3);
+
+        GLDebug.checkError("texture");
+
+        Shader shader = AssetManager.get(shaderIdentifier);
+        shader.bind();
+
+        GLDebug.checkError("bind");
+
+        for (ShapeSetting setting : settings) setting.setUniform(shader);
+        shader.setUniform("size", lengthX, lengthY, lengthZ);
+
+        GLDebug.checkError("uniform");
+
+        glBindImageTexture(0, texture, 0, false, 0, GL_WRITE_ONLY, GL_R8UI);
+        GLDebug.checkError("bindImage");
+
+        glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+        GLDebug.checkError("compute");
+
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        GLDebug.checkError("barrier");
+
+        glGetTextureImage(GL_TEXTURE_1D, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, bitMap.length, MemoryUtil.memAddress(LongBuffer.wrap(bitMap)));
+        glDeleteTextures(texture);
+
+        GLDebug.checkError("read");
+    }
+
+    private static int genTexture(int size) {
+        int texture = glGenTextures();
+        glBindTexture(GL_TEXTURE_1D, texture);
+        glTexImage1D(GL_TEXTURE_1D, 0, GL_R8UI, size, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        return texture;
     }
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
@@ -244,4 +294,5 @@ public abstract class ShapePlaceable implements Placeable {
 
     final ToggleSetting invert = new StandAloneToggleSetting(false);
     private final StandAloneOptionSetting rotation;
+    private final ShaderIdentifier shaderIdentifier;
 }

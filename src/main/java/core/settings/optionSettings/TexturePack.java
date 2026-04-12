@@ -49,6 +49,11 @@ public final class TexturePack implements Option {
     }
 
     @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Option value(String name) {
         return new TexturePack(name);
     }

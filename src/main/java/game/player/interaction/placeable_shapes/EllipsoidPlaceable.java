@@ -4,6 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
+import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.Rotation6Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +15,7 @@ import game.server.generation.Structure;
 public final class EllipsoidPlaceable extends ShapePlaceable {
 
     public EllipsoidPlaceable(byte material) {
-        super(material, Rotation6Way.ROTATION_2);
+        super(ComputeShaders.ELLIPSOID, material, Rotation6Way.ROTATION_2);
         loadSettings();
     }
 
@@ -100,29 +101,29 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         };
     }
 
-    @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-
-        invOuterRadiusA = 1.0 / radiusA.value();
-        invOuterRadiusB = 1.0 / radiusB.value();
-        invOuterRadiusC = 1.0 / radiusC.value();
-        invInnerRadiusA = 1.0 / Math.max(0, radiusA.value() - thickness.value());
-        invInnerRadiusB = 1.0 / Math.max(0, radiusB.value() - thickness.value());
-        invInnerRadiusC = 1.0 / Math.max(0, radiusC.value() - thickness.value());
-
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(
-                            (x + 0.5 - lengthX * 0.5),
-                            (y + 0.5 - lengthY * 0.5),
-                            (z + 0.5 - lengthZ * 0.5)
-                    )) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
+//    @Override
+//    protected void fillBitMap(long[] bitMap, int sideLength) {
+//        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+//
+//        invOuterRadiusA = 1.0 / radiusA.value();
+//        invOuterRadiusB = 1.0 / radiusB.value();
+//        invOuterRadiusC = 1.0 / radiusC.value();
+//        invInnerRadiusA = 1.0 / Math.max(0, radiusA.value() - thickness.value());
+//        invInnerRadiusB = 1.0 / Math.max(0, radiusB.value() - thickness.value());
+//        invInnerRadiusC = 1.0 / Math.max(0, radiusC.value() - thickness.value());
+//
+//        for (int x = 0; x < lengthX; x++)
+//            for (int y = 0; y < lengthY; y++)
+//                for (int z = 0; z < lengthZ; z++) {
+//                    if (!isInside(
+//                            (x + 0.5 - lengthX * 0.5),
+//                            (y + 0.5 - lengthY * 0.5),
+//                            (z + 0.5 - lengthZ * 0.5)
+//                    )) continue;
+//                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
+//                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
+//                }
+//    }
 
     private boolean isInside(double x, double y, double z) {
         return switch (rotation()) {

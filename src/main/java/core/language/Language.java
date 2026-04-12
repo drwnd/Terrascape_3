@@ -52,6 +52,11 @@ public final class Language implements Option {
     }
 
     @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String name() {
         return languageFile.getName();
     }

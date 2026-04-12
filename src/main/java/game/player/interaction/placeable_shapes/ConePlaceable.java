@@ -4,6 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
+import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.Rotation6Way;
 import game.player.interaction.ShapePlaceable;
@@ -34,7 +35,7 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     public ConePlaceable(byte material) {
-        super(material, Rotation6Way.ROTATION_5);
+        super(ComputeShaders.CONE, material, Rotation6Way.ROTATION_5);
         loadSettings();
     }
 

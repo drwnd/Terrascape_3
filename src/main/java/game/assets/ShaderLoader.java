@@ -1,6 +1,7 @@
 package game.assets;
 
 import core.assets.identifiers.ShaderIdentifier;
+import core.rendering_api.shaders.ComputeShader;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.RenderShader;
 import core.rendering_api.shaders.Shader;
@@ -23,6 +24,19 @@ public final class ShaderLoader {
             case Shaders.CHUNK_SHADOW -> new RenderShader("Material.vert", "Shadow.frag", identifier);
             case Shaders.PARTICLE_SHADOW -> new RenderShader("Particle.vert", "Shadow.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
+
+            case ComputeShaders.ARC -> new ComputeShader("shapeShaders/Arc.comp", identifier);
+            case ComputeShaders.CONE -> new ComputeShader("shapeShaders/Cone.comp", identifier);
+            case ComputeShaders.CUBE -> new ComputeShader("shapeShaders/Cube.comp", identifier);
+            case ComputeShaders.CYLINDER -> new ComputeShader("shapeShaders/Cylinder.comp", identifier);
+            case ComputeShaders.ELLIPSOID -> new ComputeShader("shapeShaders/Ellipsoid.comp", identifier);
+            case ComputeShaders.INSIDE_ARC -> new ComputeShader("shapeShaders/InsideArc.comp", identifier);
+            case ComputeShaders.INSIDE_STAIR -> new ComputeShader("shapeShaders/InsideStair.comp", identifier);
+            case ComputeShaders.OUTSIDE_ARC -> new ComputeShader("shapeShaders/OutsideArc.comp", identifier);
+            case ComputeShaders.OUTSIDE_STAIR -> new ComputeShader("shapeShaders/OutsideStair.comp", identifier);
+            case ComputeShaders.SLAB -> new ComputeShader("shapeShaders/Slab.comp", identifier);
+            case ComputeShaders.SPHERE -> new ComputeShader("shapeShaders/Shpere.comp", identifier);
+            case ComputeShaders.STAIR -> new ComputeShader("shapeShaders/Stair.comp", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

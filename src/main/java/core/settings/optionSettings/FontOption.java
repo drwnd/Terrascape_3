@@ -69,6 +69,11 @@ public final class FontOption implements Option, AssetIdentifier<Texture> {
     }
 
     @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Option value(String name) {
         return new FontOption(name);
     }

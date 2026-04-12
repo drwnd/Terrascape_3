@@ -33,4 +33,8 @@ public interface Option {
     default String name() {
         return ((Enum<?>) this).name();
     }
+
+    default int ordinal() {
+        return ((Enum<?>) this).ordinal();
+    }
 }

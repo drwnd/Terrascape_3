@@ -3,6 +3,7 @@ package game.player.interaction;
 import core.renderables.OptionToggle;
 import core.renderables.Toggle;
 import core.renderables.UiButton;
+import core.rendering_api.shaders.Shader;
 import core.settings.*;
 import core.utils.StringGetter;
 
@@ -12,7 +13,7 @@ import org.joml.Vector2f;
 
 import java.util.Objects;
 
-public record ShapeSetting(Setting setting, StringGetter name, String shaderName) {
+public record ShapeSetting(Setting setting, StringGetter name, String uniformName) {
 
     @Override
     public int hashCode() {
@@ -33,5 +34,15 @@ public record ShapeSetting(Setting setting, StringGetter name, String shaderName
             case OptionSetting optionSetting -> new OptionToggle(zero, zero, optionSetting, name, true);
             case null, default -> throw new IllegalStateException("Unexpected value: " + setting);
         };
+    }
+
+    public void setUniform(Shader shader) {
+        switch (setting) {
+            case IntSetting intSetting -> shader.setUniform(uniformName, intSetting.value());
+            case FloatSetting floatSetting -> shader.setUniform(uniformName, floatSetting.value());
+            case ToggleSetting toggleSetting -> shader.setUniform(uniformName, toggleSetting.value());
+            case OptionSetting optionSetting -> shader.setUniform(uniformName, optionSetting.value().ordinal());
+            case null, default -> throw new IllegalStateException("Unexpected value: " + setting);
+        }
     }
 }

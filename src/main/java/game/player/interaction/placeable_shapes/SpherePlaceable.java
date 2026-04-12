@@ -4,6 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
+import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
@@ -13,7 +14,7 @@ import game.server.generation.Structure;
 public final class SpherePlaceable extends ShapePlaceable {
 
     public SpherePlaceable(byte material) {
-        super(material);
+        super(ComputeShaders.SPHERE, material);
         loadSettings();
     }
 
