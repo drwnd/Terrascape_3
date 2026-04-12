@@ -26,7 +26,7 @@ public final class ShapeDisplay extends UiButton {
         setScalingFactor(1.2F);
 
         index = 0;
-        for (UiButton settingElement : placeable.settings()) {
+        for (UiButton settingElement : placeable.getSettingButtons()) {
             if (settingElement instanceof CallbackSlider<?> slider) slider.setSlidingCallback(shapesTab::refreshShapePreview);
             if (settingElement instanceof UiButton settingButton) {
                 Clickable clickable = settingButton.getClickable();

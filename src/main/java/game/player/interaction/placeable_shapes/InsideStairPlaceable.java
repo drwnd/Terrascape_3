@@ -16,6 +16,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
 
     public InsideStairPlaceable(byte material) {
         super(material, Rotation24Way.ROTATION_17);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -65,7 +66,7 @@ public final class InsideStairPlaceable extends RotatableShapePlaceable implemen
 
     @Override
     public Option getRotation() {
-        return rotation;
+        return rotation();
     }
 
     public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {

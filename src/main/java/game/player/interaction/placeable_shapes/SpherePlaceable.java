@@ -14,6 +14,7 @@ public final class SpherePlaceable extends ShapePlaceable {
 
     public SpherePlaceable(byte material) {
         super(material);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {

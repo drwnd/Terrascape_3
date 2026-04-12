@@ -9,21 +9,26 @@ public abstract class RotatableShapePlaceable extends ShapePlaceable {
 
     protected RotatableShapePlaceable(byte material, Option defaultRotation) {
         super(material);
-        rotation = defaultRotation;
+        rotation = new StandAloneOptionSetting(defaultRotation);
     }
 
     public void rotateForwards() {
-        rotation = rotation.next();
+        rotation.setValue(rotation.value().next());
     }
 
     public void rotateBackwards() {
-        rotation = rotation.previous();
+        rotation.setValue(rotation.value().previous());
+    }
+
+
+    protected Option rotation() {
+        return rotation.value();
     }
 
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         RotatableShapePlaceable placeable = copyWithMaterialRotatable(material);
-        placeable.rotation = rotation;
+        placeable.rotation.setValue(rotation.value());
         return placeable;
     }
 
@@ -32,7 +37,7 @@ public abstract class RotatableShapePlaceable extends ShapePlaceable {
         ShapeSetting[] baseSettings = getSettingsRotatable();
         ShapeSetting[] settings = new ShapeSetting[baseSettings.length + 1];
         System.arraycopy(baseSettings, 0, settings, 0, baseSettings.length);
-        settings[baseSettings.length] = new ShapeSetting(new StandAloneOptionSetting(rotation), UiMessages.ROTATE_SHAPE_BACKWARD, "rotation");
+        settings[baseSettings.length] = new ShapeSetting(rotation, UiMessages.ROTATE_SHAPE_BACKWARD, "rotation");
         return settings;
     }
 
@@ -40,5 +45,5 @@ public abstract class RotatableShapePlaceable extends ShapePlaceable {
 
     protected abstract ShapeSetting[] getSettingsRotatable();
 
-    protected Option rotation;
+    private final StandAloneOptionSetting rotation;
 }

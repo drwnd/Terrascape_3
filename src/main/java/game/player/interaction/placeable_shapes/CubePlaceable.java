@@ -13,6 +13,7 @@ public final class CubePlaceable extends ShapePlaceable {
 
     public CubePlaceable(byte material) {
         super(material);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {

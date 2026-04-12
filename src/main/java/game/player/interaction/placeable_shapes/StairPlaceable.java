@@ -16,6 +16,7 @@ public final class StairPlaceable extends RotatableShapePlaceable {
 
     public StairPlaceable(byte material) {
         super(material, Rotation24Way.ROTATION_01);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -72,7 +73,7 @@ public final class StairPlaceable extends RotatableShapePlaceable {
 
     private boolean isInside(int x, int y, int z, int sideLength, int outerThreshold, int innerThreshold) {
         int invert = sideLength - 1;
-        return switch ((Rotation24Way) rotation) {
+        return switch ((Rotation24Way) rotation()) {
             case Rotation24Way.ROTATION_01 -> isInside(outerThreshold, innerThreshold, z, y);
             case Rotation24Way.ROTATION_02 -> isInside(outerThreshold, innerThreshold, x, y);
             case Rotation24Way.ROTATION_03 -> isInside(outerThreshold, innerThreshold, invert - z, y);

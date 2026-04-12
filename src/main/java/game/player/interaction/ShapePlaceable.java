@@ -40,7 +40,7 @@ public abstract class ShapePlaceable implements Placeable {
         return placeable;
     }
 
-    public final List<UiButton> settings() {
+    public final List<UiButton> getSettingButtons() {
         Vector2f zero = new Vector2f(0.0F, 0.0F);
         ArrayList<UiButton> settingElements = new ArrayList<>();
 
@@ -153,6 +153,10 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapeSetting[] getSettings();
 
+
+    protected void loadSettings() {
+        settings = getSettings();
+    }
 
     protected void fillBitMap(long[] bitMap, int sideLength) {
         // TODO compute shader stuff

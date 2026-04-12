@@ -14,6 +14,7 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
 
     public SlabPlaceable(byte material) {
         super(material, Rotation3Way.ROTATION_2);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -30,17 +31,17 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return rotation == Rotation3Way.ROTATION_1 ? thickness.value() : super.getLengthX();
+        return rotation() == Rotation3Way.ROTATION_1 ? thickness.value() : super.getLengthX();
     }
 
     @Override
     public int getLengthY() {
-        return rotation == Rotation3Way.ROTATION_2 ? thickness.value() : super.getLengthY();
+        return rotation() == Rotation3Way.ROTATION_2 ? thickness.value() : super.getLengthY();
     }
 
     @Override
     public int getLengthZ() {
-        return rotation == Rotation3Way.ROTATION_3 ? thickness.value() : super.getLengthZ();
+        return rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : super.getLengthZ();
     }
 
     @Override
@@ -71,9 +72,9 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
     @Override
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
-        int lengthX = rotation == Rotation3Way.ROTATION_1 ? thickness.value() : 16;
-        int lengthY = rotation == Rotation3Way.ROTATION_2 ? thickness.value() : 16;
-        int lengthZ = rotation == Rotation3Way.ROTATION_3 ? thickness.value() : 16;
+        int lengthX = rotation() == Rotation3Way.ROTATION_1 ? thickness.value() : 16;
+        int lengthY = rotation() == Rotation3Way.ROTATION_2 ? thickness.value() : 16;
+        int lengthZ = rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : 16;
         for (int x = 0; x < lengthX; x++)
             for (int y = 0; y < lengthY; y++)
                 for (int z = 0; z < lengthZ; z++) {

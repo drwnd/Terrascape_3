@@ -15,6 +15,7 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
 
     public OutsideArcPlaceable(byte material) {
         super(material, Rotation8Way.ROTATION_1);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -88,7 +89,7 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, int invertX, int invertY, int invertZ, double outerThreshold, double innerThreshold) {
-        return switch ((Rotation8Way) rotation) {
+        return switch ((Rotation8Way) rotation()) {
             case ROTATION_1 -> isInside(outerThreshold, innerThreshold, x, y, z);
             case ROTATION_2 -> isInside(outerThreshold, innerThreshold, x, y, invertZ - z);
             case ROTATION_3 -> isInside(outerThreshold, innerThreshold, x, invertY - y, z);

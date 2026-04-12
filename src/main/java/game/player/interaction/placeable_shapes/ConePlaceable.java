@@ -35,6 +35,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     public ConePlaceable(byte material) {
         super(material, Rotation6Way.ROTATION_5);
+        loadSettings();
     }
 
     @Override
@@ -73,7 +74,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> baseRadius.value() * 2;
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> height.value();
         };
@@ -81,7 +82,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthY() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> height.value();
         };
@@ -89,7 +90,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthZ() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4 -> height.value();
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;
         };
@@ -101,7 +102,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ) {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1 -> isInside(lengthZ - 1 - z, x - (lengthX >> 1), y - (lengthY >> 1));
             case Rotation6Way.ROTATION_2 -> isInside(lengthY - 1 - y, x - (lengthX >> 1), z - (lengthZ >> 1));
             case Rotation6Way.ROTATION_3 -> isInside(lengthX - 1 - x, y - (lengthY >> 1), z - (lengthZ >> 1));

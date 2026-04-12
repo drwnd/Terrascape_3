@@ -15,6 +15,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
     public EllipsoidPlaceable(byte material) {
         super(material, Rotation6Way.ROTATION_2);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -56,7 +57,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_2 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_5 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_6 -> radiusC.value() * 2;
@@ -65,7 +66,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthY() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_4 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_6 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> radiusC.value() * 2;
@@ -74,7 +75,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthZ() {
-        return switch ((Rotation6Way) rotation) {
+        return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_6 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_4 -> radiusB.value() * 2;
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_3 -> radiusC.value() * 2;
@@ -124,7 +125,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(double x, double y, double z) {
-        return switch (rotation) {
+        return switch (rotation()) {
             case Rotation6Way.ROTATION_1 -> isInsideRotated(x, y, z);
             case Rotation6Way.ROTATION_2 -> isInsideRotated(x, z, y);
             case Rotation6Way.ROTATION_3 -> isInsideRotated(y, x, z);

@@ -16,6 +16,7 @@ public final class OutsideStairPlaceable extends RotatableShapePlaceable impleme
 
     public OutsideStairPlaceable(byte material) {
         super(material, Rotation24Way.ROTATION_17);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -70,7 +71,7 @@ public final class OutsideStairPlaceable extends RotatableShapePlaceable impleme
 
     @Override
     public Option getRotation() {
-        return rotation;
+        return rotation();
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);

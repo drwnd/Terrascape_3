@@ -15,6 +15,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     public CylinderPlaceable(byte material) {
         super(material, Rotation3Way.ROTATION_2);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -38,7 +39,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     @Override
     protected void fillBitMap(long[] bitMap, int sideLength) {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        double offset = (rotation == Rotation3Way.ROTATION_1 ? lengthY : lengthX) / 2.0;
+        double offset = (rotation() == Rotation3Way.ROTATION_1 ? lengthY : lengthX) / 2.0;
         double outerThreshold = Math.pow(radius.value(), exponent.value());
         double innerThreshold = Math.pow(Math.max(0, radius.value() - thickness.value()), exponent.value());
 
@@ -63,7 +64,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch ((Rotation3Way) rotation) {
+        return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_2 -> radius.value() * 2;
             case Rotation3Way.ROTATION_1 -> height.value();
         };
@@ -71,7 +72,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthY() {
-        return switch ((Rotation3Way) rotation) {
+        return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_1 -> radius.value() * 2;
             case Rotation3Way.ROTATION_2 -> height.value();
         };
@@ -79,7 +80,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthZ() {
-        return switch ((Rotation3Way) rotation) {
+        return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3 -> height.value();
             case Rotation3Way.ROTATION_2, Rotation3Way.ROTATION_1 -> radius.value() * 2;
         };
@@ -101,7 +102,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
-        return switch ((Rotation3Way) rotation) {
+        return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3 -> isInsideRotated(z, x, y, offset, outerThreshold, innerThreshold);
             case Rotation3Way.ROTATION_2 -> isInsideRotated(y, x, z, offset, outerThreshold, innerThreshold);
             case Rotation3Way.ROTATION_1 -> isInsideRotated(x, y, z, offset, outerThreshold, innerThreshold);

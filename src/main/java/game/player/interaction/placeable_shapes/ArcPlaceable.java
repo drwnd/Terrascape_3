@@ -15,6 +15,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
 
     public ArcPlaceable(byte material) {
         super(material, Rotation12Way.ROTATION_01);
+        loadSettings();
     }
 
     public void save(Saver<?> saver) {
@@ -57,7 +58,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthX() {
-        return switch ((Rotation12Way) rotation) {
+        return switch ((Rotation12Way) rotation()) {
             case ROTATION_01, ROTATION_03, ROTATION_09, ROTATION_11 -> height.value();
             case ROTATION_02, ROTATION_04, ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08, ROTATION_10, ROTATION_12 -> radius.value();
         };
@@ -65,7 +66,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthY() {
-        return switch ((Rotation12Way) rotation) {
+        return switch ((Rotation12Way) rotation()) {
             case ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08 -> height.value();
             case ROTATION_01, ROTATION_02, ROTATION_03, ROTATION_04, ROTATION_09, ROTATION_10, ROTATION_11, ROTATION_12 -> radius.value();
         };
@@ -73,7 +74,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
 
     @Override
     public int getLengthZ() {
-        return switch ((Rotation12Way) rotation) {
+        return switch ((Rotation12Way) rotation()) {
             case ROTATION_02, ROTATION_04, ROTATION_10, ROTATION_12 -> height.value();
             case ROTATION_01, ROTATION_03, ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08, ROTATION_09, ROTATION_11 -> radius.value();
         };
@@ -101,7 +102,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
     }
 
     private boolean isInside(int x, int y, int z, int invertX, int invertY, int invertZ, double outerThreshold, double innerThreshold) {
-        return switch ((Rotation12Way) rotation) {
+        return switch ((Rotation12Way) rotation()) {
             case Rotation12Way.ROTATION_01 -> isInside(outerThreshold, innerThreshold, z, y);
             case Rotation12Way.ROTATION_02 -> isInside(outerThreshold, innerThreshold, x, y);
             case Rotation12Way.ROTATION_03 -> isInside(outerThreshold, innerThreshold, invertZ - z, y);
