@@ -23,10 +23,7 @@ import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Utils;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -203,10 +200,10 @@ public abstract class ShapePlaceable implements Placeable {
         int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
         int numGroupsY = (lengthY >> 3) + ((lengthY & 7) != 0 ? 1 : 0);
         int numGroupsZ = (lengthZ >> 3) + ((lengthZ & 7) != 0 ? 1 : 0);
-        int texture = genTexture(bitMap.length << 3);
+        int buffer = genBuffer(bitMap.length << 3);
         System.out.println(bitMap.length << 3);
 
-        GLDebug.checkError("texture");
+        GLDebug.checkError("buffer");
 
         Shader shader = AssetManager.get(shaderIdentifier);
         shader.bind();
@@ -218,7 +215,7 @@ public abstract class ShapePlaceable implements Placeable {
 
         GLDebug.checkError("uniform");
 
-        glBindImageTexture(0, texture, 0, false, 0, GL_WRITE_ONLY, GL_R8UI);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer);
         GLDebug.checkError("bindImage");
 
         glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
@@ -227,17 +224,18 @@ public abstract class ShapePlaceable implements Placeable {
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
         GLDebug.checkError("barrier");
 
-        glGetTextureImage(GL_TEXTURE_1D, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, bitMap.length, MemoryUtil.memAddress(LongBuffer.wrap(bitMap)));
-        glDeleteTextures(texture);
+        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
+        glDeleteBuffers(buffer);
+//        System.out.println(Arrays.toString(bitMap));
 
         GLDebug.checkError("read");
     }
 
-    private static int genTexture(int size) {
-        int texture = glGenTextures();
-        glBindTexture(GL_TEXTURE_1D, texture);
-        glTexImage1D(GL_TEXTURE_1D, 0, GL_R8UI, size, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, (ByteBuffer) null);
-        return texture;
+    private static int genBuffer(int size) {
+        int buffer = glGenBuffers();
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_DYNAMIC_READ);
+        return buffer;
     }
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
