@@ -15,32 +15,17 @@ public interface Placeable {
 
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
         if (placeable == null) saver.saveByte((byte) 0);
-        else {
-            saver.saveGeneric(placeable::save);
-            if (placeable instanceof ShapePlaceable shapePlaceable) saver.saveBoolean(shapePlaceable.invert.value());
-        }
+        else saver.saveGeneric(placeable::save);
     }
 
     static Placeable loadPlaceable(Saver<?> saver) {
-        Placeable placeable = switch (saver.loadByte()) {
-            case 1 -> CubePlaceable.load(saver);
+        byte identifier = saver.loadByte();
+        return switch (identifier) {
+            case 0 -> null;
             case 2 -> StructurePlaceable.load(saver);
             case 3 -> ChunkRebuildPlaceable.load(saver);
-            case 4 -> SpherePlaceable.load(saver);
-            case 5 -> CylinderPlaceable.load(saver);
-            case 6 -> StairPlaceable.load(saver);
-            case 8 -> ConePlaceable.load(saver);
-            case 9 -> InsideStairPlaceable.load(saver);
-            case 10 -> OutsideStairPlaceable.load(saver);
-            case 13 -> SlabPlaceable.load(saver);
-            case 14 -> EllipsoidPlaceable.load(saver);
-            case 15 -> ArcPlaceable.load(saver);
-            case 16 -> InsideArcPlaceable.load(saver);
-            case 17 -> OutsideArcPlaceable.load(saver);
-            default -> null;
+            default -> ShapePlaceable.load(saver, identifier);
         };
-        if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());
-        return placeable;
     }
 
     void place(Vector3l position, int lod);

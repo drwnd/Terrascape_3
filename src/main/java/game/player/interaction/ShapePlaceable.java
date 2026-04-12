@@ -1,10 +1,11 @@
 package game.player.interaction;
 
-import core.renderables.Toggle;
 import core.renderables.UiButton;
-import core.settings.ToggleSetting;
+import core.settings.optionSettings.Option;
+import core.settings.stand_alones.StandAloneOptionSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
 import core.utils.MathUtils;
+import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.language.UiMessages;
@@ -19,33 +20,55 @@ import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Utils;
 
-import org.joml.Vector2f;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static game.utils.Constants.*;
 
 public abstract class ShapePlaceable implements Placeable {
 
-    protected ShapePlaceable(byte material) {
+    private ShapePlaceable(byte material, Option defaultRotation, ShapeSetting... settings) {
         this.material = material;
+        this.rotation = defaultRotation;
+
+        this.settings = new ShapeSetting[settings.length + 2];
+        System.arraycopy(settings, 0, this.settings, 2, settings.length);
+        this.settings[0] = new ShapeSetting(new StandAloneToggleSetting(false), UiMessages.INVERT_PLACEABLE, "invert");
+        this.settings[1] = new ShapeSetting(new StandAloneOptionSetting(defaultRotation), UiMessages.ROTATE_SHAPE_BACKWARD, "rotation"); // TODO UiMessage for rotation
     }
 
-    public final ShapePlaceable copyWithMaterial(byte material) {
-        ShapePlaceable placeable = copyWithMaterialUnique(material);
-        placeable.invert.setValue(invert.value());
-        placeable.setBitMap(getBitMap());
+    private ShapePlaceable(byte material, ShapeSetting... settings) {
+        this.material = material;
+        this.rotation = Rotation1Way.ROTATION_1;
+
+        this.settings = new ShapeSetting[settings.length + 1];
+        System.arraycopy(settings, 0, this.settings, 1, settings.length);
+        this.settings[0] = new ShapeSetting(new StandAloneToggleSetting(false), UiMessages.INVERT_PLACEABLE, "invert");
+    }
+
+    protected ShapePlaceable(ShapeSetting[] settings, byte material, Option rotation) {
+        this.material = material;
+        this.settings = settings;
+        this.rotation = rotation;
+    }
+
+
+    public ShapePlaceable copyWithMaterial(byte material) {
+        ShapeSetting[] settingsCopy = new ShapeSetting[settings.length];
+        for (int index = 0; index < settings.length; index++)
+            settingsCopy[index] = settings[index].copy();
+        ShapePlaceable placeable = newInstance(settingsCopy, material, rotation);
+
+        placeable.bitMap = getBitMap();
+        placeable.settingsHash = placeable.settingsHash();
+        placeable.preferredSize = placeable.getPreferredSize();
         return placeable;
     }
 
-    public final List<UiButton> settings() {
-        Vector2f zero = new Vector2f(0.0F, 0.0F);
+    public List<UiButton> getSettingsButtons() {
         ArrayList<UiButton> settingElements = new ArrayList<>();
-
-        settingElements.add(new Toggle(zero, zero, invert, UiMessages.INVERT_PLACEABLE, true));
-        settingElements.addAll(uniqueSettings());
-
+        for (ShapeSetting shapeSetting : settings) settingElements.add(shapeSetting.getSettingButton());
         for (UiButton element : settingElements) element.setScaleWithGuiSize(false);
         return settingElements;
     }
@@ -60,10 +83,8 @@ public abstract class ShapePlaceable implements Placeable {
         if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap, getPreferredSize());
-            if (invert.value()) invertBitMap(bitMap);
             this.bitMap = bitMap;
         }
-        this.invertValue = invert.value();
         this.settingsHash = settingsHash;
         this.preferredSize = preferredSize;
         return bitMap;
@@ -74,6 +95,15 @@ public abstract class ShapePlaceable implements Placeable {
         fillBitMap(bitMap, 16);
         return new Structure(4, material, bitMap);
     }
+
+    public void rotateForwards() {
+        rotation = rotation.next();
+    }
+
+    public void rotateBackwards() {
+        rotation = rotation.previous();
+    }
+
 
     @Override
     public void place(Vector3l position, int lod) {
@@ -147,19 +177,31 @@ public abstract class ShapePlaceable implements Placeable {
         player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, getBitMap());
     }
 
+    @Override
+    public void save(Saver<?> saver) {
 
-    protected abstract void fillBitMap(long[] bitMap, int sideLength);
-
-    protected abstract List<UiButton> uniqueSettings();
-
-    protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
-
-    protected boolean isBitMapInValid(int settingsHash, int preferredSize) {
-        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
     }
 
-    protected abstract int settingsHash();
+    public static ShapePlaceable load(Saver<?> saver, byte identifier) {
+        return null;
+    }
 
+
+    private void fillBitMap(long[] bitMap, int sideLength) {
+        // TODO compute shader stuff
+    }
+
+
+    protected abstract ShapePlaceable newInstance(ShapeSetting[] settings, byte material, Option rotation);
+
+
+    private boolean isBitMapInValid(int settingsHash, int preferredSize) {
+        return bitMap == null || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
+    }
+
+    private int settingsHash() {
+        return Objects.hash((Object[]) settings);
+    }
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
         int lod = chunk.LOD;
@@ -182,28 +224,13 @@ public abstract class ShapePlaceable implements Placeable {
         if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
     }
 
-    private void invertBitMap(long[] bitMap) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    int index = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[index >> 6] ^= 1L << index;
-                }
-    }
-
-    private void setBitMap(long[] bitMap) {
-        this.bitMap = bitMap;
-        settingsHash = settingsHash();
-        preferredSize = getPreferredSize();
-    }
-
 
     private int settingsHash, preferredSize;
-    boolean invertValue;
     private long[] bitMap;
-    private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;
 
-    final ToggleSetting invert = new StandAloneToggleSetting(false);
+    private final ShapeSetting[] settings;
+    private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
+
+    private Option rotation;
 }
