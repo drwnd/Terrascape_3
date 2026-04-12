@@ -5,13 +5,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class CylinderPlaceable extends RotatableShapePlaceable {
+public final class CylinderPlaceable extends ShapePlaceable {
 
     public CylinderPlaceable(byte material) {
         super(material, Rotation3Way.ROTATION_2);
@@ -53,7 +53,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(radius, UiMessages.RADIUS, "radius"),
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
@@ -87,7 +87,7 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CylinderPlaceable copy = new CylinderPlaceable(material);
         copy.radius.setValue(radius.value());
         copy.thickness.setValue(thickness.value());

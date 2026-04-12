@@ -5,13 +5,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation12Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class ArcPlaceable extends RotatableShapePlaceable {
+public final class ArcPlaceable extends ShapePlaceable {
 
     public ArcPlaceable(byte material) {
         super(material, Rotation12Way.ROTATION_01);
@@ -37,7 +37,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         ArcPlaceable copy = new ArcPlaceable(material);
         copy.radius.setValue(radius.value());
         copy.height.setValue(height.value());
@@ -47,7 +47,7 @@ public final class ArcPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(radius, UiMessages.RADIUS, "radius"),
                 new ShapeSetting(height, UiMessages.HEIGHT, "height"),

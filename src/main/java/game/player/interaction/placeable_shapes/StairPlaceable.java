@@ -5,14 +5,14 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
-public final class StairPlaceable extends RotatableShapePlaceable {
+public final class StairPlaceable extends ShapePlaceable {
 
     public StairPlaceable(byte material) {
         super(material, Rotation24Way.ROTATION_01);
@@ -38,7 +38,7 @@ public final class StairPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         StairPlaceable copy = new StairPlaceable(material);
         copy.stepHeight.setValue(stepHeight.value());
         copy.heightOffset.setValue(heightOffset.value());
@@ -62,7 +62,7 @@ public final class StairPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(stepHeight, UiMessages.STEP_HEIGHT, "stepHeight"),
                 new ShapeSetting(heightOffset, UiMessages.HEIGHT, "heightOffset"),

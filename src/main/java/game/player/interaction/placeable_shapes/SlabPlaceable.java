@@ -4,13 +4,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class SlabPlaceable extends RotatableShapePlaceable {
+public final class SlabPlaceable extends ShapePlaceable {
 
     public SlabPlaceable(byte material) {
         super(material, Rotation3Way.ROTATION_2);
@@ -45,14 +45,14 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SlabPlaceable copy = new SlabPlaceable(material);
         copy.thickness.setValue(thickness.value());
         return copy;
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness")
         };

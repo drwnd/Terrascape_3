@@ -5,13 +5,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class EllipsoidPlaceable extends RotatableShapePlaceable {
+public final class EllipsoidPlaceable extends ShapePlaceable {
 
     public EllipsoidPlaceable(byte material) {
         super(material, Rotation6Way.ROTATION_2);
@@ -43,7 +43,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         EllipsoidPlaceable copy = new EllipsoidPlaceable(material);
         copy.thickness.setValue(thickness.value());
         copy.radiusA.setValue(radiusA.value());
@@ -88,7 +88,7 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
                 new ShapeSetting(radiusA, UiMessages.RADIUS, "radiusA"),

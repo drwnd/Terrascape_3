@@ -5,13 +5,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class ConePlaceable extends RotatableShapePlaceable {
+public final class ConePlaceable extends ShapePlaceable {
 
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 8);
@@ -39,7 +39,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         ConePlaceable copy = new ConePlaceable(material);
         copy.baseRadius.setValue(baseRadius.value());
         copy.topRadius.setValue(topRadius.value());
@@ -62,7 +62,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(baseRadius, UiMessages.RADIUS, "baseRadius"),
                 new ShapeSetting(topRadius, UiMessages.TOP_RADIUS, "topRadius"),

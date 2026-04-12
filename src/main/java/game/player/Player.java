@@ -79,13 +79,13 @@ public final class Player {
         movement.handleInput(button, action);
         interactionHandler.handleInput(button, action);
         hotbar.handleInput(button, action);
-        if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof RotatableShapePlaceable rotatable) {
+        if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) {
             renderer.invalidateHologram();
-            rotatable.rotateForwards();
+            shapePlaceable.rotateForwards();
         }
-        if (button == KeySettings.ROTATE_SHAPE_BACKWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof RotatableShapePlaceable rotatable) {
+        if (button == KeySettings.ROTATE_SHAPE_BACKWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) {
             renderer.invalidateHologram();
-            rotatable.rotateBackwards();
+            shapePlaceable.rotateBackwards();
         }
     }
 

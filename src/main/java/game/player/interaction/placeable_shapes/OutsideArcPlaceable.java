@@ -5,13 +5,13 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
-import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation8Way;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
 
-public final class OutsideArcPlaceable extends RotatableShapePlaceable {
+public final class OutsideArcPlaceable extends ShapePlaceable {
 
     public OutsideArcPlaceable(byte material) {
         super(material, Rotation8Way.ROTATION_1);
@@ -35,7 +35,7 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected RotatableShapePlaceable copyWithMaterialRotatable(byte material) {
+    protected ShapePlaceable copyWithMaterialUnique(byte material) {
         OutsideArcPlaceable copy = new OutsideArcPlaceable(material);
         copy.radius.setValue(radius.value());
         copy.exponent.setValue(exponent.value());
@@ -44,7 +44,7 @@ public final class OutsideArcPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected ShapeSetting[] getSettingsRotatable() {
+    protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(radius, UiMessages.RADIUS, "radius"),
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
