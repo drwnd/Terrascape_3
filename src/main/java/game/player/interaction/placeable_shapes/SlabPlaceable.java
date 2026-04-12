@@ -1,20 +1,14 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
-
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class SlabPlaceable extends RotatableShapePlaceable {
 
@@ -57,16 +51,10 @@ public final class SlabPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
-        );
-    }
-
-    @Override
-    protected int settingsHash() {
-        return Objects.hash(thickness.value());
+    protected ShapeSetting[] getSettingsRotatable() {
+        return new ShapeSetting[]{
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness")
+        };
     }
 
     @Override

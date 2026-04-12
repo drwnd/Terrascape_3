@@ -1,6 +1,5 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -8,13 +7,9 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class EllipsoidPlaceable extends RotatableShapePlaceable {
 
@@ -92,22 +87,16 @@ public final class EllipsoidPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new CallbackSlider<>(zero, zero, radiusA, UiMessages.RADIUS, true),
-                new CallbackSlider<>(zero, zero, radiusB, UiMessages.RADIUS, true),
-                new CallbackSlider<>(zero, zero, radiusC, UiMessages.RADIUS, true),
-                new CallbackSlider<>(zero, zero, exponentA, UiMessages.DISTANCE_EXPONENT, true),
-                new CallbackSlider<>(zero, zero, exponentB, UiMessages.DISTANCE_EXPONENT, true),
-                new CallbackSlider<>(zero, zero, exponentC, UiMessages.DISTANCE_EXPONENT, true)
-        );
-    }
-
-    @Override
-    protected int settingsHash() {
-        return Objects.hash(thickness.value(), radiusA.value(), radiusB.value(), radiusC.value(), exponentA.value(), exponentB.value(), exponentC.value());
+    protected ShapeSetting[] getSettingsRotatable() {
+        return new ShapeSetting[]{
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
+                new ShapeSetting(radiusA, UiMessages.RADIUS, "radiusA"),
+                new ShapeSetting(radiusB, UiMessages.RADIUS, "radiusB"),
+                new ShapeSetting(radiusC, UiMessages.RADIUS, "radiusC"),
+                new ShapeSetting(exponentA, UiMessages.DISTANCE_EXPONENT, "exponentA"),
+                new ShapeSetting(exponentB, UiMessages.DISTANCE_EXPONENT, "exponentB"),
+                new ShapeSetting(exponentC, UiMessages.DISTANCE_EXPONENT, "exponentC")
+        };
     }
 
     @Override

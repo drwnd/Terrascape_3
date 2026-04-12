@@ -23,6 +23,7 @@ import org.joml.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static game.utils.Constants.*;
 
@@ -44,7 +45,7 @@ public abstract class ShapePlaceable implements Placeable {
         ArrayList<UiButton> settingElements = new ArrayList<>();
 
         settingElements.add(new Toggle(zero, zero, invert, UiMessages.INVERT_PLACEABLE, true));
-        settingElements.addAll(uniqueSettings());
+        for (ShapeSetting setting : settings) settingElements.add(setting.getSettingButton());
 
         for (UiButton element : settingElements) element.setScaleWithGuiSize(false);
         return settingElements;
@@ -148,18 +149,14 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    protected abstract void fillBitMap(long[] bitMap, int sideLength);
-
-    protected abstract List<UiButton> uniqueSettings();
-
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 
-    protected boolean isBitMapInValid(int settingsHash, int preferredSize) {
-        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
+    protected abstract ShapeSetting[] getSettings();
+
+
+    protected void fillBitMap(long[] bitMap, int sideLength) {
+        // TODO compute shader stuff
     }
-
-    protected abstract int settingsHash();
-
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
         int lod = chunk.LOD;
@@ -192,6 +189,14 @@ public abstract class ShapePlaceable implements Placeable {
                 }
     }
 
+    private boolean isBitMapInValid(int settingsHash, int preferredSize) {
+        return bitMap == null || invertValue != invert.value() || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
+    }
+
+    private int settingsHash() {
+        return Objects.hash((Object[]) settings);
+    }
+
     private void setBitMap(long[] bitMap) {
         this.bitMap = bitMap;
         settingsHash = settingsHash();
@@ -202,8 +207,9 @@ public abstract class ShapePlaceable implements Placeable {
     private int settingsHash, preferredSize;
     boolean invertValue;
     private long[] bitMap;
-    private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     final byte material;
+    private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
+    private ShapeSetting[] settings;
 
     final ToggleSetting invert = new StandAloneToggleSetting(false);
 }

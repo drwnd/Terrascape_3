@@ -1,6 +1,5 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -8,13 +7,8 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation24Way;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
-
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
@@ -67,19 +61,13 @@ public final class StairPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, stepHeight, UiMessages.STEP_HEIGHT, true),
-                new CallbackSlider<>(zero, zero, heightOffset, UiMessages.HEIGHT, true),
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new CallbackSlider<>(zero, zero, slope, UiMessages.SLOPE, true)
-        );
-    }
-
-    @Override
-    protected int settingsHash() {
-        return Objects.hash(stepHeight.value(), heightOffset.value(), thickness.value(), slope.value());
+    protected ShapeSetting[] getSettingsRotatable() {
+        return new ShapeSetting[]{
+                new ShapeSetting(stepHeight, UiMessages.STEP_HEIGHT, "stepHeight"),
+                new ShapeSetting(heightOffset, UiMessages.HEIGHT, "heightOffset"),
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
+                new ShapeSetting(slope, UiMessages.SLOPE, "slope")
+        };
     }
 
     private boolean isInside(int x, int y, int z, int sideLength, int outerThreshold, int innerThreshold) {

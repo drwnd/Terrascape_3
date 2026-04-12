@@ -1,6 +1,5 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -8,14 +7,9 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation3Way;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
-
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class CylinderPlaceable extends RotatableShapePlaceable {
 
@@ -58,18 +52,13 @@ public final class CylinderPlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, radius, UiMessages.RADIUS, true),
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true),
-                new CallbackSlider<>(zero, zero, height, UiMessages.HEIGHT, true),
-                new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true));
-    }
-
-    @Override
-    protected int settingsHash() {
-        return Objects.hash(radius.value(), thickness.value(), height.value(), exponent.value());
+    protected ShapeSetting[] getSettingsRotatable() {
+        return new ShapeSetting[]{
+                new ShapeSetting(radius, UiMessages.RADIUS, "radius"),
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
+                new ShapeSetting(height, UiMessages.HEIGHT, "height"),
+                new ShapeSetting(exponent, UiMessages.DISTANCE_EXPONENT, "exponent")
+        };
     }
 
     @Override

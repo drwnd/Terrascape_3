@@ -1,19 +1,13 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
-
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class CubePlaceable extends ShapePlaceable {
 
@@ -50,13 +44,7 @@ public final class CubePlaceable extends ShapePlaceable {
         return super.getLengthZ() - 2 * sizeReduction.value();
     }
 
-    @Override
-    public List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, sizeReduction, UiMessages.SIZE_REDUCTION, true),
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true));
-    }
+
 
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
@@ -67,8 +55,11 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected int settingsHash() {
-        return Objects.hash(sizeReduction.value(), thickness.value());
+    protected ShapeSetting[] getSettings() {
+        return new ShapeSetting[]{
+                new ShapeSetting(sizeReduction, UiMessages.SIZE_REDUCTION, "sizeReduction"),
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "wallThickness")
+        };
     }
 
     @Override

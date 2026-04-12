@@ -1,6 +1,5 @@
 package game.player.interaction.placeable_shapes;
 
-import core.renderables.UiButton;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -8,14 +7,9 @@ import core.utils.Saver;
 import game.language.UiMessages;
 import game.player.interaction.RotatableShapePlaceable;
 import game.player.interaction.Rotation6Way;
-import game.player.inventory.CallbackSlider;
+import game.player.interaction.ShapeSetting;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
-
-import org.joml.Vector2f;
-
-import java.util.List;
-import java.util.Objects;
 
 public final class ConePlaceable extends RotatableShapePlaceable {
 
@@ -67,20 +61,14 @@ public final class ConePlaceable extends RotatableShapePlaceable {
     }
 
     @Override
-    protected List<UiButton> uniqueSettings() {
-        Vector2f zero = new Vector2f();
-        return List.of(
-                new CallbackSlider<>(zero, zero, baseRadius, UiMessages.RADIUS, true),
-                new CallbackSlider<>(zero, zero, topRadius, UiMessages.TOP_RADIUS, true),
-                new CallbackSlider<>(zero, zero, exponent, UiMessages.DISTANCE_EXPONENT, true),
-                new CallbackSlider<>(zero, zero, height, UiMessages.HEIGHT, true),
-                new CallbackSlider<>(zero, zero, thickness, UiMessages.WALL_THICKNESS, true)
-        );
-    }
-
-    @Override
-    protected int settingsHash() {
-        return Objects.hash(baseRadius.value(), topRadius.value(), exponent.value(), height.value(), thickness.value());
+    protected ShapeSetting[] getSettingsRotatable() {
+        return new ShapeSetting[]{
+                new ShapeSetting(baseRadius, UiMessages.RADIUS, "baseRadius"),
+                new ShapeSetting(topRadius, UiMessages.TOP_RADIUS, "topRadius"),
+                new ShapeSetting(exponent, UiMessages.DISTANCE_EXPONENT, "exponent"),
+                new ShapeSetting(height, UiMessages.HEIGHT, "height"),
+                new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness")
+        };
     }
 
     @Override
@@ -116,7 +104,7 @@ public final class ConePlaceable extends RotatableShapePlaceable {
         return switch ((Rotation6Way) rotation) {
             case Rotation6Way.ROTATION_1 -> isInside(lengthZ - 1 - z, x - (lengthX >> 1), y - (lengthY >> 1));
             case Rotation6Way.ROTATION_2 -> isInside(lengthY - 1 - y, x - (lengthX >> 1), z - (lengthZ >> 1));
-            case Rotation6Way.ROTATION_3 -> isInside(lengthX  - 1- x, y - (lengthY >> 1), z - (lengthZ >> 1));
+            case Rotation6Way.ROTATION_3 -> isInside(lengthX - 1 - x, y - (lengthY >> 1), z - (lengthZ >> 1));
             case Rotation6Way.ROTATION_4 -> isInside(z, x - (lengthX >> 1), y - (lengthY >> 1));
             case Rotation6Way.ROTATION_5 -> isInside(y, x - (lengthX >> 1), z - (lengthZ >> 1));
             case Rotation6Way.ROTATION_6 -> isInside(x, y - (lengthY >> 1), z - (lengthZ >> 1));
