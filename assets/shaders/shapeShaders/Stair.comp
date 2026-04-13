@@ -1,5 +1,97 @@
-#version 100
+#version 460 core
+#extension GL_NV_gpu_shader5: enable
+
+layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+
+layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
+    uint8_t[] bitMap;
+};
+
+uniform ivec3 size;
+uniform bool invert;
+uniform int rotation;
+
+uniform int stepHeight;
+uniform int heightOffset;
+uniform int thickness;
+uniform float slope;
+
+int zOrderCurveValue(int value) {
+    int zOrderValue = 0;
+    for (int index = 0; index < 10; index++) {
+        int bit = value >> index & 1;
+        bit <<= index * 3;
+        zOrderValue |= bit;
+    }
+    return zOrderValue;
+}
+
+bool isValidCoord(int x, int y, int z) {
+    return x < size.x && y < size.y && z < size.z;
+}
+
+bool isInside(int x, int y, int z);
 
 void main() {
+    int bits = 0;
+    int x = int(gl_GlobalInvocationID.x) << 1;
+    int y = int(gl_GlobalInvocationID.y) << 1;
+    int z = int(gl_GlobalInvocationID.z) << 1;
 
+    if (isValidCoord(x + 0, y + 0, z + 0) && isInside(x + 0, y + 0, z + 0) != invert) bits |= 1 << 0;
+    if (isValidCoord(x + 0, y + 0, z + 1) && isInside(x + 0, y + 0, z + 1) != invert) bits |= 1 << 1;
+    if (isValidCoord(x + 0, y + 1, z + 0) && isInside(x + 0, y + 1, z + 0) != invert) bits |= 1 << 2;
+    if (isValidCoord(x + 0, y + 1, z + 1) && isInside(x + 0, y + 1, z + 1) != invert) bits |= 1 << 3;
+    if (isValidCoord(x + 1, y + 0, z + 0) && isInside(x + 1, y + 0, z + 0) != invert) bits |= 1 << 4;
+    if (isValidCoord(x + 1, y + 0, z + 1) && isInside(x + 1, y + 0, z + 1) != invert) bits |= 1 << 5;
+    if (isValidCoord(x + 1, y + 1, z + 0) && isInside(x + 1, y + 1, z + 0) != invert) bits |= 1 << 6;
+    if (isValidCoord(x + 1, y + 1, z + 1) && isInside(x + 1, y + 1, z + 1) != invert) bits |= 1 << 7;
+
+    int index = zOrderCurveValue(x >> 1) << 2 | zOrderCurveValue(y >> 1) << 1 | zOrderCurveValue(z >> 1);
+    bitMap[index] = uint8_t(bits);
 }
+
+bool isInsideRotated(int a, int b) {
+    int outerThreshold = (size.x + heightOffset) / stepHeight;
+    int innerThreshold = min(outerThreshold - 1, outerThreshold - thickness / stepHeight);
+
+    float distance = (a / stepHeight) * slope + b / stepHeight;
+    return distance < outerThreshold && distance >= innerThreshold;
+}
+
+bool isInside(int x, int y, int z) {
+    int invert = size.x - 1;
+    switch (rotation) {
+        case 0: return isInsideRotated(z, y);
+        case 1: return isInsideRotated(x, y);
+        case 2: return isInsideRotated(invert - z, y);
+        case 3: return isInsideRotated(invert - x, y);
+
+        case 4: return isInsideRotated(x, z);
+        case 5: return isInsideRotated(invert - z, x);
+        case 6: return isInsideRotated(invert - x, invert - z);
+        case 7: return isInsideRotated(invert - x, z);
+
+        case 8: return isInsideRotated(z, invert - y);
+        case 9: return isInsideRotated(x, invert - y);
+        case 10: return isInsideRotated(invert - z, invert - y);
+        case 11: return isInsideRotated(invert - x, invert - y);
+
+        case 12: return isInsideRotated(y, z);
+        case 13: return isInsideRotated(y, x);
+        case 14: return isInsideRotated(y, invert - z);
+        case 15: return isInsideRotated(y, invert - x);
+
+        case 16: return isInsideRotated(z, x);
+        case 17: return isInsideRotated(x, invert - z);
+        case 18: return isInsideRotated(invert - z, invert - x);
+        case 19: return isInsideRotated(z, invert - x);
+
+        case 20: return isInsideRotated(invert - y, z);
+        case 21: return isInsideRotated(invert - y, x);
+        case 22: return isInsideRotated(invert - y, invert - z);
+        case 23: return isInsideRotated(invert - y, invert - x);
+    }
+    return false;
+}
+

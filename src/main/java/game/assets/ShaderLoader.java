@@ -35,7 +35,7 @@ public final class ShaderLoader {
             case ComputeShaders.OUTSIDE_ARC -> new ComputeShader("shapeShaders/OutsideArc.comp", identifier);
             case ComputeShaders.OUTSIDE_STAIR -> new ComputeShader("shapeShaders/OutsideStair.comp", identifier);
             case ComputeShaders.SLAB -> new ComputeShader("shapeShaders/Slab.comp", identifier);
-            case ComputeShaders.SPHERE -> new ComputeShader("shapeShaders/Shpere.comp", identifier);
+            case ComputeShaders.SPHERE -> new ComputeShader("shapeShaders/Sphere.comp", identifier);
             case ComputeShaders.STAIR -> new ComputeShader("shapeShaders/Stair.comp", identifier);
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };

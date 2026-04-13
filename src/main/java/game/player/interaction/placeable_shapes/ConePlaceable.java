@@ -9,7 +9,6 @@ import game.language.UiMessages;
 import game.player.interaction.Rotation6Way;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class ConePlaceable extends ShapePlaceable {
@@ -51,18 +50,6 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(x, y, z, lengthX, lengthY, lengthZ)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
-
-    @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(baseRadius, UiMessages.RADIUS, "baseRadius"),
@@ -100,31 +87,6 @@ public final class ConePlaceable extends ShapePlaceable {
     @Override
     public Structure getSmallStructure() {
         return getStructure();
-    }
-
-    private boolean isInside(int x, int y, int z, int lengthX, int lengthY, int lengthZ) {
-        return switch ((Rotation6Way) rotation()) {
-            case Rotation6Way.ROTATION_1 -> isInside(lengthZ - 1 - z, x - (lengthX >> 1), y - (lengthY >> 1));
-            case Rotation6Way.ROTATION_2 -> isInside(lengthY - 1 - y, x - (lengthX >> 1), z - (lengthZ >> 1));
-            case Rotation6Way.ROTATION_3 -> isInside(lengthX - 1 - x, y - (lengthY >> 1), z - (lengthZ >> 1));
-            case Rotation6Way.ROTATION_4 -> isInside(z, x - (lengthX >> 1), y - (lengthY >> 1));
-            case Rotation6Way.ROTATION_5 -> isInside(y, x - (lengthX >> 1), z - (lengthZ >> 1));
-            case Rotation6Way.ROTATION_6 -> isInside(x, y - (lengthY >> 1), z - (lengthZ >> 1));
-        };
-    }
-
-    private boolean isInside(int a, int b, int c) {
-        double heightFraction = (double) a / height.value();
-        if (heightFraction > 1) return false;
-        double outerRadius = (1 - heightFraction) * baseRadius.value() + heightFraction * topRadius.value();
-        double innerRadius = Math.max(0, outerRadius - thickness.value());
-
-        double outerThreshold = Math.pow(outerRadius, exponent.value());
-        double innerThreshold = Math.pow(innerRadius, exponent.value());
-
-        double distanceB = Math.pow(Math.abs(b + 0.5), exponent.value());
-        double distanceC = Math.pow(Math.abs(c + 0.5), exponent.value());
-        return distanceB + distanceC <= outerThreshold && distanceB + distanceC >= innerThreshold;
     }
 
     private final StandAloneIntSetting baseRadius = new StandAloneIntSetting(0, 128, 8);

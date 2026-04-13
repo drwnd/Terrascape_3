@@ -7,7 +7,6 @@ import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class CubePlaceable extends ShapePlaceable {
@@ -65,32 +64,8 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        double offset = sideLength / 2.0;
-        double innerThreshold = offset - thickness.value();
-
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(x, y, z, offset, innerThreshold)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
-
-    @Override
     public Structure getSmallStructure() {
         return new Structure(4, getMaterial());
-    }
-
-    private static boolean isInside(int x, int y, int z, double offset, double innerThreshold) {
-        double distanceX = Math.abs(x - offset + 0.5);
-        double distanceY = Math.abs(y - offset + 0.5);
-        double distanceZ = Math.abs(z - offset + 0.5);
-        double distance = Math.max(distanceX, Math.max(distanceY, distanceZ));
-
-        return distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting sizeReduction = new StandAloneIntSetting(0, 64, 0);

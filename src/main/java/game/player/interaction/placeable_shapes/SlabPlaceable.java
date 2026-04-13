@@ -60,17 +60,6 @@ public final class SlabPlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
-
-    @Override
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
         int lengthX = rotation() == Rotation3Way.ROTATION_1 ? thickness.value() : 16;

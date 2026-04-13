@@ -8,7 +8,6 @@ import game.assets.ComputeShaders;
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class SpherePlaceable extends ShapePlaceable {
@@ -68,32 +67,8 @@ public final class SpherePlaceable extends ShapePlaceable {
     }
 
     @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        double offset = sideLength / 2.0;
-        double outerThreshold = Math.pow(radius.value(), exponent.value());
-        double innerThreshold = Math.pow(Math.max(0, radius.value() - thickness.value()), exponent.value());
-
-        for (int x = 0; x < sideLength; x++)
-            for (int y = 0; y < sideLength; y++)
-                for (int z = 0; z < sideLength; z++) {
-                    if (!isInside(x, y, z, offset, outerThreshold, innerThreshold)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
-
-    @Override
     public Structure getSmallStructure() {
         return getStructure();
-    }
-
-    private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
-        double distanceX = Math.pow(Math.abs(x - offset + 0.5), exponent.value());
-        double distanceY = Math.pow(Math.abs(y - offset + 0.5), exponent.value());
-        double distanceZ = Math.pow(Math.abs(z - offset + 0.5), exponent.value());
-        double distance = distanceX + distanceY + distanceZ;
-
-        return distance <= outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);

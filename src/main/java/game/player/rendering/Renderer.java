@@ -656,7 +656,7 @@ public final class Renderer extends Renderable {
         Vector3l position = showBreakVolume ? target.position() : target.offsetPosition();
 
         shapePlaceable.offsetPosition(position, target.side());
-        synchronizeHologramModel(shapePlaceable);
+        synchronizeHologramModel(shapePlaceable.updateBitMap());
 
         renderHologram(cameraPosition, projectionViewMatrix, position, material);
     }

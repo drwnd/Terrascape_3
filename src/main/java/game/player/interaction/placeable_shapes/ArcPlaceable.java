@@ -9,7 +9,6 @@ import game.language.UiMessages;
 import game.player.interaction.Rotation12Way;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class ArcPlaceable extends ShapePlaceable {
@@ -84,48 +83,6 @@ public final class ArcPlaceable extends ShapePlaceable {
     @Override
     public Structure getSmallStructure() {
         return getStructure();
-    }
-
-    @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        double outerThreshold = Math.pow(radius.value(), exponent.value());
-        double innerThreshold = Math.pow(Math.max(0, radius.value() - thickness.value()), exponent.value());
-
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        int invertX = lengthX - 1, invertY = lengthY - 1, invertZ = lengthZ - 1;
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(x, y, z, invertX, invertY, invertZ, outerThreshold, innerThreshold)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
-    }
-
-    private boolean isInside(int x, int y, int z, int invertX, int invertY, int invertZ, double outerThreshold, double innerThreshold) {
-        return switch ((Rotation12Way) rotation()) {
-            case Rotation12Way.ROTATION_01 -> isInside(outerThreshold, innerThreshold, z, y);
-            case Rotation12Way.ROTATION_02 -> isInside(outerThreshold, innerThreshold, x, y);
-            case Rotation12Way.ROTATION_03 -> isInside(outerThreshold, innerThreshold, invertZ - z, y);
-            case Rotation12Way.ROTATION_04 -> isInside(outerThreshold, innerThreshold, invertX - x, y);
-
-            case Rotation12Way.ROTATION_05 -> isInside(outerThreshold, innerThreshold, x, z);
-            case Rotation12Way.ROTATION_06 -> isInside(outerThreshold, innerThreshold, invertZ - z, x);
-            case Rotation12Way.ROTATION_07 -> isInside(outerThreshold, innerThreshold, invertX - x, invertZ - z);
-            case Rotation12Way.ROTATION_08 -> isInside(outerThreshold, innerThreshold, invertX - x, z);
-
-            case Rotation12Way.ROTATION_09 -> isInside(outerThreshold, innerThreshold, z, invertY - y);
-            case Rotation12Way.ROTATION_10 -> isInside(outerThreshold, innerThreshold, x, invertY - y);
-            case Rotation12Way.ROTATION_11 -> isInside(outerThreshold, innerThreshold, invertZ - z, invertY - y);
-            case Rotation12Way.ROTATION_12 -> isInside(outerThreshold, innerThreshold, invertX - x, invertY - y);
-        };
-    }
-
-    private boolean isInside(double outerThreshold, double innerThreshold, int a, int b) {
-        double distanceA = Math.pow(a + 0.5, exponent.value());
-        double distanceB = Math.pow(b + 0.5, exponent.value());
-        double distance = distanceA + distanceB;
-        return distance < outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 16);

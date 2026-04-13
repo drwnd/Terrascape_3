@@ -9,7 +9,6 @@ import game.language.UiMessages;
 import game.player.interaction.Rotation3Way;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
 import game.server.generation.Structure;
 
 public final class CylinderPlaceable extends ShapePlaceable {
@@ -35,22 +34,6 @@ public final class CylinderPlaceable extends ShapePlaceable {
         placeable.height.setValue(saver.loadInt());
         placeable.exponent.setValue(saver.loadFloat());
         return placeable;
-    }
-
-    @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        double offset = (rotation() == Rotation3Way.ROTATION_1 ? lengthY : lengthX) / 2.0;
-        double outerThreshold = Math.pow(radius.value(), exponent.value());
-        double innerThreshold = Math.pow(Math.max(0, radius.value() - thickness.value()), exponent.value());
-
-        for (int x = 0; x < lengthX; x++)
-            for (int y = 0; y < lengthY; y++)
-                for (int z = 0; z < lengthZ; z++) {
-                    if (!isInside(x, y, z, offset, outerThreshold, innerThreshold)) continue;
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(x, y, z);
-                    bitMap[bitMapIndex >> 6] |= 1L << bitMapIndex;
-                }
     }
 
     @Override
@@ -100,23 +83,6 @@ public final class CylinderPlaceable extends ShapePlaceable {
     @Override
     public Structure getSmallStructure() {
         return getStructure();
-    }
-
-    private boolean isInside(int x, int y, int z, double offset, double outerThreshold, double innerThreshold) {
-        return switch ((Rotation3Way) rotation()) {
-            case Rotation3Way.ROTATION_3 -> isInsideRotated(z, x, y, offset, outerThreshold, innerThreshold);
-            case Rotation3Way.ROTATION_2 -> isInsideRotated(y, x, z, offset, outerThreshold, innerThreshold);
-            case Rotation3Way.ROTATION_1 -> isInsideRotated(x, y, z, offset, outerThreshold, innerThreshold);
-        };
-    }
-
-    private boolean isInsideRotated(int a, int b, int c, double offset, double outerThreshold, double innerThreshold) {
-        if (a >= height.value()) return false;
-        double distanceB = Math.pow(Math.abs(b - offset + 0.5), exponent.value());
-        double distanceC = Math.pow(Math.abs(c - offset + 0.5), exponent.value());
-        double distance = distanceC + distanceB;
-
-        return distance <= outerThreshold && distance >= innerThreshold;
     }
 
     private final StandAloneIntSetting radius = new StandAloneIntSetting(0, 128, 8);

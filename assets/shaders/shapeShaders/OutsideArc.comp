@@ -11,7 +11,9 @@ uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
 
+uniform int radius;
 uniform int thickness;
+uniform float exponent;
 
 int zOrderCurveValue(int value) {
     int zOrderValue = 0;
@@ -48,6 +50,32 @@ void main() {
     bitMap[index] = uint8_t(bits);
 }
 
-bool isInside(int x, int y, int z) {
-    return true;
+bool isInsideRotated(int x, int y, int z) {
+    float outerThreshold = pow(radius, exponent);
+    float innerThreshold = pow(max(0, radius - thickness), exponent);
+
+    float distanceX = pow(x + 0.5, exponent);
+    float distanceY = pow(y + 0.5, exponent);
+    float distanceZ = pow(z + 0.5, exponent);
+    float distance = distanceX + distanceY + distanceZ;
+    return distance < outerThreshold && distance >= innerThreshold;
 }
+
+bool isInside(int x, int y, int z) {
+    int invertX = size.x - 1;
+    int invertY = size.y - 1;
+    int invertZ = size.z - 1;
+
+    switch (rotation) {
+        case 0: return isInsideRotated(x, y, z);
+        case 1: return isInsideRotated(x, y, invertZ - z);
+        case 2: return isInsideRotated(x, invertY - y, z);
+        case 3: return isInsideRotated(x, invertY - y, invertZ - z);
+        case 4: return isInsideRotated(invertX - x, y, z);
+        case 5: return isInsideRotated(invertX - x, y, invertZ - z);
+        case 6: return isInsideRotated(invertX - x, invertY - y, z);
+        case 7: return isInsideRotated(invertX - x, invertY - y, invertZ - z);
+    }
+    return false;
+}
+

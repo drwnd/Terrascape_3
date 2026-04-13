@@ -71,7 +71,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
-        fillBitMap(bitMap, 16);
+        fillBitMap(bitMap);
         return new Structure(4, material, bitMap);
     }
 
@@ -87,7 +87,6 @@ public abstract class ShapePlaceable implements Placeable {
         updateBitMap();
     }
 
-
     /**
      * Only call from main thread!
      */
@@ -96,7 +95,7 @@ public abstract class ShapePlaceable implements Placeable {
         int settingsHash = settingsHash();
         if (isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
-            fillBitMap(bitMap, getPreferredSize());
+            fillBitMap(bitMap);
             this.bitMap = bitMap;
         }
         this.settingsHash = settingsHash;
@@ -201,7 +200,7 @@ public abstract class ShapePlaceable implements Placeable {
         }
     }
 
-    protected void fillBitMap(long[] bitMap, int sideLength) {
+    private void fillBitMap(long[] bitMap) {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
         int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
         int numGroupsY = (lengthY >> 3) + ((lengthY & 7) != 0 ? 1 : 0);

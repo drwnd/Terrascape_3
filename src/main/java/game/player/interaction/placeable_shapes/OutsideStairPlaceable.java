@@ -1,6 +1,5 @@
 package game.player.interaction.placeable_shapes;
 
-import core.settings.optionSettings.Option;
 import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
@@ -13,7 +12,7 @@ import game.player.interaction.ShapeSetting;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
-public final class OutsideStairPlaceable extends ShapePlaceable implements ConerStairPlaceable {
+public final class OutsideStairPlaceable extends ShapePlaceable{
 
     public OutsideStairPlaceable(byte material) {
         super(ComputeShaders.OUTSIDE_STAIR, material, Rotation24Way.ROTATION_17);
@@ -49,13 +48,6 @@ public final class OutsideStairPlaceable extends ShapePlaceable implements Coner
     }
 
     @Override
-    protected void fillBitMap(long[] bitMap, int sideLength) {
-        int outerThreshold = (sideLength + heightOffset.value()) / stepHeight.value();
-        int innerThreshold = Math.min(outerThreshold - 1, outerThreshold - thickness.value() / stepHeight.value());
-        fillBitMap(bitMap, sideLength, outerThreshold, innerThreshold);
-    }
-
-    @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(stepHeight, UiMessages.STEP_HEIGHT, "stepHeight"),
@@ -63,16 +55,6 @@ public final class OutsideStairPlaceable extends ShapePlaceable implements Coner
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
                 new ShapeSetting(slope, UiMessages.SLOPE, "slope")
         };
-    }
-
-    public boolean isInside(int outerThreshold, int innerThreshold, int a, int b, int c) {
-        float distance = a / stepHeight.value() * slope.value() + Math.max(b, c) / stepHeight.value();
-        return distance < outerThreshold && distance >= innerThreshold;
-    }
-
-    @Override
-    public Option getRotation() {
-        return rotation();
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);
