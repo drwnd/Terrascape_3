@@ -691,8 +691,8 @@ public final class Renderer extends Renderable {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
 
-        if (placeable instanceof ShapePlaceable) {
-            synchronizeHologramModel(placeable);
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            synchronizeHologramModel(shapePlaceable.updateBitMap());
 
             int countX = (int) (maxPosition.x - minPosition.x) / placeable.getLengthX();
             int countY = (int) (maxPosition.y - minPosition.y) / placeable.getLengthY();

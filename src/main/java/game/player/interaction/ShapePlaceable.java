@@ -24,6 +24,7 @@ import game.settings.IntSettings;
 import game.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,7 +67,7 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public long[] getBitMap() {
-        return bitMap == null ? new long[]{-1L, -1L, -1L, -1L} : bitMap;
+        return bitMap;
     }
 
     public Structure getSmallStructure() {
@@ -100,6 +101,14 @@ public abstract class ShapePlaceable implements Placeable {
         }
         this.settingsHash = settingsHash;
         this.preferredSize = preferredSize;
+        return this;
+    }
+
+    public ShapePlaceable setBitMapToFull() {
+        int size = getPreferredSizePowOf2();
+        long[] bitMap = new long[Math.max(1, size * size * size >> 6)];
+        Arrays.fill(bitMap, -1L);
+        setBitMap(bitMap);
         return this;
     }
 

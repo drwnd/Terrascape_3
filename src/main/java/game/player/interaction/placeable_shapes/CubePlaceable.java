@@ -45,8 +45,6 @@ public final class CubePlaceable extends ShapePlaceable {
         return super.getLengthZ() - 2 * sizeReduction.value();
     }
 
-
-
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CubePlaceable copy = new CubePlaceable(material);
