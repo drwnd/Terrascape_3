@@ -67,7 +67,7 @@ public final class Hotbar extends UiElement {
         displays[slotIndex] = null;
 
         if (placeable == null) return;
-        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.getSmallStructure() : placeable.getStructure();
+        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap().getSmallStructure() : placeable.getStructure();
         if (structure == null) return;
 
         displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);

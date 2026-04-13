@@ -66,16 +66,7 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public long[] getBitMap() {
-        int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
-        int settingsHash = settingsHash();
-        if (isBitMapInValid(settingsHash, preferredSize)) {
-            long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
-            fillBitMap(bitMap, getPreferredSize());
-            this.bitMap = bitMap;
-        }
-        this.settingsHash = settingsHash;
-        this.preferredSize = preferredSize;
-        return bitMap;
+        return bitMap == null ? new long[]{-1L, -1L, -1L, -1L} : bitMap;
     }
 
     public Structure getSmallStructure() {
@@ -87,11 +78,30 @@ public abstract class ShapePlaceable implements Placeable {
     public void rotateForwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().next());
+        updateBitMap();
     }
 
     public void rotateBackwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().previous());
+        updateBitMap();
+    }
+
+
+    /**
+     * Only call from main thread!
+     */
+    public ShapePlaceable updateBitMap() {
+        int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
+        int settingsHash = settingsHash();
+        if (isBitMapInValid(settingsHash, preferredSize)) {
+            long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
+            fillBitMap(bitMap, getPreferredSize());
+            this.bitMap = bitMap;
+        }
+        this.settingsHash = settingsHash;
+        this.preferredSize = preferredSize;
+        return this;
     }
 
 
