@@ -91,6 +91,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             structure = shape.updateBitMap().getStructure();
         } catch (Exception exception) {
             exception.printStackTrace();
+            shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
             return;
         }
 
