@@ -7,11 +7,18 @@ import core.rendering_api.Window;
 import game.language.UiMessages;
 import game.player.Hotbar;
 import game.server.Game;
+import game.server.generation.Structure;
+import game.settings.FloatSettings;
 import game.settings.KeySettings;
 
+import game.settings.OptionSettings;
+import game.settings.ToggleSettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
+import java.util.ArrayList;
+
+import static game.utils.Constants.AMOUNT_OF_MATERIALS;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class Inventory extends UiElement {
@@ -24,16 +31,25 @@ public final class Inventory extends UiElement {
         setDoAutoFocusScaling(false);
         setScaleWithGuiSize(false);
 
+        ArrayList<CubeDisplay> cubeDisplays = getCubeDisplays();
+        OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.9F), OptionSettings.PLACE_MODE, null, true);
+        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
+
         Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE / Window.getAspectRatio(), 1.0F);
         Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE / Window.getAspectRatio(), 0.0F);
 
         addRenderable(structureTab = new StructureTab(sizeToParent, offsetToParent));
         addRenderable(shapesTab = new ShapesTab(sizeToParent, offsetToParent));
         addRenderable(miscellaneousTab = new MiscellaneousTab(sizeToParent, offsetToParent));
+        addRenderable(customShapeTab = new CustomShapeTab(sizeToParent, offsetToParent));
+
+        shapesTab.addContents(cubeDisplays, placeModeToggle, offsetToggle);
+        customShapeTab.addContents(cubeDisplays, placeModeToggle, offsetToggle);
 
         addRenderable(openTabButton = new TabOpenerButton(this, 0, shapesTab, UiMessages.SHAPES_TAB_NAME));
         addRenderable(new TabOpenerButton(this, 1, structureTab, UiMessages.STRUCTURE_TAB_NAME));
-        addRenderable(new TabOpenerButton(this, 2, miscellaneousTab, UiMessages.MISCELLANEOUS_TAB_NAME));
+        addRenderable(new TabOpenerButton(this, 2, customShapeTab, UiMessages.CUSTOM_SHAPES_TAB_NAME));
+        addRenderable(new TabOpenerButton(this, 3, miscellaneousTab, UiMessages.MISCELLANEOUS_TAB_NAME));
 
         openInventoryTab = shapesTab;
         openInventoryTab.setVisible(true);
@@ -66,6 +82,7 @@ public final class Inventory extends UiElement {
         structureTab.setVisible(false);
         shapesTab.setVisible(false);
         miscellaneousTab.setVisible(false);
+        customShapeTab.setVisible(false);
 
         openInventoryTab = toOpenTab;
         openInventoryTab.setVisible(true);
@@ -92,9 +109,30 @@ public final class Inventory extends UiElement {
         openInventoryTab.handleScroll(pixelCoordinate, yScroll);
     }
 
+
+    private static ArrayList<CubeDisplay> getCubeDisplays() {
+        long start = System.nanoTime();
+        ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>(AMOUNT_OF_MATERIALS);
+        Vector2f sizeToParent = new Vector2f(), offsetToParent = new Vector2f();
+
+        for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
+            Structure structure = new Structure((byte) material);
+
+            StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
+            display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
+            display.setScaleWithGuiSize(false);
+
+            cubeDisplays.add(new CubeDisplay(display, (byte) material));
+        }
+        System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        return cubeDisplays;
+    }
+
+
     private final StructureTab structureTab;
     private final ShapesTab shapesTab;
     private final MiscellaneousTab miscellaneousTab;
+    private final CustomShapeTab customShapeTab;
 
     private final InventoryInput input;
 

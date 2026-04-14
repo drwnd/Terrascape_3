@@ -5,15 +5,12 @@ import core.renderables.*;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 
-import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Materials;
 import game.settings.FloatSettings;
-import game.settings.OptionSettings;
-import game.settings.ToggleSettings;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -36,28 +33,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         itemNameDisplay.setDoAutoFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
 
-        OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.9F), OptionSettings.PLACE_MODE, null, true);
-        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
-
-        long start = System.nanoTime();
-        for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
-            sizeToParent = new Vector2f();
-            offsetToParent = new Vector2f();
-            Structure structure = new Structure((byte) material);
-
-            StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
-            display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
-            display.setScaleWithGuiSize(false);
-
-            cubeDisplays.add(new CubeDisplay(display, (byte) material));
-            addRenderable(display);
-        }
-        System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         loadShapeDisplays();
 
         addRenderable(itemNameDisplay);
-        addRenderable(placeModeToggle);
-        addRenderable(offsetToggle);
     }
 
     @Override
@@ -74,9 +52,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
-            if (display.display.containsPixelCoordinate(pixelCoordinate)) {
-                if (selectedDisplay == null) return new CubePlaceable(display.material);
-                return selectedDisplay.getPlaceable().copyWithMaterial(display.material);
+            if (display.display().containsPixelCoordinate(pixelCoordinate)) {
+                if (selectedDisplay == null) return new CubePlaceable(display.material());
+                return selectedDisplay.getPlaceable().copyWithMaterial(display.material());
             }
         return null;
     }
@@ -100,12 +78,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         itemNameDisplay.setVisible(false);
         for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
         for (CubeDisplay display : cubeDisplays) {
-            StructureDisplay structureDisplay = display.display;
+            StructureDisplay structureDisplay = display.display();
             if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
 
             Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
             Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
-            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material)));
+            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material())));
             itemNameDisplay.setOffsetToParent(
                     (pixelCoordinate.x - position.x) / size.x - itemNameDisplay.getLength(),
                     (pixelCoordinate.y - position.y) / size.y);
@@ -147,6 +125,15 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(shapePreview);
     }
 
+    void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
+        for (CubeDisplay display : cubeDisplays) {
+            this.cubeDisplays.add(display);
+            addRenderable(display.display());
+        }
+        addRenderable(placeModeToggle);
+        addRenderable(offsetToggle);
+    }
+
     void refreshShapePreview() {
         refreshShapePreview = true;
     }
@@ -159,13 +146,13 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         Vector2f sizeToParent = new Vector2f(itemSize, itemSize * Window.getAspectRatio() * getAspectRatio());
 
         for (CubeDisplay display : cubeDisplays) {
-            int index = display.material & 0xFF;
+            int index = display.material() & 0xFF;
             int row = index / itemsPerRow, column = index % itemsPerRow;
             float offsetX = 1.0F - sizeToParent.x * (column + 1);
             float offsetY = 1.0F - sizeToParent.y * (row + 1);
 
-            display.display.setOffsetToParent(offsetX, offsetY + input.materialScroll);
-            display.display.setSizeToParent(sizeToParent.x, sizeToParent.y);
+            display.display().setOffsetToParent(offsetX, offsetY + input.materialScroll);
+            display.display().setSizeToParent(sizeToParent.x, sizeToParent.y);
         }
     }
 
@@ -207,7 +194,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
-        for (CubeDisplay button : cubeDisplays) button.display.move(offset);
+        for (CubeDisplay button : cubeDisplays) button.display().move(offset);
     }
 
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
@@ -219,8 +206,4 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     private ShapeDisplay selectedDisplay;
     private StructureDisplay shapePreview;
     private boolean refreshShapePreview = true;
-
-    private record CubeDisplay(StructureDisplay display, byte material) {
-
-    }
 }
