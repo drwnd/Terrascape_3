@@ -7,6 +7,7 @@ import game.assets.Textures;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
+import game.player.interaction.placeable_shapes.CustomShape;
 import game.player.inventory.StructureDisplay;
 import game.player.interaction.Target;
 
@@ -61,13 +62,14 @@ public final class Hotbar extends UiElement {
 
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
-        contents[slotIndex] = placeable;
 
+        if (contents[slotIndex] instanceof CustomShape customShape) customShape.deleteShader();
         removeRenderable(displays[slotIndex]).delete();
         displays[slotIndex] = null;
+        contents[slotIndex] = placeable;
 
         if (placeable == null) return;
-        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap().getSmallStructure() : placeable.getStructure();
+        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap(false).getSmallStructure() : placeable.getStructure();
         if (structure == null) return;
 
         displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);
@@ -125,7 +127,7 @@ public final class Hotbar extends UiElement {
 
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
-        if (contents[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap();
+        if (contents[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
     }
 
     public Placeable[] getContents() {

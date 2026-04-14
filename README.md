@@ -63,6 +63,22 @@ Similarly with primitives hover over a button, then press a hotkey to put that s
 The text field at the top may be used to filter structures.
 Only buttons corresponding to structures whose name includes the text fields content will be shown.
 
+### Custom shape creation
+
+When in the inventory go to the **Custom Shape** tab.
+There you can select a file containing code that describes the shape you want.
+Similarly with primitives hover over a button, then press a hotkey to put that structure into the corresponding hotbar slot.
+
+When writing your own code you must remember the following:
+- You must define a method with the signature "bool isInside(int x, int y, int z)".
+- The compiler can only recognize methods that are defined before they are used. Also, recursion is not supported.
+- There is the global uniform "size" with .x, .y and .z int values indicating the Length X, Length Y and Length Z values respectively.
+- You can use all GLSL functions to write your code. Those include min, max, pow, exp, sin, cos, tan, asin, acos, atan, distance etc.
+- Compilation errors are printed to the console.
+- As your code is compiled to a GLSL shader you may use matrices, vectors and swizzling.
+- There are also the uniforms "int rotation" and "bool invert" those are handled automatically.
+- YOU ARE RESPONSIBLE FOR WHAT CODE YOU WRITE.
+
 ## Customizing (almost) everything
 
 When in the main menu or when having the game paused press **Settings**.

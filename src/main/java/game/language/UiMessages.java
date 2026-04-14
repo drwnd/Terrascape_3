@@ -102,7 +102,12 @@ public enum UiMessages implements Translatable {
     STRUCTURE_TAB_NAME,
     MISCELLANEOUS_TAB_NAME,
     LOCK_PLACE_POSITION,
-    SHAPE_ROTATION;
+    SHAPE_ROTATION,
+    CUSTOM_SHAPES_TAB_NAME,
+    LOAD_SHADER_CODE,
+    LENGTH_X,
+    LENGTH_Y,
+    LENGTH_Z;
 
     @Override
     public String translationFileName() {

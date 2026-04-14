@@ -198,6 +198,9 @@ public final class Window {
         });
     }
 
+    public static boolean isMaximized() {
+        return maximized;
+    }
 
     public static void setCrashCallback(CrashCallback crashCallback) {
         Window.crashCallback = crashCallback;
