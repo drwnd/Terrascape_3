@@ -656,7 +656,7 @@ public final class Renderer extends Renderable {
         Vector3l position = showBreakVolume ? target.position() : target.offsetPosition();
 
         shapePlaceable.offsetPosition(position, target.side());
-        synchronizeHologramModel(shapePlaceable.updateBitMap());
+        synchronizeHologramModel(shapePlaceable.updateBitMap(false));
 
         renderHologram(cameraPosition, projectionViewMatrix, position, material);
     }
@@ -692,7 +692,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
 
         if (placeable instanceof ShapePlaceable shapePlaceable) {
-            synchronizeHologramModel(shapePlaceable.updateBitMap());
+            synchronizeHologramModel(shapePlaceable.updateBitMap(false));
 
             int countX = (int) (maxPosition.x - minPosition.x) / placeable.getLengthX();
             int countY = (int) (maxPosition.y - minPosition.y) / placeable.getLengthY();

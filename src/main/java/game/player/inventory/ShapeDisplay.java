@@ -45,7 +45,7 @@ public final class ShapeDisplay extends UiButton {
         shapesTab.getShapePlaceableSettingSliders().addAll(settingElements);
         for (UiBackgroundElement settingElement : settingElements) shapesTab.addRenderable(settingElement);
 
-        addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.updateBitMap().getSmallStructure()));
+        addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.updateBitMap(false).getSmallStructure()));
     }
 
     @Override

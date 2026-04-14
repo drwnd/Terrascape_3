@@ -49,7 +49,7 @@ public abstract class ShapePlaceable implements Placeable {
         ShapePlaceable placeable = copyWithMaterialUnique(material);
         placeable.invert.setValue(invert.value());
         placeable.rotation.setValue(rotation.value());
-        placeable.setBitMap(getBitMap());
+        placeable.setBitMap(bitMap);
         return placeable;
     }
 
@@ -79,22 +79,22 @@ public abstract class ShapePlaceable implements Placeable {
     public void rotateForwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().next());
-        updateBitMap();
+        updateBitMap(false);
     }
 
     public void rotateBackwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().previous());
-        updateBitMap();
+        updateBitMap(false);
     }
 
     /**
      * Only call from main thread!
      */
-    public ShapePlaceable updateBitMap() {
+    public ShapePlaceable updateBitMap(boolean force) {
         int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
         int settingsHash = settingsHash();
-        if (isBitMapInValid(settingsHash, preferredSize)) {
+        if (force || isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
             fillBitMap(bitMap);
             this.bitMap = bitMap;
@@ -110,6 +110,10 @@ public abstract class ShapePlaceable implements Placeable {
         Arrays.fill(bitMap, -1L);
         setBitMap(bitMap);
         return this;
+    }
+
+    public void deleteShader() {
+        AssetManager.delete(shaderIdentifier);
     }
 
 
@@ -136,7 +140,6 @@ public abstract class ShapePlaceable implements Placeable {
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(material, NO_COLLISION)) return false;
-        long[] bitMap = getBitMap();
         int preferredSize = getPreferredSize();
 
         int minX = Math.max(0, (int) (min.x - position.x)), maxX = Math.min((int) (max.x - position.x), preferredSize);
@@ -168,7 +171,6 @@ public abstract class ShapePlaceable implements Placeable {
     public Structure getStructure() {
         int preferredSize = getPreferredSizePowOf2();
         int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
-        long[] bitMap = getBitMap();
 
         return new Structure(getLengthX(), getLengthY(), getLengthZ(), preferredSizeBits, material, bitMap);
     }
@@ -182,7 +184,7 @@ public abstract class ShapePlaceable implements Placeable {
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
         int preferredSize = getPreferredSizePowOf2();
-        player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, getBitMap());
+        player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, bitMap);
     }
 
 

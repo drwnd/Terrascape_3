@@ -18,6 +18,7 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         Vector2f offsetToParent = new Vector2f(0.0F, 0.0F);
         Structure structure;
         try {
-            structure = shape.updateBitMap().getStructure();
+            structure = shape.updateBitMap(true).getStructure();
         } catch (Exception exception) {
             exception.printStackTrace();
             shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
@@ -153,7 +154,9 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             if (action != GLFW_PRESS) return;
             if (Window.isMaximized()) Window.toggleFullScreen();
 
-            JFileChooser fileChooser = new JFileChooser();
+            JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeShaders");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt", "comp", "glsl"));
+
             int option = fileChooser.showOpenDialog(null);
             if (option != JFileChooser.APPROVE_OPTION) return;
 
