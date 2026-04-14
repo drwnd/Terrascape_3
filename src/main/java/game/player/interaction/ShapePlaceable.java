@@ -209,6 +209,12 @@ public abstract class ShapePlaceable implements Placeable {
         }
     }
 
+    protected void setShaderIdentifier(ShaderIdentifier shaderIdentifier) {
+        AssetManager.delete(this.shaderIdentifier);
+        this.shaderIdentifier = shaderIdentifier;
+    }
+
+
     private void fillBitMap(long[] bitMap) {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
         int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
@@ -280,5 +286,5 @@ public abstract class ShapePlaceable implements Placeable {
 
     final ToggleSetting invert = new StandAloneToggleSetting(false);
     private final StandAloneOptionSetting rotation;
-    private final ShaderIdentifier shaderIdentifier;
+    private ShaderIdentifier shaderIdentifier;
 }

@@ -1,0 +1,87 @@
+#version 460 core
+#extension GL_NV_gpu_shader5: enable
+
+layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+
+layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
+    uint8_t[] bitMap;
+};
+
+uniform ivec3 size;
+uniform bool invert;
+uniform int rotation;
+
+uniform int ignore;
+
+int zOrderCurveValue(int value) {
+    int zOrderValue = 0;
+    for (int index = 0; index < 10; index++) {
+        int bit = value >> index & 1;
+        bit <<= index * 3;
+        zOrderValue |= bit;
+    }
+    return zOrderValue;
+}
+
+bool isValidCoord(int x, int y, int z) {
+    return x < size.x && y < size.y && z < size.z;
+}
+
+bool isInside(int x, int y, int z);
+
+bool isInsideRotated(int x, int y, int z) {
+    int invertX = size.x - 1;
+    int invertY = size.y - 1;
+    int invertZ = size.z - 1;
+    switch (rotation) {
+        case 0: return isInside(invertZ - z, x, y);
+        case 1: return isInside(invertZ - z, x, invertY - y);
+        case 2: return isInside(invertZ - z, invertX - x, invertY - y);
+        case 3: return isInside(invertZ - z, invertX - x, y);
+
+        case 4: return isInside(invertY - y, x, z);
+        case 5: return isInside(invertY - y, x, invertZ - z);
+        case 6: return isInside(invertY - y, invertX - x, invertZ - z);
+        case 7: return isInside(invertY - y, invertX - x, z);
+
+        case 8: return isInside(invertX - x, y, z);
+        case 9: return isInside(invertX - x, y, invertZ - z);
+        case 10: return isInside(invertX - x, invertY - y, invertZ - z);
+        case 11: return isInside(invertX - x, invertY - y, z);
+
+        case 12: return isInside(z, x, y);
+        case 13: return isInside(z, x, invertY - y);
+        case 14: return isInside(z, invertX - x, invertY - y);
+        case 15: return isInside(z, invertX - x, y);
+
+        case 16: return isInside(y, x, z);
+        case 17: return isInside(y, x, invertZ - z);
+        case 18: return isInside(y, invertX - x, invertZ - z);
+        case 19: return isInside(y, invertX - x, z);
+
+        case 20: return isInside(x, y, z);
+        case 21: return isInside(x, y, invertZ - z);
+        case 22: return isInside(x, invertY - y, invertZ - z);
+        case 23: return isInside(x, invertY - y, z);
+    }
+    return false;
+}
+
+void main() {
+    int bits = 0;
+    int x = int(gl_GlobalInvocationID.x) << 1;
+    int y = int(gl_GlobalInvocationID.y) << 1;
+    int z = int(gl_GlobalInvocationID.z) << 1;
+
+    if (isValidCoord(x + 0, y + 0, z + 0) && isInsideRotated(x + 0, y + 0, z + 0) != invert) bits |= 1 << 0;
+    if (isValidCoord(x + 0, y + 0, z + 1) && isInsideRotated(x + 0, y + 0, z + 1) != invert) bits |= 1 << 1;
+    if (isValidCoord(x + 0, y + 1, z + 0) && isInsideRotated(x + 0, y + 1, z + 0) != invert) bits |= 1 << 2;
+    if (isValidCoord(x + 0, y + 1, z + 1) && isInsideRotated(x + 0, y + 1, z + 1) != invert) bits |= 1 << 3;
+    if (isValidCoord(x + 1, y + 0, z + 0) && isInsideRotated(x + 1, y + 0, z + 0) != invert) bits |= 1 << 4;
+    if (isValidCoord(x + 1, y + 0, z + 1) && isInsideRotated(x + 1, y + 0, z + 1) != invert) bits |= 1 << 5;
+    if (isValidCoord(x + 1, y + 1, z + 0) && isInsideRotated(x + 1, y + 1, z + 0) != invert) bits |= 1 << 6;
+    if (isValidCoord(x + 1, y + 1, z + 1) && isInsideRotated(x + 1, y + 1, z + 1) != invert) bits |= 1 << 7;
+
+    int index = zOrderCurveValue(x >> 1) << 2 | zOrderCurveValue(y >> 1) << 1 | zOrderCurveValue(z >> 1);
+    bitMap[index] = uint8_t(bits);
+}

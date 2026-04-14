@@ -37,6 +37,7 @@ public interface Placeable {
             case 15 -> ArcPlaceable.load(saver);
             case 16 -> InsideArcPlaceable.load(saver);
             case 17 -> OutsideArcPlaceable.load(saver);
+            case 18 -> CustomShape.load(saver);
             default -> null;
         };
         if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());

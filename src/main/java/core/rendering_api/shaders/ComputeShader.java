@@ -7,14 +7,16 @@ import org.lwjgl.opengl.GL46;
 public class ComputeShader extends Shader {
 
     public ComputeShader(String computeShaderFilePath, ShaderIdentifier identifier) {
+        this(FileManager.loadFileContents(SHADER_FOLDER_PATH + computeShaderFilePath), identifier.toString());
+    }
 
-        String computeShaderCode = FileManager.loadFileContents(SHADER_FOLDER_PATH + computeShaderFilePath);
+    public ComputeShader(String computeShaderCode, String name) {
         try {
             programID = createProgram();
             int computeShaderID = createComputeShader(computeShaderCode, programID);
             link(programID, computeShaderID);
 
-            System.out.printf("Creating uniforms for Shader %s%n", identifier);
+            System.out.printf("Creating uniforms for Shader %s%n", name);
             createUniforms(computeShaderCode);
 
         } catch (Exception exception) {
