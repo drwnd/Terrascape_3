@@ -63,7 +63,7 @@ bool isInsideRotated(int a, int b, int c) {
 
     float distanceB = pow(abs(b + 0.5), exponent);
     float distanceC = pow(abs(c + 0.5), exponent);
-    return distanceB + distanceC <= outerThreshold && distanceB + distanceC >= innerThreshold;
+    return distanceB + distanceC <= outerThreshold + 0.01 && distanceB + distanceC >= innerThreshold - 0.01;
 }
 
 bool isInside(int x, int y, int z) {

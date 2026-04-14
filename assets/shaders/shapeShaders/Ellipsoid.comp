@@ -67,7 +67,7 @@ bool isInsideRotated(float a, float b, float c) {
         distanceC = pow(abs(c / max(0, float(radiusC - thickness))), exponentC);
         float innerDistance = distanceA + distanceB + distanceC;
 
-    return outerDistance <= 1.0 && innerDistance >= 1;
+    return outerDistance <= 1.01 && innerDistance >= 0.99;
 }
 
 bool isInside(int x, int y, int z) {

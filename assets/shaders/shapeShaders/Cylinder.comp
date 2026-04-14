@@ -62,14 +62,14 @@ bool isInsideRotated(int a, int b, int c) {
     float distanceC = pow(abs(c - offset + 0.5), exponent);
     float distance = distanceC + distanceB;
 
-    return distance <= outerThreshold && distance >= innerThreshold;
+    return distance <= outerThreshold + 0.01 && distance >= innerThreshold - 0.01;
 }
 
 bool isInside(int x, int y, int z) {
     switch (rotation) {
-        case 0: return isInsideRotated(z, x, y);
+        case 0: return isInsideRotated(x, y, z);
         case 1: return isInsideRotated(y, x, z);
-        case 2: return isInsideRotated(x, y, z);
+        case 2: return isInsideRotated(z, x, y);
     }
     return false;
 }

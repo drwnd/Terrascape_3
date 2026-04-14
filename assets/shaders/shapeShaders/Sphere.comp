@@ -60,5 +60,5 @@ bool isInside(int x, int y, int z) {
     float distanceZ = pow(abs(z - offset + 0.5), exponent);
     float distance = distanceX + distanceY + distanceZ;
 
-    return distance <= outerThreshold && distance >= innerThreshold;
+    return distance <= outerThreshold + 0.01 && distance >= innerThreshold - 0.01;
 }
