@@ -36,8 +36,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         itemNameDisplay.setDoAutoFocusScaling(false);
         itemNameDisplay.setScaleWithGuiSize(false);
 
-        OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.35F, 0.9F), OptionSettings.PLACE_MODE, null, true);
-        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.525F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
+        OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.9F), OptionSettings.PLACE_MODE, null, true);
+        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
 
         long start = System.nanoTime();
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
@@ -66,9 +66,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio() * getAspectRatio());
 
         if (shapePreview != null) {
-            float sizeToParentY = 0.325F * Window.getAspectRatio() * getAspectRatio();
-            shapePreview.setSizeToParent(0.325F, sizeToParentY);
-            shapePreview.setOffsetToParent(0.0F, 0.5F - sizeToParentY * 0.5F);
+            shapePreview.setSizeToParent(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
+            shapePreview.setOffsetToParent(0.0F, 0.0F);
         }
     }
 
@@ -135,7 +134,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         removeRenderable(shapePreview).delete();
 
         Vector2f sizeToParent = new Vector2f(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
-        Vector2f offsetToParent = new Vector2f(0.0F, 0.5F - sizeToParent.y * 0.5F);
+        Vector2f offsetToParent = new Vector2f(0.0F, 0.0F);
         selectedDisplay.getPlaceable().updateBitMap();
         Structure structure = selectedDisplay.getPlaceable().getStructure();
 

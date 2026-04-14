@@ -36,7 +36,7 @@ public final class ShapeDisplay extends UiButton {
                 });
             }
             settingElement.setSizeToParent(0.3F, 0.075F);
-            settingElement.setOffsetToParent(0.35F, 0.7F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
+            settingElement.setOffsetToParent(0.35F, 1.0F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
             settingElement.setVisible(false);
             settingElement.setRimThicknessMultiplier(0.5F);
             settingElements.add(settingElement);
@@ -87,7 +87,7 @@ public final class ShapeDisplay extends UiButton {
 
     private static Vector2f getOffsetToParent(int index, Renderable parent) {
         int row = index / 6, column = index % 6;
-        return new Vector2f(0.35F + column * 0.05F, 0.875F - (row + 1) * 0.05F * Window.getAspectRatio() * parent.getAspectRatio());
+        return new Vector2f(0.025F + column * 0.05F, 0.875F - (row + 1) * 0.05F * Window.getAspectRatio() * parent.getAspectRatio());
     }
 
     private final ArrayList<UiBackgroundElement> settingElements = new ArrayList<>();
