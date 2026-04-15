@@ -132,6 +132,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         }
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
+        addRenderable(removeRenderable(itemNameDisplay));
     }
 
     void refreshShapePreview() {

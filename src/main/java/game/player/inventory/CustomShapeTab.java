@@ -34,6 +34,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         setDoAutoFocusScaling(false);
         setScaleWithGuiSize(false);
 
+        itemNameDisplay.setAddTransparentBackground(true);
+        itemNameDisplay.setDoAutoFocusScaling(false);
+        itemNameDisplay.setScaleWithGuiSize(false);
+
+        addRenderable(itemNameDisplay);
+
         UiButton loadButton = new UiButton(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.775F), getLoadButtonClickable());
         loadButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.LOAD_SHADER_CODE, Color.WHITE));
         addRenderable(loadButton);
@@ -142,6 +148,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         }
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
+        addRenderable(removeRenderable(itemNameDisplay));
     }
 
     private void moveMaterialButtons(float movement) {
