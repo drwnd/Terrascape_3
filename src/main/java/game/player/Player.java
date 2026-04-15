@@ -1,6 +1,7 @@
 package game.player;
 
 import core.rendering_api.Window;
+import core.sound.Sound;
 import core.utils.Vector3l;
 
 import game.player.interaction.*;
@@ -45,6 +46,7 @@ public final class Player {
 
 
     public void updateFrame() {
+        Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
         meshCollector.uploadAllMeshes();
