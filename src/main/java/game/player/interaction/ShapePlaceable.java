@@ -1,7 +1,6 @@
 package game.player.interaction;
 
 import core.assets.AssetManager;
-import core.assets.CoreSounds;
 import core.assets.identifiers.ShaderIdentifier;
 import core.renderables.UiButton;
 import core.rendering_api.shaders.Shader;
@@ -9,7 +8,6 @@ import core.settings.ToggleSetting;
 import core.settings.optionSettings.Option;
 import core.settings.stand_alones.StandAloneOptionSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
-import core.sound.Sound;
 import core.utils.MathUtils;
 import core.utils.Vector3l;
 
@@ -23,9 +21,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
-import game.utils.Position;
 import game.utils.Utils;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -188,7 +184,6 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public void spawnParticles(Vector3l position) {
-        Sound.play3D(CoreSounds.CLICK, null, new Position(position, null), new Vector3f());
         Player player = Game.getPlayer();
         int preferredSize = getPreferredSizePowOf2();
         player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, bitMap);

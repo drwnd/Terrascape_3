@@ -3,5 +3,8 @@
     "TRANSPARENT",
     "OCCLUDES_SELF_ONLY",
     "STRUCTURE_REPLACEABLE"
-  ]
+  ],
+  "digSounds": "DIG_FOLIAGE",
+  "stepSounds": "STEP_FOLIAGE",
+  "jumpSounds": "STEP_FOLIAGE"
 }

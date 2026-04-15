@@ -474,7 +474,7 @@ public final class MaterialsData {
                 for (int z = 0; z < lengthZ; z++)
                     for (int y = 0; y < lengthY; y++) {
                         int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
-                        if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                        if ((Material.getProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                         uncompressedMaterials[targetIndex] = material;
                     }
             return;
@@ -486,7 +486,7 @@ public final class MaterialsData {
                     int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
                     byte material = data[startIndex + getInDetailIndex(transform, x, y, z)];
                     if (material == AIR) continue;
-                    if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                    if ((Material.getProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
     }
@@ -531,7 +531,7 @@ public final class MaterialsData {
                 for (int z = 0; z < lengthZ; z += stepSize)
                     for (int y = 0; y < lengthY; y += stepSize) {
                         int targetIndex = getUncompressedIndex(targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
-                        if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                        if ((Material.getProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                         uncompressedMaterials[targetIndex] = material;
                     }
             return;
@@ -543,7 +543,7 @@ public final class MaterialsData {
                     int targetIndex = getUncompressedIndex(targetStartX + (x >> lod), targetStartY + (y >> lod), targetStartZ + (z >> lod));
                     byte material = data[startIndex + getInDetailIndex(transform, x >> lod, y >> lod, z >> lod)];
                     if (material == AIR) continue;
-                    if ((Material.getMaterialProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
+                    if ((Material.getProperties(uncompressedMaterials[targetIndex]) & STRUCTURE_REPLACEABLE) == 0) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
     }
@@ -1696,7 +1696,7 @@ public final class MaterialsData {
 
     private static byte getType(byte material) {
         if (material == AIR) return CONTAINS_TRANSPARENT;
-        int properties = Material.getMaterialProperties(material);
+        int properties = Material.getProperties(material);
         return (properties & OCCLUDES_SELF_ONLY) != 0 ? CONTAINS_SELF_OCCLUDING : CONTAINS_OPAQUE;
     }
 

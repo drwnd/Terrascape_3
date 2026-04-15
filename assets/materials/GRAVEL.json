@@ -1,5 +1,8 @@
 {
   "properties": [
     "HAS_GRAVITY"
-  ]
+  ],
+  "digSounds": "DIG_GRAVEL",
+  "stepSounds": "STEP_GRAVEl",
+  "jumpSounds": "JUMP_GRAVEL"
 }

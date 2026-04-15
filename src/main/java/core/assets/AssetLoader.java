@@ -23,11 +23,12 @@ public final class AssetLoader {
     }
 
     //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
-    public static int loadSound(String filename) {
+    public static int loadSound(String filename, boolean appendSoundFolderPath) {
+        if (appendSoundFolderPath) filename = "assets/sounds/" + filename;
         int buffer = alGenBuffers();
 
         STBVorbisInfo info = STBVorbisInfo.malloc();
-        ShortBuffer pcm = readVorbis("assets/sounds/" + filename, info);
+        ShortBuffer pcm = readVorbis(filename, info);
         alBufferData(buffer, info.channels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, info.sample_rate());
 
         return buffer;
@@ -163,7 +164,7 @@ public final class AssetLoader {
         // IDE has no idea what it's talking about
         @SuppressWarnings("DataFlowIssue")
         long decoder = STBVorbis.stb_vorbis_open_filename(filename, error, null);
-        if (decoder == MemoryUtil.NULL) throw new RuntimeException("Failed to open Ogg Vorbis file. Error: " + error.get(0));
+        if (decoder == MemoryUtil.NULL) throw new RuntimeException("Failed to open Ogg Vorbis file " + filename + ". Error: " + error.get(0));
 
         STBVorbis.stb_vorbis_get_info(decoder, info);
 

@@ -2,6 +2,8 @@ package core.sound;
 
 import core.assets.Asset;
 import core.assets.AssetManager;
+import core.assets.SoundCollection;
+import core.assets.identifiers.SoundCollectionIdentifier;
 import core.assets.identifiers.SoundIdentifier;
 import core.settings.CoreFloatSettings;
 import core.settings.FloatSetting;
@@ -16,7 +18,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 
-public record Sound(int buffer, float gainMultiplier, float pitchMultiplier, float gainWiggle, float pitchWiggle) implements Asset {
+public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) implements Asset {
 
     public static void init() {
         String defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);
@@ -48,6 +50,13 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier, flo
         alcCloseDevice(device);
     }
 
+    public static void playUI(SoundCollectionIdentifier identifier, FloatSetting gain) {
+        SoundCollection sounds = AssetManager.get(identifier);
+        if (sounds.identifiers().length == 0) return;
+        SoundIdentifier singleIdentifier = sounds.identifiers()[(int) (Math.random() * sounds.identifiers().length)];
+        playUI(singleIdentifier, gain);
+    }
+
     public static void playUI(SoundIdentifier identifier, FloatSetting gain) {
         AudioSource source = getNextFreeAudioSource();
         if (source == null) return;
@@ -57,6 +66,13 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier, flo
 
         source.setPosition(0, 0, 0).setVelocity(0, 0, 0);
         source.setGain(sound.gainMultiplier * gainMultiplier).setPitch(sound.pitchMultiplier).play(sound.buffer);
+    }
+
+    public static void play3D(SoundCollectionIdentifier identifier, FloatSetting gain, Distanceable distanceable, Vector3f velocity) {
+        SoundCollection sounds = AssetManager.get(identifier);
+        if (sounds.identifiers().length == 0) return;
+        SoundIdentifier singleIdentifier = sounds.identifiers()[(int) (Math.random() * sounds.identifiers().length)];
+        play3D(singleIdentifier, gain, distanceable, velocity);
     }
 
     public static void play3D(SoundIdentifier identifier, FloatSetting gain, Distanceable distanceable, Vector3f velocity) {
