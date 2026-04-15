@@ -72,7 +72,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
-        fillBitMap(bitMap, 16);
+        fillBitMap(bitMap, 16, true);
         return new Structure(4, material, bitMap);
     }
 
@@ -96,7 +96,7 @@ public abstract class ShapePlaceable implements Placeable {
         int settingsHash = settingsHash();
         if (force || isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
-            fillBitMap(bitMap, preferredSizePowOf2);
+            fillBitMap(bitMap, preferredSizePowOf2, false);
             this.bitMap = bitMap;
             this.settingsHash = settingsHash;
             this.preferredSize = preferredSize;
@@ -219,9 +219,11 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private void fillBitMap(long[] bitMap, int preferredSizePowOf2) {
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        int numGroups = preferredSizePowOf2 >> 2;
+    private void fillBitMap(long[] bitMap, int size, boolean forceSize) {
+        int lengthX = forceSize ? size : Math.min(getLengthX(), size);
+        int lengthY = forceSize ? size : Math.min(getLengthY(), size);
+        int lengthZ = forceSize ? size : Math.min(getLengthZ(), size);
+        int numGroups = size >> 2;
         int buffer = genBuffer(bitMap.length << 3);
 
         Shader shader = AssetManager.get(shaderIdentifier);
