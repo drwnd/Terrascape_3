@@ -14,10 +14,14 @@ import java.util.ArrayList;
 public interface Placeable {
 
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
-        if (placeable == null) saver.saveByte((byte) 0);
-        else {
-            saver.saveGeneric(placeable::save);
-            if (placeable instanceof ShapePlaceable shapePlaceable) saver.saveBoolean(shapePlaceable.invert.value());
+        if (placeable == null) {
+            saver.saveByte((byte) 0);
+            return;
+        }
+        saver.saveGeneric(placeable::save);
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            saver.saveBoolean(shapePlaceable.invert.value());
+            shapePlaceable.delete();
         }
     }
 

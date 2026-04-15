@@ -72,7 +72,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
-        fillBitMap(bitMap);
+        fillBitMap(bitMap, 16);
         return new Structure(4, material, bitMap);
     }
 
@@ -96,11 +96,11 @@ public abstract class ShapePlaceable implements Placeable {
         int settingsHash = settingsHash();
         if (force || isBitMapInValid(settingsHash, preferredSize)) {
             long[] bitMap = new long[Math.max(preferredSizePowOf2 * preferredSizePowOf2 * preferredSizePowOf2 >> 6, 1)];
-            fillBitMap(bitMap);
+            fillBitMap(bitMap, preferredSizePowOf2);
             this.bitMap = bitMap;
+            this.settingsHash = settingsHash;
+            this.preferredSize = preferredSize;
         }
-        this.settingsHash = settingsHash;
-        this.preferredSize = preferredSize;
         return this;
     }
 
@@ -112,8 +112,10 @@ public abstract class ShapePlaceable implements Placeable {
         return this;
     }
 
-    public void deleteShader() {
+    public void delete() {
         AssetManager.delete(shaderIdentifier);
+        glDeleteBuffers(buffer);
+        bufferSize = -1;
     }
 
 
@@ -217,11 +219,9 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private void fillBitMap(long[] bitMap) {
+    private void fillBitMap(long[] bitMap, int preferredSizePowOf2) {
         int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        int numGroupsX = (lengthX >> 3) + ((lengthX & 7) != 0 ? 1 : 0);
-        int numGroupsY = (lengthY >> 3) + ((lengthY & 7) != 0 ? 1 : 0);
-        int numGroupsZ = (lengthZ >> 3) + ((lengthZ & 7) != 0 ? 1 : 0);
+        int numGroups = preferredSizePowOf2 >> 2;
         int buffer = genBuffer(bitMap.length << 3);
 
         Shader shader = AssetManager.get(shaderIdentifier);
@@ -230,17 +230,17 @@ public abstract class ShapePlaceable implements Placeable {
         shader.setUniform("size", lengthX, lengthY, lengthZ);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer);
-        glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
-        glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glDispatchCompute(numGroups, numGroups, numGroups);
 
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
-        glDeleteBuffers(buffer);
     }
 
-    private static int genBuffer(int size) {
-        int buffer = glGenBuffers();
+    private int genBuffer(int size) {
+        if (size == bufferSize) return buffer;
+        glDeleteBuffers(buffer);
+        buffer = glGenBuffers();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_STREAM_READ);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_DYNAMIC_READ);
         return buffer;
     }
 
@@ -280,9 +280,10 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
+    private int buffer, bufferSize = -1;
     private int settingsHash, preferredSize;
     private long[] bitMap;
-    final byte material;
+    private final byte material;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private ShapeSetting[] settings;
 

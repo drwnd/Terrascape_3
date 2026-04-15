@@ -96,7 +96,7 @@ public final class RepeatPlaceable implements Placeable {
 
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
-        if (Properties.hasProperties(placeable.material, NO_COLLISION)) return false;
+        if (Properties.hasProperties(placeable.getMaterial(), NO_COLLISION)) return false;
 
         return min.x < maxPosition.x && minPosition.x <= max.x
                 && min.y < maxPosition.y && minPosition.y <= max.y

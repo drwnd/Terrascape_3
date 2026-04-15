@@ -63,7 +63,7 @@ public final class Hotbar extends UiElement {
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
 
-        if (contents[slotIndex] instanceof CustomShape customShape) customShape.deleteShader();
+        if (contents[slotIndex] instanceof CustomShape customShape) customShape.delete();
         removeRenderable(displays[slotIndex]).delete();
         displays[slotIndex] = null;
         contents[slotIndex] = placeable;
