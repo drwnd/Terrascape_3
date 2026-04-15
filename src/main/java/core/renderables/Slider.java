@@ -57,18 +57,19 @@ public class Slider<T extends Number> extends UiButton {
     }
 
 
-    private void action(Vector2i cursorPos, int button, int action) {
-        if (action == GLFW_HOVERED && selected != this) return;
+    private boolean action(Vector2i cursorPos, int button, int action) {
+        if (action == GLFW_HOVERED && selected != this) return false;
         if (action == GLFW_PRESS) selected = this;
         if (action == GLFW_RELEASE)
             if (selected == this) selected = null;
-            else return;
+            else return false;
         Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
         Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
 
         float fraction = (cursorPos.x - position.x) / size.x;
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
         setValue(setting.valueFromFraction(fraction));
+        return true;
     }
 
     private final boolean updateImmediately;

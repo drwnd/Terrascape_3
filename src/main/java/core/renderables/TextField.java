@@ -112,8 +112,9 @@ public class TextField extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return false;
             this.setOnTop();
+            return true;
         };
     }
 

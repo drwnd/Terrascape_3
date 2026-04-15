@@ -126,9 +126,10 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     private Clickable getButtonAction(StructureSelectionButton selectionButton) {
         return (Vector2i pixelCoordinate, int _, int action) -> {
-            if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return;
+            if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return false;
             reloadDisplay = true;
             toLoadStructureButton = selectionButton;
+            return true;
         };
     }
 

@@ -192,8 +192,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return false;
             Window.popRenderable();
+            return true;
         };
     }
 
@@ -210,8 +211,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return false;
             Window.pushRenderable(sectionCreator.getSection());
+            return true;
         };
     }
 

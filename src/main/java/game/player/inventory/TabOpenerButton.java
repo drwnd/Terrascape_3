@@ -49,9 +49,10 @@ public final class TabOpenerButton extends UiButton {
         setOffsetToParent(offsetToParent.x, offsetToParent.y);
     }
 
-    private void action(Vector2i pixelCoordinate, int button, int action) {
-        if (action != GLFW_PRESS) return;
+    private boolean action(Vector2i pixelCoordinate, int button, int action) {
+        if (action != GLFW_PRESS) return false;
         inventory.setOpenTab(toOpenTab, this);
+        return true;
     }
 
     private static Vector2f getButtonSizeToParent() {

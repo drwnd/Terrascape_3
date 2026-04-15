@@ -55,9 +55,11 @@ public class Renderable {
         return children.remove(renderable) && renderable != null ? renderable : DummyRenderable.dummy;
     }
 
-    public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
+    public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         for (Renderable renderable : children)
-            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.clickOn(pixelCoordinate, mouseButton, action);
+            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate) && renderable.clickOn(pixelCoordinate, mouseButton, action))
+                return true;
+        return false;
     }
 
     public void hoverOver(Vector2i pixelCoordinate) {
@@ -68,7 +70,8 @@ public class Renderable {
 
     public void dragOver(Vector2i pixelCoordinate) {
         hoverOver(pixelCoordinate);
-        for (Renderable renderable : children) if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
+        for (Renderable renderable : children)
+            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
     }
 
     public void move(Vector2f offset) {
