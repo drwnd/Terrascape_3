@@ -6,5 +6,8 @@
     "TRANSPARENT",
     "OCCLUDES_SELF_ONLY",
     "STRUCTURE_REPLACEABLE"
-  ]
+  ],
+  "digSounds": "POP",
+  "stepSounds": "POP",
+  "jumpSounds": "POP"
 }

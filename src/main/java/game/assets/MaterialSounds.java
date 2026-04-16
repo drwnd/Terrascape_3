@@ -40,7 +40,11 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     JUMP_SAND("jump", "sand"),
     JUMP_SNOW("jump", "snow"),
     JUMP_STONE("jump", "stone"),
-    JUMP_WOOD("jump", "wood");
+    JUMP_WOOD("jump", "wood"),
+
+    SWIM("random", "swim"),
+    SPLASH("random", "splash"),
+    POP("liquid", "lavapop");
 
     MaterialSounds(String folderPath, String fileNamePrefix) {
         this(folderPath, fileNamePrefix, 1.0F, 1.0F);
