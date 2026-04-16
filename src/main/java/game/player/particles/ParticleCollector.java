@@ -156,7 +156,6 @@ public final class ParticleCollector {
 
         addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
         addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
-
     }
 
     public void addSplashParticleEffect(int x, int y, int z, byte material) {

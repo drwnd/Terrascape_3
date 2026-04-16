@@ -3,6 +3,7 @@ package game.player;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
 
+import core.sound.Sound;
 import game.assets.Textures;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
@@ -12,6 +13,7 @@ import game.player.inventory.StructureDisplay;
 import game.player.interaction.Target;
 
 import game.server.generation.Structure;
+import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 
@@ -62,6 +64,9 @@ public final class Hotbar extends UiElement {
 
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
+
+        playSound(placeable);
+        playSound(contents[slotIndex]);
 
         if (contents[slotIndex] instanceof CustomShape customShape) customShape.delete();
         removeRenderable(displays[slotIndex]).delete();
@@ -128,6 +133,7 @@ public final class Hotbar extends UiElement {
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
         if (contents[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
+        playSound(contents[selectedSlot]);
     }
 
     public Placeable[] getContents() {
@@ -144,6 +150,10 @@ public final class Hotbar extends UiElement {
         slot %= LENGTH;
         if (slot < 0) slot += LENGTH;
         return slot;
+    }
+
+    private static void playSound(Placeable placeable) {
+        if (placeable instanceof ShapePlaceable shapePlaceable) Sound.playUI(Material.getStepSounds(shapePlaceable.getMaterial()), FloatSettings.INVENTORY_AUDIO);
     }
 
 
