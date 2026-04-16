@@ -400,7 +400,7 @@ public final class ParticleCollector {
     private static final float VELOCITY_PACKING_FACTOR = 4.0F;  // Inverse in Particle.vert
     private static final float GRAVITY_PACKING_FACTOR = 2.0F;   // Inverse in Particle.vert
     private static final float ROTATION_PACKING_FACTOR = 16.0F; // Inverse in Particle.vert
-    private static final int PARTICLE_OFFSET = 512;             // Same in Particle.vert
+    static final int PARTICLE_OFFSET = 512;                     // Same in Particle.vert
 
     private static final float BREAK_PARTICLE_GRAVITY = 80;
 

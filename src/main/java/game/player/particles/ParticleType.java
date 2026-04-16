@@ -4,7 +4,10 @@ import core.sound.Sound;
 import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.utils.Position;
+import game.utils.Utils;
+import org.joml.Vector3i;
 
+import static game.player.particles.ParticleCollector.*;
 import static game.utils.Constants.*;
 
 enum ParticleType {
@@ -38,22 +41,24 @@ enum ParticleType {
 
 
     private static void playBreakEffectSounds(ToBufferParticleEffect toBufferParticleEffect) {
-        long[] involvedMaterials = getInvolvedMaterials(toBufferParticleEffect);
-        Position position = new Position(toBufferParticleEffect.x(), toBufferParticleEffect.y(), toBufferParticleEffect.z(), 0.0F, 0.0F, 0.0F);
+        long[] involvedMaterials = new long[4];
+        Position center = new Position();
+        computeInvolvedMaterialsAndCenter(toBufferParticleEffect, involvedMaterials, center);
 
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
             if ((involvedMaterials[material >> 6] & 1L << material) == 0) continue;
-            Sound.play3D(Material.getDigSounds((byte) material), FloatSettings.DIG_AUDIO, position, null);
+            Sound.play3D(Material.getDigSounds((byte) material), FloatSettings.DIG_AUDIO, center, null);
         }
     }
 
     private static void playPlaceEffectSounds(ToBufferParticleEffect toBufferParticleEffect) {
-        long[] involvedMaterials = getInvolvedMaterials(toBufferParticleEffect);
-        Position position = new Position(toBufferParticleEffect.x(), toBufferParticleEffect.y(), toBufferParticleEffect.z(), 0.0F, 0.0F, 0.0F);
+        long[] involvedMaterials = new long[4];
+        Position center = new Position();
+        computeInvolvedMaterialsAndCenter(toBufferParticleEffect, involvedMaterials, center);
 
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
             if ((involvedMaterials[material >> 6] & 1L << material) == 0) continue;
-            Sound.play3D(Material.getStepSounds((byte) material), FloatSettings.PLACE_AUDIO, position, null);
+            Sound.play3D(Material.getStepSounds((byte) material), FloatSettings.PLACE_AUDIO, center, null);
         }
     }
 
@@ -61,15 +66,22 @@ enum ParticleType {
 
     }
 
-    private static long[] getInvolvedMaterials(ToBufferParticleEffect toBufferParticleEffect) {
-        long[] involvedMaterials = new long[4];
+    private static void computeInvolvedMaterialsAndCenter(ToBufferParticleEffect toBufferParticleEffect, long[] involvedMaterials, Position center) {
         int[] particleData = toBufferParticleEffect.particlesData();
+        Vector3i min = new Vector3i(Integer.MAX_VALUE), max = new Vector3i(Integer.MIN_VALUE);
 
-        for (int index = 2; index < particleData.length; index += 3) {
-            int material = particleData[index] & 0xFF;
+        for (int index = 0; index < particleData.length; index += 3) {
+            int position = particleData[index];
+            Utils.min(min, position >> 20 & 0x3FF, position >> 10 & 0x3FF, position & 0x3FF);
+            Utils.max(max, position >> 20 & 0x3FF, position >> 10 & 0x3FF, position & 0x3FF);
+
+            int material = particleData[index + 2] & 0xFF;
             involvedMaterials[material >> 6] |= 1L << material;
         }
-        return involvedMaterials;
+
+        center.longX = toBufferParticleEffect.x() + (min.x + max.x >> 1) - PARTICLE_OFFSET;
+        center.longY = toBufferParticleEffect.y() + (min.y + max.y >> 1) - PARTICLE_OFFSET;
+        center.longZ = toBufferParticleEffect.z() + (min.z + max.z >> 1) - PARTICLE_OFFSET;
     }
 
 
