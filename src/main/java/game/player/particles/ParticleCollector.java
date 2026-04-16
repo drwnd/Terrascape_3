@@ -1,8 +1,9 @@
-package game.player.rendering;
+package game.player.particles;
 
 import core.utils.IntArrayList;
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
+import game.player.rendering.MeshGenerator;
 import game.server.Game;
 import game.server.MaterialsData;
 import game.server.generation.Structure;
@@ -23,6 +24,17 @@ public final class ParticleCollector {
     public void uploadParticleEffects() {
         synchronized (toBufferParticleEffects) {
             for (ToBufferParticleEffect particleEffect : toBufferParticleEffects) particleEffects.add(loadParticleEffect(particleEffect));
+        }
+    }
+
+    public void playParticleEffectSounds() {
+        synchronized (toBufferParticleEffects) {
+            for (ToBufferParticleEffect particleEffect : toBufferParticleEffects) ParticleType.playSound(particleEffect);
+        }
+    }
+
+    public void clearToBufferParticleEffects() {
+        synchronized (toBufferParticleEffects) {
             toBufferParticleEffects.clear();
         }
     }
@@ -72,7 +84,8 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
-                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
+                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR)
+                        continue;
 
                     add(placeParticles,
                             xOffset, yOffset, zOffset,
@@ -88,9 +101,9 @@ public final class ParticleCollector {
                                 false, false);
                 }
 
-        addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
-        addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
-        addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
+        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
+        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
+        addParticles(startX, startY, startZ, placeParticles, Material.isGlass(material) ? ParticleType.TRANSPARENT_PLACE : ParticleType.OPAQUE_PLACE);
     }
 
     public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int countX, int countY, int countZ, ShapePlaceable placeable) {
@@ -110,16 +123,16 @@ public final class ParticleCollector {
             for (long y = startY; y < startY + (long) countY * lengthY; y += lengthY)
                 for (long z = startZ; z < startZ + (long) countZ * lengthZ; z += lengthZ) {
                     if (addBreakEffect && !addPlaceEffect)
-                        addBreakEffectLoop(startX, startY, startZ, x, y, z, transparentParticles, opaqueParticles,placeable);
+                        addBreakEffectLoop(startX, startY, startZ, x, y, z, transparentParticles, opaqueParticles, placeable);
                     else if (addBreakEffect)
-                        addBreakPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles, transparentParticles, opaqueParticles,placeable);
+                        addBreakPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles, transparentParticles, opaqueParticles, placeable);
                     else if (addPlaceEffect)
-                        addPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles,placeable);
+                        addPlaceEffectLoop(startX, startY, startZ, x, y, z, placeParticles, placeable);
                 }
 
-        addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
-        addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
-        addParticles(startX, startY, startZ, placeParticles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(placeable.getMaterial()));
+        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
+        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
+        addParticles(startX, startY, startZ, placeParticles, Material.isGlass(placeable.getMaterial()) ? ParticleType.TRANSPARENT_PLACE : ParticleType.OPAQUE_PLACE);
     }
 
     public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure) {
@@ -141,8 +154,9 @@ public final class ParticleCollector {
                             true, true);
                 }
 
-        addParticles(startX, startY, startZ, opaqueParticles, PLACE_PARTICLE_LIFETIME_TICKS, true);
-        addParticles(startX, startY, startZ, transparentParticles, PLACE_PARTICLE_LIFETIME_TICKS, false);
+        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
+        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
+
     }
 
     public void addSplashParticleEffect(int x, int y, int z, byte material) {
@@ -168,9 +182,7 @@ public final class ParticleCollector {
                     false, false);
         }
 
-        long spawnTick = Game.getServer().getCurrentGameTick();
-        int[] particlesData = packParticlesIntoBuffer(particles);
-        addToBufferParticleEffect(new ToBufferParticleEffect(particlesData, spawnTick, SPLASH_PARTICLE_LIFETIME_TICKS, true, x, y, z));
+        addParticles(x, y, z, particles, ParticleType.SPLASH);
     }
 
 
@@ -194,8 +206,8 @@ public final class ParticleCollector {
                             false, false);
                 }
 
-        addParticles(startX, startY, startZ, opaqueParticles, BREAK_PARTICLE_LIFETIME_TICKS, true);
-        addParticles(startX, startY, startZ, transparentParticles, BREAK_PARTICLE_LIFETIME_TICKS, false);
+        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
+        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
     }
 
     private void addPlaceParticleEffect(long startX, long startY, long startZ, int length, byte material, long[] bitMap) {
@@ -217,14 +229,14 @@ public final class ParticleCollector {
                             getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, material,
                             true, true);
                 }
-        addParticles(startX, startY, startZ, particles, PLACE_PARTICLE_LIFETIME_TICKS, !Material.isGlass(material));
+        addParticles(startX, startY, startZ, particles, Material.isGlass(material) ? ParticleType.TRANSPARENT_PLACE : ParticleType.OPAQUE_PLACE);
     }
 
-    private void addParticles(long startX, long startY, long startZ, IntArrayList particles, int lifeTime, boolean isOpaque) {
+    private void addParticles(long startX, long startY, long startZ, IntArrayList particles, ParticleType type) {
         long currentTick = Game.getServer().getCurrentGameTick();
         if (particles.isEmpty()) return;
         int[] particlesData = packParticlesIntoBuffer(particles);
-        ToBufferParticleEffect effect = new ToBufferParticleEffect(particlesData, currentTick, lifeTime, isOpaque, startX, startY, startZ);
+        ToBufferParticleEffect effect = new ToBufferParticleEffect(particlesData, currentTick, type, startX, startY, startZ);
         addToBufferParticleEffect(effect);
     }
 
@@ -251,7 +263,8 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
+                    if (previousMaterial == OUT_OF_WORLD || previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR)
+                        continue;
 
                     add(placeParticles,
                             xOffset + (int) (x - startX), yOffset + (int) (y - startY), zOffset + (int) (z - startZ),
@@ -269,7 +282,7 @@ public final class ParticleCollector {
     }
 
     private static void addPlaceEffectLoop(long startX, long startY, long startZ,
-                                          long x, long y, long z,
+                                           long x, long y, long z,
                                            IntArrayList placeParticles, ShapePlaceable placeable) {
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
@@ -336,8 +349,8 @@ public final class ParticleCollector {
         glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL_STATIC_DRAW);
 
         return new ParticleEffect(particlesBuffer, particleEffect.spawnTick(),
-                particleEffect.lifeTimeTicks(), particleEffect.particlesData().length / SHADER_PARTICLE_INT_SIZE,
-                particleEffect.isOpaque(), particleEffect.x(), particleEffect.y(), particleEffect.z());
+                particleEffect.type().getLifeTimeTicks(), particleEffect.particlesData().length / SHADER_PARTICLE_INT_SIZE,
+                particleEffect.type().isOpaque(), particleEffect.x(), particleEffect.y(), particleEffect.z());
     }
 
     private static void add(IntArrayList particles,
@@ -390,14 +403,8 @@ public final class ParticleCollector {
     private static final float ROTATION_PACKING_FACTOR = 16.0F; // Inverse in Particle.vert
     private static final int PARTICLE_OFFSET = 512;             // Same in Particle.vert
 
-    private static final int PLACE_PARTICLE_LIFETIME_TICKS = 10;
-    private static final int BREAK_PARTICLE_LIFETIME_TICKS = 40;
     private static final float BREAK_PARTICLE_GRAVITY = 80;
 
     private static final int SPLASH_PARTICLE_COUNT = 200;
-    private static final int SPLASH_PARTICLE_LIFETIME_TICKS = 20;
     private static final float SPLASH_PARTICLE_GRAVITY = 80;
-
-    public record ToBufferParticleEffect(int[] particlesData, long spawnTick, int lifeTimeTicks, boolean isOpaque, long x, long y, long z) {
-    }
 }

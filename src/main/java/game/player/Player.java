@@ -9,7 +9,7 @@ import game.player.inventory.Inventory;
 import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
-import game.player.rendering.ParticleCollector;
+import game.player.particles.ParticleCollector;
 import game.player.rendering.Renderer;
 import game.server.Game;
 import game.server.material.Material;
@@ -49,6 +49,8 @@ public final class Player {
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
+        particleCollector.playParticleEffectSounds();
+        particleCollector.clearToBufferParticleEffects();
         meshCollector.uploadAllMeshes();
         meshCollector.deleteOldMeshes();
 

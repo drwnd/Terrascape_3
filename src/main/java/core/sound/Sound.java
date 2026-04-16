@@ -37,6 +37,10 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
         for (int index = 0; index < sources.length; index++) sources[index] = new AudioSource();
     }
 
+    public static void setDistanceScaler(float distanceScaler) {
+        Sound.distanceScaler = distanceScaler;
+    }
+
     public static void setListenerData(Distanceable distanceable, Vector3f direction, Vector3f velocity) {
         Sound.distanceable = distanceable;
         Sound.velocity = velocity;
@@ -82,10 +86,11 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
         float gainMultiplier = gain == null || gain == CoreFloatSettings.MASTER_AUDIO ? 1.0F : gain.value();
         Sound sound = AssetManager.get(identifier);
 
-        Vector3f distance = Sound.distanceable.vectorFrom(distanceable);
-        velocity = new Vector3f(Sound.velocity).sub(velocity);
+        Vector3f distance = distanceable.vectorFrom(Sound.distanceable);
+        velocity = velocity == null ? new Vector3f(Sound.velocity).negate() : new Vector3f(velocity).sub(Sound.velocity);
 
-        source.setPosition(distance.x, distance.y, distance.z).setVelocity(velocity.x, velocity.y, velocity.z);
+        source.setPosition(distance.x * distanceScaler, distance.y * distanceScaler, distance.z * distanceScaler);
+        source.setVelocity(velocity.x * distanceScaler, velocity.y * distanceScaler, velocity.z * distanceScaler);
         source.setGain(sound.gainMultiplier * gainMultiplier).setPitch(sound.pitchMultiplier).play(sound.buffer);
     }
 
@@ -99,6 +104,8 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
     public void delete() {
         alDeleteBuffers(buffer);
     }
+
+    private static float distanceScaler = 1.0F;
 
     private static final AudioSource[] sources = new AudioSource[128];
     private static long device, context;

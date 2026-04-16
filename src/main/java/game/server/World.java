@@ -1,5 +1,6 @@
 package game.server;
 
+import core.sound.Sound;
 import core.utils.FileManager;
 import core.utils.MathUtils;
 import game.server.generation.WorldGeneration;
@@ -21,6 +22,7 @@ public final class World {
     public static void init() {
         ChunkSaver.generateHigherLODs();
         Server.loadImmediateSurroundings();
+        Sound.setDistanceScaler(0.0625F);
     }
 
     public Chunk getChunk(long chunkX, long chunkY, long chunkZ, int lod) {
