@@ -223,7 +223,7 @@ public abstract class ShapePlaceable implements Placeable {
         int lengthX = forceSize ? size : Math.min(getLengthX(), size);
         int lengthY = forceSize ? size : Math.min(getLengthY(), size);
         int lengthZ = forceSize ? size : Math.min(getLengthZ(), size);
-        int numGroups = size >> 2;
+        int numGroups = Math.max(1, size >> 2);
         int buffer = genBuffer(bitMap.length << 3);
 
         Shader shader = AssetManager.get(shaderIdentifier);
