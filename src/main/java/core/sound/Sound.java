@@ -54,6 +54,12 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
         alcCloseDevice(device);
     }
 
+    public static int getConcurrentlyPlayedSounds() {
+        int counter = 0;
+        for (AudioSource source : sources) if (source.isPlaying()) counter++;
+        return counter;
+    }
+
     public static void playUI(SoundCollectionIdentifier identifier, FloatSetting gain) {
         SoundCollection sounds = AssetManager.get(identifier);
         if (sounds.identifiers().length == 0) return;

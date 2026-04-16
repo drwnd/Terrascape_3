@@ -10,6 +10,7 @@ import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.FontOption;
 import core.settings.optionSettings.Visibility;
+import core.sound.Sound;
 import core.utils.MathUtils;
 import core.utils.StringGetter;
 import core.utils.Vector3l;
@@ -158,6 +159,8 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             if (chunk == null) return "Chunk is null";
             return "Chunk Index:%s, Chunk ID:%s".formatted(chunk.INDEX, chunk.ID);
         });
+
+        add(lines, DebugScreenOptions.CONCURRENTLY_PLAYED_SOUNDS, () -> "Concurrently played sounds: %d / 128".formatted(Sound.getConcurrentlyPlayedSounds()));
 
         add(lines, DebugScreenOptions.BIOME, () -> {
             Position position = Game.getPlayer().getPosition();
