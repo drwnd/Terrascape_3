@@ -104,7 +104,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
-        if (!refreshShapePreview) return;
+        if (!refreshShapePreview && !selectedDisplay.getPlaceable().isBitMapInvalid()) return;
 
         refreshShapePreview = false;
         Vector3f rotation = shapePreview != null ? shapePreview.getRotation() : null;

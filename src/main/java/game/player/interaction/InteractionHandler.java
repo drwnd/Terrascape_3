@@ -14,18 +14,20 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class InteractionHandler {
 
-    public void handleInput(int button, int action) {
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
-        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
-        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
-
+    public void handleActiveInput(int button, int action) {
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) handleLockPlacePosition();
         if (action == GLFW_PRESS && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleSetPlaceStartPosition();
         if (action == GLFW_RELEASE && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleReleasePlaceStartPosition();
 
         if (button == KeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
         if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
+    }
+
+    public static void handleInactiveInput(int button, int action) {
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
+        if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(1);
+        if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
     }
 
     public void handleScroll(double yScroll) {

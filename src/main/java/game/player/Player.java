@@ -77,7 +77,7 @@ public final class Player {
      */
     public void handleActiveButtonInput(int button, int action) {
         movement.handleInput(button, action);
-        interactionHandler.handleInput(button, action);
+        interactionHandler.handleActiveInput(button, action);
         hotbar.handleInput(button, action);
         if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) {
             renderer.invalidateHologram();
@@ -94,6 +94,8 @@ public final class Player {
      * For example Closing a menu or toggling the debug screen.
      */
     public void handleInactiveKeyInput(int button, int action) {
+        InteractionHandler.handleInactiveInput(button, action);
+
         if (button == KeySettings.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
         if (button == KeySettings.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
         if (button == KeySettings.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();

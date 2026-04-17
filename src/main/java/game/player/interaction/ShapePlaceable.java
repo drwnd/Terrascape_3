@@ -118,6 +118,10 @@ public abstract class ShapePlaceable implements Placeable {
         bufferSize = -1;
     }
 
+    public boolean isBitMapInvalid() {
+        return isBitMapInValid(settingsHash(), getPreferredSize());
+    }
+
 
     @Override
     public void place(Vector3l position, int lod) {
