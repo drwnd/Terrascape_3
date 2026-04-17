@@ -64,18 +64,22 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
         SoundCollection sounds = AssetManager.get(identifier);
         if (sounds.identifiers().length == 0) return;
         SoundIdentifier singleIdentifier = sounds.identifiers()[(int) (Math.random() * sounds.identifiers().length)];
-        playUI(singleIdentifier, gain);
+        playUI(singleIdentifier, gain, 1.0F, 1.0F);
     }
 
     public static void playUI(SoundIdentifier identifier, FloatSetting gain) {
+        playUI(identifier, gain, 1.0F, 1.0F);
+    }
+
+    public static void playUI(SoundIdentifier identifier, FloatSetting gain, float gainMultiplier, float pitchMultiplier) {
         AudioSource source = getNextFreeAudioSource();
         if (source == null) return;
 
-        float gainMultiplier = gain == null || gain == CoreFloatSettings.MASTER_AUDIO ? 1.0F : gain.value();
+        gainMultiplier *= gain == null || gain == CoreFloatSettings.MASTER_AUDIO ? 1.0F : gain.value();
         Sound sound = AssetManager.get(identifier);
 
         source.setPosition(0, 0, 0).setVelocity(0, 0, 0);
-        source.setGain(sound.gainMultiplier * gainMultiplier).setPitch(sound.pitchMultiplier).play(sound.buffer);
+        source.setGain(sound.gainMultiplier * gainMultiplier).setPitch(sound.pitchMultiplier * pitchMultiplier).play(sound.buffer);
     }
 
     public static void play3D(SoundCollectionIdentifier identifier, FloatSetting gain, Distanceable distanceable, Vector3f velocity) {

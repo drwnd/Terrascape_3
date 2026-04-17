@@ -146,6 +146,7 @@ public final class Inventory extends UiElement {
             StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
             display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
             display.setScaleWithGuiSize(false);
+            display.setPlayFocusSound(false);
 
             cubeDisplays.add(new CubeDisplay(display, (byte) material));
         }
