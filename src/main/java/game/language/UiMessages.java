@@ -24,6 +24,7 @@ public enum UiMessages implements Translatable {
     FOV,
     SENSITIVITY,
     FOOTSTEPS_AUDIO,
+    JUMP_AUDIO,
     PLACE_AUDIO,
     DIG_AUDIO,
     INVENTORY_AUDIO,

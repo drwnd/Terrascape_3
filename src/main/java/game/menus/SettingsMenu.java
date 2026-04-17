@@ -145,6 +145,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addSlider(CoreFloatSettings.MASTER_AUDIO, CoreUiMessages.MASTER_AUDIO);
         section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessages.FOOTSTEPS_AUDIO);
+        section.addSlider(FloatSettings.JUMP_AUDIO, UiMessages.JUMP_AUDIO);
         section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
         section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
         section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);

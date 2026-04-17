@@ -5,6 +5,7 @@ import core.utils.MathUtils;
 
 import game.server.Game;
 import game.server.World;
+import game.server.material.Properties;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
@@ -50,9 +51,33 @@ public abstract class MovementState {
         velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY;
     }
 
+    byte getStandingMaterial(Position position) {
+        Vector3i hitboxSize = getHitboxSize();
+        World world = Game.getWorld();
+
+        byte centerMaterial = world.getMaterial(position.longX, position.longY, position.longZ, 0);
+        if (Properties.doesntHaveProperties(centerMaterial, NO_COLLISION)) return centerMaterial;
+
+        long minX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
+        long minZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long y = position.longY - 1;
+        int width = hitboxSize.x + 1;
+        int depth = hitboxSize.z + 1;
+
+        for (long x = minX; x != minX + width; x++)
+            for (long z = minZ; z != minZ + depth; z++) {
+                byte material = world.getMaterial(x, y, z, 0);
+                if (Properties.doesntHaveProperties(material, NO_COLLISION)) return material;
+            }
+
+        return centerMaterial;
+    }
+
     abstract void handleInput(int key, int action);
 
     abstract int getMaxAutoStepHeight();
+
+    abstract int ticksBetweenFootsteps();
 
     abstract boolean preventsFallingFromEdge();
 

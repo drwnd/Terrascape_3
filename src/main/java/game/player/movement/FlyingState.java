@@ -73,6 +73,11 @@ public final class FlyingState extends MovementState {
         return 3;
     }
 
+    @Override
+    public int ticksBetweenFootsteps() {
+        return -1;
+    }
+
 
     private static final float VERTICAL_FLY_SPEED = 0.5F;
     private static final float HORIZONTAL_FLY_SPEED = 1.0F;

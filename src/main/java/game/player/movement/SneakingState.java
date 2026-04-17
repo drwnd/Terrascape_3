@@ -66,6 +66,11 @@ public final class SneakingState extends MovementState {
         return 2;
     }
 
+    @Override
+    public int ticksBetweenFootsteps() {
+        return -1;
+    }
+
 
     private static final float JUMP_STRENGTH = 11.125F;
     private static final float SWIM_STRENGTH = 0.00096268F;

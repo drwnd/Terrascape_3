@@ -5,5 +5,5 @@
   ],
   "digSounds": "DIG_GLASS",
   "stepSounds": "STEP_GLASS",
-  "jumpSounds": "JUMP_GLASS"
+  "jumpSounds": "STEP_GLASS"
 }

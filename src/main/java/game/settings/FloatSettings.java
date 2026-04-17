@@ -6,6 +6,7 @@ import core.utils.MathUtils;
 public enum FloatSettings implements FloatSetting {
     FOV(1.0F, 175.0F, 90.0F, 1.0F),
     FOOTSTEPS_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
+    JUMP_AUDIO(0.0F, 5.0F, 1.5F, 0.01F),
     PLACE_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
     DIG_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
     INVENTORY_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),

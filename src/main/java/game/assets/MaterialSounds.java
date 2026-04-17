@@ -23,10 +23,10 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     DIG_ICE("dig", "420880__inspectorj__impact-ice-moderate"),
     DIG_CLOTH("dig", "cloth"),
 
-    STEP_STONE("step", "stone"),
-    STEP_WOOD("step", "wood"),
+    STEP_STONE("step", "stone",0.8F, 1),
+    STEP_WOOD("step", "wood", 1.2F, 1),
     STEP_GLASS("step", "glass"),
-    STEP_GRASS("step", "grass"),
+    STEP_GRASS("step", "grass", 2, 1),
     STEP_GRAVEL("step", "gravel"),
     STEP_SAND("step", "sand"),
     STEP_SNOW("step", "snow"),
