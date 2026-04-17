@@ -4,7 +4,7 @@ import core.assets.identifiers.SoundIdentifier;
 import core.sound.Sound;
 
 public enum CoreSounds implements SoundIdentifier {
-    CLICK("note/bd.ogg", 1, 1);
+    CLICK("core/click.ogg", 1, 1);
 
     CoreSounds(String filePath, float gainMultiplier, float pitchMultiplier) {
         this.filePath = filePath;
