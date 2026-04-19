@@ -56,12 +56,12 @@ public class Slider<T extends Number> extends UiButton {
     }
 
 
-    private boolean setValueOnClick(Vector2i cursorPos, int button, int action) {
-        if (action == GLFW_HOVERED && selected != this) return false;
+    private ButtonResult setValueOnClick(Vector2i cursorPos, int button, int action) {
+        if (action == GLFW_HOVERED && selected != this) return ButtonResult.IGNORE;
         if (action == GLFW_PRESS) selected = this;
         if (action == GLFW_RELEASE)
             if (selected == this) selected = null;
-            else return false;
+            else return ButtonResult.IGNORE;
 
         Vector2f position = getPosition(), size = getSize();
         if (isFocused()) scaleForFocused(position, size);
@@ -72,7 +72,7 @@ public class Slider<T extends Number> extends UiButton {
         float fraction = (cursorPos.x - position.x) / size.x;
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
         setValue(setting.valueFromFraction(fraction));
-        return true;
+        return ButtonResult.SUCCESS;
     }
 
     private final boolean updateImmediately;

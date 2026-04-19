@@ -1,6 +1,7 @@
 package core.renderables;
 
 import core.assets.CoreSounds;
+import core.settings.CoreFloatSettings;
 import core.sound.Sound;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -11,7 +12,7 @@ public class UiButton extends UiBackgroundElement {
         super(sizeToParent, offsetToParent);
         clickable = (_, _, _) -> {
             runnable.run();
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
@@ -24,7 +25,7 @@ public class UiButton extends UiBackgroundElement {
         super(sizeToParent, offsetToParent);
         clickable = (_, _, _) -> {
             System.err.printf("No action set for this button %s%n", this);
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
@@ -37,7 +38,7 @@ public class UiButton extends UiBackgroundElement {
         if (action == null) return;
         clickable = (_, _, _) -> {
             action.run();
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
@@ -47,9 +48,10 @@ public class UiButton extends UiBackgroundElement {
 
     @Override
     public boolean clickOn(Vector2i cursorPos, int button, int action) {
-        boolean success = clickable.clickOn(cursorPos, button, action);
-        if (success) Sound.playUI(CoreSounds.CLICK, null);
-        return success;
+        ButtonResult result = clickable.clickOn(cursorPos, button, action);
+        if (result == ButtonResult.SUCCESS) Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO);
+        if (result == ButtonResult.FAILURE) Sound.playUI(CoreSounds.BUTTON_FAILURE, CoreFloatSettings.UI_AUDIO);
+        return result == ButtonResult.SUCCESS;
     }
 
     private Clickable clickable;

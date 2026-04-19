@@ -99,9 +99,9 @@ public final class KeySelector extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.setInput(new KeySelectorInput(this));
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 

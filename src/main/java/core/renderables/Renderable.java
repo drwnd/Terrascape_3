@@ -2,6 +2,7 @@ package core.renderables;
 
 import core.assets.CoreSounds;
 import core.rendering_api.Window;
+import core.settings.CoreFloatSettings;
 import core.sound.Sound;
 
 import org.joml.Vector2f;
@@ -191,7 +192,7 @@ public class Renderable {
         if (!isVisible() || !isFlag(DO_AUTO_FOCUS_SCALING) || isFocused() == focused) return;
 
         if (isFlag(PLAY_FOCUS_SOUNDS_MASK))
-            Sound.playUI(CoreSounds.CLICK, null, 0.35F, 0.5F);
+            Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO, 0.35F, 0.5F);
 
         setFlag(focused, FOCUSSED_MASK);
         if (isFocused()) return;

@@ -1,5 +1,6 @@
 package game.menus;
 
+import core.renderables.ButtonResult;
 import core.renderables.CoreSettingsRenderable;
 import core.renderables.OptionToggle;
 import core.renderables.TextElement;
@@ -34,10 +35,10 @@ public class SettingsRenderable extends CoreSettingsRenderable {
         options.add(visibilityOption);
 
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             colorOption.setToDefault();
             visibilityOption.setToDefault();
-            return true;
+            return ButtonResult.SUCCESS;
         });
     }
 }

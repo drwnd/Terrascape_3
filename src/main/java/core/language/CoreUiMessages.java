@@ -12,7 +12,7 @@ public enum CoreUiMessages implements Translatable {
     GUI_SIZE,
     TEXT_SIZE,
     MASTER_AUDIO,
-    MISCELLANEOUS_AUDIO,
+    UI_AUDIO,
     RIM_THICKNESS,
     RESIZE_WINDOW,
     RAW_MOUSE_INPUT,

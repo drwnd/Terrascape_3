@@ -1,6 +1,7 @@
 package game.player.inventory;
 
 import core.assets.AssetManager;
+import core.renderables.ButtonResult;
 import core.renderables.Clickable;
 import core.renderables.Renderable;
 import core.renderables.TextField;
@@ -126,10 +127,10 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     private Clickable getButtonAction(StructureSelectionButton selectionButton) {
         return (Vector2i pixelCoordinate, int _, int action) -> {
-            if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return false;
+            if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return ButtonResult.IGNORE;
             reloadDisplay = true;
             toLoadStructureButton = selectionButton;
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 

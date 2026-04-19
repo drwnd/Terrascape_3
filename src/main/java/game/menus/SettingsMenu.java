@@ -149,7 +149,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
         section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
         section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);
-        section.addSlider(CoreFloatSettings.MISCELLANEOUS_AUDIO, CoreUiMessages.MISCELLANEOUS_AUDIO);
+        section.addSlider(CoreFloatSettings.UI_AUDIO, CoreUiMessages.UI_AUDIO);
 
         return section;
     }
@@ -193,9 +193,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.popRenderable();
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
@@ -212,9 +212,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.pushRenderable(sectionCreator.getSection());
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 

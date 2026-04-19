@@ -47,10 +47,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             if (settingElement instanceof UiButton settingButton) {
                 Clickable clickable = settingButton.getClickable();
                 settingButton.setAction((Vector2i pixelCoordinate, int button, int action) -> {
-                    if (!clickable.clickOn(pixelCoordinate, button, action)) return false;
-                    if (action != GLFW_PRESS) return false;
+                    ButtonResult result = clickable.clickOn(pixelCoordinate, button, action);
+                    if (result != ButtonResult.SUCCESS) return result;
+                    if (action != GLFW_PRESS) return ButtonResult.IGNORE;
                     refreshShapePreview = true;
-                    return true;
+                    return ButtonResult.SUCCESS;
                 });
             }
             settingElement.setSizeToParent(0.3F, 0.075F);
@@ -142,20 +143,20 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
     private Clickable getLoadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (Window.isMaximized()) Window.toggleFullScreen();
 
             JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeShaders");
             fileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt", "comp", "glsl"));
 
             int option = fileChooser.showOpenDialog(null);
-            if (option != JFileChooser.APPROVE_OPTION) return false;
+            if (option != JFileChooser.APPROVE_OPTION) return ButtonResult.FAILURE;
 
             File file = fileChooser.getSelectedFile();
             String shaderCode = FileManager.loadFileContents(file.getPath());
             shape.setShaderCode(shaderCode);
             refreshShapePreview = true;
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 

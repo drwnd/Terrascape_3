@@ -1,5 +1,6 @@
 package game.player.inventory;
 
+import core.renderables.ButtonResult;
 import core.renderables.TextElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
@@ -49,10 +50,10 @@ public final class TabOpenerButton extends UiButton {
         setOffsetToParent(offsetToParent.x, offsetToParent.y);
     }
 
-    private boolean action(Vector2i pixelCoordinate, int button, int action) {
-        if (action != GLFW_PRESS) return false;
+    private ButtonResult action(Vector2i pixelCoordinate, int button, int action) {
+        if (action != GLFW_PRESS) return ButtonResult.IGNORE;
         inventory.setOpenTab(toOpenTab, this);
-        return true;
+        return ButtonResult.SUCCESS;
     }
 
     private static Vector2f getButtonSizeToParent() {

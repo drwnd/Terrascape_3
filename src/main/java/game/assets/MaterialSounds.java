@@ -23,7 +23,7 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     DIG_ICE("dig", "420880__inspectorj__impact-ice-moderate"),
     DIG_CLOTH("dig", "cloth"),
 
-    STEP_STONE("step", "stone",0.8F, 1),
+    STEP_STONE("step", "stone", 0.8F, 1),
     STEP_WOOD("step", "wood", 1.2F, 1),
     STEP_GLASS("step", "glass"),
     STEP_GRASS("step", "grass", 2, 1),
@@ -88,7 +88,7 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     private final String folderPath, fileNamePrefix;
     private final float gainMultiplier, pitchMultiplier;
 
-    private record SingleSoundIdentifier(String filePath, float gainMultiplier, float pitchMultiplier) implements SoundIdentifier{
+    private record SingleSoundIdentifier(String filePath, float gainMultiplier, float pitchMultiplier) implements SoundIdentifier {
         @Override
         public Sound generateAsset() {
             return new Sound(AssetLoader.loadSound(filePath, false), gainMultiplier, pitchMultiplier);

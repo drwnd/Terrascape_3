@@ -47,24 +47,25 @@ public final class WorldCreationMenu extends UiBackgroundElement {
 
     private static Clickable getBackButtonClickable() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.popRenderable();
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
     private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS || nameField.getText().isEmpty()) return false;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            if (nameField.getText().isEmpty()) return ButtonResult.FAILURE;
             String worldName = sanitizeWorldName(nameField.getText());
             File[] savedWorlds = MainMenu.getSavedWorlds();
-            for (File file : savedWorlds) if (file.getName().equals(worldName)) return false;
+            for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(worldName)) return ButtonResult.FAILURE;
 
             long seed = getSeed(seedField.getText());
             new WorldSaver().save(new World(seed), WorldSaver.getSaveFileLocation(worldName));
 
             Window.popRenderable();
-            return true;
+            return ButtonResult.SUCCESS;
         };
     }
 
