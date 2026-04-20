@@ -2,7 +2,7 @@ package game.server.saving;
 
 import core.utils.Saver;
 
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 
 import static game.utils.Constants.*;

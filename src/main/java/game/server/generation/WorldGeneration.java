@@ -2,7 +2,7 @@ package game.server.generation;
 
 import core.utils.MathUtils;
 import game.server.Chunk;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
 import game.server.biomes.*;
 import game.utils.Status;

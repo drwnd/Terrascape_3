@@ -5,7 +5,7 @@ import core.utils.Saver;
 import game.server.Chunk;
 import game.server.ChunkID;
 import game.server.Game;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.WorldGeneration;
 import game.utils.Status;
 

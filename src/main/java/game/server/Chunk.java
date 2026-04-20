@@ -3,6 +3,7 @@ package game.server;
 import core.utils.ByteArrayList;
 import game.player.interaction.ShapePlaceable;
 import game.server.generation.Structure;
+import game.server.materials_data.MaterialsData;
 import game.utils.Status;
 import game.utils.Utils;
 

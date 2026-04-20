@@ -132,8 +132,8 @@ public final class Hotbar extends UiElement {
 
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
-        if (contents[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
-        playSound(contents[selectedSlot]);
+        if (contents[this.selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
+        playSound(contents[this.selectedSlot]);
     }
 
     public Placeable[] getContents() {

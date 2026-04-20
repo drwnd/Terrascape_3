@@ -4,7 +4,7 @@ import core.utils.MathUtils;
 import core.utils.OpenSimplex2S;
 
 import game.server.Chunk;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
 
 import org.joml.Vector3i;

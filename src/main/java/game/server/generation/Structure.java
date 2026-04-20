@@ -1,7 +1,7 @@
 package game.server.generation;
 
 import core.assets.Asset;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 
 import static game.utils.Constants.*;
 

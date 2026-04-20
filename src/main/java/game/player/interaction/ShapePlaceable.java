@@ -15,7 +15,7 @@ import game.language.UiMessages;
 import game.player.Player;
 import game.server.Chunk;
 import game.server.Game;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;

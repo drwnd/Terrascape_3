@@ -5,7 +5,7 @@ import core.utils.IntArrayList;
 
 import game.server.Chunk;
 import game.server.Game;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 

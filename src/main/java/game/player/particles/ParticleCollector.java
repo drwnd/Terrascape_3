@@ -5,7 +5,7 @@ import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
 import game.server.Game;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.settings.OptionSettings;
