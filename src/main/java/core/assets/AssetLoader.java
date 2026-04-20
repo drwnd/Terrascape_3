@@ -4,13 +4,17 @@ import core.assets.identifiers.GuiElementIdentifier;
 import core.rendering_api.shaders.TextShader;
 
 import org.lwjgl.stb.STBImage;
+import org.lwjgl.stb.STBVorbis;
+import org.lwjgl.stb.STBVorbisInfo;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.openal.AL10.*;
 
 public final class AssetLoader {
 
@@ -18,6 +22,17 @@ public final class AssetLoader {
 
     }
 
+    //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
+    public static int loadSound(String filename, boolean appendSoundFolderPath) {
+        if (appendSoundFolderPath) filename = "assets/sounds/" + filename;
+        int buffer = alGenBuffers();
+
+        STBVorbisInfo info = STBVorbisInfo.malloc();
+        ShortBuffer pcm = readVorbis(filename, info);
+        alBufferData(buffer, info.channels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, info.sample_rate());
+
+        return buffer;
+    }
 
     public static Texture loadTexture2D(String filepath) {
         int width, height;
@@ -140,5 +155,26 @@ public final class AssetLoader {
         IntBuffer buffer = MemoryUtil.memAllocInt(data.length);
         buffer.put(data).flip();
         return buffer;
+    }
+
+    //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
+    private static ShortBuffer readVorbis(String filename, STBVorbisInfo info) throws RuntimeException {
+        MemoryStack stack = MemoryStack.stackPush();
+        IntBuffer error = stack.mallocInt(1);
+        // IDE has no idea what it's talking about
+        @SuppressWarnings("DataFlowIssue")
+        long decoder = STBVorbis.stb_vorbis_open_filename(filename, error, null);
+        if (decoder == MemoryUtil.NULL) throw new RuntimeException("Failed to open Ogg Vorbis file " + filename + ". Error: " + error.get(0));
+
+        STBVorbis.stb_vorbis_get_info(decoder, info);
+
+        int channels = info.channels();
+        int lengthSamples = STBVorbis.stb_vorbis_stream_length_in_samples(decoder);
+        ShortBuffer result = MemoryUtil.memAllocShort(lengthSamples * channels);
+
+        result.limit(STBVorbis.stb_vorbis_get_samples_short_interleaved(decoder, channels, result) * channels);
+        STBVorbis.stb_vorbis_close(decoder);
+
+        return result;
     }
 }

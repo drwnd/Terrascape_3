@@ -2,5 +2,8 @@
   "properties": [
     "TRANSPARENT",
     "OCCLUDES_SELF_ONLY"
-  ]
+  ],
+  "digSounds": "DIG_GLASS",
+  "stepSounds": "STEP_GLASS",
+  "jumpSounds": "STEP_GLASS"
 }

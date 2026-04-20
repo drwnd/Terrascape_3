@@ -1,10 +1,13 @@
 package game.player.movement;
 
+import core.sound.Sound;
 import core.utils.MathUtils;
 
 import game.server.Game;
 import game.server.World;
+import game.server.material.Material;
 import game.server.material.Properties;
+import game.settings.FloatSettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 
@@ -30,6 +33,7 @@ public final class Movement {
 
         velocity.set(move(position));
         renderVelocity = position.vectorFrom(lastPosition);
+        playFootstepSound(position);
 
         if (ToggleSettings.NO_CLIP.value() || noCollision(position, state.next, -1)) state = state.next;
         state.movement = this;
@@ -280,6 +284,16 @@ public final class Movement {
         return position.longZ + MathUtils.floor(position.fractionZ + offset);
     }
 
+    private void playFootstepSound(Position position) {
+        long currentGameTick = Game.getServer().getCurrentGameTick();
+        int ticksBetweenFootsteps = state.ticksBetweenFootsteps();
+        if (ticksBetweenFootsteps < 0 || currentGameTick < lastFootstepTick + ticksBetweenFootsteps || velocity.lengthSquared() < 1) return;
+        lastFootstepTick = currentGameTick;
+
+        byte standingMaterial = state.getStandingMaterial(position);
+        Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, null);
+    }
+
 
     private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
         World world = Game.getWorld();
@@ -299,6 +313,7 @@ public final class Movement {
     }
 
 
+    private long lastFootstepTick = 0;
     private MovementState state;
     private boolean grounded;
     private final Vector3f velocity = new Vector3f();

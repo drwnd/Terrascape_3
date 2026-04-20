@@ -62,7 +62,9 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         sliders.add(slider);
 
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
-            if (action == GLFW_PRESS) slider.setToDefault();
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            slider.setToDefault();
+            return ButtonResult.SUCCESS;
         });
     }
 
@@ -76,7 +78,9 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         keySelectors.add(keySelector);
 
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
-            if (action == GLFW_PRESS) keySelector.setToDefault();
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            keySelector.setToDefault();
+            return ButtonResult.SUCCESS;
         });
     }
 
@@ -96,8 +100,10 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         keySelectors.add(keySelector);
 
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
-            if (action == GLFW_PRESS) toggle.setToDefault();
-            if (action == GLFW_PRESS) keySelector.setToDefault();
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            toggle.setToDefault();
+            keySelector.setToDefault();
+            return ButtonResult.SUCCESS;
         });
     }
 
@@ -111,7 +117,9 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         options.add(option);
 
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
-            if (action == GLFW_PRESS) option.setToDefault();
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            option.setToDefault();
+            return ButtonResult.SUCCESS;
         });
     }
 
@@ -139,7 +147,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     private Clickable getApplyChangesButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
 
             for (Slider<? extends Number> slider : sliders) slider.getSetting().setValue(slider.getValue());
             for (KeySelector keySelector : keySelectors) keySelector.getSetting().setKeybind(keySelector.getValue());
@@ -148,19 +156,21 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
             Settings.writeToFile();
             Window.popRenderable();
+            return ButtonResult.SUCCESS;
         };
     }
 
     private Clickable getResetSettingsButtonAction() {
         return (Vector2i pixelCoordinate, int button, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             for (UiButton resetButton : resetButtons) resetButton.clickOn(pixelCoordinate, button, action);
+            return ButtonResult.SUCCESS;
         };
     }
 
     private Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
 
             for (Slider<? extends Number> slider : sliders) slider.matchSetting();
             for (KeySelector keySelector : keySelectors) keySelector.matchSetting();
@@ -168,6 +178,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
             for (OptionToggle option : options) option.matchSetting();
 
             Window.popRenderable();
+            return ButtonResult.SUCCESS;
         };
     }
 

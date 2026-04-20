@@ -3,5 +3,8 @@
     "TRANSPARENT",
     "OCCLUDES_SELF_ONLY",
     "SHADOW_TRANSPARENT"
-  ]
+  ],
+  "digSounds": "DIG_GLASS",
+  "stepSounds": "STEP_GLASS",
+  "jumpSounds": "STEP_GLASS"
 }

@@ -38,11 +38,11 @@ public enum Properties {
     }
 
     public static boolean hasProperties(byte material, int properties) {
-        return (Material.getMaterialProperties(material) & properties) == properties;
+        return (Material.getProperties(material) & properties) == properties;
     }
 
     public static boolean doesntHaveProperties(byte material, byte properties) {
-        return (Material.getMaterialProperties(material) & properties) == 0;
+        return (Material.getProperties(material) & properties) == 0;
     }
 
     /**

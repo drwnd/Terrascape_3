@@ -29,7 +29,8 @@ public enum DebugScreenOptions {
     BUFFER_STORAGE(ColorOption.ORANGE),
     GENERATION_DATA(ColorOption.WHITE),
     BIOME(ColorOption.GREEN),
-    RESULTING_HEIGHT(ColorOption.GREEN);
+    RESULTING_HEIGHT(ColorOption.GREEN),
+    CONCURRENTLY_PLAYED_SOUNDS(ColorOption.WHITE);
 
     DebugScreenOptions(Option color) {
         this.visibility = new DebugOption(Visibility.WHEN_SCREEN_OPEN, this.name() + "_VISIBILITY");

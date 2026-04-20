@@ -31,8 +31,11 @@ public final class ShapeDisplay extends UiButton {
             if (settingElement instanceof UiButton settingButton) {
                 Clickable clickable = settingButton.getClickable();
                 settingButton.setAction((Vector2i pixelCoordinate, int button, int action) -> {
-                    clickable.clickOn(pixelCoordinate, button, action);
-                    if (action == GLFW_PRESS) shapesTab.refreshShapePreview();
+                    ButtonResult result = clickable.clickOn(pixelCoordinate, button, action);
+                    if (result != ButtonResult.SUCCESS) return result;
+                    if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+                    shapesTab.refreshShapePreview();
+                    return ButtonResult.SUCCESS;
                 });
             }
             settingElement.setSizeToParent(0.3F, 0.075F);
@@ -73,11 +76,12 @@ public final class ShapeDisplay extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             ((ShapesTab) getParent()).setSelectedDisplay(this);
             for (UiBackgroundElement settingElement : ((ShapesTab) getParent()).getShapePlaceableSettingSliders()) settingElement.setVisible(false);
             for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
             ((ShapesTab) getParent()).refreshShapePreview();
+            return ButtonResult.SUCCESS;
         };
     }
 

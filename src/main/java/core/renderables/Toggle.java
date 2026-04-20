@@ -67,9 +67,10 @@ public final class Toggle extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             value = !value;
             if (updateImmediately) setting.setValue(value);
+            return ButtonResult.SUCCESS;
         };
     }
 

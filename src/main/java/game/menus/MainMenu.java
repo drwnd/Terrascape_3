@@ -81,7 +81,7 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
     @Override
-    public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
+    public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         boolean buttonFound = false;
         for (Renderable button : getChildren())
             if (button.isVisible() && button.containsPixelCoordinate(pixelCoordinate)) {
@@ -91,6 +91,7 @@ public final class MainMenu extends UiBackgroundElement {
             }
 
         if (!buttonFound) hideWorldSpecificButtons();
+        return true;
     }
 
 
@@ -151,52 +152,58 @@ public final class MainMenu extends UiBackgroundElement {
 
     private Clickable getDeleteWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             hideWorldSpecificButtons();
 
             confirmDeletionButton.setAction(getConfirmDeletionAction(saveFile));
             confirmDeletionButton.setVisible(true);
             cancelDeletionButton.setVisible(true);
+            return ButtonResult.SUCCESS;
         };
     }
 
     private Clickable getConfirmDeletionAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
 
             FileManager.delete(saveFile);
             createWorldButtons();
             hideWorldSpecificButtons();
+            return ButtonResult.SUCCESS;
         };
     }
 
     private Clickable getOptimizeWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             WorldOptimizer.optimize(saveFile);
             hideWorldSpecificButtons();
+            return ButtonResult.SUCCESS;
         };
     }
 
 
     private static Clickable getSettingsAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.pushRenderable(new SettingsMenu());
+            return ButtonResult.SUCCESS;
         };
     }
 
     private static Clickable getCreateWorldAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.pushRenderable(new WorldCreationMenu());
+            return ButtonResult.SUCCESS;
         };
     }
 
     private static Clickable getPlayWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Game.play(saveFile);
+            return ButtonResult.SUCCESS;
         };
     }
 

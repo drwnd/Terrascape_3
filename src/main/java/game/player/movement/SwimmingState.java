@@ -79,5 +79,15 @@ public final class SwimmingState extends MovementState {
         return 1;
     }
 
+    @Override
+    public int ticksBetweenFootsteps() {
+        return 13;
+    }
+
+    @Override
+    byte getStandingMaterial(Position position) {
+        return WATER;
+    }
+
     private static final float SWIM_SPEED = 0.0045F;
 }

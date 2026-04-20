@@ -7,7 +7,7 @@ public enum CoreFloatSettings implements FloatSetting {
     SENSITIVITY(0.0F, 1.0F, 0.14612676056338028F),
     TEXT_SIZE(0.5F, 3.0F, 1.0F, 0.01F),
     MASTER_AUDIO(0.0F, 10.0F, 0.5F, 0.01F),
-    MISCELLANEOUS_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
+    UI_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
     RIM_THICKNESS(0.0F, 0.1F, 0.015625F);
 
     CoreFloatSettings(float min, float max, float defaultValue, float accuracy) {

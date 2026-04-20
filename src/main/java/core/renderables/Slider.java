@@ -13,8 +13,7 @@ public class Slider<T extends Number> extends UiButton {
 
     public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
-        setAction(this::action);
-        setDoAutoFocusScaling(false);
+        setAction(this::setValueOnClick);
         this.setting = setting;
         this.settingName = settingName;
         this.updateImmediately = updateImmediately;
@@ -49,7 +48,7 @@ public class Slider<T extends Number> extends UiButton {
 
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
-        action(pixelCoordinate, GLFW_MOUSE_BUTTON_LEFT, GLFW_HOVERED);
+        setValueOnClick(pixelCoordinate, GLFW_MOUSE_BUTTON_LEFT, GLFW_HOVERED);
     }
 
     public void matchSetting() {
@@ -57,18 +56,23 @@ public class Slider<T extends Number> extends UiButton {
     }
 
 
-    private void action(Vector2i cursorPos, int button, int action) {
-        if (action == GLFW_HOVERED && selected != this) return;
+    private ButtonResult setValueOnClick(Vector2i cursorPos, int button, int action) {
+        if (action == GLFW_HOVERED && selected != this) return ButtonResult.IGNORE;
         if (action == GLFW_PRESS) selected = this;
         if (action == GLFW_RELEASE)
             if (selected == this) selected = null;
-            else return;
-        Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
-        Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
+            else return ButtonResult.IGNORE;
+
+        Vector2f position = getPosition(), size = getSize();
+        if (isFocused()) scaleForFocused(position, size);
+
+        position = Window.toPixelCoordinate(position, scalesWithGuiSize());
+        size = Window.toPixelSize(size, scalesWithGuiSize());
 
         float fraction = (cursorPos.x - position.x) / size.x;
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
         setValue(setting.valueFromFraction(fraction));
+        return ButtonResult.SUCCESS;
     }
 
     private final boolean updateImmediately;

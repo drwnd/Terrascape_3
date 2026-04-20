@@ -65,6 +65,11 @@ public final class CrawlingState extends MovementState {
         return 4;
     }
 
+    @Override
+    public int ticksBetweenFootsteps() {
+        return -1;
+    }
+
 
     private static final float JUMP_STRENGTH = 10.0F;
     private static final float SWIM_STRENGTH = 0.0033F;

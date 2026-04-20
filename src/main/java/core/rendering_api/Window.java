@@ -4,6 +4,7 @@ import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.settings.CoreFloatSettings;
 
+import core.sound.Sound;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -22,6 +23,7 @@ public final class Window {
     }
 
     public static void init(String title) {
+        Sound.init();
         Window.maximized = true;
 
         GLFWErrorCallback.createPrint(System.err).set();
@@ -120,6 +122,7 @@ public final class Window {
     public static void cleanUp() {
         AssetManager.deleteAll();
         glfwDestroyWindow(window);
+        Sound.cleanUp();
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {

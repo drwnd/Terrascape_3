@@ -91,3 +91,9 @@ Pressing **Back** in any menu will discard all changes you made since entering t
 Pressing **Apply** will immediately apply all changes.
 Pressing **Reset All** will reset all settings in that menu to their default value.
 Alternatively press the **Reset** button next to any setting to only reset that setting.
+
+## Credits
+
+Most of the sounds are taken from https://mcpedl.com/better-sounds/.
+Some are from https://freesound.org/.
+All credit goes to the creators there.

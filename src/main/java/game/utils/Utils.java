@@ -1,6 +1,7 @@
 package game.utils;
 
 import core.utils.Vector3l;
+import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
@@ -68,6 +69,18 @@ public final class Utils {
                 wrappedMax(a.y, b.y),
                 wrappedMax(a.z, b.z)
         );
+    }
+
+    public static void min(Vector3i vector, int x, int y, int z) {
+        vector.x = Math.min(vector.x, x);
+        vector.y = Math.min(vector.y, y);
+        vector.z = Math.min(vector.z, z);
+    }
+
+    public static void max(Vector3i vector, int x, int y, int z) {
+        vector.x = Math.max(vector.x, x);
+        vector.y = Math.max(vector.y, y);
+        vector.z = Math.max(vector.z, z);
     }
 
     public static int[] zOrderCurveLookupTable(int size, int split, int shift) {

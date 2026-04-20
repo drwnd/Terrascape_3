@@ -27,6 +27,7 @@ import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.*;
 import game.player.interaction.placeable_shapes.CubePlaceable;
+import game.player.particles.ParticleEffect;
 import game.server.*;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;

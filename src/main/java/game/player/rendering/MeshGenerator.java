@@ -24,9 +24,9 @@ public final class MeshGenerator {
         if (toTestMaterial == AIR) return false;
         if (occludingMaterial == AIR) return true;
 
-        if ((Material.getMaterialProperties(occludingMaterial) & TRANSPARENT) == 0) return false;
+        if ((Material.getProperties(occludingMaterial) & TRANSPARENT) == 0) return false;
 
-        if ((Material.getMaterialProperties(toTestMaterial) & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY)
+        if ((Material.getProperties(toTestMaterial) & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY)
             return toTestMaterial != occludingMaterial;
         return true;
     }
@@ -395,7 +395,7 @@ public final class MeshGenerator {
     }
 
     private void addSideFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
-        if ((Material.getMaterialProperties(material) & TRANSPARENT) != 0) return;
+        if ((Material.getProperties(material) & TRANSPARENT) != 0) return;
         addFace(opaqueVerticesLists[6], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
     }
 
@@ -438,7 +438,7 @@ public final class MeshGenerator {
         vertices.add(xStart | materialX);
         vertices.add(yStart | materialY);
         vertices.add(zStart | materialZ);
-        vertices.add(Material.getMaterialProperties(material) << PROPERTIES_OFFSET | faceSize1 << 17 | faceSize2 << 11 | side << 8 | material & 0xFF);
+        vertices.add(Material.getProperties(material) << PROPERTIES_OFFSET | faceSize1 << 17 | faceSize2 << 11 | side << 8 | material & 0xFF);
     }
 
     private int xStart, yStart, zStart;

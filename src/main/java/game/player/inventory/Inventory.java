@@ -1,13 +1,18 @@
 package game.player.inventory;
 
 import core.assets.CoreTextures;
+import core.language.Language;
 import core.renderables.*;
 
+import core.rendering_api.Input;
 import core.rendering_api.Window;
+import core.sound.Sound;
 import game.language.UiMessages;
 import game.player.Hotbar;
 import game.server.Game;
 import game.server.generation.Structure;
+import game.server.material.Material;
+import game.server.material.Materials;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 
@@ -110,6 +115,26 @@ public final class Inventory extends UiElement {
     }
 
 
+    static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Vector2i lastCursorPos, Renderable tab) {
+        if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
+        itemNameDisplay.setVisible(false);
+        for (CubeDisplay display : cubeDisplays) {
+            StructureDisplay structureDisplay = display.display();
+            boolean shouldBeFocused = structureDisplay.containsPixelCoordinate(pixelCoordinate);
+            if (structureDisplay.isFocused() != shouldBeFocused) Sound.playUI(Material.getStepSounds(display.material()), FloatSettings.INVENTORY_AUDIO);
+            if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
+
+            Vector2f size = Window.toPixelSize(tab.getSize(), tab.scalesWithGuiSize());
+            Vector2f position = Window.toPixelCoordinate(tab.getPosition(), tab.scalesWithGuiSize());
+            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material())));
+            itemNameDisplay.setOffsetToParent(
+                    (pixelCoordinate.x - position.x) / size.x - itemNameDisplay.getLength(),
+                    (pixelCoordinate.y - position.y) / size.y);
+            itemNameDisplay.setVisible(true);
+        }
+        for (Renderable renderable : tab.getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
+    }
+
     private static ArrayList<CubeDisplay> getCubeDisplays() {
         long start = System.nanoTime();
         ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>(AMOUNT_OF_MATERIALS);
@@ -121,6 +146,7 @@ public final class Inventory extends UiElement {
             StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
             display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
             display.setScaleWithGuiSize(false);
+            display.setPlayFocusSound(false);
 
             cubeDisplays.add(new CubeDisplay(display, (byte) material));
         }

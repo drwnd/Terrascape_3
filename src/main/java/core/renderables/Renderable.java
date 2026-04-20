@@ -1,6 +1,9 @@
 package core.renderables;
 
+import core.assets.CoreSounds;
 import core.rendering_api.Window;
+import core.settings.CoreFloatSettings;
+import core.sound.Sound;
 
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -55,20 +58,23 @@ public class Renderable {
         return children.remove(renderable) && renderable != null ? renderable : DummyRenderable.dummy;
     }
 
-    public void clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
+    public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         for (Renderable renderable : children)
-            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.clickOn(pixelCoordinate, mouseButton, action);
+            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate) && renderable.clickOn(pixelCoordinate, mouseButton, action))
+                return true;
+        return false;
     }
 
     public void hoverOver(Vector2i pixelCoordinate) {
         if (isFocused()) return;
         for (Renderable renderable : children)
-            if (renderable.isVisible()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
+            renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
     public void dragOver(Vector2i pixelCoordinate) {
         hoverOver(pixelCoordinate);
-        for (Renderable renderable : children) if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
+        for (Renderable renderable : children)
+            if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
     }
 
     public void move(Vector2f offset) {
@@ -76,8 +82,11 @@ public class Renderable {
     }
 
     public boolean containsPixelCoordinate(Vector2i pixelCoordinate) {
-        Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
-        Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
+        Vector2f position = getPosition(), size = getSize();
+        if (isFocused()) scaleForFocused(position, size);
+
+        position = Window.toPixelCoordinate(position, scalesWithGuiSize());
+        size = Window.toPixelSize(size, scalesWithGuiSize());
 
         return position.x <= pixelCoordinate.x && position.x + size.x >= pixelCoordinate.x && position.y <= pixelCoordinate.y && position.y + size.y >= pixelCoordinate.y;
     }
@@ -162,6 +171,10 @@ public class Renderable {
         return isFlag(SCALES_WITH_GUI_SIZE_MASK) && parent.scalesWithGuiSize();
     }
 
+    public void setPlayFocusSound(boolean playFocusSound) {
+        setFlag(playFocusSound, PLAY_FOCUS_SOUNDS_MASK);
+    }
+
     public void setScaleWithGuiSize(boolean scaleWithGuiSize) {
         setFlag(scaleWithGuiSize, SCALES_WITH_GUI_SIZE_MASK);
     }
@@ -176,9 +189,12 @@ public class Renderable {
     }
 
     public void setFocused(boolean focused) {
-        if (!isFlag(DO_AUTO_FOCUS_SCALING)) return;
-        setFlag(focused, FOCUSSED_MASK);
+        if (!isVisible() || !isFlag(DO_AUTO_FOCUS_SCALING) || isFocused() == focused) return;
 
+        if (isFlag(PLAY_FOCUS_SOUNDS_MASK))
+            Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO, 0.35F, 0.5F);
+
+        setFlag(focused, FOCUSSED_MASK);
         if (isFocused()) return;
         for (Renderable renderable : children) renderable.setFocused(false);
     }
@@ -205,10 +221,11 @@ public class Renderable {
     private final Vector2f offsetToParent;
     private Renderable parent = DummyRenderable.dummy;
     private float scalingFactor = 1.05F;
-    private int flags = VISIBILITY_MASK | DO_AUTO_FOCUS_SCALING | SCALES_WITH_GUI_SIZE_MASK;
+    private int flags = VISIBILITY_MASK | DO_AUTO_FOCUS_SCALING | SCALES_WITH_GUI_SIZE_MASK | PLAY_FOCUS_SOUNDS_MASK;
 
     private static final int VISIBILITY_MASK = 0x1;
     private static final int FOCUSSED_MASK = 0x2;
     private static final int DO_AUTO_FOCUS_SCALING = 0x4;
     private static final int SCALES_WITH_GUI_SIZE_MASK = 0x8;
+    private static final int PLAY_FOCUS_SOUNDS_MASK = 0x10;
 }

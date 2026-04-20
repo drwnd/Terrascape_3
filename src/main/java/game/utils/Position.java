@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 
 import static game.utils.Constants.*;
 
-public final class Position {
+public final class Position implements Distanceable {
 
     public long longX, longY, longZ;
     public float fractionX, fractionY, fractionZ;
@@ -29,9 +29,9 @@ public final class Position {
 
 
     public Position() {
-        this.longX = 0;
-        this.longY = 0;
-        this.longZ = 0;
+        this.longX = 0L;
+        this.longY = 0L;
+        this.longZ = 0L;
         this.fractionX = 0.0F;
         this.fractionY = 0.0F;
         this.fractionZ = 0.0F;
@@ -46,13 +46,13 @@ public final class Position {
         this.fractionZ = fractionZ;
     }
 
-    public Position(Vector3l intPosition, Vector3f fractionPosition) {
-        this.longX = intPosition.x;
-        this.longY = intPosition.y;
-        this.longZ = intPosition.z;
-        this.fractionX = fractionPosition.x;
-        this.fractionY = fractionPosition.y;
-        this.fractionZ = fractionPosition.z;
+    public Position(Vector3l longPosition, Vector3f fractionPosition) {
+        this.longX = longPosition == null ? 0L : longPosition.x;
+        this.longY = longPosition == null ? 0L : longPosition.y;
+        this.longZ = longPosition == null ? 0L : longPosition.z;
+        this.fractionX = fractionPosition == null ? 0.0F : fractionPosition.x;
+        this.fractionY = fractionPosition == null ? 0.0F : fractionPosition.y;
+        this.fractionZ = fractionPosition == null ? 0.0F : fractionPosition.z;
     }
 
     public Position(Position position) {
@@ -114,7 +114,9 @@ public final class Position {
         return this;
     }
 
-    public Vector3f vectorFrom(Position position) {
+    @Override
+    public Vector3f vectorFrom(Distanceable distanceable) {
+        if (!(distanceable instanceof Position position)) return new Vector3f(Float.NaN);
         return new Vector3f(
                 (longX - position.longX) + (fractionX - position.fractionX),
                 (longY - position.longY) + (fractionY - position.fractionY),

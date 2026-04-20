@@ -1,0 +1,6 @@
+{
+  "properties": [],
+  "digSounds": "DIG_GRASS",
+  "stepSounds": "STEP_DIRT",
+  "jumpSounds": "STEP_GRASS"
+}

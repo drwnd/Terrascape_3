@@ -1,15 +1,12 @@
 package game.player.inventory;
 
-import core.language.Language;
 import core.renderables.*;
-import core.rendering_api.Input;
 import core.rendering_api.Window;
 
 import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
 import game.server.generation.Structure;
-import game.server.material.Materials;
 import game.settings.FloatSettings;
 
 import org.joml.Vector2f;
@@ -19,7 +16,6 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 
 import static game.utils.Constants.*;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
@@ -74,22 +70,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
-        if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
-        itemNameDisplay.setVisible(false);
-        for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
-        for (CubeDisplay display : cubeDisplays) {
-            StructureDisplay structureDisplay = display.display();
-            if (!structureDisplay.containsPixelCoordinate(pixelCoordinate)) continue;
-
-            Vector2f size = Window.toPixelSize(getSize(), scalesWithGuiSize());
-            Vector2f position = Window.toPixelCoordinate(getPosition(), scalesWithGuiSize());
-            itemNameDisplay.setText(Language.getTranslation(Materials.getTranslatable(display.material())));
-            itemNameDisplay.setOffsetToParent(
-                    (pixelCoordinate.x - position.x) / size.x - itemNameDisplay.getLength(),
-                    (pixelCoordinate.y - position.y) / size.y);
-            itemNameDisplay.setVisible(true);
-            break;
-        }
+        Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
     @Override

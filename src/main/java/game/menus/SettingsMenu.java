@@ -145,10 +145,11 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addSlider(CoreFloatSettings.MASTER_AUDIO, CoreUiMessages.MASTER_AUDIO);
         section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessages.FOOTSTEPS_AUDIO);
+        section.addSlider(FloatSettings.JUMP_AUDIO, UiMessages.JUMP_AUDIO);
         section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
         section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
         section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);
-        section.addSlider(CoreFloatSettings.MISCELLANEOUS_AUDIO, CoreUiMessages.MISCELLANEOUS_AUDIO);
+        section.addSlider(CoreFloatSettings.UI_AUDIO, CoreUiMessages.UI_AUDIO);
 
         return section;
     }
@@ -192,8 +193,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.popRenderable();
+            return ButtonResult.SUCCESS;
         };
     }
 
@@ -210,8 +212,9 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i _, int _, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             Window.pushRenderable(sectionCreator.getSection());
+            return ButtonResult.SUCCESS;
         };
     }
 

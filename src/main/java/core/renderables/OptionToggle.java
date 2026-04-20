@@ -53,9 +53,10 @@ public final class OptionToggle extends UiButton {
 
     private Clickable getAction() {
         return (Vector2i _, int button, int action) -> {
-            if (action != GLFW_PRESS) return;
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (button == GLFW_MOUSE_BUTTON_LEFT) setValue(value.next());
             if (button == GLFW_MOUSE_BUTTON_RIGHT) setValue(value.previous());
+            return ButtonResult.SUCCESS;
         };
     }
 

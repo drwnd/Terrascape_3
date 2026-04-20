@@ -1,8 +1,11 @@
 package game.player.movement;
 
 import core.rendering_api.Input;
+import core.sound.Sound;
 import core.utils.MathUtils;
 
+import game.server.material.Material;
+import game.settings.FloatSettings;
 import game.settings.KeySettings;
 import game.utils.Position;
 
@@ -26,6 +29,7 @@ public final class WalkingState extends MovementState {
         applyXZMovement(velocityChange, speed, SPRINT_SPEED_MODIFIER);
 
         if (Input.isKeyPressed(KeySettings.JUMP)) {
+            playJumpSound(lastPosition);
             handleJump(lastPosition, velocityChange, JUMP_STRENGTH, SWIM_STRENGTH);
             if (Input.isKeyPressed(KeySettings.MOVE_FORWARD) && Input.isKeyPressed(KeySettings.SPRINT) && movement.isGrounded())
                 velocityChange.x += JUMP_SPEED_GAIN;
@@ -68,6 +72,17 @@ public final class WalkingState extends MovementState {
     @Override
     public byte getIdentifier() {
         return 0;
+    }
+
+    @Override
+    public int ticksBetweenFootsteps() {
+        return Input.isKeyPressed(KeySettings.SPRINT) ? 5 : 8;
+    }
+
+    private void playJumpSound(Position position) {
+        if (!movement.isGrounded()) return;
+        byte standingMaterial = getStandingMaterial(position);
+        Sound.play3D(Material.getJumpSounds(standingMaterial), FloatSettings.JUMP_AUDIO, position, null);
     }
 
 
