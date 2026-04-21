@@ -1,9 +1,21 @@
 package game.utils;
 
 import core.utils.MathUtils;
+
 import game.server.material.Properties;
 
 public final class Constants {
+
+    static {
+        boolean isPerformanceTest = "true".equals(System.getenv().get("isPerformanceTest"));
+        if (isPerformanceTest) {
+            RENDER_DISTANCE_XZ = 62;
+            RENDER_DISTANCE_Y = 62;
+        } else {
+            RENDER_DISTANCE_XZ = 6;
+            RENDER_DISTANCE_Y = 6;
+        }
+    }
 
     public static final float Z_NEAR = 0.8208F; // Just barely can't xRay
     public static final float Z_FAR = Float.POSITIVE_INFINITY;
@@ -16,8 +28,8 @@ public final class Constants {
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
-    public static final byte RENDER_DISTANCE_XZ = 6;
-    public static final byte RENDER_DISTANCE_Y = 6;
+    public static final byte RENDER_DISTANCE_XZ;
+    public static final byte RENDER_DISTANCE_Y;
 
     public static final int RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_XZ * 2 + 3);
     public static final int RENDERED_WORLD_HEIGHT = MathUtils.nextLargestPowOf2(RENDER_DISTANCE_Y * 2 + 3);

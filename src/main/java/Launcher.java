@@ -16,4 +16,8 @@ public final class Launcher {
         Window.cleanUp();
         Game.cleanUp();
     }
+
+    private Launcher() {
+
+    }
 }
