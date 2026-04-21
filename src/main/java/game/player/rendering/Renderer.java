@@ -191,7 +191,7 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value()) {
+        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0) {
             glBindFramebuffer(GL_FRAMEBUFFER, ssaoFramebuffer);
             glClear(GL_COLOR_BUFFER_BIT);
             glDisable(GL_STENCIL_TEST);
