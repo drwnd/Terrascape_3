@@ -59,10 +59,6 @@ public final class GenerationData {
         Arrays.fill(cachedMaterials, AIR);
     }
 
-    public void fillWithAir() {
-        Arrays.fill(uncompressedMaterials, AIR);
-    }
-
     public void set(int inChunkX, int inChunkZ) {
         int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
         int mapIndex = getMapIndex(inChunkX, inChunkZ);
@@ -117,7 +113,7 @@ public final class GenerationData {
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
-    public boolean storeTree(Tree tree) {
+    public boolean storeTree(Tree tree, boolean clearBeforeGenerating) {
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
@@ -142,6 +138,7 @@ public final class GenerationData {
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
+        if (clearBeforeGenerating) Arrays.fill(uncompressedMaterials, AIR);
         MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), tree.transform(), LOD, targetStart, sourceStart, size);
         return true;
     }

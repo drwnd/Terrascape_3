@@ -188,7 +188,6 @@ public final class WorldGeneration {
     private static boolean generateTrees(GenerationData data, boolean clearBeforeGenerating) {
         if (!data.hasTrees()) return false;
         boolean hasGeneratedTree = false;
-        if (clearBeforeGenerating) data.fillWithAir();
 
         int sideLength = (1 << data.LOD) + 2;
         for (int x = 0; x < sideLength; x++)
@@ -196,7 +195,7 @@ public final class WorldGeneration {
                 Tree tree = data.treeMapValue(x * sideLength + z);
                 if (tree == null) continue;
 
-                hasGeneratedTree |= data.storeTree(tree);
+                hasGeneratedTree |= data.storeTree(tree, clearBeforeGenerating && !hasGeneratedTree);
             }
         return hasGeneratedTree;
     }
