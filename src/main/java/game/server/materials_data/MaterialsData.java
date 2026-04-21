@@ -16,6 +16,8 @@ import game.utils.Utils;
 
 import org.joml.Vector3i;
 
+import java.util.Arrays;
+
 import static game.utils.Constants.*;
 
 public final class MaterialsData {
@@ -222,7 +224,7 @@ public final class MaterialsData {
     }
 
     public boolean isHomogenous(byte material) {
-        return data[0] == HOMOGENOUS && data[1] == material;
+        return getIdentifier(0) == HOMOGENOUS && data[1] == material;
     }
 
     public AABB getOccluder() {
@@ -307,7 +309,7 @@ public final class MaterialsData {
             int size = 1 << sizeBits * 3;
             byte material = data[startIndex + 1];
             startIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
-            for (int index = startIndex; index < startIndex + size; index++) uncompressedMaterials[index] = material;
+            Arrays.fill(uncompressedMaterials, startIndex, startIndex + size, material);
             return;
         }
         if (identifier == DETAIL) {

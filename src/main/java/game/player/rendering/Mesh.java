@@ -14,10 +14,12 @@ public record Mesh(int[] opaqueVertices, int[] vertexCounts,
     }
 
     public int getOpaqueByteSize() {
+        if (opaqueVertices == null) return 0;
         return opaqueVertices.length << 2;
     }
 
     public int getTransparentByteSize() {
+        if (transparentVertices == null) return 0;
         return transparentVertices.length << 2;
     }
 }

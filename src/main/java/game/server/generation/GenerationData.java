@@ -56,8 +56,11 @@ public final class GenerationData {
         chunkY = chunk.Y;
         chunkZ = chunk.Z;
 
-        Arrays.fill(uncompressedMaterials, AIR);
         Arrays.fill(cachedMaterials, AIR);
+    }
+
+    public void fillWithAir() {
+        Arrays.fill(uncompressedMaterials, AIR);
     }
 
     public void set(int inChunkX, int inChunkZ) {
@@ -106,7 +109,7 @@ public final class GenerationData {
     }
 
     public void storeConsecutive(int startIndex, int count, byte material) {
-        for (int index = startIndex; index < startIndex + count; index++) uncompressedMaterials[index] = material;
+        Arrays.fill(uncompressedMaterials, startIndex, startIndex + count, material);
     }
 
     public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {

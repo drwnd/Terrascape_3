@@ -44,7 +44,7 @@ public final class WorldGeneration {
             chunkContainsVoxels = true;
         }
 
-        chunkContainsVoxels |= generateTrees(data);
+        chunkContainsVoxels |= generateTrees(data, !chunkContainsVoxels);
 
         chunk.setMaterials(chunkContainsVoxels ? data.getCompressedMaterials() : new MaterialsData(CHUNK_SIZE_BITS, AIR));
         chunk.setGenerationStatus(Status.DONE);
@@ -185,9 +185,10 @@ public final class WorldGeneration {
         }
     }
 
-    private static boolean generateTrees(GenerationData data) {
+    private static boolean generateTrees(GenerationData data, boolean clearBeforeGenerating) {
         if (!data.hasTrees()) return false;
         boolean hasGeneratedTree = false;
+        if (clearBeforeGenerating) data.fillWithAir();
 
         int sideLength = (1 << data.LOD) + 2;
         for (int x = 0; x < sideLength; x++)
