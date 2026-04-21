@@ -52,7 +52,7 @@ public final class PerformanceTester {
         World world = Game.getWorld();
 
         for (int chunkY = -chunkCount + 1; chunkY < chunkCount - 1; chunkY++) {
-            Mesh mesh = meshGenerator.generateMeshNoSaving(world.getChunk(chunkX, chunkY, chunkZ, lod));
+            Mesh mesh = meshGenerator.generateMesh(world.getChunk(chunkX, chunkY, chunkZ, lod));
             if (mesh == null) System.err.printf("Chunk at x:%d, y:%d, z:%d couldn't generate a mesh", chunkX, chunkY, chunkZ);
         }
     }

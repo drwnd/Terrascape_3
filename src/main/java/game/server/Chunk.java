@@ -25,30 +25,19 @@ public final class Chunk {
         LOD = lod;
     }
 
-    public Chunk getNeighbor(int side) {
-        return switch (side) {
-            case NORTH -> Game.getWorld().getChunk(X, Y, Z + 1, LOD);
-            case TOP -> Game.getWorld().getChunk(X, Y + 1, Z, LOD);
-            case WEST -> Game.getWorld().getChunk(X + 1, Y, Z, LOD);
-            case SOUTH -> Game.getWorld().getChunk(X, Y, Z - 1, LOD);
-            case BOTTOM -> Game.getWorld().getChunk(X, Y - 1, Z, LOD);
-            case EAST -> Game.getWorld().getChunk(X - 1, Y, Z, LOD);
-            default -> throw new IllegalArgumentException("Side cannot be " + side);
-        };
-    }
-
     public byte getSaveMaterial(int inChunkX, int inChunkY, int inChunkZ) {
         return materials.getMaterial(inChunkX, inChunkY, inChunkZ);
     }
 
-    public boolean areSurroundingChunksGenerated() {
+    public ChunkNeighbors getNeighbors() {
         World world = Game.getWorld();
-        return world.getGenerationStatus(X, Y, Z + 1, LOD) == Status.DONE
-                && world.getGenerationStatus(X, Y, Z - 1, LOD) == Status.DONE
-                && world.getGenerationStatus(X, Y + 1, Z, LOD) == Status.DONE
-                && world.getGenerationStatus(X, Y - 1, Z, LOD) == Status.DONE
-                && world.getGenerationStatus(X + 1, Y, Z, LOD) == Status.DONE
-                && world.getGenerationStatus(X - 1, Y, Z, LOD) == Status.DONE;
+        return new ChunkNeighbors(
+                world.getChunk(X, Y, Z + 1, LOD),
+                world.getChunk(X, Y + 1, Z, LOD),
+                world.getChunk(X + 1, Y, Z, LOD),
+                world.getChunk(X, Y, Z - 1, LOD),
+                world.getChunk(X, Y - 1, Z, LOD),
+                world.getChunk(X - 1, Y, Z, LOD));
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
@@ -62,13 +51,13 @@ public final class Chunk {
         modified = true;
     }
 
-    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers) {
-        getNeighbor(NORTH).materials.fillSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
-        getNeighbor(TOP).materials.fillSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
-        getNeighbor(WEST).materials.fillSideLayerInto(adjacentChunkLayers[WEST], EAST);
-        getNeighbor(SOUTH).materials.fillSideLayerInto(adjacentChunkLayers[SOUTH], NORTH);
-        getNeighbor(BOTTOM).materials.fillSideLayerInto(adjacentChunkLayers[BOTTOM], TOP);
-        getNeighbor(EAST).materials.fillSideLayerInto(adjacentChunkLayers[EAST], WEST);
+    public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers, ChunkNeighbors neighbors) {
+        neighbors.north().materials.fillSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
+        neighbors.top().materials.fillSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
+        neighbors.west().materials.fillSideLayerInto(adjacentChunkLayers[WEST], EAST);
+        neighbors.south().materials.fillSideLayerInto(adjacentChunkLayers[SOUTH], NORTH);
+        neighbors.bottom().materials.fillSideLayerInto(adjacentChunkLayers[BOTTOM], TOP);
+        neighbors.east().materials.fillSideLayerInto(adjacentChunkLayers[EAST], WEST);
         materials.fillUncompressedMaterialsInto(uncompressedMaterials);
 
         byte[][] adjacentChunkLayersData = {
