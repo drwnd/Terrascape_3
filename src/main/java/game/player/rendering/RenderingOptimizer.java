@@ -10,7 +10,6 @@ import core.utils.Vector3l;
 import game.assets.Shaders;
 import game.player.Player;
 import game.settings.ToggleSettings;
-import game.utils.Constants;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -306,7 +305,7 @@ public final class RenderingOptimizer {
         long distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
         long distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
 
-        return distanceX > (RENDER_DISTANCE >> 1) + 1 || distanceZ > (RENDER_DISTANCE >> 1) + 1 || distanceY > (Constants.RENDER_DISTANCE >> 1) + 1;
+        return distanceX > (RENDER_DISTANCE >> 1) + 1 || distanceZ > (RENDER_DISTANCE >> 1) + 1 || distanceY > (RENDER_DISTANCE >> 1) + 1;
     }
 
     private boolean modelCubePresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {

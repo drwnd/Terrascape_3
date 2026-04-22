@@ -3,9 +3,9 @@ package game.server;
 import core.sound.Sound;
 import core.utils.FileManager;
 import core.utils.MathUtils;
+
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
-import game.utils.Constants;
 import game.utils.Status;
 import game.utils.Utils;
 
@@ -17,7 +17,7 @@ public final class World {
 
     public World(long seed) {
         WorldGeneration.SEED = seed;
-        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * Constants.RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
+        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
     }
 
     public static void init() {
