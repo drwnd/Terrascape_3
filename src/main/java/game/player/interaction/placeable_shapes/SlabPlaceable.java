@@ -8,7 +8,7 @@ import game.language.UiMessages;
 import game.player.interaction.Rotation3Way;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 
 public final class SlabPlaceable extends ShapePlaceable {

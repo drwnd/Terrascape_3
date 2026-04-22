@@ -4,7 +4,7 @@ import core.utils.MathUtils;
 import core.utils.OpenSimplex2S;
 
 import game.server.Chunk;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
 
 import org.joml.Vector3i;
@@ -56,7 +56,6 @@ public final class GenerationData {
         chunkY = chunk.Y;
         chunkZ = chunk.Z;
 
-        Arrays.fill(uncompressedMaterials, AIR);
         Arrays.fill(cachedMaterials, AIR);
     }
 
@@ -106,7 +105,7 @@ public final class GenerationData {
     }
 
     public void storeConsecutive(int startIndex, int count, byte material) {
-        for (int index = startIndex; index < startIndex + count; index++) uncompressedMaterials[index] = material;
+        Arrays.fill(uncompressedMaterials, startIndex, startIndex + count, material);
     }
 
     public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {
@@ -114,7 +113,7 @@ public final class GenerationData {
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
-    public boolean storeTree(Tree tree) {
+    public boolean storeTree(Tree tree, boolean clearBeforeGenerating) {
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkStartZ = chunkZ << CHUNK_SIZE_BITS + LOD;
@@ -139,8 +138,13 @@ public final class GenerationData {
         Vector3i sourceStart = new Vector3i(startX, startY, startZ);
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
+        if (clearBeforeGenerating) fillUncompressedMaterialsWithAir();
         MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, tree.structure(), tree.transform(), LOD, targetStart, sourceStart, size);
         return true;
+    }
+
+    public void fillUncompressedMaterialsWithAir() {
+        Arrays.fill(uncompressedMaterials, AIR);
     }
 
     public MaterialsData getCompressedMaterials() {

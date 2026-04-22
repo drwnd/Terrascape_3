@@ -1,8 +1,9 @@
 package game.server.generation;
 
 import core.utils.MathUtils;
+
 import game.server.Chunk;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
 import game.server.biomes.*;
 import game.utils.Status;
@@ -28,12 +29,13 @@ public final class WorldGeneration {
         data.setChunk(chunk);
         boolean chunkContainsVoxels = false;
 
-        if (data.chunkContainsGround()) {
+        boolean containsGround = data.chunkContainsGround(), containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
+        if (containsGround) {
             generateStone(data);
             chunkContainsVoxels = true;
         }
 
-        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
+        if (!containsBiome && !containsGround && containsRiver) data.fillUncompressedMaterialsWithAir();
         if (containsBiome || containsRiver) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
@@ -44,7 +46,7 @@ public final class WorldGeneration {
             chunkContainsVoxels = true;
         }
 
-        chunkContainsVoxels |= generateTrees(data);
+        chunkContainsVoxels |= generateTrees(data, !chunkContainsVoxels);
 
         chunk.setMaterials(chunkContainsVoxels ? data.getCompressedMaterials() : new MaterialsData(CHUNK_SIZE_BITS, AIR));
         chunk.setGenerationStatus(Status.DONE);
@@ -185,7 +187,7 @@ public final class WorldGeneration {
         }
     }
 
-    private static boolean generateTrees(GenerationData data) {
+    private static boolean generateTrees(GenerationData data, boolean clearBeforeGenerating) {
         if (!data.hasTrees()) return false;
         boolean hasGeneratedTree = false;
 
@@ -195,7 +197,7 @@ public final class WorldGeneration {
                 Tree tree = data.treeMapValue(x * sideLength + z);
                 if (tree == null) continue;
 
-                hasGeneratedTree |= data.storeTree(tree);
+                hasGeneratedTree |= data.storeTree(tree, clearBeforeGenerating && !hasGeneratedTree);
             }
         return hasGeneratedTree;
     }

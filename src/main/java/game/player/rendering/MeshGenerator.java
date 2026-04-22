@@ -4,8 +4,9 @@ import core.utils.ByteArrayList;
 import core.utils.IntArrayList;
 
 import game.server.Chunk;
+import game.server.ChunkNeighbors;
 import game.server.Game;
-import game.server.MaterialsData;
+import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
 
@@ -31,21 +32,17 @@ public final class MeshGenerator {
         return true;
     }
 
+    public Mesh generateMesh(Chunk chunk) {
+        if (chunk.isAir()) return new Mesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
 
-    public void generateMesh(Chunk chunk) {
-        if (chunk.isAir()) {
-            Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
-            Mesh mesh = new Mesh(null, null, null, 0, 0, chunk.X, chunk.Y, chunk.Z, chunk.LOD, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
-            Game.getPlayer().getMeshCollector().queueMesh(mesh);
-            return;
-        }
-        if (!chunk.areSurroundingChunksGenerated()) {
+        ChunkNeighbors neighbors = chunk.getNeighbors();
+        if (neighbors.areUnGenerated()) {
             Game.getServer().scheduleGeneratorRestart();
-            return;
+            return null;
         }
-        Game.getPlayer().getMeshCollector().setMeshed(true, chunk.INDEX, chunk.LOD);
+
         AABB occluder = chunk.getMaterials().getOccluder();
-        chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers);
+        chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, neighbors);
 
         xStart = (int) chunk.X << CHUNK_SIZE_BITS;
         yStart = (int) chunk.Y << CHUNK_SIZE_BITS;
@@ -58,8 +55,7 @@ public final class MeshGenerator {
         AABB occludee = getOccludee();
         if (chunk.LOD != 0 && hasOpaqueMesh()) addSideLayers();
 
-        Mesh mesh = loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
-        Game.getPlayer().getMeshCollector().queueMesh(mesh);
+        return loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
     }
 
     public Mesh generateMesh(Structure structure) {

@@ -2,6 +2,7 @@ package game.server.generation;
 
 import core.utils.Vector3l;
 
+import game.player.rendering.Mesh;
 import game.player.rendering.MeshCollector;
 import game.player.rendering.MeshGenerator;
 import game.server.*;
@@ -188,21 +189,27 @@ public final class ChunkGenerator {
                     int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
                     ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
                     Chunk chunk = world.getChunk(chunkIndex, lod);
+
                     if (chunk == null) {
                         System.err.printf("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
                         continue;
                     }
                     if (!chunk.ID.equals(expectedId)) {
-                        System.err.println("Chunk has wrong ID" + chunkX + " " + chunkY + " " + chunkZ + " " + lod + " is " + chunk.ID + " should be " + expectedId);
+                        System.err.printf("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
                         continue;
                     }
                     if (chunk.getGenerationStatus() != Status.DONE) {
-                        System.err.println("to mesh chunk hasn't been generated " + chunk.getGenerationStatus().name());
-                        System.err.println(chunkX + " " + chunkY + " " + chunkZ + " " + lod);
+                        System.err.printf("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
+                        System.err.printf("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
                         continue;
                     }
+
                     if (meshCollector.isMeshed(chunkIndex, lod)) continue;
-                    meshGenerator.generateMesh(chunk);
+                    meshCollector.setMeshed(true, chunkIndex, lod);
+
+                    Mesh mesh = meshGenerator.generateMesh(chunk);
+                    if (mesh == null) meshCollector.setMeshed(false, chunkIndex, lod);
+                    else meshCollector.queueMesh(mesh);
 
                 } catch (Exception exception) {
                     System.err.println("Meshing:");
