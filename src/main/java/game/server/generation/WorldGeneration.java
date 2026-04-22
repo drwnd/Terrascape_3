@@ -1,6 +1,7 @@
 package game.server.generation;
 
 import core.utils.MathUtils;
+
 import game.server.Chunk;
 import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
@@ -28,12 +29,13 @@ public final class WorldGeneration {
         data.setChunk(chunk);
         boolean chunkContainsVoxels = false;
 
-        if (data.chunkContainsGround()) {
+        boolean containsGround = data.chunkContainsGround(), containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
+        if (containsGround) {
             generateStone(data);
             chunkContainsVoxels = true;
         }
 
-        boolean containsBiome = data.chunkContainsBiome(), containsRiver = data.containsUndergroundRiver();
+        if (!containsBiome && !containsGround && containsRiver) data.fillUncompressedMaterialsWithAir();
         if (containsBiome || containsRiver) {
             for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
                 for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
