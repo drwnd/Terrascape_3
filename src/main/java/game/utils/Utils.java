@@ -9,22 +9,22 @@ public final class Utils {
 
     public static int getChunkIndex(long chunkX, long chunkY, long chunkZ, int lod) {
         chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
-        chunkY &= RENDERED_WORLD_HEIGHT_MASK & MAX_CHUNKS_MASK >> lod;
+        chunkY &= Constants.RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
         chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
 
-        return (int) (((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_HEIGHT_BITS) + chunkY);
+        return (int) (((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << Constants.RENDERED_WORLD_WIDTH_BITS) + chunkY);
     }
 
     public static boolean outsideChunkKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
-        return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + 1
-                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ + 1
-                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y + 1;
+        return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE + 1
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE + 1
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > Constants.RENDER_DISTANCE + 1;
     }
 
     public static boolean outsideRenderKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
-        return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ
-                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_XZ
-                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE_Y;
+        return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > Constants.RENDER_DISTANCE;
     }
 
     public static long chunkDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {

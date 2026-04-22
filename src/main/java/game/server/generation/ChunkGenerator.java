@@ -7,6 +7,7 @@ import game.player.rendering.MeshCollector;
 import game.player.rendering.MeshGenerator;
 import game.server.*;
 import game.server.saving.ChunkSaver;
+import game.utils.Constants;
 import game.utils.Status;
 import game.utils.Utils;
 
@@ -84,11 +85,11 @@ public final class ChunkGenerator {
             long lodPlayerY = playerChunkY >> lod;
             long lodPlayerZ = playerChunkZ >> lod;
 
-            for (int ring = 0; ring <= RENDER_DISTANCE_XZ + 1; ring++) {
+            for (int ring = 0; ring <= RENDER_DISTANCE + 1; ring++) {
                 submitRingGeneration(lodPlayerX, lodPlayerY, lodPlayerZ, ring, lod);
                 submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, ring - 2, lod);
             }
-            submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, RENDER_DISTANCE_XZ, lod);
+            submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, RENDER_DISTANCE, lod);
         }
     }
 
@@ -131,7 +132,7 @@ public final class ChunkGenerator {
 
     private static boolean columnRequiresGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
         World world = Game.getWorld();
-        for (long chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY != playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++)
+        for (long chunkY = playerChunkY - Constants.RENDER_DISTANCE - 1; chunkY != playerChunkY + Constants.RENDER_DISTANCE + 2; chunkY++)
             if (world.getGenerationStatus(chunkX, chunkY, chunkZ, lod) == Status.NOT_STARTED) return true;
         return false;
     }
@@ -139,7 +140,7 @@ public final class ChunkGenerator {
     private static boolean columnRequiresMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
         World world = Game.getWorld();
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
-        for (long chunkY = playerChunkY - RENDER_DISTANCE_Y; chunkY != playerChunkY + RENDER_DISTANCE_Y + 1; chunkY++) {
+        for (long chunkY = playerChunkY - Constants.RENDER_DISTANCE; chunkY != playerChunkY + Constants.RENDER_DISTANCE + 1; chunkY++) {
             int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
             Chunk chunk = world.getChunk(chunkIndex, lod);
             if (chunk == null || !meshCollector.isMeshed(chunkIndex, lod)) return true;
@@ -158,7 +159,7 @@ public final class ChunkGenerator {
             GenerationData generationData = new GenerationData(chunkX, chunkZ, lod);
             ChunkSaver saver = new ChunkSaver();
 
-            for (long chunkY = playerChunkY - RENDER_DISTANCE_Y - 1; chunkY != playerChunkY + RENDER_DISTANCE_Y + 2; chunkY++) {
+            for (long chunkY = playerChunkY - Constants.RENDER_DISTANCE - 1; chunkY != playerChunkY + Constants.RENDER_DISTANCE + 2; chunkY++) {
                 try {
                     Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
                     if (chunk.getGenerationStatus() == Status.NOT_STARTED) {
@@ -184,7 +185,7 @@ public final class ChunkGenerator {
             World world = Game.getWorld();
             MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
 
-            for (long chunkY = playerChunkY - RENDER_DISTANCE_Y; chunkY != playerChunkY + RENDER_DISTANCE_Y + 1; chunkY++) {
+            for (long chunkY = playerChunkY - Constants.RENDER_DISTANCE; chunkY != playerChunkY + Constants.RENDER_DISTANCE + 1; chunkY++) {
                 try {
                     int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
                     ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
