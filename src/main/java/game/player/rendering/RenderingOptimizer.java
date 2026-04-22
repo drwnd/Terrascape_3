@@ -250,7 +250,6 @@ public final class RenderingOptimizer {
                 (chunkY + length << chunkSizeBits) - cameraY,
                 (chunkZ + length << chunkSizeBits) - cameraZ);
 
-        if (intersectionType == FrustumIntersection.OUTSIDE) return;
         if (intersectionType == FrustumIntersection.INSIDE) {
             for (long x = chunkX; x < chunkX + length; x++)
                 for (long y = chunkY; y < chunkY + length; y++)
@@ -258,18 +257,18 @@ public final class RenderingOptimizer {
                         int chunkIndex = Utils.getChunkIndex(x, y, z, lod);
                         lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
                     }
-            return;
         }
-
-        length >>= 1;
-        fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ);
-        fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ + length);
-        fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ);
-        fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ + length);
-        fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ);
-        fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ + length);
-        fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ);
-        fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ + length);
+        if (intersectionType == FrustumIntersection.INTERSECT) {
+            length >>= 1;
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ + length);
+        }
     }
 
     private void removeLodVisibilityOverlap(int lod) {
