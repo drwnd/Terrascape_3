@@ -9,9 +9,7 @@ import core.utils.Vector3l;
 
 import game.assets.Shaders;
 import game.player.Player;
-import game.server.Game;
 import game.settings.ToggleSettings;
-import game.utils.Constants;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -216,55 +214,60 @@ public final class RenderingOptimizer {
     }
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection, long[][] visibilityBits) {
-        long chunkX = cameraChunkX >> lod;
-        long chunkY = cameraChunkY >> lod;
-        long chunkZ = cameraChunkZ >> lod;
-
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
 
-        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
-
-        fillVisibleChunks(chunkX, chunkY, chunkZ + 1, (byte) (1 << NORTH), lod, frustumIntersection);
-        fillVisibleChunks(chunkX, chunkY, chunkZ - 1, (byte) (1 << SOUTH), lod, frustumIntersection);
-
-        fillVisibleChunks(chunkX, chunkY + 1, chunkZ, (byte) (1 << TOP), lod, frustumIntersection);
-        fillVisibleChunks(chunkX, chunkY - 1, chunkZ, (byte) (1 << BOTTOM), lod, frustumIntersection);
-
-        fillVisibleChunks(chunkX + 1, chunkY, chunkZ, (byte) (1 << WEST), lod, frustumIntersection);
-        fillVisibleChunks(chunkX - 1, chunkY, chunkZ, (byte) (1 << EAST), lod, frustumIntersection);
+        long chunkX = (cameraChunkX >> lod) - (RENDERED_WORLD_WIDTH >> 1);
+        long chunkY = (cameraChunkY >> lod) - (RENDERED_WORLD_WIDTH >> 1);
+        long chunkZ = (cameraChunkZ >> lod) - (RENDERED_WORLD_WIDTH >> 1);
+        fillVisibleChunks(lod, frustumIntersection, RENDERED_WORLD_WIDTH, chunkX, chunkY, chunkZ);
     }
 
-    private void fillVisibleChunks(long chunkX, long chunkY, long chunkZ, byte traveledDirections, int lod, FrustumIntersection intersection) {
-        int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-        if ((lodVisibilityBits[chunkIndex >> 6] & 1L << chunkIndex) != 0 || Game.getWorld().getChunk(chunkIndex, lod) == null) return;
-
+    private void fillVisibleChunks(int lod, FrustumIntersection intersection, int length, long chunkX, long chunkY, long chunkZ) {
+        if (length < 1) throw new IllegalArgumentException("Length cannot be %d\n".formatted(length));
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
-        if (!intersection.testAab(
+
+        if (length == 1) {
+            if (intersection.testAab(
+                    (chunkX << chunkSizeBits) - cameraX,
+                    (chunkY << chunkSizeBits) - cameraY,
+                    (chunkZ << chunkSizeBits) - cameraZ,
+                    (chunkX + 1 << chunkSizeBits) - cameraX,
+                    (chunkY + 1 << chunkSizeBits) - cameraY,
+                    (chunkZ + 1 << chunkSizeBits) - cameraZ)) {
+                int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
+                lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
+            }
+            return;
+        }
+
+        int intersectionType = intersection.intersectAab(
                 (chunkX << chunkSizeBits) - cameraX,
                 (chunkY << chunkSizeBits) - cameraY,
                 (chunkZ << chunkSizeBits) - cameraZ,
-                (chunkX + 1 << chunkSizeBits) - cameraX,
-                (chunkY + 1 << chunkSizeBits) - cameraY,
-                (chunkZ + 1 << chunkSizeBits) - cameraZ)) return;
+                (chunkX + length << chunkSizeBits) - cameraX,
+                (chunkY + length << chunkSizeBits) - cameraY,
+                (chunkZ + length << chunkSizeBits) - cameraZ);
 
-        lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
-
-        if ((traveledDirections & 1 << SOUTH) == 0)
-            fillVisibleChunks(chunkX, chunkY, chunkZ + 1, (byte) (traveledDirections | 1 << NORTH), lod, intersection);
-        if ((traveledDirections & 1 << NORTH) == 0)
-            fillVisibleChunks(chunkX, chunkY, chunkZ - 1, (byte) (traveledDirections | 1 << SOUTH), lod, intersection);
-
-        if ((traveledDirections & 1 << BOTTOM) == 0)
-            fillVisibleChunks(chunkX, chunkY + 1, chunkZ, (byte) (traveledDirections | 1 << TOP), lod, intersection);
-        if ((traveledDirections & 1 << TOP) == 0)
-            fillVisibleChunks(chunkX, chunkY - 1, chunkZ, (byte) (traveledDirections | 1 << BOTTOM), lod, intersection);
-
-        if ((traveledDirections & 1 << EAST) == 0)
-            fillVisibleChunks(chunkX + 1, chunkY, chunkZ, (byte) (traveledDirections | 1 << WEST), lod, intersection);
-        if ((traveledDirections & 1 << WEST) == 0)
-            fillVisibleChunks(chunkX - 1, chunkY, chunkZ, (byte) (traveledDirections | 1 << EAST), lod, intersection);
+        if (intersectionType == FrustumIntersection.INSIDE) {
+            for (long x = chunkX; x < chunkX + length; x++)
+                for (long y = chunkY; y < chunkY + length; y++)
+                    for (long z = chunkZ; z < chunkZ + length; z++) {
+                        int chunkIndex = Utils.getChunkIndex(x, y, z, lod);
+                        lodVisibilityBits[chunkIndex >> 6] |= 1L << chunkIndex;
+                    }
+        }
+        if (intersectionType == FrustumIntersection.INTERSECT) {
+            length >>= 1;
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX, chunkY + length, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY, chunkZ + length);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ);
+            fillVisibleChunks(lod, intersection, length, chunkX + length, chunkY + length, chunkZ + length);
+        }
     }
 
     private void removeLodVisibilityOverlap(int lod) {
@@ -302,7 +305,7 @@ public final class RenderingOptimizer {
         long distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
         long distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
 
-        return distanceX > (RENDER_DISTANCE >> 1) + 1 || distanceZ > (RENDER_DISTANCE >> 1) + 1 || distanceY > (Constants.RENDER_DISTANCE >> 1) + 1;
+        return distanceX > (RENDER_DISTANCE >> 1) + 1 || distanceZ > (RENDER_DISTANCE >> 1) + 1 || distanceY > (RENDER_DISTANCE >> 1) + 1;
     }
 
     private boolean modelCubePresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
