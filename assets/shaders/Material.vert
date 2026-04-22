@@ -2,6 +2,7 @@
 
 out vec3 texturePosition;
 out vec3 voxelPosition;
+out vec2 trianglePos;
 flat out vec3 normal;
 flat out int textureData;
 
@@ -19,7 +20,7 @@ uniform int lodSize;
 uniform ivec3 iCameraPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
-const vec2[6] FACE_POSITIONS = vec2[6](vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1), vec2(1, 0), vec2(0, 1));
+const vec2[3] FACE_POSITIONS = vec2[3](vec2(0, 0), vec2(0, 2), vec2(2, 0));
 const int NORTH = 0;
 const int TOP = 1;
 const int WEST = 2;
@@ -43,8 +44,8 @@ vec3 getFacePositions(int side, int currentVertexId, int faceSize1, int faceSize
 }
 
 void main() {
-    Vertex currentVertex = vertices[gl_VertexID / 6];
-    int currentVertexId = gl_VertexID % 6;
+    Vertex currentVertex = vertices[gl_VertexID / 3];
+    int currentVertexId = gl_VertexID % 3;
 
     int x = currentVertex.x;
     int y = currentVertex.y;
@@ -61,4 +62,5 @@ void main() {
 
     textureData = currentVertex.textureData;
     normal = NORMALS[side];
+    trianglePos = FACE_POSITIONS[currentVertexId];
 }

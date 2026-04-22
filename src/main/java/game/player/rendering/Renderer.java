@@ -502,7 +502,7 @@ public final class Renderer extends Renderable {
 
             long start = renderingOptimizer.getOpaqueLodStart(lod);
             int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
-            renderedOpaqueModels += drawCount / 6;
+            renderedOpaqueModels += drawCount / 3;
 
             glMultiDrawArraysIndirect(GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }

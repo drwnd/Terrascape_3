@@ -3,6 +3,7 @@
 
 flat in int textureData;
 in vec3 texturePosition;
+in vec2 trianglePos;
 layout(early_fragment_tests) in;
 
 layout (location = 0) out vec4 fragColor;
@@ -31,6 +32,7 @@ vec2 getUVOffset(int side, int textureSize) {
 }
 
 void main() {
+    if (trianglePos.x > 1 || trianglePos.y > 1) discard;
     side = textureData >> 8 & 7;
     int material = textureData & 0xFF;
     int textureSize = textureSizes[material];

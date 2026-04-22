@@ -16,7 +16,7 @@ import static game.utils.Constants.*;
 public final class MeshGenerator {
 
     public static final int INTS_PER_VERTEX = 4;
-    public static final int VERTICES_PER_QUAD = 6; // 2 * 3 for 2 Triangles each 3 Vertices
+    public static final int VERTICES_PER_QUAD = 3; // for 1 Triangle each 3 Vertices
     public static final int PROPERTIES_OFFSET = 24;
     public static final byte OPAQUE = GRASS;
 

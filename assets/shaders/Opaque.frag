@@ -8,6 +8,7 @@ flat in int textureData;
 flat in vec3 normal;
 in vec3 texturePosition;
 in vec3 voxelPosition;
+in vec2 trianglePos;
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out int side;
@@ -104,6 +105,7 @@ vec3 getColor(vec3 color, vec3 textureCoord) {
 }
 
 void main() {
+    if (trianglePos.x > 1 || trianglePos.y > 1) discard;
     side = textureData >> 8 & 7;
     int material = textureData & 0xFF;
     int textureSize = textureSizes[material];

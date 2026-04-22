@@ -8,6 +8,7 @@
 
 out vec3 texturePosition;
 out vec3 voxelPosition;
+out vec2 trianglePos;
 flat out vec3 normal;
 flat out int textureData;
 
@@ -29,7 +30,7 @@ uniform ivec3 iCameraPosition;
 uniform ivec3 startPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
-const vec2[6] FACE_POSITIONS = vec2[6](vec2(0, 0), vec2(0, 1), vec2(1, 0), vec2(1, 1), vec2(1, 0), vec2(0, 1));
+const vec2[3] FACE_POSITIONS = vec2[3](vec2(0, 0), vec2(0, 2), vec2(2, 0));
 
 
 float getTimeScaler(Particle currentParticle) {
@@ -101,12 +102,12 @@ vec3 rotate(vec3 vector, Particle currentParticle, float aliveTime) {
 
 void main() {
     Particle currentParticle = particles[gl_InstanceID];
-    int currentVertexId = gl_VertexID % 6;
+    int currentVertexId = gl_VertexID % 3;
 
     int x = (currentParticle.packedOffset >> 20 & 0x3FF) + startPosition.x - PARTICLE_OFFSET;
     int y = (currentParticle.packedOffset >> 10 & 0x3FF) + startPosition.y - PARTICLE_OFFSET;
     int z = (currentParticle.packedOffset >> 00 & 0x3FF) + startPosition.z - PARTICLE_OFFSET;
-    int side = (gl_VertexID / 6) % 6;
+    int side = (gl_VertexID / 3) % 6;
     float aliveTime = getAliveTime(currentParticle);
     float timeScaler = getTimeScaler(currentParticle);
 
@@ -121,4 +122,5 @@ void main() {
     textureData = side << 8 | currentParticle.packedRotationMaterial & 0xFF0000FF;
     texturePosition = wrappedPositon + facePosition;
     normal = rotate(NORMALS[side], currentParticle, aliveTime);
+    trianglePos = FACE_POSITIONS[currentVertexId];
 }
