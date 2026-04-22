@@ -6,6 +6,7 @@
 
 flat in int textureData;
 flat in vec3 normal;
+in vec2 trianglePos;
 in vec3 texturePosition;
 in vec3 voxelPosition;
 
@@ -34,6 +35,8 @@ vec2 getUVOffset(int side, int textureSize) {
 }
 
 void main() {
+    if (trianglePos.x > 1 || trianglePos.y > 1) discard;
+
     if (material != 0) {
         int textureMaterial = textureData & 0xFF;
         int side = textureData >> 8 & 7;
