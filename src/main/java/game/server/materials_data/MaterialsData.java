@@ -185,6 +185,14 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
+    public MaterialsData getSurfaceEquivalent() {
+        ByteArrayList dataList = new ByteArrayList(1000);
+        synchronized (this) {
+            getSurfaceEquivalent(dataList, totalSizeBits, 0);
+        }
+        return new MaterialsData(totalSizeBits, dataList.toArray());
+    }
+
     public void storeLowerLODChunks(Chunk chunk0, Chunk chunk1, Chunk chunk2, Chunk chunk3,
                                     Chunk chunk4, Chunk chunk5, Chunk chunk6, Chunk chunk7) {
 
@@ -810,14 +818,6 @@ public final class MaterialsData {
     }
 
     // Mesh generation for chunks
-    private MaterialsData getSurfaceEquivalent() {
-        ByteArrayList dataList = new ByteArrayList(1000);
-        synchronized (this) {
-            getSurfaceEquivalent(dataList, totalSizeBits, 0);
-        }
-        return new MaterialsData(totalSizeBits, dataList.toArray());
-    }
-
     private int getSurfaceEquivalent(ByteArrayList materials, int sizeBits, int startIndex) {
         byte types = getTypes(startIndex);
 

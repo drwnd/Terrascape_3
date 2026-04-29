@@ -27,22 +27,7 @@ record JavaMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) i
                 ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
                 Chunk chunk = world.getChunk(chunkIndex, lod);
 
-                if (chunk == null) {
-                    System.err.printf("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                    continue;
-                }
-                if (!chunk.ID.equals(expectedId)) {
-                    System.err.printf("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
-                    continue;
-                }
-                if (chunk.getGenerationStatus() != Status.DONE) {
-                    System.err.printf("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
-                    System.err.printf("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                    continue;
-                }
-
-                if (meshCollector.isMeshed(chunkIndex, lod)) continue;
-                meshCollector.setMeshed(true, chunkIndex, lod);
+                if (!canMesh(chunk, chunkX, chunkY, chunkZ, lod, expectedId, meshCollector, chunkIndex)) continue;
 
                 Mesh mesh = meshGenerator.generateMesh(chunk);
                 if (mesh == null) meshCollector.setMeshed(false, chunkIndex, lod);
@@ -55,5 +40,25 @@ record JavaMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) i
                 System.err.printf("%d %d %d%n", chunkX, chunkY, chunkZ);
             }
         }
+    }
+
+    public static boolean canMesh(Chunk chunk, long chunkX, long chunkY, long chunkZ, int lod, ChunkID expectedId, MeshCollector meshCollector, int chunkIndex) {
+        if (chunk == null) {
+            System.err.printf("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
+            return false;
+        }
+        if (!chunk.ID.equals(expectedId)) {
+            System.err.printf("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
+            return false;
+        }
+        if (chunk.getGenerationStatus() != Status.DONE) {
+            System.err.printf("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
+            System.err.printf("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
+            return false;
+        }
+
+        if (meshCollector.isMeshed(chunkIndex, lod)) return false;
+        meshCollector.setMeshed(true, chunkIndex, lod);
+        return true;
     }
 }
