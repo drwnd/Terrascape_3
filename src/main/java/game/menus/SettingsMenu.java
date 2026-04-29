@@ -175,6 +175,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
         section.addToggle(ToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
         section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
+        section.addToggle(ToggleSettings.USE_RUST_FUNCTIONS, new Message("Use Rust Functions (restart)"));
 
         section.addSlider(IntSettings.REACH, new Message("Reach"));
         section.addSlider(IntSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));

@@ -6,6 +6,7 @@ import game.server.material.Material;
 import game.server.saving.PlayerSaver;
 import game.server.saving.ServerSaver;
 import game.server.saving.WorldSaver;
+import game.settings.ToggleSettings;
 
 import java.io.File;
 
@@ -18,6 +19,7 @@ public final class Game {
         player = new PlayerSaver().load(PlayerSaver.getSaveFileLocation(worldName));
         server = new ServerSaver().load(ServerSaver.getSaveFileLocation(worldName));
         world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
+        useRustFunctions = ToggleSettings.USE_RUST_FUNCTIONS.value();
 
         world.setName(worldName);
         World.init();
@@ -59,6 +61,10 @@ public final class Game {
         return server;
     }
 
+    public static boolean useRustFunctions() {
+        return useRustFunctions;
+    }
+
 
     public static boolean setTemporaryWorld(World world) {
         if (Game.world != null || player != null || server != null) {
@@ -81,4 +87,5 @@ public final class Game {
     private static Player player;
     private static World world;
     private static Server server;
+    private static boolean useRustFunctions;
 }
