@@ -10,7 +10,7 @@ import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
 import game.server.command.Command;
 import game.server.command.CommandResult;
-import game.server.generation.ChunkGenerator;
+import game.server.generation.Generator;
 import game.server.saving.ChunkSaver;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
@@ -46,7 +46,7 @@ public final class Server implements CrashCallback {
     }
 
     public static void loadImmediateSurroundings() {
-        ChunkGenerator.loadImmediateSurroundings();
+        Generator.loadImmediateSurroundings();
     }
 
     public static void unloadDistantChunks(Vector3l playerChunkPosition) {
@@ -227,7 +227,7 @@ public final class Server implements CrashCallback {
 
     private ScheduledExecutorService executor;
     private final ArrayList<ChatMessage> messages;
-    private final ChunkGenerator generator = new ChunkGenerator();
+    private final Generator generator = new Generator();
     private final HashMap<Object, Function> functions = new HashMap<>();
 
     private long gameTickStartTime;
