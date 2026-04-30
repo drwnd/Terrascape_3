@@ -4,7 +4,6 @@ use jni::objects::{JByteArray, JClass, JIntArray, JPrimitiveArray};
 use jni::sys::{jint, jintArray};
 use jni::{AttachGuard, Env, EnvUnowned};
 use jni::elements::ReleaseMode;
-
 use super::materials_data::{CHUNK_SIZE, CHUNK_SIZE_BITS, AIR, MaterialsData, OPAQUE, NORTH, SOUTH, get_uncompressed_index, TOP, BOTTOM, WEST, EAST};
 
 #[allow(non_snake_case)]
@@ -39,8 +38,6 @@ pub extern "system" fn Java_game_server_generation_NativeFunctions_generateMesh<
 
     let mesh_data: Vec<i32> = generate_mesh(materials_data, surface_equivalent, north, top, west, south, bottom, east, x_start, y_start, z_start);
     let result: JPrimitiveArray<jint> = JIntArray::new(env, mesh_data.len()).unwrap();
-
-
     result.as_raw() as jintArray
 }
 
@@ -227,10 +224,10 @@ impl MeshGenerator {
                 let material: i8 = self.materials_layer[material_z << CHUNK_SIZE_BITS | material_y];
                 let face_end_y: usize = self.grow_face_1st_direction(to_mesh_faces_map[material_z], material_y + 1, material_z, material);
                 let mask: u64 = MaterialsData::get_mask(face_end_y - material_y + 1, material_y);
-                let face_end_x: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_z + 1, mask, material_y, face_end_y, material);
+                let face_end_z: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_z + 1, mask, material_y, face_end_y, material);
 
-                MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_x, face_end_x);
-                self.add_face(side, material_x, material_y, material_z, material, face_end_y - material_y, face_end_x - material_x);
+                MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_z, face_end_z);
+                self.add_face(side, material_x, material_y, material_z, material, face_end_y - material_y, face_end_z - material_z);
                 material_y = to_mesh_faces_map[material_z].trailing_zeros() as usize;
             }
         }
@@ -276,7 +273,7 @@ impl MeshGenerator {
 
     fn remove_from_map(to_mesh_faces_map: &mut [u64], mut mask: u64, start: usize, end: usize) {
         mask = !mask;
-        for index in start..end {
+        for index in start..=end {
             to_mesh_faces_map[index] &= mask;
         }
     }
@@ -398,10 +395,10 @@ impl MeshGenerator {
                 let material: i8 = self.materials_layer[material_z << CHUNK_SIZE_BITS | material_y];
                 let face_end_y: usize = self.grow_face_1st_direction(to_mesh_faces_map[material_z], material_y + 1, material_z, material);
                 let mask: u64 = MaterialsData::get_mask(face_end_y - material_y + 1, material_y);
-                let face_end_x: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_z + 1, mask, material_y, face_end_y, material);
+                let face_end_z: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_z + 1, mask, material_y, face_end_y, material);
 
-                MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_x, face_end_x);
-                self.add_side_face(side, material_x, material_y, material_z, material, face_end_y - material_y, face_end_x - material_x);
+                MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_z, face_end_z);
+                self.add_side_face(side, material_x, material_y, material_z, material, face_end_y - material_y, face_end_z - material_z);
                 material_y = to_mesh_faces_map[material_z].trailing_zeros() as usize;
             }
         }

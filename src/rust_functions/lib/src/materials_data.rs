@@ -391,7 +391,6 @@ impl MaterialsData<'_> {
     fn get_material_2d(data: &[i8], in_chunk_a: usize, in_chunk_b: usize) -> i8 {
         let mut index: usize = 0;
         let mut size_bits: usize = CHUNK_SIZE_BITS;
-
         loop {
             let identifier: i8 = data[index] & IDENTIFIER_MASK;
 
@@ -417,7 +416,7 @@ impl MaterialsData<'_> {
     }
 
     fn get_offset_at(&self, splitter_index: usize, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize, size_bits: usize) -> usize {
-        let in_splitter_index: usize = 3 * ((in_chunk_x >> size_bits & 1) << 2 | (in_chunk_y >> size_bits & 1) << 1) | (in_chunk_z >> splitter_index & 1);
+        let in_splitter_index: usize = 3 * (((in_chunk_x >> size_bits & 1) << 2 | (in_chunk_y >> size_bits & 1) << 1) | (in_chunk_z >> splitter_index & 1));
         if in_splitter_index == 0 {
             return SPLITTER_BYTE_SIZE;
         }
@@ -425,7 +424,7 @@ impl MaterialsData<'_> {
     }
 
     fn get_offset(&self, index: usize) -> usize {
-        (self.data[index] as u8 as usize) << 16 | (self.data[index + 1] as u8 as usize) << 8 | self.data[index + 2] as u8 as usize
+        (self.data[index] as u8 as usize) << 16 | (self.data[index + 1] as u8 as usize) << 8 | (self.data[index + 2] as u8 as usize)
     }
 
     fn get_identifier(&self, start_index: usize) -> i8 {

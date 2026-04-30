@@ -9,6 +9,8 @@ import game.server.saving.WorldSaver;
 import game.settings.ToggleSettings;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public final class Game {
 
@@ -20,6 +22,19 @@ public final class Game {
         server = new ServerSaver().load(ServerSaver.getSaveFileLocation(worldName));
         world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
         useRustFunctions = ToggleSettings.USE_RUST_FUNCTIONS.value();
+
+        if (useRustFunctions) {
+            Path path = Paths.get("src/rust_functions/lib/target/release/lib.dll");
+            System.out.println("loading dll at " + path.toAbsolutePath());
+
+            try {
+                System.load(path.toAbsolutePath().toString());
+            } catch (Exception exception) {
+                System.err.println("Failed to load dll");
+                exception.printStackTrace();
+                useRustFunctions = false;
+            }
+        }
 
         world.setName(worldName);
         World.init();

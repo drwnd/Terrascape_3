@@ -150,6 +150,7 @@ public final class Generator {
     }
 
     private static Runnable getMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) {
+        if (Game.useRustFunctions()) return new RustMeshGenerator(chunkX, playerChunkY, chunkZ, lod);
         return new JavaMeshGenerator(chunkX, playerChunkY, chunkZ, lod);
     }
 
