@@ -72,7 +72,7 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         int yStart = (int) chunk.Y << CHUNK_SIZE_BITS;
         int zStart = (int) chunk.Z << CHUNK_SIZE_BITS;
 
-        int[] meshData = NativeFunction.generateMesh(materialsData, surfaceEquivalent,
+        int[] meshData = NativeFunctions.generateMesh(materialsData, surfaceEquivalent,
                 north, top, west, south, bottom, east,
                 xStart, yStart, zStart);
 
@@ -107,12 +107,6 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         int sum = 0;
         for (int vertexCount : vertexCounts) sum += vertexCount;
         return sum;
-    }
-
-    private static class NativeFunction {
-        public static native int[] generateMesh(byte[] materialsData, byte[] surfaceEquivalent,
-                                                byte[] north, byte[] top, byte[] west, byte[] south, byte[] bottom, byte[] east,
-                                                int xStart, int yStart, int zStart);
     }
 }
 
