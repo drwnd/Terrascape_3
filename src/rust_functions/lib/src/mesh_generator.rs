@@ -38,6 +38,10 @@ pub extern "system" fn Java_game_server_generation_NativeFunctions_generateMesh<
 
     let mesh_data: Vec<i32> = generate_mesh(materials_data, surface_equivalent, north, top, west, south, bottom, east, x_start, y_start, z_start);
     let result: JPrimitiveArray<jint> = JIntArray::new(env, mesh_data.len()).unwrap();
+
+    let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
+    unsafe { std::ptr::copy_nonoverlapping(mesh_data.as_ptr(), java_array.as_ptr(), mesh_data.len()); }
+
     result.as_raw() as jintArray
 }
 
@@ -91,7 +95,7 @@ impl MeshGenerator {
         self.vertices.iter().for_each(|vec: &Vec<i32>| { required_length += vec.len(); });
         let mut mesh_data: Vec<i32> = Vec::with_capacity(required_length);
 
-        self.vertices.iter().for_each(|vec: &Vec<i32>| { mesh_data.push(vec.len() as i32); });
+        self.vertices.iter().for_each(|vec: &Vec<i32>| { mesh_data.push((vec.len() >> 2) as i32); });
         self.vertices.iter_mut().for_each(|vec: &mut Vec<i32>| { mesh_data.append(vec); });
 
         mesh_data

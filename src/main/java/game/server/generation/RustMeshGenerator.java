@@ -86,7 +86,9 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         int opaqueVertexCount = vertexCountSum(vertexCounts);
         int waterVertexCount = meshData[7];
         int glassVertexCount = meshData[8];
-//        if (opaqueVertexCount == 0 && waterVertexCount == 0 && glassVertexCount == 0) return new Mesh(chunkX, chunkY, chunkZ, lod);
+
+//        System.out.printf("Opaque: %d, Water: %d, Glass: %d, total: %d%n", opaqueVertexCount, waterVertexCount, glassVertexCount, meshData.length - 9);
+        if (opaqueVertexCount == 0 && waterVertexCount == 0 && glassVertexCount == 0) return new Mesh(chunkX, chunkY, chunkZ, lod);
 
         int[] opaqueVertices = new int[opaqueVertexCount * MeshGenerator.VERTICES_PER_QUAD];
         int[] transparentVertices = new int[(waterVertexCount + glassVertexCount) * MeshGenerator.VERTICES_PER_QUAD];
