@@ -5,7 +5,7 @@ pub struct MaterialsData<'a> {
 }
 
 impl MaterialsData<'_> {
-    pub fn fill_uncompressed_materials(&self, uncompressed_materials: &mut [i8],
+    pub fn fill_uncompressed_materials(&self, uncompressed_materials: &mut [i8; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
                                        mut size_bits: usize, mut start_index: usize,
                                        in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
@@ -44,8 +44,9 @@ impl MaterialsData<'_> {
     }
 
     pub fn generate_to_mesh_faces_maps(&self,
-                                       to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], uncompressed_materials: &[i8], adjacent_chunk_layers: &[&[i8]; 6],
-                                       mut size_bits: usize, start_index: usize, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
+                                       to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], uncompressed_materials: &[i8; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
+                                       adjacent_chunk_layers: &[&[i8]; 6], mut size_bits: usize, start_index: usize,
+                                       in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -88,7 +89,7 @@ impl MaterialsData<'_> {
 
 // To mesh faces functions
 impl MaterialsData<'_> {
-    fn generate_to_mesh_faces_homogenous_north_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_north_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                      size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_z == CHUNK_SIZE {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[NORTH];
@@ -100,7 +101,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_north_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_x, in_chunk_y)
     }
 
-    fn generate_to_mesh_faces_homogenous_north_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_x: usize, in_chunk_y: usize) {
+    fn generate_to_mesh_faces_homogenous_north_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                            start_index: usize, in_chunk_x: usize, in_chunk_y: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -125,7 +127,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_south_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_south_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                      size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_z == usize::MAX {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[SOUTH];
@@ -137,7 +139,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_south_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_x, in_chunk_y)
     }
 
-    fn generate_to_mesh_faces_homogenous_south_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_x: usize, in_chunk_y: usize) {
+    fn generate_to_mesh_faces_homogenous_south_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                            start_index: usize, in_chunk_x: usize, in_chunk_y: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -162,7 +165,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_top_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_top_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                    size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_y == CHUNK_SIZE {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[TOP];
@@ -174,7 +177,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_top_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_x, in_chunk_z)
     }
 
-    fn generate_to_mesh_faces_homogenous_top_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_x: usize, in_chunk_z: usize) {
+    fn generate_to_mesh_faces_homogenous_top_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                          start_index: usize, in_chunk_x: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -199,7 +203,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_bottom_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_bottom_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                       size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_y == usize::MAX {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[BOTTOM];
@@ -211,7 +215,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_bottom_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_x, in_chunk_z)
     }
 
-    fn generate_to_mesh_faces_homogenous_bottom_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_x: usize, in_chunk_z: usize) {
+    fn generate_to_mesh_faces_homogenous_bottom_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                             start_index: usize, in_chunk_x: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -236,7 +241,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_west_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_west_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                     size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_x == CHUNK_SIZE {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[WEST];
@@ -248,7 +253,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_west_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_y, in_chunk_z)
     }
 
-    fn generate_to_mesh_faces_homogenous_west_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_y: usize, in_chunk_z: usize) {
+    fn generate_to_mesh_faces_homogenous_west_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                           start_index: usize, in_chunk_y: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -273,7 +279,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_east_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layers: &[&[i8]; 6],
+    fn generate_to_mesh_faces_homogenous_east_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6],
                                                     size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_x == usize::MAX {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[EAST];
@@ -285,7 +291,8 @@ impl MaterialsData<'_> {
         self.generate_to_mesh_faces_homogenous_east_layer_inside(to_mesh_faces_map, size_bits, material, start_index, in_chunk_y, in_chunk_z)
     }
 
-    fn generate_to_mesh_faces_homogenous_east_layer_inside(&self, to_mesh_faces_map: &mut [u64], mut size_bits: usize, material: i8, start_index: usize, in_chunk_y: usize, in_chunk_z: usize) {
+    fn generate_to_mesh_faces_homogenous_east_layer_inside(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut size_bits: usize, material: i8,
+                                                           start_index: usize, in_chunk_y: usize, in_chunk_z: usize) {
         let identifier: i8 = self.get_identifier(start_index);
 
         if identifier == SPLITTER {
@@ -310,7 +317,7 @@ impl MaterialsData<'_> {
     }
 
 
-    fn generate_to_mesh_faces_homogenous_side_layer(&self, to_mesh_faces_map: &mut [u64], adjacent_chunk_layer: &[i8],
+    fn generate_to_mesh_faces_homogenous_side_layer(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE], adjacent_chunk_layer: &[i8],
                                                     start_index: usize, mut size_bits: usize, material: i8, in_chunk_a: usize, in_chunk_b: usize) {
         let identifier: i8 = adjacent_chunk_layer[start_index] & IDENTIFIER_MASK;
 
@@ -336,7 +343,7 @@ impl MaterialsData<'_> {
         } else { panic!() }
     }
 
-    fn fill_to_mesh_faces_map_homogenous(to_mesh_faces_map: &mut [u64], size_bits: usize, material: i8, occluding_material: i8, in_chunk_a: usize, in_chunk_b: usize) {
+    fn fill_to_mesh_faces_map_homogenous(to_mesh_faces_map: &mut [u64; CHUNK_SIZE], size_bits: usize, material: i8, occluding_material: i8, in_chunk_a: usize, in_chunk_b: usize) {
         if !mesh_generator::is_visible(material, occluding_material) { return; }
         let length: usize = 1 << size_bits;
         let mask: u64 = MaterialsData::get_mask(length, in_chunk_b);
@@ -345,8 +352,8 @@ impl MaterialsData<'_> {
         }
     }
 
-    fn generate_to_mesh_faces_detail(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], uncompressed_materials: &[i8], adjacent_chunk_layers: &[&[i8]; 6],
-                                     in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
+    fn generate_to_mesh_faces_detail(&self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], uncompressed_materials: &[i8; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
+                                     adjacent_chunk_layers: &[&[i8]; 6], in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         let material: i8 = uncompressed_materials[get_uncompressed_index(in_chunk_x, in_chunk_y, in_chunk_z)];
         if material == AIR { return; }
 
@@ -365,7 +372,7 @@ impl MaterialsData<'_> {
         if mesh_generator::is_visible(material, east_material) { MaterialsData::split_map(to_mesh_faces_map, EAST, in_chunk_x)[in_chunk_z] |= 1 << in_chunk_y; }
     }
 
-    fn get_material(uncompressed_materials: &[i8], adjacent_chunk_layers: &[&[i8]; 6], in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) -> i8 {
+    fn get_material(uncompressed_materials: &[i8; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE], adjacent_chunk_layers: &[&[i8]; 6], in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) -> i8 {
         if in_chunk_x == usize::MAX { return MaterialsData::get_material_2d(adjacent_chunk_layers[EAST], in_chunk_z, in_chunk_y); }
         if in_chunk_y == usize::MAX { return MaterialsData::get_material_2d(adjacent_chunk_layers[BOTTOM], in_chunk_x, in_chunk_z); }
         if in_chunk_z == usize::MAX { return MaterialsData::get_material_2d(adjacent_chunk_layers[SOUTH], in_chunk_x, in_chunk_y); }
@@ -445,9 +452,9 @@ impl MaterialsData<'_> {
         self.data[start_index] & IDENTIFIER_MASK
     }
 
-    pub fn split_map(to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &mut [u64] {
+    pub fn split_map(to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &mut [u64; CHUNK_SIZE] {
         let index: usize = side * CHUNK_SIZE * CHUNK_SIZE + in_chunk * CHUNK_SIZE;
-        &mut to_mesh_faces_map[index..index + CHUNK_SIZE]
+        <&mut [u64; 64]>::try_from(&mut to_mesh_faces_map[index..index + CHUNK_SIZE]).unwrap()
     }
 
     pub fn get_mask(length: usize, offset: usize) -> u64 {

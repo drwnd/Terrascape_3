@@ -3,10 +3,7 @@ package game.server.generation;
 import core.utils.ByteArrayList;
 import game.player.rendering.*;
 import game.server.*;
-import game.server.materials_data.MaterialsData;
 import game.utils.Utils;
-
-import java.util.Arrays;
 
 import static game.utils.Constants.*;
 
@@ -45,7 +42,7 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         }
     }
 
-    private Mesh generateMesh(Chunk chunk) {
+    public Mesh generateMesh(Chunk chunk) {
         if (chunk.isAir()) return new Mesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
 
         ChunkNeighbors neighbors = chunk.getNeighbors();
@@ -72,46 +69,6 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         int xStart = (int) chunk.X << CHUNK_SIZE_BITS;
         int yStart = (int) chunk.Y << CHUNK_SIZE_BITS;
         int zStart = (int) chunk.Z << CHUNK_SIZE_BITS;
-
-        {
-            MaterialsData uncompressed = new MaterialsData(CHUNK_SIZE_BITS, materialsData);
-            byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-            uncompressed.fillUncompressedMaterialsInto(uncompressedMaterials);
-
-            byte[] rustUncompressedMaterials = NativeFunctions.getUncompressedMaterials(materialsData);
-            if (!Arrays.equals(uncompressedMaterials, rustUncompressedMaterials)) {
-                System.err.println("Uncompressed materials are not correct");
-            }
-
-//            long[][][] bitMap_from_layers = new long[6][CHUNK_SIZE][CHUNK_SIZE];
-//            long[][][] bitMap_from_chunk = new long[6][CHUNK_SIZE][CHUNK_SIZE];
-//
-//            chunk.generateToMeshFacesMaps(bitMap_from_chunk, uncompressedMaterials, new ByteArrayList[]{
-//                    new ByteArrayList(100),
-//                    new ByteArrayList(100),
-//                    new ByteArrayList(100),
-//                    new ByteArrayList(100),
-//                    new ByteArrayList(100),
-//                    new ByteArrayList(100)}, neighbors);
-//            uncompressed.generateToMeshFacesMaps(bitMap_from_layers, uncompressedMaterials, new byte[][]{north, top, west, south, bottom, east});
-//            long[] rustBitMap = NativeFunctions.getBitMap(materialsData, surfaceEquivalent,
-//                    north, top, west, south, bottom, east,
-//                    xStart, yStart, zStart);
-//
-//            long[] tmp = new long[CHUNK_SIZE];
-//
-//            for (int side = 0; side < 6; side++)
-//                for (int inChunk = 0; inChunk < CHUNK_SIZE; inChunk++) {
-//                    int index = side * CHUNK_SIZE * CHUNK_SIZE + inChunk * CHUNK_SIZE;
-//                    System.arraycopy(rustBitMap, index, tmp, 0, CHUNK_SIZE);
-//                    if (!Arrays.equals(bitMap_from_chunk[side][inChunk], tmp)) {
-//                        System.err.printf("Rust   Bit map is not correct at side %d at position %d RUST %n", side, inChunk);
-//                    }
-//                    if (!Arrays.equals(bitMap_from_chunk[side][inChunk], bitMap_from_layers[side][inChunk])) {
-//                        System.err.printf("Layers Bit map is not correct as side %d at position %d LAYER%n", side, inChunk);
-//                    }
-//                }
-        }
 
         int[] meshData = NativeFunctions.generateMesh(materialsData, surfaceEquivalent,
                 north, top, west, south, bottom, east,

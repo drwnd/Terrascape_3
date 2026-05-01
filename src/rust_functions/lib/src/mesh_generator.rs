@@ -1,81 +1,10 @@
 extern crate jni;
 
-use jni::objects::{JByteArray, JClass, JIntArray, JLongArray, JPrimitiveArray};
-use jni::sys::{jbyte, jbyteArray, jint, jintArray, jlong, jlongArray};
+use jni::objects::{JByteArray, JClass, JIntArray, JPrimitiveArray};
+use jni::sys::{jint, jintArray};
 use jni::{AttachGuard, Env, EnvUnowned};
 use jni::elements::ReleaseMode;
 use super::materials_data::{CHUNK_SIZE, CHUNK_SIZE_BITS, AIR, MaterialsData, NORTH, SOUTH, get_uncompressed_index, TOP, BOTTOM, WEST, EAST};
-
-#[allow(non_snake_case)]
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_game_server_generation_NativeFunctions_getUncompressedMaterials<'a>(
-    env_unowned: EnvUnowned, _class: JClass,
-    materials_data: JByteArray) -> jbyteArray {
-    let mut guard: AttachGuard = unsafe { AttachGuard::from_unowned(env_unowned.as_raw()) };
-    let env: &mut Env = guard.borrow_env_mut();
-
-    let mut auto_elements = unsafe { materials_data.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let materials_data: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
-
-    let materials: MaterialsData = MaterialsData { data: materials_data };
-    let mut generator: MeshGenerator = MeshGenerator::new(0, 0, 0);
-    materials.fill_uncompressed_materials(&mut generator.uncompressed_materials, CHUNK_SIZE_BITS, 0, 0, 0, 0);
-
-    let result: JPrimitiveArray<jbyte> = JByteArray::new(env, generator.uncompressed_materials.len()).unwrap();
-
-    let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
-    unsafe { std::ptr::copy_nonoverlapping(generator.uncompressed_materials.as_ptr(), java_array.as_ptr(), generator.uncompressed_materials.len()); }
-
-    result.as_raw() as jintArray
-}
-
-#[allow(non_snake_case)]
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_game_server_generation_NativeFunctions_getBitMap<'a>(
-    env_unowned: EnvUnowned, _class: JClass,
-    materials_data: JByteArray, surface_equivalent: JByteArray,
-    north: JByteArray, top: JByteArray, west: JByteArray, south: JByteArray, bottom: JByteArray, east: JByteArray,
-    x_start: jint, y_start: jint, z_start: jint) -> jlongArray {
-    let mut guard: AttachGuard = unsafe { AttachGuard::from_unowned(env_unowned.as_raw()) };
-    let env: &mut Env = guard.borrow_env_mut();
-
-    let mut auto_elements = unsafe { materials_data.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let materials_data: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { surface_equivalent.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let surface_equivalent: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
-
-    let mut auto_elements = unsafe { north.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let north: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { top.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let top: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-
-    let mut auto_elements = unsafe { west.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let west: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { south.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let south: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-
-    let mut auto_elements = unsafe { bottom.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let bottom: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { east.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let east: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-
-    let materials: MaterialsData = MaterialsData { data: materials_data };
-    let surface_equivalent: MaterialsData = MaterialsData { data: surface_equivalent };
-
-    let mut generator: MeshGenerator = MeshGenerator::new(x_start, y_start, z_start);
-    let mut to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6] = &mut [0; CHUNK_SIZE * CHUNK_SIZE * 6];
-    let adjacent_chunk_layers: &[&[i8]; 6] = &[north, top, west, south, bottom, east];
-
-    materials.fill_uncompressed_materials(&mut generator.uncompressed_materials, CHUNK_SIZE_BITS, 0, 0, 0, 0);
-    surface_equivalent.generate_to_mesh_faces_maps(&mut to_mesh_faces_map, &mut generator.uncompressed_materials, adjacent_chunk_layers, CHUNK_SIZE_BITS, 0, 0, 0, 0);
-
-    let result: JPrimitiveArray<jlong> = JLongArray::new(env, to_mesh_faces_map.len()).unwrap();
-
-    let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
-    unsafe { std::ptr::copy_nonoverlapping(to_mesh_faces_map.as_ptr() as *mut jlong, java_array.as_ptr(), to_mesh_faces_map.len()); }
-
-    result.as_raw() as jlongArray
-}
 
 #[allow(non_snake_case)]
 #[unsafe(no_mangle)]
@@ -212,8 +141,8 @@ impl MeshGenerator {
 
 
     fn copy_materials_north_south(&mut self, material_z: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, NORTH, material_z);
-        let to_mesh_faces_2: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, SOUTH, material_z);
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, NORTH, material_z);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, SOUTH, material_z);
 
         for material_x in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_x] | to_mesh_faces_2[material_x];
@@ -228,8 +157,8 @@ impl MeshGenerator {
     }
 
     fn copy_materials_top_bottom(&mut self, material_y: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, TOP, material_y);
-        let to_mesh_faces_2: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, BOTTOM, material_y);
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, TOP, material_y);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, BOTTOM, material_y);
 
         for material_x in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_x] | to_mesh_faces_2[material_x];
@@ -244,8 +173,8 @@ impl MeshGenerator {
     }
 
     fn copy_materials_west_east(&mut self, material_x: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, WEST, material_x);
-        let to_mesh_faces_2: &[u64] = MeshGenerator::split_map(to_mesh_faces_map, EAST, material_x);
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, WEST, material_x);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, EAST, material_x);
 
         for material_z in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_z] | to_mesh_faces_2[material_z];
@@ -261,7 +190,7 @@ impl MeshGenerator {
 
 
     fn add_north_south_layer(&mut self, side: usize, material_z: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64] = MaterialsData::split_map(to_mesh_faces_map, side, material_z);
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_z);
         for material_x in 0..CHUNK_SIZE {
             let mut material_y: usize = to_mesh_faces_map[material_x].trailing_zeros() as usize;
 
@@ -279,7 +208,7 @@ impl MeshGenerator {
     }
 
     fn add_top_bottom_layer(&mut self, side: usize, material_y: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64] = MaterialsData::split_map(to_mesh_faces_map, side, material_y);
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_y);
         for material_x in 0..CHUNK_SIZE {
             let mut material_z: usize = to_mesh_faces_map[material_x].trailing_zeros() as usize;
 
@@ -297,7 +226,7 @@ impl MeshGenerator {
     }
 
     fn add_west_east_layer(&mut self, side: usize, material_x: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64] = MaterialsData::split_map(to_mesh_faces_map, side, material_x);
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_x);
         for material_z in 0..CHUNK_SIZE {
             let mut material_y: usize = to_mesh_faces_map[material_z].trailing_zeros() as usize;
 
@@ -352,7 +281,7 @@ impl MeshGenerator {
         grow_start - 1
     }
 
-    fn remove_from_map(to_mesh_faces_map: &mut [u64], mut mask: u64, start: usize, end: usize) {
+    fn remove_from_map(to_mesh_faces_map: &mut [u64; CHUNK_SIZE], mut mask: u64, start: usize, end: usize) {
         mask = !mask;
         for index in start..=end {
             to_mesh_faces_map[index] &= mask;
@@ -363,9 +292,9 @@ impl MeshGenerator {
         material as u8 >= 125 && material as u8 <= 132
     }
 
-    fn split_map(to_mesh_faces_map: &[u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &[u64] {
+    fn split_map(to_mesh_faces_map: &[u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &[u64; CHUNK_SIZE] {
         let index: usize = side * CHUNK_SIZE * CHUNK_SIZE + in_chunk * CHUNK_SIZE;
-        &to_mesh_faces_map[index..index + CHUNK_SIZE]
+        <&[u64; 64]>::try_from(&to_mesh_faces_map[index..index + CHUNK_SIZE]).unwrap()
     }
 
     fn has_opaque_mesh(&self) -> bool {
