@@ -109,7 +109,7 @@ public final class GenerationData {
     }
 
     public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {
-        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
+        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.Z_ORDER_3D_TABLE_Z[inChunkZ];
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 

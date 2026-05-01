@@ -360,7 +360,7 @@ impl MaterialsData<'_> {
         if mesh_generator::is_visible(material, north_material) { MaterialsData::split_map(to_mesh_faces_map, NORTH, in_chunk_z)[in_chunk_x] |= 1 << in_chunk_y; }
         if mesh_generator::is_visible(material, top_material) { MaterialsData::split_map(to_mesh_faces_map, TOP, in_chunk_y)[in_chunk_x] |= 1 << in_chunk_z; }
         if mesh_generator::is_visible(material, west_material) { MaterialsData::split_map(to_mesh_faces_map, WEST, in_chunk_x)[in_chunk_z] |= 1 << in_chunk_y; }
-        if mesh_generator::is_visible(material, south_material) { MaterialsData::split_map(to_mesh_faces_map, NORTH, in_chunk_z)[in_chunk_x] |= 1 << in_chunk_y; }
+        if mesh_generator::is_visible(material, south_material) { MaterialsData::split_map(to_mesh_faces_map, SOUTH, in_chunk_z)[in_chunk_x] |= 1 << in_chunk_y; }
         if mesh_generator::is_visible(material, bottom_material) { MaterialsData::split_map(to_mesh_faces_map, BOTTOM, in_chunk_y)[in_chunk_x] |= 1 << in_chunk_z; }
         if mesh_generator::is_visible(material, east_material) { MaterialsData::split_map(to_mesh_faces_map, EAST, in_chunk_x)[in_chunk_z] |= 1 << in_chunk_y; }
     }
@@ -392,7 +392,7 @@ impl MaterialsData<'_> {
     }
 
     fn get_offset_2d_of(data: &[i8], splitter_index: usize, in_chunk_a: usize, in_chunk_b: usize, size_bits: usize) -> usize {
-        let in_splitter_index = 3 * ((in_chunk_a >> size_bits & 1) << 1 | (in_chunk_b >> size_bits & 1));
+        let in_splitter_index: usize = 3 * ((in_chunk_a >> size_bits & 1) << 1 | (in_chunk_b >> size_bits & 1));
         if in_splitter_index == 0 { return SPLITTER_BYTE_SIZE_2D; }
         MaterialsData::get_offset_2d(data, splitter_index + in_splitter_index - 2)
     }
@@ -460,35 +460,10 @@ pub fn get_uncompressed_index(in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: 
     (Z_ORDER_3D_TABLE_X[in_chunk_x] | Z_ORDER_3D_TABLE_Y[in_chunk_y] | Z_ORDER_3D_TABLE_Z[in_chunk_z]) as usize
 }
 
-const fn generate_z_order_table(split: u32, shift: u32) -> [u32; CHUNK_SIZE] {
-    let mut table: [u32; CHUNK_SIZE] = [0; CHUNK_SIZE];
-    let mut index: usize = 0;
 
-    while index < CHUNK_SIZE {
-        table[index] = z_order_value(index as u32, split) << shift;
-        index += 1;
-    }
-    table
-}
-
-const fn z_order_value(value: u32, split: u32) -> u32 {
-    let mut z_order_value: u32 = 0;
-    let mut index: u32 = 0;
-
-    while index < CHUNK_SIZE_BITS as u32 {
-        let mut bit: u32 = value >> index & 1;
-        bit <<= index * split;
-        z_order_value |= bit;
-
-        index += 1;
-    }
-
-    z_order_value
-}
-
-static Z_ORDER_3D_TABLE_X: [u32; CHUNK_SIZE] = generate_z_order_table(3, 2);
-static Z_ORDER_3D_TABLE_Y: [u32; CHUNK_SIZE] = generate_z_order_table(3, 1);
-static Z_ORDER_3D_TABLE_Z: [u32; CHUNK_SIZE] = generate_z_order_table(3, 0);
+static Z_ORDER_3D_TABLE_X: [u32; CHUNK_SIZE] = [0, 4, 32, 36, 256, 260, 288, 292, 2048, 2052, 2080, 2084, 2304, 2308, 2336, 2340, 16384, 16388, 16416, 16420, 16640, 16644, 16672, 16676, 18432, 18436, 18464, 18468, 18688, 18692, 18720, 18724, 131072, 131076, 131104, 131108, 131328, 131332, 131360, 131364, 133120, 133124, 133152, 133156, 133376, 133380, 133408, 133412, 147456, 147460, 147488, 147492, 147712, 147716, 147744, 147748, 149504, 149508, 149536, 149540, 149760, 149764, 149792, 149796];
+static Z_ORDER_3D_TABLE_Y: [u32; CHUNK_SIZE] = [0, 2, 16, 18, 128, 130, 144, 146, 1024, 1026, 1040, 1042, 1152, 1154, 1168, 1170, 8192, 8194, 8208, 8210, 8320, 8322, 8336, 8338, 9216, 9218, 9232, 9234, 9344, 9346, 9360, 9362, 65536, 65538, 65552, 65554, 65664, 65666, 65680, 65682, 66560, 66562, 66576, 66578, 66688, 66690, 66704, 66706, 73728, 73730, 73744, 73746, 73856, 73858, 73872, 73874, 74752, 74754, 74768, 74770, 74880, 74882, 74896, 74898];
+static Z_ORDER_3D_TABLE_Z: [u32; CHUNK_SIZE] = [0, 1, 8, 9, 64, 65, 72, 73, 512, 513, 520, 521, 576, 577, 584, 585, 4096, 4097, 4104, 4105, 4160, 4161, 4168, 4169, 4608, 4609, 4616, 4617, 4672, 4673, 4680, 4681, 32768, 32769, 32776, 32777, 32832, 32833, 32840, 32841, 33280, 33281, 33288, 33289, 33344, 33345, 33352, 33353, 36864, 36865, 36872, 36873, 36928, 36929, 36936, 36937, 37376, 37377, 37384, 37385, 37440, 37441, 37448, 37449];
 
 pub const CHUNK_SIZE: usize = 64;
 pub const CHUNK_SIZE_BITS: usize = 6;

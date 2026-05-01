@@ -330,7 +330,7 @@ impl MeshGenerator {
         vertices.push(self.x_start | material_x as i32);
         vertices.push(self.y_start | material_y as i32);
         vertices.push(self.z_start | material_z as i32);
-        vertices.push((face_size_1 << 17 | face_size_2 << 11 | side << 8 | (material as u8 as usize)) as i32); // TODO properties
+        vertices.push(((MATERIAL_PROPERTIES[material as u8 as usize] as usize) << 24 | face_size_1 << 17 | face_size_2 << 11 | side << 8 | (material as u8 as usize)) as i32);
     }
 
     fn grow_face_1st_direction(&self, to_mesh_faces: u64, mut grow_start: usize, fixed_start: usize, material: i8) -> usize {
@@ -344,7 +344,7 @@ impl MeshGenerator {
 
     fn grow_face_2nd_direction(&self, to_mesh_faces_map: &[u64], mut grow_start: usize, mask: u64, fixed_start: usize, fixed_end: usize, material: i8) -> usize {
         while grow_start < CHUNK_SIZE && (to_mesh_faces_map[grow_start] & mask) == mask {
-            for index in fixed_start..fixed_end {
+            for index in fixed_start..=fixed_end {
                 if self.materials_layer[grow_start << CHUNK_SIZE_BITS | index] != material { return grow_start - 1; }
             }
             grow_start += 1;
@@ -404,7 +404,7 @@ impl MeshGenerator {
     }
 
     fn add_side_face(&mut self, side: usize, material_x: usize, material_y: usize, material_z: usize, material: i8, face_size_1: usize, face_size_2: usize) {
-        if material == AIR { return; }  //TODO all with TRANSPARENT != 0
+        if MATERIAL_PROPERTIES[material as u8 as usize] & TRANSPARENT != 0 { return; }
         self.add_face_to_vertices(SIDES_INDEX, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
     }
 
