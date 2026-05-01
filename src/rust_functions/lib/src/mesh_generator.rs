@@ -1,10 +1,81 @@
 extern crate jni;
 
-use jni::objects::{JByteArray, JClass, JIntArray, JPrimitiveArray};
-use jni::sys::{jint, jintArray};
+use jni::objects::{JByteArray, JClass, JIntArray, JLongArray, JPrimitiveArray};
+use jni::sys::{jbyte, jbyteArray, jint, jintArray, jlong, jlongArray};
 use jni::{AttachGuard, Env, EnvUnowned};
 use jni::elements::ReleaseMode;
-use super::materials_data::{CHUNK_SIZE, CHUNK_SIZE_BITS, AIR, MaterialsData, OPAQUE, NORTH, SOUTH, get_uncompressed_index, TOP, BOTTOM, WEST, EAST};
+use super::materials_data::{CHUNK_SIZE, CHUNK_SIZE_BITS, AIR, MaterialsData, NORTH, SOUTH, get_uncompressed_index, TOP, BOTTOM, WEST, EAST};
+
+#[allow(non_snake_case)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_game_server_generation_NativeFunctions_getUncompressedMaterials<'a>(
+    env_unowned: EnvUnowned, _class: JClass,
+    materials_data: JByteArray) -> jbyteArray {
+    let mut guard: AttachGuard = unsafe { AttachGuard::from_unowned(env_unowned.as_raw()) };
+    let env: &mut Env = guard.borrow_env_mut();
+
+    let mut auto_elements = unsafe { materials_data.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let materials_data: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
+
+    let materials: MaterialsData = MaterialsData { data: materials_data };
+    let mut generator: MeshGenerator = MeshGenerator::new(0, 0, 0);
+    materials.fill_uncompressed_materials(&mut generator.uncompressed_materials, CHUNK_SIZE_BITS, 0, 0, 0, 0);
+
+    let result: JPrimitiveArray<jbyte> = JByteArray::new(env, generator.uncompressed_materials.len()).unwrap();
+
+    let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
+    unsafe { std::ptr::copy_nonoverlapping(generator.uncompressed_materials.as_ptr(), java_array.as_ptr(), generator.uncompressed_materials.len()); }
+
+    result.as_raw() as jintArray
+}
+
+#[allow(non_snake_case)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_game_server_generation_NativeFunctions_getBitMap<'a>(
+    env_unowned: EnvUnowned, _class: JClass,
+    materials_data: JByteArray, surface_equivalent: JByteArray,
+    north: JByteArray, top: JByteArray, west: JByteArray, south: JByteArray, bottom: JByteArray, east: JByteArray,
+    x_start: jint, y_start: jint, z_start: jint) -> jlongArray {
+    let mut guard: AttachGuard = unsafe { AttachGuard::from_unowned(env_unowned.as_raw()) };
+    let env: &mut Env = guard.borrow_env_mut();
+
+    let mut auto_elements = unsafe { materials_data.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let materials_data: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut auto_elements = unsafe { surface_equivalent.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let surface_equivalent: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
+
+    let mut auto_elements = unsafe { north.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let north: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut auto_elements = unsafe { top.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let top: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+
+    let mut auto_elements = unsafe { west.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let west: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut auto_elements = unsafe { south.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let south: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+
+    let mut auto_elements = unsafe { bottom.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let bottom: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut auto_elements = unsafe { east.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
+    let east: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+
+    let materials: MaterialsData = MaterialsData { data: materials_data };
+    let surface_equivalent: MaterialsData = MaterialsData { data: surface_equivalent };
+
+    let mut generator: MeshGenerator = MeshGenerator::new(x_start, y_start, z_start);
+    let mut to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6] = &mut [0; CHUNK_SIZE * CHUNK_SIZE * 6];
+    let adjacent_chunk_layers: &[&[i8]; 6] = &[north, top, west, south, bottom, east];
+
+    materials.fill_uncompressed_materials(&mut generator.uncompressed_materials, CHUNK_SIZE_BITS, 0, 0, 0, 0);
+    surface_equivalent.generate_to_mesh_faces_maps(&mut to_mesh_faces_map, &mut generator.uncompressed_materials, adjacent_chunk_layers, CHUNK_SIZE_BITS, 0, 0, 0, 0);
+
+    let result: JPrimitiveArray<jlong> = JLongArray::new(env, to_mesh_faces_map.len()).unwrap();
+
+    let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
+    unsafe { std::ptr::copy_nonoverlapping(to_mesh_faces_map.as_ptr() as *mut jlong, java_array.as_ptr(), to_mesh_faces_map.len()); }
+
+    result.as_raw() as jlongArray
+}
 
 #[allow(non_snake_case)]
 #[unsafe(no_mangle)]
@@ -46,9 +117,15 @@ pub extern "system" fn Java_game_server_generation_NativeFunctions_generateMesh<
 }
 
 pub fn is_visible(to_test_material: i8, occluding_material: i8) -> bool {
-    if to_test_material == AIR || occluding_material == OPAQUE { return false; }
+    if to_test_material == AIR { return false; }
     if occluding_material == AIR { return true; }
-    to_test_material != occluding_material
+
+    if (MATERIAL_PROPERTIES[occluding_material as u8 as usize] & TRANSPARENT) == 0 { return false; }
+    if (MATERIAL_PROPERTIES[to_test_material as u8 as usize] & OCCLUDES_SELF_ONLY) == OCCLUDES_SELF_ONLY {
+        return to_test_material != occluding_material;
+    }
+
+    true
 }
 
 fn generate_mesh(materials_data: &[i8], surface_equivalent: &[i8],
@@ -95,7 +172,7 @@ impl MeshGenerator {
         self.vertices.iter().for_each(|vec: &Vec<i32>| { required_length += vec.len(); });
         let mut mesh_data: Vec<i32> = Vec::with_capacity(required_length);
 
-        self.vertices.iter().for_each(|vec: &Vec<i32>| { mesh_data.push((vec.len() >> 2) as i32); });
+        self.vertices.iter().for_each(|vec: &Vec<i32>| { mesh_data.push((vec.len() * 3 / 4) as i32); });
         self.vertices.iter_mut().for_each(|vec: &mut Vec<i32>| { mesh_data.append(vec); });
 
         mesh_data
@@ -213,7 +290,7 @@ impl MeshGenerator {
                 let face_end_x: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_x + 1, mask, material_z, face_end_z, material);
 
                 MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_x, face_end_x);
-                self.add_face(side, material_x, material_y, material_z, material, face_end_z - material_z, face_end_x - material_x);
+                self.add_face(side, material_x, material_y, material_z, material, face_end_x - material_x, face_end_z - material_z);
                 material_z = to_mesh_faces_map[material_x].trailing_zeros() as usize;
             }
         }
@@ -385,7 +462,7 @@ impl MeshGenerator {
                 let face_end_x: usize = self.grow_face_2nd_direction(to_mesh_faces_map, material_x + 1, mask, material_z, face_end_z, material);
 
                 MeshGenerator::remove_from_map(to_mesh_faces_map, mask, material_x, face_end_x);
-                self.add_side_face(side, material_x, material_y, material_z, material, face_end_z - material_z, face_end_x - material_x);
+                self.add_side_face(side, material_x, material_y, material_z, material, face_end_x - material_x, face_end_z - material_z);
                 material_z = to_mesh_faces_map[material_x].trailing_zeros() as usize;
             }
         }
@@ -408,6 +485,11 @@ impl MeshGenerator {
         }
     }
 }
+
+static MATERIAL_PROPERTIES: [u32; 140] = [11, 6, 0, 0, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 14, 14, 14, 14, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0];
+
+const TRANSPARENT: u32 = 2;
+const OCCLUDES_SELF_ONLY: u32 = 6;
 
 const WATER: i8 = 4;
 const SIDES_INDEX: usize = 6;

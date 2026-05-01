@@ -29,17 +29,18 @@ impl MaterialsData<'_> {
             return;
         }
 
-        // if identifier == SPLITTER
-        size_bits -= 1;
-        let next_size: usize = 1 << size_bits;
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + SPLITTER_BYTE_SIZE, in_chunk_x, in_chunk_y, in_chunk_z);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 1), in_chunk_x, in_chunk_y, in_chunk_z + next_size);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 4), in_chunk_x, in_chunk_y + next_size, in_chunk_z);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 7), in_chunk_x, in_chunk_y + next_size, in_chunk_z + next_size);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 10), in_chunk_x + next_size, in_chunk_y, in_chunk_z);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 13), in_chunk_x + next_size, in_chunk_y, in_chunk_z + next_size);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 16), in_chunk_x + next_size, in_chunk_y + next_size, in_chunk_z);
-        self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 19), in_chunk_x + next_size, in_chunk_y + next_size, in_chunk_z + next_size);
+        if identifier == SPLITTER {
+            size_bits -= 1;
+            let next_size: usize = 1 << size_bits;
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + SPLITTER_BYTE_SIZE, in_chunk_x, in_chunk_y, in_chunk_z);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 1), in_chunk_x, in_chunk_y, in_chunk_z + next_size);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 4), in_chunk_x, in_chunk_y + next_size, in_chunk_z);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 7), in_chunk_x, in_chunk_y + next_size, in_chunk_z + next_size);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 10), in_chunk_x + next_size, in_chunk_y, in_chunk_z);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 13), in_chunk_x + next_size, in_chunk_y, in_chunk_z + next_size);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 16), in_chunk_x + next_size, in_chunk_y + next_size, in_chunk_z);
+            self.fill_uncompressed_materials(uncompressed_materials, size_bits, start_index + self.get_offset(start_index + 19), in_chunk_x + next_size, in_chunk_y + next_size, in_chunk_z + next_size);
+        } else { panic!() }
     }
 
     pub fn generate_to_mesh_faces_maps(&self,
@@ -62,9 +63,7 @@ impl MaterialsData<'_> {
         }
         if identifier == HOMOGENOUS {
             let material: i8 = self.data[start_index + 1];
-            if material == AIR {
-                return;
-            }
+            if material == AIR { return; }
             let length: usize = 1 << size_bits;
             self.generate_to_mesh_faces_homogenous_north_layer(MaterialsData::split_map(to_mesh_faces_map, NORTH, in_chunk_z + length - 1), adjacent_chunk_layers, size_bits, material, in_chunk_x, in_chunk_y, in_chunk_z + length);
             self.generate_to_mesh_faces_homogenous_top_layer(MaterialsData::split_map(to_mesh_faces_map, TOP, in_chunk_y + length - 1), adjacent_chunk_layers, size_bits, material, in_chunk_x, in_chunk_y + length, in_chunk_z);
@@ -74,15 +73,16 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_east_layer(MaterialsData::split_map(to_mesh_faces_map, EAST, in_chunk_x), adjacent_chunk_layers, size_bits, material, in_chunk_x.wrapping_sub(1), in_chunk_y, in_chunk_z);
             return;
         }
-        // if identifier == DETAIL
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y, in_chunk_z);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y, in_chunk_z + 1);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y + 1, in_chunk_z);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y + 1, in_chunk_z + 1);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y, in_chunk_z);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y, in_chunk_z + 1);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y + 1, in_chunk_z);
-        self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y + 1, in_chunk_z + 1);
+        if identifier == DETAIL {
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y, in_chunk_z);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y, in_chunk_z + 1);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y + 1, in_chunk_z);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x, in_chunk_y + 1, in_chunk_z + 1);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y, in_chunk_z);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y, in_chunk_z + 1);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y + 1, in_chunk_z);
+            self.generate_to_mesh_faces_detail(to_mesh_faces_map, uncompressed_materials, adjacent_chunk_layers, in_chunk_x + 1, in_chunk_y + 1, in_chunk_z + 1);
+        } else { panic!() }
     }
 }
 
@@ -110,16 +110,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_north_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 4), in_chunk_x, in_chunk_y + next_size);
             self.generate_to_mesh_faces_homogenous_north_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 10), in_chunk_x + next_size, in_chunk_y);
             self.generate_to_mesh_faces_homogenous_north_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 16), in_chunk_x + next_size, in_chunk_y + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_x, in_chunk_y);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 1; }
+        } else { panic!() }
     }
 
 
@@ -145,16 +147,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_south_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 7), in_chunk_x, in_chunk_y + next_size);
             self.generate_to_mesh_faces_homogenous_south_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 13), in_chunk_x + next_size, in_chunk_y);
             self.generate_to_mesh_faces_homogenous_south_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 19), in_chunk_x + next_size, in_chunk_y + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_x, in_chunk_y);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_y + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_y + 1; }
+        } else { panic!() }
     }
 
 
@@ -180,16 +184,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_top_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 1), in_chunk_x, in_chunk_z + next_size);
             self.generate_to_mesh_faces_homogenous_top_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 10), in_chunk_x + next_size, in_chunk_z);
             self.generate_to_mesh_faces_homogenous_top_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 13), in_chunk_x + next_size, in_chunk_z + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_x, in_chunk_z);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 1; }
+        } else { panic!() }
     }
 
 
@@ -215,16 +221,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_bottom_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 7), in_chunk_x, in_chunk_z + next_size);
             self.generate_to_mesh_faces_homogenous_bottom_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 16), in_chunk_x + next_size, in_chunk_z);
             self.generate_to_mesh_faces_homogenous_bottom_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 19), in_chunk_x + next_size, in_chunk_z + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_x, in_chunk_z);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_x + 0] |= 1 << in_chunk_z + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_x + 1] |= 1 << in_chunk_z + 1; }
+        } else { panic!() }
     }
 
 
@@ -250,16 +258,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_west_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 1), in_chunk_y, in_chunk_z + next_size);
             self.generate_to_mesh_faces_homogenous_west_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 4), in_chunk_y + next_size, in_chunk_z);
             self.generate_to_mesh_faces_homogenous_west_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 7), in_chunk_y + next_size, in_chunk_z + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_z, in_chunk_y);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_y + 0] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_y + 0] |= 1 << in_chunk_z + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_y + 1] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_y + 1] |= 1 << in_chunk_z + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 1]) { to_mesh_faces_map[in_chunk_z + 0] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 2]) { to_mesh_faces_map[in_chunk_z + 0] |= 1 << in_chunk_y + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 3]) { to_mesh_faces_map[in_chunk_z + 1] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 4]) { to_mesh_faces_map[in_chunk_z + 1] |= 1 << in_chunk_y + 1; }
+        } else { panic!() }
     }
 
 
@@ -267,7 +277,7 @@ impl MaterialsData<'_> {
                                                     size_bits: usize, material: i8, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize) {
         if in_chunk_x == usize::MAX {
             let adjacent_chunk_layer: &[i8] = adjacent_chunk_layers[EAST];
-            let start_index: usize = MaterialsData::start_index_of_2d(adjacent_chunk_layer, in_chunk_x, in_chunk_y, CHUNK_SIZE_BITS, size_bits);
+            let start_index: usize = MaterialsData::start_index_of_2d(adjacent_chunk_layer, in_chunk_z, in_chunk_y, CHUNK_SIZE_BITS, size_bits);
             self.generate_to_mesh_faces_homogenous_side_layer(to_mesh_faces_map, adjacent_chunk_layer, start_index, size_bits, material, in_chunk_z, in_chunk_y);
             return;
         }
@@ -285,16 +295,18 @@ impl MaterialsData<'_> {
             self.generate_to_mesh_faces_homogenous_east_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 13), in_chunk_y, in_chunk_z + next_size);
             self.generate_to_mesh_faces_homogenous_east_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 16), in_chunk_y + next_size, in_chunk_z);
             self.generate_to_mesh_faces_homogenous_east_layer_inside(to_mesh_faces_map, size_bits, material, start_index + self.get_offset(start_index + 19), in_chunk_y + next_size, in_chunk_z + next_size);
+            return;
         }
         if identifier == HOMOGENOUS {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, self.data[start_index + 1], in_chunk_z, in_chunk_y);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_y + 0] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_y + 0] |= 1 << in_chunk_z + 1; }
-        if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_y + 1] |= 1 << in_chunk_z + 0; }
-        if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_y + 1] |= 1 << in_chunk_z + 1; }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, self.data[start_index + 5]) { to_mesh_faces_map[in_chunk_z + 0] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 6]) { to_mesh_faces_map[in_chunk_z + 0] |= 1 << in_chunk_y + 1; }
+            if mesh_generator::is_visible(material, self.data[start_index + 7]) { to_mesh_faces_map[in_chunk_z + 1] |= 1 << in_chunk_y + 0; }
+            if mesh_generator::is_visible(material, self.data[start_index + 8]) { to_mesh_faces_map[in_chunk_z + 1] |= 1 << in_chunk_y + 1; }
+        } else { panic!() }
     }
 
 
@@ -316,11 +328,12 @@ impl MaterialsData<'_> {
             MaterialsData::fill_to_mesh_faces_map_homogenous(to_mesh_faces_map, size_bits, material, occluding_material, in_chunk_a, in_chunk_b);
             return;
         }
-        // if identifier == DETAIL
-        if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 1]) { to_mesh_faces_map[in_chunk_a + 0] |= 1 << in_chunk_b + 0 }
-        if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 2]) { to_mesh_faces_map[in_chunk_a + 0] |= 1 << in_chunk_b + 1 }
-        if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 3]) { to_mesh_faces_map[in_chunk_a + 1] |= 1 << in_chunk_b + 0 }
-        if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 4]) { to_mesh_faces_map[in_chunk_a + 1] |= 1 << in_chunk_b + 1 }
+        if identifier == DETAIL {
+            if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 1]) { to_mesh_faces_map[in_chunk_a + 0] |= 1 << in_chunk_b + 0 }
+            if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 2]) { to_mesh_faces_map[in_chunk_a + 0] |= 1 << in_chunk_b + 1 }
+            if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 3]) { to_mesh_faces_map[in_chunk_a + 1] |= 1 << in_chunk_b + 0 }
+            if mesh_generator::is_visible(material, adjacent_chunk_layer[start_index + 4]) { to_mesh_faces_map[in_chunk_a + 1] |= 1 << in_chunk_b + 1 }
+        } else { panic!() }
     }
 
     fn fill_to_mesh_faces_map_homogenous(to_mesh_faces_map: &mut [u64], size_bits: usize, material: i8, occluding_material: i8, in_chunk_a: usize, in_chunk_b: usize) {
@@ -396,9 +409,10 @@ impl MaterialsData<'_> {
 
             if identifier == HOMOGENOUS { return data[index + 1]; }
             if identifier == DETAIL { return data[index + ((in_chunk_a & 1) << 1 | (in_chunk_b & 1)) + 1]; }
-            // if identifier == SPLITTER
-            size_bits -= 1;
-            index += MaterialsData::get_offset_2d_of(data, index, in_chunk_a, in_chunk_b, size_bits);
+            if identifier == SPLITTER {
+                size_bits -= 1;
+                index += MaterialsData::get_offset_2d_of(data, index, in_chunk_a, in_chunk_b, size_bits);
+            } else { panic!() }
         }
     }
 
@@ -416,7 +430,7 @@ impl MaterialsData<'_> {
     }
 
     fn get_offset_at(&self, splitter_index: usize, in_chunk_x: usize, in_chunk_y: usize, in_chunk_z: usize, size_bits: usize) -> usize {
-        let in_splitter_index: usize = 3 * (((in_chunk_x >> size_bits & 1) << 2 | (in_chunk_y >> size_bits & 1) << 1) | (in_chunk_z >> splitter_index & 1));
+        let in_splitter_index: usize = 3 * ((in_chunk_x >> size_bits & 1) << 2 | (in_chunk_y >> size_bits & 1) << 1 | (in_chunk_z >> size_bits & 1));
         if in_splitter_index == 0 {
             return SPLITTER_BYTE_SIZE;
         }

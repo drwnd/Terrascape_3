@@ -3,7 +3,10 @@ package game.server.generation;
 import core.utils.ByteArrayList;
 import game.player.rendering.*;
 import game.server.*;
+import game.server.materials_data.MaterialsData;
 import game.utils.Utils;
+
+import java.util.Arrays;
 
 import static game.utils.Constants.*;
 
@@ -72,6 +75,35 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
         int yStart = (int) chunk.Y << CHUNK_SIZE_BITS;
         int zStart = (int) chunk.Z << CHUNK_SIZE_BITS;
 
+        {
+            MaterialsData uncompressed = new MaterialsData(CHUNK_SIZE_BITS, materialsData);
+            byte[] uncompressedMaterials = new byte[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+            uncompressed.fillUncompressedMaterialsInto(uncompressedMaterials);
+
+            byte[] rustUncompressedMaterials = NativeFunctions.getUncompressedMaterials(materialsData);
+            if (!Arrays.equals(uncompressedMaterials, rustUncompressedMaterials)) {
+                System.err.println("Uncompressed materials are not correct");
+            }
+
+            long[][][] bitMap = new long[6][CHUNK_SIZE][CHUNK_SIZE];
+            uncompressed.generateToMeshFacesMaps(bitMap, uncompressedMaterials, new byte[][]{north, top, west, south, bottom, east});
+            long[] rustBitMap = NativeFunctions.getBitMap(materialsData, surfaceEquivalent,
+                    north, top, west, south, bottom, east,
+                    xStart, yStart, zStart);
+
+            long[] tmp = new long[CHUNK_SIZE];
+
+            for (int side = 0; side < 6; side++)
+                for (int inChunk = 0; inChunk < CHUNK_SIZE; inChunk++) {
+                    int index = side * CHUNK_SIZE * CHUNK_SIZE + inChunk * CHUNK_SIZE;
+                    System.arraycopy(rustBitMap, index, tmp, 0, CHUNK_SIZE);
+                    if (!Arrays.equals(tmp, bitMap[side][inChunk])) {
+                        System.err.printf("Bit map is not correct at side %d at position %d%n", side, inChunk);
+                    }
+                }
+        }
+
+
         int[] meshData = NativeFunctions.generateMesh(materialsData, surfaceEquivalent,
                 north, top, west, south, bottom, east,
                 xStart, yStart, zStart);
@@ -90,8 +122,8 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
 //        System.out.printf("Opaque: %d, Water: %d, Glass: %d, total: %d%n", opaqueVertexCount, waterVertexCount, glassVertexCount, meshData.length - 9);
         if (opaqueVertexCount == 0 && waterVertexCount == 0 && glassVertexCount == 0) return new Mesh(chunkX, chunkY, chunkZ, lod);
 
-        int[] opaqueVertices = new int[opaqueVertexCount * MeshGenerator.VERTICES_PER_QUAD];
-        int[] transparentVertices = new int[(waterVertexCount + glassVertexCount) * MeshGenerator.VERTICES_PER_QUAD];
+        int[] opaqueVertices = new int[opaqueVertexCount * MeshGenerator.INTS_PER_VERTEX / MeshGenerator.VERTICES_PER_QUAD];
+        int[] transparentVertices = new int[(waterVertexCount + glassVertexCount) * MeshGenerator.INTS_PER_VERTEX / MeshGenerator.VERTICES_PER_QUAD];
 
         System.arraycopy(meshData, 9, opaqueVertices, 0, opaqueVertices.length);
         System.arraycopy(meshData, 9 + opaqueVertices.length, transparentVertices, 0, transparentVertices.length);

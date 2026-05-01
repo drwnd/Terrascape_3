@@ -321,13 +321,13 @@ public final class MaterialsData {
             return;
         }
         if (identifier == DETAIL) {
-            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = data[startIndex + 1];
-            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ)] = data[startIndex + 2];
-            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY, inChunkZ + 1)] = data[startIndex + 3];
-            uncompressedMaterials[getUncompressedIndex(inChunkX, inChunkY + 1, inChunkZ + 1)] = data[startIndex + 4];
-            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ)] = data[startIndex + 5];
-            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ)] = data[startIndex + 6];
-            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY, inChunkZ + 1)] = data[startIndex + 7];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 0, inChunkY + 0, inChunkZ + 0)] = data[startIndex + 1];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 0, inChunkY + 1, inChunkZ + 0)] = data[startIndex + 2];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 0, inChunkY + 0, inChunkZ + 1)] = data[startIndex + 3];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 0, inChunkY + 1, inChunkZ + 1)] = data[startIndex + 4];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 0, inChunkZ + 0)] = data[startIndex + 5];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 0)] = data[startIndex + 6];
+            uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 0, inChunkZ + 1)] = data[startIndex + 7];
             uncompressedMaterials[getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 1)] = data[startIndex + 8];
             return;
         }
@@ -824,14 +824,14 @@ public final class MaterialsData {
         if (addSurfaceEquivalentHomogenous(materials, startIndex, types)) return HOMOGENOUS_BYTE_SIZE;
         if (sizeBits == 1) {
             materials.add(DETAIL);
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 1]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 2]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 3]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 4]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 5]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 6]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 7]));
-            materials.add(getSurfaceEquivalentMaterial(data[startIndex + 8]));
+            materials.add(data[startIndex + 1]);
+            materials.add(data[startIndex + 2]);
+            materials.add(data[startIndex + 3]);
+            materials.add(data[startIndex + 4]);
+            materials.add(data[startIndex + 5]);
+            materials.add(data[startIndex + 6]);
+            materials.add(data[startIndex + 7]);
+            materials.add(data[startIndex + 8]);
             return DETAIL_BYTE_SIZE;
         }
 
@@ -875,11 +875,6 @@ public final class MaterialsData {
             return true;
         }
         return false;
-    }
-
-    private static byte getSurfaceEquivalentMaterial(byte material) {
-        if ((Material.getProperties(material) & TRANSPARENT) == 0) return MeshGenerator.OPAQUE;
-        return material;
     }
 
     private void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, byte[][] adjacentChunkLayers, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
