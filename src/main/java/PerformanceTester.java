@@ -52,6 +52,9 @@ public final class PerformanceTester {
 
         long totalTime = System.nanoTime() - totalStart;
         System.out.printf("Total time %ds%n", totalTime / 1_000_000_000);
+
+        System.out.printf("Rust time: %d%n", RustMeshGenerator.rustTime / 1000);
+        System.out.printf("Java time: %d%n", RustMeshGenerator.javaTime / 1000);
     }
 
     private static void generateColumn(int chunkX, int chunkZ, int chunkCount, int lod) {

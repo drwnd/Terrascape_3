@@ -3,7 +3,7 @@ extern crate jni;
 use jni::objects::{JByteArray, JClass, JIntArray, JPrimitiveArray};
 use jni::sys::{jint, jintArray};
 use jni::{AttachGuard, Env, EnvUnowned};
-use jni::elements::ReleaseMode;
+use jni::elements::{ReleaseMode};
 use super::materials_data::{CHUNK_SIZE, CHUNK_SIZE_BITS, AIR, MaterialsData, NORTH, SOUTH, get_uncompressed_index, TOP, BOTTOM, WEST, EAST};
 
 #[allow(non_snake_case)]
@@ -13,36 +13,40 @@ pub extern "system" fn Java_game_server_generation_NativeFunctions_generateMesh<
     materials_data: JByteArray, surface_equivalent: JByteArray,
     north: JByteArray, top: JByteArray, west: JByteArray, south: JByteArray, bottom: JByteArray, east: JByteArray,
     x_start: jint, y_start: jint, z_start: jint) -> jintArray {
+    // let function_start: Instant = Instant::now();
+
     let mut guard: AttachGuard = unsafe { AttachGuard::from_unowned(env_unowned.as_raw()) };
     let env: &mut Env = guard.borrow_env_mut();
 
-    let mut auto_elements = unsafe { materials_data.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let materials_data: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { surface_equivalent.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let surface_equivalent: &mut [i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut materials_data: Vec<i8> = copy_from_java_array(&env, materials_data);
+    let mut surface_equivalent: Vec<i8> = copy_from_java_array(&env, surface_equivalent);
 
-    let mut auto_elements = unsafe { north.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let north: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { top.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let top: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mut north: Vec<i8> = copy_from_java_array(&env, north);
+    let mut top: Vec<i8> = copy_from_java_array(&env, top);
+    let mut west: Vec<i8> = copy_from_java_array(&env, west);
+    let mut south: Vec<i8> = copy_from_java_array(&env, south);
+    let mut bottom: Vec<i8> = copy_from_java_array(&env, bottom);
+    let mut east: Vec<i8> = copy_from_java_array(&env, east);
 
-    let mut auto_elements = unsafe { west.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let west: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { south.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let south: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    // println!("Got data ready in {}", function_start.elapsed().as_micros());
+    // let start: Instant = Instant::now();
 
-    let mut auto_elements = unsafe { bottom.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let bottom: &[i8] = auto_elements.as_mut().unwrap().as_mut();
-    let mut auto_elements = unsafe { east.get_elements_critical(&env, ReleaseMode::NoCopyBack) };
-    let east: &[i8] = auto_elements.as_mut().unwrap().as_mut();
+    let mesh_data: Vec<i32> = generate_mesh(materials_data.as_mut(), surface_equivalent.as_mut(),
+                                            north.as_mut(), top.as_mut(), west.as_mut(), south.as_mut(), bottom.as_mut(), east.as_mut(),
+                                            x_start, y_start, z_start);
+    // println!("Meshed Rust side in {}", start.elapsed().as_micros());
 
-    let mesh_data: Vec<i32> = generate_mesh(materials_data, surface_equivalent, north, top, west, south, bottom, east, x_start, y_start, z_start);
     let result: JPrimitiveArray<jint> = JIntArray::new(env, mesh_data.len()).unwrap();
 
     let java_array = unsafe { result.get_elements_critical(&env, ReleaseMode::CopyBack) }.unwrap();
     unsafe { std::ptr::copy_nonoverlapping(mesh_data.as_ptr(), java_array.as_ptr(), mesh_data.len()); }
 
     result.as_raw() as jintArray
+}
+
+fn copy_from_java_array(env: &Env, array: JByteArray) -> Vec<i8> {
+    let auto_elements = unsafe { array.get_elements(&env, ReleaseMode::NoCopyBack) };
+    auto_elements.unwrap().to_vec()
 }
 
 pub fn is_visible(to_test_material: i8, occluding_material: i8) -> bool {
@@ -107,42 +111,42 @@ impl MeshGenerator {
         mesh_data
     }
 
-    fn generate_mesh(&mut self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        self.add_north_south_faces(to_mesh_faces_map);
-        self.add_top_bottom_faces(to_mesh_faces_map);
-        self.add_west_east_faces(to_mesh_faces_map);
+    fn generate_mesh(&mut self, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        self.add_north_south_faces(to_mesh_faces_maps);
+        self.add_top_bottom_faces(to_mesh_faces_maps);
+        self.add_west_east_faces(to_mesh_faces_maps);
         if self.has_opaque_mesh() { self.add_side_layers() }
     }
 
 
-    fn add_north_south_faces(&mut self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+    fn add_north_south_faces(&mut self, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
         for material_z in 0..CHUNK_SIZE {
-            self.copy_materials_north_south(material_z, to_mesh_faces_map);
-            self.add_north_south_layer(NORTH, material_z, to_mesh_faces_map);
-            self.add_north_south_layer(SOUTH, material_z, to_mesh_faces_map);
+            self.copy_materials_north_south(material_z, to_mesh_faces_maps);
+            self.add_north_south_layer(NORTH, material_z, to_mesh_faces_maps);
+            self.add_north_south_layer(SOUTH, material_z, to_mesh_faces_maps);
         }
     }
 
-    fn add_top_bottom_faces(&mut self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+    fn add_top_bottom_faces(&mut self, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
         for material_y in 0..CHUNK_SIZE {
-            self.copy_materials_top_bottom(material_y, to_mesh_faces_map);
-            self.add_top_bottom_layer(TOP, material_y, to_mesh_faces_map);
-            self.add_top_bottom_layer(BOTTOM, material_y, to_mesh_faces_map);
+            self.copy_materials_top_bottom(material_y, to_mesh_faces_maps);
+            self.add_top_bottom_layer(TOP, material_y, to_mesh_faces_maps);
+            self.add_top_bottom_layer(BOTTOM, material_y, to_mesh_faces_maps);
         }
     }
 
-    fn add_west_east_faces(&mut self, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+    fn add_west_east_faces(&mut self, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
         for material_x in 0..CHUNK_SIZE {
-            self.copy_materials_west_east(material_x, to_mesh_faces_map);
-            self.add_west_east_layer(WEST, material_x, to_mesh_faces_map);
-            self.add_west_east_layer(EAST, material_x, to_mesh_faces_map);
+            self.copy_materials_west_east(material_x, to_mesh_faces_maps);
+            self.add_west_east_layer(WEST, material_x, to_mesh_faces_maps);
+            self.add_west_east_layer(EAST, material_x, to_mesh_faces_maps);
         }
     }
 
 
-    fn copy_materials_north_south(&mut self, material_z: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, NORTH, material_z);
-        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, SOUTH, material_z);
+    fn copy_materials_north_south(&mut self, material_z: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, NORTH, material_z);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, SOUTH, material_z);
 
         for material_x in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_x] | to_mesh_faces_2[material_x];
@@ -156,9 +160,9 @@ impl MeshGenerator {
         }
     }
 
-    fn copy_materials_top_bottom(&mut self, material_y: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, TOP, material_y);
-        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, BOTTOM, material_y);
+    fn copy_materials_top_bottom(&mut self, material_y: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, TOP, material_y);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, BOTTOM, material_y);
 
         for material_x in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_x] | to_mesh_faces_2[material_x];
@@ -172,9 +176,9 @@ impl MeshGenerator {
         }
     }
 
-    fn copy_materials_west_east(&mut self, material_x: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, WEST, material_x);
-        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_map, EAST, material_x);
+    fn copy_materials_west_east(&mut self, material_x: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_1: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, WEST, material_x);
+        let to_mesh_faces_2: &[u64; CHUNK_SIZE] = MeshGenerator::split_map(to_mesh_faces_maps, EAST, material_x);
 
         for material_z in 0..CHUNK_SIZE {
             let mut required_materials: u64 = to_mesh_faces_1[material_z] | to_mesh_faces_2[material_z];
@@ -189,8 +193,8 @@ impl MeshGenerator {
     }
 
 
-    fn add_north_south_layer(&mut self, side: usize, material_z: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_z);
+    fn add_north_south_layer(&mut self, side: usize, material_z: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_maps, side, material_z);
         for material_x in 0..CHUNK_SIZE {
             let mut material_y: usize = to_mesh_faces_map[material_x].trailing_zeros() as usize;
 
@@ -207,8 +211,8 @@ impl MeshGenerator {
         }
     }
 
-    fn add_top_bottom_layer(&mut self, side: usize, material_y: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_y);
+    fn add_top_bottom_layer(&mut self, side: usize, material_y: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_maps, side, material_y);
         for material_x in 0..CHUNK_SIZE {
             let mut material_z: usize = to_mesh_faces_map[material_x].trailing_zeros() as usize;
 
@@ -225,8 +229,8 @@ impl MeshGenerator {
         }
     }
 
-    fn add_west_east_layer(&mut self, side: usize, material_x: usize, to_mesh_faces_map: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
-        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_map, side, material_x);
+    fn add_west_east_layer(&mut self, side: usize, material_x: usize, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
+        let to_mesh_faces_map: &mut [u64; CHUNK_SIZE] = MaterialsData::split_map(to_mesh_faces_maps, side, material_x);
         for material_z in 0..CHUNK_SIZE {
             let mut material_y: usize = to_mesh_faces_map[material_z].trailing_zeros() as usize;
 
@@ -271,7 +275,7 @@ impl MeshGenerator {
         CHUNK_SIZE - 1
     }
 
-    fn grow_face_2nd_direction(&self, to_mesh_faces_map: &[u64], mut grow_start: usize, mask: u64, fixed_start: usize, fixed_end: usize, material: i8) -> usize {
+    fn grow_face_2nd_direction(&self, to_mesh_faces_map: &[u64; CHUNK_SIZE], mut grow_start: usize, mask: u64, fixed_start: usize, fixed_end: usize, material: i8) -> usize {
         while grow_start < CHUNK_SIZE && (to_mesh_faces_map[grow_start] & mask) == mask {
             for index in fixed_start..=fixed_end {
                 if self.materials_layer[grow_start << CHUNK_SIZE_BITS | index] != material { return grow_start - 1; }
@@ -292,9 +296,9 @@ impl MeshGenerator {
         material as u8 >= 125 && material as u8 <= 132
     }
 
-    fn split_map(to_mesh_faces_map: &[u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &[u64; CHUNK_SIZE] {
+    fn split_map(to_mesh_faces_maps: &[u64; CHUNK_SIZE * CHUNK_SIZE * 6], side: usize, in_chunk: usize) -> &[u64; CHUNK_SIZE] {
         let index: usize = side * CHUNK_SIZE * CHUNK_SIZE + in_chunk * CHUNK_SIZE;
-        <&[u64; 64]>::try_from(&to_mesh_faces_map[index..index + CHUNK_SIZE]).unwrap()
+        <&[u64; CHUNK_SIZE]>::try_from(&to_mesh_faces_maps[index..index + CHUNK_SIZE]).unwrap()
     }
 
     fn has_opaque_mesh(&self) -> bool {
