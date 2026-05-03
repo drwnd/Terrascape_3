@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.utils.Distanceable;
 import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;

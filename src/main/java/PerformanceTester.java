@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 public final class PerformanceTester {
 
-    private static final int CHUNK_COUNT = 128;
+    private static final int CHUNK_COUNT = 16;
     private static final boolean USE_RUST_FUNCTIONS = true;
 
     public static void main(String[] args) {
@@ -53,8 +53,8 @@ public final class PerformanceTester {
         long totalTime = System.nanoTime() - totalStart;
         System.out.printf("Total time %ds%n", totalTime / 1_000_000_000);
 
-        System.out.printf("Rust time: %d%n", RustMeshGenerator.rustTime / 1000);
-        System.out.printf("Java time: %d%n", RustMeshGenerator.javaTime / 1000);
+        System.out.printf("Rust time: %d%n", RustMeshGenerator.rustTime / 1_000_000);
+        System.out.printf("Java time: %d%n", RustMeshGenerator.javaTime / 1_000_000);
     }
 
     private static void generateColumn(int chunkX, int chunkZ, int chunkCount, int lod) {

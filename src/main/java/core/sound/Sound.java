@@ -8,7 +8,7 @@ import core.assets.identifiers.SoundIdentifier;
 import core.settings.CoreFloatSettings;
 import core.settings.FloatSetting;
 
-import game.utils.Distanceable;
+import core.utils.Distanceable;
 import org.joml.Vector3f;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
