@@ -87,25 +87,20 @@ fn generate_mesh(materials_data: &[i8], surface_equivalent: &[i8],
 struct MeshGenerator {
     uncompressed_materials: [i8; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
     materials_layer: [i8; CHUNK_SIZE * CHUNK_SIZE],
-    vertices: [Vec<i32>; 9],
+    vertex_counts: [i32; 9],
     x_start: i32,
     y_start: i32,
     z_start: i32,
 }
+
+static mut VERTICES: [Vec<i32>; 4] = [Vec::new(), Vec::new(), Vec::new(), Vec::new()];
 
 impl MeshGenerator {
     fn new(x_start: i32, y_start: i32, z_start: i32) -> MeshGenerator {
         MeshGenerator {
             uncompressed_materials: [AIR; CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE],
             materials_layer: [AIR; CHUNK_SIZE * CHUNK_SIZE],
-            vertices: [
-                Vec::with_capacity(1024),
-                Vec::with_capacity(1024),
-                Vec::with_capacity(1024),
-                Vec::with_capacity(1024),
-                Vec::with_capacity(1024),
-                Vec::with_capacity(1024),
-                Vec::new(), Vec::new(), Vec::new()],
+            vertex_counts: [0; 9],
             x_start,
             y_start,
             z_start,
@@ -113,14 +108,19 @@ impl MeshGenerator {
     }
 
     fn get_mesh_data(&mut self) -> Vec<i32> {
-        let mut required_length: usize = 9;
-        self.vertices.iter().for_each(|vec: &Vec<i32>| { required_length += vec.len(); });
-        let mut mesh_data: Vec<i32> = Vec::with_capacity(required_length);
+        unsafe {
+            let mut required_length: usize = 9;
+            required_length += VERTICES[0].len() + VERTICES[1].len() + VERTICES[2].len() + VERTICES[3].len();
+            let mut mesh_data: Vec<i32> = Vec::with_capacity(required_length);
 
-        self.vertices.iter().for_each(|vec: &Vec<i32>| { mesh_data.push((vec.len() * 3 / 4) as i32); });
-        self.vertices.iter_mut().for_each(|vec: &mut Vec<i32>| { mesh_data.append(vec); });
+            self.vertex_counts.iter().for_each(|vertex_count: &i32| { mesh_data.push(*vertex_count); });
+            mesh_data.append(&mut VERTICES[0]);
+            mesh_data.append(&mut VERTICES[1]);
+            mesh_data.append(&mut VERTICES[2]);
+            mesh_data.append(&mut VERTICES[3]);
 
-        mesh_data
+            mesh_data
+        }
     }
 
     fn generate_mesh(&mut self, to_mesh_faces_maps: &mut [u64; CHUNK_SIZE * CHUNK_SIZE * 6]) {
@@ -262,20 +262,25 @@ impl MeshGenerator {
 
     fn add_face(&mut self, side: usize, material_x: i32, material_y: i32, material_z: i32, material: i8, face_size_1: i32, face_size_2: i32) {
         if MeshGenerator::is_glass(material) {
-            self.add_face_to_vertices(GLASS_INDEX, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            self.add_face_to_vertices(3, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            self.vertex_counts[8] += 3;
         } else if material == WATER {
-            self.add_face_to_vertices(WATER_INDEX, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            self.add_face_to_vertices(2, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            self.vertex_counts[7] += 3;
         } else {
-            self.add_face_to_vertices(side, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            let index: usize = if side >= SOUTH { 1 } else { 0 };
+            self.add_face_to_vertices(index, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+            self.vertex_counts[side] += 3;
         }
     }
 
     fn add_face_to_vertices(&mut self, vertices_index: usize, side: usize, material_x: i32, material_y: i32, material_z: i32, material: i8, face_size_1: i32, face_size_2: i32) {
-        let vertices: &mut Vec<i32> = &mut self.vertices[vertices_index];
-        vertices.push(self.x_start | material_x);
-        vertices.push(self.y_start | material_y);
-        vertices.push(self.z_start | material_z);
-        vertices.push((MATERIAL_PROPERTIES[material as u8 as usize] as i32) << 24 | face_size_1 << 17 | face_size_2 << 11 | (side as i32) << 8 | (material as u8 as i32));
+        unsafe {
+            VERTICES[vertices_index].push(self.x_start | material_x);
+            VERTICES[vertices_index].push(self.y_start | material_y);
+            VERTICES[vertices_index].push(self.z_start | material_z);
+            VERTICES[vertices_index].push((MATERIAL_PROPERTIES[material as u8 as usize] as i32) << 24 | face_size_1 << 17 | face_size_2 << 11 | (side as i32) << 8 | (material as u8 as i32));
+        }
     }
 
     fn grow_face_1st_direction(&self, to_mesh_faces: u64, mut grow_start: i32, fixed_start: i32, material: i8) -> i32 {
@@ -314,8 +319,10 @@ impl MeshGenerator {
     }
 
     fn has_opaque_mesh(&self) -> bool {
-        for vertices in &self.vertices[0..SIDES_INDEX] {
-            if vertices.len() != 0 { return true; }
+        unsafe {
+            for vertices_vec in &VERTICES[0..2] {
+                if vertices_vec.len() != 0 { return true; }
+            }
         }
         false
     }
@@ -350,7 +357,8 @@ impl MeshGenerator {
 
     fn add_side_face(&mut self, side: usize, material_x: i32, material_y: i32, material_z: i32, material: i8, face_size_1: i32, face_size_2: i32) {
         if MATERIAL_PROPERTIES[material as u8 as usize] & TRANSPARENT != 0 { return; }
-        self.add_face_to_vertices(SIDES_INDEX, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+        self.add_face_to_vertices(1, side, material_x, material_y, material_z, material, face_size_1, face_size_2);
+        self.vertex_counts[6] += 3;
     }
 
 
@@ -437,7 +445,4 @@ const TRANSPARENT: u32 = 2;
 const OCCLUDES_SELF_ONLY: u32 = 6;
 
 const WATER: i8 = 4;
-const SIDES_INDEX: usize = 6;
-const WATER_INDEX: usize = 7;
-const GLASS_INDEX: usize = 8;
 

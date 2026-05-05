@@ -22,6 +22,7 @@ public final class PerformanceTester {
             System.out.println("loading dll at " + path.toAbsolutePath());
             try {
                 System.load(path.toAbsolutePath().toString());
+                System.out.println("Loaded dll");
             } catch (Exception exception) {
                 System.err.println("Failed to load dll");
                 exception.printStackTrace();
@@ -32,7 +33,9 @@ public final class PerformanceTester {
         Game.setTemporaryWorld(new World(0x9EF6E7FAF3299DDDL));
         long totalStart = System.nanoTime();
 
-        for (int lod = 0; CHUNK_COUNT >> lod != 0; lod++) {
+        int lod = 0;
+//        for (; CHUNK_COUNT >> lod != 0; lod++)
+        {
             int chunkCount = CHUNK_COUNT >> lod;
 
             long generationStart = System.nanoTime();

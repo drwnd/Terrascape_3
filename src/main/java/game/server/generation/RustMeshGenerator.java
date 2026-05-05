@@ -10,7 +10,7 @@ import static game.utils.Constants.*;
 
 public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int lod, ByteArrayList[] adjacentChunkLayers) implements Runnable {
 
-//    private static final MeshGenerator gen = new MeshGenerator();
+    private static final MeshGenerator gen = new MeshGenerator();
     public static long rustTime = 0, javaTime = 0;
 
     public RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) {
@@ -55,12 +55,12 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
             return null;
         }
 
-//        long start = System.nanoTime();
-//        Mesh javaMesh = gen.generateMesh(chunk);
-//        System.out.printf("Meshed java only in %d%n", (System.nanoTime() - start) / 1000);
-//        javaTime += System.nanoTime() - start;
+        long start = System.nanoTime();
+        Mesh javaMesh = gen.generateMesh(chunk);
+        System.out.printf("Meshed java only in %d%n", (System.nanoTime() - start) / 1000);
+        javaTime += System.nanoTime() - start;
 
-//        start = System.nanoTime();
+        start = System.nanoTime();
         byte[] north = fillNeighborSideLayer(neighbors.north(), adjacentChunkLayers[NORTH], SOUTH);
         byte[] top = fillNeighborSideLayer(neighbors.top(), adjacentChunkLayers[TOP], BOTTOM);
         byte[] west = fillNeighborSideLayer(neighbors.west(), adjacentChunkLayers[WEST], EAST);
@@ -86,10 +86,10 @@ public record RustMeshGenerator(long chunkX, long playerChunkY, long chunkZ, int
                 xStart, yStart, zStart);
 
         Mesh rustMesh = loadMesh(meshData, chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, AABB.newMaxChunkAABB());
-//        System.out.printf("Meshed java side in %d%n", (System.nanoTime() - start) / 1000);
-//        rustTime += System.nanoTime() - start;
+        System.out.printf("Meshed java side in %d%n", (System.nanoTime() - start) / 1000);
+        rustTime += System.nanoTime() - start;
 
-//        System.out.println();
+        System.out.println();
         return rustMesh;  //TODO actually good occludee
     }
 
