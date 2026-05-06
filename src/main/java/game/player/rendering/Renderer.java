@@ -58,7 +58,7 @@ public final class Renderer extends Renderable {
         setDoAutoFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
-        renderingOptimizer = new RenderingOptimizer(meshCollector);
+        renderingOptimizer = new RenderingOptimizer(meshCollector, Window.getWidth(), Window.getHeight());
         crosshair = new UiElement(new Vector2f(), new Vector2f(), Textures.CROSSHAIR);
         crosshair.setScaleWithGuiSize(false);
         crosshair.setDoAutoFocusScaling(false);
@@ -245,6 +245,9 @@ public final class Renderer extends Renderable {
 
         createTextures(width, height);
         createFrameBuffers();
+
+        renderingOptimizer.cleanUp();
+        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector(), width, height);
     }
 
     @Override
@@ -924,10 +927,10 @@ public final class Renderer extends Renderable {
 
     private boolean vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
+    private RenderingOptimizer renderingOptimizer;
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
     private final UiElement crosshair;
-    private final RenderingOptimizer renderingOptimizer;
     private final Player player;
 
     private OpaqueModel opaqueHologram;

@@ -27,8 +27,11 @@ public final class RenderingOptimizer {
 
     public static final int INDIRECT_COMMAND_SIZE = 16;
 
-    public RenderingOptimizer(MeshCollector meshCollector) {
+    public RenderingOptimizer(MeshCollector meshCollector, int width, int height) {
         this.meshCollector = meshCollector;
+        this.width = width / 4;
+        this.height = height / 4;
+
         shadowIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
@@ -53,7 +56,7 @@ public final class RenderingOptimizer {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, occludeeBuffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
 
-        depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
+        depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, this.width, this.height, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
@@ -500,6 +503,7 @@ public final class RenderingOptimizer {
     private final MeshCollector meshCollector;
     private long cameraChunkX, cameraChunkY, cameraChunkZ;
     private long cameraX, cameraY, cameraZ;
+    private final int width, height;
 
     private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
@@ -517,5 +521,4 @@ public final class RenderingOptimizer {
 
     private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
-    private static final int width = 1920, height = 1080;
 }
