@@ -166,7 +166,7 @@ public final class MeshCollector {
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getOpaqueByteSize());
-        if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, start, mesh.lod(), false);
+        if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, -1, mesh.lod(), false);
 
         glNamedBufferSubData(allocator.getBuffer(), start, mesh.opaqueVertices());
         return new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
@@ -174,13 +174,13 @@ public final class MeshCollector {
 
     private TransparentModel loadTransparentModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getTransparentByteSize());
-        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), 0, 0, -1, mesh.lod());
 
         glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
         return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
     }
 
-    private final MemoryAllocator allocator = new MemoryAllocator(500_000_000);
+    private final MemoryAllocator allocator = new MemoryAllocator(1 << 29);
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();

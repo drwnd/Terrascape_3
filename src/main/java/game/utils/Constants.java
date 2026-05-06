@@ -10,7 +10,7 @@ public final class Constants {
     static {
         boolean isPerformanceTest = "true".equals(System.getenv().get("isPerformanceTest"));
         if (isPerformanceTest) RENDER_DISTANCE = 62;
-        else RENDER_DISTANCE = 10;
+        else RENDER_DISTANCE = 8;
     }
 
     public static final float Z_NEAR = 0.8208F; // Just barely can't xRay

@@ -14,7 +14,7 @@ public final class MemoryAllocator {
     }
 
     public int memAlloc(int size) {
-        if (size == 0) return -1;
+        if (size <= 0) return -1;
         MemoryRegion region = free;
         MemoryRegion previous = null;
 
@@ -36,7 +36,7 @@ public final class MemoryAllocator {
             return start;
         }
 
-        growAtLeast(size);
+        if (!growAtLeast(size)) return -1;
         return memAlloc(size);
     }
 
@@ -114,11 +114,14 @@ public final class MemoryAllocator {
     }
 
 
-    private void growAtLeast(int size) {
+    private boolean growAtLeast(int size) {
         int oldCapacity = capacity;
-        capacity = Math.max(capacity << 1, capacity + size);
+        int newCapacity = Math.clamp((long) capacity << 1L, capacity + size, glGetInteger(GL_MAX_SHADER_STORAGE_BLOCK_SIZE));
+        if (newCapacity < oldCapacity + size) return false;
 
+        capacity = newCapacity;
         int newBuffer = glGenBuffers();
+
         glBindBuffer(GL_COPY_READ_BUFFER, buffer);
         glBindBuffer(GL_COPY_WRITE_BUFFER, newBuffer);
         glBufferData(GL_COPY_WRITE_BUFFER, capacity, GL_DYNAMIC_DRAW);
@@ -131,6 +134,7 @@ public final class MemoryAllocator {
         while (last.next != null) last = last.next;
         if (last.start + last.size == oldCapacity) last.size = last.size + capacity - oldCapacity;
         else last.next = new MemoryRegion(oldCapacity, capacity - oldCapacity);
+        return true;
     }
 
     private void removeFreeAfter(MemoryRegion previous, MemoryRegion region) {
