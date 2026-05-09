@@ -1,5 +1,7 @@
 package game.server.material;
 
+import core.rendering_api.Debug;
+
 import java.util.List;
 
 public enum Properties {
@@ -29,7 +31,7 @@ public enum Properties {
             try {
                 propertyEnum = valueOf(property);
             } catch (IllegalArgumentException exception) {
-                System.err.printf("Unrecognized property : %s%n", property);
+                Debug.err("Unrecognized property : %s%n", property);
                 continue;
             }
             value |= propertyEnum.value;

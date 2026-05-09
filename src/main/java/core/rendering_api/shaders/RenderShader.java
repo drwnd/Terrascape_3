@@ -1,6 +1,7 @@
 package core.rendering_api.shaders;
 
 import core.assets.identifiers.ShaderIdentifier;
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 
 import static org.lwjgl.opengl.GL20.*;
@@ -17,7 +18,7 @@ public class RenderShader extends Shader {
             int fragmentShaderID = createFragmentShader(fragmentShaderCode, programID);
             link(programID, vertexShaderID, fragmentShaderID);
 
-            System.out.printf("Creating uniforms for Shader %s%n", identifier);
+            Debug.log("Creating uniforms for Shader %s%n", identifier);
             createUniforms(vertexShaderCode);
             createUniforms(fragmentShaderCode);
         } catch (Exception exception) {

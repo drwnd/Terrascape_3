@@ -1,5 +1,6 @@
 package game.server;
 
+import core.rendering_api.Debug;
 import game.player.Player;
 import core.rendering_api.Window;
 import game.server.material.Material;
@@ -62,7 +63,7 @@ public final class Game {
 
     public static boolean setTemporaryWorld(World world) {
         if (Game.world != null || player != null || server != null) {
-            System.err.println("Cannot set temporary World. The Game might be running");
+            Debug.err("Cannot set temporary World. The Game might be running");
             return false;
         }
         Game.world = world;
@@ -71,7 +72,7 @@ public final class Game {
 
     public static void removeTemporaryWorld() {
         if (player != null || server != null) {
-            System.err.println("Cannot remove temporary World. The Game might be running");
+            Debug.err("Cannot remove temporary World. The Game might be running");
             return;
         }
         world = null;

@@ -1,6 +1,7 @@
 package core.assets;
 
 import core.assets.identifiers.GuiElementIdentifier;
+import core.rendering_api.Debug;
 import core.rendering_api.shaders.TextShader;
 
 import org.lwjgl.stb.STBImage;
@@ -44,7 +45,7 @@ public final class AssetLoader {
 
             buffer = STBImage.stbi_load(filepath, w, h, c, 4);
             if (buffer == null) {
-                System.err.println("Image File " + filepath + " not loaded " + STBImage.stbi_failure_reason());
+                Debug.err("Image File %s ot loaded %s%n", filepath, STBImage.stbi_failure_reason());
                 return new Texture(0);
             }
 

@@ -1,6 +1,7 @@
 package core.rendering_api.shaders;
 
 import core.assets.identifiers.ShaderIdentifier;
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 import org.lwjgl.opengl.GL46;
 
@@ -16,7 +17,7 @@ public class ComputeShader extends Shader {
             int computeShaderID = createComputeShader(computeShaderCode, programID);
             link(programID, computeShaderID);
 
-            System.out.printf("Creating uniforms for Shader %s%n", name);
+            Debug.log("Creating uniforms for Shader %s%n", name);
             createUniforms(computeShaderCode);
 
         } catch (Exception exception) {

@@ -1,5 +1,6 @@
 package game.server.saving;
 
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 import core.utils.Saver;
 import game.server.Chunk;
@@ -30,7 +31,7 @@ public final class ChunkSaver extends Saver<Chunk> {
     public static void generateHigherLODs() {
         long start = System.nanoTime();
         for (int lod = 1; lod < LOD_COUNT; lod++) generateLod(lod);
-        System.out.printf("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
     private static void generateLod(int lod) {
@@ -48,7 +49,7 @@ public final class ChunkSaver extends Saver<Chunk> {
         File[] lowerLodChunkFiles = FileManager.getChildren(lowerLodFile);
 
         if (lowerLodChunkFiles == null) {
-            System.err.println("Error occurred when listing lod " + lowerLOD + " chunk files.");
+            Debug.err("Error occurred when listing lod " + lowerLOD + " chunk files.");
             return;
         }
 
@@ -66,7 +67,7 @@ public final class ChunkSaver extends Saver<Chunk> {
             generateChunk(thisLodChunk, saver);
             saver.save(thisLodChunk, getSaveFileLocation(thisLodChunkId, lod));
         }
-        System.out.printf("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
+       Debug.log("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
     }
 
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {

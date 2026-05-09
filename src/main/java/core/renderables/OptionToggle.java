@@ -45,7 +45,7 @@ public final class OptionToggle extends UiButton {
 
     private void setValue(Option value) {
         this.value = value;
-        if (settingName != null) textElement.setText(settingName.get() + " " + value.name());
+        if (settingName != null) textElement.setText(settingName.get() + ": " + value.name());
         else textElement.setText(value instanceof Translatable translatable ? translatable.get() : value.name());
         if (value instanceof ColorOption colorOption) textElement.setColor(colorOption.getColor());
         if (updateImmediately) setting.setValue(value);

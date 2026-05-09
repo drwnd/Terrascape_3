@@ -2,6 +2,7 @@ package game.server.material;
 
 import com.google.gson.Gson;
 import core.assets.AssetManager;
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 import game.assets.MaterialSounds;
 
@@ -17,7 +18,7 @@ public final class Material {
 
         Gson gson = new Gson();
         for (Materials identifier : Materials.values()) loadMaterial(identifier, gson);
-        System.out.printf("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Loaded all materials. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
     public static int getProperties(byte material) {
@@ -55,7 +56,7 @@ public final class Material {
         STEP_SOUNDS[materialIndex] = MaterialSounds.get(material.stepSounds);
         JUMP_SOUNDS[materialIndex] = MaterialSounds.get(material.jumpSounds);
 
-        System.out.println("Loaded Material " + identifier.name());
+        Debug.log("Loaded Material " + identifier.name());
     }
 
     private static final byte[] MATERIAL_PROPERTIES = new byte[AMOUNT_OF_MATERIALS];

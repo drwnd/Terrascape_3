@@ -2,6 +2,7 @@ package core.rendering_api.shaders;
 
 import core.assets.Asset;
 
+import core.rendering_api.Debug;
 import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
@@ -147,9 +148,9 @@ public abstract class Shader implements Asset {
 
     private void createUniform(String uniformName) {
         int uniformLocation = glGetUniformLocation(programID, uniformName);
-        if (uniformLocation == -1) System.err.println("Could not find uniform " + uniformName);
+        if (uniformLocation == -1) Debug.err("Could not find uniform " + uniformName);
         uniforms.put(uniformName, uniformLocation);
-        System.out.printf("-Created uniform %s with binding %s%n", uniformName, uniformLocation);
+        Debug.log("-Created uniform %s with binding %s%n", uniformName, uniformLocation);
     }
 
     private int getUniform(String uniformName) {

@@ -1,6 +1,7 @@
 package core.assets;
 
 import core.assets.identifiers.*;
+import core.rendering_api.Debug;
 
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ public final class AssetManager {
 
 
     public static void deleteAll() {
-        System.out.println("---Deleting old Assets---");
+        Debug.log("---Deleting old Assets---");
         synchronized (assets) {
             for (Asset asset : assets.values()) asset.delete();
             assets.clear();

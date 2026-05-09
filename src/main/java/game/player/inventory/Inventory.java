@@ -4,6 +4,7 @@ import core.assets.CoreTextures;
 import core.language.Language;
 import core.renderables.*;
 
+import core.rendering_api.Debug;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.sound.Sound;
@@ -150,7 +151,7 @@ public final class Inventory extends UiElement {
 
             cubeDisplays.add(new CubeDisplay(display, (byte) material));
         }
-        System.out.printf("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         return cubeDisplays;
     }
 
