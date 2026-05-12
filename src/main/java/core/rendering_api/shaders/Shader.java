@@ -27,6 +27,12 @@ public abstract class Shader implements Asset {
         }
     }
 
+    public void setUniform(String uniformName, Matrix3f value) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            glUniformMatrix3fv(getUniform(uniformName), false, value.get(stack.mallocFloat(9)));
+        }
+    }
+
     public void setUniform(String uniformName, int[] data) {
         glUniform1iv(getUniform(uniformName), data);
     }

@@ -6,7 +6,7 @@ uniform isampler2D sideTexture;
 
 uniform mat4 projectionMatrix;
 uniform mat4 projectionInverse;
-uniform mat4 viewMatrix;
+uniform mat3 viewMatrix;
 
 uniform int samples;
 
@@ -96,24 +96,32 @@ vec3 calcViewPosition(vec2 coords) {
     return vs_pos.xyz;
 }
 
+mat3 getSampleMatrix(int side) {
+    switch (side) {
+        case 0: return mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+        case 1: return mat3(1, 0, 0, 0, 0, 1, 0, 1, 0);
+        case 2: return mat3(0, 0, 1, 0, 1, 0, 1, 0, 0);
+        case 3: return mat3(1, 0, 0, 0, 1, 0, 0, 0, -1);
+        case 4: return mat3(1, 0, 0, 0, 0, -1, 0, 1, 0);
+        case 5: return mat3(0, 0, -1, 0, 1, 0, 1, 0, 0);
+    }
+    return mat3(0);
+}
+
 float computeOcclusion() {
     int side = texture(sideTexture, fragTextureCoordinate).r;
-    if (side == 6) return 1;
+    if (side < 0 || side >= 6) return 1;
     vec3 worldNormal = NORMALS[side].xyz;
-    vec3 viewNormal = (viewMatrix * vec4(worldNormal, 0)).xyz;
     vec3 viewPos = calcViewPosition(fragTextureCoordinate);
 
-    vec3 randomVec = vec3(0, 1, 0);
-    vec3 tangent = normalize(randomVec - viewNormal * dot(randomVec, viewNormal));
-    vec3 bitangent = cross(viewNormal, tangent);
-    mat3 TBN = mat3(tangent, bitangent, viewNormal);
+    mat3 sampleMatrix = viewMatrix * getSampleMatrix(side);
 
     float occlusionFactor = 0.0;
     float radius = 4.0 * 64.0 / samples;
 
     int count = clamp(samples, 0, SAMPLE_COUNT);
     for (int index = 0; index < count; index++) {
-        vec3 samplePos = TBN * SAMPLES[index].xyz;
+        vec3 samplePos = sampleMatrix * SAMPLES[index].xyz;
         samplePos = viewPos + samplePos * radius;
 
         vec4 offset = vec4(samplePos, 1.0);

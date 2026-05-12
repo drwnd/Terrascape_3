@@ -191,16 +191,12 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0) {
-            glDisable(GL_STENCIL_TEST);
-            glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-            applyAmbientOcclusion();
-        }
+        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0) applyAmbientOcclusion();
 
         renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
         renderGlassParticles(cameraPosition, projectionViewMatrix);
-        renderVolumeIndicator(cameraPosition, projectionViewMatrix);
+        renderPlaceableHologram(cameraPosition, projectionViewMatrix);
 
         glDisable(GL_STENCIL_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -490,7 +486,7 @@ public final class Renderer extends Renderable {
     }
 
     private void applyAmbientOcclusion() {
-        Matrix4f viewMatrix = Transformation.createViewMatrix(player.getCamera());
+        Matrix3f viewMatrix = Transformation.createViewMatrix(player.getCamera());
         Matrix4f projectionMatrix = player.getCamera().getProjectionMatrix();
         Matrix4f projectionInverse = new Matrix4f(projectionMatrix).invert();
 
@@ -513,6 +509,7 @@ public final class Renderer extends Renderable {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, sideTexture);
         glDisable(GL_BLEND);
+        glDisable(GL_STENCIL_TEST);
 
         shader.flipNextDrawVertically();
         shader.drawFullScreenQuad();
@@ -583,7 +580,7 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix) {
+    private void renderPlaceableHologram(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Target currentTarget = Target.getPlayerTarget();
         Target lockedTarget = player.getInteractionHandler().getLockedTarget();
         Target startTarget = player.getInteractionHandler().getStartTarget();
