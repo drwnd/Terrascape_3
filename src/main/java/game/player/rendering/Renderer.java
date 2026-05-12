@@ -191,7 +191,8 @@ public final class Renderer extends Renderable {
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0) applyAmbientOcclusion();
+        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0)
+            applyAmbientOcclusion(cameraPosition);
 
         renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
@@ -485,8 +486,9 @@ public final class Renderer extends Renderable {
         renderParticles(shader, currentTick, true);
     }
 
-    private void applyAmbientOcclusion() {
+    private void applyAmbientOcclusion(Position cameraPosition) {
         Matrix3f viewMatrix = Transformation.createViewMatrix(player.getCamera());
+        Matrix3f viewInverse = new Matrix3f(viewMatrix).invert();
         Matrix4f projectionMatrix = player.getCamera().getProjectionMatrix();
         Matrix4f projectionInverse = new Matrix4f(projectionMatrix).invert();
 
@@ -500,6 +502,9 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionMatrix", projectionMatrix);
         shader.setUniform("projectionInverse", projectionInverse);
         shader.setUniform("viewMatrix", viewMatrix);
+        shader.setUniform("viewInverse", viewInverse);
+
+        shader.setUniform("fractionPosition", cameraPosition.fractionX, cameraPosition.fractionY, cameraPosition.fractionZ);
         shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
