@@ -1,23 +1,21 @@
 #version 400 core
 
 uniform sampler2D depthTexture;
-uniform sampler2D noiseTexture;
+uniform sampler2D colorTexture;
 uniform isampler2D sideTexture;
 
 uniform mat4 projectionMatrix;
 uniform mat4 projectionInverse;
 uniform mat4 viewMatrix;
 
-uniform ivec2 noiseScale;
 uniform int samples;
 
 in vec2 fragTextureCoordinate;
 
-out float visibilityFactor;
+out vec4 fragColor;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const float MAX_DISTANCE = 2000.0;
-const vec2 HALF_2 = vec2(0.5);
 const int SAMPLE_COUNT = 64;
 const vec3[SAMPLE_COUNT] SAMPLES = vec3[SAMPLE_COUNT](
 vec3(0.07142376, 0.040854275, 0.056829352),
@@ -105,7 +103,7 @@ float computeOcclusion() {
     vec3 viewNormal = (viewMatrix * vec4(worldNormal, 0)).xyz;
     vec3 viewPos = calcViewPosition(fragTextureCoordinate);
 
-    vec3 randomVec = texture(noiseTexture, fragTextureCoordinate * noiseScale).xyz;
+    vec3 randomVec = vec3(0, 1, 0);
     vec3 tangent = normalize(randomVec - viewNormal * dot(randomVec, viewNormal));
     vec3 bitangent = cross(viewNormal, tangent);
     mat3 TBN = mat3(tangent, bitangent, viewNormal);
@@ -114,14 +112,14 @@ float computeOcclusion() {
     float radius = 4.0 * 64.0 / samples;
 
     int count = clamp(samples, 0, SAMPLE_COUNT);
-    for (int i = 0; i < count; i++) {
-        vec3 samplePos = TBN * SAMPLES[i].xyz;
+    for (int index = 0; index < count; index++) {
+        vec3 samplePos = TBN * SAMPLES[index].xyz;
         samplePos = viewPos + samplePos * radius;
 
         vec4 offset = vec4(samplePos, 1.0);
         offset = projectionMatrix * offset;
         offset.xy /= offset.w;
-        offset.xy = offset.xy * HALF_2 + HALF_2;
+        offset.xy = offset.xy * 0.5 + 0.5;
 
         float geometryDepth = calcViewPosition(offset.xy).z;
         float rangeCheck = float(abs(viewPos.z - geometryDepth) < radius);
@@ -139,6 +137,10 @@ float computeOcclusion() {
 }
 
 void main() {
-    visibilityFactor = computeOcclusion();
-    visibilityFactor = max(visibilityFactor, 0.5);
+    vec4 color = texture(colorTexture, fragTextureCoordinate);
+    if (color.a == 0) discard;
+
+    float occlusion = computeOcclusion();
+    occlusion = max(occlusion, 0.5);
+    fragColor = vec4(color.rgb * occlusion, color.a);
 }

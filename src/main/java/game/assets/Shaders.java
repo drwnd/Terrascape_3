@@ -10,7 +10,6 @@ public enum Shaders implements ShaderIdentifier {
     WATER,
     GLASS,
     SSAO,
-    AO_APPLIER,
     OPAQUE_PARTICLE,
     GLASS_PARTICLE,
     AABB_INDICATOR,
