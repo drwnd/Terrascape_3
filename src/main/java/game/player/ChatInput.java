@@ -57,6 +57,7 @@ public final class ChatInput extends TextFieldInput {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
 
         if (key == GLFW_KEY_BACKSPACE) handleBackspace();
+        if (key == GLFW_KEY_DELETE) handleDelete();
         if (key == GLFW_KEY_ESCAPE) Game.getPlayer().toggleChat();
         if (key == GLFW_KEY_ENTER) {
             Game.getServer().sendPlayerMessage(field.getText());
