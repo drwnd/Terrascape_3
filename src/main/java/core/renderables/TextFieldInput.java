@@ -56,13 +56,14 @@ public class TextFieldInput extends Input {
         return cursorIndex;
     }
 
+
     private void unselect() {
         Renderable renderable = Window.topRenderable();
         renderable.setOnTop();
         renderable.hoverOver(cursorPos);
     }
 
-    protected void handleBackspace() {
+    private void handleBackspace() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
 
@@ -72,7 +73,7 @@ public class TextFieldInput extends Input {
         } else field.setText(cutBefore(currentText));
     }
 
-    protected void handleDelete() {
+    private void handleDelete() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
 
@@ -82,13 +83,13 @@ public class TextFieldInput extends Input {
         } else field.setText(cutAfter(currentText));
     }
 
-    protected void handleMoveLeft() {
+    private void handleMoveLeft() {
         if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL))
             cursorIndex = Math.clamp(lastSpaceIndexBeforeCursor(field.getText()), 0, cursorIndex);
         else cursorIndex = Math.clamp(cursorIndex - 1, 0, field.getText().length());
     }
 
-    protected void handleMoveRight() {
+    private void handleMoveRight() {
         if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL))
             cursorIndex = Math.clamp(firstSpaceIndexAfterCursor(field.getText()), cursorIndex, field.getText().length());
         else cursorIndex = Math.clamp(cursorIndex + 1, 0, field.getText().length());
