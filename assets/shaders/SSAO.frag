@@ -15,40 +15,40 @@ const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec
 const float MAX_DISTANCE = 2000.0;
 const int SAMPLE_COUNT = 34;
 const vec3[SAMPLE_COUNT] SAMPLES = vec3[SAMPLE_COUNT](
-vec3(-1, -1, -0.5),
-vec3(-1, 0, -0.5),
-vec3(-1, 1, -0.5),
-vec3(0, -1, -0.5),
-vec3(0, 0, -0.5),
-vec3(0, 1, -0.5),
-vec3(1, -1, -0.5),
-vec3(1, 0, -0.5),
-vec3(1, 1, -0.5),
-vec3(-2, -2, 0.5),
-vec3(-2, -1, 0.5),
-vec3(-2, 0, 0.5),
-vec3(-2, 1, 0.5),
-vec3(-2, 2, 0.5),
-vec3(-1, -2, 0.5),
 vec3(-1, -1, 0.5),
 vec3(-1, 0, 0.5),
 vec3(-1, 1, 0.5),
-vec3(-1, 2, 0.5),
-vec3(0, -2, 0.5),
 vec3(0, -1, 0.5),
 vec3(0, 0, 0.5),
 vec3(0, 1, 0.5),
-vec3(0, 2, 0.5),
-vec3(1, -2, 0.5),
 vec3(1, -1, 0.5),
 vec3(1, 0, 0.5),
 vec3(1, 1, 0.5),
-vec3(1, 2, 0.5),
-vec3(2, -2, 0.5),
-vec3(2, -1, 0.5),
-vec3(2, 0, 0.5),
-vec3(2, 1, 0.5),
-vec3(2, 2, 0.5)
+vec3(-2, -2, 1.5),
+vec3(-2, -1, 1.5),
+vec3(-2, 0, 1.5),
+vec3(-2, 1, 1.5),
+vec3(-2, 2, 1.5),
+vec3(-1, -2, 1.5),
+vec3(-1, -1, 1.5),
+vec3(-1, 0, 1.5),
+vec3(-1, 1, 1.5),
+vec3(-1, 2, 1.5),
+vec3(0, -2, 1.5),
+vec3(0, -1, 1.5),
+vec3(0, 0, 1.5),
+vec3(0, 1, 1.5),
+vec3(0, 2, 1.5),
+vec3(1, -2, 1.5),
+vec3(1, -1, 1.5),
+vec3(1, 0, 1.5),
+vec3(1, 1, 1.5),
+vec3(1, 2, 1.5),
+vec3(2, -2, 1.5),
+vec3(2, -1, 1.5),
+vec3(2, 0, 1.5),
+vec3(2, 1, 1.5),
+vec3(2, 2, 1.5)
 );
 
 mat3 getSampleMatrix(int side) {
@@ -67,7 +67,6 @@ float computeVisibilityFactor() {
     ivec4 intPos = texture(intPosTexture, fragTextureCoordinate);
     int side = intPos.w;
     if (side < 0 || side >= 6) return 1;
-    vec3 worldNormal = NORMALS[side].xyz;
     vec3 voxelPos = vec3(intPos.xyz) + 0.5;
     float currentDepth = length(voxelPos - inChunkPosition);
 
@@ -76,7 +75,7 @@ float computeVisibilityFactor() {
 
     int count = clamp(samples, 0, SAMPLE_COUNT);
     for (int index = 0; index < count; index++) {
-        vec3 samplePos = sampleMatrix * (SAMPLES[index] + vec3(0, 0, 1.5)) + voxelPos;
+        vec3 samplePos = sampleMatrix * SAMPLES[index] + voxelPos;
 
         vec4 offset = vec4(samplePos, 1.0);
         offset = projectionViewMatrix * offset;
@@ -88,8 +87,8 @@ float computeVisibilityFactor() {
 
         float geometryDepth = length(geometryIntPos.xyz - inChunkPosition + 0.5);
         float expectedDepth = length(samplePos - inChunkPosition);
-        float rangeCheck = float(abs(currentDepth - geometryDepth) < 7);
-        occlusionFactor += rangeCheck * float(geometryDepth < expectedDepth - 0.01);
+        float rangeCheck = float(abs(currentDepth - geometryDepth) < length(SAMPLES[index]) * 2);
+        occlusionFactor += rangeCheck * float(geometryDepth < expectedDepth - 0.1);
     }
 
     float distanceScale = 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, currentDepth));
@@ -107,7 +106,8 @@ void main() {
     float visibilityFactor = computeVisibilityFactor();
     visibilityFactor = max(visibilityFactor, 0.5);
     fragColor = vec4(color.rgb * visibilityFactor, color.a);
-//        fragColor = vec4((texture(intPosTexture, fragTextureCoordinate).xyz - inChunkPosition + 1) / 32, 1);
+//        fragColor = vec4((texture(intPosTexture, fragTextureCoordinate).xyz + 0.5), 1);
     //    fragColor = vec4(vec3(length(texture(intPosTexture, fragTextureCoordinate).xyz - inChunkPosition + 1)) / 100, 1);
 //    fragColor = vec4(abs(NORMALS[texture(intPosTexture, fragTextureCoordinate).w]), 1);
+//    fragColor = vec4((projectionViewMatrix * vec4(texture(intPosTexture, fragTextureCoordinate).xyz, 1)).xyz, 1);
 }

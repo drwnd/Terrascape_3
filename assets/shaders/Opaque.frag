@@ -115,5 +115,5 @@ void main() {
     if (fragColor.a == 0) discard;
 
     fragColor.rgb = getColor(fragColor.rgb, textureCoord);
-    intPos = ivec4(int(floor(voxelPosition.x)), int(floor(voxelPosition.y)), int(floor(voxelPosition.z)), side);
+    intPos = ivec4(ivec3(floor(voxelPosition - normal * 0.5)), side);
 }

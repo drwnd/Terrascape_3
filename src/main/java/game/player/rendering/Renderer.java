@@ -499,7 +499,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
 
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
-        shader.setUniform("inChunkPosition", cameraPosition.getInChunkPosition());
+        shader.setUniform("inChunkPosition", (float) (cameraPosition.longX & CHUNK_SIZE_MASK), cameraPosition.longY & CHUNK_SIZE_MASK, cameraPosition.longZ & CHUNK_SIZE_MASK);
         shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
