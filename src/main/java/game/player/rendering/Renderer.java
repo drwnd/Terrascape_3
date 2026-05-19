@@ -185,14 +185,16 @@ public final class Renderer extends Renderable {
         setupRenderState();
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         renderSkybox(camera);
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
+        glDrawBuffers(GL_COLOR_ATTACHMENT0);
         if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0)
-            applyAmbientOcclusion(cameraPosition);
+            applyAmbientOcclusion(cameraPosition, projectionViewMatrix);
 
         renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
@@ -251,7 +253,10 @@ public final class Renderer extends Renderable {
 
     private void createTextures(int width, int height) {
         colorTexture = CoreObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-        sideTexture = CoreObjectLoader.createTexture2D(GL_R8I, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, GL_NEAREST);
+        intPosTexture = CoreObjectLoader.createTexture2D(GL_RGBA16I, width, height, GL_RGBA_INTEGER, GL_SHORT, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 6});
         shadowColorTexture = CoreObjectLoader.createTexture2D(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST);
 
         depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH32F_STENCIL8, width, height, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_LINEAR);
@@ -269,7 +274,7 @@ public final class Renderer extends Renderable {
         framebuffer = glCreateFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, sideTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, intPosTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
         glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -289,7 +294,7 @@ public final class Renderer extends Renderable {
     private void deleteTextures() {
         glDeleteTextures(colorTexture);
         glDeleteTextures(depthTexture);
-        glDeleteTextures(sideTexture);
+        glDeleteTextures(intPosTexture);
         glDeleteTextures(shadowTexture);
         glDeleteTextures(shadowColorTexture);
     }
@@ -486,33 +491,21 @@ public final class Renderer extends Renderable {
         renderParticles(shader, currentTick, true);
     }
 
-    private void applyAmbientOcclusion(Position cameraPosition) {
-        Matrix3f viewMatrix = Transformation.createViewMatrix(player.getCamera());
-        Matrix3f viewInverse = new Matrix3f(viewMatrix).invert();
-        Matrix4f projectionMatrix = player.getCamera().getProjectionMatrix();
-        Matrix4f projectionInverse = new Matrix4f(projectionMatrix).invert();
-
+    private void applyAmbientOcclusion(Position cameraPosition, Matrix4f projectionViewMatrix) {
         GuiShader shader = (GuiShader) AssetManager.get(Shaders.SSAO);
         shader.bind();
-        shader.setUniform("depthTexture", 0);
-        shader.setUniform("colorTexture", 1);
-        shader.setUniform("sideTexture", 2);
+        shader.setUniform("colorTexture", 0);
+        shader.setUniform("intPosTexture", 1);
         shader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
 
-        shader.setUniform("projectionMatrix", projectionMatrix);
-        shader.setUniform("projectionInverse", projectionInverse);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("viewInverse", viewInverse);
-
-        shader.setUniform("fractionPosition", cameraPosition.fractionX, cameraPosition.fractionY, cameraPosition.fractionZ);
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("inChunkPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthTexture);
-        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, colorTexture);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, sideTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, intPosTexture);
         glDisable(GL_BLEND);
         glDisable(GL_STENCIL_TEST);
 
@@ -890,7 +883,7 @@ public final class Renderer extends Renderable {
     private boolean hologramModelsValid = false;
     private int hologramSize, hologramHash;
 
-    private int framebuffer, colorTexture, depthTexture, sideTexture;
+    private int framebuffer, colorTexture, depthTexture, intPosTexture;
     private int shadowFramebuffer, shadowTexture, shadowColorTexture;
 
     private static final int HEAD_UNDER_WATER_BIT = 1;

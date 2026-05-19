@@ -3,7 +3,7 @@
 in vec2 fragTextureCoordinates;
 
 layout (location = 0) out vec4 fragColor;
-layout (location = 1) out int side;
+layout (location = 1) out ivec4 intPos;
 
 uniform sampler2D dayTexture;
 uniform sampler2D nightTexture;
@@ -15,5 +15,5 @@ void main() {
 
     float absTime = abs(time);
     fragColor = color1 * absTime + color2 * (1 - absTime);
-    side = 6; // Prevents AO on the sky
+    intPos = ivec4(0, 0, 0, 6); // Prevents AO on the sky
 }

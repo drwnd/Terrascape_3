@@ -10,8 +10,7 @@ in vec2 trianglePos;
 flat in vec3 normal;
 flat in int textureData;
 
-layout (location = 0) out vec4 fragColor;
-layout (location = 1) out int side;
+out vec4 fragColor;
 
 uniform sampler2DArray textures;
 uniform sampler2D shadowMap;
@@ -79,7 +78,7 @@ vec2 getUVOffset(int side, int textureSize) {
 
 void main() {
     if (trianglePos.x > 1 || trianglePos.y > 1) discard;
-    side = textureData >> 8 & 7;
+    int side = textureData >> 8 & 7;
     int material = textureData & 0xFF;
     int textureSize = textureSizes[material];
 
