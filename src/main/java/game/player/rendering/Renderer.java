@@ -240,14 +240,14 @@ public final class Renderer extends Renderable {
     protected void resizeSelfTo(int width, int height) {
         if (width == 0 || height == 0) return;
 
+        renderingOptimizer.cleanUp();
+        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector(), width, height);
+
         deleteFrameBuffers();
         deleteTextures();
 
         createTextures(width, height);
         createFrameBuffers();
-
-        renderingOptimizer.cleanUp();
-        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector(), width, height);
     }
 
     @Override

@@ -68,15 +68,32 @@ public final class Window {
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
         glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
-            Window.width = width;
-            Window.height = height;
-            Vector2i size = new Vector2i(width, height);
-            for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0F, 1.0F);
+            try {
+                Window.width = width;
+                Window.height = height;
+                Vector2i size = new Vector2i(width, height);
+                for (Renderable renderable : renderablesStack) renderable.resize(size, 1.0F, 1.0F);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
 
         glfwMakeContextCurrent(window);
         glfwShowWindow(window);
         glfwSwapInterval(1);
+    }
+
+    private static void handleException(Exception exception) {
+        CrashAction action = crashCallback.notify(exception);
+        switch (action) {
+            case PRINT -> exception.printStackTrace();
+            case CLOSE -> glfwSetWindowShouldClose(window, true);
+            case THROW -> throw new RuntimeException(exception);
+            case PRINT_AND_CLOSE -> {
+                exception.printStackTrace();
+                glfwSetWindowShouldClose(window, true);
+            }
+        }
     }
 
     public static void renderLoop() {
@@ -96,16 +113,7 @@ public final class Window {
                 glfwPollEvents();
 
             } catch (Exception exception) {
-                CrashAction action = crashCallback.notify(exception);
-                switch (action) {
-                    case PRINT -> exception.printStackTrace();
-                    case CLOSE -> glfwSetWindowShouldClose(window, true);
-                    case THROW -> throw exception;
-                    case PRINT_AND_CLOSE -> {
-                        exception.printStackTrace();
-                        glfwSetWindowShouldClose(window, true);
-                    }
-                }
+                handleException(exception);
             }
         }
     }
@@ -180,24 +188,44 @@ public final class Window {
         Window.input = input;
         input.setInputMode();
         glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
-            standardInput.cursorPosCallback(window, xPos, yPos);
-            input.cursorPosCallback(window, xPos, yPos);
+            try {
+                standardInput.cursorPosCallback(window, xPos, yPos);
+                input.cursorPosCallback(window, xPos, yPos);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
         glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
-            standardInput.mouseButtonCallback(window, button, action, mods);
-            input.mouseButtonCallback(window, button, action, mods);
+            try {
+                standardInput.mouseButtonCallback(window, button, action, mods);
+                input.mouseButtonCallback(window, button, action, mods);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
         glfwSetScrollCallback(window, (long window, double xScroll, double yScroll) -> {
-            standardInput.scrollCallback(window, xScroll, yScroll);
-            input.scrollCallback(window, xScroll, yScroll);
+            try {
+                standardInput.scrollCallback(window, xScroll, yScroll);
+                input.scrollCallback(window, xScroll, yScroll);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
         glfwSetKeyCallback(window, (long window, int key, int scancode, int action, int mods) -> {
-            standardInput.keyCallback(window, key, scancode, action, mods);
-            input.keyCallback(window, key, scancode, action, mods);
+            try {
+                standardInput.keyCallback(window, key, scancode, action, mods);
+                input.keyCallback(window, key, scancode, action, mods);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
         glfwSetCharCallback(window, (long window, int codePoint) -> {
-            standardInput.charCallback(window, codePoint);
-            input.charCallback(window, codePoint);
+            try {
+                standardInput.charCallback(window, codePoint);
+                input.charCallback(window, codePoint);
+            } catch (Exception exception) {
+                handleException(exception);
+            }
         });
     }
 
