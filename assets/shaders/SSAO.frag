@@ -69,6 +69,8 @@ float computeVisibilityFactor() {
     if (side < 0 || side >= 6) return 1;
     vec3 voxelPos = vec3(intPos.xyz) + 0.5;
     float currentDepth = length(voxelPos - inChunkPosition);
+    float distanceScale = 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, currentDepth));
+    if (distanceScale == 0) return 1;
 
     mat3 sampleMatrix = getSampleMatrix(side);
     float occlusionFactor = 0.0;
@@ -91,7 +93,6 @@ float computeVisibilityFactor() {
         occlusionFactor += rangeCheck * float(geometryDepth < expectedDepth - 0.1);
     }
 
-    float distanceScale = 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, currentDepth));
     float averageOcclusionFactor = occlusionFactor * distanceScale / count;
     float visibilityFactor = 1.0 - averageOcclusionFactor;
     visibilityFactor = pow(visibilityFactor, 5.0);
@@ -106,8 +107,4 @@ void main() {
     float visibilityFactor = computeVisibilityFactor();
     visibilityFactor = max(visibilityFactor, 0.5);
     fragColor = vec4(color.rgb * visibilityFactor, color.a);
-//        fragColor = vec4((texture(intPosTexture, fragTextureCoordinate).xyz + 0.5), 1);
-    //    fragColor = vec4(vec3(length(texture(intPosTexture, fragTextureCoordinate).xyz - inChunkPosition + 1)) / 100, 1);
-//    fragColor = vec4(abs(NORMALS[texture(intPosTexture, fragTextureCoordinate).w]), 1);
-//    fragColor = vec4((projectionViewMatrix * vec4(texture(intPosTexture, fragTextureCoordinate).xyz, 1)).xyz, 1);
 }
