@@ -41,6 +41,7 @@ public class TextFieldInput extends Input {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
         if (key == GLFW_KEY_ESCAPE) unselect();
         if (key == GLFW_KEY_BACKSPACE) handleBackspace();
+        if (key == GLFW_KEY_DELETE) handleDelete();
         if (key == GLFW_KEY_LEFT) handleMoveLeft();
         if (key == GLFW_KEY_RIGHT) handleMoveRight();
     }
@@ -55,29 +56,40 @@ public class TextFieldInput extends Input {
         return cursorIndex;
     }
 
+
     private void unselect() {
         Renderable renderable = Window.topRenderable();
         renderable.setOnTop();
         renderable.hoverOver(cursorPos);
     }
 
-    protected void handleBackspace() {
+    private void handleBackspace() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
 
         if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL)) {
             int spaceIndex = lastSpaceIndexBeforeCursor(currentText);
-            field.setText(cut(currentText, spaceIndex));
-        } else field.setText(cut(currentText));
+            field.setText(cutBefore(currentText, spaceIndex));
+        } else field.setText(cutBefore(currentText));
     }
 
-    protected void handleMoveLeft() {
+    private void handleDelete() {
+        String currentText = field.getText();
+        if (currentText.isEmpty()) return;
+
+        if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL)) {
+            int spaceIndex = firstSpaceIndexAfterCursor(currentText);
+            field.setText(cutAfter(currentText, spaceIndex));
+        } else field.setText(cutAfter(currentText));
+    }
+
+    private void handleMoveLeft() {
         if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL))
             cursorIndex = Math.clamp(lastSpaceIndexBeforeCursor(field.getText()), 0, cursorIndex);
         else cursorIndex = Math.clamp(cursorIndex - 1, 0, field.getText().length());
     }
 
-    protected void handleMoveRight() {
+    private void handleMoveRight() {
         if (Input.isKeyPressed(GLFW_KEY_LEFT_CONTROL) || Input.isKeyPressed(GLFW_KEY_RIGHT_CONTROL))
             cursorIndex = Math.clamp(firstSpaceIndexAfterCursor(field.getText()), cursorIndex, field.getText().length());
         else cursorIndex = Math.clamp(cursorIndex + 1, 0, field.getText().length());
@@ -91,7 +103,7 @@ public class TextFieldInput extends Input {
         return prefix + toInsert + suffix;
     }
 
-    private String cut(String string, int spaceIndex) {
+    private String cutBefore(String string, int spaceIndex) {
         if (spaceIndex == -1) {
             String suffix = string.substring(cursorIndex);
             cursorIndex = 0;
@@ -106,12 +118,30 @@ public class TextFieldInput extends Input {
         return result;
     }
 
-    private String cut(String string) {
+    private String cutBefore(String string) {
         if (cursorIndex == 0) return string;
 
         String prefix = string.substring(0, cursorIndex - 1);
         String suffix = string.substring(cursorIndex);
         cursorIndex = Math.clamp(cursorIndex - 1, 0, field.getText().length());
+
+        return prefix + suffix;
+    }
+
+    private String cutAfter(String string, int spaceIndex) {
+        if (spaceIndex == string.length()) return string.substring(0, cursorIndex);
+
+        String prefix = string.substring(0, cursorIndex);
+        String suffix = string.substring(spaceIndex);
+
+        return prefix + suffix;
+    }
+
+    private String cutAfter(String string) {
+        if (cursorIndex == string.length()) return string;
+
+        String prefix = string.substring(0, cursorIndex);
+        String suffix = string.substring(cursorIndex + 1);
 
         return prefix + suffix;
     }

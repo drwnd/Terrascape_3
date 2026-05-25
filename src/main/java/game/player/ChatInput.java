@@ -55,8 +55,6 @@ public final class ChatInput extends TextFieldInput {
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
-
-        if (key == GLFW_KEY_BACKSPACE) handleBackspace();
         if (key == GLFW_KEY_ESCAPE) Game.getPlayer().toggleChat();
         if (key == GLFW_KEY_ENTER) {
             Game.getServer().sendPlayerMessage(field.getText());
@@ -65,8 +63,8 @@ public final class ChatInput extends TextFieldInput {
         }
         if (key == GLFW_KEY_UP) replaceText(nextPlayerMessage(1));
         if (key == GLFW_KEY_DOWN) replaceText(nextPlayerMessage(-1));
-        if (key == GLFW_KEY_LEFT) handleMoveLeft();
-        if (key == GLFW_KEY_RIGHT) handleMoveRight();
+
+        super.keyCallback(window, key, scancode, action, mods);
     }
 
     private String nextPlayerMessage(int increment) {
