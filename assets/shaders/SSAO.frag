@@ -29,17 +29,13 @@ vec3(-2, 1, 2.1), vec3(-2, 0, 2.1), vec3(1, 0, 3.1), vec3(-1, 0, 3.1),
 vec3(-1, -1, 3.1), vec3(-1, 1, 3.1), vec3(0, 0, 3.1), vec3(1, 1, 3.1),
 vec3(0, -1, 3.1), vec3(1, -1, 3.1), vec3(0, 1, 3.1));
 
-mat3 getSampleMatrix(int side) {
-    switch (side) {
-        case 0: return mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-        case 1: return mat3(1, 0, 0, 0, 0, 1, 0, 1, 0);
-        case 2: return mat3(0, 0, 1, 0, 1, 0, 1, 0, 0);
-        case 3: return mat3(1, 0, 0, 0, 1, 0, 0, 0, -1);
-        case 4: return mat3(1, 0, 0, 0, 0, 1, 0, -1, 0);
-        case 5: return mat3(0, 0, 1, 0, 1, 0, -1, 0, 0);
-    }
-    return mat3(0);
-}
+const mat3[6] SAMPLE_MATRICES = mat3[6](
+mat3(1, 0, 0, 0, 1, 0, 0, 0, 1),
+mat3(1, 0, 0, 0, 0, 1, 0, 1, 0),
+mat3(0, 0, 1, 0, 1, 0, 1, 0, 0),
+mat3(1, 0, 0, 0, 1, 0, 0, 0, -1),
+mat3(1, 0, 0, 0, 0, 1, 0, -1, 0),
+mat3(0, 0, 1, 0, 1, 0, -1, 0, 0));
 
 float computeVisibilityFactor() {
     ivec4 intPos = texture(intPosTexture, fragTextureCoordinate);
@@ -50,7 +46,7 @@ float computeVisibilityFactor() {
     float distanceScale = 1.0 - smoothstep(0.0, MAX_DISTANCE, min(MAX_DISTANCE, currentDepth));
     if (distanceScale == 0) return 1;
 
-    mat3 sampleMatrix = getSampleMatrix(side);
+    mat3 sampleMatrix = SAMPLE_MATRICES[side];
     float occlusionFactor = 0.0;
 
     int count = clamp(samples, 0, SAMPLE_COUNT);
