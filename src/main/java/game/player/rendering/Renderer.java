@@ -185,28 +185,21 @@ public final class Renderer extends Renderable {
         setupRenderState();
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         renderSkybox(camera);
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix, sunMatrix);
 
-        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0) {
-            glBindFramebuffer(GL_FRAMEBUFFER, ssaoFramebuffer);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glDisable(GL_STENCIL_TEST);
-
-            computeAmbientOcclusion();
-
-            glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-            applyAmbientOcclusion();
-        }
+        glDrawBuffers(GL_COLOR_ATTACHMENT0);
+        if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0)
+            applyAmbientOcclusion(cameraPosition, projectionViewMatrix);
 
         renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
         renderGlass(cameraPosition, projectionViewMatrix);
         renderGlassParticles(cameraPosition, projectionViewMatrix);
-        renderVolumeIndicator(cameraPosition, projectionViewMatrix);
+        renderPlaceableHologram(cameraPosition, projectionViewMatrix);
 
         glDisable(GL_STENCIL_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -260,54 +253,32 @@ public final class Renderer extends Renderable {
 
     private void createTextures(int width, int height) {
         colorTexture = CoreObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-        sideTexture = CoreObjectLoader.createTexture2D(GL_R8I, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, GL_NEAREST);
+        intPosTexture = CoreObjectLoader.createTexture2D(GL_RGBA16I, width, height, GL_RGBA_INTEGER, GL_SHORT, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new int[]{1000, 1000, 1000, 6});
         shadowColorTexture = CoreObjectLoader.createTexture2D(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST);
 
-        ssaoTexture = CoreObjectLoader.createTexture2D(GL_RED, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
         depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH32F_STENCIL8, width, height, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
 
         shadowTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
-
-        int noiseSamples = 4 * 4 * 3;
-        float[] noise = new float[noiseSamples];
-        for (int i = 0; i < noiseSamples; i += 3) {
-            noise[i] = (float) (Math.random() * 2 - 1);
-            noise[i + 1] = (float) (Math.random() * 2 - 1);
-            noise[i + 2] = 0.0F;
-        }
-        noiseTexture = glCreateTextures(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, noiseTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 4, 4, 0, GL_RGB, GL_FLOAT, noise);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     private void createFrameBuffers() {
         framebuffer = glCreateFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, sideTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, intPosTexture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
         glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-
-        ssaoFramebuffer = glCreateFramebuffers();
-        glBindFramebuffer(GL_FRAMEBUFFER, ssaoFramebuffer);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoTexture, 0);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            throw new IllegalStateException("SSAO Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 
         shadowFramebuffer = glCreateFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
@@ -323,16 +294,13 @@ public final class Renderer extends Renderable {
     private void deleteTextures() {
         glDeleteTextures(colorTexture);
         glDeleteTextures(depthTexture);
-        glDeleteTextures(noiseTexture);
-        glDeleteTextures(ssaoTexture);
-        glDeleteTextures(sideTexture);
+        glDeleteTextures(intPosTexture);
         glDeleteTextures(shadowTexture);
         glDeleteTextures(shadowColorTexture);
     }
 
     private void deleteFrameBuffers() {
         glDeleteFramebuffers(framebuffer);
-        glDeleteFramebuffers(ssaoFramebuffer);
         glDeleteFramebuffers(shadowFramebuffer);
     }
 
@@ -523,45 +491,23 @@ public final class Renderer extends Renderable {
         renderParticles(shader, currentTick, true);
     }
 
-    private void computeAmbientOcclusion() {
-        Matrix4f viewMatrix = Transformation.createViewMatrix(player.getCamera());
-        Matrix4f projectionMatrix = player.getCamera().getProjectionMatrix();
-        Matrix4f projectionInverse = new Matrix4f(projectionMatrix).invert();
-
+    private void applyAmbientOcclusion(Position cameraPosition, Matrix4f projectionViewMatrix) {
         GuiShader shader = (GuiShader) AssetManager.get(Shaders.SSAO);
         shader.bind();
-        shader.setUniform("depthTexture", 0);
-        shader.setUniform("noiseTexture", 1);
-        shader.setUniform("sideTexture", 2);
-        shader.setUniform("projectionMatrix", projectionMatrix);
-        shader.setUniform("projectionInverse", projectionInverse);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("noiseScale", Window.getWidth() >> 2, Window.getHeight() >> 2);
-        shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, noiseTexture);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, sideTexture);
-        glDisable(GL_BLEND);
-
-        shader.flipNextDrawVertically();
-        shader.drawFullScreenQuad();
-    }
-
-    private void applyAmbientOcclusion() {
-        GuiShader shader = (GuiShader) AssetManager.get(Shaders.AO_APPLIER);
-        shader.bind();
         shader.setUniform("colorTexture", 0);
-        shader.setUniform("ssaoTexture", 1);
+        shader.setUniform("intPosTexture", 1);
         shader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
+
+        shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("inChunkPosition", (float) (cameraPosition.longX & CHUNK_SIZE_MASK), cameraPosition.longY & CHUNK_SIZE_MASK, cameraPosition.longZ & CHUNK_SIZE_MASK);
+        shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorTexture);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, ssaoTexture);
+        glBindTexture(GL_TEXTURE_2D, intPosTexture);
+        glDisable(GL_BLEND);
+        glDisable(GL_STENCIL_TEST);
 
         shader.flipNextDrawVertically();
         shader.drawFullScreenQuad();
@@ -632,7 +578,7 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix) {
+    private void renderPlaceableHologram(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Target currentTarget = Target.getPlayerTarget();
         Target lockedTarget = player.getInteractionHandler().getLockedTarget();
         Target startTarget = player.getInteractionHandler().getStartTarget();
@@ -937,8 +883,7 @@ public final class Renderer extends Renderable {
     private boolean hologramModelsValid = false;
     private int hologramSize, hologramHash;
 
-    private int framebuffer, colorTexture, depthTexture, sideTexture;
-    private int ssaoFramebuffer, ssaoTexture, noiseTexture;
+    private int framebuffer, colorTexture, depthTexture, intPosTexture;
     private int shadowFramebuffer, shadowTexture, shadowColorTexture;
 
     private static final int HEAD_UNDER_WATER_BIT = 1;

@@ -11,7 +11,7 @@ in vec3 voxelPosition;
 in vec2 trianglePos;
 
 layout (location = 0) out vec4 fragColor;
-layout (location = 1) out int side;
+layout (location = 1) out ivec4 intPos;
 
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
@@ -106,7 +106,7 @@ vec3 getColor(vec3 color, vec3 textureCoord) {
 
 void main() {
     if (trianglePos.x > 1 || trianglePos.y > 1) discard;
-    side = textureData >> 8 & 7;
+    int side = textureData >> 8 & 7;
     int material = textureData & 0xFF;
     int textureSize = textureSizes[material];
     vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
@@ -115,4 +115,5 @@ void main() {
     if (fragColor.a == 0) discard;
 
     fragColor.rgb = getColor(fragColor.rgb, textureCoord);
+    intPos = ivec4(ivec3(floor(voxelPosition - normal * 0.5)), side);
 }

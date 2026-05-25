@@ -3,6 +3,7 @@ package game.utils;
 import core.utils.MathUtils;
 import game.player.rendering.Camera;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -10,10 +11,10 @@ import static game.utils.Constants.*;
 
 public final class Transformation {
 
-    public static Matrix4f createViewMatrix(Camera camera) {
+    public static Matrix3f createViewMatrix(Camera camera) {
         Vector3f rotation = camera.getRotation();
 
-        Matrix4f matrix = new Matrix4f();
+        Matrix3f matrix = new Matrix3f();
         matrix.rotate((float) Math.toRadians(rotation.x), 1.0F, 0.0F, 0.0F)
                 .rotate((float) Math.toRadians(rotation.y), 0.0F, 1.0F, 0.0F)
                 .rotate((float) Math.toRadians(rotation.z), 0.0F, 0.0F, 1.0F);
