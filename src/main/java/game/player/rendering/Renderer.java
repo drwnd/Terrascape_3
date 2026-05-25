@@ -150,7 +150,7 @@ public final class Renderer extends Renderable {
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
-        glEnable(GL_STENCIL_TEST);
+        glDisable(GL_STENCIL_TEST);
         glEnable(GL_CULL_FACE);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
         glDepthMask(false);
