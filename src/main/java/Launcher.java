@@ -1,3 +1,4 @@
+import core.compute.OpenCL;
 import core.rendering_api.Window;
 import core.settings.Settings;
 
@@ -10,6 +11,7 @@ public final class Launcher {
     public static void main(String[] args) {
         Settings.registerSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
         Settings.registerSettings(DebugScreenOptions.getVisibilitySettings(), DebugScreenOptions.getColorSettings());
+        OpenCL.init();
         Window.init("Terrascape");
         Window.pushRenderable(new MainMenu());
         Window.renderLoop();
