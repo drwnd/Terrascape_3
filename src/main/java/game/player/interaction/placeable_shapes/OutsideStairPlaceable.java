@@ -4,7 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation24Way;
 import game.player.interaction.ShapePlaceable;
@@ -15,7 +15,7 @@ import static game.utils.Constants.CHUNK_SIZE;
 public final class OutsideStairPlaceable extends ShapePlaceable{
 
     public OutsideStairPlaceable(byte material) {
-        super(ComputeShaders.OUTSIDE_STAIR, material, Rotation24Way.ROTATION_17);
+        super(Kernels.OUTSIDE_STAIR, material, Rotation24Way.ROTATION_17);
         loadSettings();
     }
 

@@ -1,7 +1,8 @@
 package game.assets;
 
+import core.assets.Kernel;
+import core.assets.identifiers.KernelIdentifier;
 import core.assets.identifiers.ShaderIdentifier;
-import core.rendering_api.shaders.ComputeShader;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.RenderShader;
 import core.rendering_api.shaders.Shader;
@@ -24,19 +25,24 @@ public final class ShaderLoader {
             case Shaders.CHUNK_SHADOW -> new RenderShader("Material.vert", "Shadow.frag", identifier);
             case Shaders.PARTICLE_SHADOW -> new RenderShader("Particle.vert", "Shadow.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
+            default -> throw new IllegalStateException("Unexpected value: " + identifier);
+        };
+    }
 
-            case ComputeShaders.ARC -> new ComputeShader("shapeShaders/Arc.comp", identifier);
-            case ComputeShaders.CONE -> new ComputeShader("shapeShaders/Cone.comp", identifier);
-            case ComputeShaders.CUBE -> new ComputeShader("shapeShaders/Cube.comp", identifier);
-            case ComputeShaders.CYLINDER -> new ComputeShader("shapeShaders/Cylinder.comp", identifier);
-            case ComputeShaders.ELLIPSOID -> new ComputeShader("shapeShaders/Ellipsoid.comp", identifier);
-            case ComputeShaders.INSIDE_ARC -> new ComputeShader("shapeShaders/InsideArc.comp", identifier);
-            case ComputeShaders.INSIDE_STAIR -> new ComputeShader("shapeShaders/InsideStair.comp", identifier);
-            case ComputeShaders.OUTSIDE_ARC -> new ComputeShader("shapeShaders/OutsideArc.comp", identifier);
-            case ComputeShaders.OUTSIDE_STAIR -> new ComputeShader("shapeShaders/OutsideStair.comp", identifier);
-            case ComputeShaders.SLAB -> new ComputeShader("shapeShaders/Slab.comp", identifier);
-            case ComputeShaders.SPHERE -> new ComputeShader("shapeShaders/Sphere.comp", identifier);
-            case ComputeShaders.STAIR -> new ComputeShader("shapeShaders/Stair.comp", identifier);
+    public static Kernel loadKernel(KernelIdentifier identifier) {
+        return switch (identifier) {
+            case Kernels.ARC -> new Kernel("shapeKernels/Arc.comp");
+            case Kernels.CONE -> new Kernel("shapeKernels/Cone.comp");
+            case Kernels.CUBE -> new Kernel("shapeKernels/Cube.comp");
+            case Kernels.CYLINDER -> new Kernel("shapeKernels/Cylinder.comp");
+            case Kernels.ELLIPSOID -> new Kernel("shapeKernels/Ellipsoid.comp");
+            case Kernels.INSIDE_ARC -> new Kernel("shapeKernels/InsideArc.comp");
+            case Kernels.INSIDE_STAIR -> new Kernel("shapeKernels/InsideStair.comp");
+            case Kernels.OUTSIDE_ARC -> new Kernel("shapeKernels/OutsideArc.comp");
+            case Kernels.OUTSIDE_STAIR -> new Kernel("shapeKernels/OutsideStair.comp");
+            case Kernels.SLAB -> new Kernel("shapeKernels/Slab.comp");
+            case Kernels.SPHERE -> new Kernel("shapeKernels/Sphere.comp");
+            case Kernels.STAIR -> new Kernel("shapeKernels/Stair.comp");
             default -> throw new IllegalStateException("Unexpected value: " + identifier);
         };
     }

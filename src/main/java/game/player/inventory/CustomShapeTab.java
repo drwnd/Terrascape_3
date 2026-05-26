@@ -98,7 +98,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             structure = shape.updateBitMap(true).getStructure();
         } catch (Exception exception) {
             exception.printStackTrace();
-            shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
+            shape.setKernelCode("bool isInside(int x, int y, int z) {return true;}");
             return;
         }
 
@@ -146,7 +146,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (Window.isMaximized()) Window.toggleFullScreen();
 
-            JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeShaders");
+            JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeKernels");
             fileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt", "comp", "glsl"));
 
             int option = fileChooser.showOpenDialog(null);
@@ -154,7 +154,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
             File file = fileChooser.getSelectedFile();
             String shaderCode = FileManager.loadFileContents(file.getPath());
-            shape.setShaderCode(shaderCode);
+            shape.setKernelCode(shaderCode);
             refreshShapePreview = true;
             return ButtonResult.SUCCESS;
         };

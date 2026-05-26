@@ -4,7 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation6Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +14,7 @@ import game.server.generation.Structure;
 public final class EllipsoidPlaceable extends ShapePlaceable {
 
     public EllipsoidPlaceable(byte material) {
-        super(ComputeShaders.ELLIPSOID, material, Rotation6Way.ROTATION_2);
+        super(Kernels.ELLIPSOID, material, Rotation6Way.ROTATION_2);
         loadSettings();
     }
 

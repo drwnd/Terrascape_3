@@ -16,6 +16,9 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public final class OpenCL {
 
+    public static long device;
+    public static long context;
+
     private OpenCL() {
 
     }
@@ -270,8 +273,4 @@ public final class OpenCL {
             default -> "Unrecognized error : " + error;
         };
     }
-
-
-    private static long device;
-    private static long context;
 }

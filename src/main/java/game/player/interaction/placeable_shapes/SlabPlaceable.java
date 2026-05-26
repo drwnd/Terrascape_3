@@ -3,7 +3,7 @@ package game.player.interaction.placeable_shapes;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation3Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +14,7 @@ import game.server.generation.Structure;
 public final class SlabPlaceable extends ShapePlaceable {
 
     public SlabPlaceable(byte material) {
-        super(ComputeShaders.SLAB, material, Rotation3Way.ROTATION_2);
+        super(Kernels.SLAB, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 

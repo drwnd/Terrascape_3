@@ -4,7 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation8Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +14,7 @@ import game.server.generation.Structure;
 public final class OutsideArcPlaceable extends ShapePlaceable {
 
     public OutsideArcPlaceable(byte material) {
-        super(ComputeShaders.OUTSIDE_ARC, material, Rotation8Way.ROTATION_1);
+        super(Kernels.OUTSIDE_ARC, material, Rotation8Way.ROTATION_1);
         loadSettings();
     }
 

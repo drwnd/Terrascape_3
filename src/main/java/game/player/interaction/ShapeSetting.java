@@ -1,9 +1,9 @@
 package game.player.interaction;
 
+import core.assets.Kernel;
 import core.renderables.OptionToggle;
 import core.renderables.Toggle;
 import core.renderables.UiButton;
-import core.rendering_api.shaders.Shader;
 import core.settings.*;
 import core.utils.StringGetter;
 
@@ -12,6 +12,8 @@ import game.player.inventory.CallbackSlider;
 import org.joml.Vector2f;
 
 import java.util.Objects;
+
+import static org.lwjgl.opencl.CL30.*;
 
 public record ShapeSetting(Setting setting, StringGetter name, String uniformName) {
 
@@ -36,12 +38,12 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
         };
     }
 
-    public void setUniform(Shader shader) {
+    public void setUniform(Kernel kernel, int index) {
         switch (setting) {
-            case IntSetting intSetting -> shader.setUniform(uniformName, intSetting.value());
-            case FloatSetting floatSetting -> shader.setUniform(uniformName, floatSetting.value());
-            case ToggleSetting toggleSetting -> shader.setUniform(uniformName, toggleSetting.value());
-            case OptionSetting optionSetting -> shader.setUniform(uniformName, optionSetting.value().ordinal());
+            case IntSetting intSetting -> clSetKernelArg(kernel.id(), index, new int[]{intSetting.value()});
+            case FloatSetting floatSetting -> clSetKernelArg(kernel.id(), index, new float[]{floatSetting.value()});
+            case ToggleSetting toggleSetting -> clSetKernelArg(kernel.id(), index, new int[]{toggleSetting.value() ? 1 : 0});
+            case OptionSetting optionSetting -> clSetKernelArg(kernel.id(), index, new int[]{optionSetting.value().ordinal()});
             case null, default -> throw new IllegalStateException("Unexpected value: " + setting);
         }
     }

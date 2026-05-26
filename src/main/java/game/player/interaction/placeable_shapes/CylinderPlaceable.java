@@ -4,7 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation3Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +14,7 @@ import game.server.generation.Structure;
 public final class CylinderPlaceable extends ShapePlaceable {
 
     public CylinderPlaceable(byte material) {
-        super(ComputeShaders.CYLINDER, material, Rotation3Way.ROTATION_2);
+        super(Kernels.CYLINDER, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 

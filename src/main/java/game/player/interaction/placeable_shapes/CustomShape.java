@@ -1,6 +1,6 @@
 package game.player.interaction.placeable_shapes;
 
-import core.rendering_api.shaders.ComputeShader;
+import core.assets.Kernel;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.FileManager;
 import core.utils.Saver;
@@ -13,7 +13,7 @@ import game.player.interaction.ShapeSetting;
 public final class CustomShape extends ShapePlaceable {
 
     public CustomShape(byte material, String shaderCode) {
-        super(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
+        super(() -> new Kernel(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
         this.shaderCode = shaderCode;
         loadSettings();
     }
@@ -69,9 +69,9 @@ public final class CustomShape extends ShapePlaceable {
         return lengthZ.value();
     }
 
-    public void setShaderCode(String shaderCode) {
-        this.shaderCode = shaderCode;
-        setShaderIdentifier(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"));
+    public void setKernelCode(String kernelCode) {
+        this.shaderCode = kernelCode;
+        setKernelIdentifier(() -> new Kernel(CODE_TEMPLATE + kernelCode, "CUSTOM"));
     }
 
     private String shaderCode;

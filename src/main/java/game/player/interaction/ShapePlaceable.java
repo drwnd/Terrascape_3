@@ -1,9 +1,10 @@
 package game.player.interaction;
 
 import core.assets.AssetManager;
-import core.assets.identifiers.ShaderIdentifier;
+import core.assets.Kernel;
+import core.assets.identifiers.KernelIdentifier;
+import core.compute.OpenCL;
 import core.renderables.UiButton;
-import core.rendering_api.shaders.Shader;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.Option;
 import core.settings.stand_alones.StandAloneOptionSetting;
@@ -22,25 +23,29 @@ import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Utils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import static game.utils.Constants.*;
-import static org.lwjgl.opengl.GL46.*;
+import static org.lwjgl.opencl.CL30.*;
 
 public abstract class ShapePlaceable implements Placeable {
 
-    protected ShapePlaceable(ShaderIdentifier identifier, byte material) {
-        this.shaderIdentifier = identifier;
+    protected ShapePlaceable(KernelIdentifier identifier, byte material) {
+        this.kernelIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(null);
     }
 
-    protected ShapePlaceable(ShaderIdentifier identifier, byte material, Option defaultRotation) {
-        this.shaderIdentifier = identifier;
+    protected ShapePlaceable(KernelIdentifier identifier, byte material, Option defaultRotation) {
+        this.kernelIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(defaultRotation);
     }
@@ -113,8 +118,8 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     public void delete() {
-        AssetManager.delete(shaderIdentifier);
-        glDeleteBuffers(buffer);
+        AssetManager.delete(kernelIdentifier);
+        OpenCL.checkCLError(clReleaseMemObject(buffer));
         bufferSize = -1;
     }
 
@@ -217,9 +222,9 @@ public abstract class ShapePlaceable implements Placeable {
         }
     }
 
-    protected void setShaderIdentifier(ShaderIdentifier shaderIdentifier) {
-        AssetManager.delete(this.shaderIdentifier);
-        this.shaderIdentifier = shaderIdentifier;
+    protected void setKernelIdentifier(KernelIdentifier kernelIdentifier) {
+        AssetManager.delete(this.kernelIdentifier);
+        this.kernelIdentifier = kernelIdentifier;
     }
 
 
@@ -227,27 +232,27 @@ public abstract class ShapePlaceable implements Placeable {
         int lengthX = forceSize ? size : Math.min(getLengthX(), size);
         int lengthY = forceSize ? size : Math.min(getLengthY(), size);
         int lengthZ = forceSize ? size : Math.min(getLengthZ(), size);
-        int numGroups = Math.max(1, size >> 2);
-        int buffer = genBuffer(bitMap.length << 3);
 
-        Shader shader = AssetManager.get(shaderIdentifier);
-        shader.bind();
-        for (ShapeSetting setting : settings) setting.setUniform(shader);
-        shader.setUniform("size", lengthX, lengthY, lengthZ);
+        Kernel kernel = AssetManager.get(kernelIdentifier);
+        long queue = OpenCL.createQueue();
+        long buffer = genBuffer(bitMap.length << 3);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer);
-        glDispatchCompute(numGroups, numGroups, numGroups);
+        int index = 0;
+        for (ShapeSetting setting : settings) setting.setUniform(kernel, index++);
+        clSetKernelArg(kernel.id(), index, new int[]{lengthX, lengthY, lengthZ});
 
-        glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
+        // TODO synchronize buffer creation -> execution -> buffer reading with events
+        PointerBuffer globalWorkSize = PointerBuffer.allocateDirect(3).put(new long[]{size >> 1, size >> 1, size >> 1});
+        clEnqueueNDRangeKernel(queue, kernel.id(), 3, null, globalWorkSize, null, null, null);
+
+        IntBuffer bitMapAsBuffer = MemoryUtil.memIntBuffer(MemoryUtil.memAddress(LongBuffer.wrap(bitMap)), bitMap.length << 1);
+        clEnqueueReadBuffer(queue, buffer, true, 0, bitMapAsBuffer, null, null);
+        OpenCL.deleteQueue(queue);
     }
 
-    private int genBuffer(int size) {
+    private long genBuffer(int size) {
         if (size == bufferSize) return buffer;
-        glDeleteBuffers(buffer);
-        buffer = glGenBuffers();
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_DYNAMIC_READ);
-        return buffer;
+        return buffer = clCreateBuffer(OpenCL.context, CL_MEM_WRITE_ONLY, size, null);
     }
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
@@ -286,7 +291,8 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
 
-    private int buffer, bufferSize = -1;
+    private long buffer;
+    private int bufferSize = -1;
     private int settingsHash, preferredSize;
     private long[] bitMap;
     private final byte material;
@@ -295,5 +301,5 @@ public abstract class ShapePlaceable implements Placeable {
 
     final ToggleSetting invert = new StandAloneToggleSetting(false);
     private final StandAloneOptionSetting rotation;
-    private ShaderIdentifier shaderIdentifier;
+    private KernelIdentifier kernelIdentifier;
 }

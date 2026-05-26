@@ -4,7 +4,7 @@ import core.settings.stand_alones.StandAloneFloatSetting;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
-import game.assets.ComputeShaders;
+import game.assets.Kernels;
 import game.language.UiMessages;
 import game.player.interaction.Rotation12Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,7 +14,7 @@ import game.server.generation.Structure;
 public final class ArcPlaceable extends ShapePlaceable {
 
     public ArcPlaceable(byte material) {
-        super(ComputeShaders.ARC, material, Rotation12Way.ROTATION_01);
+        super(Kernels.ARC, material, Rotation12Way.ROTATION_01);
         loadSettings();
     }
 
