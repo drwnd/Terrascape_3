@@ -26,7 +26,7 @@ public final class Movement {
 
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
-        grounded = velocity.y == 0.0F && checkGrounded(position);
+        grounded = velocity.y == 0.0F && checkWideGrounded(position);
 
         Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
         state.changeVelocity(velocity, acceleration, position, rotation);
@@ -78,22 +78,24 @@ public final class Movement {
     }
 
 
-    private boolean checkGrounded(Position position) {
+    private boolean checkWideGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
-        World world = Game.getWorld();
 
-        long minX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        long minZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
-        long y = position.longY - 1;
-        int width = hitboxSize.x + 1;
-        int depth = hitboxSize.z + 1;
+        long minX = position.longX + (int) Math.floor(position.fractionX - hitboxSize.x * 0.5F);
+        long minZ = position.longZ + (int) Math.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long maxX = position.longX + (int) Math.ceil(position.fractionX + hitboxSize.x * 0.5F) + 1;
+        long maxZ = position.longZ + (int) Math.ceil(position.fractionZ + hitboxSize.z * 0.5F) + 1;
+        return containsCollisionalVoxel(position.longY, minX, minZ, maxX, maxZ);
+    }
 
-        for (long x = minX; x != minX + width; x++)
-            for (long z = minZ; z != minZ + depth; z++) {
-                byte material = world.getMaterial(x, y, z, 0);
-                if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
-            }
-        return false;
+    private boolean checkThinGrounded(Position position) {
+        Vector3i hitboxSize = state.getHitboxSize();
+
+        long minX = position.longX + (int) Math.ceil(position.fractionX - hitboxSize.x * 0.5F);
+        long minZ = position.longZ + (int) Math.ceil(position.fractionZ - hitboxSize.z * 0.5F);
+        long maxX = position.longX + (int) Math.floor(position.fractionX + hitboxSize.x * 0.5F) + 1;
+        long maxZ = position.longZ + (int) Math.floor(position.fractionZ + hitboxSize.z * 0.5F) + 1;
+        return containsCollisionalVoxel(position.longY, minX, minZ, maxX, maxZ);
     }
 
     private Vector3f move(Position position) {
@@ -183,7 +185,7 @@ public final class Movement {
 
         boolean swimming = MovementState.intersectsLiquid(position, state);
         float maxStepHeight = state.getMaxAutoStepHeight() * (swimming ? 2.5F : 1.0F);
-        if ((!checkGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
+        if ((!checkThinGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
 
         Position steppedPosition = new Position(position);
         steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
@@ -294,6 +296,17 @@ public final class Movement {
         Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, null);
     }
 
+
+    private static boolean containsCollisionalVoxel(long y, long minX, long minZ, long maxX, long maxZ) {
+        World world = Game.getWorld();
+
+        for (long x = minX; x != maxX; x++)
+            for (long z = minZ; z != maxZ; z++) {
+                byte material = world.getMaterial(x, y, z, 0);
+                if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
+            }
+        return false;
+    }
 
     private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
         World world = Game.getWorld();
