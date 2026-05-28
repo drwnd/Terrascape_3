@@ -9,6 +9,8 @@ import core.settings.optionSettings.Visibility;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public enum DebugScreenOptions {
 
     WORLD_NAME(ColorOption.LIGHT_GRAY),
@@ -90,6 +92,22 @@ public enum DebugScreenOptions {
         public Option defaultValue() {
             return defaultValue;
         }
+
+        @Override
+        public void setKeybind(int keybind) {
+
+        }
+
+        @Override
+        public int keybind() {
+            return GLFW_KEY_UNKNOWN;
+        }
+
+        @Override
+        public int defaultKeybind() {
+            return GLFW_KEY_UNKNOWN;
+        }
+
 
         private final String name;
         private final Option defaultValue;

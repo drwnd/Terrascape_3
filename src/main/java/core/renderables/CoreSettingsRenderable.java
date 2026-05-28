@@ -94,7 +94,6 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         toggles.add(toggle);
 
         offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
-        sizeToParent = new Vector2f(sizeToParent);
         KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, CoreUiMessages.KEYBIND);
         addRenderable(keySelector);
         keySelectors.add(keySelector);
@@ -109,16 +108,22 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     public void addOption(OptionSetting setting, StringGetter settingName) {
         settingsCount++;
-        Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
+        Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * settingsCount);
 
         OptionToggle option = new OptionToggle(sizeToParent, offsetToParent, setting, settingName, false);
         addRenderable(option);
         options.add(option);
 
+        offsetToParent = new Vector2f(0.6625F, 1.0F - 0.15F * settingsCount);
+        KeySelector keySelector = new KeySelector(sizeToParent, offsetToParent, setting, CoreUiMessages.KEYBIND);
+        addRenderable(keySelector);
+        keySelectors.add(keySelector);
+
         createResetButton(settingsCount).setAction((Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             option.setToDefault();
+            keySelector.setToDefault();
             return ButtonResult.SUCCESS;
         });
     }

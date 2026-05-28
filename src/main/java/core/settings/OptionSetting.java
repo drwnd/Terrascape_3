@@ -2,7 +2,7 @@ package core.settings;
 
 import core.settings.optionSettings.Option;
 
-public interface OptionSetting extends Setting {
+public interface OptionSetting extends KeySetting {
 
     default boolean setIfPresent(String name, String value) {
         if (!name().equalsIgnoreCase(name)) return false;

@@ -33,8 +33,8 @@ final class SettingCommand {
                 case FloatSetting floatSetting -> Float.toString(floatSetting.value());
                 case IntSetting intSetting -> Integer.toString(intSetting.value());
                 case ToggleSetting toggleSetting -> Boolean.toString(toggleSetting.value());
-                case KeySetting keySetting -> KeySelector.getDisplayString(keySetting.keybind());
                 case OptionSetting optionSetting -> optionSetting.value().name();
+                case KeySetting keySetting -> KeySelector.getDisplayString(keySetting.keybind());
 
                 default -> "";
             };
@@ -53,8 +53,8 @@ final class SettingCommand {
                 case FloatSetting floatSetting -> set(floatSetting, value);
                 case IntSetting intSetting -> set(intSetting, value);
                 case ToggleSetting toggleSetting -> set(toggleSetting, value);
-                case KeySetting keySetting -> set(keySetting, value);
                 case OptionSetting optionSetting -> set(optionSetting, value);
+                case KeySetting keySetting -> set(keySetting, value);
 
                 default -> CommandResult.fail("Unrecognized Setting type");
             };

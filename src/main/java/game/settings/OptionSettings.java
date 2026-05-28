@@ -4,12 +4,23 @@ import core.settings.OptionSetting;
 import core.settings.optionSettings.Option;
 import game.player.interaction.PlaceMode;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public enum OptionSettings implements OptionSetting {
     PLACE_MODE(PlaceMode.REPLACE);
 
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
+        this.defaultKeybind = GLFW_KEY_UNKNOWN;
+        this.keybind = defaultKeybind;
+    }
+
+    OptionSettings(Option defaultValue, int defaultKeybind) {
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
+        this.defaultKeybind = defaultKeybind;
+        this.keybind = defaultKeybind;
     }
 
     @Override
@@ -27,6 +38,25 @@ public enum OptionSettings implements OptionSetting {
         return defaultValue;
     }
 
+    @Override
+    public void setKeybind(int keybind) {
+        this.keybind = keybind;
+    }
+
+    @Override
+    public int keybind() {
+        return keybind;
+    }
+
+    @Override
+    public int defaultKeybind() {
+        return defaultKeybind;
+    }
+
+
     private Option value;
     private final Option defaultValue;
+
+    private final int defaultKeybind;
+    private int keybind;
 }
