@@ -85,7 +85,7 @@ public final class Movement {
         long minZ = position.longZ + (int) Math.floor(position.fractionZ - hitboxSize.z * 0.5F);
         long maxX = position.longX + (int) Math.ceil(position.fractionX + hitboxSize.x * 0.5F) + 1;
         long maxZ = position.longZ + (int) Math.ceil(position.fractionZ + hitboxSize.z * 0.5F) + 1;
-        return containsCollisionalVoxel(position.longY, minX, minZ, maxX, maxZ);
+        return containsCollisionalVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
     private boolean checkThinGrounded(Position position) {
@@ -95,7 +95,7 @@ public final class Movement {
         long minZ = position.longZ + (int) Math.ceil(position.fractionZ - hitboxSize.z * 0.5F);
         long maxX = position.longX + (int) Math.floor(position.fractionX + hitboxSize.x * 0.5F) + 1;
         long maxZ = position.longZ + (int) Math.floor(position.fractionZ + hitboxSize.z * 0.5F) + 1;
-        return containsCollisionalVoxel(position.longY, minX, minZ, maxX, maxZ);
+        return containsCollisionalVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
     private Vector3f move(Position position) {
