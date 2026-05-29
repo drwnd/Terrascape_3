@@ -82,6 +82,13 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    protected void resizeSelfTo(int width, int height) {
+        if (shapePreview == null) return;
+        shapePreview.setSizeToParent(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
+        shapePreview.setOffsetToParent(0.0F, 0.0F);
+    }
+
+    @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         if (!refreshShapePreview) return;
@@ -91,7 +98,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         float zoom = shapePreview != null ? shapePreview.getZoom() : 1.0F;
         removeRenderable(shapePreview).delete();
 
-        Vector2f sizeToParent = new Vector2f(0.45F, 0.45F * Window.getAspectRatio() * getAspectRatio());
+        Vector2f sizeToParent = new Vector2f(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
         Vector2f offsetToParent = new Vector2f(0.0F, 0.0F);
         Structure structure;
         try {
