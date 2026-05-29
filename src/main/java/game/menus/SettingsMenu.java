@@ -105,6 +105,8 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessages.HOTBAR_SIZE);
         section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessages.NIGHT_BRIGHTNESS);
         section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessages.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH, UiMessages.BREAK_PARTICLE_STEP_LENGTH);
+        section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH, UiMessages.PLACE_PARTICLE_STEP_LENGTH);
 
         section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessages.USE_SHADOW_MAPPING);
         section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessages.CHUNKS_CAST_SHADOWS);
@@ -112,7 +114,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS, UiMessages.GLASS_CASTS_SHADOWS);
         section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION, UiMessages.USE_AMBIENT_OCCLUSION);
         section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES, UiMessages.SHOW_BREAK_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_CUBE_PLACE_PARTICLES, UiMessages.SHOW_CUBE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES, UiMessages.SHOW_SHAPE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessages.SHOW_STRUCTURE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, UiMessages.SHOW_SPLASH_PARTICLES);
         section.addToggle(ToggleSettings.USE_OCCLUSION_CULLING, UiMessages.USE_OCCLUSION_CULLING);

@@ -67,7 +67,7 @@ Nachricht
 Höchste Nachrichtenanzahl
 Benutze Ambient Occlusion
 Zeige Partikel beim Zerstören
-Zeige Partikel beim Würfel Platzieren
+Zeige Partikel beim Formen Platzieren
 Zeige Partikel beim Struktur Platzieren
 Zeige Platscherpartikel
 Setze Platzierungsstartposition
@@ -104,3 +104,5 @@ Lade Programm
 Länge X
 Länge Y
 Länge Z
+Partikelschrittgröße beim Zerstören
+Partikelschrittgröße beim Platzieren
