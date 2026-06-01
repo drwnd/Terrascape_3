@@ -1,16 +1,19 @@
 package game.server.materials_data;
 
 import core.utils.ByteArrayList;
+import core.utils.IntArrayList;
 import core.utils.MathUtils;
 
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
+import game.player.particles.ParticleCollector;
 import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
 import game.server.Chunk;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.server.material.Properties;
+import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.utils.Utils;
 
@@ -213,6 +216,16 @@ public final class MaterialsData {
             int startIndex = startIndexOf(chunkX << CHUNK_SIZE_BITS, chunkY << CHUNK_SIZE_BITS, chunkZ << CHUNK_SIZE_BITS, CHUNK_SIZE_BITS);
             generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, Math.min(CHUNK_SIZE_BITS, totalSizeBits), startIndex, 0, 0, 0);
         }
+    }
+
+    public void addPlaceParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent) {
+        addPlaceParticles(collector, getBitMap(), opaque, transparent, totalSizeBits, 0, 0, 0, 0);
+    }
+
+    public long[] getBitMap() {
+        long[] bitMap = new long[(1 << totalSizeBits * 3) / Long.SIZE];
+        fillBitMap(bitMap, totalSizeBits, 0, 0, 0, 0);
+        return bitMap;
     }
 
     public byte[] getBytes() {
@@ -770,6 +783,95 @@ public final class MaterialsData {
         setOffset(materials, offset, index + 7);
         offset += fillWestLayerInto(materials, startIndex + getOffset(startIndex + 19));
         return offset;
+    }
+
+    private void addPlaceParticles(ParticleCollector collector, long[] bitMap, IntArrayList opaque, IntArrayList transparent, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int identifier = getIdentifier(startIndex);
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+
+            IntArrayList materialList = Material.isGlass(material) ? transparent : opaque;
+            int size = 1 << sizeBits;
+            int stepLength = IntSettings.PLACE_PARTICLE_STEP_LENGTH.value();
+
+            for (int xOffset = inChunkX; xOffset < inChunkX + size; xOffset += stepLength)
+                for (int yOffset = inChunkY; yOffset < inChunkY + size; yOffset += stepLength)
+                    for (int zOffset = inChunkZ; zOffset < inChunkZ + size; zOffset += stepLength) {
+                        collector.addPlaceParticle(materialList, bitMap,
+                                1 << totalSizeBits, 1 << totalSizeBits, 1 << totalSizeBits,
+                                xOffset, yOffset, zOffset, material);
+                    }
+            return;
+        }
+
+        if (identifier == DETAIL) {
+            int stepLength = IntSettings.PLACE_PARTICLE_STEP_LENGTH.value() == 1 ? 1 : 8;
+            for (int inDetailIndex = 0; inDetailIndex < 8; inDetailIndex += stepLength) {
+                byte material = data[startIndex + 1 + inDetailIndex];
+                if (material == AIR) continue;
+                collector.addPlaceParticle(Material.isGlass(material) ? transparent : opaque, bitMap,
+                        1 << totalSizeBits, 1 << totalSizeBits, 1 << totalSizeBits,
+                        inChunkX + (inDetailIndex >> 2 & 1), inChunkY + (inDetailIndex >> 1 & 1), inChunkZ + (inDetailIndex & 1),
+                        material);
+            }
+            return;
+        }
+
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+    }
+
+    private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        byte types = getTypes(startIndex);
+        if (types == CONTAINS_TRANSPARENT) return;
+
+        if ((types & CONTAINS_TRANSPARENT) == 0) {
+            int bitMapStartIndex = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
+            if (sizeBits > 2) {
+                int count = 1 << (sizeBits - 2) * 3;
+                Arrays.fill(bitMap, bitMapStartIndex >> 6, (bitMapStartIndex >> 6) + count, -1L);
+            } else {
+                long mask = getMask(1 << sizeBits * 3, bitMapStartIndex);
+                bitMap[bitMapStartIndex >> 6] |= mask;
+            }
+            return;
+        }
+
+        byte identifier = getIdentifier(startIndex);
+        if (identifier == HOMOGENOUS) return;
+
+        if (identifier == DETAIL) {
+            if (data[startIndex + 1] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 0, inChunkY + 0, inChunkZ + 0));
+            if (data[startIndex + 2] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 0, inChunkY + 0, inChunkZ + 1));
+            if (data[startIndex + 3] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 0, inChunkY + 1, inChunkZ + 0));
+            if (data[startIndex + 4] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 0, inChunkY + 1, inChunkZ + 1));
+            if (data[startIndex + 5] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 1, inChunkY + 0, inChunkZ + 0));
+            if (data[startIndex + 6] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 1, inChunkY + 0, inChunkZ + 1));
+            if (data[startIndex + 7] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 0));
+            if (data[startIndex + 8] != AIR) setBit(bitMap, getUncompressedIndex(inChunkX + 1, inChunkY + 1, inChunkZ + 1));
+            return;
+        }
+
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        fillBitMap(bitMap, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     // Helper functions
@@ -1491,10 +1593,14 @@ public final class MaterialsData {
         return length == CHUNK_SIZE ? -1L : (1L << length) - 1 << offset;
     }
 
+    private static void setBit(long[] bitMap, int bitIndex) {
+        bitMap[bitIndex >> 6] |= 1L << bitIndex;
+    }
 
-    public static final int[] Z_ORDER_3D_TABLE_X = Utils.zOrderCurveLookupTable(256, 3, 2);
-    public static final int[] Z_ORDER_3D_TABLE_Y = Utils.zOrderCurveLookupTable(256, 3, 1);
-    public static final int[] T_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(256, 3, 0);
+
+    public static final int[] Z_ORDER_3D_TABLE_X = Utils.zOrderCurveLookupTable(512, 3, 2);
+    public static final int[] Z_ORDER_3D_TABLE_Y = Utils.zOrderCurveLookupTable(512, 3, 1);
+    public static final int[] T_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(512, 3, 0);
 
     static final byte HOMOGENOUS = 0;
     static final byte DETAIL = 1;

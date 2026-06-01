@@ -30,10 +30,9 @@ public enum PlacingState {
     public boolean shouldRender() {
         return switch (this) {
             case NONE -> false;
-            case REPEAT_PLACE, REPEAT_BREAK, REPEAT_PLACE_LOCKED, REPEAT_BREAK_LOCKED,
-                 STRUCTURE_PLACE, STRUCTURE_PLACE_LOCKED,
+            case REPEAT_PLACE, REPEAT_BREAK, REPEAT_PLACE_LOCKED, REPEAT_BREAK_LOCKED, STRUCTURE_PLACE_LOCKED,
                  SHAPE_PLACE_LOCKED, SHAPE_BREAK_LOCKED -> true;
-            case SHAPE_PLACE, SHAPE_BREAK -> Input.isKeyPressed(KeySettings.SHOW_PLACEABLE_PREVIEW);
+            case SHAPE_PLACE, SHAPE_BREAK, STRUCTURE_PLACE -> Input.isKeyPressed(KeySettings.SHOW_PLACEABLE_PREVIEW);
         };
     }
 }

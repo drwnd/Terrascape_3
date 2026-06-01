@@ -99,24 +99,11 @@ public final class ParticleCollector {
         if (!ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
         IntArrayList transparentParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
-        MaterialsData materials = structure.materials();
 
-        int stepLength = IntSettings.PLACE_PARTICLE_STEP_LENGTH.value();
-        for (int xOffset = 0; xOffset < structure.sizeX(); xOffset += stepLength)
-            for (int yOffset = 0; yOffset < structure.sizeY(); yOffset += stepLength)
-                for (int zOffset = 0; zOffset < structure.sizeZ(); zOffset += stepLength) {
-                    byte material = materials.getMaterial(xOffset, yOffset, zOffset);
-                    if (material == AIR || material == OUT_OF_WORLD) continue;
+        structure.materials().addPlaceParticles(this, opaqueParticles, transparentParticles);
 
-                    add(Material.isGlass(material) ? transparentParticles : opaqueParticles,
-                            xOffset, yOffset, zOffset,
-                            getRandom(-8F, 8F), getRandom(-8F, 8F), getRandom(-8F, 8F),
-                            getRandom(0.0F, 5F), getRandom(0.0F, 5F), 0.0F, material,
-                            true, true);
-                }
-
-        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
-        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_BREAK);
+        addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_PLACE);
+        addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_PLACE);
     }
 
     public void addSplashParticleEffect(int x, int y, int z, byte material) {
@@ -155,6 +142,7 @@ public final class ParticleCollector {
         for (int xOffset = 0; xOffset < length; xOffset += stepLength)
             for (int yOffset = 0; yOffset < length; yOffset += stepLength)
                 for (int zOffset = 0; zOffset < length; zOffset += stepLength) {
+
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
@@ -178,10 +166,12 @@ public final class ParticleCollector {
         for (int xOffset = 0; xOffset < length; xOffset += stepLength)
             for (int yOffset = 0; yOffset < length; yOffset += stepLength)
                 for (int zOffset = 0; zOffset < length; zOffset += stepLength) {
+
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
                     if (previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
+
                     addPlaceParticle(particles, bitMap,
                             length, length, length,
                             xOffset, yOffset, zOffset,
@@ -219,10 +209,12 @@ public final class ParticleCollector {
         for (int xOffset = 0; xOffset < lengthX; xOffset += stepLength)
             for (int yOffset = 0; yOffset < lengthY; yOffset += stepLength)
                 for (int zOffset = 0; zOffset < lengthZ; zOffset += stepLength) {
+
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
                     if (previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
+
                     addPlaceParticle(placeParticles, bitMap,
                             lengthX, lengthY, lengthZ,
                             xOffset + (int) (x - startX), yOffset + (int) (y - startY), zOffset + (int) (z - startZ),
@@ -244,6 +236,7 @@ public final class ParticleCollector {
         for (int xOffset = 0; xOffset < lengthX; xOffset += stepLength)
             for (int yOffset = 0; yOffset < lengthY; yOffset += stepLength)
                 for (int zOffset = 0; zOffset < lengthZ; zOffset += stepLength) {
+
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
@@ -275,10 +268,10 @@ public final class ParticleCollector {
                 particleEffect.type().isOpaque(), particleEffect.x(), particleEffect.y(), particleEffect.z());
     }
 
-    private void addPlaceParticle(IntArrayList particles, long[] bitMap,
-                                  int lengthX, int lengthY, int lengthZ,
-                                  int xOffset, int yOffset, int zOffset,
-                                  byte material) {
+    public void addPlaceParticle(IntArrayList particles, long[] bitMap,
+                                 int lengthX, int lengthY, int lengthZ,
+                                 int xOffset, int yOffset, int zOffset,
+                                 byte material) {
         float velocityX = getRandom(-8F, 8F), velocityY = getRandom(-8F, 8F), velocityZ = getRandom(-8F, 8F);
         float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
 
@@ -289,7 +282,7 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
-    private void addBreakParticle(IntArrayList particles, int xOffset, int yOffset, int zOffset, byte material) {
+    public void addBreakParticle(IntArrayList particles, int xOffset, int yOffset, int zOffset, byte material) {
         float velocityX = getRandom(-12F, 12F), velocityY = getRandom(-2F, 25F), velocityZ = getRandom(-12F, 12F);
         float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
 
@@ -298,11 +291,11 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
-    private static void add(IntArrayList particles,
-                            int xOffset, int yOffset, int zOffset,
-                            float velocityX, float velocityY, float velocityZ,
-                            float rotationSpeedX, float rotationSpeedY,
-                            float gravity, byte material, boolean disableTimeScalar, boolean invertMotion) {
+    public static void add(IntArrayList particles,
+                           int xOffset, int yOffset, int zOffset,
+                           float velocityX, float velocityY, float velocityZ,
+                           float rotationSpeedX, float rotationSpeedY,
+                           float gravity, byte material, boolean disableTimeScalar, boolean invertMotion) {
 
         particles.add(packOffset(xOffset, yOffset, zOffset, disableTimeScalar, invertMotion));
         particles.add(packVelocityGravity(velocityX, velocityY, velocityZ, gravity));
