@@ -5,8 +5,8 @@ import core.settings.IntSetting;
 import static game.utils.Constants.CHUNK_SIZE_BITS;
 
 public enum IntSettings implements IntSetting {
-    REACH(0, 500, 5),
-    BREAK_PLACE_INTERVALL(1, 20, 5),
+    REACH(0, 500, 112),
+    BREAK_PLACE_INTERVALL(1, 20, 4),
     MAX_CHAT_MESSAGE_COUNT(10, 1000, 100),
     AMBIENT_OCCLUSION_SAMPLES(0, 51, 51),
     OCCLUDERS_OCCLUDEES_LOD(0, 30, 0),

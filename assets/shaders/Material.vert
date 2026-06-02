@@ -1,4 +1,5 @@
 #version 460 core
+#define FACE_PAD 0.001
 
 out vec3 texturePosition;
 out vec3 voxelPosition;
@@ -21,6 +22,7 @@ uniform ivec3 iCameraPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const vec2[3] FACE_POSITIONS = vec2[3](vec2(0, 0), vec2(0, 2), vec2(2, 0));
+const vec2[3] FACE_PADDINGS = vec2[3](vec2(-FACE_PAD, -FACE_PAD), vec2(-FACE_PAD, 3 * FACE_PAD), vec2(3 * FACE_PAD, -FACE_PAD));
 const int NORTH = 0;
 const int TOP = 1;
 const int WEST = 2;
@@ -30,14 +32,15 @@ const int EAST = 5;
 
 vec3 getFacePositions(int side, int currentVertexId, int faceSize1, int faceSize2) {
     vec3 currentVertexOffset = vec3(FACE_POSITIONS[currentVertexId].xy, 1);
+    vec3 currentVertexPadding = vec3(FACE_PADDINGS[currentVertexId].xy, 0);
 
     switch (side) {
-        case NORTH: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1);
-        case TOP: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2);
-        case WEST: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2);
-        case SOUTH: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 0);
-        case BOTTOM: return currentVertexOffset.yzx * vec3(faceSize1, 0, faceSize2);
-        case EAST: return currentVertexOffset.zxy * vec3(0, faceSize1, faceSize2);
+        case NORTH: return currentVertexOffset.yxz * vec3(faceSize2, faceSize1, 1) + currentVertexPadding.yxz;
+        case TOP: return currentVertexOffset.xzy * vec3(faceSize1, 1, faceSize2) + currentVertexPadding.xzy;
+        case WEST: return currentVertexOffset.zyx * vec3(1, faceSize1, faceSize2) + currentVertexPadding.zyx;
+        case SOUTH: return currentVertexOffset.xyz * vec3(faceSize2, faceSize1, 0) + currentVertexPadding.xyz;
+        case BOTTOM: return currentVertexOffset.yzx * vec3(faceSize1, 0, faceSize2) + currentVertexPadding.yzx;
+        case EAST: return currentVertexOffset.zxy * vec3(0, faceSize1, faceSize2) + currentVertexPadding.zxy;
     }
 
     return vec3(0, 0, 0);
