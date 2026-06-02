@@ -189,8 +189,7 @@ public abstract class ShapePlaceable implements Placeable {
     @Override
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
-        int preferredSize = getPreferredSizePowOf2();
-        player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, preferredSize, material, bitMap);
+        player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, 1, 1, 1, this);
     }
 
 
