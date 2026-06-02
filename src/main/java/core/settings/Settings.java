@@ -3,6 +3,7 @@ package core.settings;
 import core.assets.AssetManager;
 import core.assets.SettingsFile;
 import core.assets.identifiers.AssetIdentifier;
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 
 import java.io.*;
@@ -44,7 +45,7 @@ public final class Settings {
 
         } catch (Exception exception) {
             exception.printStackTrace();
-            System.err.println("Failed to save Settings to File");
+            Debug.err("Failed to save Settings to File");
         }
     }
 

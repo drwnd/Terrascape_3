@@ -1,5 +1,6 @@
 package game.server.generation;
 
+import core.rendering_api.Debug;
 import core.utils.Vector3l;
 
 import game.player.rendering.Mesh;
@@ -45,7 +46,7 @@ public final class ChunkGenerator {
             //noinspection ResultOfMethodCallIgnored
             executor.awaitTermination(250, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
-            System.err.println("Executor failed to generate immediate surroundings.");
+            Debug.err("Executor failed to generate immediate surroundings.");
         }
     }
 
@@ -73,7 +74,7 @@ public final class ChunkGenerator {
             //noinspection ResultOfMethodCallIgnored
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } catch (InterruptedException e) {
-            System.err.println("Crashed when awaiting termination");
+            Debug.err("Crashed when awaiting termination");
             e.printStackTrace();
         }
     }
@@ -166,10 +167,10 @@ public final class ChunkGenerator {
                         Game.getWorld().storeChunk(chunk);
                     }
                 } catch (Exception exception) {
-                    System.err.println("Generation:");
-                    System.err.println(exception.getClass());
+                    Debug.err("Generation:");
+                    Debug.err(exception.getClass());
                     exception.printStackTrace();
-                    System.err.printf("%d %d %d%n", chunkX, chunkY, chunkZ);
+                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
                 }
             }
         }
@@ -191,16 +192,16 @@ public final class ChunkGenerator {
                     Chunk chunk = world.getChunk(chunkIndex, lod);
 
                     if (chunk == null) {
-                        System.err.printf("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
+                        Debug.err("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
                         continue;
                     }
                     if (!chunk.ID.equals(expectedId)) {
-                        System.err.printf("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
+                        Debug.err("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
                         continue;
                     }
                     if (chunk.getGenerationStatus() != Status.DONE) {
-                        System.err.printf("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
-                        System.err.printf("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
+                        Debug.err("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
+                        Debug.err("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
                         continue;
                     }
 
@@ -212,10 +213,10 @@ public final class ChunkGenerator {
                     else meshCollector.queueMesh(mesh);
 
                 } catch (Exception exception) {
-                    System.err.println("Meshing:");
-                    System.err.println(exception.getClass());
+                    Debug.err("Meshing:");
+                    Debug.err(exception.getClass());
                     exception.printStackTrace();
-                    System.err.printf("%d %d %d%n", chunkX, chunkY, chunkZ);
+                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
                 }
             }
         }

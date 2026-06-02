@@ -35,6 +35,11 @@ public final class Debug {
         System.out.printf(format, args);
     }
 
+    public static void log(Object object) {
+        if (CoreOptionSettings.LOG_MESSAGES.value() != LogMessages.ALL) return;
+        System.out.println(object);
+    }
+
     public static void err(String message) {
         if (CoreOptionSettings.LOG_MESSAGES.value() == LogMessages.NONE) return;
         System.err.println(message);
@@ -43,5 +48,10 @@ public final class Debug {
     public static void err(String format, Object... args) {
         if (CoreOptionSettings.LOG_MESSAGES.value() == LogMessages.NONE) return;
         System.err.printf(format, args);
+    }
+
+    public static void err(Object object) {
+        if (CoreOptionSettings.LOG_MESSAGES.value() == LogMessages.NONE) return;
+        System.err.println(object);
     }
 }

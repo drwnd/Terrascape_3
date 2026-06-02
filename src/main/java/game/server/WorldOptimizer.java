@@ -1,5 +1,6 @@
 package game.server;
 
+import core.rendering_api.Debug;
 import core.utils.FileManager;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
@@ -18,11 +19,11 @@ public final class WorldOptimizer {
 
         long start = System.nanoTime();
         deleteHigherLODs();
-        System.out.printf("Deleted higher LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Deleted higher LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
 
         start = System.nanoTime();
         int deletedChunkCount = deleteRedundantChunks();
-        System.out.printf("Deleted %s redundant chunks. Took %sms%n", deletedChunkCount, (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Deleted %s redundant chunks. Took %sms%n", deletedChunkCount, (System.nanoTime() - start) / 1_000_000);
 
         ChunkSaver.generateHigherLODs();
 

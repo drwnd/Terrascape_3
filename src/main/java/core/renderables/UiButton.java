@@ -1,6 +1,7 @@
 package core.renderables;
 
 import core.assets.CoreSounds;
+import core.rendering_api.Debug;
 import core.settings.CoreFloatSettings;
 import core.sound.Sound;
 import org.joml.Vector2f;
@@ -24,7 +25,7 @@ public class UiButton extends UiBackgroundElement {
     public UiButton(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         clickable = (_, _, _) -> {
-            System.err.printf("No action set for this button %s%n", this);
+            Debug.err("No action set for this button %s%n", this);
             return ButtonResult.SUCCESS;
         };
     }
