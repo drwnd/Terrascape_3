@@ -72,7 +72,7 @@ public enum UiMessages implements Translatable {
     MAX_CHAT_MESSAGE_COUNT,
     USE_AMBIENT_OCCLUSION,
     SHOW_BREAK_PARTICLES,
-    SHOW_CUBE_PLACE_PARTICLES,
+    SHOW_SHAPE_PLACE_PARTICLES,
     SHOW_STRUCTURE_PLACE_PARTICLES,
     SHOW_SPLASH_PARTICLES,
     SET_PLACE_START_POSITION,
@@ -108,7 +108,9 @@ public enum UiMessages implements Translatable {
     LOAD_SHADER_CODE,
     LENGTH_X,
     LENGTH_Y,
-    LENGTH_Z;
+    LENGTH_Z,
+    BREAK_PARTICLE_STEP_LENGTH,
+    PLACE_PARTICLE_STEP_LENGTH;
 
     @Override
     public String translationFileName() {

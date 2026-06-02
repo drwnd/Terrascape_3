@@ -67,7 +67,7 @@ Message
 Max Amount of Chat Messages
 Use Ambient Occlusion
 Show Break Particles
-Show Cube Place Particles
+Show Shape Place Particles
 Show Structure Place Particles
 Show Splash Particles
 Set Place Start Position
@@ -104,3 +104,5 @@ Load Code
 Length X
 Length Y
 Length Z
+Break Particle Step Length
+Place Particle Step Length

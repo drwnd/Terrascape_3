@@ -10,7 +10,7 @@ public enum ToggleSettings implements ToggleSetting {
     USE_SHADOW_MAPPING(false),
     USE_AMBIENT_OCCLUSION(true),
     SHOW_BREAK_PARTICLES(true),
-    SHOW_CUBE_PLACE_PARTICLES(true),
+    SHOW_SHAPE_PLACE_PARTICLES(true),
     SHOW_STRUCTURE_PLACE_PARTICLES(true),
     SHOW_SPLASH_PARTICLES(true),
     X_RAY(false),

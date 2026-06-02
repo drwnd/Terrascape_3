@@ -38,12 +38,24 @@ public final class StructureSaver extends Saver<Structure> {
     }
 
     @Override
+    protected Structure loadOldVersion(int versionNumber) {
+        if (versionNumber == 0) {
+            Structure structure = load();
+            byte[] uncompressedMaterials = new byte[1 << structure.materials().getTotalSizeBits() * 3];
+            structure.materials().fillUncompressedMaterialsInto(uncompressedMaterials);
+            MaterialsData materialsData = MaterialsData.getCompressedMaterials(structure.materials().getTotalSizeBits(), uncompressedMaterials);
+            return new Structure(structure.sizeX(), structure.sizeY(), structure.sizeZ(), materialsData);
+        }
+        return super.loadOldVersion(versionNumber);
+    }
+
+    @Override
     protected Structure getDefault() {
         return new Structure(OUT_OF_WORLD);
     }
 
     @Override
     protected int getVersionNumber() {
-        return 0;
+        return 1;
     }
 }

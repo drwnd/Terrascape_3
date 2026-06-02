@@ -11,7 +11,9 @@ public enum IntSettings implements IntSetting {
     AMBIENT_OCCLUSION_SAMPLES(0, 51, 51),
     OCCLUDERS_OCCLUDEES_LOD(0, 30, 0),
     BREAK_PLACE_SIZE(0, CHUNK_SIZE_BITS + 2, 4),
-    BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4);
+    BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
+    BREAK_PARTICLE_STEP_LENGTH(1, 16, 2),
+    PLACE_PARTICLE_STEP_LENGTH(1, 16, 1);
 
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
