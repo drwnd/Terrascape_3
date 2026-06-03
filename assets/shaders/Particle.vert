@@ -28,6 +28,7 @@ uniform int lifeTimeTicks;
 uniform float gameTickFraction;
 uniform ivec3 iCameraPosition;
 uniform ivec3 startPosition;
+uniform vec3 viewPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
 const vec2[3] FACE_POSITIONS = vec2[3](vec2(0, 0), vec2(0, 2), vec2(2, 0));
@@ -107,20 +108,26 @@ void main() {
     int x = (currentParticle.packedOffset >> 20 & 0x3FF) + startPosition.x - PARTICLE_OFFSET;
     int y = (currentParticle.packedOffset >> 10 & 0x3FF) + startPosition.y - PARTICLE_OFFSET;
     int z = (currentParticle.packedOffset >> 00 & 0x3FF) + startPosition.z - PARTICLE_OFFSET;
-    int side = (gl_VertexID / 3) % 6;
+    int side = (gl_VertexID / 3) % 3;
     float aliveTime = getAliveTime(currentParticle);
     float timeScaler = getTimeScaler(currentParticle);
 
     ivec3 wrappedPositon = ivec3(x, y, z) - iCameraPosition;
-    vec3 facePosition = getFacePositions(side, currentVertexId);
-    voxelPosition = vec3(wrappedPositon) + rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime) + vec3(timeScaler * 0.5);
-    voxelPosition += getVelocity(currentParticle) * aliveTime;
+    voxelPosition = vec3(wrappedPositon) + vec3(timeScaler * 0.5) + getVelocity(currentParticle) * aliveTime;
     voxelPosition.y -= 0.5 * getGravity(currentParticle) * aliveTime * aliveTime;
+
+    normal = rotate(NORMALS[side], currentParticle, aliveTime);
+    if (dot(voxelPosition - viewPosition, normal) > 0) {
+        side += 3;
+        normal = -normal;
+    }
+
+    vec3 facePosition = getFacePositions(side, currentVertexId);
+    voxelPosition += rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime);
 
     gl_Position = projectionViewMatrix * vec4(voxelPosition, 1.0);
 
     textureData = side << 8 | currentParticle.packedRotationMaterial & 0xFF0000FF;
     texturePosition = wrappedPositon + facePosition;
-    normal = rotate(NORMALS[side], currentParticle, aliveTime);
     trianglePos = FACE_POSITIONS[currentVertexId];
 }

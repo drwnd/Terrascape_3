@@ -354,6 +354,8 @@ public final class Renderer extends Renderable {
     }
 
     private void computeShadowMap(Position cameraPosition, Matrix4f sunMatrix) {
+        Vector3f sunDirection = Transformation.getSunDirection(getRenderTime()).mul(-4096);
+
         glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
         glClearColor(1.0F, 1.0F, 1.0F, 0.0F);
@@ -395,6 +397,7 @@ public final class Renderer extends Renderable {
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+            shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
@@ -441,6 +444,7 @@ public final class Renderer extends Renderable {
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+            shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
@@ -487,6 +491,7 @@ public final class Renderer extends Renderable {
         long currentTick = Game.getServer().getCurrentGameTick();
         shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
         shader.setUniform("flags", getFlags(cameraPosition));
+        shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
 
         renderParticles(shader, currentTick, true);
     }
@@ -563,6 +568,7 @@ public final class Renderer extends Renderable {
         glDisable(GL_STENCIL_TEST);
         long currentTick = Game.getServer().getCurrentGameTick();
         shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+        shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
 
         renderParticles(shader, currentTick, false);
     }
@@ -574,7 +580,7 @@ public final class Renderer extends Renderable {
             shader.setUniform("aliveTicks", (int) (currentTick - particleEffect.spawnTick()));
             shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
-            glDrawArraysInstanced(GL_TRIANGLES, 0, 36, particleEffect.count());
+            glDrawArraysInstanced(GL_TRIANGLES, 0, 9, particleEffect.count());
         }
     }
 
