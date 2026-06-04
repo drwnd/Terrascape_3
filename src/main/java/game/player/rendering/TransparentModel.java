@@ -73,5 +73,9 @@ public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, i
     public long chunkZ() {
         return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
+
+    public long manhattanDistanceFromCamera(long cameraX, long cameraY, long cameraZ) {
+        return Math.abs(cameraX - totalX) + Math.abs(cameraY - totalY) + Math.abs(cameraZ - totalZ);
+    }
 }
 

@@ -18,6 +18,7 @@ import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static game.utils.Constants.*;
@@ -357,6 +358,7 @@ public final class RenderingOptimizer {
         lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
+        ArrayList<TransparentModel> transparentModels = new ArrayList<>();
         long[] lodVisibilityBits = visibilityBits[lod];
         long lodCameraChunkX = cameraChunkX >> lod;
         long lodCameraChunkY = cameraChunkY >> lod;
@@ -374,27 +376,51 @@ public final class RenderingOptimizer {
                 if (opaqueModel == null || transparentModel == null) continue;
                 if (opaqueModel.isEmpty() && transparentModel.isEmpty()) continue;
 
-                drawCount++;
-                boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
-                opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
-                transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
-                occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
+                if (transparentModel.isWaterEmpty()) {
+                    drawCount++;
+                    boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+                    opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
+                    transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
 
-                if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod) <= 1) {
-                    opaqueCommands.set(opaqueCommands.size() - 3, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 7, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 11, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 15, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 19, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 23, 1);
-                    opaqueCommands.set(opaqueCommands.size() - 27, 1);
-                    waterCommands.set(waterCommands.size() - 3, 1);
-                    glassCommands.set(glassCommands.size() - 3, 1);
-                }
+                    occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
+                    forceRenderingIfClose(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+                } else transparentModels.add(transparentModel);
             }
+
+        transparentModels.sort((a, b) ->
+                (int) (b.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ) - a.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ))
+        );
+        for (TransparentModel model : transparentModels) {
+            drawCount++;
+            int chunkIndex = Utils.getChunkIndex(model.chunkX(), model.chunkY(), model.chunkZ(), lod);
+            AABB occludee = meshCollector.getOccludee(chunkIndex, lod);
+            OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
+
+            boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+            opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
+            model.addDataWithOcclusionCulling(waterCommands, glassCommands);
+
+            occludee.addData(aabbs, (int) model.totalX(), (int) model.totalY(), (int) model.totalZ(), lod);
+            forceRenderingIfClose(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, model.chunkX(), model.chunkY(), model.chunkZ(), lod);
+        }
+
         lodDrawCounts[lod * 3 + 0] = drawCount * 7;
         lodDrawCounts[lod * 3 + 1] = drawCount;
         lodDrawCounts[lod * 3 + 2] = drawCount;
+    }
+
+    private void forceRenderingIfClose(long lodCameraChunkX, long lodCameraChunkY, long lodCameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
+        if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, chunkX, chunkY, chunkZ, lod) <= 1) {
+            opaqueCommands.set(opaqueCommands.size() - 3, 1);
+            opaqueCommands.set(opaqueCommands.size() - 7, 1);
+            opaqueCommands.set(opaqueCommands.size() - 11, 1);
+            opaqueCommands.set(opaqueCommands.size() - 15, 1);
+            opaqueCommands.set(opaqueCommands.size() - 19, 1);
+            opaqueCommands.set(opaqueCommands.size() - 23, 1);
+            opaqueCommands.set(opaqueCommands.size() - 27, 1);
+            waterCommands.set(waterCommands.size() - 3, 1);
+            glassCommands.set(glassCommands.size() - 3, 1);
+        }
     }
 
     private void generateIndirectCommandsWithoutOcclusionCulling(int lod) {
