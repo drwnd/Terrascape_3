@@ -53,6 +53,7 @@ public final class Player {
         particleCollector.clearToBufferParticleEffects();
         meshCollector.uploadAllMeshes();
         meshCollector.deleteOldMeshes();
+        meshCollector.sortNearestWaterModel(camera.getPosition());
 
         float fraction = Game.getServer().getCurrentGameTickFraction();
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
@@ -106,7 +107,8 @@ public final class Player {
         if (button == KeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
         if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS)
+            hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleScrollInput(double yScroll) {

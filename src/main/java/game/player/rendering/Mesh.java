@@ -2,6 +2,7 @@ package game.player.rendering;
 
 import core.utils.Vector3l;
 
+import static game.player.rendering.MeshGenerator.*;
 import static game.utils.Constants.*;
 
 public record Mesh(int[] opaqueVertices, int[] vertexCounts,
@@ -10,7 +11,7 @@ public record Mesh(int[] opaqueVertices, int[] vertexCounts,
                    AABB occluder, AABB occludee) {
 
     public Mesh(long chunkX, long chunkY, long chunkZ, int lod) {
-        this(null, null, null, 0, 0, chunkX, chunkY,chunkZ, lod, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
+        this(null, null, null, 0, 0, chunkX, chunkY, chunkZ, lod, AABB.newMinChunkAABB(), AABB.newMinChunkAABB());
     }
 
     public Vector3l getWorldCoordinate() {
@@ -25,5 +26,11 @@ public record Mesh(int[] opaqueVertices, int[] vertexCounts,
     public int getTransparentByteSize() {
         if (transparentVertices == null) return 0;
         return transparentVertices.length << 2;
+    }
+
+    public int[] getWaterVertices() {
+        int[] waterVertices = new int[waterVertexCount / VERTICES_PER_QUAD * INTS_PER_VERTEX];
+        System.arraycopy(transparentVertices, 0, waterVertices, 0, waterVertices.length);
+        return waterVertices;
     }
 }

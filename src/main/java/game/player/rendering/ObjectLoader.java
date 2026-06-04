@@ -18,10 +18,10 @@ public final class ObjectLoader {
 
     public static TransparentModel loadTransparentModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
-        if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod());
+        if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod(), null);
         int vertexBuffer = glCreateBuffers();
         glNamedBufferData(vertexBuffer, mesh.transparentVertices(), GL_STATIC_DRAW);
-        return new TransparentModel(position, mesh.waterVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod());
+        return new TransparentModel(position, mesh.waterVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod(), mesh.getWaterVertices());
     }
 
     public static OpaqueModel loadCombinedModel(Mesh mesh) {

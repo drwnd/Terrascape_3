@@ -360,9 +360,6 @@ public final class RenderingOptimizer {
 
         ArrayList<TransparentModel> transparentModels = new ArrayList<>();
         long[] lodVisibilityBits = visibilityBits[lod];
-        long lodCameraChunkX = cameraChunkX >> lod;
-        long lodCameraChunkY = cameraChunkY >> lod;
-        long lodCameraChunkZ = cameraChunkZ >> lod;
 
         for (int bitsIndex = 0; bitsIndex < LONGS_PER_LOD_BITS; bitsIndex++)
             for (int chunkIndex = (bitsIndex << 6) + Long.numberOfTrailingZeros(lodVisibilityBits[bitsIndex]),
@@ -378,12 +375,7 @@ public final class RenderingOptimizer {
 
                 if (transparentModel.isWaterEmpty()) {
                     drawCount++;
-                    boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
-                    opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
-                    transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
-
-                    occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
-                    forceRenderingIfClose(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+                    addCommandsAndOccludee(lod, opaqueModel, transparentModel, occludee);
                 } else transparentModels.add(transparentModel);
             }
 
@@ -391,22 +383,30 @@ public final class RenderingOptimizer {
                 (int) (b.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ) - a.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ))
         );
         for (TransparentModel model : transparentModels) {
-            drawCount++;
             int chunkIndex = Utils.getChunkIndex(model.chunkX(), model.chunkY(), model.chunkZ(), lod);
             AABB occludee = meshCollector.getOccludee(chunkIndex, lod);
             OpaqueModel opaqueModel = meshCollector.getOpaqueModel(chunkIndex, lod);
 
-            boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
-            opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
-            model.addDataWithOcclusionCulling(waterCommands, glassCommands);
-
-            occludee.addData(aabbs, (int) model.totalX(), (int) model.totalY(), (int) model.totalZ(), lod);
-            forceRenderingIfClose(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, model.chunkX(), model.chunkY(), model.chunkZ(), lod);
+            drawCount++;
+            addCommandsAndOccludee(lod, opaqueModel, model, occludee);
         }
 
         lodDrawCounts[lod * 3 + 0] = drawCount * 7;
         lodDrawCounts[lod * 3 + 1] = drawCount;
         lodDrawCounts[lod * 3 + 2] = drawCount;
+    }
+
+    private void addCommandsAndOccludee(int lod, OpaqueModel opaqueModel, TransparentModel transparentModel, AABB occludee) {
+        long lodCameraChunkX = cameraChunkX >> lod;
+        long lodCameraChunkY = cameraChunkY >> lod;
+        long lodCameraChunkZ = cameraChunkZ >> lod;
+
+        boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
+        opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
+        transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
+
+        occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
+        forceRenderingIfClose(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
     }
 
     private void forceRenderingIfClose(long lodCameraChunkX, long lodCameraChunkY, long lodCameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
