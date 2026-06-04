@@ -58,7 +58,7 @@ public final class Renderer extends Renderable {
         setDoAutoFocusScaling(false);
         debugLines = DebugScreenLine.getDebugLines();
 
-        renderingOptimizer = new RenderingOptimizer(meshCollector, Window.getWidth(), Window.getHeight());
+        renderingOptimizer = new RenderingOptimizer(meshCollector);
         crosshair = new UiElement(new Vector2f(), new Vector2f(), Textures.CROSSHAIR);
         crosshair.setScaleWithGuiSize(false);
         crosshair.setDoAutoFocusScaling(false);
@@ -132,7 +132,7 @@ public final class Renderer extends Renderable {
         glEnable(GL_BLEND);
         glEnable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
-        glDepthMask(true);
+        glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
@@ -179,9 +179,12 @@ public final class Renderer extends Renderable {
         Matrix4f sunMatrix = Transformation.getSunMatrix(getRenderTime());
         Position cameraPosition = player.getCamera().getPosition();
 
-        if (ToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        if (ToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, lastCameraPosition, lastProjectionViewMatrix);
         if (ToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
 
+        lastProjectionViewMatrix = projectionViewMatrix;
+        lastCameraPosition = cameraPosition;
         setupRenderState();
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -211,7 +214,7 @@ public final class Renderer extends Renderable {
 
         if (ToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
         if (ToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
-        if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
+        if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(depthTexture);
         if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
         if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
 
@@ -234,7 +237,7 @@ public final class Renderer extends Renderable {
         if (width == 0 || height == 0) return;
 
         renderingOptimizer.cleanUp();
-        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector(), width, height);
+        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector());
 
         deleteFrameBuffers();
         deleteTextures();
@@ -312,6 +315,7 @@ public final class Renderer extends Renderable {
         Game.getPlayer().getCamera().updateProjectionMatrix();
 
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glDepthFunc(GL_GREATER);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glDisable(GL_STENCIL_TEST);
         glPolygonMode(GL_FRONT_AND_BACK, ToggleSettings.X_RAY.value() ? GL_LINE : GL_FILL);
@@ -885,6 +889,8 @@ public final class Renderer extends Renderable {
     private final UiElement crosshair;
     private final Player player;
 
+    private Position lastCameraPosition;
+    private Matrix4f lastProjectionViewMatrix;
     private OpaqueModel opaqueHologram;
     private boolean hologramModelsValid = false;
     private int hologramSize, hologramHash;
