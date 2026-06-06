@@ -4,6 +4,7 @@ import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.settings.CoreFloatSettings;
 
+import core.settings.Settings;
 import core.sound.Sound;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -131,6 +132,7 @@ public final class Window {
         AssetManager.deleteAll();
         glfwDestroyWindow(window);
         Sound.cleanUp();
+        Settings.writeToFile();
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {
