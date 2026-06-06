@@ -7,12 +7,12 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index, int[] waterVertices) {
+public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index, Vertex[] waterVertices) {
 
     public TransparentModel(Vector3l position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod, int[] waterVertices) {
         this(position.x << lod, position.y << lod, position.z << lod,
                 lod, bufferOrStart, waterVertexCount, glassVertexCount,
-                (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX, waterVertices);
+                (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX, Vertex.toVertexObjects(waterVertices));
     }
 
     public void addDataWithOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {

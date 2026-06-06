@@ -129,7 +129,7 @@ public final class Position implements Distanceable {
     }
 
     public Vector3l getChunkCoordinate() {
-        return new Vector3l(longX >>> CHUNK_SIZE_BITS, longY >>> CHUNK_SIZE_BITS, longZ >>> CHUNK_SIZE_BITS);
+        return new Vector3l(chunkX(), chunkY(), chunkZ());
     }
 
     public Vector3l longPosition() {
@@ -140,10 +140,20 @@ public final class Position implements Distanceable {
         return new Vector3f(fractionX, fractionY, fractionZ);
     }
 
+    public long chunkX() {
+        return longX >>> CHUNK_SIZE_BITS;
+    }
+
+    public long chunkY() {
+        return longY >>> CHUNK_SIZE_BITS;
+    }
+
+    public long chunkZ() {
+        return longZ >>> CHUNK_SIZE_BITS;
+    }
+
     public boolean sharesChunkWith(Position position) {
-        return longX >>> CHUNK_SIZE_BITS == position.longX >>> CHUNK_SIZE_BITS
-                && longY >>> CHUNK_SIZE_BITS == position.longY >>> CHUNK_SIZE_BITS
-                && longZ >>> CHUNK_SIZE_BITS == position.longZ >>> CHUNK_SIZE_BITS;
+        return chunkX() == position.chunkX() && chunkY() == position.chunkY() && chunkZ() == position.chunkZ();
     }
 
     public String intPositionToString() {

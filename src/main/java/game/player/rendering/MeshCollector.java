@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.utils.ArrayQueue;
 import core.utils.Vector3l;
 
 import game.server.Game;
@@ -9,7 +10,6 @@ import game.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static game.player.rendering.MeshGenerator.INTS_PER_VERTEX;
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
 
@@ -130,32 +130,31 @@ public final class MeshCollector {
                 && ((model = getOpaqueModel(Utils.getChunkIndex(chunkX, chunkY, chunkZ + 1, lod), lod)) == null || model.isEmpty());
     }
 
-    public void sortNearestWaterModel(Position cameraPosition) {
-        int chunkIndex = Utils.getChunkIndex(
-                cameraPosition.longX >>> CHUNK_SIZE_BITS,
-                cameraPosition.longY >>> CHUNK_SIZE_BITS,
-                cameraPosition.longZ >>> CHUNK_SIZE_BITS, 0);
-        TransparentModel model = getTransparentModel(chunkIndex, 0);
-        if (model == null || model.isWaterEmpty()) return;
+    public void enqueueToSortModel(TransparentModel model) {
+        toSortTransparentModels.enqueue(model);
+    }
 
+    public void sortModelsWithTimeLimit(Position cameraPosition, long timeLimit) {
+        long endTime = System.nanoTime() + timeLimit;
         int cameraX = (int) cameraPosition.longX, cameraY = (int) cameraPosition.longY, cameraZ = (int) cameraPosition.longZ;
-        int[] verticesData = model.waterVertices();
-        Vertex[] vertices = new Vertex[verticesData.length / INTS_PER_VERTEX];
 
-        for (int index = 0; index < verticesData.length; index += INTS_PER_VERTEX) {
-            vertices[index >> 2] = new Vertex(verticesData[index], verticesData[index + 1], verticesData[index + 2], verticesData[index + 3]);
+        synchronized (this) {
+            while (!toSortTransparentModels.isEmpty() && System.nanoTime() < endTime) {
+                TransparentModel model = toSortTransparentModels.dequeue();
+                Vertex[] vertices = model.waterVertices();
+
+                Arrays.sort(vertices, (a, b) ->
+                        b.manhattanDistanceFrom(cameraX, cameraY, cameraZ, model.LOD()) - a.manhattanDistanceFrom(cameraX, cameraY, cameraZ, model.LOD())
+                );
+
+                int[] verticesData = Vertex.toVertexData(vertices);
+                glNamedBufferSubData(allocator.getBuffer(), model.bufferOrStart(), verticesData);
+            }
         }
+    }
 
-        Arrays.sort(vertices, (a, b) -> b.manhattanDistanceFrom(cameraX, cameraY, cameraZ) - a.manhattanDistanceFrom(cameraX, cameraY, cameraZ));
-
-        for (int index = 0; index < verticesData.length; index += INTS_PER_VERTEX) {
-            Vertex vertex = vertices[index >> 2];
-            verticesData[index] = vertex.x;
-            verticesData[index + 1] = vertex.y;
-            verticesData[index + 2] = vertex.z;
-            verticesData[index + 3] = vertex.textureData;
-        }
-        glNamedBufferSubData(allocator.getBuffer(), model.bufferOrStart(), verticesData);
+    public TransparentModel[] getTransparentLodModels(int lod) {
+        return transparentModels[lod];
     }
 
 
@@ -192,6 +191,11 @@ public final class MeshCollector {
 
         occluders[mesh.lod()][chunkIndex] = mesh.occluder();
         occludees[mesh.lod()][chunkIndex] = mesh.occludee();
+
+        if (!transparentModel.isWaterEmpty())
+            synchronized (this) {
+                enqueueToSortModel(transparentModel);
+            }
     }
 
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
@@ -214,6 +218,7 @@ public final class MeshCollector {
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
+    private final ArrayQueue<TransparentModel> toSortTransparentModels = new ArrayQueue<>(100);
 
     private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][CHUNKS_PER_LOD];
     private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][CHUNKS_PER_LOD];
@@ -221,9 +226,4 @@ public final class MeshCollector {
     private final AABB[][] occludees = new AABB[LOD_COUNT][CHUNKS_PER_LOD];
     private final long[][] isMeshed = new long[LOD_COUNT][CHUNKS_PER_LOD / 64];
 
-    private record Vertex(int x, int y, int z, int textureData) {
-        public int manhattanDistanceFrom(int cameraX, int cameraY, int cameraZ) {
-            return Math.abs(x - cameraX) + Math.abs(y - cameraY) + Math.abs(z - cameraZ);
-        }
-    }
 }

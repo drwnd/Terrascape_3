@@ -11,6 +11,7 @@ import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
 import game.player.particles.ParticleCollector;
 import game.player.rendering.Renderer;
+import game.player.rendering.TransparentModel;
 import game.server.Game;
 import game.server.material.Material;
 import game.settings.KeySettings;
@@ -53,7 +54,7 @@ public final class Player {
         particleCollector.clearToBufferParticleEffects();
         meshCollector.uploadAllMeshes();
         meshCollector.deleteOldMeshes();
-        meshCollector.sortNearestWaterModel(camera.getPosition());
+        meshCollector.sortModelsWithTimeLimit(camera.getPosition(), 1_000_000);
 
         float fraction = Game.getServer().getCurrentGameTickFraction();
         fraction = Math.clamp(fraction, 0.0F, 1.0F);
@@ -69,9 +70,12 @@ public final class Player {
     }
 
     public void updateGameTick() {
+        Position lastCameraPosition = new Position(position).addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
         synchronized (this) {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
         }
+        Position cameraPosition = new Position(position).addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
+        enqueueToSortModels(lastCameraPosition, cameraPosition);
         if (canDoActiveActions()) interactionHandler.updateGameTick();
         renderer.updateGameTick();
     }
@@ -220,6 +224,28 @@ public final class Player {
         if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());
         setInput();
+    }
+
+
+    private void enqueueToSortModels(Position lastCameraPosition, Position cameraPosition) {
+        boolean sortX = lastCameraPosition.longX != cameraPosition.longX;
+        boolean sortY = lastCameraPosition.longY != cameraPosition.longY;
+        boolean sortZ = lastCameraPosition.longZ != cameraPosition.longZ;
+        long chunkX = cameraPosition.chunkX(), lastChunkX = lastCameraPosition.chunkX();
+        long chunkY = cameraPosition.chunkY(), lastChunkY = lastCameraPosition.chunkY();
+        long chunkZ = cameraPosition.chunkZ(), lastChunkZ = lastCameraPosition.chunkZ();
+
+        synchronized (meshCollector) {
+            for (int lod = 0; lod < LOD_COUNT; lod++)
+                for (TransparentModel model : meshCollector.getTransparentLodModels(lod)) {
+                    if (model == null || model.isWaterEmpty()) continue;
+
+                    if (sortX && (model.chunkX() == chunkX || model.chunkX() == lastChunkX)
+                            || sortY && (model.chunkY() == chunkY || model.chunkY() == lastChunkY)
+                            || sortZ && (model.chunkZ() == chunkZ || model.chunkZ() == lastChunkZ))
+                        meshCollector.enqueueToSortModel(model);
+                }
+        }
     }
 
     private final MeshCollector meshCollector;
