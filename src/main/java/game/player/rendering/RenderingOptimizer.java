@@ -380,7 +380,7 @@ public final class RenderingOptimizer {
             }
 
         transparentModels.sort((a, b) ->
-                (int) (b.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ) - a.manhattanDistanceFromCamera(cameraX, cameraY, cameraZ))
+                Long.signum(b.squareDistanceFrom(cameraX, cameraY, cameraZ) - a.squareDistanceFrom(cameraX, cameraY, cameraZ))
         );
         for (TransparentModel model : transparentModels) {
             int chunkIndex = Utils.getChunkIndex(model.chunkX(), model.chunkY(), model.chunkZ(), lod);

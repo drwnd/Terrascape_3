@@ -7,7 +7,8 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index, Vertex[] waterVertices) {
+public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index,
+                               Vertex[] waterVertices) {
 
     public TransparentModel(Vector3l position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod, int[] waterVertices) {
         this(position.x << lod, position.y << lod, position.z << lod,
@@ -74,8 +75,12 @@ public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, i
         return totalZ >>> CHUNK_SIZE_BITS + LOD;
     }
 
-    public long manhattanDistanceFromCamera(long cameraX, long cameraY, long cameraZ) {
-        return Math.abs(cameraX - totalX) + Math.abs(cameraY - totalY) + Math.abs(cameraZ - totalZ);
+    public long squareDistanceFrom(long cameraX, long cameraY, long cameraZ) {
+        final long halfChunkSize = CHUNK_SIZE / 2;
+        long distanceX = Math.abs(cameraX - totalX - (halfChunkSize << LOD));
+        long distanceY = Math.abs(cameraY - totalY - (halfChunkSize << LOD));
+        long distanceZ = Math.abs(cameraZ - totalZ - (halfChunkSize << LOD));
+        return distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ;
     }
 }
 

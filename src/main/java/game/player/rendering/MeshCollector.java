@@ -143,9 +143,7 @@ public final class MeshCollector {
                 TransparentModel model = toSortTransparentModels.dequeue();
                 Vertex[] vertices = model.waterVertices();
 
-                Arrays.sort(vertices, (a, b) ->
-                        b.manhattanDistanceFrom(cameraX, cameraY, cameraZ, model.LOD()) - a.manhattanDistanceFrom(cameraX, cameraY, cameraZ, model.LOD())
-                );
+                Arrays.sort(vertices, (a, b) -> Vertex.compare(b, a, cameraX, cameraY, cameraZ, model.LOD()));
 
                 int[] verticesData = Vertex.toVertexData(vertices);
                 glNamedBufferSubData(allocator.getBuffer(), model.bufferOrStart(), verticesData);
