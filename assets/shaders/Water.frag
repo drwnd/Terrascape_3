@@ -3,6 +3,7 @@
 #define HEAD_UNDER_WATER_BIT 1
 #define DO_SHADOW_MAPPING_BIT 2
 #define DO_GLASS_SHADOWS_BIT 4
+#define USE_WEIGHT_1 8
 
 in vec3 texturePosition;
 in vec3 voxelPosition;
@@ -109,7 +110,7 @@ void main() {
     vec3 waterFog = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
     vec4 fragColor = vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
 
-    float weight =
+    float weight = bool(isFlag(USE_WEIGHT_1)) ? 1 :
     max(min(1.0, max(max(fragColor.r, fragColor.g), fragColor.b) * fragColor.a), fragColor.a)
     * clamp(0.03 / (1e-5 + pow(gl_FragCoord.z / 200, 4.0)), 1e-2, 3e3);
 
