@@ -136,7 +136,7 @@ public final class MeshCollector {
 
     public void sortModelsWithTimeLimit(Position cameraPosition, long timeLimit) {
         long endTime = System.nanoTime() + timeLimit;
-        int cameraX = (int) cameraPosition.longX, cameraY = (int) cameraPosition.longY, cameraZ = (int) cameraPosition.longZ;
+        long cameraX = cameraPosition.longX, cameraY = cameraPosition.longY, cameraZ = cameraPosition.longZ;
 
         synchronized (this) {
             while (!toSortTransparentModels.isEmpty() && System.nanoTime() < endTime) {
