@@ -10,7 +10,8 @@ in vec2 trianglePos;
 flat in vec3 normal;
 flat in int textureData;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 accumulation;
+layout (location = 1) out float reveal;
 
 uniform sampler2DArray textures;
 uniform sampler2D shadowMap;
@@ -106,5 +107,12 @@ void main() {
     vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight * (1 - waterFogMultiplier);
     vec3 waterColor = (color.rgb + angle * vec3(0.0, 0.4, 0.15)) * light * (1 - fogMultiplier);
     vec3 waterFog = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
-    fragColor = vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
+    vec4 fragColor = vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
+
+    float weight =
+    max(min(1.0, max(max(fragColor.r, fragColor.g), fragColor.b) * fragColor.a), fragColor.a)
+    * clamp(0.03 / (1e-5 + pow(gl_FragCoord.z / 200, 4.0)), 1e-2, 3e3);
+
+    accumulation = vec4(fragColor.rgb * fragColor.a, fragColor.a) * weight;
+    reveal = fragColor.a;
 }

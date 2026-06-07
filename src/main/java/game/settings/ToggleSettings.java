@@ -19,6 +19,8 @@ public enum ToggleSettings implements ToggleSetting {
     RENDER_OCCLUDER_DEPTH_MAP(false),
     RENDER_SHADOW_MAP(false),
     RENDER_SHADOW_COLORS(false),
+    RENDER_ACCUMULATION_TEXTURE(false),
+    RENDER_REVEAL_TEXTURE(false),
     CHUNKS_CAST_SHADOWS(true),
     PARTICLES_CAST_SHADOWS(true),
     GLASS_CASTS_SHADOWS(true),

@@ -81,6 +81,7 @@ public final class StructureDisplay extends Renderable {
 
         shader = AssetManager.get(Shaders.WATER);
         Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0F);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         shader.setUniform("flags", 0);
         renderWaterModel(transparentModel, shader);
 

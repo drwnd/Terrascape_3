@@ -129,11 +129,8 @@ public final class Renderer extends Renderable {
         shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
         glEnable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
-        glDepthMask(true);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
@@ -196,7 +193,10 @@ public final class Renderer extends Renderable {
         if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0)
             applyAmbientOcclusion(cameraPosition, projectionViewMatrix);
 
+        startTransparentRendering();
         renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
+        finishTransparentRendering();
+
         renderGlass(cameraPosition, projectionViewMatrix);
         renderGlassParticles(cameraPosition, projectionViewMatrix);
         renderPlaceableHologram(cameraPosition, projectionViewMatrix);
@@ -214,6 +214,8 @@ public final class Renderer extends Renderable {
         if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(renderingOptimizer.getDepthTexture());
         if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
         if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
+        if (ToggleSettings.RENDER_ACCUMULATION_TEXTURE.value()) renderDebugTexture(accumulationTexture);
+        if (ToggleSettings.RENDER_REVEAL_TEXTURE.value()) renderDebugTexture(revealTexture);
 
         renderChat();
         renderDebugInfo();
@@ -268,6 +270,9 @@ public final class Renderer extends Renderable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
+
+        accumulationTexture = CoreObjectLoader.createTexture2D(GL_RGBA16F, width, height, GL_RGBA, GL_HALF_FLOAT, GL_NEAREST);
+        revealTexture = CoreObjectLoader.createTexture2D(GL_R8, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
     }
 
     private void createFrameBuffers() {
@@ -288,6 +293,15 @@ public final class Renderer extends Renderable {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             throw new IllegalStateException("Shadow Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 
+        transparencyFramebuffer = glCreateFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, transparencyFramebuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, accumulationTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, revealTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            throw new IllegalStateException("Transparency buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
@@ -297,11 +311,14 @@ public final class Renderer extends Renderable {
         glDeleteTextures(intPosTexture);
         glDeleteTextures(shadowTexture);
         glDeleteTextures(shadowColorTexture);
+        glDeleteTextures(accumulationTexture);
+        glDeleteTextures(revealTexture);
     }
 
     private void deleteFrameBuffers() {
         glDeleteFramebuffers(framebuffer);
         glDeleteFramebuffers(shadowFramebuffer);
+        glDeleteFramebuffers(transparencyFramebuffer);
     }
 
     private void setupRenderState() {
@@ -518,6 +535,18 @@ public final class Renderer extends Renderable {
         shader.drawFullScreenQuad();
     }
 
+    private void startTransparentRendering() {
+        glDepthMask(false);
+        glEnable(GL_BLEND);
+        glBlendFunci(0, GL_ONE, GL_ONE);
+        glBlendFunci(1, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        glBlendEquation(GL_FUNC_ADD);
+        glBindFramebuffer(GL_FRAMEBUFFER, transparencyFramebuffer);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
+        glClearBufferfv(GL_COLOR, 0, new float[]{0, 0, 0, 0});
+        glClearBufferfv(GL_COLOR, 1, new float[]{1, 1, 1, 1});
+    }
+
     private void renderWater(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
         renderedWaterModels = 0;
 
@@ -540,6 +569,28 @@ public final class Renderer extends Renderable {
 
             glMultiDrawArraysIndirect(GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
+    }
+
+    private void finishTransparentRendering() {
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
+
+        GuiShader shader = (GuiShader) AssetManager.get(Shaders.TRANSPARENCY);
+        shader.bind();
+        shader.setUniform("accumulationTexture", 0);
+        shader.setUniform("revealTexture", 1);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, accumulationTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, revealTexture);
+
+        shader.flipNextDrawVertically();
+        shader.drawFullScreenQuad();
     }
 
     private void renderGlass(Position cameraPosition, Matrix4f projectionViewMatrix) {
@@ -891,6 +942,7 @@ public final class Renderer extends Renderable {
 
     private int framebuffer, colorTexture, depthTexture, intPosTexture;
     private int shadowFramebuffer, shadowTexture, shadowColorTexture;
+    private int transparencyFramebuffer, accumulationTexture, revealTexture;
 
     private static final int HEAD_UNDER_WATER_BIT = 1;
     private static final int DO_SHADOW_MAPPING_BIT = 2;

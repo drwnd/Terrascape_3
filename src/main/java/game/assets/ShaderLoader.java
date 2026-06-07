@@ -23,6 +23,7 @@ public final class ShaderLoader {
             case Shaders.CHUNK_SHADOW -> new RenderShader("Material.vert", "Shadow.frag", identifier);
             case Shaders.PARTICLE_SHADOW -> new RenderShader("Particle.vert", "Shadow.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
+            case Shaders.TRANSPARENCY -> new GuiShader("Gui.vert", "Transparency.frag", identifier);
 
             case ComputeShaders.ARC -> new ComputeShader("shapeShaders/Arc.comp", identifier);
             case ComputeShaders.CONE -> new ComputeShader("shapeShaders/Cone.comp", identifier);

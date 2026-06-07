@@ -17,7 +17,8 @@ public enum Shaders implements ShaderIdentifier {
     OCCLUSION_CULLING,
     CHUNK_SHADOW,
     PARTICLE_SHADOW,
-    VOLUME_INDICATOR;
+    VOLUME_INDICATOR,
+    TRANSPARENCY;
 
     @Override
     public Shader generateAsset() {
