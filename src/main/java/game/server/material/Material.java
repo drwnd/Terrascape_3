@@ -59,7 +59,7 @@ public final class Material {
         Debug.log("Loaded Material " + identifier.name());
     }
 
-    private static final byte[] MATERIAL_PROPERTIES = new byte[AMOUNT_OF_MATERIALS];
+    private static final int[] MATERIAL_PROPERTIES = new int[AMOUNT_OF_MATERIALS];
     private static final MaterialSounds[] DIG_SOUNDS = new MaterialSounds[AMOUNT_OF_MATERIALS];
     private static final MaterialSounds[] STEP_SOUNDS = new MaterialSounds[AMOUNT_OF_MATERIALS];
     private static final MaterialSounds[] JUMP_SOUNDS = new MaterialSounds[AMOUNT_OF_MATERIALS];

@@ -397,11 +397,12 @@ public final class MeshGenerator {
 
 
     private void addFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
-        if (Material.isGlass(material))
+        int renderingType = Material.getProperties(material) & RENDERING_TYPE_MASK;
+        if (renderingType == GLASS_RENDERING)
             addFace(glassVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
-        else if (material == WATER)
+        else if (renderingType == TRANSPARENT_RENDERING)
             addFace(transparentVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
-        else
+        else //if (renderingType == OPAQUE_RENDERING)
             addFace(opaqueVerticesLists[side], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
     }
 

@@ -4,28 +4,38 @@ import core.rendering_api.Debug;
 
 import java.util.List;
 
+import static game.utils.Constants.*;
+
 public enum Properties {
 
     NO_COLLISION,
     TRANSPARENT,
     OCCLUDES_SELF_ONLY(TRANSPARENT),
     STRUCTURE_REPLACEABLE,
-    SHADOW_TRANSPARENT;
+    SHADOW_TRANSPARENT,
 
+    USE_OPAQUE_RENDERING(OPAQUE_RENDERING),
+    USE_TRANSPARENT_RENDERING(TRANSPARENT_RENDERING, TRANSPARENT, OCCLUDES_SELF_ONLY),
+    USE_GLASS_RENDERING(GLASS_RENDERING, TRANSPARENT, OCCLUDES_SELF_ONLY);
 
     Properties(Properties... properties) {
-        byte value = (byte) (1 << ordinal());
+        int value = 1 << ordinal();
         for (Properties property : properties) value |= property.value;
         this.value = value;
     }
 
     Properties() {
-        value = (byte) (1 << ordinal());
+        value = 1 << ordinal();
     }
 
-    public static byte getCombinedValue(List<String> properties) {
+    Properties(int value, Properties... properties) {
+        for (Properties property : properties) value |= property.value;
+        this.value = value;
+    }
+
+    public static int getCombinedValue(List<String> properties) {
         if (properties == null) return 0;
-        byte value = 0;
+        int value = 0;
         for (String property : properties) {
             Properties propertyEnum;
             try {
@@ -43,7 +53,7 @@ public enum Properties {
         return (Material.getProperties(material) & properties) == properties;
     }
 
-    public static boolean doesntHaveProperties(byte material, byte properties) {
+    public static boolean doesntHaveProperties(byte material, int properties) {
         return (Material.getProperties(material) & properties) == 0;
     }
 
@@ -52,9 +62,9 @@ public enum Properties {
      *
      * @return The same value as {@code CONSTANTS.PROPERTY_NAME} just slower
      */
-    public byte getValue() {
+    public int getValue() {
         return value;
     }
 
-    private final byte value;
+    private final int value;
 }

@@ -1,5 +1,9 @@
 {
-  "properties": [],
+  "properties": [
+    "TRANSPARENT",
+    "OCCLUDES_SELF_ONLY",
+    "USE_TRANSPARENT_RENDERING"
+  ],
   "digSounds": "DIG_ICE",
   "stepSounds": "STEP_GLASS",
   "jumpSounds": "STEP_GLASS"

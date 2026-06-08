@@ -4,6 +4,7 @@
 #define DO_SHADOW_MAPPING_BIT 2
 #define DO_GLASS_SHADOWS_BIT 4
 #define USE_WEIGHT_1 8
+#define WATER 4
 
 in vec3 texturePosition;
 in vec3 voxelPosition;
@@ -15,6 +16,7 @@ layout (location = 0) out vec4 accumulation;
 layout (location = 1) out float reveal;
 
 uniform sampler2DArray textures;
+uniform sampler2DArray propertiesTextures;
 uniform sampler2D shadowMap;
 uniform sampler2D shadowColor;
 uniform mat4 sunMatrix;
@@ -57,10 +59,6 @@ vec3 getSkyLight(vec3 position, vec3 normal) {
     return currentDepth + 0.005 < closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
 }
 
-float getBlockLight() {
-    return 0.0;
-}
-
 vec2 getUVOffset(int side, int textureSize) {
     float invTextureSize = 1.0 / textureSize;
     vec3 textureCoordinate = fract(texturePosition * invTextureSize);
@@ -78,25 +76,10 @@ vec2 getUVOffset(int side, int textureSize) {
     return fract(textureCoordinate.zx);
 }
 
-void main() {
-    if (trianglePos.x > 1 || trianglePos.y > 1) discard;
-    int side = textureData >> 8 & 7;
-    int material = textureData & 0xFF;
-    int textureSize = textureSizes[material];
-
-    vec4 color = texture(textures, vec3(getUVOffset(side, textureSize), textureData & 0xFF));
-
-    float distance = length(cameraPosition - texturePosition);
-    float angle = abs(dot((texturePosition - cameraPosition) / distance, normal));
-
-
+vec3 computeLight(float nightLight, float timeLight) {
     float absTime = abs(time);
-    float blockLight = getBlockLight();
-    float timeLight = max(nightBrightness, easeInOutQuart(absTime));
-    float nightLight = -0.6 * (1 - absTime) * (1 - absTime);
-    float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
-    float fogMultiplier = 1 - exp(-distance * 0.000005);
 
+    vec3 nightLightVec = vec3(nightLight, nightLight, nightLight);
     vec3 nightBrightnessVec = vec3(nightBrightness);
     vec3 skyLight = getSkyLight(voxelPosition, normal);
     vec3 sunIllumination = dot(normal, sunDirection) * 0.2 * absTime * skyLight;
@@ -104,11 +87,59 @@ void main() {
 
     light = max(nightBrightnessVec, light);
     light.b = max(nightBrightness, max(nightBrightness, skyLight.b + nightLight) * timeLight + sunIllumination.b);
+    return light;
+}
+
+vec4 getWaterColor(vec4 color, vec3 textureCoord) {
+    float distance = length(cameraPosition - texturePosition);
+    float angle = abs(dot((texturePosition - cameraPosition) / distance, normal));
+    float absTime = abs(time);
+    float nightLight = -0.6 * (1 - absTime) * (1 - absTime);
+
+    float timeLight = max(nightBrightness, easeInOutQuart(absTime));
+    float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
+    float fogMultiplier = 1 - exp(-distance * 0.000005);
+
+    vec3 light = computeLight(nightLight, timeLight);
 
     vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight * (1 - waterFogMultiplier);
     vec3 waterColor = (color.rgb + angle * vec3(0.0, 0.4, 0.15)) * light * (1 - fogMultiplier);
     vec3 waterFog = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
-    vec4 fragColor = vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
+    return vec4((waterColor + waterFog + fogColor), color.a - angle * 0.3);
+}
+
+vec3 getOpaqueColor(vec3 color, vec3 textureCoord) {
+    float emissivness = texture(propertiesTextures, textureCoord).r;
+    float distance = length(cameraPosition - texturePosition);
+    float absTime = abs(time);
+    float nightLight = 0.6 * (1 - absTime) * (1 - absTime);
+
+    float timeLight = max(nightBrightness, easeInOutQuart(absTime));
+    float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
+    float fogMultiplier = 1 - exp(-distance * 0.000005);
+
+    vec3 light = computeLight(nightLight, timeLight);
+
+    vec3 fragLight = max(vec3(emissivness), light);
+    vec3 baseColor = color * fragLight * (1 - waterFogMultiplier) * (1 - fogMultiplier);
+    vec3 waterColor = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
+    vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight;
+
+    return baseColor + waterColor + fogColor;
+}
+
+void main() {
+    if (trianglePos.x > 1 || trianglePos.y > 1) discard;
+    int side = textureData >> 8 & 7;
+    int material = textureData & 0xFF;
+    int textureSize = textureSizes[material];
+    vec3 textureCoord = vec3(getUVOffset(side, textureSize), material);
+
+    vec4 color = texture(textures, textureCoord);
+
+    vec4 fragColor = vec4(0, 0, 0, 1);
+    if (material == WATER) fragColor = getWaterColor(color, textureCoord);
+    else fragColor = vec4(getOpaqueColor(color.rgb, textureCoord), color.a);
 
     float weight = bool(isFlag(USE_WEIGHT_1)) ? 1 :
     max(min(1.0, max(max(fragColor.r, fragColor.g), fragColor.b) * fragColor.a), fragColor.a)
