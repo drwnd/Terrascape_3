@@ -177,7 +177,7 @@ public final class MeshCollector {
         if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), 0, 0, -1, mesh.lod());
 
         glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
-        return new TransparentModel(mesh.getWorldCoordinate(), mesh.waterVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        return new TransparentModel(mesh.getWorldCoordinate(), mesh.transparentVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
     }
 
     private final MemoryAllocator allocator = new MemoryAllocator(1 << 29);

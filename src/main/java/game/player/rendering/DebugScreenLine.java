@@ -102,7 +102,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.RENDERED_MODELS, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
-            return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedWaterModels, renderer.renderedGlassModels);
+            return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedTransparentModels, renderer.renderedGlassModels);
         });
 
         add(lines, DebugScreenOptions.POSITION, () -> {

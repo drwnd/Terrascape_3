@@ -86,7 +86,7 @@ public final class MeshGenerator {
 
 
     private void clear() {
-        waterVerticesList.clear();
+        transparentVerticesList.clear();
         glassVerticesList.clear();
         for (IntArrayList list : opaqueVerticesLists) list.clear();
         for (ByteArrayList list : adjacentChunkLayers) list.clear();
@@ -98,15 +98,15 @@ public final class MeshGenerator {
         int[] transparentVertices = loadTransparentVertices();
 
         return new Mesh(opaqueVertices, vertexCounts, transparentVertices,
-                waterVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
+                transparentVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
                 glassVerticesList.size() * VERTICES_PER_QUAD / INTS_PER_VERTEX,
                 chunkX, chunkY, chunkZ, lod, occluder, occludee);
     }
 
     private int[] loadTransparentVertices() {
-        int[] transparentVertices = new int[waterVerticesList.size() + glassVerticesList.size()];
-        waterVerticesList.copyInto(transparentVertices, 0);
-        glassVerticesList.copyInto(transparentVertices, waterVerticesList.size());
+        int[] transparentVertices = new int[transparentVerticesList.size() + glassVerticesList.size()];
+        transparentVerticesList.copyInto(transparentVertices, 0);
+        glassVerticesList.copyInto(transparentVertices, transparentVerticesList.size());
         return transparentVertices;
     }
 
@@ -134,7 +134,7 @@ public final class MeshGenerator {
         AABB occludee = AABB.newMinChunkAABB();
 
         for (IntArrayList vertices : opaqueVerticesLists) addToAABB(vertices, occludee);
-        addToAABB(waterVerticesList, occludee);
+        addToAABB(transparentVerticesList, occludee);
         addToAABB(glassVerticesList, occludee);
 
         return occludee;
@@ -400,7 +400,7 @@ public final class MeshGenerator {
         if (Material.isGlass(material))
             addFace(glassVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
         else if (material == WATER)
-            addFace(waterVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
+            addFace(transparentVerticesList, side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
         else
             addFace(opaqueVerticesLists[side], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
     }
@@ -448,7 +448,7 @@ public final class MeshGenerator {
     };
 
     private static final int EXPECTED_LIST_SIZE = CHUNK_SIZE * CHUNK_SIZE;
-    private final IntArrayList waterVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
+    private final IntArrayList transparentVerticesList = new IntArrayList(EXPECTED_LIST_SIZE), glassVerticesList = new IntArrayList(EXPECTED_LIST_SIZE);
     private final IntArrayList[] opaqueVerticesLists = new IntArrayList[]{
             new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE),
             new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE), new IntArrayList(EXPECTED_LIST_SIZE),

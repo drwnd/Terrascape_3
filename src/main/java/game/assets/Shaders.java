@@ -7,7 +7,7 @@ public enum Shaders implements ShaderIdentifier {
 
     OPAQUE_GEOMETRY,
     SKYBOX,
-    WATER,
+    TRANSPARENT,
     GLASS,
     SSAO,
     OPAQUE_PARTICLE,
@@ -18,7 +18,7 @@ public enum Shaders implements ShaderIdentifier {
     CHUNK_SHADOW,
     PARTICLE_SHADOW,
     VOLUME_INDICATOR,
-    TRANSPARENCY;
+    TRANSPARENCY_APPLIER;
 
     @Override
     public Shader generateAsset() {
