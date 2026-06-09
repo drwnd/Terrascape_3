@@ -5,7 +5,7 @@ import core.utils.Vector3l;
 import static game.utils.Constants.*;
 
 public record Mesh(int[] opaqueVertices, int[] vertexCounts,
-                   int[] transparentVertices, int waterVertexCount, int glassVertexCount,
+                   int[] transparentVertices, int transparentVertexCount, int glassVertexCount,
                    long chunkX, long chunkY, long chunkZ, int lod,
                    AABB occluder, AABB occludee) {
 

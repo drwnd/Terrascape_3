@@ -7,47 +7,47 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int waterVertexCount, int glassVertexCount, int index) {
+public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int transparentVertexCount, int glassVertexCount, int index) {
 
-    public TransparentModel(Vector3l position, int waterVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
+    public TransparentModel(Vector3l position, int transparentVertexCount, int glassVertexCount, int bufferOrStart, int lod) {
         this(position.x << lod, position.y << lod, position.z << lod,
-                lod, bufferOrStart, waterVertexCount, glassVertexCount,
+                lod, bufferOrStart, transparentVertexCount, glassVertexCount,
                 (bufferOrStart >> 2) * MeshGenerator.VERTICES_PER_QUAD / MeshGenerator.INTS_PER_VERTEX);
     }
 
-    public void addDataWithOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {
-        waterCommands.add(isWaterEmpty() ? 0 : waterVertexCount);
-        waterCommands.add(0);
-        waterCommands.add(isWaterEmpty() ? 0 : index);
-        waterCommands.add(0);
+    public void addDataWithOcclusionCulling(IntArrayList transparentCommands, IntArrayList glassCommands) {
+        transparentCommands.add(isTransparentEmpty() ? 0 : transparentVertexCount);
+        transparentCommands.add(0);
+        transparentCommands.add(isTransparentEmpty() ? 0 : index);
+        transparentCommands.add(0);
 
         glassCommands.add(isGlassEmpty() ? 0 : glassVertexCount);
         glassCommands.add(0);
-        glassCommands.add(isGlassEmpty() ? 0 : index + waterVertexCount);
+        glassCommands.add(isGlassEmpty() ? 0 : index + transparentVertexCount);
         glassCommands.add(0);
     }
 
-    public void addDataWithoutOcclusionCulling(IntArrayList waterCommands, IntArrayList glassCommands) {
-        if (!isWaterEmpty()) addWaterData(waterCommands);
+    public void addDataWithoutOcclusionCulling(IntArrayList transparentCommands, IntArrayList glassCommands) {
+        if (!isTransparentEmpty()) addTransparentData(transparentCommands);
         if (!isGlassEmpty()) addGlassData(glassCommands);
     }
 
     public void addGlassData(IntArrayList glassCommands) {
         glassCommands.add(glassVertexCount);
         glassCommands.add(1);
-        glassCommands.add(index + waterVertexCount);
+        glassCommands.add(index + transparentVertexCount);
         glassCommands.add(0);
     }
 
-    public void addWaterData(IntArrayList waterCommands) {
-        waterCommands.add(waterVertexCount);
-        waterCommands.add(1);
-        waterCommands.add(index);
-        waterCommands.add(0);
+    public void addTransparentData(IntArrayList transparentCommands) {
+        transparentCommands.add(transparentVertexCount);
+        transparentCommands.add(1);
+        transparentCommands.add(index);
+        transparentCommands.add(0);
     }
 
-    public boolean isWaterEmpty() {
-        return waterVertexCount == 0;
+    public boolean isTransparentEmpty() {
+        return transparentVertexCount == 0;
     }
 
     public boolean isGlassEmpty() {
@@ -55,7 +55,7 @@ public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, i
     }
 
     public boolean isEmpty() {
-        return isWaterEmpty() && isGlassEmpty();
+        return isTransparentEmpty() && isGlassEmpty();
     }
 
     public void delete() {

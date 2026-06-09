@@ -50,7 +50,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Renderer extends Renderable {
 
-    public int renderedOpaqueModels, renderedWaterModels, renderedGlassModels;
+    public int renderedOpaqueModels, renderedTransparentModels, renderedGlassModels;
 
     public Renderer(Player player, MeshCollector meshCollector) {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
@@ -115,7 +115,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TexturePack.get(TextureArrays.PROPERTIES)).id());
     }
 
-    public static void setUpWaterRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
+    public static void setUpTransparentRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
@@ -194,7 +194,7 @@ public final class Renderer extends Renderable {
             applyAmbientOcclusion(cameraPosition, projectionViewMatrix);
 
         startTransparentRendering();
-        renderWater(cameraPosition, projectionViewMatrix, sunMatrix);
+        renderTransparentGeometry(cameraPosition, projectionViewMatrix, sunMatrix);
         finishTransparentRendering();
 
         renderGlass(cameraPosition, projectionViewMatrix);
@@ -547,15 +547,15 @@ public final class Renderer extends Renderable {
         glClearBufferfv(GL_COLOR, 1, new float[]{1, 1, 1, 1});
     }
 
-    private void renderWater(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
-        renderedWaterModels = 0;
+    private void renderTransparentGeometry(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
+        renderedTransparentModels = 0;
 
-        Shader shader = AssetManager.get(Shaders.WATER);
-        setUpWaterRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        Shader shader = AssetManager.get(Shaders.TRANSPARENT);
+        setUpTransparentRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
         setUpShadowMappedRendering(sunMatrix, shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getWaterIndirectBuffer());
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getTransparentIndirectBuffer());
 
         int flags = getFlags(cameraPosition);
         for (int lod = 0; lod < LOD_COUNT; lod++) {
@@ -563,9 +563,9 @@ public final class Renderer extends Renderable {
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 
-            long start = renderingOptimizer.getWaterLodStart(lod);
-            int drawCount = renderingOptimizer.getWaterLodDrawCount(lod);
-            renderedWaterModels += drawCount;
+            long start = renderingOptimizer.getTransparentLodStart(lod);
+            int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
+            renderedTransparentModels += drawCount;
 
             glMultiDrawArraysIndirect(GL_TRIANGLES, start, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
@@ -579,7 +579,7 @@ public final class Renderer extends Renderable {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
 
-        GuiShader shader = (GuiShader) AssetManager.get(Shaders.TRANSPARENCY);
+        GuiShader shader = (GuiShader) AssetManager.get(Shaders.TRANSPARENCY_APPLIER);
         shader.bind();
         shader.setUniform("accumulationTexture", 0);
         shader.setUniform("revealTexture", 1);

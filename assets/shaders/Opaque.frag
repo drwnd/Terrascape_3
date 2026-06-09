@@ -74,14 +74,9 @@ vec3 getSkyLight(vec3 position, vec3 normal) {
     return currentDepth + bias < closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
 }
 
-float getBlockLight(vec3 position, vec3 normal) {
-    return 0.0;
-}
-
 vec3 getColor(vec3 color, vec3 textureCoord) {
     float emissivness = texture(propertiesTextures, textureCoord).r;
     float absTime = abs(time);
-    float blockLight = getBlockLight(texturePosition, normal);
     float timeLight = max(nightBrightness, easeInOutQuart(absTime));
     float nightLight = 0.6 * (1 - absTime) * (1 - absTime);
     float distance = length(cameraPosition - texturePosition);

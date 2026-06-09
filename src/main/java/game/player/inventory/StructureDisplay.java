@@ -79,11 +79,11 @@ public final class StructureDisplay extends Renderable {
         shader.setUniform("flags", 0);
         renderOpaqueModel(opaqueModel, shader);
 
-        shader = AssetManager.get(Shaders.WATER);
-        Renderer.setUpWaterRendering(shader, matrix, 0, 0, 0, 1.0F);
+        shader = AssetManager.get(Shaders.TRANSPARENT);
+        Renderer.setUpTransparentRendering(shader, matrix, 0, 0, 0, 1.0F);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         shader.setUniform("flags", 8);
-        renderWaterModel(transparentModel, shader);
+        renderTransparentModel(transparentModel, shader);
 
         shader = AssetManager.get(Shaders.GLASS);
         Renderer.setUpGlassRendering(shader, matrix, 0, 0, 0);
@@ -107,13 +107,13 @@ public final class StructureDisplay extends Renderable {
         glMultiDrawArrays(GL_TRIANGLES, model.indices(), model.vertexCounts());
     }
 
-    private static void renderWaterModel(TransparentModel model, Shader shader) {
-        if (model.isWaterEmpty()) return;
+    private static void renderTransparentModel(TransparentModel model, Shader shader) {
+        if (model.isTransparentEmpty()) return;
 
         shader.setUniform("cameraPosition", 3000.0F, 4000.0F, 2000.0F);
         shader.setUniform("lodSize", 1);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
-        glDrawArrays(GL_TRIANGLES, 0, model.waterVertexCount());
+        glDrawArrays(GL_TRIANGLES, 0, model.transparentVertexCount());
     }
 
     private static void renderGlassModel(TransparentModel model, Shader shader) {
@@ -121,7 +121,7 @@ public final class StructureDisplay extends Renderable {
 
         shader.setUniform("lodSize", 1);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, model.bufferOrStart());
-        glDrawArrays(GL_TRIANGLES, model.waterVertexCount(), model.glassVertexCount());
+        glDrawArrays(GL_TRIANGLES, model.transparentVertexCount(), model.glassVertexCount());
     }
 
     private final OpaqueModel opaqueModel;

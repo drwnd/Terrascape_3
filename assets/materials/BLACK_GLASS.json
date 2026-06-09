@@ -1,7 +1,8 @@
 {
   "properties": [
     "TRANSPARENT",
-    "OCCLUDES_SELF_ONLY"
+    "OCCLUDES_SELF_ONLY",
+    "USE_GLASS_RENDERING"
   ],
   "digSounds": "DIG_GLASS",
   "stepSounds": "STEP_GLASS",

@@ -40,8 +40,8 @@ public final class RenderingOptimizer {
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 7, GL_DYNAMIC_DRAW);
 
-        waterIndirectBuffer = glGenBuffers();
-        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, waterIndirectBuffer);
+        transparentIndirectBuffer = glGenBuffers();
+        glBindBuffer(GL_DRAW_INDIRECT_BUFFER, transparentIndirectBuffer);
         glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE, GL_DYNAMIC_DRAW);
 
         glassIndirectBuffer = glGenBuffers();
@@ -85,7 +85,7 @@ public final class RenderingOptimizer {
         for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
 
         opaqueCommands.clear();
-        waterCommands.clear();
+        transparentCommands.clear();
         glassCommands.clear();
         if (ToggleSettings.USE_OCCLUSION_CULLING.value())
             generateIndirectCommandsWithOcclusionCulling(cameraPosition, projectionViewMatrix);
@@ -100,11 +100,11 @@ public final class RenderingOptimizer {
         return lodDrawCounts[lod * 3];
     }
 
-    public long getWaterLodStart(int lod) {
+    public long getTransparentLodStart(int lod) {
         return lodStarts[lod * 3 + 1];
     }
 
-    public int getWaterLodDrawCount(int lod) {
+    public int getTransparentLodDrawCount(int lod) {
         return lodDrawCounts[lod * 3 + 1];
     }
 
@@ -120,8 +120,8 @@ public final class RenderingOptimizer {
         return opaqueIndirectBuffer;
     }
 
-    public int getWaterIndirectBuffer() {
-        return waterIndirectBuffer;
+    public int getTransparentIndirectBuffer() {
+        return transparentIndirectBuffer;
     }
 
     public int getGlassIndirectBuffer() {
@@ -176,7 +176,7 @@ public final class RenderingOptimizer {
 
     public void cleanUp() {
         glDeleteBuffers(opaqueIndirectBuffer);
-        glDeleteBuffers(waterIndirectBuffer);
+        glDeleteBuffers(transparentIndirectBuffer);
         glDeleteBuffers(glassIndirectBuffer);
         glDeleteBuffers(occluderBuffer);
         glDeleteBuffers(occludeeBuffer);
@@ -195,7 +195,7 @@ public final class RenderingOptimizer {
         int occludeeCount = aabbs.size() / AABB_INT_SIZE;
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
-        glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
+        glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
         glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
         glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
 
@@ -212,7 +212,7 @@ public final class RenderingOptimizer {
         for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
-        glNamedBufferSubData(waterIndirectBuffer, 0, waterCommands.toArray());
+        glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
         glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
     }
 
@@ -354,7 +354,7 @@ public final class RenderingOptimizer {
     private void generateIndirectCommandsWithOcclusionCulling(int lod) {
         int drawCount = 0;
         lodStarts[lod * 3 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
-        lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 1] = (long) transparentCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
         long[] lodVisibilityBits = visibilityBits[lod];
@@ -377,7 +377,7 @@ public final class RenderingOptimizer {
                 drawCount++;
                 boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
                 opaqueModel.addDataWithOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
-                transparentModel.addDataWithOcclusionCulling(waterCommands, glassCommands);
+                transparentModel.addDataWithOcclusionCulling(transparentCommands, glassCommands);
                 occludee.addData(aabbs, (int) opaqueModel.totalX(), (int) opaqueModel.totalY(), (int) opaqueModel.totalZ(), lod);
 
                 if (Utils.chunkDistance(lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod) <= 1) {
@@ -388,7 +388,7 @@ public final class RenderingOptimizer {
                     opaqueCommands.set(opaqueCommands.size() - 19, 1);
                     opaqueCommands.set(opaqueCommands.size() - 23, 1);
                     opaqueCommands.set(opaqueCommands.size() - 27, 1);
-                    waterCommands.set(waterCommands.size() - 3, 1);
+                    transparentCommands.set(transparentCommands.size() - 3, 1);
                     glassCommands.set(glassCommands.size() - 3, 1);
                 }
             }
@@ -399,10 +399,10 @@ public final class RenderingOptimizer {
 
     private void generateIndirectCommandsWithoutOcclusionCulling(int lod) {
         int oldOpaqueDrawCount = opaqueCommands.size() / 4;
-        int oldWaterDrawCount = waterCommands.size() / 4;
+        int oldTransparentDrawCount = transparentCommands.size() / 4;
         int oldGlassDrawCount = glassCommands.size() / 4;
         lodStarts[lod * 3 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
-        lodStarts[lod * 3 + 1] = (long) waterCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
+        lodStarts[lod * 3 + 1] = (long) transparentCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
         lodStarts[lod * 3 + 2] = (long) glassCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
 
         long[] lodVisibilityBits = visibilityBits[lod];
@@ -422,11 +422,11 @@ public final class RenderingOptimizer {
 
                 boolean isBorderChunk = isLodBorderChunk(opaqueModel.chunkX(), opaqueModel.chunkY(), opaqueModel.chunkZ(), lod);
                 opaqueModel.addDataWithoutOcclusionCulling(opaqueCommands, lodCameraChunkX, lodCameraChunkY, lodCameraChunkZ, isBorderChunk);
-                transparentModel.addDataWithoutOcclusionCulling(waterCommands, glassCommands);
+                transparentModel.addDataWithoutOcclusionCulling(transparentCommands, glassCommands);
             }
 
         lodDrawCounts[lod * 3 + 0] = opaqueCommands.size() / 4 - oldOpaqueDrawCount;
-        lodDrawCounts[lod * 3 + 1] = waterCommands.size() / 4 - oldWaterDrawCount;
+        lodDrawCounts[lod * 3 + 1] = transparentCommands.size() / 4 - oldTransparentDrawCount;
         lodDrawCounts[lod * 3 + 2] = glassCommands.size() / 4 - oldGlassDrawCount;
     }
 
@@ -487,7 +487,7 @@ public final class RenderingOptimizer {
         glDepthMask(false);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, waterIndirectBuffer);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, transparentIndirectBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, glassIndirectBuffer);
 
         glDrawArraysInstanced(GL_TRIANGLES, 0, 36, occludeeCount);
@@ -505,7 +505,7 @@ public final class RenderingOptimizer {
     private long cameraX, cameraY, cameraZ;
     private final int width, height;
 
-    private final int opaqueIndirectBuffer, waterIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
+    private final int opaqueIndirectBuffer, transparentIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
     private final int framebuffer, depthTexture;
 
@@ -515,7 +515,7 @@ public final class RenderingOptimizer {
     private int shadowDrawCount;
 
     private final IntArrayList opaqueCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 256);
-    private final IntArrayList waterCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
+    private final IntArrayList transparentCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList glassCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList aabbs = new IntArrayList(AABB_INT_SIZE * 256);
 

@@ -12,7 +12,7 @@ public final class ShaderLoader {
         return switch (identifier) {
             case Shaders.OPAQUE_GEOMETRY -> new RenderShader("Material.vert", "Opaque.frag", identifier);
             case Shaders.SKYBOX -> new RenderShader("Skybox.vert", "Skybox.frag", identifier);
-            case Shaders.WATER -> new RenderShader("Material.vert", "Water.frag", identifier);
+            case Shaders.TRANSPARENT -> new RenderShader("Material.vert", "Transparent.frag", identifier);
             case Shaders.GLASS -> new RenderShader("Material.vert", "Glass.frag", identifier);
             case Shaders.SSAO -> new GuiShader("Gui.vert", "SSAO.frag", identifier);
             case Shaders.OPAQUE_PARTICLE -> new RenderShader("Particle.vert", "Opaque.frag", identifier);
@@ -23,7 +23,7 @@ public final class ShaderLoader {
             case Shaders.CHUNK_SHADOW -> new RenderShader("Material.vert", "Shadow.frag", identifier);
             case Shaders.PARTICLE_SHADOW -> new RenderShader("Particle.vert", "Shadow.frag", identifier);
             case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
-            case Shaders.TRANSPARENCY -> new GuiShader("Gui.vert", "Transparency.frag", identifier);
+            case Shaders.TRANSPARENCY_APPLIER -> new GuiShader("Gui.vert", "TransparencyApplier.frag", identifier);
 
             case ComputeShaders.ARC -> new ComputeShader("shapeShaders/Arc.comp", identifier);
             case ComputeShaders.CONE -> new ComputeShader("shapeShaders/Cone.comp", identifier);
