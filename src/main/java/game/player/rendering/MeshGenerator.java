@@ -137,6 +137,12 @@ public final class MeshGenerator {
         addToAABB(transparentVerticesList, occludee);
         addToAABB(glassVerticesList, occludee);
 
+        occludee.maxX += 1;
+        occludee.maxY += 1;
+        occludee.maxZ += 1;
+        occludee.minX -= 1;
+        occludee.minY -= 1;
+        occludee.minZ -= 1;
         return occludee;
     }
 

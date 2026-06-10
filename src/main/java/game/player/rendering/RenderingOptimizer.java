@@ -1,15 +1,14 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
-import core.rendering_api.CoreObjectLoader;
-import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
+import core.settings.optionSettings.Option;
 import core.utils.IntArrayList;
 import core.utils.Vector3l;
 
 import game.assets.Shaders;
 import game.player.Player;
-import game.settings.ToggleSettings;
+import game.settings.OptionSettings;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -27,10 +26,8 @@ public final class RenderingOptimizer {
 
     public static final int INDIRECT_COMMAND_SIZE = 16;
 
-    public RenderingOptimizer(MeshCollector meshCollector, int width, int height) {
+    public RenderingOptimizer(MeshCollector meshCollector) {
         this.meshCollector = meshCollector;
-        this.width = width / 4;
-        this.height = height / 4;
 
         shadowIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
@@ -55,22 +52,11 @@ public final class RenderingOptimizer {
         occludeeBuffer = glGenBuffers();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, occludeeBuffer);
         glBufferData(GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
-
-        depthTexture = CoreObjectLoader.createTexture2D(GL_DEPTH_COMPONENT32F, this.width, this.height, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
-
-        framebuffer = glCreateFramebuffers();
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
-        glDrawBuffers(GL_NONE);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
     }
 
     // Occlusion culling for normal rendering
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
+        if (cameraPosition == null || projectionViewMatrix == null) return;
         FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
         Vector3l position = cameraPosition.longPosition();
 
@@ -87,7 +73,7 @@ public final class RenderingOptimizer {
         opaqueCommands.clear();
         transparentCommands.clear();
         glassCommands.clear();
-        if (ToggleSettings.USE_OCCLUSION_CULLING.value())
+        if (OptionSettings.OCCLUSION_CULLING.value() != OcclusionCullingOptions.DISABLED)
             generateIndirectCommandsWithOcclusionCulling(cameraPosition, projectionViewMatrix);
         else generateIndirectCommandsWithoutOcclusionCulling();
     }
@@ -169,19 +155,12 @@ public final class RenderingOptimizer {
         return shadowDrawCount;
     }
 
-    // Other
-    public int getDepthTexture() {
-        return depthTexture;
-    }
-
     public void cleanUp() {
         glDeleteBuffers(opaqueIndirectBuffer);
         glDeleteBuffers(transparentIndirectBuffer);
         glDeleteBuffers(glassIndirectBuffer);
         glDeleteBuffers(occluderBuffer);
         glDeleteBuffers(occludeeBuffer);
-        glDeleteTextures(depthTexture);
-        glDeleteFramebuffers(framebuffer);
     }
 
     public long[] getVisibilityBits(int lod) {
@@ -457,7 +436,6 @@ public final class RenderingOptimizer {
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
-        glViewport(0, 0, width, height);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -465,10 +443,9 @@ public final class RenderingOptimizer {
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_BLEND);
         glDepthFunc(GL_GREATER);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         glDepthMask(true);
         glColorMask(false, false, false, false);
+        if (OptionSettings.OCCLUSION_CULLING.value() != OcclusionCullingOptions.AGGRESSIVE) glClear(GL_DEPTH_BUFFER_BIT);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, occluderBuffer);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 36, occluderCount);
@@ -484,6 +461,7 @@ public final class RenderingOptimizer {
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
         glCullFace(GL_BACK);
+        glDepthFunc(GL_GEQUAL);
         glDepthMask(false);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, occludeeBuffer);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, opaqueIndirectBuffer);
@@ -494,7 +472,6 @@ public final class RenderingOptimizer {
 
         glDepthMask(true);
         glColorMask(true, true, true, true);
-        glViewport(0, 0, Window.getWidth(), Window.getHeight());
         glDisable(GL_BLEND);
     }
 
@@ -503,11 +480,9 @@ public final class RenderingOptimizer {
     private final MeshCollector meshCollector;
     private long cameraChunkX, cameraChunkY, cameraChunkZ;
     private long cameraX, cameraY, cameraZ;
-    private final int width, height;
 
     private final int opaqueIndirectBuffer, transparentIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
-    private final int framebuffer, depthTexture;
 
     private final long[][] visibilityBits = new long[LOD_COUNT][LONGS_PER_LOD_BITS];
     private final long[] lodStarts = new long[LOD_COUNT * 3];
@@ -521,4 +496,8 @@ public final class RenderingOptimizer {
 
     private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
+
+    public enum OcclusionCullingOptions implements Option {
+        DISABLED, NORMAL, AGGRESSIVE
+    }
 }

@@ -3,11 +3,13 @@ package game.settings;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.Option;
 import game.player.interaction.PlaceMode;
+import game.player.rendering.RenderingOptimizer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public enum OptionSettings implements OptionSetting {
-    PLACE_MODE(PlaceMode.REPLACE);
+    PLACE_MODE(PlaceMode.REPLACE),
+    OCCLUSION_CULLING(RenderingOptimizer.OcclusionCullingOptions.NORMAL);
 
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;
