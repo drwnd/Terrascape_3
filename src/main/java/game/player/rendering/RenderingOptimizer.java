@@ -2,12 +2,13 @@ package game.player.rendering;
 
 import core.assets.AssetManager;
 import core.rendering_api.shaders.Shader;
+import core.settings.optionSettings.Option;
 import core.utils.IntArrayList;
 import core.utils.Vector3l;
 
 import game.assets.Shaders;
 import game.player.Player;
-import game.settings.ToggleSettings;
+import game.settings.OptionSettings;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -72,7 +73,7 @@ public final class RenderingOptimizer {
         opaqueCommands.clear();
         waterCommands.clear();
         glassCommands.clear();
-        if (ToggleSettings.USE_OCCLUSION_CULLING.value())
+        if (OptionSettings.OCCLUSION_CULLING.value() != OcclusionCullingOptions.DISABLED)
             generateIndirectCommandsWithOcclusionCulling(cameraPosition, projectionViewMatrix);
         else generateIndirectCommandsWithoutOcclusionCulling();
     }
@@ -444,6 +445,7 @@ public final class RenderingOptimizer {
         glDepthFunc(GL_GREATER);
         glDepthMask(true);
         glColorMask(false, false, false, false);
+        if (OptionSettings.OCCLUSION_CULLING.value() != OcclusionCullingOptions.AGGRESSIVE) glClear(GL_DEPTH_BUFFER_BIT);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, occluderBuffer);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 36, occluderCount);
@@ -494,4 +496,8 @@ public final class RenderingOptimizer {
 
     private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
+
+    public enum OcclusionCullingOptions implements Option {
+        DISABLED, NORMAL, AGGRESSIVE
+    }
 }

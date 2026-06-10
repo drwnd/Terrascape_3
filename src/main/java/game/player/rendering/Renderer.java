@@ -30,10 +30,7 @@ import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.particles.ParticleEffect;
 import game.server.*;
 import game.server.generation.Structure;
-import game.settings.FloatSettings;
-import game.settings.IntSettings;
-import game.settings.KeySettings;
-import game.settings.ToggleSettings;
+import game.settings.*;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -180,7 +177,11 @@ public final class Renderer extends Renderable {
         Position cameraPosition = player.getCamera().getPosition();
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        if (ToggleSettings.CULLING_COMPUTATION.value()) renderingOptimizer.computeVisibility(player, lastCameraPosition, lastProjectionViewMatrix);
+        if (ToggleSettings.CULLING_COMPUTATION.value()) {
+            if (OptionSettings.OCCLUSION_CULLING.value() == RenderingOptimizer.OcclusionCullingOptions.AGGRESSIVE)
+                renderingOptimizer.computeVisibility(player, lastCameraPosition, lastProjectionViewMatrix);
+            else renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
+        }
         if (ToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, sunMatrix);
 
         lastProjectionViewMatrix = projectionViewMatrix;

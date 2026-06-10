@@ -117,7 +117,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES, UiMessages.SHOW_SHAPE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessages.SHOW_STRUCTURE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, UiMessages.SHOW_SPLASH_PARTICLES);
-        section.addToggle(ToggleSettings.USE_OCCLUSION_CULLING, UiMessages.USE_OCCLUSION_CULLING);
+        section.addOption(OptionSettings.OCCLUSION_CULLING, UiMessages.OCCLUSION_CULLING);
 
         return section;
     }
