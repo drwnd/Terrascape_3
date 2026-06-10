@@ -7,7 +7,7 @@ out vec4 fragColor;
 
 in vec2 fragTextureCoordinate;
 
-const float EPSILON = 0.00001f;
+const float EPSILON = 0.00001;
 
 bool isApproximatelyEqual(float a, float b) {
     return abs(a - b) <= (abs(a) < abs(b) ? abs(b) : abs(a)) * EPSILON;

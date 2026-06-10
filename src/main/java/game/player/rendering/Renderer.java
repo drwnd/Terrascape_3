@@ -129,7 +129,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
 
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_STENCIL_TEST);
+        glDisable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
@@ -559,7 +559,6 @@ public final class Renderer extends Renderable {
 
         int flags = getFlags(cameraPosition);
         for (int lod = 0; lod < LOD_COUNT; lod++) {
-            glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 

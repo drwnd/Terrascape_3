@@ -144,7 +144,7 @@ void main() {
 
     float weight = bool(isFlag(USE_WEIGHT_1)) ? 1 :
     max(min(1.0, max(max(fragColor.r, fragColor.g), fragColor.b) * fragColor.a), fragColor.a)
-    * clamp(0.03 / (1e-5 + pow(gl_FragCoord.z / 200, 4.0)), 1e-2, 3e3);
+    * clamp(0.03 / (0.00001 + pow(gl_FragCoord.z / 200, 4.0)), 0.01, 1000.0);
 
     accumulation = vec4(fragColor.rgb * fragColor.a, fragColor.a) * weight;
     reveal = fragColor.a;

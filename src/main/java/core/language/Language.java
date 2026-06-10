@@ -28,7 +28,9 @@ public final class Language implements Option {
     private String getLanguageTranslation(Translatable translatable) {
         AssetIdentifier<Translation> identifier = translationIdentifierTable.computeIfAbsent(translatable.getClass(),
                 _ -> () -> loadTranslation(translatable.translationFileName()));
-        return AssetManager.get(identifier).translations()[translatable.ordinal()];
+        String[] translations = AssetManager.get(identifier).translations();
+        if (translatable.ordinal() >= translations.length) return translatable.fallbackTranslation();
+        return translations[translatable.ordinal()];
     }
 
 

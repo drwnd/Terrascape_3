@@ -5,7 +5,7 @@
     "USE_TRANSPARENT_RENDERING",
     "SHADOW_TRANSPARENT"
   ],
-  "digSounds": "DIG_ICE",
+  "digSounds": "DIG_GLASS",
   "stepSounds": "STEP_GLASS",
   "jumpSounds": "STEP_GLASS"
 }

@@ -144,7 +144,15 @@ public enum Materials implements Translatable, FileNamer {
     YELLOW_LIGHT,
     MAGENTA_LIGHT,
     CYAN_LIGHT,
-    WHITE_LIGHT;
+    WHITE_LIGHT,
+    RED_CRYSTAL,
+    GREEN_CRYSTAL,
+    BLUE_CRYSTAL,
+    YELLOW_CRYSTAL,
+    MAGENTA_CRYSTAL,
+    CYAN_CRYSTAL,
+    WHITE_CRYSTAL,
+    BLACK_CRYSTAL;
 
     @Override
     public String translationFileName() {
