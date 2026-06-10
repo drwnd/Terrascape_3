@@ -85,17 +85,17 @@ public final class Movement {
         long minZ = position.longZ + (int) Math.floor(position.fractionZ - hitboxSize.z * 0.5F);
         long maxX = position.longX + (int) Math.ceil(position.fractionX + hitboxSize.x * 0.5F) + 1;
         long maxZ = position.longZ + (int) Math.ceil(position.fractionZ + hitboxSize.z * 0.5F) + 1;
-        return containsCollisionalVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
+        return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
     private boolean checkThinGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
 
-        long minX = position.longX + (int) Math.ceil(position.fractionX - hitboxSize.x * 0.5F);
-        long minZ = position.longZ + (int) Math.ceil(position.fractionZ - hitboxSize.z * 0.5F);
-        long maxX = position.longX + (int) Math.floor(position.fractionX + hitboxSize.x * 0.5F) + 1;
-        long maxZ = position.longZ + (int) Math.floor(position.fractionZ + hitboxSize.z * 0.5F) + 1;
-        return containsCollisionalVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
+        long minX = position.longX + (int) Math.floor(position.fractionX - hitboxSize.x * 0.5F + 0.5F);
+        long minZ = position.longZ + (int) Math.floor(position.fractionZ - hitboxSize.z * 0.5F + 0.5F);
+        long maxX = position.longX + (int) Math.ceil(position.fractionX + hitboxSize.x * 0.5F);
+        long maxZ = position.longZ + (int) Math.ceil(position.fractionZ + hitboxSize.z * 0.5F);
+        return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
     private Vector3f move(Position position) {
@@ -220,9 +220,9 @@ public final class Movement {
 
         int xOffset = component == X_COMPONENT ? (velocity.x > 0.0F ? -1 : 1) : 0;
         int zOffset = component == Z_COMPONENT ? (velocity.z > 0.0F ? -1 : 1) : 0;
-        long startX = position.longX + MathUtils.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
+        long startX = position.longX + (int) Math.floor(position.fractionX - (hitboxSize.x + xOffset) * 0.5F);
         long startY = position.longY;
-        long startZ = position.longZ + MathUtils.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
+        long startZ = position.longZ + (int) Math.floor(position.fractionZ - (hitboxSize.z + zOffset) * 0.5F);
 
         return !collides(startX, startY, startZ, hitboxSize.x + 1, hitboxSize.y, hitboxSize.z + 1);
     }
@@ -232,9 +232,9 @@ public final class Movement {
 
         int xOffset = component == X_COMPONENT ? (velocity.x > 0.0F ? -1 : 1) : 0;
         int zOffset = component == Z_COMPONENT ? (velocity.z > 0.0F ? -1 : 1) : 0;
-        long startX = position.longX + MathUtils.floor(position.fractionX - (hitboxSize.x + 1 + xOffset) * 0.5F);
+        long startX = position.longX + (int) Math.floor(position.fractionX - (hitboxSize.x + 1 + xOffset) * 0.5F);
         long startY = position.longY;
-        long startZ = position.longZ + MathUtils.floor(position.fractionZ - (hitboxSize.z + 1 + zOffset) * 0.5F);
+        long startZ = position.longZ + (int) Math.floor(position.fractionZ - (hitboxSize.z + 1 + zOffset) * 0.5F);
 
         return collides(startX, startY, startZ, hitboxSize.x + 2, hitboxSize.y, hitboxSize.z + 2);
     }
@@ -273,17 +273,17 @@ public final class Movement {
 
     private long getStartX(Position position, Vector3i hitboxSize, int component) {
         float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F + 0.5F : -hitboxSize.x * 0.5F;
-        return position.longX + MathUtils.floor(position.fractionX + offset);
+        return position.longX + (int) Math.floor(position.fractionX + offset);
     }
 
     private long getStartY(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Y_COMPONENT && velocity.y > 0 ? hitboxSize.y : 0;
-        return position.longY + MathUtils.floor(position.fractionY + offset);
+        return position.longY + (int) Math.floor(position.fractionY + offset);
     }
 
     private long getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
-        return position.longZ + MathUtils.floor(position.fractionZ + offset);
+        return position.longZ + (int) Math.floor(position.fractionZ + offset);
     }
 
     private void playFootstepSound(Position position) {
@@ -297,7 +297,7 @@ public final class Movement {
     }
 
 
-    private static boolean containsCollisionalVoxel(long y, long minX, long minZ, long maxX, long maxZ) {
+    private static boolean containsCollidableVoxel(long y, long minX, long minZ, long maxX, long maxZ) {
         World world = Game.getWorld();
 
         for (long x = minX; x != maxX; x++)
