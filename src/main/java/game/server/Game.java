@@ -49,6 +49,7 @@ public final class Game {
     }
 
     public static void updateRenderDistance() {
+        if (world == null) return;
         world = new World(world);
         player.updateRenderDistanceAndLod();
         server.scheduleGeneratorRestart();
