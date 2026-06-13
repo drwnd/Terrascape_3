@@ -110,7 +110,9 @@ public enum UiMessages implements Translatable {
     LENGTH_Y,
     LENGTH_Z,
     BREAK_PARTICLE_STEP_LENGTH,
-    PLACE_PARTICLE_STEP_LENGTH;
+    PLACE_PARTICLE_STEP_LENGTH,
+    RENDER_DISTANCE,
+    LOD_COUNT;
 
     @Override
     public String translationFileName() {

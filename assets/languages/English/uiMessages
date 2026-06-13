@@ -106,3 +106,5 @@ Length Y
 Length Z
 Break Particle Step Length
 Place Particle Step Length
+Render Distance
+Lod Count
