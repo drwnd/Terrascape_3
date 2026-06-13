@@ -86,6 +86,11 @@ public final class Renderer extends Renderable {
         hologramModelsValid = false;
     }
 
+    public void reloadRenderingOptimizer() {
+        renderingOptimizer.cleanUp();
+        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector());
+    }
+
 
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
@@ -239,8 +244,7 @@ public final class Renderer extends Renderable {
     protected void resizeSelfTo(int width, int height) {
         if (width == 0 || height == 0) return;
 
-        renderingOptimizer.cleanUp();
-        renderingOptimizer = new RenderingOptimizer(player.getMeshCollector());
+        reloadRenderingOptimizer();
 
         deleteFrameBuffers();
         deleteTextures();

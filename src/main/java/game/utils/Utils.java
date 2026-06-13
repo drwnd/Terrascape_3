@@ -1,5 +1,6 @@
 package game.utils;
 
+import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.server.Game;
@@ -13,6 +14,17 @@ public final class Utils {
     public static int getChunkIndex(long chunkX, long chunkY, long chunkZ, int lod) {
         int widthMask = Game.getWorld().RENDERED_WORLD_WIDTH_MASK;
         int widthBits = Game.getWorld().RENDERED_WORLD_WIDTH_BITS;
+
+        chunkX &= widthMask & MAX_CHUNKS_MASK >> lod;
+        chunkY &= widthMask & MAX_CHUNKS_MASK >> lod;
+        chunkZ &= widthMask & MAX_CHUNKS_MASK >> lod;
+
+        return (int) (((chunkX << widthBits) + chunkZ << widthBits) + chunkY);
+    }
+
+    public static int getChunkIndexNoCaching(long chunkX, long chunkY, long chunkZ, int lod) {
+        int widthMask = MathUtils.nextLargestPowOf2(IntSettings.RENDER_DISTANCE.value() * 2 + 3) - 1;
+        int widthBits = Integer.numberOfTrailingZeros(widthMask + 1);
 
         chunkX &= widthMask & MAX_CHUNKS_MASK >> lod;
         chunkY &= widthMask & MAX_CHUNKS_MASK >> lod;

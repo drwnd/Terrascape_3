@@ -13,7 +13,8 @@ public final class Chunk {
 
     public final long X, Y, Z;
     public final ChunkID ID;
-    public final int INDEX, LOD;
+    public final int LOD;
+    public int INDEX;
 
     public Chunk(long chunkX, long chunkY, long chunkZ, int lod) {
         materials = new MaterialsData(CHUNK_SIZE_BITS, AIR);

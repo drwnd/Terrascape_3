@@ -75,6 +75,12 @@ public final class Player {
         renderer.updateGameTick();
     }
 
+    public void updateRenderDistanceAndLod() {
+        meshCollector.cleanUp();
+        meshCollector = new MeshCollector();
+        renderer.reloadRenderingOptimizer();
+    }
+
     /**
      * Intended for actions that should not be taken when a menu is displayed.
      * For example movement, block interactions etc.
@@ -106,7 +112,8 @@ public final class Player {
         if (button == KeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
         if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS) hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
+        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS)
+            hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleScrollInput(double yScroll) {
@@ -220,7 +227,7 @@ public final class Player {
         setInput();
     }
 
-    private final MeshCollector meshCollector;
+    private MeshCollector meshCollector;
     private final ParticleCollector particleCollector;
     private final Camera camera;
     private final PlayerInput input;
