@@ -21,7 +21,6 @@ import game.server.Game;
 import game.server.generation.MapSample;
 import game.server.generation.WorldGeneration;
 import game.settings.DebugScreenOptions;
-import game.settings.IntSettings;
 import game.utils.Position;
 import game.utils.Status;
 
@@ -81,7 +80,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         add(lines, DebugScreenOptions.CHUNK_MEMORY, () -> {
             long memory = 0L;
             int chunks = 0;
-            for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++)
+            for (int lod = 0; lod < LOD_COUNT; lod++)
                 for (Chunk chunk : Game.getWorld().getLod(lod)) {
                     if (chunk == null || chunk.getGenerationStatus() != Status.DONE) continue;
                     memory += chunk.getMaterials().getBytes().length;

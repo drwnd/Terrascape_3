@@ -48,17 +48,10 @@ public final class Game {
         server.cleanUp();
     }
 
-    public static void reloadWithNewRenderDistance() {
+    public static void updateRenderDistance() {
         world = new World(world);
         player.updateRenderDistanceAndLod();
         server.scheduleGeneratorRestart();
-    }
-
-    public static void reloadWithNewLodCount() {
-        // TODO World
-        // TODO MeshCollector
-        // TODO RenderingOptimizer
-        throw new UnsupportedOperationException("Not implemented yet");
     }
 
 

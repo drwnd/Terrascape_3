@@ -8,7 +8,6 @@ import game.server.ChunkID;
 import game.server.Game;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.WorldGeneration;
-import game.settings.IntSettings;
 import game.utils.Status;
 
 import java.io.File;
@@ -31,7 +30,7 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     public static void generateHigherLODs() {
         long start = System.nanoTime();
-        for (int lod = 1; lod < IntSettings.LOD_COUNT.value(); lod++) generateLod(lod);
+        for (int lod = 1; lod < LOD_COUNT; lod++) generateLod(lod);
         Debug.log("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 

@@ -81,7 +81,7 @@ public final class ChunkGenerator {
     }
 
     private void submitTasks(long playerChunkX, long playerChunkY, long playerChunkZ) {
-        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
             long lodPlayerX = playerChunkX >> lod;
             long lodPlayerY = playerChunkY >> lod;
             long lodPlayerZ = playerChunkZ >> lod;

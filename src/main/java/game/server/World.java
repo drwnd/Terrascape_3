@@ -24,7 +24,6 @@ public final class World {
 
     public World(long seed) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
-        int lodCount = IntSettings.LOD_COUNT.value();
 
         RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3);
         RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
@@ -32,32 +31,31 @@ public final class World {
         CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
 
         WorldGeneration.SEED = seed;
-        chunks = new Chunk[lodCount][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
+        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
     }
 
     public World(World oldWorld) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
-        int lodCount = IntSettings.LOD_COUNT.value();
 
         RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3);
         RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
         RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
         CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
 
-        chunks = new Chunk[lodCount][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
+        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
         name = oldWorld.name;
 
         Position playerPosition = Game.getPlayer().getPosition();
-        Chunk[][] oldChunks = oldWorld.chunks;
         ChunkSaver saver = new ChunkSaver();
 
-        for (int lod = 0; lod < lodCount; lod++) {
-            if (lod >= oldChunks.length) throw new UnsupportedOperationException("Not implemented yet");
+        deleteHigherLODs(LOD_COUNT);
+
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
             long cameraX = playerPosition.longX >>> CHUNK_SIZE_BITS + lod;
             long cameraY = playerPosition.longY >>> CHUNK_SIZE_BITS + lod;
             long cameraZ = playerPosition.longZ >>> CHUNK_SIZE_BITS + lod;
 
-            for (Chunk chunk : oldChunks[lod]) {
+            for (Chunk chunk : oldWorld.chunks[lod]) {
                 if (chunk == null) continue;
                 if (Utils.outsideChunkKeepDistance(cameraX, cameraY, cameraZ, chunk.X, chunk.Y, chunk.Z, chunk.LOD)) {
                     if (chunk.isModified())
@@ -116,7 +114,7 @@ public final class World {
                 saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
             }
 
-        deleteHigherLODs(IntSettings.LOD_COUNT.value() - 1);
+        deleteHigherLODs(LOD_COUNT - 1);
     }
 
     public static void deleteHigherLODs(int maxKeptLod) {

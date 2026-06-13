@@ -16,6 +16,7 @@ public final class Constants {
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
+    public static final int LOD_COUNT = 10;
     public static final int MAX_TREE_LOD = 4;
 
     public static final int SHADOW_MAP_SIZE = 2048;

@@ -3,12 +3,12 @@ package game.player.rendering;
 import core.utils.Vector3l;
 
 import game.server.Game;
-import game.settings.IntSettings;
 import game.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public final class MeshCollector {
@@ -107,7 +107,7 @@ public final class MeshCollector {
     }
 
     public void removeAll() {
-        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
             for (OpaqueModel model : opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
             for (TransparentModel model : transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
 
@@ -185,9 +185,9 @@ public final class MeshCollector {
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
 
-    private final OpaqueModel[][] opaqueModels = new OpaqueModel[IntSettings.LOD_COUNT.value()][Game.getWorld().CHUNKS_PER_LOD];
-    private final TransparentModel[][] transparentModels = new TransparentModel[IntSettings.LOD_COUNT.value()][Game.getWorld().CHUNKS_PER_LOD];
-    private final AABB[][] occluders = new AABB[IntSettings.LOD_COUNT.value()][Game.getWorld().CHUNKS_PER_LOD];
-    private final AABB[][] occludees = new AABB[IntSettings.LOD_COUNT.value()][Game.getWorld().CHUNKS_PER_LOD];
-    private final long[][] isMeshed = new long[IntSettings.LOD_COUNT.value()][Game.getWorld().CHUNKS_PER_LOD / 64];
+    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final AABB[][] occluders = new AABB[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final AABB[][] occludees = new AABB[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final long[][] isMeshed = new long[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD / 64];
 }
