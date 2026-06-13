@@ -492,8 +492,8 @@ public final class Renderer extends Renderable {
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getOpaqueIndirectBuffer());
 
         int flags = getFlags(cameraPosition);
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
+            glStencilFunc(GL_GEQUAL, IntSettings.LOD_COUNT.value() - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 
@@ -563,7 +563,7 @@ public final class Renderer extends Renderable {
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getTransparentIndirectBuffer());
 
         int flags = getFlags(cameraPosition);
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
 
@@ -605,8 +605,8 @@ public final class Renderer extends Renderable {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getGlassIndirectBuffer());
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
+            glStencilFunc(GL_GEQUAL, IntSettings.LOD_COUNT.value() - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
 
             long start = renderingOptimizer.getGlassLodStart(lod);
@@ -820,7 +820,7 @@ public final class Renderer extends Renderable {
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
-        if (lod < 0 || lod >= LOD_COUNT) return;
+        if (lod < 0 || lod >= IntSettings.LOD_COUNT.value()) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
         shader.bind();
@@ -839,7 +839,7 @@ public final class Renderer extends Renderable {
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
-        if (lod < 0 || lod >= LOD_COUNT) return;
+        if (lod < 0 || lod >= IntSettings.LOD_COUNT.value()) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
         shader.bind();

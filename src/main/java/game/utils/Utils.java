@@ -2,6 +2,8 @@ package game.utils;
 
 import core.utils.Vector3l;
 
+import game.server.Game;
+import game.settings.IntSettings;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -9,23 +11,28 @@ import static game.utils.Constants.*;
 public final class Utils {
 
     public static int getChunkIndex(long chunkX, long chunkY, long chunkZ, int lod) {
-        chunkX &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
-        chunkY &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
-        chunkZ &= RENDERED_WORLD_WIDTH_MASK & MAX_CHUNKS_MASK >> lod;
+        int widthMask = Game.getWorld().RENDERED_WORLD_WIDTH_MASK;
+        int widthBits = Game.getWorld().RENDERED_WORLD_WIDTH_BITS;
 
-        return (int) (((chunkX << RENDERED_WORLD_WIDTH_BITS) + chunkZ << RENDERED_WORLD_WIDTH_BITS) + chunkY);
+        chunkX &= widthMask & MAX_CHUNKS_MASK >> lod;
+        chunkY &= widthMask & MAX_CHUNKS_MASK >> lod;
+        chunkZ &= widthMask & MAX_CHUNKS_MASK >> lod;
+
+        return (int) (((chunkX << widthBits) + chunkZ << widthBits) + chunkY);
     }
 
     public static boolean outsideChunkKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
-        return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE + 1
-                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE + 1
-                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE + 1;
+        int renderDistance = IntSettings.RENDER_DISTANCE.value();
+        return distance(chunkX - cameraChunkX, MAX_CHUNKS_MASK >> lod) > renderDistance + 1
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > renderDistance + 1
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > renderDistance + 1;
     }
 
     public static boolean outsideRenderKeepDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {
-        return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE
-                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE
-                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > RENDER_DISTANCE;
+        int renderDistance = IntSettings.RENDER_DISTANCE.value();
+        return distance(cameraChunkX - chunkX, MAX_CHUNKS_MASK >> lod) > renderDistance
+                || distance(chunkZ - cameraChunkZ, MAX_CHUNKS_MASK >> lod) > renderDistance
+                || distance(chunkY - cameraChunkY, MAX_CHUNKS_MASK >> lod) > renderDistance;
     }
 
     public static long chunkDistance(long cameraChunkX, long cameraChunkY, long cameraChunkZ, long chunkX, long chunkY, long chunkZ, int lod) {

@@ -1,17 +1,9 @@
 package game.utils;
 
-import core.utils.MathUtils;
-
 import game.server.material.Materials;
 import game.server.material.Properties;
 
 public final class Constants {
-
-    static {
-        boolean isPerformanceTest = "true".equals(System.getenv().get("isPerformanceTest"));
-        if (isPerformanceTest) RENDER_DISTANCE = 62;
-        else RENDER_DISTANCE = 8;
-    }
 
     public static final float Z_NEAR = 0.8208F; // Just barely can't xRay
     public static final float Z_FAR = Float.POSITIVE_INFINITY;
@@ -24,14 +16,6 @@ public final class Constants {
 
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
-    public static final byte RENDER_DISTANCE;
-
-    public static final int RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(RENDER_DISTANCE * 2 + 3);
-    public static final int RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
-    public static final int RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
-    public static final int CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
-
-    public static final int LOD_COUNT = 10;
     public static final int MAX_TREE_LOD = 4;
 
     public static final int SHADOW_MAP_SIZE = 2048;

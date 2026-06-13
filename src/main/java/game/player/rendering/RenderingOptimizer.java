@@ -8,6 +8,8 @@ import core.utils.Vector3l;
 
 import game.assets.Shaders;
 import game.player.Player;
+import game.server.Game;
+import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.utils.Position;
 import game.utils.Transformation;
@@ -28,30 +30,31 @@ public final class RenderingOptimizer {
 
     public RenderingOptimizer(MeshCollector meshCollector) {
         this.meshCollector = meshCollector;
+        int chunksPerLod = Game.getWorld().CHUNKS_PER_LOD;
 
         shadowIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) chunksPerLod * INDIRECT_COMMAND_SIZE * 6, GL_DYNAMIC_DRAW);
 
         opaqueIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, opaqueIndirectBuffer);
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE * 7, GL_DYNAMIC_DRAW);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) IntSettings.LOD_COUNT.value() * chunksPerLod * INDIRECT_COMMAND_SIZE * 7, GL_DYNAMIC_DRAW);
 
         transparentIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, transparentIndirectBuffer);
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE, GL_DYNAMIC_DRAW);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) IntSettings.LOD_COUNT.value() * chunksPerLod * INDIRECT_COMMAND_SIZE, GL_DYNAMIC_DRAW);
 
         glassIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, glassIndirectBuffer);
-        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * INDIRECT_COMMAND_SIZE, GL_DYNAMIC_DRAW);
+        glBufferData(GL_DRAW_INDIRECT_BUFFER, (long) IntSettings.LOD_COUNT.value() * chunksPerLod * INDIRECT_COMMAND_SIZE, GL_DYNAMIC_DRAW);
 
         occluderBuffer = glGenBuffers();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, occluderBuffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, (long) IntSettings.LOD_COUNT.value() * chunksPerLod * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
 
         occludeeBuffer = glGenBuffers();
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, occludeeBuffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, (long) LOD_COUNT * CHUNKS_PER_LOD * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, (long) IntSettings.LOD_COUNT.value() * chunksPerLod * AABB_INT_SIZE * 4, GL_DYNAMIC_DRAW);
     }
 
     // Occlusion culling for normal rendering
@@ -67,8 +70,8 @@ public final class RenderingOptimizer {
         cameraY = position.y;
         cameraZ = position.z;
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) computeLodVisibility(lod, frustumIntersection, visibilityBits);
+        for (int lod = IntSettings.LOD_COUNT.value() - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
 
         opaqueCommands.clear();
         transparentCommands.clear();
@@ -122,7 +125,7 @@ public final class RenderingOptimizer {
         int zOffset = sunDirection.z < 0 ? 1 : -1;
 
         opaqueCommands.clear();
-        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+        for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
             OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, SHADOW_LOD);
             if (model == null || model.isEmpty()) continue;
 
@@ -137,7 +140,7 @@ public final class RenderingOptimizer {
 
     public void populateGlassShadowIndirectBuffer() {
         opaqueCommands.clear();
-        for (int chunkIndex = 0; chunkIndex < CHUNKS_PER_LOD; chunkIndex++) {
+        for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
             TransparentModel model = meshCollector.getTransparentModel(chunkIndex, SHADOW_LOD);
             if (model == null || model.isGlassEmpty()) continue;
 
@@ -170,7 +173,7 @@ public final class RenderingOptimizer {
 
     private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
         aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithOcclusionCulling(lod);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) generateIndirectCommandsWithOcclusionCulling(lod);
         int occludeeCount = aabbs.size() / AABB_INT_SIZE;
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
@@ -179,7 +182,7 @@ public final class RenderingOptimizer {
         glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
 
         aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluderBuffer(lod);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) populateOccluderBuffer(lod);
         glNamedBufferSubData(occluderBuffer, 0, aabbs.toArray());
         int occluderCount = aabbs.size() / AABB_INT_SIZE;
 
@@ -188,7 +191,7 @@ public final class RenderingOptimizer {
     }
 
     private void generateIndirectCommandsWithoutOcclusionCulling() {
-        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
         glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
@@ -199,10 +202,11 @@ public final class RenderingOptimizer {
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
 
-        long chunkX = (cameraChunkX >> lod) - (RENDERED_WORLD_WIDTH >> 1);
-        long chunkY = (cameraChunkY >> lod) - (RENDERED_WORLD_WIDTH >> 1);
-        long chunkZ = (cameraChunkZ >> lod) - (RENDERED_WORLD_WIDTH >> 1);
-        fillVisibleChunks(lod, frustumIntersection, RENDERED_WORLD_WIDTH, chunkX, chunkY, chunkZ);
+        int width = Game.getWorld().RENDERED_WORLD_WIDTH;
+        long chunkX = (cameraChunkX >> lod) - (width >> 1);
+        long chunkY = (cameraChunkY >> lod) - (width >> 1);
+        long chunkZ = (cameraChunkZ >> lod) - (width >> 1);
+        fillVisibleChunks(lod, frustumIntersection, width, chunkX, chunkY, chunkZ);
     }
 
     private void fillVisibleChunks(int lod, FrustumIntersection intersection, int length, long chunkX, long chunkY, long chunkZ) {
@@ -283,11 +287,12 @@ public final class RenderingOptimizer {
     }
 
     private boolean modelFarEnoughAway(long lodModelX, long lodModelY, long lodModelZ, int lod) {
+        int requiredDistance = (IntSettings.RENDER_DISTANCE.value() >> 1) + 1;
         long distanceX = Math.abs(Utils.getWrappedChunkCoordinate(lodModelX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod));
         long distanceY = Math.abs(Utils.getWrappedChunkCoordinate(lodModelY, cameraChunkY >> lod, lod) - (cameraChunkY >> lod));
         long distanceZ = Math.abs(Utils.getWrappedChunkCoordinate(lodModelZ, cameraChunkZ >> lod, lod) - (cameraChunkZ >> lod));
 
-        return distanceX > (RENDER_DISTANCE >> 1) + 1 || distanceZ > (RENDER_DISTANCE >> 1) + 1 || distanceY > (RENDER_DISTANCE >> 1) + 1;
+        return distanceX > requiredDistance || distanceZ > requiredDistance || distanceY > requiredDistance;
     }
 
     private boolean modelCubePresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
@@ -484,9 +489,9 @@ public final class RenderingOptimizer {
     private final int opaqueIndirectBuffer, transparentIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
 
-    private final long[][] visibilityBits = new long[LOD_COUNT][LONGS_PER_LOD_BITS];
-    private final long[] lodStarts = new long[LOD_COUNT * 3];
-    private final int[] lodDrawCounts = new int[LOD_COUNT * 3];
+    private final long[][] visibilityBits = new long[IntSettings.LOD_COUNT.value()][LONGS_PER_LOD_BITS];
+    private final long[] lodStarts = new long[IntSettings.LOD_COUNT.value() * 3];
+    private final int[] lodDrawCounts = new int[IntSettings.LOD_COUNT.value() * 3];
     private int shadowDrawCount;
 
     private final IntArrayList opaqueCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 256);
@@ -494,7 +499,7 @@ public final class RenderingOptimizer {
     private final IntArrayList glassCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList aabbs = new IntArrayList(AABB_INT_SIZE * 256);
 
-    private static final int LONGS_PER_LOD_BITS = CHUNKS_PER_LOD / 64;
+    private static final int LONGS_PER_LOD_BITS = Game.getWorld().CHUNKS_PER_LOD / 64;
     private static final int AABB_INT_SIZE = 4;
 
     public enum OcclusionCullingOptions implements Option {

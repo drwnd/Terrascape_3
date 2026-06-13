@@ -25,8 +25,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static game.utils.Constants.*;
-
 public final class Server implements CrashCallback {
 
     public static final int TARGET_TPS = 20;
@@ -53,7 +51,7 @@ public final class Server implements CrashCallback {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) {
             long lodPlayerX = playerChunkPosition.x >> lod;
             long lodPlayerY = playerChunkPosition.y >> lod;
             long lodPlayerZ = playerChunkPosition.z >> lod;
@@ -75,7 +73,7 @@ public final class Server implements CrashCallback {
     public static void unloadAll() {
         ChunkSaver saver = new ChunkSaver();
 
-        for (int lod = 0; lod < LOD_COUNT; lod++)
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++)
             for (Chunk chunk : Game.getWorld().getLod(lod)) {
                 if (chunk == null) continue;
                 Game.getWorld().setNull(chunk.INDEX, chunk.LOD);
@@ -110,7 +108,7 @@ public final class Server implements CrashCallback {
         placeable.spawnParticles(position);
 
         MeshCollector meshCollector = player.getMeshCollector();
-        for (int lod = 0; lod < LOD_COUNT; lod++) placeable.place(position, lod);
+        for (int lod = 0; lod < IntSettings.LOD_COUNT.value(); lod++) placeable.place(position, lod);
         for (Chunk chunk : placeable.getAffectedChunks()) {
             if (chunk == null) continue;
             meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);

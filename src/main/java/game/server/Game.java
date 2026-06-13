@@ -16,9 +16,9 @@ public final class Game {
         Material.loadMaterials();
         String worldName = saveFile.getName();
 
-        player = new PlayerSaver().load(PlayerSaver.getSaveFileLocation(worldName));
-        server = new ServerSaver().load(ServerSaver.getSaveFileLocation(worldName));
         world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
+        server = new ServerSaver().load(ServerSaver.getSaveFileLocation(worldName));
+        player = new PlayerSaver().load(PlayerSaver.getSaveFileLocation(worldName));
 
         world.setName(worldName);
         World.init();

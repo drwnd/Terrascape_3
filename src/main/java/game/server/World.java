@@ -6,6 +6,7 @@ import core.utils.MathUtils;
 
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
+import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
 
@@ -15,9 +16,22 @@ import static game.utils.Constants.*;
 
 public final class World {
 
+    public final int RENDERED_WORLD_WIDTH;
+    public final int RENDERED_WORLD_WIDTH_MASK;
+    public final int RENDERED_WORLD_WIDTH_BITS;
+    public final int CHUNKS_PER_LOD;
+
     public World(long seed) {
+        int renderDistance = IntSettings.RENDER_DISTANCE.value();
+        int lodCount = IntSettings.LOD_COUNT.value();
+
+        RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3);
+        RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
+        RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
+        CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
+
         WorldGeneration.SEED = seed;
-        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
+        chunks = new Chunk[lodCount][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
     }
 
     public static void init() {
@@ -66,7 +80,7 @@ public final class World {
                 saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
             }
 
-        deleteHigherLODs(LOD_COUNT - 1);
+        deleteHigherLODs(IntSettings.LOD_COUNT.value() - 1);
     }
 
     public static void deleteHigherLODs(int maxKeptLod) {
