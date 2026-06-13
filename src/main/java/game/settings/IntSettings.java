@@ -1,6 +1,7 @@
 package game.settings;
 
 import core.settings.IntSetting;
+import game.server.Game;
 
 import static game.utils.Constants.CHUNK_SIZE_BITS;
 
@@ -14,18 +15,28 @@ public enum IntSettings implements IntSetting {
     BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
     BREAK_PARTICLE_STEP_LENGTH(1, 16, 2),
     PLACE_PARTICLE_STEP_LENGTH(1, 16, 1),
-    RENDER_DISTANCE(1, 16, 6),
-    LOD_COUNT(2, 25, 10);
+    RENDER_DISTANCE(1, 16, 6, Game::reloadWithNewRenderDistance),
+    LOD_COUNT(2, 25, 10, Game::reloadWithNewLodCount);
 
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
         this.max = max;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
+        this.callback = null;
+    }
+
+    IntSettings(int min, int max, int defaultValue, ChangeCallback callback) {
+        this.min = min;
+        this.max = max;
+        this.defaultValue = defaultValue;
+        this.value = defaultValue;
+        this.callback = callback;
     }
 
     @Override
     public void setValue(int value) {
+        if (this.value != value && callback != null) callback.run(this.value, value);
         this.value = value;
     }
 
@@ -51,4 +62,9 @@ public enum IntSettings implements IntSetting {
 
     private final int min, max, defaultValue;
     private int value;
+    private final ChangeCallback callback;
+
+    public interface ChangeCallback {
+        void run(int oldValue, int newValue);
+    }
 }

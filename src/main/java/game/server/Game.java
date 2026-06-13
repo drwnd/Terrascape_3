@@ -48,6 +48,21 @@ public final class Game {
         server.cleanUp();
     }
 
+    public static void reloadWithNewRenderDistance(int oldRenderDistance, int newRenderDistance) {
+        // TODO World
+        // TODO MeshCollector
+        // TODO RenderingOptimizer
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    public static void reloadWithNewLodCount(int oldLodCount, int newLodCount) {
+        // TODO World
+        // TODO MeshCollector
+        // TODO RenderingOptimizer
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+
     public static Player getPlayer() {
         return player;
     }
