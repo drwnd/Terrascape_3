@@ -75,9 +75,8 @@ public final class Player {
         renderer.updateGameTick();
     }
 
-    public void updateRenderDistanceAndLod() {
-        meshCollector.cleanUp();
-        meshCollector = new MeshCollector();
+    public void updateRenderDistanceAndLod(int oldRenderDistance) {
+        meshCollector = new MeshCollector(meshCollector, oldRenderDistance);
         renderer.reloadRenderingOptimizer();
     }
 

@@ -37,7 +37,7 @@ public enum IntSettings implements IntSetting {
     public void setValue(int value) {
         int oldValue = this.value;
         this.value = value;
-        if (oldValue != value && callback != null) callback.run();
+        if (oldValue != value && callback != null) callback.run(oldValue);
     }
 
     @Override
@@ -65,6 +65,6 @@ public enum IntSettings implements IntSetting {
     private final ChangeCallback callback;
 
     public interface ChangeCallback {
-        void run();
+        void run(int oldValue);
     }
 }

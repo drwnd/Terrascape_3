@@ -48,10 +48,10 @@ public final class Game {
         server.cleanUp();
     }
 
-    public static void updateRenderDistance() {
+    public static void updateRenderDistance(int oldRenderDistance) {
         if (world == null) return;
         world = new World(world);
-        player.updateRenderDistanceAndLod();
+        player.updateRenderDistanceAndLod(oldRenderDistance);
         server.scheduleGeneratorRestart();
     }
 

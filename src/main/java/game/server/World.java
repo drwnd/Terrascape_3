@@ -62,7 +62,7 @@ public final class World {
                         saver.save(chunk, ChunkSaver.getSaveFileLocation(chunk.ID, chunk.LOD));
                     continue;
                 }
-                chunk.INDEX = Utils.getChunkIndexNoCaching(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
+                chunk.INDEX = Utils.getChunkIndex(chunk.X, chunk.Y, chunk.Z, chunk.LOD, renderDistance);
                 chunks[chunk.LOD][chunk.INDEX] = chunk;
             }
         }

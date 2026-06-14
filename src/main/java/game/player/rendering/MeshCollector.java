@@ -3,6 +3,8 @@ package game.player.rendering;
 import core.utils.Vector3l;
 
 import game.server.Game;
+import game.settings.IntSettings;
+import game.utils.Position;
 import game.utils.Utils;
 
 import java.util.ArrayList;
@@ -12,6 +14,69 @@ import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public final class MeshCollector {
+
+    public MeshCollector() {
+        allocator = new MemoryAllocator(1 << 29);
+    }
+
+    public MeshCollector(MeshCollector oldMeshCollector, int oldRenderDistance) {
+        allocator = oldMeshCollector.allocator;
+        meshQueue.addAll(oldMeshCollector.meshQueue);
+        synchronized (toDeleteOpaqueModels) {
+            toDeleteOpaqueModels.addAll(oldMeshCollector.toDeleteOpaqueModels);
+        }
+        synchronized (toDeleteTransparentModels) {
+            toDeleteTransparentModels.addAll(oldMeshCollector.toDeleteTransparentModels);
+        }
+
+        Position playerPosition = Game.getPlayer().getPosition();
+        int renderDistance = Math.min(oldRenderDistance, IntSettings.RENDER_DISTANCE.value());
+
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            long cameraX = playerPosition.longX >>> CHUNK_SIZE_BITS + lod;
+            long cameraY = playerPosition.longY >>> CHUNK_SIZE_BITS + lod;
+            long cameraZ = playerPosition.longZ >>> CHUNK_SIZE_BITS + lod;
+
+            for (OpaqueModel model : oldMeshCollector.opaqueModels[lod]) {
+                if (model == null) continue;
+                if (Utils.outsideChunkKeepDistance(cameraX, cameraY, cameraZ, model.chunkX(), model.chunkY(), model.chunkZ(), lod)) {
+                    synchronized (toDeleteOpaqueModels) {
+                        toDeleteOpaqueModels.add(model);
+                    }
+                    continue;
+                }
+                int index = Utils.getChunkIndex(model.chunkX(), model.chunkY(), model.chunkZ(), lod);
+                opaqueModels[lod][index] = model;
+            }
+            for (TransparentModel model : oldMeshCollector.transparentModels[lod]) {
+                if (model == null) continue;
+                if (Utils.outsideChunkKeepDistance(cameraX, cameraY, cameraZ, model.chunkX(), model.chunkY(), model.chunkZ(), lod)) {
+                    synchronized (toDeleteTransparentModels) {
+                        toDeleteTransparentModels.add(model);
+                    }
+                    continue;
+                }
+                int index = Utils.getChunkIndex(model.chunkX(), model.chunkY(), model.chunkZ(), lod);
+                transparentModels[lod][index] = model;
+            }
+
+            for (long chunkX = cameraX - renderDistance - 1; chunkX != cameraX + renderDistance + 2; chunkX++)
+                for (long chunkY = cameraY - renderDistance - 1; chunkY != cameraY + renderDistance + 2; chunkY++)
+                    for (long chunkZ = cameraZ - renderDistance - 1; chunkZ != cameraZ + renderDistance + 2; chunkZ++) {
+
+                        int oldIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod, oldRenderDistance);
+                        int currentIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
+
+                        if (oldMeshCollector.isMeshed(oldIndex, lod)) setMeshed(true, currentIndex, lod);
+
+                        AABB occluder = oldMeshCollector.getOccluder(oldIndex, lod);
+                        AABB occludee = oldMeshCollector.getOccludee(oldIndex, lod);
+
+                        if (occluder != null) occluders[lod][currentIndex] = occluder;
+                        if (occludee != null) occludees[lod][currentIndex] = occludee;
+                    }
+        }
+    }
 
     public void uploadAllMeshes() {
         Vector3l playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
@@ -180,7 +245,7 @@ public final class MeshCollector {
         return new TransparentModel(mesh.getWorldCoordinate(), mesh.transparentVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
     }
 
-    private final MemoryAllocator allocator = new MemoryAllocator(1 << 29);
+    private final MemoryAllocator allocator;
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();

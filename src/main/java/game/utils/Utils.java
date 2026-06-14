@@ -22,8 +22,8 @@ public final class Utils {
         return (int) (((chunkX << widthBits) + chunkZ << widthBits) + chunkY);
     }
 
-    public static int getChunkIndexNoCaching(long chunkX, long chunkY, long chunkZ, int lod) {
-        int widthMask = MathUtils.nextLargestPowOf2(IntSettings.RENDER_DISTANCE.value() * 2 + 3) - 1;
+    public static int getChunkIndex(long chunkX, long chunkY, long chunkZ, int lod, int renderDistance) {
+        int widthMask = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3) - 1;
         int widthBits = Integer.numberOfTrailingZeros(widthMask + 1);
 
         chunkX &= widthMask & MAX_CHUNKS_MASK >> lod;
