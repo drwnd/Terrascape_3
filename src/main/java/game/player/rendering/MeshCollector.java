@@ -20,14 +20,9 @@ public final class MeshCollector {
     }
 
     public MeshCollector(MeshCollector oldMeshCollector, int oldRenderDistance) {
+        oldMeshCollector.deleteOldMeshes();
+        oldMeshCollector.uploadAllMeshes();
         allocator = oldMeshCollector.allocator;
-        meshQueue.addAll(oldMeshCollector.meshQueue);
-        synchronized (toDeleteOpaqueModels) {
-            toDeleteOpaqueModels.addAll(oldMeshCollector.toDeleteOpaqueModels);
-        }
-        synchronized (toDeleteTransparentModels) {
-            toDeleteTransparentModels.addAll(oldMeshCollector.toDeleteTransparentModels);
-        }
 
         Position playerPosition = Game.getPlayer().getPosition();
         int renderDistance = Math.min(oldRenderDistance, IntSettings.RENDER_DISTANCE.value());
