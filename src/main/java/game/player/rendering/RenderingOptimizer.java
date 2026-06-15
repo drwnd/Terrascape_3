@@ -30,7 +30,7 @@ public final class RenderingOptimizer {
 
     public RenderingOptimizer(MeshCollector meshCollector) {
         this.meshCollector = meshCollector;
-        int chunksPerLod = Game.getWorld().CHUNKS_PER_LOD, lodCount = LOD_COUNT;
+        int chunksPerLod = Game.getWorld().CHUNKS_PER_LOD, lodCount = Game.getWorld().LOD_COUNT;
 
         shadowIndirectBuffer = glGenBuffers();
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, shadowIndirectBuffer);
@@ -70,8 +70,9 @@ public final class RenderingOptimizer {
         cameraY = position.y;
         cameraZ = position.z;
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) computeLodVisibility(lod, frustumIntersection);
-        for (int lod = LOD_COUNT - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
+        int lodCount = Game.getWorld().LOD_COUNT;
+        for (int lod = 0; lod < lodCount; lod++) computeLodVisibility(lod, frustumIntersection);
+        for (int lod = lodCount - 1; lod >= 0; lod--) removeLodVisibilityOverlap(lod);
 
         opaqueCommands.clear();
         transparentCommands.clear();
@@ -173,7 +174,8 @@ public final class RenderingOptimizer {
 
     private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
         aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithOcclusionCulling(lod);
+        int lodCount = Game.getWorld().LOD_COUNT;
+        for (int lod = 0; lod < lodCount; lod++) generateIndirectCommandsWithOcclusionCulling(lod);
         int occludeeCount = aabbs.size() / AABB_INT_SIZE;
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
@@ -182,7 +184,7 @@ public final class RenderingOptimizer {
         glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
 
         aabbs.clear();
-        for (int lod = 0; lod < LOD_COUNT; lod++) populateOccluderBuffer(lod);
+        for (int lod = 0; lod < lodCount; lod++) populateOccluderBuffer(lod);
         glNamedBufferSubData(occluderBuffer, 0, aabbs.toArray());
         int occluderCount = aabbs.size() / AABB_INT_SIZE;
 
@@ -191,7 +193,7 @@ public final class RenderingOptimizer {
     }
 
     private void generateIndirectCommandsWithoutOcclusionCulling() {
-        for (int lod = 0; lod < LOD_COUNT; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
 
         glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
         glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
@@ -491,9 +493,9 @@ public final class RenderingOptimizer {
 
     private final int LONGS_PER_LOD_BITS = Game.getWorld().CHUNKS_PER_LOD / 64;
 
-    private final long[][] visibilityBits = new long[LOD_COUNT][LONGS_PER_LOD_BITS];
-    private final long[] lodStarts = new long[LOD_COUNT * 3];
-    private final int[] lodDrawCounts = new int[LOD_COUNT * 3];
+    private final long[][] visibilityBits = new long[Game.getWorld().LOD_COUNT][LONGS_PER_LOD_BITS];
+    private final long[] lodStarts = new long[Game.getWorld().LOD_COUNT * 3];
+    private final int[] lodDrawCounts = new int[Game.getWorld().LOD_COUNT * 3];
     private int shadowDrawCount;
 
     private final IntArrayList opaqueCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 256);

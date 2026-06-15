@@ -21,10 +21,12 @@ public final class World {
     public final int RENDERED_WORLD_WIDTH_MASK;
     public final int RENDERED_WORLD_WIDTH_BITS;
     public final int CHUNKS_PER_LOD;
+    public final int LOD_COUNT;
 
     public World(long seed) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
+        LOD_COUNT = IntSettings.LOD_COUNT.value();
         RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3);
         RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
         RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
@@ -37,6 +39,7 @@ public final class World {
     public World(World oldWorld) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
+        LOD_COUNT = oldWorld.LOD_COUNT;
         RENDERED_WORLD_WIDTH = MathUtils.nextLargestPowOf2(renderDistance * 2 + 3);
         RENDERED_WORLD_WIDTH_MASK = RENDERED_WORLD_WIDTH - 1;
         RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
@@ -47,8 +50,6 @@ public final class World {
 
         Position playerPosition = Game.getPlayer().getPosition();
         ChunkSaver saver = new ChunkSaver();
-
-        deleteHigherLODs(LOD_COUNT);
 
         for (int lod = 0; lod < LOD_COUNT; lod++) {
             long cameraX = playerPosition.longX >>> CHUNK_SIZE_BITS + lod;
