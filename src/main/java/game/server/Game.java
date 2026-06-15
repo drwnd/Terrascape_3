@@ -4,9 +4,11 @@ import core.rendering_api.Debug;
 import game.player.Player;
 import core.rendering_api.Window;
 import game.server.material.Material;
+import game.server.saving.ChunkSaver;
 import game.server.saving.PlayerSaver;
 import game.server.saving.ServerSaver;
 import game.server.saving.WorldSaver;
+import game.settings.IntSettings;
 
 import java.io.File;
 
@@ -49,10 +51,24 @@ public final class Game {
     }
 
     public static void updateRenderDistance(int oldRenderDistance) {
-        if (world == null) return;
-        world = new World(world);
-        player.updateRenderDistanceAndLod(oldRenderDistance);
-        server.scheduleGeneratorRestart();
+        if (world == null || oldRenderDistance == IntSettings.RENDER_DISTANCE.value()) return;
+        server = new Server(server);
+        world = new World(world, true, false);
+        player.updateRenderDistance(oldRenderDistance);
+
+        server.startTicks();
+    }
+
+    public static void updateLodCount(int oldLodCount) {
+        if (world == null || oldLodCount == IntSettings.LOD_COUNT.value()) return;
+        server = new Server(server);
+        world = new World(world, false, true);
+        player.updateLodCount();
+
+        if (oldLodCount < IntSettings.LOD_COUNT.value()) ChunkSaver.generateHigherLODs();
+        else World.deleteHigherLODs(IntSettings.LOD_COUNT.value());
+
+        server.startTicks();
     }
 
 

@@ -36,6 +36,13 @@ public final class Server implements CrashCallback {
         this.messages = messages;
     }
 
+    public Server(Server oldServer) {
+        oldServer.cleanUp();
+        currentGameTick = oldServer.currentGameTick;
+        dayTime = oldServer.dayTime;
+        messages = oldServer.messages;
+    }
+
 
     @Override
     public CrashAction notify(Exception exception) {
@@ -121,9 +128,11 @@ public final class Server implements CrashCallback {
 
     public void pauseTicks() {
         if (executor != null) executor.shutdownNow();
+        executor = null;
     }
 
     public void startTicks() {
+        if (executor != null) return;
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
@@ -223,7 +232,7 @@ public final class Server implements CrashCallback {
     private long currentGameTick;
     private float dayTime;
 
-    private ScheduledExecutorService executor;
+    private ScheduledExecutorService executor = null;
     private final ArrayList<ChatMessage> messages;
     private final ChunkGenerator generator = new ChunkGenerator();
     private final HashMap<Object, Function> functions = new HashMap<>();

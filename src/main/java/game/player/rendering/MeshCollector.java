@@ -73,6 +73,24 @@ public final class MeshCollector {
         }
     }
 
+    public MeshCollector(MeshCollector oldMeshCollector) {
+        oldMeshCollector.deleteOldMeshes();
+        oldMeshCollector.uploadAllMeshes();
+        allocator = oldMeshCollector.allocator;
+        int lodCount = Math.min(oldMeshCollector.isMeshed.length, isMeshed.length);
+
+        System.arraycopy(oldMeshCollector.isMeshed, 0, isMeshed, 0, lodCount);
+        System.arraycopy(oldMeshCollector.opaqueModels, 0, opaqueModels, 0, lodCount);
+        System.arraycopy(oldMeshCollector.transparentModels, 0, transparentModels, 0, lodCount);
+        System.arraycopy(oldMeshCollector.occluders, 0, occluders, 0, lodCount);
+        System.arraycopy(oldMeshCollector.occludees, 0, occludees, 0, lodCount);
+
+        for (int lod = lodCount; lod < oldMeshCollector.opaqueModels.length; lod++) {
+            for (OpaqueModel model : oldMeshCollector.opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+            for (TransparentModel model : oldMeshCollector.transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+        }
+    }
+
     public void uploadAllMeshes() {
         Vector3l playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (meshQueue) {
