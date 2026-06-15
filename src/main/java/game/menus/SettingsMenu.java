@@ -102,6 +102,7 @@ public final class SettingsMenu extends UiBackgroundElement {
 
         section.addSlider(FloatSettings.FOV, UiMessages.FOV);
         section.addSlider(IntSettings.RENDER_DISTANCE, UiMessages.RENDER_DISTANCE);
+        section.addSlider(IntSettings.LOD_COUNT, UiMessages.LOD_COUNT);
         section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessages.NIGHT_BRIGHTNESS);
         section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessages.CROSSHAIR_SIZE);
         section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessages.HOTBAR_SIZE);
