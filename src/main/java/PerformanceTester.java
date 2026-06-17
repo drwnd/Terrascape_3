@@ -5,12 +5,14 @@ import game.server.Game;
 import game.server.World;
 import game.server.generation.GenerationData;
 import game.server.generation.WorldGeneration;
+import game.settings.IntSettings;
 
 public final class PerformanceTester {
 
     private static final int CHUNK_COUNT = 128;
 
     public static void main(String[] args) {
+        IntSettings.RENDER_DISTANCE.setValue(CHUNK_COUNT);
         Game.setTemporaryWorld(new World(0x9EF6E7FAF3299DDDL));
         long totalStart = System.nanoTime();
 
