@@ -124,10 +124,11 @@ public final class RenderingOptimizer {
         int xOffset = sunDirection.x < 0 ? 1 : -1;
         int yOffset = sunDirection.y < 0 ? 1 : -1;
         int zOffset = sunDirection.z < 0 ? 1 : -1;
+        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
 
         opaqueCommands.clear();
         for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
-            OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, SHADOW_LOD);
+            OpaqueModel model = meshCollector.getOpaqueModel(chunkIndex, shadowLod);
             if (model == null || model.isEmpty()) continue;
 
             model.addDataWithoutOcclusionCulling(opaqueCommands,
@@ -140,9 +141,11 @@ public final class RenderingOptimizer {
     }
 
     public void populateGlassShadowIndirectBuffer() {
+        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
+
         opaqueCommands.clear();
         for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
-            TransparentModel model = meshCollector.getTransparentModel(chunkIndex, SHADOW_LOD);
+            TransparentModel model = meshCollector.getTransparentModel(chunkIndex, shadowLod);
             if (model == null || model.isGlassEmpty()) continue;
 
             model.addGlassData(opaqueCommands);
