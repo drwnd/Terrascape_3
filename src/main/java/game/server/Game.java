@@ -53,7 +53,7 @@ public final class Game {
     public static void updateRenderDistance(int oldRenderDistance) {
         if (world == null || oldRenderDistance == IntSettings.RENDER_DISTANCE.value()) return;
         server = new Server(server);
-        world = new World(world, true, false);
+        world = new World(world, true);
         player.updateRenderDistance(oldRenderDistance);
 
         server.startTicks();
@@ -62,7 +62,7 @@ public final class Game {
     public static void updateLodCount(int oldLodCount) {
         if (world == null || oldLodCount == IntSettings.LOD_COUNT.value()) return;
         server = new Server(server);
-        world = new World(world, false, true);
+        world = new World(world, false);
         player.updateLodCount();
 
         if (oldLodCount < IntSettings.LOD_COUNT.value()) ChunkSaver.generateHigherLODs();

@@ -36,8 +36,7 @@ public final class World {
         chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
     }
 
-    public World(World oldWorld, boolean updateRenderDistance, boolean updateLodCount) {
-        if (updateRenderDistance == updateLodCount) throw new IllegalArgumentException();
+    public World(World oldWorld, boolean updateRenderDistance) {
         if (updateRenderDistance) {
             int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
@@ -69,7 +68,7 @@ public final class World {
                     chunks[chunk.LOD][chunk.INDEX] = chunk;
                 }
             }
-        } else {
+        } else {    // Update LOD_COUNT
             LOD_COUNT = IntSettings.LOD_COUNT.value();
             RENDERED_WORLD_WIDTH = oldWorld.RENDERED_WORLD_WIDTH;
             RENDERED_WORLD_WIDTH_MASK = oldWorld.RENDERED_WORLD_WIDTH_MASK;
