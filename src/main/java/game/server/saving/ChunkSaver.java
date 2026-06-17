@@ -30,7 +30,7 @@ public final class ChunkSaver extends Saver<Chunk> {
 
     public static void generateHigherLODs() {
         long start = System.nanoTime();
-        for (int lod = 1; lod < LOD_COUNT; lod++) generateLod(lod);
+        for (int lod = 1, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) generateLod(lod);
         Debug.log("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 

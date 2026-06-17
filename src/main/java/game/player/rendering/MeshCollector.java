@@ -27,7 +27,7 @@ public final class MeshCollector {
         Position playerPosition = Game.getPlayer().getPosition();
         int renderDistance = Math.min(oldRenderDistance, IntSettings.RENDER_DISTANCE.value());
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             long cameraX = playerPosition.longX >>> CHUNK_SIZE_BITS + lod;
             long cameraY = playerPosition.longY >>> CHUNK_SIZE_BITS + lod;
             long cameraZ = playerPosition.longZ >>> CHUNK_SIZE_BITS + lod;
@@ -70,6 +70,24 @@ public final class MeshCollector {
                         if (occluder != null) occluders[lod][currentIndex] = occluder;
                         if (occludee != null) occludees[lod][currentIndex] = occludee;
                     }
+        }
+    }
+
+    public MeshCollector(MeshCollector oldMeshCollector) {
+        oldMeshCollector.deleteOldMeshes();
+        oldMeshCollector.uploadAllMeshes();
+        allocator = oldMeshCollector.allocator;
+        int lodCount = Math.min(oldMeshCollector.isMeshed.length, isMeshed.length);
+
+        System.arraycopy(oldMeshCollector.isMeshed, 0, isMeshed, 0, lodCount);
+        System.arraycopy(oldMeshCollector.opaqueModels, 0, opaqueModels, 0, lodCount);
+        System.arraycopy(oldMeshCollector.transparentModels, 0, transparentModels, 0, lodCount);
+        System.arraycopy(oldMeshCollector.occluders, 0, occluders, 0, lodCount);
+        System.arraycopy(oldMeshCollector.occludees, 0, occludees, 0, lodCount);
+
+        for (int lod = lodCount; lod < oldMeshCollector.opaqueModels.length; lod++) {
+            for (OpaqueModel model : oldMeshCollector.opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
+            for (TransparentModel model : oldMeshCollector.transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
         }
     }
 
@@ -167,7 +185,7 @@ public final class MeshCollector {
     }
 
     public void removeAll() {
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             for (OpaqueModel model : opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
             for (TransparentModel model : transparentModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
 
@@ -245,9 +263,9 @@ public final class MeshCollector {
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
     private final ArrayList<TransparentModel> toDeleteTransparentModels = new ArrayList<>();
 
-    private final OpaqueModel[][] opaqueModels = new OpaqueModel[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
-    private final TransparentModel[][] transparentModels = new TransparentModel[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
-    private final AABB[][] occluders = new AABB[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
-    private final AABB[][] occludees = new AABB[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
-    private final long[][] isMeshed = new long[LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD / 64];
+    private final OpaqueModel[][] opaqueModels = new OpaqueModel[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final TransparentModel[][] transparentModels = new TransparentModel[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final AABB[][] occluders = new AABB[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final AABB[][] occludees = new AABB[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
+    private final long[][] isMeshed = new long[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD / 64];
 }

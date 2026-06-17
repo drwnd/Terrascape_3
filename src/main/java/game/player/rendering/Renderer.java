@@ -381,6 +381,7 @@ public final class Renderer extends Renderable {
 
     private void computeShadowMap(Position cameraPosition, Matrix4f sunMatrix) {
         Vector3f sunDirection = Transformation.getSunDirection(getRenderTime()).mul(-4096);
+        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
 
         glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
@@ -393,7 +394,7 @@ public final class Renderer extends Renderable {
         if (ToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.CHUNK_SHADOW);
             shader.bind();
-            shader.setUniform("lodSize", 1 << SHADOW_LOD);
+            shader.setUniform("lodSize", 1 << shadowLod);
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
                     cameraPosition.longX & ~CHUNK_SIZE_MASK,
@@ -439,7 +440,7 @@ public final class Renderer extends Renderable {
         if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.GLASS);
             shader.bind();
-            shader.setUniform("lodSize", 1 << SHADOW_LOD);
+            shader.setUniform("lodSize", 1 << shadowLod);
             shader.setUniform("projectionViewMatrix", sunMatrix);
             shader.setUniform("iCameraPosition",
                     cameraPosition.longX & ~CHUNK_SIZE_MASK,
@@ -496,10 +497,12 @@ public final class Renderer extends Renderable {
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getOpaqueIndirectBuffer());
 
         int flags = getFlags(cameraPosition);
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
+        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
+
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
+            glStencilFunc(GL_GEQUAL, lodCount - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
-            shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
+            shader.setUniform("flags", flags & (lod > shadowLod ? ~DO_SHADOW_MAPPING_BIT : -1));
 
             long start = renderingOptimizer.getOpaqueLodStart(lod);
             int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
@@ -567,9 +570,11 @@ public final class Renderer extends Renderable {
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getTransparentIndirectBuffer());
 
         int flags = getFlags(cameraPosition);
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
+        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
+
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             shader.setUniform("lodSize", 1 << lod);
-            shader.setUniform("flags", flags & (lod > SHADOW_LOD ? ~DO_SHADOW_MAPPING_BIT : -1));
+            shader.setUniform("flags", flags & (lod > shadowLod ? ~DO_SHADOW_MAPPING_BIT : -1));
 
             long start = renderingOptimizer.getTransparentLodStart(lod);
             int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
@@ -609,8 +614,8 @@ public final class Renderer extends Renderable {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getGlassIndirectBuffer());
 
-        for (int lod = 0; lod < LOD_COUNT; lod++) {
-            glStencilFunc(GL_GEQUAL, LOD_COUNT - lod, 0xFF);
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
+            glStencilFunc(GL_GEQUAL, lodCount - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
 
             long start = renderingOptimizer.getGlassLodStart(lod);
@@ -824,7 +829,7 @@ public final class Renderer extends Renderable {
 
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
-        if (lod < 0 || lod >= LOD_COUNT) return;
+        if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
         shader.bind();
@@ -843,7 +848,7 @@ public final class Renderer extends Renderable {
 
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
-        if (lod < 0 || lod >= LOD_COUNT) return;
+        if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
         shader.bind();

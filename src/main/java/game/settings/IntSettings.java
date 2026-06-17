@@ -15,7 +15,8 @@ public enum IntSettings implements IntSetting {
     BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
     BREAK_PARTICLE_STEP_LENGTH(1, 16, 2),
     PLACE_PARTICLE_STEP_LENGTH(1, 16, 1),
-    RENDER_DISTANCE(2, 16, 6, Game::updateRenderDistance);
+    RENDER_DISTANCE(2, 16, 6, Game::updateRenderDistance),
+    LOD_COUNT(1, 20, 10, Game::updateLodCount);
 
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
