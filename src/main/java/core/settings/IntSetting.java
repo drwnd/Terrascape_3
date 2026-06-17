@@ -18,6 +18,10 @@ public interface IntSetting extends Setting, NumberSetting<Integer> {
 
     int defaultValue();
 
+    int min();
+
+    int max();
+
     @Override
     default Integer valueGeneric() {
         return value();

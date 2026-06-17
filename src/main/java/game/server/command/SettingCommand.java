@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 final class SettingCommand {
 
-    static final String SYNTAX = "{get Setting_Name, set Setting_Name value, reload, list}";
+    static final String SYNTAX = "{get Setting_Name, reset Setting_Name, set Setting_Name value, reload, list}";
     static final String EXPLANATION = "Queries a Setting, sets a setting value, reloads all Settings from file or shows a list of all settings";
 
     private SettingCommand() {
@@ -61,6 +61,25 @@ final class SettingCommand {
             if (result.successful()) Settings.writeToFile();
             return result;
 
+        } else if ("reset".equalsIgnoreCase(keyword)) {
+            String settingName = tokens.expectNextKeyWord().keyword();
+
+            Setting setting = Settings.getSettingWithName(settingName);
+            if (setting == null) return CommandResult.fail(settingName + " is not a Setting");
+            tokens.expectFinishedLess();
+
+            switch (setting) {
+                case FloatSetting floatSetting -> floatSetting.setValue(floatSetting.defaultValue());
+                case IntSetting intSetting -> intSetting.setValue(intSetting.defaultValue());
+                case ToggleSetting toggleSetting -> toggleSetting.setValue(toggleSetting.value());
+                case OptionSetting optionSetting -> optionSetting.setValue(optionSetting.defaultValue());
+                case KeySetting keySetting -> keySetting.setKeybind(keySetting.defaultKeybind());
+                default -> {
+                    return CommandResult.fail("Unrecognized Setting type");
+                }
+            }
+            Settings.writeToFile();
+            return CommandResult.success();
         } else if ("reload".equalsIgnoreCase(keyword)) {
             tokens.expectFinishedLess();
             Settings.loadFromFile();
@@ -86,6 +105,8 @@ final class SettingCommand {
 
     private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
+        if (number < setting.min() || number > setting.max())
+            return CommandResult.fail("Value %f is out of allowed range [%f, %f]".formatted(number, setting.min(), setting.max()));
         setting.setValue((float) number);
         return CommandResult.success();
     }
@@ -93,6 +114,8 @@ final class SettingCommand {
     private static CommandResult set(IntSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number)) || (int) number != number)
             return CommandResult.fail("Value must be an Integer for that setting");
+        if ((int) number < setting.min() || (int) number > setting.max())
+            return CommandResult.fail("Value %d is out of allowed range [%d, %d]".formatted((int) number, setting.min(), setting.max()));
         setting.setValue((int) number);
         return CommandResult.success();
     }

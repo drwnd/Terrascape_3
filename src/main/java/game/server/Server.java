@@ -1,8 +1,11 @@
 package game.server;
 
+import core.assets.CoreSounds;
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
+import core.settings.CoreFloatSettings;
 import core.settings.optionSettings.ColorOption;
+import core.sound.Sound;
 import core.utils.Vector3l;
 
 import game.player.Player;
@@ -157,7 +160,10 @@ public final class Server implements CrashCallback {
         if (message.charAt(0) != '/') return;
         CommandResult result = Command.execute(message);
 
-        if (!result.successful()) sendServerMessage(result.reason(), ColorOption.RED);
+        if (!result.successful()) {
+            sendServerMessage(result.reason(), ColorOption.RED);
+            Sound.playUI(CoreSounds.BUTTON_FAILURE, CoreFloatSettings.UI_AUDIO);
+        }
     }
 
     public ArrayList<ChatMessage> getMessages() {

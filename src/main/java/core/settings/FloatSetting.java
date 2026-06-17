@@ -18,6 +18,10 @@ public interface FloatSetting extends Setting, NumberSetting<Float> {
 
     float defaultValue();
 
+    float min();
+
+    float max();
+
     @Override
     default Float valueGeneric() {
         return value();

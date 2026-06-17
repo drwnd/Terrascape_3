@@ -32,6 +32,16 @@ public final class StandAloneFloatSetting implements FloatSetting {
     }
 
     @Override
+    public float min() {
+        return min;
+    }
+
+    @Override
+    public float max() {
+        return max;
+    }
+
+    @Override
     public Float valueFromFraction(float fraction) {
         float unroundedValue = min + fraction * (max - min);
         float roundingOffset = MathUtils.absMin(-(unroundedValue % accuracy), accuracy - unroundedValue % accuracy);

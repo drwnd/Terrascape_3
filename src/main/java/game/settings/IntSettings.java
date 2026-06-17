@@ -47,6 +47,16 @@ public enum IntSettings implements IntSetting {
     }
 
     @Override
+    public int min() {
+        return min;
+    }
+
+    @Override
+    public int max() {
+        return max;
+    }
+
+    @Override
     public Integer valueFromFraction(float fraction) {
         return Math.round(min + fraction * (max - min));
     }
