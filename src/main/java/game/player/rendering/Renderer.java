@@ -60,11 +60,17 @@ public final class Renderer extends Renderable {
         crosshair.setScaleWithGuiSize(false);
         crosshair.setDoAutoFocusScaling(false);
 
-        addRenderable(crosshair);
-        addRenderable(new BreakPlaceOptionsDisplay());
+        addHUDRenderable(crosshair);
+        addHUDRenderable(new BreakPlaceOptionsDisplay());
 
         createTextures(Window.getWidth(), Window.getHeight());
         createFrameBuffers();
+    }
+
+
+    public void addHUDRenderable(Renderable renderable) {
+        hudElements.add(renderable);
+        addRenderable(renderable);
     }
 
     public ArrayList<Long> getFrameTimes() {
@@ -228,6 +234,8 @@ public final class Renderer extends Renderable {
 
         renderChat();
         renderDebugInfo();
+
+        glDepthMask(true);
     }
 
     @Override
@@ -330,6 +338,8 @@ public final class Renderer extends Renderable {
     }
 
     private void setupRenderState() {
+        for (Renderable renderable : hudElements) renderable.setVisible(ToggleSettings.RENDER_HUD.value());
+
         long currentTime = System.nanoTime();
         frameTimes.removeIf(frameTime -> currentTime - frameTime > 1_000_000_000L);
         frameTimes.add(currentTime);
@@ -946,6 +956,7 @@ public final class Renderer extends Renderable {
     private RenderingOptimizer renderingOptimizer;
     private final ArrayList<Long> frameTimes = new ArrayList<>();
     private final ArrayList<DebugScreenLine> debugLines;
+    private final ArrayList<Renderable> hudElements = new ArrayList<>();
     private final UiElement crosshair;
     private final Player player;
 

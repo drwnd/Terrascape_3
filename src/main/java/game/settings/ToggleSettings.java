@@ -24,10 +24,11 @@ public enum ToggleSettings implements ToggleSetting {
     CHUNKS_CAST_SHADOWS(true),
     PARTICLES_CAST_SHADOWS(true),
     GLASS_CASTS_SHADOWS(true),
-    NO_CLIP(false, GLFW_KEY_P),
-    CULLING_COMPUTATION(true, GLFW_KEY_L),
+    NO_CLIP(false),
+    CULLING_COMPUTATION(true),
     DEBUG_MENU(false, GLFW_KEY_F3),
-    OFFSET_FROM_GROUND(true);
+    OFFSET_FROM_GROUND(true),
+    RENDER_HUD(true, GLFW_KEY_F4);
 
     ToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;
