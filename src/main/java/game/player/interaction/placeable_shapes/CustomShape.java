@@ -79,5 +79,5 @@ public final class CustomShape extends ShapePlaceable {
     private final StandAloneIntSetting lengthY = new StandAloneIntSetting(0, 256, 16);
     private final StandAloneIntSetting lengthZ = new StandAloneIntSetting(0, 256, 16);
 
-    private static final String CODE_TEMPLATE = FileManager.loadFileContents("assets/shaders/shapeShaders/CustomTemplace.comp");
+    private static final String CODE_TEMPLATE = FileManager.loadFileContents("assets/shaders/shapeShaders/CustomTemplate.comp");
 }

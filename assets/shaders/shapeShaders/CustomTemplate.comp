@@ -10,9 +10,7 @@ uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
 
-uniform int radius;
-uniform int thickness;
-uniform float exponent;
+uniform int ignore;
 
 uint zOrderCurveValue(uint value) {
     uint zOrderValue = 0;
@@ -30,8 +28,46 @@ bool isValidCoord(int x, int y, int z) {
 
 bool isInside(int x, int y, int z);
 
+bool isInsideRotated(int x, int y, int z) {
+    int invertX = size.x - 1;
+    int invertY = size.y - 1;
+    int invertZ = size.z - 1;
+    switch (rotation) {
+        case 0: return isInside(invertZ - z, x, y);
+        case 1: return isInside(invertZ - z, x, invertY - y);
+        case 2: return isInside(invertZ - z, invertX - x, invertY - y);
+        case 3: return isInside(invertZ - z, invertX - x, y);
+
+        case 4: return isInside(invertY - y, x, z);
+        case 5: return isInside(invertY - y, x, invertZ - z);
+        case 6: return isInside(invertY - y, invertX - x, invertZ - z);
+        case 7: return isInside(invertY - y, invertX - x, z);
+
+        case 8: return isInside(invertX - x, y, z);
+        case 9: return isInside(invertX - x, y, invertZ - z);
+        case 10: return isInside(invertX - x, invertY - y, invertZ - z);
+        case 11: return isInside(invertX - x, invertY - y, z);
+
+        case 12: return isInside(z, x, y);
+        case 13: return isInside(z, x, invertY - y);
+        case 14: return isInside(z, invertX - x, invertY - y);
+        case 15: return isInside(z, invertX - x, y);
+
+        case 16: return isInside(y, x, z);
+        case 17: return isInside(y, x, invertZ - z);
+        case 18: return isInside(y, invertX - x, invertZ - z);
+        case 19: return isInside(y, invertX - x, z);
+
+        case 20: return isInside(x, y, z);
+        case 21: return isInside(x, y, invertZ - z);
+        case 22: return isInside(x, invertY - y, invertZ - z);
+        case 23: return isInside(x, invertY - y, z);
+    }
+    return false;
+}
+
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    return isValidCoord(x, y, z) && isInsideRotated(x, y, z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -85,33 +121,3 @@ void main() {
     bitMap[index * 2 + 0] = computeBits(x + 0, y, z);
     bitMap[index * 2 + 1] = computeBits(x + 2, y, z);
 }
-
-bool isInsideRotated(int x, int y, int z) {
-    float outerThreshold = pow(radius, exponent);
-    float innerThreshold = pow(max(0, radius - thickness), exponent);
-    
-    float distanceX = pow(x + 0.5, exponent);
-    float distanceY = pow(y + 0.5, exponent);
-    float distanceZ = pow(z + 0.5, exponent);
-    float distance = min(distanceX + distanceY, min(distanceX + distanceZ, distanceY + distanceZ));
-    return distance < outerThreshold + 0.01 && distance >= innerThreshold - 0.01;
-}
-
-bool isInside(int x, int y, int z) {
-    int invertX = size.x - 1;
-    int invertY = size.y - 1;
-    int invertZ = size.z - 1;
-    
-    switch (rotation) {
-        case 0: return isInsideRotated(x, y, z);
-        case 1: return isInsideRotated(x, y, invertZ - z);
-        case 2: return isInsideRotated(x, invertY - y, z);
-        case 3: return isInsideRotated(x, invertY - y, invertZ - z);
-        case 4: return isInsideRotated(invertX - x, y, z);
-        case 5: return isInsideRotated(invertX - x, y, invertZ - z);
-        case 6: return isInsideRotated(invertX - x, invertY - y, z);
-        case 7: return isInsideRotated(invertX - x, invertY - y, invertZ - z);
-    }
-    return false;
-}
-
