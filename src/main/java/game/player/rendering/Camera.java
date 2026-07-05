@@ -7,6 +7,7 @@ import core.utils.MathUtils;
 
 import core.utils.Vector3l;
 import game.settings.FloatSettings;
+import game.settings.OptionSettings;
 import game.utils.Position;
 
 import org.joml.*;
@@ -95,6 +96,14 @@ public final class Camera {
         if (component == Y_COMPONENT) return direction.y > 0.0F ? TOP : BOTTOM;
         if (component == Z_COMPONENT) return direction.z > 0.0F ? NORTH : SOUTH;
         throw new IllegalStateException(component + " is not a valid Component");
+    }
+
+
+    public Position applyPerspectiveOffset(Position position) {
+        if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
+        Vector3f offset = getDirection().mul(48).mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
+
+        return position.add(offset.x, offset.y, offset.z);
     }
 
 

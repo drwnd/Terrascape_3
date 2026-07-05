@@ -63,7 +63,7 @@ public final class Player {
             Position toRenderPosition = new Position(position)
                     .add(movementThisTick.x, movementThisTick.y, movementThisTick.z)
                     .addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
-            camera.setPosition(toRenderPosition);
+            camera.setPosition(camera.applyPerspectiveOffset(toRenderPosition));
         }
     }
 
