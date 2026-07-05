@@ -104,12 +104,12 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(IntSettings.RENDER_DISTANCE, UiMessages.RENDER_DISTANCE);
         section.addSlider(IntSettings.LOD_COUNT, UiMessages.LOD_COUNT);
         section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessages.NIGHT_BRIGHTNESS);
+        section.addOption(OptionSettings.PERSPECTIVE, UiMessages.PERSPECTIVE);
         section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessages.CROSSHAIR_SIZE);
         section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessages.HOTBAR_SIZE);
         section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessages.AMBIENT_OCCLUSION_SAMPLES);
         section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH, UiMessages.BREAK_PARTICLE_STEP_LENGTH);
         section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH, UiMessages.PLACE_PARTICLE_STEP_LENGTH);
-
         section.addToggle(ToggleSettings.RENDER_HUD, UiMessages.RENDER_HUD);
         section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessages.USE_SHADOW_MAPPING);
         section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessages.CHUNKS_CAST_SHADOWS);

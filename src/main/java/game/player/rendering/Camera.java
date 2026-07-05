@@ -2,6 +2,7 @@ package game.player.rendering;
 
 import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
+import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
 
 import core.utils.Vector3l;
@@ -114,4 +115,8 @@ public final class Camera {
     private final Vector3f rotation;
 
     private final Matrix4f projectionMatrix = new Matrix4f();
+
+    public enum Perspective implements Option {
+        FIRST_PERSON, SECOND_PERSON, THIRD_PERSON
+    }
 }
