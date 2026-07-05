@@ -6,6 +6,9 @@ import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
 
 import core.utils.Vector3l;
+import game.server.Game;
+import game.server.World;
+import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.OptionSettings;
 import game.utils.Position;
@@ -101,9 +104,12 @@ public final class Camera {
 
     public Position applyPerspectiveOffset(Position position) {
         if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
-        Vector3f offset = getDirection().mul(48).mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
+        Vector3f direction = getDirection().mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
+        int length = 0;
 
-        return position.add(offset.x, offset.y, offset.z);
+        while (length++ < 48 && isUnobstructed(position)) position.add(direction.x, direction.y, direction.z);
+
+        return position;
     }
 
 
@@ -115,6 +121,21 @@ public final class Camera {
             rotation.x = Math.clamp(rotation.x, -90.0F, 90.0F);
             rotation.y %= 360.0F;
         }
+    }
+
+    private static boolean isUnobstructed(Position position) {
+        long startX = position.longX - 2, endX = position.longX + 2;
+        long startY = position.longY - 2, endY = position.longY + 2;
+        long startZ = position.longZ - 2, endZ = position.longZ + 2;
+        World world = Game.getWorld();
+
+        for (long x = startX; x <= endX; x++)
+            for (long y = startY; y <= endY; y++)
+                for (long z = startZ; z <= endZ; z++) {
+                    byte material = world.getMaterial(x, y, z, 0);
+                    if (Properties.doesntHaveProperties(material, TRANSPARENT)) return false;
+                }
+        return true;
     }
 
 
