@@ -1,6 +1,7 @@
 package game.menus;
 
 import core.rendering_api.Input;
+import core.rendering_api.Window;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -48,7 +49,7 @@ public final class SettingsMenuInput extends Input {
 
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
-
+        if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) Window.popRenderable();
     }
 
     @Override

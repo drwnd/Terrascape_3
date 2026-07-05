@@ -12,7 +12,8 @@ public final class PerformanceTester {
     private static final int CHUNK_COUNT = 128;
 
     public static void main(String[] args) {
-        IntSettings.RENDER_DISTANCE.setValue(CHUNK_COUNT);
+        IntSettings.RENDER_DISTANCE.setValue(CHUNK_COUNT / 2 - 3);
+        IntSettings.LOD_COUNT.setValue(Integer.numberOfTrailingZeros(CHUNK_COUNT) + 1);
         Game.setTemporaryWorld(new World(0x9EF6E7FAF3299DDDL));
         long totalStart = System.nanoTime();
 
