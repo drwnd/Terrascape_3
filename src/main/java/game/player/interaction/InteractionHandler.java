@@ -115,9 +115,9 @@ public final class InteractionHandler {
         }
 
         int targetedSide = target.side();
-        Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
+        Vector3l position = offsetPosition ? target.offsetPosition().longPosition() : target.position().longPosition();
         if (startTarget != null && placeable instanceof ShapePlaceable shapePlaceable) {
-            Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
+            Vector3l startPosition = offsetPosition ? startTarget.offsetPosition().longPosition() : startTarget.position().longPosition();
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
             targetedSide = startTarget.side();
             startTarget = null;

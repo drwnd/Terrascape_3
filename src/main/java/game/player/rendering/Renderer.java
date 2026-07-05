@@ -683,7 +683,7 @@ public final class Renderer extends Renderable {
     private void renderShapeVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, Placeable placeable, boolean showBreakVolume) {
         ShapePlaceable shapePlaceable = placeable instanceof ShapePlaceable ? (ShapePlaceable) placeable : breakHologram;
         byte material = showBreakVolume ? AIR : shapePlaceable.getMaterial();
-        Vector3l position = showBreakVolume ? target.position() : target.offsetPosition();
+        Vector3l position = showBreakVolume ? target.position().longPosition() : target.offsetPosition().longPosition();
 
         shapePlaceable.offsetPosition(position, target.side());
         synchronizeHologramModel(shapePlaceable.updateBitMap(false));
@@ -692,7 +692,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, StructurePlaceable placeable) {
-        Vector3l position = target.offsetPosition();
+        Vector3l position = target.offsetPosition().longPosition();
         placeable.offsetPosition(position, target.side());
         synchronizeHologramModel(placeable);
 
@@ -703,8 +703,8 @@ public final class Renderer extends Renderable {
         Placeable placeable = player.getHeldPlaceable();
         byte material = placeable instanceof ShapePlaceable shapePlaceable && !Input.isKeyPressed(KeySettings.SPRINT) ? shapePlaceable.getMaterial() : AIR;
 
-        Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
-        Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
+        Vector3l startPositon = material == AIR ? startTarget.position().longPosition() : startTarget.offsetPosition().longPosition();
+        Vector3l endPosition = material == AIR ? currentTarget.position().longPosition() : currentTarget.offsetPosition().longPosition();
 
         RepeatPlaceable.offsetPositions(startPositon, endPosition, startTarget.side(), placeable);
         Vector3l minPosition = Utils.min(startPositon, endPosition);

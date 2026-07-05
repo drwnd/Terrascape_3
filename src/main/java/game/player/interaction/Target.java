@@ -1,7 +1,5 @@
 package game.player.interaction;
 
-import core.utils.Vector3l;
-
 import game.server.Game;
 import game.server.material.Material;
 import game.server.material.Properties;
@@ -14,19 +12,19 @@ import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
-public record Target(Vector3l position, int side, byte material) {
+public record Target(Position position, int side, byte material) {
 
     public Target(Target target) {
-        this(new Vector3l(target.position), target.side, target.material);
+        this(new Position(target.position), target.side, target.material);
     }
 
     public static Target getPlayerTarget() {
         Position playerPosition = Game.getPlayer().getCamera().getPosition();
         Vector3f playerDirection = Game.getPlayer().getCamera().getDirection();
-        return Target.getTarget(playerPosition, playerDirection);
+        return Target.getTarget(playerPosition, playerDirection, IntSettings.REACH.value());
     }
 
-    public static Target getTarget(Position origin, Vector3f dir) {
+    public static Target getTarget(Position origin, Vector3f dir, float maxLength) {
 
         long x = origin.longX;
         long y = origin.longY;
@@ -53,14 +51,13 @@ public record Target(Vector3l position, int side, byte material) {
         double length = 0;
 
         int intersectedSide = 0;
-        float reach = IntSettings.REACH.value();
-        while (length < reach) {
+        while (length < maxLength) {
 
             byte material = Game.getWorld().getMaterial(x, y, z, 0);
             if (material == OUT_OF_WORLD) return null;
 
             if (Properties.doesntHaveProperties(material, NO_COLLISION))
-                return new Target(new Vector3l(x, y, z), intersectedSide, material);
+                return new Target(new Position(x, y, z, origin.fractionX, origin.fractionY, origin.fractionZ), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {
                 x = x + xDir;
@@ -86,21 +83,18 @@ public record Target(Vector3l position, int side, byte material) {
         position.add(movement.x, movement.y, movement.z);
     }
 
-    public Vector3l offsetPosition() {
+    public Position offsetPosition() {
         return Utils.offsetByNormal(position(), side);
     }
 
-    public Vector3l position() {
-        return new Vector3l(
-                position.x,
-                position.y,
-                position.z);
+    public Position position() {
+        return new Position(position);
     }
 
     public String string() {
         return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s".formatted(
-                position.x,
-                position.y,
-                position.z, side, Material.getSystemName(material));
+                position.longX,
+                position.longY,
+                position.longZ, side, Material.getSystemName(material));
     }
 }

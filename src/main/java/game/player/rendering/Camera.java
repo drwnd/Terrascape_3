@@ -6,6 +6,7 @@ import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
 
 import core.utils.Vector3l;
+import game.player.interaction.Target;
 import game.settings.FloatSettings;
 import game.settings.OptionSettings;
 import game.utils.Position;
@@ -101,9 +102,11 @@ public final class Camera {
 
     public Position applyPerspectiveOffset(Position position) {
         if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
-        Vector3f offset = getDirection().mul(48).mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
+        Vector3f offset = getDirection().mul(PERSPECTIVE_OFFSET_LENGTH).mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
 
-        return position.add(offset.x, offset.y, offset.z);
+        Target target = Target.getTarget(position, offset, PERSPECTIVE_OFFSET_LENGTH);
+        if (target == null) return position.add(offset.x, offset.y, offset.z);
+        return target.position().add(offset.x, offset.y, offset.z);
     }
 
 

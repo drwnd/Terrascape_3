@@ -63,16 +63,16 @@ public final class Utils {
         return actualPosition;
     }
 
-    public static Vector3l offsetByNormal(Vector3l value, int side) {
-        switch (side) {
+    public static Position offsetByNormal(Position value, int side) {
+        return switch (side) {
             case NORTH -> value.add(0, 0, 1);
             case TOP -> value.add(0, 1, 0);
             case WEST -> value.add(1, 0, 0);
             case SOUTH -> value.add(0, 0, -1);
             case BOTTOM -> value.add(0, -1, 0);
             case EAST -> value.add(-1, 0, 0);
-        }
-        return value;
+            default -> throw new IllegalStateException("Unexpected value: " + side);
+        };
     }
 
     public static Vector3l min(Vector3l a, Vector3l b) {
