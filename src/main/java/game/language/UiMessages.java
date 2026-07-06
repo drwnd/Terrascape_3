@@ -113,7 +113,8 @@ public enum UiMessages implements Translatable {
     PLACE_PARTICLE_STEP_LENGTH,
     RENDER_DISTANCE,
     LOD_COUNT,
-    RENDER_HUD;
+    RENDER_HUD,
+    PERSPECTIVE;
 
     @Override
     public String translationFileName() {

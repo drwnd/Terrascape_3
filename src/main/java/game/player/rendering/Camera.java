@@ -2,10 +2,15 @@ package game.player.rendering;
 
 import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
+import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
-
 import core.utils.Vector3l;
+
+import game.server.Game;
+import game.server.World;
+import game.server.material.Properties;
 import game.settings.FloatSettings;
+import game.settings.OptionSettings;
 import game.utils.Position;
 
 import org.joml.*;
@@ -97,6 +102,18 @@ public final class Camera {
     }
 
 
+    public Position applyPerspectiveOffset(Position position) {
+        if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
+        Vector3f direction = getDirection().mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
+        int length = 0;
+
+        while (length++ < PERSPECTIVE_OFFSET_LENGTH && !isObstructed(position)) position.add(direction.x, direction.y, direction.z);
+        if (length < PERSPECTIVE_OFFSET_LENGTH) pushPositionToWall(position, direction);
+
+        return position;
+    }
+
+
     private void moveRotation(float yaw, float pitch) {
         synchronized (this) {
             rotation.x += pitch;
@@ -107,6 +124,26 @@ public final class Camera {
         }
     }
 
+    private static boolean isObstructed(Position position) {
+        long startX = position.longX - 2, endX = position.longX + 2;
+        long startY = position.longY - 2, endY = position.longY + 2;
+        long startZ = position.longZ - 2, endZ = position.longZ + 2;
+        World world = Game.getWorld();
+
+        for (long x = startX; x <= endX; x++)
+            for (long y = startY; y <= endY; y++)
+                for (long z = startZ; z <= endZ; z++) {
+                    byte material = world.getMaterial(x, y, z, 0);
+                    if (Properties.doesntHaveProperties(material, TRANSPARENT)) return true;
+                }
+        return false;
+    }
+
+    private static void pushPositionToWall(Position position, Vector3f direction) {
+        direction.mul(-0.05F);
+        while (isObstructed(position)) position.add(direction.x, direction.y, direction.z);
+    }
+
 
     private boolean zoomed = false;
     private float zoomFactor = 1.0F;
@@ -114,4 +151,8 @@ public final class Camera {
     private final Vector3f rotation;
 
     private final Matrix4f projectionMatrix = new Matrix4f();
+
+    public enum Perspective implements Option {
+        FIRST_PERSON, THIRD_PERSON, SECOND_PERSON
+    }
 }
