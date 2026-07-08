@@ -1,6 +1,7 @@
 package game.player.particles;
 
 import core.utils.IntArrayList;
+
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
@@ -11,7 +12,9 @@ import game.server.material.Material;
 import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
+
 import org.joml.Random;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -90,12 +93,12 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, placeParticles, Material.isGlass(placeable.getMaterial()) ? ParticleType.TRANSPARENT_PLACE : ParticleType.OPAQUE_PLACE);
     }
 
-    public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure) {
+    public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure, Vector3i lengths, byte transform) {
         if (!ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
         IntArrayList transparentParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
 
-        structure.materials().addPlaceParticles(this, opaqueParticles, transparentParticles);
+        structure.materials().addPlaceParticles(this, opaqueParticles, transparentParticles, lengths, transform);
 
         addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_PLACE);
         addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_PLACE);
@@ -214,6 +217,40 @@ public final class ParticleCollector {
         return new ParticleEffect(particlesBuffer, particleEffect.spawnTick(),
                 particleEffect.type().getLifeTimeTicks(), particleEffect.particlesData().length / SHADER_PARTICLE_INT_SIZE,
                 particleEffect.type().isOpaque(), particleEffect.x(), particleEffect.y(), particleEffect.z());
+    }
+
+    public void addPlaceParticle(IntArrayList particles, long[] bitMap,
+                                 int lengthX, int lengthY, int lengthZ,
+                                 int xOffset, int yOffset, int zOffset,
+                                 byte material, byte transform) {
+        float velocityX = getRandom(-8F, 8F), velocityY = getRandom(-8F, 8F), velocityZ = getRandom(-8F, 8F);
+        float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
+
+        if (checkParticleVisibility(bitMap, lengthX, lengthY, lengthZ, xOffset, yOffset, zOffset, velocityX, velocityY, velocityZ)) return;
+
+        if (transform == Structure.ROTATE_90 || transform == Structure.ALL_TRANSFORMS) transform ^= Structure.MIRROR_X | Structure.MIRROR_Z;
+        if ((transform & Structure.MIRROR_X) != 0) {
+            xOffset = lengthX - xOffset - 1;
+            velocityX = -velocityX;
+        }
+        if ((transform & Structure.MIRROR_Z) != 0) {
+            zOffset = lengthZ - zOffset - 1;
+            velocityZ = -velocityZ;
+        }
+        if ((transform & Structure.ROTATE_90) != 0) {
+            int offsetCopy = zOffset;
+            float velocityCopy = velocityZ;
+
+            zOffset = xOffset;
+            velocityZ = velocityX;
+
+            xOffset = lengthZ - offsetCopy - 1;
+            velocityX = -velocityCopy;
+        }
+
+        particles.add(packOffset(xOffset, yOffset, zOffset, true, true));
+        particles.add(packVelocityGravity(velocityX, velocityY, velocityZ, 0.0F));
+        particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
     public void addPlaceParticle(IntArrayList particles, long[] bitMap,

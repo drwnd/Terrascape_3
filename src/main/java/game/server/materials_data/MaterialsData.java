@@ -218,8 +218,8 @@ public final class MaterialsData {
         }
     }
 
-    public void addPlaceParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent) {
-        addPlaceParticles(collector, getBitMap(), opaque, transparent, totalSizeBits, 0, 0, 0, 0);
+    public void addPlaceParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent, Vector3i lengths, byte transform) {
+        addPlaceParticles(collector, getBitMap(), transform, lengths, opaque, transparent, totalSizeBits, 0, 0, 0, 0);
     }
 
     public long[] getBitMap() {
@@ -785,7 +785,8 @@ public final class MaterialsData {
         return offset;
     }
 
-    private void addPlaceParticles(ParticleCollector collector, long[] bitMap, IntArrayList opaque, IntArrayList transparent, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+    private void addPlaceParticles(ParticleCollector collector, long[] bitMap, byte transform, Vector3i lengths, IntArrayList opaque, IntArrayList transparent,
+                                   int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int identifier = getIdentifier(startIndex);
 
         if (identifier == HOMOGENOUS) {
@@ -800,8 +801,8 @@ public final class MaterialsData {
                 for (int yOffset = inChunkY; yOffset < inChunkY + size; yOffset += stepLength)
                     for (int zOffset = inChunkZ; zOffset < inChunkZ + size; zOffset += stepLength) {
                         collector.addPlaceParticle(materialList, bitMap,
-                                1 << totalSizeBits, 1 << totalSizeBits, 1 << totalSizeBits,
-                                xOffset, yOffset, zOffset, material);
+                                lengths.x, lengths.y, lengths.z,
+                                xOffset, yOffset, zOffset, material, transform);
                     }
             return;
         }
@@ -812,23 +813,23 @@ public final class MaterialsData {
                 byte material = data[startIndex + 1 + inDetailIndex];
                 if (material == AIR) continue;
                 collector.addPlaceParticle(Material.isGlass(material) ? transparent : opaque, bitMap,
-                        1 << totalSizeBits, 1 << totalSizeBits, 1 << totalSizeBits,
+                        lengths.x, lengths.y, lengths.z,
                         inChunkX + (inDetailIndex >> 2 & 1), inChunkY + (inDetailIndex >> 1 & 1), inChunkZ + (inDetailIndex & 1),
-                        material);
+                        material, transform);
             }
             return;
         }
 
 //        if (identifier == SPLITTER)
         int nextSize = 1 << --sizeBits;
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        addPlaceParticles(collector, bitMap, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {

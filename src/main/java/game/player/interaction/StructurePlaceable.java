@@ -16,6 +16,7 @@ import game.settings.IntSettings;
 import game.utils.Transformation;
 import game.utils.Utils;
 import org.joml.Matrix4f;
+import org.joml.Vector3i;
 
 import java.util.ArrayList;
 
@@ -103,7 +104,9 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void spawnParticles(Vector3l position) {
-        Game.getPlayer().getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structure);
+        byte transform = (byte) rotation.ordinal();
+        Vector3i lengths = new Vector3i(structure.sizeX(), structure.sizeY(), structure.sizeZ());
+        Game.getPlayer().getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structure, lengths, transform);
     }
 
     @Override
