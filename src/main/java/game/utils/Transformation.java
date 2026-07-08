@@ -3,6 +3,7 @@ package game.utils;
 import core.utils.MathUtils;
 import game.player.rendering.Camera;
 
+import game.server.generation.Structure;
 import game.settings.OptionSettings;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -72,6 +73,18 @@ public final class Transformation {
                 (float) Math.min(Math.cos(alpha), -0.3),
                 (float) Math.cos(alpha)
         ).normalize();
+    }
+
+    public static Matrix4f getModelMatrix(byte transform, Structure structure) {
+        Matrix4f matrix = new Matrix4f();
+
+        if ((transform & Structure.MIRROR_X) != 0) matrix.m00(-matrix.m00()).translate(-structure.sizeX(transform), 0, 0);
+        if ((transform & Structure.MIRROR_Z) != 0) matrix.m22(-matrix.m22()).translate(0, 0, -structure.sizeZ(transform));
+        if (((transform & Structure.ROTATE_90) != 0)) matrix
+                .rotateY((float) Math.PI * 0.5F)
+                .translate(-structure.sizeZ(transform), 0, 0);
+
+        return matrix;
     }
 
     private Transformation() {

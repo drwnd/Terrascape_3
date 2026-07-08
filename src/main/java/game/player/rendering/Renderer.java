@@ -688,7 +688,7 @@ public final class Renderer extends Renderable {
         shapePlaceable.offsetPosition(position, target.side());
         synchronizeHologramModel(shapePlaceable.updateBitMap(false));
 
-        renderHologram(cameraPosition, projectionViewMatrix, position, material);
+        renderHologram(cameraPosition, projectionViewMatrix, new Matrix4f(), new int[]{NORTH, TOP, WEST, SOUTH, BOTTOM, EAST}, position, material);
     }
 
     private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target, StructurePlaceable placeable) {
@@ -696,7 +696,7 @@ public final class Renderer extends Renderable {
         placeable.offsetPosition(position, target.side());
         synchronizeHologramModel(placeable);
 
-        renderHologram(cameraPosition, projectionViewMatrix, position, OUT_OF_WORLD);
+        renderHologram(cameraPosition, projectionViewMatrix, placeable.getModelMatrix(), placeable.getSideTransform(), position, OUT_OF_WORLD);
     }
 
     private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget) {
@@ -735,6 +735,8 @@ public final class Renderer extends Renderable {
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
             shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+            shader.setUniform("modelMatrix", new Matrix4f());
+            shader.setUniform("sideTransform", new int[]{NORTH, TOP, WEST, SOUTH, BOTTOM, EAST});
             shader.setUniform("instanceCount", countX, countY, countZ);
             shader.setUniform("instanceSize", placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
             shader.setUniform("startPosition", minPosition.x, minPosition.y, minPosition.z);
@@ -761,7 +763,7 @@ public final class Renderer extends Renderable {
         }
     }
 
-    private void renderHologram(Position cameraPosition, Matrix4f projectionViewMatrix, Vector3l position, byte material) {
+    private void renderHologram(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f modelMatrix, int[] sideTransform, Vector3l position, byte material) {
         TextureArray materialsTexture = AssetManager.get(TexturePack.get(TextureArrays.MATERIALS));
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -779,6 +781,8 @@ public final class Renderer extends Renderable {
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
+        shader.setUniform("modelMatrix", modelMatrix);
+        shader.setUniform("sideTransform", sideTransform);
         shader.setUniform("instanceCount", 1, 1, 1);
         shader.setUniform("instanceSize", hologramSize, hologramSize, hologramSize);
         shader.setUniform("startPosition", position.x, position.y, position.z);

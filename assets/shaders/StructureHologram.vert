@@ -16,6 +16,8 @@ layout (std430, binding = 0) restrict readonly buffer vertexBuffer {
 };
 
 uniform mat4 projectionViewMatrix;
+uniform mat4 modelMatrix;
+uniform int sideTransform[6];
 uniform ivec3 iCameraPosition;
 uniform ivec3 instanceCount;
 uniform ivec3 instanceSize;
@@ -65,13 +67,14 @@ void main() {
     int faceSize1 = (currentVertex.textureData >> 17 & 63) + 1;
     int faceSize2 = (currentVertex.textureData >> 11 & 63) + 1;
     vec3 inChunkPosition = getFacePositions(side, currentVertexId, faceSize1, faceSize2);
-    texturePosition = ivec3(x, y, z) + ivec3(offsetX, offsetY, offsetZ) * instanceSize + startPosition - iCameraPosition + inChunkPosition;
+    vec4 transformedInChunkPosition = modelMatrix * vec4(ivec3(x, y, z) + inChunkPosition, 1);
+    texturePosition = ivec3(offsetX, offsetY, offsetZ) * instanceSize + startPosition - iCameraPosition + transformedInChunkPosition.xyz;
     voxelPosition = texturePosition;
-    texturePosition += NORMALS[side] * 0.001;
+    normal = NORMALS[sideTransform[side]];
+    texturePosition += normal * 0.001;
 
     gl_Position = projectionViewMatrix * vec4(texturePosition, 1.0);
 
-    textureData = currentVertex.textureData;
-    normal = NORMALS[side];
+    textureData = currentVertex.textureData & 0xFFFFF8FF | sideTransform[side] << 8;
     trianglePos = FACE_POSITIONS[currentVertexId];
 }

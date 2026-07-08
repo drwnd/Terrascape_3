@@ -13,7 +13,9 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import game.utils.Transformation;
 import game.utils.Utils;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 
@@ -112,6 +114,23 @@ public final class StructurePlaceable implements Placeable {
 
     public StructureIdentifier getIdentifier() {
         return identifier;
+    }
+
+    public Matrix4f getModelMatrix() {
+        return Transformation.getModelMatrix((byte) rotation.ordinal(), structure);
+    }
+
+    public int[] getSideTransform() {
+        boolean rotate90 = (rotation.ordinal() & Structure.ROTATE_90) != 0;
+
+        return new int[]{
+                rotate90 ? WEST : NORTH,
+                TOP,
+                rotate90 ? SOUTH : WEST,
+                rotate90 ? EAST : SOUTH,
+                BOTTOM,
+                rotate90 ? NORTH : EAST
+        };
     }
 
 
