@@ -62,6 +62,12 @@ public interface Placeable {
 
     void save(Saver<?> saver);
 
+    default void rotateForwards() {
+    }
+
+    default void rotateBackwards() {
+    }
+
     default int getLengthX() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }

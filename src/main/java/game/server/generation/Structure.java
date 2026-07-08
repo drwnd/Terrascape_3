@@ -49,6 +49,10 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         return (transform & Structure.ROTATE_90) == 0 ? sizeX : sizeZ;
     }
 
+    public int sizeY(byte transform) {
+        return sizeY;
+    }
+
     public int sizeZ(byte transform) {
         return (transform & Structure.ROTATE_90) == 0 ? sizeZ : sizeX;
     }

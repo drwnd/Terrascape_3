@@ -76,12 +76,14 @@ public abstract class ShapePlaceable implements Placeable {
         return new Structure(4, material, bitMap);
     }
 
+    @Override
     public void rotateForwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().next());
         updateBitMap(false);
     }
 
+    @Override
     public void rotateBackwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().previous());

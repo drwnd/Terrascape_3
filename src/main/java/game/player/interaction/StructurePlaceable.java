@@ -31,18 +31,29 @@ public final class StructurePlaceable implements Placeable {
         saver.saveString(identifier.structureName());
     }
 
+    @Override
+    public void rotateForwards() {
+        rotation = (Rotation8Way) rotation.next();
+    }
+
+    @Override
+    public void rotateBackwards() {
+        rotation = (Rotation8Way) rotation.previous();
+    }
+
     public static StructurePlaceable load(Saver<?> saver) {
         return new StructurePlaceable(new StructureIdentifier(saver.loadString()));
     }
 
     @Override
     public void place(Vector3l position, int lod) {
+        byte transform = (byte) rotation.ordinal();
         long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + structure.sizeX() >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY() >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + structure.sizeZ() >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + structure.sizeX(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + structure.sizeZ(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
@@ -63,8 +74,9 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
-        position.x -= structure.sizeX() >> 1;
-        position.z -= structure.sizeZ() >> 1;
+        byte transform = (byte) rotation.ordinal();
+        position.x -= structure.sizeX(transform) >> 1;
+        position.z -= structure.sizeZ(transform) >> 1;
 
         int breakPlaceAlign = IntSettings.BREAK_PLACE_ALIGN.value();
         int mask = -(1 << breakPlaceAlign);
@@ -104,6 +116,7 @@ public final class StructurePlaceable implements Placeable {
 
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
+        byte transform = (byte) rotation.ordinal();
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -116,16 +129,16 @@ public final class StructurePlaceable implements Placeable {
         int startY = (int) (chunkStartY + (inChunkY << chunk.LOD) - position.y);
         int startZ = (int) (chunkStartZ + (inChunkZ << chunk.LOD) - position.z);
 
-        int lengthX = MathUtils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX());
-        int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
-        int lengthZ = MathUtils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ());
+        int lengthX = MathUtils.min(structure.sizeX(transform) - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX(transform));
+        int lengthY = MathUtils.min(structure.sizeY(transform) - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY(transform));
+        int lengthZ = MathUtils.min(structure.sizeZ(transform) - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ(transform));
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
 
         chunk.storeStructureMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                chunk.LOD, structure, (byte) 0);
+                chunk.LOD, structure, transform);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
@@ -137,6 +150,7 @@ public final class StructurePlaceable implements Placeable {
         if (inChunkZ + lengthZ == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
     }
 
+    private Rotation8Way rotation = Rotation8Way.ROTATION_1;
     private final StructureIdentifier identifier;
     private final Structure structure;
     private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
