@@ -15,6 +15,7 @@ import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Transformation;
 import game.utils.Utils;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 
@@ -50,7 +51,7 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void place(Vector3l position, int lod) {
-        byte transform = (byte) rotation.ordinal();
+        byte transform = getTransform();
         long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
@@ -77,7 +78,7 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
-        byte transform = (byte) rotation.ordinal();
+        byte transform = getTransform();
         position.x -= structure.sizeX(transform) >> 1;
         position.z -= structure.sizeZ(transform) >> 1;
 
@@ -92,11 +93,12 @@ public final class StructurePlaceable implements Placeable {
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         min.sub(position);
         max.sub(position);
+        byte transform = getTransform();
 
-        for (long structureX = min.x; structureX < max.x; structureX++)
-            for (long structureY = min.y; structureY < max.y; structureY++)
-                for (long structureZ = min.z; structureZ < max.z; structureZ++) {
-                    byte material = structure.getMaterial(structureX, structureY, structureZ);
+        for (int structureX = (int) min.x; structureX < max.x; structureX++)
+            for (int structureY = (int) min.y; structureY < max.y; structureY++)
+                for (int structureZ = (int) min.z; structureZ < max.z; structureZ++) {
+                    byte material = structure.getMaterial(structureX, structureY, structureZ, transform);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }
         return false;
@@ -104,7 +106,7 @@ public final class StructurePlaceable implements Placeable {
 
     @Override
     public void spawnParticles(Vector3l position) {
-        byte transform = (byte) rotation.ordinal();
+        byte transform = getTransform();
         Vector3i lengths = new Vector3i(structure.sizeX(), structure.sizeY(), structure.sizeZ());
         Game.getPlayer().getParticleCollector().addPlaceParticleEffect(position.x, position.y, position.z, structure, lengths, transform);
     }
@@ -120,7 +122,7 @@ public final class StructurePlaceable implements Placeable {
     }
 
     public Matrix4f getModelMatrix() {
-        return Transformation.getModelMatrix((byte) rotation.ordinal(), structure);
+        return Transformation.getModelMatrix(getTransform(), structure);
     }
 
     public int[] getSideTransform() {
@@ -138,7 +140,7 @@ public final class StructurePlaceable implements Placeable {
 
 
     private void placeInChunk(Chunk chunk, Vector3l position) {
-        byte transform = (byte) rotation.ordinal();
+        byte transform = getTransform();
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -170,6 +172,10 @@ public final class StructurePlaceable implements Placeable {
         if (inChunkX + lengthX == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, chunk.LOD));
         if (inChunkY + lengthY == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, chunk.LOD));
         if (inChunkZ + lengthZ == CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, chunk.LOD));
+    }
+
+    private byte getTransform() {
+        return (byte) rotation.ordinal();
     }
 
     private Rotation8Way rotation = Rotation8Way.ROTATION_1;

@@ -29,9 +29,21 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         this(sizeX, sizeY, sizeZ, MaterialsData.getCompressedMaterials(sizeBits, bitMap, material));
     }
 
-    public byte getMaterial(long structureX, long structureY, long structureZ) {
-        if (!contains((int) structureX, (int) structureY, (int) structureZ)) return AIR;
-        return materials.getMaterial((int) structureX, (int) structureY, (int) structureZ);
+    public byte getMaterial(int structureX, int structureY, int structureZ) {
+        if (!contains(structureX, structureY, structureZ)) return AIR;
+        return materials.getMaterial(structureX, structureY, structureZ);
+    }
+
+    public byte getMaterial(int structureX, int structureY, int structureZ, byte transform) {
+        if ((transform & MIRROR_X) != 0) structureX = sizeX(transform) - structureX - 1;
+        if ((transform & MIRROR_Z) != 0) structureZ = sizeZ(transform) - structureZ - 1;
+        if ((transform & ROTATE_90) != 0) {
+            int copy = structureZ;
+            structureZ = structureX;
+            structureX = sizeZ(transform) - copy - 1;
+        }
+
+        return getMaterial(structureX, structureY, structureZ);
     }
 
     public boolean contains(int structureX, int structureY, int structureZ) {
