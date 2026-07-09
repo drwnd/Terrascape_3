@@ -8,6 +8,7 @@ import game.language.UiMessages;
 import game.server.World;
 import game.server.saving.WorldSaver;
 
+import game.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -57,7 +58,7 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (nameField.getText().isEmpty()) return ButtonResult.FAILURE;
-            String worldName = sanitizeWorldName(nameField.getText());
+            String worldName = Utils.sanitizeFileName(nameField.getText());
             File[] savedWorlds = MainMenu.getSavedWorlds();
             for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(worldName)) return ButtonResult.FAILURE;
 
@@ -105,16 +106,4 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         return longs;
     }
 
-    private static String sanitizeWorldName(String worldName) {
-        char[] chars = worldName.toCharArray();
-        for (int index = 0; index < chars.length; index++) if (!isAllowedChar(chars[index])) chars[index] = '_';
-        return String.valueOf(chars);
-    }
-
-    private static boolean isAllowedChar(char character) {
-        if (character >= '0' && character <= '9') return true;
-        if (character >= 'a' && character <= 'z') return true;
-        if (character >= 'A' && character <= 'Z') return true;
-        return character == '_' || character == '-' || character == ' ';
-    }
 }

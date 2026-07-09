@@ -15,6 +15,8 @@ public final class Constants {
     public static final int CHUNK_SIZE_MASK = CHUNK_SIZE - 1;
     public static final long MAX_CHUNKS_MASK = -1L >>> CHUNK_SIZE_BITS;
 
+    public static final int MAX_STRUCTURE_SIZE = 512;
+
     // Make into settings later
     public static final byte NUMBER_OF_GENERATION_THREADS = 3;
     public static final int MAX_TREE_LOD = 4;

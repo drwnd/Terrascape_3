@@ -1599,9 +1599,9 @@ public final class MaterialsData {
     }
 
 
-    public static final int[] Z_ORDER_3D_TABLE_X = Utils.zOrderCurveLookupTable(512, 3, 2);
-    public static final int[] Z_ORDER_3D_TABLE_Y = Utils.zOrderCurveLookupTable(512, 3, 1);
-    public static final int[] T_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(512, 3, 0);
+    public static final int[] Z_ORDER_3D_TABLE_X = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 2);
+    public static final int[] Z_ORDER_3D_TABLE_Y = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 1);
+    public static final int[] T_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 0);
 
     static final byte HOMOGENOUS = 0;
     static final byte DETAIL = 1;

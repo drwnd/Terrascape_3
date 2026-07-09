@@ -162,6 +162,20 @@ public final class Utils {
         return Math.max(a, b);
     }
 
+
+    public static String sanitizeFileName(String fileName) {
+        char[] chars = fileName.toCharArray();
+        for (int index = 0; index < chars.length; index++) if (!isAllowedChar(chars[index])) chars[index] = '_';
+        return String.valueOf(chars);
+    }
+
+    private static boolean isAllowedChar(char character) {
+        if (character >= '0' && character <= '9') return true;
+        if (character >= 'a' && character <= 'z') return true;
+        if (character >= 'A' && character <= 'Z') return true;
+        return character == '_' || character == '-' || character == ' ';
+    }
+
     private Utils() {
     }
 }
