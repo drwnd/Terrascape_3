@@ -1,8 +1,10 @@
 package game.server.command;
 
+import core.assets.AssetManager;
 import core.utils.MathUtils;
 import core.utils.Vector3l;
 
+import game.assets.StructureIdentifier;
 import game.player.Player;
 import game.player.interaction.PlacingState;
 import game.player.interaction.RepeatPlaceable;
@@ -14,11 +16,13 @@ import game.server.materials_data.MaterialsData;
 import game.server.saving.StructureSaver;
 import game.utils.Utils;
 
+import java.io.File;
+
 import static game.utils.Constants.*;
 
 public final class StructureCommand {
 
-    static final String SYNTAX = "save \"Structure Name\"";
+    static final String SYNTAX = "save \"Structure Name\" [force]";
     static final String EXPLANATION = "Saves the selected Region as a structure with the given name";
 
     static CommandResult execute(TokenList tokens) {
@@ -28,17 +32,29 @@ public final class StructureCommand {
     }
 
     private static CommandResult executeSaveAction(TokenList tokens) {
-        StringToken name = tokens.expectNextString();
+        String fileName = Utils.sanitizeFileName(tokens.expectNextString().string());
+        String saveFileLocation = StructureSaver.getSaveFileLocation(fileName);
+        boolean forceSave;
+        if (tokens.isFinished()) forceSave = false;
+        else {
+            String keyword = tokens.expectNextKeyWord().keyword();
+            if ("force".equalsIgnoreCase(keyword)) forceSave = true;
+            else return CommandResult.fail("Unexpected keyword: " + keyword);
+        }
+        if (!forceSave && new File(saveFileLocation).exists())
+            return CommandResult.fail("That structure already exists. Choose another name or override with /%s force".formatted(tokens.getCommand()));
+
         tokens.expectFinishedLess();
 
         Player player = Game.getPlayer();
         Target lockedTarget = player.getInteractionHandler().getLockedTarget();
         Target startTarget = player.getInteractionHandler().getStartTarget();
+        if (startTarget == null) startTarget = lockedTarget;
         PlacingState state = player.getInteractionHandler().getState(Target.getPlayerTarget());
 
         if (player.getHeldPlaceable() != null)
             return CommandResult.fail("Must have an empty hand");
-        if (state != PlacingState.REPEAT_BREAK_LOCKED)
+        if (state != PlacingState.REPEAT_BREAK_LOCKED && state != PlacingState.SHAPE_BREAK_LOCKED)
             return CommandResult.fail("Must have locked a region to save as a structure");
 
         Vector3l startPositon = startTarget.position();
@@ -70,9 +86,9 @@ public final class StructureCommand {
 
         Structure structure = new Structure(sizeX, sizeY, sizeZ, MaterialsData.getCompressedMaterials(sizeBits, uncompressedMaterials));
         StructureSaver structureSaver = new StructureSaver();
-        String fileName = Utils.sanitizeFileName(name.string());
 
-        structureSaver.save(structure, StructureSaver.getSaveFileLocation(fileName));
+        structureSaver.save(structure, saveFileLocation);
+        AssetManager.delete(new StructureIdentifier(fileName));
         return CommandResult.success();
     }
 }

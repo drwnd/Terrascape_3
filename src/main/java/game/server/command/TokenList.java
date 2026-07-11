@@ -5,6 +5,11 @@ import java.util.ArrayList;
 public final class TokenList extends ArrayList<Token> {
 
     private int index = -1;
+    private final String command;
+
+    TokenList(String command) {
+        this.command = command;
+    }
 
     Token get() {
         return index >= size() ? null : get(index);
@@ -13,6 +18,14 @@ public final class TokenList extends ArrayList<Token> {
     Token getNext() {
         index++;
         return get();
+    }
+
+    String getCommand() {
+        return command;
+    }
+
+    boolean isFinished() {
+        return index + 1 >= size();
     }
 
     void next() {

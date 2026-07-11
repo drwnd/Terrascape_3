@@ -7,7 +7,7 @@ interface Token {
     TokenType type();
 
     static TokenList tokenize(String command) {
-        TokenList tokens = new TokenList();
+        TokenList tokens = new TokenList(command);
         command += ' ';
         char[] chars = command.toCharArray();
         int index = 0;
