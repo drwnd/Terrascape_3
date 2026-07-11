@@ -70,6 +70,11 @@ public final class ChunkRebuildPlaceable implements Placeable {
     }
 
     @Override
+    public boolean allowBreak() {
+        return false;
+    }
+
+    @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         return false;
     }

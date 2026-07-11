@@ -164,7 +164,7 @@ public final class Utils {
 
 
     public static String sanitizeFileName(String fileName) {
-        char[] chars = fileName.toCharArray();
+        char[] chars = fileName.strip().toCharArray();
         for (int index = 0; index < chars.length; index++) if (!isAllowedChar(chars[index])) chars[index] = '_';
         return String.valueOf(chars);
     }

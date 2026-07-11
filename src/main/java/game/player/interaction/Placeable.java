@@ -42,6 +42,7 @@ public interface Placeable {
             case 16 -> InsideArcPlaceable.load(saver);
             case 17 -> OutsideArcPlaceable.load(saver);
             case 18 -> CustomShape.load(saver);
+            case 19 -> StructureSelector.load(saver);
             default -> null;
         };
         if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());
@@ -66,6 +67,10 @@ public interface Placeable {
     }
 
     default void rotateBackwards() {
+    }
+
+    default boolean allowBreak() {
+        return true;
     }
 
     default int getLengthX() {

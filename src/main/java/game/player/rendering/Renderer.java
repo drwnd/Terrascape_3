@@ -669,11 +669,12 @@ public final class Renderer extends Renderable {
         switch (state) {
             case SHAPE_PLACE -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, placeable, false);
             case SHAPE_BREAK -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, placeable, true);
-            case SHAPE_PLACE_LOCKED -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, placeable, false);
-            case SHAPE_BREAK_LOCKED -> renderShapeVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, placeable, true);
 
             case REPEAT_PLACE, REPEAT_BREAK -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
             case REPEAT_PLACE_LOCKED, REPEAT_BREAK_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget);
+
+            case STRUCTURE_SELECT -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? currentTarget : startTarget, currentTarget);
+            case STRUCTURE_SELECT_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? lockedTarget : startTarget, lockedTarget);
 
             case STRUCTURE_PLACE -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget, (StructurePlaceable) placeable);
             case STRUCTURE_PLACE_LOCKED -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget, (StructurePlaceable) placeable);

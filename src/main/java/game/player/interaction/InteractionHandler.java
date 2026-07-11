@@ -66,6 +66,8 @@ public final class InteractionHandler {
         boolean isRepeat = startTarget != null;
 
         if (placeable instanceof ChunkRebuildPlaceable) return PlacingState.NONE;
+        if (placeable instanceof StructureSelector) return isLocked ? PlacingState.STRUCTURE_SELECT_LOCKED : PlacingState.STRUCTURE_SELECT;
+
         if (placeable instanceof StructurePlaceable && !isBreak) {
             if (currentTarget == null && !isLocked) return PlacingState.NONE;
             return isLocked ? PlacingState.STRUCTURE_PLACE_LOCKED : PlacingState.STRUCTURE_PLACE;
@@ -94,6 +96,11 @@ public final class InteractionHandler {
 
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
+        if (placeable != null && !placeable.allowBreak()) {
+            destroyInfo.forceAction = false;
+            destroyInfo.lastAction = Game.getServer().getCurrentGameTick();
+            return;
+        }
         if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
         else placeable = shapePlaceable.copyWithMaterial(AIR);
         handleUseDestroy(destroyInfo, placeable, false);
@@ -116,10 +123,11 @@ public final class InteractionHandler {
 
         int targetedSide = target.side();
         Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
-        if (startTarget != null && placeable instanceof ShapePlaceable shapePlaceable) {
-            Vector3l startPosition = offsetPosition ? startTarget.offsetPosition() : startTarget.position();
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            if (startTarget != null) target = startTarget;
+            Vector3l startPosition = offsetPosition ? target.offsetPosition() : target.position();
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
-            targetedSide = startTarget.side();
+            targetedSide = target.side();
             startTarget = null;
         }
 
@@ -132,7 +140,10 @@ public final class InteractionHandler {
         Target currentTarget = Target.getPlayerTarget();
         PlacingState state = getState(currentTarget);
         if (state.isLocked()) lockedTarget = startTarget = null;
-        else lockedTarget = currentTarget;
+        else {
+            lockedTarget = currentTarget;
+            startTarget = new Target(currentTarget);
+        }
     }
 
     private void handleSetPlaceStartPosition() {

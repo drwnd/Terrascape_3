@@ -8,6 +8,7 @@ import game.assets.StructureIdentifier;
 import game.player.Player;
 import game.player.interaction.PlacingState;
 import game.player.interaction.RepeatPlaceable;
+import game.player.interaction.StructureSelector;
 import game.player.interaction.Target;
 import game.server.Game;
 import game.server.World;
@@ -52,9 +53,9 @@ public final class StructureCommand {
         if (startTarget == null) startTarget = lockedTarget;
         PlacingState state = player.getInteractionHandler().getState(Target.getPlayerTarget());
 
-        if (player.getHeldPlaceable() != null)
-            return CommandResult.fail("Must have an empty hand");
-        if (state != PlacingState.REPEAT_BREAK_LOCKED && state != PlacingState.SHAPE_BREAK_LOCKED)
+        if (!(player.getHeldPlaceable() instanceof StructureSelector))
+            return CommandResult.fail("Must use a Structure Selector");
+        if (state != PlacingState.STRUCTURE_SELECT_LOCKED)
             return CommandResult.fail("Must have locked a region to save as a structure");
 
         Vector3l startPositon = startTarget.position();
