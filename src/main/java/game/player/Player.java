@@ -116,8 +116,6 @@ public final class Player {
         if (button == KeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 
         if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
-        if (button == KeySettings.GET_CHUNK_REBUILD_PLACEABLE.keybind() && action == GLFW_PRESS)
-            hotbar.setContent(hotbar.getSelectedSlot(), new ChunkRebuildPlaceable());
     }
 
     public void handleScrollInput(double yScroll) {
