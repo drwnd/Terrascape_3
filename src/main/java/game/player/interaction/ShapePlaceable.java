@@ -12,16 +12,10 @@ import core.utils.MathUtils;
 import core.utils.Vector3l;
 
 import game.language.UiMessages;
-import game.player.Player;
 import game.server.Chunk;
-import game.server.Game;
 import game.server.materials_data.MaterialsData;
-import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
-import game.server.saving.ChunkSaver;
-import game.settings.IntSettings;
-import game.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -126,23 +120,11 @@ public abstract class ShapePlaceable implements Placeable {
 
 
     @Override
-    public void place(Vector3l position, int lod) {
-        if (Long.numberOfTrailingZeros(position.x & -MathUtils.nextLargestPowOf2(getLengthX())) < lod
-                || Long.numberOfTrailingZeros(position.y & -MathUtils.nextLargestPowOf2(getLengthY())) < lod
-                || Long.numberOfTrailingZeros(position.z & -MathUtils.nextLargestPowOf2(getLengthZ())) < lod) return;
+    public Structure getStructure() {
+        int preferredSize = getPreferredSizePowOf2();
+        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
 
-        long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
-        long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
-        long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + getLengthX() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + getLengthY() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + getLengthZ() - 1 >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
-        ChunkSaver saver = new ChunkSaver();
-
-        for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
-            for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
-                for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
-                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), position);
+        return new Structure(getLengthX(), getLengthY(), getLengthZ(), preferredSizeBits, material, bitMap);
     }
 
     @Override
@@ -165,33 +147,23 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     @Override
-    public void offsetPosition(Vector3l position, int targetedSide) {
-        int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
-        int mask = -breakPlaceAlign;
-
-        RepeatPlaceable.offsetPositionFromGround(position, targetedSide, getLengthX(), getLengthY(), getLengthZ());
-        position.x &= mask;
-        position.y &= mask;
-        position.z &= mask;
+    public void place(Vector3l position, int lod) {
+        throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 
     @Override
-    public Structure getStructure() {
-        int preferredSize = getPreferredSizePowOf2();
-        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
-
-        return new Structure(getLengthX(), getLengthY(), getLengthZ(), preferredSizeBits, material, bitMap);
+    public void offsetPosition(Vector3l position, int targetedSide) {
+        throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 
     @Override
     public ArrayList<Chunk> getAffectedChunks() {
-        return affectedChunks;
+        throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 
     @Override
     public void spawnParticles(Vector3l position) {
-        Player player = Game.getPlayer();
-        player.getParticleCollector().addBreakPlaceParticleEffect(position.x, position.y, position.z, 1, 1, 1, this);
+        throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 
 
@@ -251,27 +223,6 @@ public abstract class ShapePlaceable implements Placeable {
         return buffer;
     }
 
-    private void placeInChunk(Chunk chunk, Vector3l position) {
-        int lod = chunk.LOD;
-        int preferredSizeBits = Integer.numberOfTrailingZeros(getPreferredSizePowOf2());
-
-        int inChunkX = (int) (position.x - (chunk.X << CHUNK_SIZE_BITS + lod)) >> lod;
-        int inChunkY = (int) (position.y - (chunk.Y << CHUNK_SIZE_BITS + lod)) >> lod;
-        int inChunkZ = (int) (position.z - (chunk.Z << CHUNK_SIZE_BITS + lod)) >> lod;
-        int lodSize = Math.max(0, preferredSizeBits - lod);
-
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, lod, this);
-
-        World world = Game.getWorld();
-        affectedChunks.add(chunk);
-        if (inChunkX <= 0) affectedChunks.add(world.getChunk(chunk.X - 1, chunk.Y, chunk.Z, lod));
-        if (inChunkY <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y - 1, chunk.Z, lod));
-        if (inChunkZ <= 0) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z - 1, lod));
-        if (inChunkX + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X + 1, chunk.Y, chunk.Z, lod));
-        if (inChunkY + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y + 1, chunk.Z, lod));
-        if (inChunkZ + (1 << lodSize) >= CHUNK_SIZE) affectedChunks.add(world.getChunk(chunk.X, chunk.Y, chunk.Z + 1, lod));
-    }
-
     private boolean isBitMapInValid(int settingsHash, int preferredSize) {
         return bitMap == null || settingsHash != this.settingsHash || this.preferredSize != preferredSize;
     }
@@ -291,7 +242,6 @@ public abstract class ShapePlaceable implements Placeable {
     private int settingsHash, preferredSize;
     private long[] bitMap;
     private final byte material;
-    private final ArrayList<Chunk> affectedChunks = new ArrayList<>();
     private ShapeSetting[] settings;
 
     final ToggleSetting invert = new StandAloneToggleSetting(false);

@@ -128,7 +128,6 @@ public final class InteractionHandler {
             Vector3l startPosition = offsetPosition ? target.offsetPosition() : target.position();
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
             targetedSide = target.side();
-            startTarget = null;
         }
 
         if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) return;

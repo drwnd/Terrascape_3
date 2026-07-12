@@ -97,10 +97,19 @@ public final class RepeatPlaceable implements Placeable {
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(placeable.getMaterial(), NO_COLLISION)) return false;
+        int lengthX = placeable.getLengthX(), lengthY = placeable.getLengthY(), lengthZ = placeable.getLengthZ();
+        int countX = (int) (maxPosition.x - minPosition.x + lengthX) / lengthX;
+        int countY = (int) (maxPosition.y - minPosition.y + lengthY) / lengthY;
+        int countZ = (int) (maxPosition.z - minPosition.z + lengthZ) / lengthZ;
+        Vector3l currentPosition = new Vector3l();
 
-        return min.x < maxPosition.x && minPosition.x <= max.x
-                && min.y < maxPosition.y && minPosition.y <= max.y
-                && min.z < maxPosition.z && minPosition.z <= max.z;
+        for (int repeatX = 0; repeatX < countX; repeatX++)
+            for (int repeatY = 0; repeatY < countY; repeatY++)
+                for (int repeatZ = 0; repeatZ < countZ; repeatZ++) {
+                    currentPosition.set(minPosition).add((long) lengthX * repeatX, (long) lengthY * repeatY, (long) lengthZ * repeatZ);
+                    if (placeable.intersectsAABB(currentPosition, min, max)) return true;
+                }
+        return false;
     }
 
     @Override
