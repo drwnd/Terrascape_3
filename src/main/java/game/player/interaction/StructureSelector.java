@@ -29,7 +29,7 @@ public final class StructureSelector implements Placeable {
 
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
-        return false;
+        return true;
     }
 
     @Override

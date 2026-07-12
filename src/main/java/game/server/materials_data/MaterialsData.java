@@ -152,13 +152,6 @@ public final class MaterialsData {
         compressIntoData(uncompressedMaterials);
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, int lod, ShapePlaceable placeable) {
-        byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
-        fillUncompressedMaterialsInto(uncompressedMaterials);
-        storeMaterial(inChunkX, inChunkY, inChunkZ, uncompressedMaterials, lod, placeable);
-        compressIntoData(uncompressedMaterials);
-    }
-
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                         int startX, int startY, int startZ,
                                         int lengthX, int lengthY, int lengthZ,
@@ -279,9 +272,8 @@ public final class MaterialsData {
         byte material = placeable.getMaterial();
         long[] bitMap = placeable.getBitMap();
 
-        int inChunkAlign = Math.min(Math.min(
-                Integer.numberOfTrailingZeros(inChunkX), Integer.numberOfTrailingZeros(inChunkY)), Integer.numberOfTrailingZeros(inChunkZ));
-        int align = Math.min(totalSizeBits, Math.min(inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2())));
+        int inChunkAlign = MathUtils.min(Integer.numberOfTrailingZeros(inChunkX), Integer.numberOfTrailingZeros(inChunkY), Integer.numberOfTrailingZeros(inChunkZ));
+        int align = MathUtils.min(totalSizeBits, inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2()));
 
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
         int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);

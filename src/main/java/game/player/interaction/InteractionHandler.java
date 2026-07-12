@@ -141,7 +141,7 @@ public final class InteractionHandler {
         if (state.isLocked()) lockedTarget = startTarget = null;
         else {
             lockedTarget = currentTarget;
-            startTarget = new Target(currentTarget);
+            if (startTarget == null) startTarget = new Target(currentTarget);
         }
     }
 

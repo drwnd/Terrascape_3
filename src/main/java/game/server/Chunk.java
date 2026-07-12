@@ -47,11 +47,6 @@ public final class Chunk {
         modified = true;
     }
 
-    public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, int lod, ShapePlaceable placeable) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, lod, placeable);
-        modified = true;
-    }
-
     public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers, ChunkNeighbors neighbors) {
         neighbors.north().materials.fillSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
         neighbors.top().materials.fillSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
