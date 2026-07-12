@@ -68,7 +68,7 @@ public final class InteractionHandler {
         if (placeable instanceof ChunkRebuildPlaceable) return PlacingState.NONE;
         if (placeable instanceof StructureSelector) return isLocked ? PlacingState.STRUCTURE_SELECT_LOCKED : PlacingState.STRUCTURE_SELECT;
 
-        if (placeable instanceof StructurePlaceable && !isBreak) {
+        if (placeable instanceof StructurePlaceable) {
             if (currentTarget == null && !isLocked) return PlacingState.NONE;
             return isLocked ? PlacingState.STRUCTURE_PLACE_LOCKED : PlacingState.STRUCTURE_PLACE;
         }

@@ -116,6 +116,10 @@ public final class StructurePlaceable implements Placeable {
         return Math.max(structure.sizeX(), Math.max(structure.sizeY(), structure.sizeZ()));
     }
 
+    @Override
+    public boolean allowBreak() {
+        return false;
+    }
 
     public StructureIdentifier getIdentifier() {
         return identifier;
