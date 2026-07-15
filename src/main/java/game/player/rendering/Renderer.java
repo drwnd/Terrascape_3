@@ -349,7 +349,7 @@ public final class Renderer extends Renderable {
         glDepthFunc(GL_GREATER);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glDisable(GL_STENCIL_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, ToggleSettings.X_RAY.value() ? GL_LINE : GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, ToggleSettings.TOGGLE_X_RAY.value() ? GL_LINE : GL_FILL);
         if (vSync != CoreToggleSettings.V_SYNC.value()) {
             vSync = CoreToggleSettings.V_SYNC.value();
             glfwSwapInterval(vSync ? 1 : 0);
@@ -824,7 +824,7 @@ public final class Renderer extends Renderable {
     }
 
     private void renderDebugInfo() {
-        boolean debugScreenOpen = ToggleSettings.DEBUG_MENU.value();
+        boolean debugScreenOpen = ToggleSettings.OPEN_DEBUG_MENU.value();
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }

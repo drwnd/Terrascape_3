@@ -9,6 +9,7 @@ import core.settings.CoreFloatSettings;
 import game.assets.Shaders;
 import game.player.rendering.*;
 import game.server.generation.Structure;
+import game.settings.FloatSettings;
 import game.utils.Transformation;
 
 import org.joml.Matrix4f;
@@ -37,7 +38,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     public void rotate(Vector2i cursorMovement) {
-        float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
+        float sensitivityFactor = FloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 7.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;

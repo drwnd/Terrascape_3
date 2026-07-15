@@ -43,6 +43,11 @@ public enum CoreToggleSettings implements ToggleSetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        return "coreToggleSettings";
+    }
+
     private final boolean defaultValue;
     private boolean value;
 

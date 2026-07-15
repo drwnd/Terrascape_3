@@ -39,7 +39,7 @@ public final class Inventory extends UiElement {
 
         ArrayList<CubeDisplay> cubeDisplays = getCubeDisplays();
         OptionToggle placeModeToggle = new OptionToggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.9F), OptionSettings.PLACE_MODE, null, true);
-        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, UiMessages.OFFSET_FROM_GROUND, true);
+        Toggle offsetToggle = new Toggle(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.9F), ToggleSettings.OFFSET_FROM_GROUND, ToggleSettings.OFFSET_FROM_GROUND, true);
 
         Vector2f sizeToParent = new Vector2f(1.0F - TabOpenerButton.SIZE / Window.getAspectRatio(), 1.0F);
         Vector2f offsetToParent = new Vector2f(TabOpenerButton.SIZE / Window.getAspectRatio(), 0.0F);

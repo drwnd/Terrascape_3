@@ -25,6 +25,16 @@ public final class StandAloneKeySetting implements KeySetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
+    @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
     private final int defaultKeybind;
     private int keybind;
 }

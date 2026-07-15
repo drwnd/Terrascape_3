@@ -1,6 +1,8 @@
 package core.settings;
 
-public interface Setting {
+import core.language.Translatable;
+
+public interface Setting extends Translatable {
 
     default String name() {
         return ((Enum<?>) this).name();

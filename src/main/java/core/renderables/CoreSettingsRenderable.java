@@ -52,6 +52,24 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Window.popRenderable();
     }
 
+
+    public <T extends Number> void addSlider(NumberSetting<T> setting) {
+        addSlider(setting, setting);
+    }
+
+    public void addKeySelector(KeySetting setting) {
+        addKeySelector(setting, setting);
+    }
+
+    public void addToggle(ToggleSetting setting) {
+        addToggle(setting, setting);
+    }
+
+    public void addOption(OptionSetting setting) {
+        addOption(setting, setting);
+    }
+
+
     public <T extends Number> void addSlider(NumberSetting<T> setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);

@@ -1,6 +1,7 @@
 package game.player.rendering;
 
 import core.assets.AssetManager;
+import core.language.Translatable;
 import core.rendering_api.shaders.Shader;
 import core.settings.optionSettings.Option;
 import core.utils.IntArrayList;
@@ -508,7 +509,12 @@ public final class RenderingOptimizer {
 
     private static final int AABB_INT_SIZE = 4;
 
-    public enum OcclusionCullingOptions implements Option {
-        DISABLED, NORMAL, AGGRESSIVE
+    public enum OcclusionCullingOptions implements Option, Translatable {
+        DISABLED, NORMAL, AGGRESSIVE;
+
+        @Override
+        public String translationFileName() {
+            return "occlusionCullingModes";
+        }
     }
 }

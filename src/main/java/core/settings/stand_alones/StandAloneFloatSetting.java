@@ -58,6 +58,16 @@ public final class StandAloneFloatSetting implements FloatSetting {
         return defaultValue;
     }
 
+    @Override
+    public String translationFileName() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
+    @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
     private final float min, max, defaultValue, accuracy;
     private float value;
 }

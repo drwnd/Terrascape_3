@@ -13,22 +13,23 @@ public enum ToggleSettings implements ToggleSetting {
     SHOW_SHAPE_PLACE_PARTICLES(true),
     SHOW_STRUCTURE_PLACE_PARTICLES(true),
     SHOW_SPLASH_PARTICLES(true),
-    X_RAY(false),
+    CHUNKS_CAST_SHADOWS(true),
+    PARTICLES_CAST_SHADOWS(true),
+    GLASS_CASTS_SHADOWS(true),
+    OFFSET_FROM_GROUND(true),
+    RENDER_HUD(true, GLFW_KEY_F4),
+
+    NO_CLIP(false),
+    CULLING_COMPUTATION(true),
+    OPEN_DEBUG_MENU(false, GLFW_KEY_F3),
+    TOGGLE_X_RAY(false),
     RENDER_OCCLUDERS(false),
     RENDER_OCCLUDEES(false),
     RENDER_OCCLUDER_DEPTH_MAP(false),
     RENDER_SHADOW_MAP(false),
     RENDER_SHADOW_COLORS(false),
     RENDER_ACCUMULATION_TEXTURE(false),
-    RENDER_REVEAL_TEXTURE(false),
-    CHUNKS_CAST_SHADOWS(true),
-    PARTICLES_CAST_SHADOWS(true),
-    GLASS_CASTS_SHADOWS(true),
-    NO_CLIP(false),
-    CULLING_COMPUTATION(true),
-    DEBUG_MENU(false, GLFW_KEY_F3),
-    OFFSET_FROM_GROUND(true),
-    RENDER_HUD(true, GLFW_KEY_F4);
+    RENDER_REVEAL_TEXTURE(false);
 
     ToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;
@@ -79,4 +80,9 @@ public enum ToggleSettings implements ToggleSetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "toggleSettings";
+    }
 }

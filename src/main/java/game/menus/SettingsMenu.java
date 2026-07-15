@@ -1,7 +1,6 @@
 package game.menus;
 
 import core.settings.*;
-import core.utils.Message;
 import core.utils.StringGetter;
 import core.language.CoreUiMessages;
 import core.renderables.*;
@@ -53,46 +52,46 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createControlsSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addToggle(ToggleSettings.SCROLL_HOTBAR, UiMessages.SCROLL_HOTBAR);
-        section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT, CoreUiMessages.RAW_MOUSE_INPUT);
+        section.addToggle(ToggleSettings.SCROLL_HOTBAR);
+        section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT);
 
-        section.addSlider(CoreFloatSettings.SENSITIVITY, UiMessages.SENSITIVITY);
+        section.addSlider(FloatSettings.SENSITIVITY);
 
-        section.addKeySelector(KeySettings.MOVE_FORWARD, UiMessages.MOVE_FORWARD);
-        section.addKeySelector(KeySettings.MOVE_BACK, UiMessages.MOVE_BACK);
-        section.addKeySelector(KeySettings.MOVE_RIGHT, UiMessages.MOVE_RIGHT);
-        section.addKeySelector(KeySettings.MOVE_LEFT, UiMessages.MOVE_LEFT);
-        section.addKeySelector(KeySettings.JUMP, UiMessages.JUMP);
-        section.addKeySelector(KeySettings.SPRINT, UiMessages.SPRINT);
-        section.addKeySelector(KeySettings.SNEAK, UiMessages.SNEAK);
-        section.addKeySelector(KeySettings.CRAWL, UiMessages.CRAWL);
-        section.addKeySelector(KeySettings.FLY_FAST, UiMessages.FLY_FAST);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_1, UiMessages.HOTBAR_SLOT_1);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_2, UiMessages.HOTBAR_SLOT_2);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_3, UiMessages.HOTBAR_SLOT_3);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_4, UiMessages.HOTBAR_SLOT_4);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_5, UiMessages.HOTBAR_SLOT_5);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_6, UiMessages.HOTBAR_SLOT_6);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_7, UiMessages.HOTBAR_SLOT_7);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_8, UiMessages.HOTBAR_SLOT_8);
-        section.addKeySelector(KeySettings.HOTBAR_SLOT_9, UiMessages.HOTBAR_SLOT_9);
-        section.addKeySelector(KeySettings.DESTROY, UiMessages.DESTROY);
-        section.addKeySelector(KeySettings.USE, UiMessages.USE);
-        section.addKeySelector(KeySettings.PICK_BLOCK, UiMessages.PICK_BLOCK);
-        section.addKeySelector(KeySettings.INVENTORY, UiMessages.INVENTORY);
-        section.addKeySelector(KeySettings.SET_PLACE_START_POSITION, UiMessages.SET_PLACE_START_POSITION);
-        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION, UiMessages.LOCK_PLACE_POSITION);
-        section.addKeySelector(KeySettings.SHOW_PLACEABLE_PREVIEW, UiMessages.SHOW_PLACEABLE_PREVIEW);
-        section.addKeySelector(KeySettings.ROTATE_SHAPE_FORWARD, UiMessages.ROTATE_SHAPE_FORWARD);
-        section.addKeySelector(KeySettings.ROTATE_SHAPE_BACKWARD, UiMessages.ROTATE_SHAPE_BACKWARD);
-        section.addKeySelector(KeySettings.ZOOM, UiMessages.ZOOM);
-        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE, UiMessages.INCREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE, UiMessages.DECREASE_BREAK_PLACE_SIZE);
-        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_ALIGN, UiMessages.INCREASE_BREAK_PLACE_ALIGN);
-        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_ALIGN, UiMessages.DECREASE_BREAK_PLACE_ALIGN);
-        section.addKeySelector(KeySettings.DROP, UiMessages.DROP);
-        section.addKeySelector(KeySettings.OPEN_CHAT, UiMessages.OPEN_CHAT);
-        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
+        section.addKeySelector(KeySettings.MOVE_FORWARD);
+        section.addKeySelector(KeySettings.MOVE_BACK);
+        section.addKeySelector(KeySettings.MOVE_RIGHT);
+        section.addKeySelector(KeySettings.MOVE_LEFT);
+        section.addKeySelector(KeySettings.JUMP);
+        section.addKeySelector(KeySettings.SPRINT);
+        section.addKeySelector(KeySettings.SNEAK);
+        section.addKeySelector(KeySettings.CRAWL);
+        section.addKeySelector(KeySettings.FLY_FAST);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_1);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_2);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_3);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_4);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_5);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_6);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_7);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_8);
+        section.addKeySelector(KeySettings.HOTBAR_SLOT_9);
+        section.addKeySelector(KeySettings.DESTROY);
+        section.addKeySelector(KeySettings.USE);
+        section.addKeySelector(KeySettings.PICK_BLOCK);
+        section.addKeySelector(KeySettings.OPEN_INVENTORY);
+        section.addKeySelector(KeySettings.SET_PLACE_START_POSITION);
+        section.addKeySelector(KeySettings.LOCK_PLACE_POSITION);
+        section.addKeySelector(KeySettings.SHOW_PLACEABLE_PREVIEW);
+        section.addKeySelector(KeySettings.ROTATE_SHAPE_FORWARD);
+        section.addKeySelector(KeySettings.ROTATE_SHAPE_BACKWARD);
+        section.addKeySelector(KeySettings.ZOOM);
+        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_SIZE);
+        section.addKeySelector(KeySettings.INCREASE_BREAK_PLACE_ALIGN);
+        section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_ALIGN);
+        section.addKeySelector(KeySettings.DROP);
+        section.addKeySelector(KeySettings.OPEN_CHAT);
+        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW);
 
         return section;
     }
@@ -100,27 +99,27 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(FloatSettings.FOV, UiMessages.FOV);
-        section.addSlider(IntSettings.RENDER_DISTANCE, UiMessages.RENDER_DISTANCE);
-        section.addSlider(IntSettings.LOD_COUNT, UiMessages.LOD_COUNT);
-        section.addSlider(FloatSettings.NIGHT_BRIGHTNESS, UiMessages.NIGHT_BRIGHTNESS);
-        section.addOption(OptionSettings.PERSPECTIVE, UiMessages.PERSPECTIVE);
-        section.addSlider(FloatSettings.CROSSHAIR_SIZE, UiMessages.CROSSHAIR_SIZE);
-        section.addSlider(FloatSettings.HOTBAR_SIZE, UiMessages.HOTBAR_SIZE);
-        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES, UiMessages.AMBIENT_OCCLUSION_SAMPLES);
-        section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH, UiMessages.BREAK_PARTICLE_STEP_LENGTH);
-        section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH, UiMessages.PLACE_PARTICLE_STEP_LENGTH);
-        section.addToggle(ToggleSettings.RENDER_HUD, UiMessages.RENDER_HUD);
-        section.addToggle(ToggleSettings.USE_SHADOW_MAPPING, UiMessages.USE_SHADOW_MAPPING);
-        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS, UiMessages.CHUNKS_CAST_SHADOWS);
-        section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS, UiMessages.PARTICLES_CAST_SHADOWS);
-        section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS, UiMessages.GLASS_CASTS_SHADOWS);
-        section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION, UiMessages.USE_AMBIENT_OCCLUSION);
-        section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES, UiMessages.SHOW_BREAK_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES, UiMessages.SHOW_SHAPE_PLACE_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES, UiMessages.SHOW_STRUCTURE_PLACE_PARTICLES);
-        section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES, UiMessages.SHOW_SPLASH_PARTICLES);
-        section.addOption(OptionSettings.OCCLUSION_CULLING, UiMessages.OCCLUSION_CULLING);
+        section.addSlider(FloatSettings.FOV);
+        section.addSlider(IntSettings.RENDER_DISTANCE);
+        section.addSlider(IntSettings.LOD_COUNT);
+        section.addSlider(FloatSettings.NIGHT_BRIGHTNESS);
+        section.addOption(OptionSettings.PERSPECTIVE);
+        section.addSlider(FloatSettings.CROSSHAIR_SIZE);
+        section.addSlider(FloatSettings.HOTBAR_SIZE);
+        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH);
+        section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH);
+        section.addToggle(ToggleSettings.RENDER_HUD);
+        section.addToggle(ToggleSettings.USE_SHADOW_MAPPING);
+        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS);
+        section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS);
+        section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION);
+        section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES);
+        section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES);
+        section.addOption(OptionSettings.OCCLUSION_CULLING);
 
         return section;
     }
@@ -128,19 +127,19 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createUiSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addOption(CoreOptionSettings.LANGUAGE, CoreUiMessages.LANGUAGE);
-        section.addOption(CoreOptionSettings.FONT, CoreUiMessages.FONT);
-        section.addOption(CoreOptionSettings.TEXTURE_PACK, CoreUiMessages.TEXTURE_PACK);
+        section.addOption(CoreOptionSettings.LANGUAGE);
+        section.addOption(CoreOptionSettings.FONT);
+        section.addOption(CoreOptionSettings.TEXTURE_PACK);
 
-        section.addSlider(CoreFloatSettings.GUI_SIZE, CoreUiMessages.GUI_SIZE);
-        section.addSlider(CoreFloatSettings.TEXT_SIZE, CoreUiMessages.TEXT_SIZE);
-        section.addSlider(CoreFloatSettings.RIM_THICKNESS, CoreUiMessages.RIM_THICKNESS);
-        section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, UiMessages.CHAT_MESSAGE_DURATION);
-        section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT, UiMessages.MAX_CHAT_MESSAGE_COUNT);
-        section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessages.HOTBAR_INDICATOR_SCALER);
-        section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR, UiMessages.PAUSE_MENU_BACKGROUND_BLUR);
-        section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE, UiMessages.INVENTORY_ITEM_SIZE);
-        section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING, UiMessages.INVENTORY_ITEM_SCALING);
+        section.addSlider(CoreFloatSettings.GUI_SIZE);
+        section.addSlider(CoreFloatSettings.TEXT_SIZE);
+        section.addSlider(CoreFloatSettings.RIM_THICKNESS);
+        section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION);
+        section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT);
+        section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER);
+        section.addSlider(FloatSettings.PAUSE_MENU_BACKGROUND_BLUR);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SIZE);
+        section.addSlider(FloatSettings.INVENTORY_ITEM_SCALING);
 
         return section;
     }
@@ -148,13 +147,13 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createSoundSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(CoreFloatSettings.MASTER_AUDIO, CoreUiMessages.MASTER_AUDIO);
-        section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessages.FOOTSTEPS_AUDIO);
-        section.addSlider(FloatSettings.JUMP_AUDIO, UiMessages.JUMP_AUDIO);
-        section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
-        section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
-        section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);
-        section.addSlider(CoreFloatSettings.UI_AUDIO, CoreUiMessages.UI_AUDIO);
+        section.addSlider(CoreFloatSettings.MASTER_AUDIO);
+        section.addSlider(FloatSettings.FOOTSTEPS_AUDIO);
+        section.addSlider(FloatSettings.JUMP_AUDIO);
+        section.addSlider(FloatSettings.PLACE_AUDIO);
+        section.addSlider(FloatSettings.DIG_AUDIO);
+        section.addSlider(FloatSettings.INVENTORY_AUDIO);
+        section.addSlider(CoreFloatSettings.UI_AUDIO);
 
         return section;
     }
@@ -162,32 +161,32 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
-        section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS, new Message("Reload Settings"));
-        section.addKeySelector(CoreKeySettings.RELOAD_ASSETS, new Message("Reload Assets"));
-        section.addKeySelector(CoreKeySettings.RELOAD_FONT, new Message("Reload Font"));
-        section.addKeySelector(KeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
-        section.addKeySelector(KeySettings.START_COMMAND, new Message("Start Command"));
+        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW);
+        section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS);
+        section.addKeySelector(CoreKeySettings.RELOAD_ASSETS);
+        section.addKeySelector(CoreKeySettings.RELOAD_FONT);
+        section.addKeySelector(KeySettings.RELOAD_MATERIALS);
+        section.addKeySelector(KeySettings.START_COMMAND);
 
-        section.addToggle(ToggleSettings.DEBUG_MENU, new Message("Open Debug Screen"));
-        section.addToggle(ToggleSettings.NO_CLIP, new Message("No-Clip"));
-        section.addToggle(ToggleSettings.CULLING_COMPUTATION, new Message("Culling Computation"));
-        section.addToggle(ToggleSettings.X_RAY, new Message("X-Ray"));
-        section.addToggle(CoreToggleSettings.V_SYNC, new Message("Use V-Sync"));
-        section.addToggle(ToggleSettings.RENDER_OCCLUDERS, new Message("Render Occluders"));
-        section.addToggle(ToggleSettings.RENDER_OCCLUDEES, new Message("Render Occludees"));
-        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
-        section.addToggle(ToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
-        section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
-        section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE, new Message("Render Accumulation Texture"));
-        section.addToggle(ToggleSettings.RENDER_REVEAL_TEXTURE, new Message("Render Reveal Texture"));
-        section.addOption(CoreOptionSettings.LOG_MESSAGES, new Message("Messages to Log"));
+        section.addToggle(ToggleSettings.OPEN_DEBUG_MENU);
+        section.addToggle(ToggleSettings.NO_CLIP);
+        section.addToggle(ToggleSettings.CULLING_COMPUTATION);
+        section.addToggle(ToggleSettings.TOGGLE_X_RAY);
+        section.addToggle(CoreToggleSettings.V_SYNC);
+        section.addToggle(ToggleSettings.RENDER_OCCLUDERS);
+        section.addToggle(ToggleSettings.RENDER_OCCLUDEES);
+        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP);
+        section.addToggle(ToggleSettings.RENDER_SHADOW_MAP);
+        section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS);
+        section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE);
+        section.addToggle(ToggleSettings.RENDER_REVEAL_TEXTURE);
+        section.addOption(CoreOptionSettings.LOG_MESSAGES);
 
-        section.addSlider(IntSettings.REACH, new Message("Reach"));
-        section.addSlider(IntSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
-        section.addSlider(FloatSettings.TIME_SPEED, new Message("Time Speed"));
-        section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
-        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
+        section.addSlider(IntSettings.REACH);
+        section.addSlider(IntSettings.BREAK_PLACE_INTERVALL);
+        section.addSlider(FloatSettings.TIME_SPEED);
+        section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION);
+        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD);
 
         return section;
     }

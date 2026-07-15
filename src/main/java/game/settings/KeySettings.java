@@ -27,7 +27,7 @@ public enum KeySettings implements KeySetting {
     DESTROY(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON),
     USE(GLFW_MOUSE_BUTTON_RIGHT | Input.IS_MOUSE_BUTTON),
     PICK_BLOCK(GLFW_MOUSE_BUTTON_MIDDLE | Input.IS_MOUSE_BUTTON),
-    INVENTORY(GLFW_KEY_E),
+    OPEN_INVENTORY(GLFW_KEY_E),
     ZOOM(GLFW_KEY_V),
     INCREASE_BREAK_PLACE_SIZE(GLFW_KEY_UP),
     DECREASE_BREAK_PLACE_SIZE(GLFW_KEY_DOWN),
@@ -66,4 +66,9 @@ public enum KeySettings implements KeySetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "keySettings";
+    }
 }

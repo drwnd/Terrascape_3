@@ -51,6 +51,16 @@ public final class StandAloneOptionSetting implements OptionSetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
+    @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
     private Option value;
     private final Option defaultValue;
 

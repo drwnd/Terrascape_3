@@ -2,6 +2,7 @@ package game.settings;
 
 import core.settings.OptionSetting;
 import core.settings.optionSettings.Option;
+
 import game.player.interaction.PlaceMode;
 import game.player.rendering.Camera;
 import game.player.rendering.RenderingOptimizer;
@@ -9,9 +10,9 @@ import game.player.rendering.RenderingOptimizer;
 import static org.lwjgl.glfw.GLFW.*;
 
 public enum OptionSettings implements OptionSetting {
-    PLACE_MODE(PlaceMode.REPLACE),
     OCCLUSION_CULLING(RenderingOptimizer.OcclusionCullingOptions.NORMAL),
-    PERSPECTIVE(Camera.Perspective.FIRST_PERSON, GLFW_KEY_C);
+    PERSPECTIVE(Camera.Perspective.FIRST_PERSON, GLFW_KEY_C),
+    PLACE_MODE(PlaceMode.REPLACE);
 
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;
@@ -63,4 +64,9 @@ public enum OptionSettings implements OptionSetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "optionSettings";
+    }
 }

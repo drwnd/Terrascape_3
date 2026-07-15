@@ -108,6 +108,16 @@ public enum DebugScreenOptions {
             return GLFW_KEY_UNKNOWN;
         }
 
+        @Override
+        public String translationFileName() {
+            throw new UnsupportedOperationException("DebugOptions aren't Translatable");
+        }
+
+        @Override
+        public int ordinal() {
+            throw new UnsupportedOperationException("DebugOptions aren't Translatable");
+        }
+
 
         private final String name;
         private final Option defaultValue;

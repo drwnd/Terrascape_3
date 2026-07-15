@@ -46,6 +46,16 @@ public final class StandAloneIntSetting implements IntSetting {
         return defaultValue;
     }
 
+    @Override
+    public String translationFileName() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
+    @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
     private final int min, max, defaultValue;
     private int value;
 }

@@ -16,74 +16,14 @@ Debug Screen
 World Name
 World Seed
 Create World
-Field Of View
-Sensitivity
-Footsteps Audio
-Jump Audio
-Place Audio
-Dig Audio
-Inventory Audio
-Crosshair Size
-Hotbar Size
-Hotbar Indicator Size
-Pause Menu Background Blur
-Inventory Item Size
-Inventory Item Scaling
-Move Forward
-Move Back
-Move Right
-Move Left
-Jump
-Spring
-Sneak
-Crawl
-Fly Fast
-Hotbar Slot 1
-Hotbar Slot 2
-Hotbar Slot 3
-Hotbar Slot 4
-Hotbar Slot 5
-Hotbar Slot 6
-Hotbar Slot 7
-Hotbar Slot 8
-Hotbar Slot 9
-Destroy
-Use
-Pick Block
-Open Inventory
-Zoom
-Increase Break Place Size
-Decrease Break Place Size
-Drop Item
-Scroll Hotbar
-Use Shadow Mapping
 Structure Name
-Night Brightness
 Optimize %s
 (May take a few Minutes)
-Open Chat
-Chat Message Duration (Seconds)
 Message
-Max Amount of Chat Messages
-Use Ambient Occlusion
-Show Break Particles
-Show Shape Place Particles
-Show Structure Place Particles
-Show Splash Particles
-Set Place Start Position
-Ambient Occlusion Samples
-Occlusion Culling
-Chunks cast Shadows
-Particles cast Shadows
-Glass casts Shadows
 Distance Exponent
-Increase Break Place Align
-Decrease Break Place Align
 Size: %s³ Voxel
 Align: %s³ Voxel
 Invert
-Rotate Shape Forward
-Rotate Shape Backward
 Step Height
 Radius
 Height
@@ -91,22 +31,13 @@ Slope
 Top Radius
 Wall Thickness
 Paint
-Offset from Ground
 Size Reduction
-Show Placeable Preview
 Shapes
 Structures
 Other
-Lock Place Position
 Rotation
 Custom Shape
 Load Code
 Length X
 Length Y
 Length Z
-Break Particle Step Length
-Place Particle Step Length
-Render Distance
-Lod Count
-Render HUD
-Perspective
