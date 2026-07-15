@@ -6,14 +6,19 @@ public interface OptionSetting extends KeySetting {
 
     default boolean setIfPresent(String name, String value) {
         if (!name().equalsIgnoreCase(name)) return false;
-        Option savedValue = defaultValue().value(value);
+
+        String[] values = value.split("#");
+
+        Option savedValue = defaultValue().value(values[0]);
         if (savedValue == null) return false;
         setValue(savedValue);
+
+        setKeybind(Integer.parseInt(values[1]));
         return true;
     }
 
     default String toSaveValue() {
-        return String.valueOf(value());
+        return "%s#%d".formatted(String.valueOf(value()), keybind());
     }
 
     void setValue(Option value);
