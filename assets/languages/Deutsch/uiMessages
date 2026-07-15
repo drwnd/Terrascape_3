@@ -16,74 +16,14 @@ Debugbildschirm
 Weltname
 Weltsamen
 Welt erstellen
-Sichtfeld
-Empfindsamkeit
-Fußstapfen Audio
-Springen Audio
-Platzieren Audio
-Graben Audio
-Inventar Audio
-Fadenkreuzgröße
-Hotbargröße
-Hotbaranzeigergröße
-Pausenmenühintergrundsverwischung
-Inventargegenstandsgröße
-Inventargegenstandsvergrößerung
-Vorwärts bewegen
-Rückwärts bewegen
-Nach recht bewegen
-Nach links bewegen
-Springen
-Rennen
-Schleichen
-Kriechen
-Schnell fliegen
-Hotbarslot 1
-Hotbarslot 2
-Hotbarslot 3
-Hotbarslot 4
-Hotbarslot 5
-Hotbarslot 6
-Hotbarslot 7
-Hotbarslot 8
-Hotbarslot 9
-Zerstören
-Benutzen
-Block wählen
-Inventar öffnen
-Heranzoomen
-Zerstör-, Platziergröße erhöhen
-Zerstör-, Platziergröße verringern
-Gegenstand fallen lassen
-Hotbarscrollen
-Benutze Shadowmapping
 Strukturname
-Nachthelligkeit
 Optimiere %s
 (Könnte ein paar Minuten brauchen)
-Sprachraum Öffnen
-Nachricht Dauer (Sekunden)
 Nachricht
-Höchste Nachrichtenanzahl
-Benutze Ambient Occlusion
-Zeige Partikel beim Zerstören
-Zeige Partikel beim Formen Platzieren
-Zeige Partikel beim Struktur Platzieren
-Zeige Platscherpartikel
-Setze Platzierungsstartposition
-Umgebungsverdeckungsproben
-Umgebungsverdeckung
-Chunks werfen Schatten
-Partikel werfen Schatten
-Glas wirft Schatten
 Distanzexponent
-Zerstör-, Platzierausrichtung erhöhen
-Zerstör-, Platzierausrichtung verringern
 Größe: %s³ Voxel
 Ausrichtung: %s³ Voxel
 Umkehren
-Objekt vorwärts drehen
-Objekt rückwärts drehen
 Stufenhöhe
 Radius
 Höhe
@@ -91,22 +31,13 @@ Steigung
 Oberer Radius
 Wanddicke
 Malen
-Vom Boden abheben
 Größenreduzierung
-Zeige Platzierungsvorschau
 Formen
 Strukturen
 Andere
-Fixiere Platzierungsposition
 Rotation
 Benutzerdefinierte Form
 Lade Programm
 Länge X
 Länge Y
 Länge Z
-Partikelschrittgröße beim Zerstören
-Partikelschrittgröße beim Platzieren
-Sichtweite
-Lod Anzahl
-Zeige HUD
-Perspektive
