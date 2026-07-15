@@ -1,5 +1,6 @@
 package game.player.rendering;
 
+import core.language.Translatable;
 import core.rendering_api.Window;
 import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
@@ -151,7 +152,12 @@ public final class Camera {
 
     private final Matrix4f projectionMatrix = new Matrix4f();
 
-    public enum Perspective implements Option {
-        FIRST_PERSON, THIRD_PERSON, SECOND_PERSON
+    public enum Perspective implements Option, Translatable {
+        FIRST_PERSON, THIRD_PERSON, SECOND_PERSON;
+
+        @Override
+        public String translationFileName() {
+            return "perspectives";
+        }
     }
 }
