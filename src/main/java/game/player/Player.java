@@ -111,7 +111,7 @@ public final class Player {
         InteractionHandler.handleInactiveInput(button, action);
 
         if (button == KeySettings.ZOOM.keybind() && action != GLFW_REPEAT) camera.setZoomed(action == GLFW_PRESS);
-        if (button == KeySettings.INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
+        if (button == KeySettings.OPEN_INVENTORY.keybind() && action == GLFW_PRESS) toggleInventory();
         if (button == KeySettings.OPEN_CHAT.keybind() && action == GLFW_PRESS) toggleChat();
         if (button == KeySettings.START_COMMAND.keybind() && action == GLFW_PRESS) startCommand();
 

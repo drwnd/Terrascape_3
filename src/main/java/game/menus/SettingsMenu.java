@@ -1,7 +1,6 @@
 package game.menus;
 
 import core.settings.*;
-import core.utils.Message;
 import core.utils.StringGetter;
 import core.language.CoreUiMessages;
 import core.renderables.*;
@@ -79,7 +78,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySettings.DESTROY);
         section.addKeySelector(KeySettings.USE);
         section.addKeySelector(KeySettings.PICK_BLOCK);
-        section.addKeySelector(KeySettings.INVENTORY);
+        section.addKeySelector(KeySettings.OPEN_INVENTORY);
         section.addKeySelector(KeySettings.SET_PLACE_START_POSITION);
         section.addKeySelector(KeySettings.LOCK_PLACE_POSITION);
         section.addKeySelector(KeySettings.SHOW_PLACEABLE_PREVIEW);
@@ -166,28 +165,28 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS);
         section.addKeySelector(CoreKeySettings.RELOAD_ASSETS);
         section.addKeySelector(CoreKeySettings.RELOAD_FONT);
-        section.addKeySelector(KeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
-        section.addKeySelector(KeySettings.START_COMMAND, new Message("Start Command"));
+        section.addKeySelector(KeySettings.RELOAD_MATERIALS);
+        section.addKeySelector(KeySettings.START_COMMAND);
 
-        section.addToggle(ToggleSettings.DEBUG_MENU, new Message("Open Debug Screen"));
-        section.addToggle(ToggleSettings.NO_CLIP, new Message("No-Clip"));
-        section.addToggle(ToggleSettings.CULLING_COMPUTATION, new Message("Culling Computation"));
-        section.addToggle(ToggleSettings.X_RAY, new Message("X-Ray"));
+        section.addToggle(ToggleSettings.OPEN_DEBUG_MENU);
+        section.addToggle(ToggleSettings.NO_CLIP);
+        section.addToggle(ToggleSettings.CULLING_COMPUTATION);
+        section.addToggle(ToggleSettings.TOGGLE_X_RAY);
         section.addToggle(CoreToggleSettings.V_SYNC);
-        section.addToggle(ToggleSettings.RENDER_OCCLUDERS, new Message("Render Occluders"));
-        section.addToggle(ToggleSettings.RENDER_OCCLUDEES, new Message("Render Occludees"));
-        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
-        section.addToggle(ToggleSettings.RENDER_SHADOW_MAP, new Message("Render Shadow Map"));
-        section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS, new Message("Render Shadow Color"));
-        section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE, new Message("Render Accumulation Texture"));
-        section.addToggle(ToggleSettings.RENDER_REVEAL_TEXTURE, new Message("Render Reveal Texture"));
-        section.addOption(CoreOptionSettings.LOG_MESSAGES, new Message("Messages to Log"));
+        section.addToggle(ToggleSettings.RENDER_OCCLUDERS);
+        section.addToggle(ToggleSettings.RENDER_OCCLUDEES);
+        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP);
+        section.addToggle(ToggleSettings.RENDER_SHADOW_MAP);
+        section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS);
+        section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE);
+        section.addToggle(ToggleSettings.RENDER_REVEAL_TEXTURE);
+        section.addOption(CoreOptionSettings.LOG_MESSAGES);
 
-        section.addSlider(IntSettings.REACH, new Message("Reach"));
-        section.addSlider(IntSettings.BREAK_PLACE_INTERVALL, new Message("Break Place Intervall"));
-        section.addSlider(FloatSettings.TIME_SPEED, new Message("Time Speed"));
-        section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION, new Message("Downward Sun Direction"));
-        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD, new Message("Occluders / Occludees debug lod"));
+        section.addSlider(IntSettings.REACH);
+        section.addSlider(IntSettings.BREAK_PLACE_INTERVALL);
+        section.addSlider(FloatSettings.TIME_SPEED);
+        section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION);
+        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD);
 
         return section;
     }

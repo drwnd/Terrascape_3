@@ -10,9 +10,9 @@ import game.player.rendering.RenderingOptimizer;
 import static org.lwjgl.glfw.GLFW.*;
 
 public enum OptionSettings implements OptionSetting {
-    PLACE_MODE(PlaceMode.REPLACE),
     OCCLUSION_CULLING(RenderingOptimizer.OcclusionCullingOptions.NORMAL),
-    PERSPECTIVE(Camera.Perspective.FIRST_PERSON, GLFW_KEY_C);
+    PERSPECTIVE(Camera.Perspective.FIRST_PERSON, GLFW_KEY_C),
+    PLACE_MODE(PlaceMode.REPLACE);
 
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;

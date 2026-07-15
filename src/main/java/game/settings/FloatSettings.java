@@ -17,10 +17,11 @@ public enum FloatSettings implements FloatSetting {
     PAUSE_MENU_BACKGROUND_BLUR(0.0F, 10.0F, 0.0F, 0.1F),
     INVENTORY_ITEM_SIZE(0.01F, 0.1F, 0.02F, 0.001F),
     INVENTORY_ITEM_SCALING(1, 2, 1.2F, 0.01F),
-    TIME_SPEED(0.0F, 0.001F, 0.00008333F, 0.000001F),
-    DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F),
     NIGHT_BRIGHTNESS(0.05F, 1.0F, 0.2F, 0.01F),
-    CHAT_MESSAGE_DURATION(1.0F, 30.0F, 5.0F, 0.1F);
+    CHAT_MESSAGE_DURATION(1.0F, 30.0F, 5.0F, 0.1F),
+
+    TIME_SPEED(0.0F, 0.001F, 0.00008333F, 0.000001F),
+    DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F);
 
     FloatSettings(float min, float max, float defaultValue, float accuracy) {
         this.min = min;

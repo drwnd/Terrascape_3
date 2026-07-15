@@ -7,17 +7,18 @@ import game.server.Game;
 import static game.utils.Constants.CHUNK_SIZE_BITS;
 
 public enum IntSettings implements IntSetting {
-    REACH(0, 500, 112),
-    BREAK_PLACE_INTERVALL(1, 20, 4),
     MAX_CHAT_MESSAGE_COUNT(10, 1000, 100),
     AMBIENT_OCCLUSION_SAMPLES(0, 51, 51),
-    OCCLUDERS_OCCLUDEES_LOD(0, 30, 0),
-    BREAK_PLACE_SIZE(0, CHUNK_SIZE_BITS + 2, 4),
-    BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
     BREAK_PARTICLE_STEP_LENGTH(1, 16, 2),
     PLACE_PARTICLE_STEP_LENGTH(1, 16, 1),
     RENDER_DISTANCE(2, 16, 6, Game::updateRenderDistance),
-    LOD_COUNT(1, 20, 10, Game::updateLodCount);
+    LOD_COUNT(1, 20, 10, Game::updateLodCount),
+
+    OCCLUDERS_OCCLUDEES_LOD(0, LOD_COUNT.max - 1, 0),
+    BREAK_PLACE_SIZE(0, CHUNK_SIZE_BITS + 2, 4),
+    BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
+    REACH(0, 500, 112),
+    BREAK_PLACE_INTERVALL(1, 20, 4);
 
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
