@@ -50,6 +50,16 @@ public final class StandAloneToggleSetting implements ToggleSetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
+    @Override
+    public int ordinal() {
+        throw new UnsupportedOperationException("Standalone Settings aren't Translatable");
+    }
+
     private final boolean defaultValue;
     private boolean value;
 

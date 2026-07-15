@@ -1,6 +1,7 @@
 package game.settings;
 
 import core.settings.IntSetting;
+
 import game.server.Game;
 
 import static game.utils.Constants.CHUNK_SIZE_BITS;
@@ -74,6 +75,11 @@ public enum IntSettings implements IntSetting {
     private final int min, max, defaultValue;
     private int value;
     private final ChangeCallback callback;
+
+    @Override
+    public String translationFileName() {
+        return "intSettings";
+    }
 
     public interface ChangeCallback {
         void run(int oldValue);

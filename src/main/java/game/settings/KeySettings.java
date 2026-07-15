@@ -66,4 +66,9 @@ public enum KeySettings implements KeySetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "keySettings";
+    }
 }

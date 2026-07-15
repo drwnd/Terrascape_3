@@ -2,6 +2,7 @@ package game.settings;
 
 import core.settings.OptionSetting;
 import core.settings.optionSettings.Option;
+
 import game.player.interaction.PlaceMode;
 import game.player.rendering.Camera;
 import game.player.rendering.RenderingOptimizer;
@@ -63,4 +64,9 @@ public enum OptionSettings implements OptionSetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "optionSettings";
+    }
 }

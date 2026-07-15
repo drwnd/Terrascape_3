@@ -55,6 +55,11 @@ public enum CoreOptionSettings implements OptionSetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        return "coreOptionSettings";
+    }
+
     private Option value;
     private final Option defaultValue;
 

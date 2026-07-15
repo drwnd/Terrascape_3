@@ -65,4 +65,9 @@ public enum CoreFloatSettings implements FloatSetting {
 
     private final float min, max, defaultValue, accuracy;
     private float value;
+
+    @Override
+    public String translationFileName() {
+        return "coreFloatSettings";
+    }
 }

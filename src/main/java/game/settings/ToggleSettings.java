@@ -79,4 +79,9 @@ public enum ToggleSettings implements ToggleSetting {
 
     private final int defaultKeybind;
     private int keybind;
+
+    @Override
+    public String translationFileName() {
+        return "toggleSettings";
+    }
 }

@@ -29,6 +29,11 @@ public enum CoreKeySettings implements KeySetting {
         return defaultKeybind;
     }
 
+    @Override
+    public String translationFileName() {
+        return "coreKeySettings";
+    }
+
     private final int defaultKeybind;
     private int keybind;
 }
