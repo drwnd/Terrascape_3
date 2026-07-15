@@ -26,7 +26,8 @@ public final class Movement {
 
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
-        grounded = velocity.y == 0.0F && checkWideGrounded(position);
+        wideGrounded = velocity.y == 0.0F && checkWideGrounded(position);
+        thinGrounded = wideGrounded && checkThinGrounded(position);
 
         Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
         state.changeVelocity(velocity, acceleration, position, rotation);
@@ -73,8 +74,12 @@ public final class Movement {
         return state;
     }
 
-    public boolean isGrounded() {
-        return grounded;
+    public boolean isWideGrounded() {
+        return wideGrounded;
+    }
+
+    public boolean isThinGrounded() {
+        return thinGrounded;
     }
 
 
@@ -328,7 +333,7 @@ public final class Movement {
 
     private long lastFootstepTick = 0;
     private MovementState state;
-    private boolean grounded;
+    private boolean wideGrounded, thinGrounded;
     private final Vector3f velocity = new Vector3f();
     private Vector3f renderVelocity = new Vector3f();
 }

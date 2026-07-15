@@ -37,7 +37,7 @@ public final class FlyingState extends MovementState {
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
-        if (movement.isGrounded() && !ToggleSettings.NO_CLIP.value()) next = new WalkingState();
+        if (movement.isThinGrounded() && !ToggleSettings.NO_CLIP.value()) next = new WalkingState();
     }
 
     @Override
