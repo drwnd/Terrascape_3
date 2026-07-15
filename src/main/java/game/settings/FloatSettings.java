@@ -4,6 +4,7 @@ import core.settings.FloatSetting;
 import core.utils.MathUtils;
 
 public enum FloatSettings implements FloatSetting {
+    SENSITIVITY(0.0F, 1.0F, 0.14612676056338028F),
     FOV(1.0F, 175.0F, 90.0F, 1.0F),
     FOOTSTEPS_AUDIO(0.0F, 5.0F, 1.0F, 0.01F),
     JUMP_AUDIO(0.0F, 5.0F, 1.5F, 0.01F),

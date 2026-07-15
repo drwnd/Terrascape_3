@@ -1,6 +1,8 @@
 package core.settings;
 
-public interface NumberSetting<T extends Number> {
+import core.language.Translatable;
+
+public interface NumberSetting<T extends Number> extends Translatable {
 
     T valueFromFraction(float fraction);
 

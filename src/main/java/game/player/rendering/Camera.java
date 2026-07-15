@@ -1,7 +1,6 @@
 package game.player.rendering;
 
 import core.rendering_api.Window;
-import core.settings.CoreFloatSettings;
 import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
 import core.utils.Vector3l;
@@ -41,7 +40,7 @@ public final class Camera {
     }
 
     public void rotate(Vector2i cursorMovement) {
-        float sensitivityFactor = CoreFloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
+        float sensitivityFactor = FloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 1.2F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
         float rotationYaw = cursorMovement.x * sensitivityFactor;
         float rotationPitch = cursorMovement.y * sensitivityFactor;

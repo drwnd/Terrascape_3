@@ -54,9 +54,9 @@ public final class SettingsMenu extends UiBackgroundElement {
         SettingsRenderable section = new SettingsRenderable();
 
         section.addToggle(ToggleSettings.SCROLL_HOTBAR, UiMessages.SCROLL_HOTBAR);
-        section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT, CoreUiMessages.RAW_MOUSE_INPUT);
+        section.addToggle(CoreToggleSettings.RAW_MOUSE_INPUT);
 
-        section.addSlider(CoreFloatSettings.SENSITIVITY, UiMessages.SENSITIVITY);
+        section.addSlider(FloatSettings.SENSITIVITY, UiMessages.SENSITIVITY);
 
         section.addKeySelector(KeySettings.MOVE_FORWARD, UiMessages.MOVE_FORWARD);
         section.addKeySelector(KeySettings.MOVE_BACK, UiMessages.MOVE_BACK);
@@ -92,7 +92,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addKeySelector(KeySettings.DECREASE_BREAK_PLACE_ALIGN, UiMessages.DECREASE_BREAK_PLACE_ALIGN);
         section.addKeySelector(KeySettings.DROP, UiMessages.DROP);
         section.addKeySelector(KeySettings.OPEN_CHAT, UiMessages.OPEN_CHAT);
-        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
+        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW);
 
         return section;
     }
@@ -128,13 +128,13 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createUiSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addOption(CoreOptionSettings.LANGUAGE, CoreUiMessages.LANGUAGE);
-        section.addOption(CoreOptionSettings.FONT, CoreUiMessages.FONT);
-        section.addOption(CoreOptionSettings.TEXTURE_PACK, CoreUiMessages.TEXTURE_PACK);
+        section.addOption(CoreOptionSettings.LANGUAGE);
+        section.addOption(CoreOptionSettings.FONT);
+        section.addOption(CoreOptionSettings.TEXTURE_PACK);
 
-        section.addSlider(CoreFloatSettings.GUI_SIZE, CoreUiMessages.GUI_SIZE);
-        section.addSlider(CoreFloatSettings.TEXT_SIZE, CoreUiMessages.TEXT_SIZE);
-        section.addSlider(CoreFloatSettings.RIM_THICKNESS, CoreUiMessages.RIM_THICKNESS);
+        section.addSlider(CoreFloatSettings.GUI_SIZE);
+        section.addSlider(CoreFloatSettings.TEXT_SIZE);
+        section.addSlider(CoreFloatSettings.RIM_THICKNESS);
         section.addSlider(FloatSettings.CHAT_MESSAGE_DURATION, UiMessages.CHAT_MESSAGE_DURATION);
         section.addSlider(IntSettings.MAX_CHAT_MESSAGE_COUNT, UiMessages.MAX_CHAT_MESSAGE_COUNT);
         section.addSlider(FloatSettings.HOTBAR_INDICATOR_SCALER, UiMessages.HOTBAR_INDICATOR_SCALER);
@@ -148,13 +148,13 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createSoundSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addSlider(CoreFloatSettings.MASTER_AUDIO, CoreUiMessages.MASTER_AUDIO);
+        section.addSlider(CoreFloatSettings.MASTER_AUDIO);
         section.addSlider(FloatSettings.FOOTSTEPS_AUDIO, UiMessages.FOOTSTEPS_AUDIO);
         section.addSlider(FloatSettings.JUMP_AUDIO, UiMessages.JUMP_AUDIO);
         section.addSlider(FloatSettings.PLACE_AUDIO, UiMessages.PLACE_AUDIO);
         section.addSlider(FloatSettings.DIG_AUDIO, UiMessages.DIG_AUDIO);
         section.addSlider(FloatSettings.INVENTORY_AUDIO, UiMessages.INVENTORY_AUDIO);
-        section.addSlider(CoreFloatSettings.UI_AUDIO, CoreUiMessages.UI_AUDIO);
+        section.addSlider(CoreFloatSettings.UI_AUDIO);
 
         return section;
     }
@@ -162,10 +162,10 @@ public final class SettingsMenu extends UiBackgroundElement {
     private static SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
-        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW, CoreUiMessages.RESIZE_WINDOW);
-        section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS, new Message("Reload Settings"));
-        section.addKeySelector(CoreKeySettings.RELOAD_ASSETS, new Message("Reload Assets"));
-        section.addKeySelector(CoreKeySettings.RELOAD_FONT, new Message("Reload Font"));
+        section.addKeySelector(CoreKeySettings.RESIZE_WINDOW);
+        section.addKeySelector(CoreKeySettings.RELOAD_SETTINGS);
+        section.addKeySelector(CoreKeySettings.RELOAD_ASSETS);
+        section.addKeySelector(CoreKeySettings.RELOAD_FONT);
         section.addKeySelector(KeySettings.RELOAD_MATERIALS, new Message("Reload Materials"));
         section.addKeySelector(KeySettings.START_COMMAND, new Message("Start Command"));
 
@@ -173,7 +173,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.NO_CLIP, new Message("No-Clip"));
         section.addToggle(ToggleSettings.CULLING_COMPUTATION, new Message("Culling Computation"));
         section.addToggle(ToggleSettings.X_RAY, new Message("X-Ray"));
-        section.addToggle(CoreToggleSettings.V_SYNC, new Message("Use V-Sync"));
+        section.addToggle(CoreToggleSettings.V_SYNC);
         section.addToggle(ToggleSettings.RENDER_OCCLUDERS, new Message("Render Occluders"));
         section.addToggle(ToggleSettings.RENDER_OCCLUDEES, new Message("Render Occludees"));
         section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP, new Message("Render Occluder Depth Map"));
