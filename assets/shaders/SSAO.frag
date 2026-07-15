@@ -67,7 +67,7 @@ float computeVisibilityFactor() {
 
         float angleScale = abs(dot(NORMALS[geometryIntPos.w], normalize(relativePosition)));
         float rangeCheck = float(abs(currentDepth - geometryDepth) < 7) / length(SAMPLES[index]);
-        occlusionFactor += rangeCheck * float(geometryDepth < expectedDepth + 1.1 - angleScale);
+        occlusionFactor += rangeCheck * float(geometryDepth < expectedDepth + angleScale);
     }
 
     float averageOcclusionFactor = occlusionFactor * distanceScale / count;
