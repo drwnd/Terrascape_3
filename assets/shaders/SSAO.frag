@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 
 uniform sampler2D colorTexture;
 uniform isampler2D intPosTexture;

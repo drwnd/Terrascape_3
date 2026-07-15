@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 #define MAX_AMOUNT_OF_MATERIALS 256
 
 flat in int textureData;

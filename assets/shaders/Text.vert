@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 #define MAX_TEXT_LENGTH 128
 
 in int data;

@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 #define SHADOW_TRANSPARENT_ORDINAL 4
 #define PROPERTIES_OFFSET 24
 

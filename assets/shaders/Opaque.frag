@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 #define MAX_AMOUNT_OF_MATERIALS 256
 #define HEAD_UNDER_WATER_BIT 1
 #define DO_SHADOW_MAPPING_BIT 2

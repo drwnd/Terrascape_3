@@ -1,4 +1,4 @@
-#version 400 core
+#version 460 core
 
 layout(early_fragment_tests) in;
 
