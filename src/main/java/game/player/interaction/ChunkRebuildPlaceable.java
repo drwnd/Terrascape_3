@@ -43,11 +43,11 @@ public final class ChunkRebuildPlaceable implements Placeable {
         int inChunkY = (int) position.y >> chunk.LOD & CHUNK_SIZE_MASK;
         int inChunkZ = (int) position.z >> chunk.LOD & CHUNK_SIZE_MASK;
 
-        chunk.storeMaterials(
+        chunk.storeStructureMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 0, 0, 0,
                 CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE,
-                lod, toPlaceChunk);
+                lod, toPlaceChunk, (byte) 0);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();
