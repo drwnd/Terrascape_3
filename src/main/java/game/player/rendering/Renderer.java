@@ -666,10 +666,10 @@ public final class Renderer extends Renderable {
 
         if (!state.shouldRender()) return;
         switch (state) {
-            case REPEAT_PLACE, REPEAT_BREAK -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
-            case REPEAT_PLACE_LOCKED, REPEAT_BREAK_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget);
+            case REPEAT -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget);
+            case REPEAT_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget);
 
-            case STRUCTURE_SELECT, SHAPE_PLACE, SHAPE_BREAK ->
+            case STRUCTURE_SELECT, SHAPE ->
                     renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? currentTarget : startTarget, currentTarget);
             case STRUCTURE_SELECT_LOCKED ->
                     renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? lockedTarget : startTarget, lockedTarget);

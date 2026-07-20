@@ -63,7 +63,6 @@ public final class InteractionHandler {
     public PlacingState getState(Target currentTarget) {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT) || placeable == null || breakHeldOnly;
         boolean isLocked = lockedTarget != null;
         boolean isRepeat = startTarget != null;
 
@@ -77,13 +76,13 @@ public final class InteractionHandler {
         }
 
         if (isRepeat) {
-            if (isLocked) return isBreak ? PlacingState.REPEAT_BREAK_LOCKED : PlacingState.REPEAT_PLACE_LOCKED;
+            if (isLocked) return PlacingState.REPEAT_LOCKED;
             if (currentTarget == null) return PlacingState.NONE;
-            return isBreak ? PlacingState.REPEAT_BREAK : PlacingState.REPEAT_PLACE;
+            return PlacingState.REPEAT;
         }
-        if (isLocked) return isBreak ? PlacingState.SHAPE_BREAK_LOCKED : PlacingState.SHAPE_PLACE_LOCKED;
+        if (isLocked) return PlacingState.SHAPE_LOCKED;
         if (currentTarget == null) return PlacingState.NONE;
-        return isBreak ? PlacingState.SHAPE_BREAK : PlacingState.SHAPE_PLACE;
+        return PlacingState.SHAPE;
     }
 
 
