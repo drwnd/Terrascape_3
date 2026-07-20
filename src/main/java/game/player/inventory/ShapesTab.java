@@ -19,6 +19,12 @@ import static game.utils.Constants.*;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
+/**
+ * Creates a new ShapesTab instance.
+ *
+ * @param sizeToParent parameter
+ * @param offsetToParent parameter
+ */
     public ShapesTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -34,6 +40,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(itemNameDisplay);
     }
 
+/**
+ * Performs resize self to.
+ *
+ * @param width parameter
+ * @param height parameter
+ */
     @Override
     public void resizeSelfTo(int width, int height) {
         updateDisplayPositions();
@@ -45,6 +57,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         }
     }
 
+/**
+ * Returns the selected placeable.
+ *
+ * @param pixelCoordinate parameter
+ * @return result
+ */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
@@ -55,6 +73,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return null;
     }
 
+/**
+ * Performs handle scroll.
+ *
+ * @param pixelCoordinate parameter
+ * @param yScroll parameter
+ */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
@@ -73,6 +97,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
+/**
+ * Performs drag over.
+ *
+ * @param pixelCoordinate parameter
+ */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
@@ -82,6 +111,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         lastCursorPos.set(pixelCoordinate);
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -106,6 +141,13 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(shapePreview);
     }
 
+/**
+ * Adds contents.
+ *
+ * @param cubeDisplays parameter
+ * @param placeModeToggle parameter
+ * @param offsetToggle parameter
+ */
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -120,6 +162,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         refreshShapePreview = true;
     }
 
+/**
+ * Performs update display positions.
+ */
     void updateDisplayPositions() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
@@ -150,6 +195,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return shapePlaceableSettingSliders;
     }
 
+/**
+ * Performs load shape displays.
+ */
     private void loadShapeDisplays() {
         for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
         for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
@@ -174,6 +222,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (Renderable renderable : selectedDisplay.getSettingElements()) renderable.setVisible(true);
     }
 
+/**
+ * Performs move material buttons.
+ *
+ * @param movement parameter
+ */
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (CubeDisplay button : cubeDisplays) button.display().move(offset);

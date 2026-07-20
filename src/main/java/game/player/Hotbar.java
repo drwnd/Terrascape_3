@@ -25,6 +25,9 @@ public final class Hotbar extends UiElement {
 
     public static final int LENGTH = 9;
 
+/**
+ * Creates a new Hotbar instance.
+ */
     public Hotbar() {
         super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
         setScaleWithGuiSize(false);
@@ -37,6 +40,12 @@ public final class Hotbar extends UiElement {
     }
 
 
+/**
+ * Performs handle input.
+ *
+ * @param button parameter
+ * @param action parameter
+ */
     public void handleInput(int button, int action) {
         if (action != GLFW_PRESS) return;
 
@@ -62,6 +71,12 @@ public final class Hotbar extends UiElement {
         setContent(slotIndex, new CubePlaceable(material));
     }
 
+/**
+ * Sets content.
+ *
+ * @param slotIndex X coordinate in local block coordinates
+ * @param placeable parameter
+ */
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
 
@@ -83,6 +98,12 @@ public final class Hotbar extends UiElement {
     }
 
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
@@ -97,12 +118,22 @@ public final class Hotbar extends UiElement {
     }
 
 
+/**
+ * Performs next free slot.
+ * @return result
+ */
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
             if (contents[slot % LENGTH] == null) return slot % LENGTH;
         return selectedSlot;
     }
 
+/**
+ * Performs index of.
+ *
+ * @param material parameter
+ * @return result
+ */
     private int indexOf(byte material) {
         for (int slot = 0; slot < LENGTH; slot++) {
             Placeable placeable = contents[slot];
@@ -111,6 +142,9 @@ public final class Hotbar extends UiElement {
         return -1;
     }
 
+/**
+ * Performs handle pick block.
+ */
     private void handlePickBlock() {
         Target target = Target.getPlayerTarget();
         if (target == null) return;
@@ -130,6 +164,11 @@ public final class Hotbar extends UiElement {
         return selectedSlot;
     }
 
+/**
+ * Sets selected slot.
+ *
+ * @param selectedSlot parameter
+ */
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
         if (contents[this.selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
@@ -140,12 +179,23 @@ public final class Hotbar extends UiElement {
         return contents;
     }
 
+/**
+ * Sets contents.
+ *
+ * @param contents parameter
+ */
     public void setContents(Placeable[] contents) {
         if (contents.length != LENGTH) return;
         for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);
     }
 
 
+/**
+ * Performs clamp slot.
+ *
+ * @param slot parameter
+ * @return result
+ */
     private static int clampSlot(int slot) {
         slot %= LENGTH;
         if (slot < 0) slot += LENGTH;

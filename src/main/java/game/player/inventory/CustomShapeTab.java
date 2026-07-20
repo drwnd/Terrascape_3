@@ -25,6 +25,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class CustomShapeTab extends Renderable implements InventoryTab {
 
+/**
+ * Creates a new CustomShapeTab instance.
+ *
+ * @param sizeToParent parameter
+ * @param offsetToParent parameter
+ */
     public CustomShapeTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -61,6 +67,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         }
     }
 
+/**
+ * Returns the selected placeable.
+ *
+ * @param pixelCoordinate parameter
+ * @return result
+ */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
@@ -68,6 +80,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         return null;
     }
 
+/**
+ * Performs handle scroll.
+ *
+ * @param pixelCoordinate parameter
+ * @param yScroll parameter
+ */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
@@ -81,6 +99,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         input.materialScroll = newScroll;
     }
 
+/**
+ * Performs resize self to.
+ *
+ * @param width parameter
+ * @param height parameter
+ */
     @Override
     protected void resizeSelfTo(int width, int height) {
         if (shapePreview == null) return;
@@ -88,6 +112,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         shapePreview.setOffsetToParent(0.0F, 0.0F);
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -123,6 +153,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
+/**
+ * Performs drag over.
+ *
+ * @param pixelCoordinate parameter
+ */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
@@ -133,6 +168,13 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
 
+/**
+ * Adds contents.
+ *
+ * @param cubeDisplays parameter
+ * @param placeModeToggle parameter
+ * @param offsetToggle parameter
+ */
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -143,11 +185,20 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         addRenderable(removeRenderable(itemNameDisplay));
     }
 
+/**
+ * Performs move material buttons.
+ *
+ * @param movement parameter
+ */
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (CubeDisplay button : cubeDisplays) button.display().move(offset);
     }
 
+/**
+ * Returns the load button clickable.
+ * @return result
+ */
     private Clickable getLoadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

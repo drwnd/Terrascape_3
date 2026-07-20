@@ -23,6 +23,14 @@ public enum FloatSettings implements FloatSetting {
     TIME_SPEED(0.0F, 0.001F, 0.00008333F, 0.000001F),
     DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F);
 
+/**
+ * Creates a new FloatSettings instance.
+ *
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @param defaultValue parameter
+ * @param accuracy Y coordinate in local block coordinates
+ */
     FloatSettings(float min, float max, float defaultValue, float accuracy) {
         this.min = min;
         this.max = max;
@@ -31,6 +39,13 @@ public enum FloatSettings implements FloatSetting {
         this.accuracy = accuracy;
     }
 
+/**
+ * Creates a new FloatSettings instance.
+ *
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @param defaultValue parameter
+ */
     FloatSettings(float min, float max, float defaultValue) {
         this.min = min;
         this.max = max;
@@ -59,6 +74,12 @@ public enum FloatSettings implements FloatSetting {
         return max;
     }
 
+/**
+ * Performs value from fraction.
+ *
+ * @param fraction parameter
+ * @return result
+ */
     @Override
     public Float valueFromFraction(float fraction) {
         float unroundedValue = min + fraction * (max - min);

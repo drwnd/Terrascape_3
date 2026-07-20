@@ -15,6 +15,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class SettingsRenderable extends CoreSettingsRenderable {
 
+/**
+ * Adds debug line setting.
+ *
+ * @param debugLine parameter
+ */
     public void addDebugLineSetting(DebugScreenOptions debugLine) {
         settingsCount++;
 

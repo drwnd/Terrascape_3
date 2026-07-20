@@ -28,12 +28,20 @@ public final class ChunkSaver extends Saver<Chunk> {
         return "saves/%s/chunks".formatted(Game.getWorld().getName());
     }
 
+/**
+ * Generates higher lo ds.
+ */
     public static void generateHigherLODs() {
         long start = System.nanoTime();
         for (int lod = 1, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) generateLod(lod);
         Debug.log("Finished generating all LODs. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
     }
 
+/**
+ * Generates lod.
+ *
+ * @param lod parameter
+ */
     private static void generateLod(int lod) {
         long start = System.nanoTime();
         ChunkSaver saver = new ChunkSaver();
@@ -70,6 +78,12 @@ public final class ChunkSaver extends Saver<Chunk> {
        Debug.log("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
     }
 
+/**
+ * Generates chunk.
+ *
+ * @param chunk parameter
+ * @param saver parameter
+ */
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {
         WorldGeneration.generate(chunk);
         Game.getWorld().storeChunk(chunk);
@@ -92,12 +106,30 @@ public final class ChunkSaver extends Saver<Chunk> {
     }
 
 
+/**
+ * Performs load and generate.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return result
+ */
     public Chunk loadAndGenerate(long chunkX, long chunkY, long chunkZ, int lod) {
         Chunk chunk = load(chunkX, chunkY, chunkZ, lod);
         WorldGeneration.generate(chunk);
         return chunk;
     }
 
+/**
+ * Performs load.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return result
+ */
     public Chunk load(long chunkX, long chunkY, long chunkZ, int lod) {
         ChunkID expectedID = new ChunkID(chunkX, chunkY, chunkZ, lod);
         Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, lod);
@@ -110,6 +142,16 @@ public final class ChunkSaver extends Saver<Chunk> {
         return chunk;
     }
 
+/**
+ * Performs load.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @param id parameter
+ * @return result
+ */
     private Chunk load(long chunkX, long chunkY, long chunkZ, int lod, ChunkID id) {
         Chunk chunk = load(getSaveFileLocation(id, lod));
         if (chunk == null) chunk = new Chunk(chunkX, chunkY, chunkZ, lod);
@@ -119,6 +161,11 @@ public final class ChunkSaver extends Saver<Chunk> {
         return chunk;
     }
 
+/**
+ * Performs save.
+ *
+ * @param chunk parameter
+ */
     @Override
     protected void save(Chunk chunk) {
         saveLong(chunk.X);
@@ -128,6 +175,10 @@ public final class ChunkSaver extends Saver<Chunk> {
         saveByteArray(chunk.getMaterials().getBytes());
     }
 
+/**
+ * Performs load.
+ * @return result
+ */
     @Override
     protected Chunk load() {
         long x = loadLong();
@@ -151,6 +202,12 @@ public final class ChunkSaver extends Saver<Chunk> {
         return 2;
     }
 
+/**
+ * Performs load old version.
+ *
+ * @param versionNumber parameter
+ * @return result
+ */
     @Override
     protected Chunk loadOldVersion(int versionNumber) {
         if (versionNumber == 1) {

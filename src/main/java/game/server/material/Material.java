@@ -12,6 +12,9 @@ import static game.utils.Constants.*;
 
 public final class Material {
 
+/**
+ * Performs load materials.
+ */
     public static void loadMaterials() {
         long start = System.nanoTime();
         AssetManager.deleteAll();
@@ -41,11 +44,23 @@ public final class Material {
         return (material & 0xFF) >= (RED_GLASS & 0xFF) && (material & 0xFF) <= (BLACK_GLASS & 0xFF);
     }
 
+/**
+ * Returns the system name.
+ *
+ * @param material parameter
+ * @return result
+ */
     public static String getSystemName(byte material) {
         if ((material & 0xFF) >= AMOUNT_OF_MATERIALS) return "UNKNOWN";
         return Materials.values()[material & 0xFF].name();
     }
 
+/**
+ * Performs load material.
+ *
+ * @param identifier parameter
+ * @param gson parameter
+ */
     private static void loadMaterial(Materials identifier, Gson gson) {
         String json = FileManager.loadJson("assets/materials/%s.json".formatted(identifier.name()));
         Material material = gson.fromJson(json, Material.class);

@@ -11,6 +11,13 @@ import org.joml.Vector2f;
 
 public final class StructureSelectionButton extends UiButton {
 
+/**
+ * Creates a new StructureSelectionButton instance.
+ *
+ * @param sizeToParent parameter
+ * @param offsetToParent parameter
+ * @param structureName parameter
+ */
     public StructureSelectionButton(Vector2f sizeToParent, Vector2f offsetToParent, String structureName) {
         super(sizeToParent, offsetToParent);
         identifier = new StructureIdentifier(structureName);

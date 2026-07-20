@@ -34,12 +34,21 @@ public enum DebugScreenOptions {
     RESULTING_HEIGHT(ColorOption.GREEN),
     CONCURRENTLY_PLAYED_SOUNDS(ColorOption.WHITE);
 
+/**
+ * Creates a new DebugScreenOptions instance.
+ *
+ * @param color parameter
+ */
     DebugScreenOptions(Option color) {
         this.visibility = new DebugOption(Visibility.WHEN_SCREEN_OPEN, this.name() + "_VISIBILITY");
         this.color = new DebugOption(color, this.name() + "_COLOR");
     }
 
 
+/**
+ * Returns the visibility settings.
+ * @return result
+ */
     public static List<Setting> getVisibilitySettings() {
         DebugScreenOptions[] values = DebugScreenOptions.values();
         ArrayList<Setting> settings = new ArrayList<>(values.length);
@@ -47,6 +56,10 @@ public enum DebugScreenOptions {
         return settings;
     }
 
+/**
+ * Returns the color settings.
+ * @return result
+ */
     public static List<Setting> getColorSettings() {
         DebugScreenOptions[] values = DebugScreenOptions.values();
         ArrayList<Setting> settings = new ArrayList<>(values.length);
@@ -67,6 +80,13 @@ public enum DebugScreenOptions {
 
     private static class DebugOption implements OptionSetting {
 
+/**
+ * Performs debug option.
+ *
+ * @param defaultValue parameter
+ * @param name parameter
+ * @return result
+ */
         private DebugOption(Option defaultValue, String name) {
             this.name = name;
             this.defaultValue = defaultValue;

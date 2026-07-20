@@ -11,6 +11,19 @@ final class BitMapCompressor {
 
     }
 
+/**
+ * Performs compress materials.
+ *
+ * @param data parameter
+ * @param bitMap parameter
+ * @param material parameter
+ * @param sizeBits parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @return result
+ */
     static int compressMaterials(ByteArrayList data, long[] bitMap, byte material, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int homogeneity = getHomogeneity(inChunkX, inChunkY, inChunkZ, sizeBits, bitMap);
         if (homogeneity == FULLY_HOMOGENOUS) return addHomogenous(data, bitMap, material, inChunkX, inChunkY, inChunkZ);
@@ -77,6 +90,17 @@ final class BitMapCompressor {
     }
 
 
+/**
+ * Adds homogenous.
+ *
+ * @param data parameter
+ * @param bitMap parameter
+ * @param material parameter
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @return result
+ */
     private static int addHomogenous(ByteArrayList data, long[] bitMap, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         material = getBitMapByte(bitMap, getUncompressedIndex(inChunkX, inChunkY, inChunkZ) >> 3) == -1 ? material : AIR;
         data.add((byte) (getType(material) | HOMOGENOUS));
@@ -85,6 +109,16 @@ final class BitMapCompressor {
     }
 
 
+/**
+ * Returns the homogeneity.
+ *
+ * @param startX X coordinate in local block coordinates
+ * @param startY Y coordinate in local block coordinates
+ * @param startZ Z coordinate in local block coordinates
+ * @param sizeBits parameter
+ * @param bitMap parameter
+ * @return result
+ */
     private static int getHomogeneity(int startX, int startY, int startZ, int sizeBits, long[] bitMap) {
         int startIndex = getUncompressedIndex(startX, startY, startZ);
         if (sizeBits == 1) return isHomogenous(startIndex, 8, bitMap) ? FULLY_HOMOGENOUS : 0;
@@ -117,6 +151,14 @@ final class BitMapCompressor {
     }
 
 
+/**
+ * Checks whether homogenous.
+ *
+ * @param startIndex X coordinate in local block coordinates
+ * @param length parameter
+ * @param bitMap parameter
+ * @return true if the condition holds
+ */
     private static boolean isHomogenous(int startIndex, int length, long[] bitMap) {
         byte target = getBitMapByte(bitMap, startIndex >> 3);
         if (target != 0 && target != -1) return false;

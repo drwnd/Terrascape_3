@@ -6,6 +6,12 @@ interface Token {
 
     TokenType type();
 
+/**
+ * Performs tokenize.
+ *
+ * @param command parameter
+ * @return result
+ */
     static TokenList tokenize(String command) {
         TokenList tokens = new TokenList(command);
         command += ' ';
@@ -16,6 +22,15 @@ interface Token {
         return tokens;
     }
 
+/**
+ * Adds next token.
+ *
+ * @param command parameter
+ * @param chars parameter
+ * @param tokens parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @return result
+ */
     private static int addNextToken(String command, char[] chars, ArrayList<Token> tokens, int startIndex) {
         while (startIndex < chars.length && chars[startIndex] == ' ') startIndex++;
         if (startIndex == chars.length) return chars.length;
@@ -42,16 +57,37 @@ interface Token {
         return startIndex + 1;
     }
 
+/**
+ * Returns the string end index.
+ *
+ * @param chars parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @return result
+ */
     private static int getStringEndIndex(char[] chars, int startIndex) {
         while (startIndex < chars.length && chars[startIndex] != '"') startIndex++;
         return startIndex == chars.length ? -65536 : startIndex;
     }
 
+/**
+ * Performs next non number index.
+ *
+ * @param chars parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @return result
+ */
     private static int nextNonNumberIndex(char[] chars, int startIndex) {
         while (startIndex < chars.length && isNumberChar(chars[startIndex])) startIndex++;
         return startIndex;
     }
 
+/**
+ * Performs next not letter index.
+ *
+ * @param chars parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @return result
+ */
     private static int nextNotLetterIndex(char[] chars, int startIndex) {
         while (startIndex < chars.length && (Character.isLetter(chars[startIndex]) || chars[startIndex] == '_')) startIndex++;
         return startIndex;

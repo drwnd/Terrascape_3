@@ -21,6 +21,13 @@ import static game.utils.Constants.*;
 
 public final class RepeatPlaceable implements Placeable {
 
+/**
+ * Creates a new RepeatPlaceable instance.
+ *
+ * @param placeable parameter
+ * @param startPosition parameter
+ * @param endPosition parameter
+ */
     public RepeatPlaceable(ShapePlaceable placeable, Vector3l startPosition, Vector3l endPosition) {
         this.placeable = placeable;
         this.startPosition = startPosition;
@@ -29,6 +36,15 @@ public final class RepeatPlaceable implements Placeable {
         this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
+/**
+ * Performs offset position from ground.
+ *
+ * @param position parameter
+ * @param targetedSide parameter
+ * @param lengthX extent along the X axis in local block coordinates
+ * @param lengthY extent along the Y axis in local block coordinates
+ * @param lengthZ extent along the Z axis in local block coordinates
+ */
     public static void offsetPositionFromGround(Vector3l position, int targetedSide, int lengthX, int lengthY, int lengthZ) {
         int offset = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += offset - lengthX >> 1;
@@ -41,6 +57,14 @@ public final class RepeatPlaceable implements Placeable {
         if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z += offset - lengthZ;
     }
 
+/**
+ * Performs offset positions.
+ *
+ * @param startPosition parameter
+ * @param endPosition parameter
+ * @param targetedSide parameter
+ * @param placeable parameter
+ */
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
         int lengthX = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthX();
         int lengthY = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthY();
@@ -64,6 +88,12 @@ public final class RepeatPlaceable implements Placeable {
         else startPosition.z += lengthZ - 1;
     }
 
+/**
+ * Performs place.
+ *
+ * @param position parameter
+ * @param lod parameter
+ */
     @Override
     public void place(Vector3l position, int lod) {
         int countX = (int) (maxPosition.x - minPosition.x + placeable.getLengthX()) / placeable.getLengthX();
@@ -94,6 +124,14 @@ public final class RepeatPlaceable implements Placeable {
         return placeable.getStructure();
     }
 
+/**
+ * Performs intersects aabb.
+ *
+ * @param position parameter
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @return true if the condition holds
+ */
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         if (Properties.hasProperties(placeable.getMaterial(), NO_COLLISION)) return false;
@@ -112,6 +150,12 @@ public final class RepeatPlaceable implements Placeable {
         return false;
     }
 
+/**
+ * Performs offset position.
+ *
+ * @param position parameter
+ * @param targetedSide parameter
+ */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         offsetPositions(startPosition, endPosition, targetedSide, placeable);
@@ -119,6 +163,11 @@ public final class RepeatPlaceable implements Placeable {
         maxPosition.set(Utils.max(startPosition, endPosition));
     }
 
+/**
+ * Performs spawn particles.
+ *
+ * @param position parameter
+ */
     @Override
     public void spawnParticles(Vector3l position) {
         Player player = Game.getPlayer();
@@ -135,6 +184,14 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
+/**
+ * Performs place in chunk.
+ *
+ * @param chunk parameter
+ * @param countX extent along the X axis in local block coordinates
+ * @param countY extent along the Y axis in local block coordinates
+ * @param countZ extent along the Z axis in local block coordinates
+ */
     private void placeInChunk(Chunk chunk, int countX, int countY, int countZ) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;

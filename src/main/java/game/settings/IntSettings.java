@@ -20,6 +20,13 @@ public enum IntSettings implements IntSetting {
     REACH(0, 500, 112),
     BREAK_PLACE_INTERVALL(1, 20, 4);
 
+/**
+ * Creates a new IntSettings instance.
+ *
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @param defaultValue parameter
+ */
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
         this.max = max;
@@ -28,6 +35,14 @@ public enum IntSettings implements IntSetting {
         this.callback = null;
     }
 
+/**
+ * Creates a new IntSettings instance.
+ *
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @param defaultValue parameter
+ * @param callback parameter
+ */
     IntSettings(int min, int max, int defaultValue, ChangeCallback callback) {
         this.min = min;
         this.max = max;
@@ -36,6 +51,11 @@ public enum IntSettings implements IntSetting {
         this.callback = callback;
     }
 
+/**
+ * Sets value.
+ *
+ * @param value parameter
+ */
     @Override
     public void setValue(int value) {
         int oldValue = this.value;

@@ -21,6 +21,9 @@ import static game.utils.Constants.*;
 
 public final class Camera {
 
+/**
+ * Creates a new Camera instance.
+ */
     public Camera() {
         position = new Position(new Vector3l(), new Vector3f());
         rotation = new Vector3f(0.0F, 0.0F, 0.0F);
@@ -28,18 +31,31 @@ public final class Camera {
     }
 
 
+/**
+ * Performs update projection matrix.
+ */
     public void updateProjectionMatrix() {
         projectionMatrix
                 .identity()
                 .setPerspective((float) Math.toRadians(FloatSettings.FOV.value() * zoomFactor), Window.getAspectRatio(), Z_FAR, Z_NEAR, true);
     }
 
+/**
+ * Sets position.
+ *
+ * @param position parameter
+ */
     public void setPosition(Position position) {
         synchronized (this) {
             this.position = new Position(position);
         }
     }
 
+/**
+ * Performs rotate.
+ *
+ * @param cursorMovement parameter
+ */
     public void rotate(Vector2i cursorMovement) {
         float sensitivityFactor = FloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 1.2F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
@@ -49,12 +65,22 @@ public final class Camera {
         moveRotation(rotationYaw, -rotationPitch);
     }
 
+/**
+ * Sets rotation.
+ *
+ * @param rotation parameter
+ */
     public void setRotation(Vector3f rotation) {
         synchronized (this) {
             this.rotation.set(rotation);
         }
     }
 
+/**
+ * Sets zoomed.
+ *
+ * @param zoomed parameter
+ */
     public void setZoomed(boolean zoomed) {
         this.zoomed = zoomed;
         if (zoomed) zoomFactor = 0.25F;
@@ -69,6 +95,10 @@ public final class Camera {
         return zoomed;
     }
 
+/**
+ * Returns the direction.
+ * @return result
+ */
     public Vector3f getDirection() {
         synchronized (this) {
             return MathUtils.getDirection(rotation);
@@ -79,18 +109,30 @@ public final class Camera {
         return projectionMatrix;
     }
 
+/**
+ * Returns the position.
+ * @return result
+ */
     public Position getPosition() {
         synchronized (this) {
             return new Position(position);
         }
     }
 
+/**
+ * Returns the rotation.
+ * @return result
+ */
     public Vector3f getRotation() {
         synchronized (this) {
             return new Vector3f(rotation);
         }
     }
 
+/**
+ * Returns the primary direction.
+ * @return result
+ */
     public int getPrimaryDirection() {
         Vector3f direction = getDirection();
         int component = direction.maxComponent();
@@ -102,6 +144,12 @@ public final class Camera {
     }
 
 
+/**
+ * Performs apply perspective offset.
+ *
+ * @param position parameter
+ * @return result
+ */
     public Position applyPerspectiveOffset(Position position) {
         if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
         Vector3f direction = getDirection().mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
@@ -114,6 +162,12 @@ public final class Camera {
     }
 
 
+/**
+ * Performs move rotation.
+ *
+ * @param yaw parameter
+ * @param pitch parameter
+ */
     private void moveRotation(float yaw, float pitch) {
         synchronized (this) {
             rotation.x += pitch;
@@ -124,6 +178,12 @@ public final class Camera {
         }
     }
 
+/**
+ * Checks whether obstructed.
+ *
+ * @param position parameter
+ * @return true if the condition holds
+ */
     private static boolean isObstructed(Position position) {
         long startX = position.longX - 2, endX = position.longX + 2;
         long startY = position.longY - 2, endY = position.longY + 2;
@@ -139,6 +199,12 @@ public final class Camera {
         return false;
     }
 
+/**
+ * Performs push position to wall.
+ *
+ * @param position parameter
+ * @param direction parameter
+ */
     private static void pushPositionToWall(Position position, Vector3f direction) {
         direction.mul(-0.05F);
         while (isObstructed(position)) position.add(direction.x, direction.y, direction.z);

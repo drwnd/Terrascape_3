@@ -1,5 +1,15 @@
 package game.server.generation;
 
+/**
+ * Performs tree.
+ *
+ * @param centerX X coordinate in local block coordinates
+ * @param baseY Y coordinate in local block coordinates
+ * @param centerZ Z coordinate in local block coordinates
+ * @param structure parameter
+ * @param transform parameter
+ * @return result
+ */
 public record Tree(long centerX, long baseY, long centerZ, Structure structure, byte transform) {
 
     public long getMinX() {

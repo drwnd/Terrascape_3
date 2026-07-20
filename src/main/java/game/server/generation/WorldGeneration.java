@@ -17,11 +17,22 @@ public final class WorldGeneration {
     public static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
     public static long SEED;
 
+/**
+ * Performs generate.
+ *
+ * @param chunk parameter
+ */
     public static void generate(Chunk chunk) {
         if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
         generate(chunk, new GenerationData(chunk.X, chunk.Z, chunk.LOD));
     }
 
+/**
+ * Performs generate.
+ *
+ * @param chunk parameter
+ * @param data parameter
+ */
     public static void generate(Chunk chunk, GenerationData data) {
         if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
         chunk.setGenerationStatus(Status.IN_PROGRESS);
@@ -52,6 +63,12 @@ public final class WorldGeneration {
         chunk.setGenerationStatus(Status.DONE);
     }
 
+/**
+ * Returns the resulting height.
+ *
+ * @param sample parameter
+ * @return result
+ */
     public static int getResultingHeight(MapSample sample) {
         double continentalModifier = getContinentalModifier(sample);
         double erosionModifier = getErosionModifier(continentalModifier, sample);
@@ -64,6 +81,12 @@ public final class WorldGeneration {
         return getResultingHeight(new MapSample(totalX, totalZ, false, true));
     }
 
+/**
+ * Returns the resulting height map.
+ *
+ * @param samples parameter
+ * @return array result
+ */
     public static int[] getResultingHeightMap(ChunkMapSamples samples) {
         int[] resultingHeightMap = new int[CHUNK_SIZE_PADDED * CHUNK_SIZE_PADDED];
         for (int mapX = 0; mapX < CHUNK_SIZE_PADDED; mapX++)
@@ -76,6 +99,12 @@ public final class WorldGeneration {
         return resultingHeightMap;
     }
 
+/**
+ * Returns the underground river depth map.
+ *
+ * @param samples parameter
+ * @return array result
+ */
     public static int[] getUndergroundRiverDepthMap(ChunkMapSamples samples) {
         float[] riverMap = samples.riverMap();
         int[] riverDepthMap = new int[riverMap.length];
@@ -87,6 +116,14 @@ public final class WorldGeneration {
         return (int) (Math.sqrt(Math.max(0, UNDERGROUND_RIVER_THRESHOLD - river)) * 1500);
     }
 
+/**
+ * Returns the biomes.
+ *
+ * @param heightMap parameter
+ * @param featureMap parameter
+ * @param samples parameter
+ * @return array result
+ */
     public static Biome[] getBiomes(int[] heightMap, double[] featureMap, ChunkMapSamples samples) {
         Biome[] biomes = new Biome[CHUNK_SIZE * CHUNK_SIZE];
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
@@ -98,6 +135,14 @@ public final class WorldGeneration {
         return biomes;
     }
 
+/**
+ * Returns the biome.
+ *
+ * @param sample parameter
+ * @param height parameter
+ * @param feature parameter
+ * @return result
+ */
     public static Biome getBiome(MapSample sample, int height, double feature) {
         double dither = feature * 0.05 - 0.025;
 
@@ -140,6 +185,11 @@ public final class WorldGeneration {
     }
 
 
+/**
+ * Generates stone.
+ *
+ * @param data parameter
+ */
     private static void generateStone(GenerationData data) {
         long chunkStartX = data.chunkX << CHUNK_SIZE_BITS + data.LOD;
         long chunkStartY = data.chunkY << CHUNK_SIZE_BITS + data.LOD;
@@ -154,6 +204,13 @@ public final class WorldGeneration {
         }
     }
 
+/**
+ * Generates biome.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param data parameter
+ */
     private static void generateBiome(int inChunkX, int inChunkZ, GenerationData data) {
         Biome biome = data.biome;
         int height = data.height;
@@ -177,6 +234,13 @@ public final class WorldGeneration {
         }
     }
 
+/**
+ * Generates underground river.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param data parameter
+ */
     private static void generateUndergroundRiver(int inChunkX, int inChunkZ, GenerationData data) {
         int start = Math.clamp(-data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
         int end = Math.clamp(data.undergroundRiverDepth + WATER_LEVEL - (data.chunkY << CHUNK_SIZE_BITS + data.LOD) >> data.LOD, 0, CHUNK_SIZE);
@@ -187,6 +251,13 @@ public final class WorldGeneration {
         }
     }
 
+/**
+ * Generates trees.
+ *
+ * @param data parameter
+ * @param clearBeforeGenerating parameter
+ * @return true if the condition holds
+ */
     private static boolean generateTrees(GenerationData data, boolean clearBeforeGenerating) {
         if (!data.hasTrees()) return false;
         boolean hasGeneratedTree = false;
@@ -202,6 +273,12 @@ public final class WorldGeneration {
         return hasGeneratedTree;
     }
 
+/**
+ * Returns the continental modifier.
+ *
+ * @param sample parameter
+ * @return result
+ */
     private static double getContinentalModifier(MapSample sample) {
         double continentalModifier = 0.0, continental = sample.continental();
         // Mountains
@@ -220,6 +297,13 @@ public final class WorldGeneration {
         return continentalModifier;
     }
 
+/**
+ * Returns the erosion modifier.
+ *
+ * @param continentalModifier parameter
+ * @param sample parameter
+ * @return result
+ */
     private static double getErosionModifier(double continentalModifier, MapSample sample) {
         double erosionModifier = 0.0, erosion = sample.erosion(), height = sample.height();
         // Elevated areas
@@ -233,6 +317,14 @@ public final class WorldGeneration {
         return erosionModifier;
     }
 
+/**
+ * Returns the river modifier.
+ *
+ * @param erosionModifier parameter
+ * @param continentalModifier parameter
+ * @param sample parameter
+ * @return result
+ */
     private static double getRiverModifier(double erosionModifier, double continentalModifier, MapSample sample) {
         double height = sample.height(), river = sample.river();
         double riverThinning = getRiverThinning(sample);
@@ -249,6 +341,12 @@ public final class WorldGeneration {
         return riverModifier * (1 - riverThinning) * (1 - oceanScale);
     }
 
+/**
+ * Returns the river thinning.
+ *
+ * @param sample parameter
+ * @return result
+ */
     private static double getRiverThinning(MapSample sample) {
         double riverThinning = MathUtils.smoothInOutQuad(Math.max(sample.continental(), MOUNTAIN_THRESHOLD), MOUNTAIN_THRESHOLD, MOUNTAIN_THRESHOLD + 0.1);
         if (sample.continental() > MOUNTAIN_THRESHOLD + 0.1) riverThinning = 1;

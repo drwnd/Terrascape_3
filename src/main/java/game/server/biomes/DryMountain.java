@@ -7,6 +7,15 @@ import game.server.generation.GenerationData;
 import static game.server.generation.WorldGeneration.WATER_LEVEL;
 
 public final class DryMountain extends Biome {
+/**
+ * Performs place material.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param data parameter
+ * @return true if the condition holds
+ */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalX = data.totalX;

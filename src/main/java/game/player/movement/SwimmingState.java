@@ -14,6 +14,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class SwimmingState extends MovementState {
 
+/**
+ * Computes next game tick acceleration.
+ *
+ * @param playerRotation parameter
+ * @param lastPosition parameter
+ * @return result
+ */
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.SPRINT) || !Input.isKeyPressed(KeySettings.MOVE_FORWARD)) next = new CrawlingState();
@@ -29,6 +36,14 @@ public final class SwimmingState extends MovementState {
         return velocityChange;
     }
 
+/**
+ * Performs change velocity.
+ *
+ * @param velocity Y coordinate in local block coordinates
+ * @param acceleration parameter
+ * @param playerPosition parameter
+ * @param playerRotation parameter
+ */
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         if (!intersectsLiquid(playerPosition, this)) next = new CrawlingState();
@@ -46,6 +61,12 @@ public final class SwimmingState extends MovementState {
         }
     }
 
+/**
+ * Performs handle input.
+ *
+ * @param key Y coordinate in local block coordinates
+ * @param action parameter
+ */
     @Override
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {

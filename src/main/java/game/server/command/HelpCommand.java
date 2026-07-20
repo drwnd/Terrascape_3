@@ -12,6 +12,12 @@ final class HelpCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         if (tokens.size() == 1) {
             for (Command command : Command.values()) Game.getServer().sendServerMessage(command.name(), ColorOption.WHITE);

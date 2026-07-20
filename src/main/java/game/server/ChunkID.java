@@ -2,6 +2,14 @@ package game.server;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs chunk id.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @return result
+ */
 public record ChunkID(long chunkX, long chunkY, long chunkZ) {
 
     public ChunkID(long chunkX, long chunkY, long chunkZ, int lod) {

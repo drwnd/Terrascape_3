@@ -3,6 +3,16 @@ package game.server;
 import core.rendering_api.shaders.TextShader;
 import core.settings.optionSettings.ColorOption;
 
+/**
+ * Performs chat message.
+ *
+ * @param message parameter
+ * @param sender parameter
+ * @param color parameter
+ * @param timestamp parameter
+ * @param lines parameter
+ * @return result
+ */
 public record ChatMessage(String message, Sender sender, ColorOption color, long timestamp, String[] lines) {
 
     public ChatMessage(String message, Sender sender, ColorOption color) {

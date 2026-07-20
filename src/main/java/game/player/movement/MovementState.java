@@ -39,6 +39,14 @@ public abstract class MovementState {
      * @param playerPosition The position of the Player.
      * @param playerRotation The rotation of the Player.
      */
+/**
+ * Performs change velocity.
+ *
+ * @param velocity Y coordinate in local block coordinates
+ * @param acceleration parameter
+ * @param playerPosition parameter
+ * @param playerRotation parameter
+ */
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         float waterIntersection = intersectedVolume(playerPosition, this, WATER);
         float lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
@@ -51,6 +59,12 @@ public abstract class MovementState {
         velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY;
     }
 
+/**
+ * Returns the standing material.
+ *
+ * @param position parameter
+ * @return result
+ */
     byte getStandingMaterial(Position position) {
         Vector3i hitboxSize = getHitboxSize();
         World world = Game.getWorld();
@@ -88,6 +102,12 @@ public abstract class MovementState {
     public abstract byte getIdentifier();
 
 
+/**
+ * Returns the state from identifier.
+ *
+ * @param identifier parameter
+ * @return result
+ */
     public static MovementState getStateFromIdentifier(byte identifier) {
         return switch (identifier) {
             case 0 -> new WalkingState();
@@ -100,11 +120,28 @@ public abstract class MovementState {
     }
 
 
+/**
+ * Performs handle jump.
+ *
+ * @param position parameter
+ * @param velocityChange parameter
+ * @param jumpStrength parameter
+ * @param swimStrength parameter
+ */
     void handleJump(Position position, Vector3f velocityChange, float jumpStrength, float swimStrength) {
         if (movement.isWideGrounded()) velocityChange.y = jumpStrength;
         else velocityChange.y += intersectedVolume(position, this, WATER) * swimStrength + intersectedVolume(position, this, LAVA) * swimStrength;
     }
 
+/**
+ * Returns the movement speed.
+ *
+ * @param lastPosition parameter
+ * @param movementSpeed parameter
+ * @param inAirSpeed parameter
+ * @param swimStrength parameter
+ * @return result
+ */
     float getMovementSpeed(Position lastPosition, float movementSpeed, float inAirSpeed, float swimStrength) {
         float speed = movement.isWideGrounded() ? movementSpeed : inAirSpeed;
         speed += intersectedVolume(lastPosition, this, WATER) * swimStrength * movementSpeed * 0.25F;
@@ -113,12 +150,22 @@ public abstract class MovementState {
     }
 
 
+/**
+ * Performs normalize to max component.
+ *
+ * @param velocity Y coordinate in local block coordinates
+ */
     static void normalizeToMaxComponent(Vector3f velocity) {
         float max = Math.abs(velocity.get(velocity.maxComponent()));
         if (max < 1E-4F) return;
         velocity.normalize(max);
     }
 
+/**
+ * Performs normalize xz to max component.
+ *
+ * @param velocity Y coordinate in local block coordinates
+ */
     static void normalizeXZToMaxComponent(Vector3f velocity) {
         float max = Math.max(Math.abs(velocity.x), Math.abs(velocity.z));
         if (max < 1E-4F) return;
@@ -127,6 +174,12 @@ public abstract class MovementState {
         velocity.z *= normalizer;
     }
 
+/**
+ * Performs to world direction.
+ *
+ * @param relativeVelocity Y coordinate in local block coordinates
+ * @param direction parameter
+ */
     static void toWorldDirection(Vector3f relativeVelocity, Vector3f direction) {
         relativeVelocity.set(
                 relativeVelocity.x * direction.x + relativeVelocity.z * direction.z,
@@ -135,6 +188,13 @@ public abstract class MovementState {
         );
     }
 
+/**
+ * Performs apply xz movement.
+ *
+ * @param velocityChange parameter
+ * @param speed parameter
+ * @param sprintSpeedModifier parameter
+ */
     static void applyXZMovement(Vector3f velocityChange, float speed, float sprintSpeedModifier) {
         if (Input.isKeyPressed(KeySettings.MOVE_FORWARD)) velocityChange.x += speed;
         if (Input.isKeyPressed(KeySettings.SPRINT)) velocityChange.mul(sprintSpeedModifier);
@@ -149,6 +209,14 @@ public abstract class MovementState {
         velocity.y -= GRAVITY_ACCELERATION;
     }
 
+/**
+ * Performs intersected volume.
+ *
+ * @param position parameter
+ * @param state parameter
+ * @param targetMaterial parameter
+ * @return result
+ */
     static float intersectedVolume(Position position, MovementState state, byte targetMaterial) {
         if (ToggleSettings.NO_CLIP.value()) return 0;
 

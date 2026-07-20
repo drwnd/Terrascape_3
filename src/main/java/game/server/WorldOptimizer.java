@@ -11,6 +11,11 @@ import java.util.Arrays;
 
 public final class WorldOptimizer {
 
+/**
+ * Performs optimize.
+ *
+ * @param saveFile parameter
+ */
     public static void optimize(File saveFile) {
         String worldName = saveFile.getName();
         World world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
@@ -34,6 +39,10 @@ public final class WorldOptimizer {
         World.deleteHigherLODs(0);
     }
 
+/**
+ * Performs delete redundant chunks.
+ * @return result
+ */
     private static int deleteRedundantChunks() {
         File[] chunkFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation(0)));
         if (chunkFiles == null) return 0;
@@ -48,6 +57,13 @@ public final class WorldOptimizer {
         return counter;
     }
 
+/**
+ * Performs delete if redundant.
+ *
+ * @param saver parameter
+ * @param chunkFile parameter
+ * @return true if the condition holds
+ */
     private static boolean deleteIfRedundant(ChunkSaver saver, File chunkFile) {
         Chunk savedChunk = saver.load(chunkFile.getPath());
         if (savedChunk == null) return delete(chunkFile);
@@ -65,6 +81,12 @@ public final class WorldOptimizer {
         return delete(chunkFile);
     }
 
+/**
+ * Performs delete.
+ *
+ * @param chunkFile parameter
+ * @return true if the condition holds
+ */
     private static boolean delete(File chunkFile) {
         FileManager.delete(chunkFile);
         return true;

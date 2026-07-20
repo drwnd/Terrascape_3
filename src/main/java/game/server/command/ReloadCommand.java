@@ -12,6 +12,12 @@ final class ReloadCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         tokens.expectFinishedLess();

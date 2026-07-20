@@ -22,6 +22,9 @@ public final class ChatInput extends TextFieldInput {
         return scroll;
     }
 
+/**
+ * Sets input mode.
+ */
     @Override
     public void setInputMode() {
         setStandardInputMode();
@@ -41,6 +44,12 @@ public final class ChatInput extends TextFieldInput {
 
     }
 
+/**
+ * Performs char callback.
+ *
+ * @param window parameter
+ * @param codePoint parameter
+ */
     @Override
     public void charCallback(long window, int codePoint) {
         if (!skipNextInput) super.charCallback(window, codePoint);
@@ -52,6 +61,15 @@ public final class ChatInput extends TextFieldInput {
         scroll = Math.max((float) (scroll + yScroll * 0.05), 0.0F);
     }
 
+/**
+ * Performs key callback.
+ *
+ * @param window parameter
+ * @param key Y coordinate in local block coordinates
+ * @param scancode parameter
+ * @param action parameter
+ * @param mods parameter
+ */
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
@@ -67,6 +85,12 @@ public final class ChatInput extends TextFieldInput {
         super.keyCallback(window, key, scancode, action, mods);
     }
 
+/**
+ * Performs next player message.
+ *
+ * @param increment parameter
+ * @return result
+ */
     private String nextPlayerMessage(int increment) {
         ArrayList<ChatMessage> messages = Game.getServer().getMessages();
         do {
@@ -80,6 +104,11 @@ public final class ChatInput extends TextFieldInput {
         return messages.get(messages.size() - messageIndex).message();
     }
 
+/**
+ * Performs replace text.
+ *
+ * @param text parameter
+ */
     private void replaceText(String text) {
         cursorIndex = text.length();
         field.setText(text);

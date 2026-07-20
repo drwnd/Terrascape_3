@@ -12,11 +12,30 @@ final class LongArrayCompressor {
 
     }
 
+/**
+ * Performs compress materials.
+ *
+ * @param data parameter
+ * @param uncompressedMaterials parameter
+ * @param sizeBits parameter
+ */
     static void compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int sizeBits) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(uncompressedMaterials);
         compressMaterials(data, byteBuffer, sizeBits, 0, 0, 0, 0);
     }
 
+/**
+ * Performs compress materials.
+ *
+ * @param data parameter
+ * @param uncompressedMaterials parameter
+ * @param sizeBits parameter
+ * @param startIndex X coordinate in local block coordinates
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @return result
+ */
     private static int compressMaterials(ByteArrayList data, ByteBuffer uncompressedMaterials, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         if (isHomogenous(MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ), 1 << sizeBits * 3, uncompressedMaterials))
             return addHomogenous(data, uncompressedMaterials, inChunkX, inChunkY, inChunkZ);
@@ -59,6 +78,14 @@ final class LongArrayCompressor {
         return offset;
     }
 
+/**
+ * Checks whether homogenous.
+ *
+ * @param startIndex X coordinate in local block coordinates
+ * @param length parameter
+ * @param uncompressedMaterials parameter
+ * @return true if the condition holds
+ */
     private static boolean isHomogenous(int startIndex, int length, ByteBuffer uncompressedMaterials) {
         long target = uncompressedMaterials.getLong(startIndex);
         if (!isHomogenous(target)) return false;
@@ -68,6 +95,16 @@ final class LongArrayCompressor {
         return true;
     }
 
+/**
+ * Adds homogenous.
+ *
+ * @param data parameter
+ * @param uncompressedMaterials parameter
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @return result
+ */
     private static int addHomogenous(ByteArrayList data, ByteBuffer uncompressedMaterials, int inChunkX, int inChunkY, int inChunkZ) {
         int index = getUncompressedIndex(inChunkX, inChunkY, inChunkZ);
         byte material = (byte) (uncompressedMaterials.getLong(index) >> (index & 7) * 8);
@@ -76,6 +113,12 @@ final class LongArrayCompressor {
         return HOMOGENOUS_BYTE_SIZE;
     }
 
+/**
+ * Checks whether homogenous.
+ *
+ * @param materials parameter
+ * @return true if the condition holds
+ */
     private static boolean isHomogenous(long materials) {
         byte material = (byte) materials;
         return (byte) (materials >> 8) == material
@@ -87,6 +130,12 @@ final class LongArrayCompressor {
                 && (byte) (materials >> 56) == material;
     }
 
+/**
+ * Returns the types.
+ *
+ * @param materials parameter
+ * @return result
+ */
     private static int getTypes(long materials) {
         return getType((byte) materials)
                 | getType((byte) (materials >> 8))

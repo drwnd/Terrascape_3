@@ -21,6 +21,10 @@ public enum StructureCollectionIdentifier implements AssetIdentifier<StructureCo
         this.structureBaseName = structureBaseName.toLowerCase();
     }
 
+/**
+ * Generates asset.
+ * @return result
+ */
     @Override
     public StructureCollection generateAsset() {
         File[] structureFiles = FileManager.getChildren(new File(StructureSaver.getSaveFileLocation()));

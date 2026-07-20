@@ -12,6 +12,12 @@ final class TPCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         Position position = Game.getPlayer().getPosition();
 

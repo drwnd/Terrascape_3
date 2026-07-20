@@ -25,6 +25,13 @@ public final class GenerationData {
     public long chunkX, chunkY, chunkZ;
     public final int LOD;
 
+/**
+ * Creates a new GenerationData instance.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ */
     public GenerationData(long chunkX, long chunkZ, int lod) {
         this.LOD = lod;
 
@@ -51,6 +58,11 @@ public final class GenerationData {
         maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
     }
 
+/**
+ * Sets chunk.
+ *
+ * @param chunk parameter
+ */
     public void setChunk(Chunk chunk) {
         chunkX = chunk.X;
         chunkY = chunk.Y;
@@ -59,6 +71,12 @@ public final class GenerationData {
         Arrays.fill(cachedMaterials, AIR);
     }
 
+/**
+ * Performs set.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ */
     public void set(int inChunkX, int inChunkZ) {
         int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
         int mapIndex = getMapIndex(inChunkX, inChunkZ);
@@ -108,11 +126,25 @@ public final class GenerationData {
         Arrays.fill(uncompressedMaterials, startIndex, startIndex + count, material);
     }
 
+/**
+ * Fills above with air.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ */
     public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {
         int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
+/**
+ * Stores tree.
+ *
+ * @param tree parameter
+ * @param clearBeforeGenerating parameter
+ * @return true if the condition holds
+ */
     public boolean storeTree(Tree tree, boolean clearBeforeGenerating) {
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
@@ -155,17 +187,29 @@ public final class GenerationData {
         return treeMap[index];
     }
 
+/**
+ * Performs chunk contains ground.
+ * @return true if the condition holds
+ */
     public boolean chunkContainsGround() {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         return chunkStartY < maxHeight;
     }
 
+/**
+ * Performs chunk contains biome.
+ * @return true if the condition holds
+ */
     public boolean chunkContainsBiome() {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
         return chunkStartY < maxSpecialHeight && chunkEndY > minHeight - WorldGeneration.MAX_SURFACE_MATERIALS_DEPTH;
     }
 
+/**
+ * Performs contains underground river.
+ * @return true if the condition holds
+ */
     public boolean containsUndergroundRiver() {
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
         long chunkEndY = chunkY + 1 << CHUNK_SIZE_BITS + LOD;
@@ -173,6 +217,14 @@ public final class GenerationData {
     }
 
 
+/**
+ * Returns the generating stone type.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public static byte getGeneratingStoneType(long x, long y, long z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
         if (Math.abs(noise) < ANDESITE_THRESHOLD) return ANDESITE;
@@ -181,6 +233,14 @@ public final class GenerationData {
         else return STONE;
     }
 
+/**
+ * Returns the ocean floor material.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -198,6 +258,14 @@ public final class GenerationData {
         return material;
     }
 
+/**
+ * Returns the warm ocean floor material.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getWarmOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -215,6 +283,14 @@ public final class GenerationData {
         return material;
     }
 
+/**
+ * Returns the cold ocean floor material.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getColdOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -232,6 +308,14 @@ public final class GenerationData {
         return material;
     }
 
+/**
+ * Returns the generating dirt type.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getGeneratingDirtType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -247,6 +331,14 @@ public final class GenerationData {
         return material;
     }
 
+/**
+ * Returns the generating ice type.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getGeneratingIceType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -262,6 +354,14 @@ public final class GenerationData {
         return material;
     }
 
+/**
+ * Returns the generating grass type.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getGeneratingGrassType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -279,6 +379,14 @@ public final class GenerationData {
     }
 
 
+/**
+ * Performs feature map.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return array result
+ */
     private static double[] featureMap(long chunkX, long chunkZ, int lod) {
         double[] featureMap = new double[CHUNK_SIZE * CHUNK_SIZE];
         double inverseMaxValue = 1.0 / Integer.MAX_VALUE;
@@ -293,6 +401,13 @@ public final class GenerationData {
         return featureMap;
     }
 
+/**
+ * Performs steepness map.
+ *
+ * @param heightMapPadded parameter
+ * @param lod parameter
+ * @return array result
+ */
     private static byte[] steepnessMap(int[] heightMapPadded, int lod) {
         byte[] steepnessMap = new byte[CHUNK_SIZE * CHUNK_SIZE];
 
@@ -307,6 +422,15 @@ public final class GenerationData {
         return steepnessMap;
     }
 
+/**
+ * Performs special height map.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @param biomeMap parameter
+ * @return array result
+ */
     private static int[] specialHeightMap(long chunkX, long chunkZ, int lod, Biome[] biomeMap) {
         int[] specialHeightMap = new int[CHUNK_SIZE * CHUNK_SIZE];
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + lod;
@@ -321,6 +445,14 @@ public final class GenerationData {
         return specialHeightMap;
     }
 
+/**
+ * Performs tree map.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return array result
+ */
     private static Tree[] treeMap(long chunkX, long chunkZ, int lod) {
         if (lod > MAX_TREE_LOD) return null;
 
@@ -340,6 +472,13 @@ public final class GenerationData {
         return treeMap;
     }
 
+/**
+ * Performs tree map value.
+ *
+ * @param totalX X coordinate in local block coordinates
+ * @param totalZ Z coordinate in local block coordinates
+ * @return result
+ */
     private static Tree treeMapValue(long totalX, long totalZ) {
         MapSample sample = new MapSample(totalX, totalZ, true, true);
 
@@ -356,24 +495,49 @@ public final class GenerationData {
         return biome.getGeneratingTree(totalX, resultingHeight, totalZ);
     }
 
+/**
+ * Returns the min height.
+ *
+ * @param resultingHeightMap parameter
+ * @return result
+ */
     private static int getMinHeight(int[] resultingHeightMap) {
         int min = Integer.MAX_VALUE;
         for (int height : resultingHeightMap) min = Math.min(min, height);
         return min;
     }
 
+/**
+ * Returns the max.
+ *
+ * @param values parameter
+ * @return result
+ */
     private static int getMax(int[] values) {
         int max = Integer.MIN_VALUE;
         for (int value : values) max = Math.max(max, value);
         return max;
     }
 
+/**
+ * Returns the min river.
+ *
+ * @param samples parameter
+ * @return result
+ */
     private static float getMinRiver(ChunkMapSamples samples) {
         float min = Float.POSITIVE_INFINITY;
         for (float riverValue : samples.riverMap()) min = Math.min(min, riverValue);
         return min;
     }
 
+/**
+ * Returns the max special height.
+ *
+ * @param resultingHeightMap parameter
+ * @param specialHeightMap parameter
+ * @return result
+ */
     private static int getMaxSpecialHeight(int[] resultingHeightMap, int[] specialHeightMap) {
         int max = Integer.MIN_VALUE;
         for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
@@ -384,6 +548,13 @@ public final class GenerationData {
         return max;
     }
 
+/**
+ * Checks whether underground river dominant.
+ *
+ * @param riverDepthMap parameter
+ * @param resultingHeightMap parameter
+ * @return true if the condition holds
+ */
     private static boolean isUndergroundRiverDominant(int[] riverDepthMap, int[] resultingHeightMap) {
         if (riverDepthMap == null) return false;
         for (int index = 0; index < riverDepthMap.length; index++)
@@ -392,6 +563,14 @@ public final class GenerationData {
     }
 
 
+/**
+ * Returns the compressed index.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     private int getCompressedIndex(long x, long y, long z) {
         // >> 2 for compression and performance improvement
         int compressedX = (int) (x >> LOD & CHUNK_SIZE_MASK) >> 2;

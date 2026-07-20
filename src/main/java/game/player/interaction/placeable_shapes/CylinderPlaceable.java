@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class CylinderPlaceable extends ShapePlaceable {
 
+/**
+ * Creates a new CylinderPlaceable instance.
+ *
+ * @param material parameter
+ */
     public CylinderPlaceable(byte material) {
         super(ComputeShaders.CYLINDER, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 5);
         saver.saveByte(getMaterial());
@@ -27,6 +37,12 @@ public final class CylinderPlaceable extends ShapePlaceable {
         saver.saveFloat(exponent.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static CylinderPlaceable load(Saver<?> saver) {
         CylinderPlaceable placeable = new CylinderPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
@@ -36,6 +52,10 @@ public final class CylinderPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -46,6 +66,10 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length x.
+ * @return result
+ */
     @Override
     public int getLengthX() {
         return switch ((Rotation3Way) rotation()) {
@@ -54,6 +78,10 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length y.
+ * @return result
+ */
     @Override
     public int getLengthY() {
         return switch ((Rotation3Way) rotation()) {
@@ -62,6 +90,10 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length z.
+ * @return result
+ */
     @Override
     public int getLengthZ() {
         return switch ((Rotation3Way) rotation()) {
@@ -70,6 +102,12 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CylinderPlaceable copy = new CylinderPlaceable(material);

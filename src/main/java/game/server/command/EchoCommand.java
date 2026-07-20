@@ -12,6 +12,12 @@ final class EchoCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         ColorOption color = null;
         int printCount = 1;

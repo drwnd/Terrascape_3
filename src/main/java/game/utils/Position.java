@@ -14,6 +14,11 @@ public final class Position implements Distanceable {
     public float fractionX, fractionY, fractionZ;
 
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveLong(longX);
         saver.saveLong(longY);
@@ -28,6 +33,9 @@ public final class Position implements Distanceable {
     }
 
 
+/**
+ * Creates a new Position instance.
+ */
     public Position() {
         this.longX = 0L;
         this.longY = 0L;
@@ -37,6 +45,16 @@ public final class Position implements Distanceable {
         this.fractionZ = 0.0F;
     }
 
+/**
+ * Creates a new Position instance.
+ *
+ * @param intX X coordinate in local block coordinates
+ * @param intY Y coordinate in local block coordinates
+ * @param intZ Z coordinate in local block coordinates
+ * @param fractionX X coordinate in local block coordinates
+ * @param fractionY Y coordinate in local block coordinates
+ * @param fractionZ Z coordinate in local block coordinates
+ */
     public Position(long intX, long intY, long intZ, float fractionX, float fractionY, float fractionZ) {
         this.longX = intX;
         this.longY = intY;
@@ -46,6 +64,12 @@ public final class Position implements Distanceable {
         this.fractionZ = fractionZ;
     }
 
+/**
+ * Creates a new Position instance.
+ *
+ * @param longPosition parameter
+ * @param fractionPosition parameter
+ */
     public Position(Vector3l longPosition, Vector3f fractionPosition) {
         this.longX = longPosition == null ? 0L : longPosition.x;
         this.longY = longPosition == null ? 0L : longPosition.y;
@@ -55,6 +79,11 @@ public final class Position implements Distanceable {
         this.fractionZ = fractionPosition == null ? 0.0F : fractionPosition.z;
     }
 
+/**
+ * Creates a new Position instance.
+ *
+ * @param position parameter
+ */
     public Position(Position position) {
         this.longX = position.longX;
         this.longY = position.longY;
@@ -64,6 +93,12 @@ public final class Position implements Distanceable {
         this.fractionZ = position.fractionZ;
     }
 
+/**
+ * Performs set.
+ *
+ * @param position parameter
+ * @return result
+ */
     public Position set(Position position) {
         this.longX = position.longX;
         this.longY = position.longY;
@@ -75,6 +110,14 @@ public final class Position implements Distanceable {
         return this;
     }
 
+/**
+ * Performs add.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @return result
+ */
     public Position add(float x, float y, float z) {
         fractionX += x;
         fractionY += y;
@@ -91,6 +134,13 @@ public final class Position implements Distanceable {
         return this;
     }
 
+/**
+ * Adds component.
+ *
+ * @param component parameter
+ * @param value parameter
+ * @return result
+ */
     public Position addComponent(int component, float value) {
 
         switch (component) {
@@ -114,6 +164,12 @@ public final class Position implements Distanceable {
         return this;
     }
 
+/**
+ * Performs vector from.
+ *
+ * @param distanceable parameter
+ * @return result
+ */
     @Override
     public Vector3f vectorFrom(Distanceable distanceable) {
         if (!(distanceable instanceof Position position)) return new Vector3f(Float.NaN);
@@ -140,12 +196,22 @@ public final class Position implements Distanceable {
         return new Vector3f(fractionX, fractionY, fractionZ);
     }
 
+/**
+ * Performs shares chunk with.
+ *
+ * @param position parameter
+ * @return true if the condition holds
+ */
     public boolean sharesChunkWith(Position position) {
         return longX >>> CHUNK_SIZE_BITS == position.longX >>> CHUNK_SIZE_BITS
                 && longY >>> CHUNK_SIZE_BITS == position.longY >>> CHUNK_SIZE_BITS
                 && longZ >>> CHUNK_SIZE_BITS == position.longZ >>> CHUNK_SIZE_BITS;
     }
 
+/**
+ * Performs int position to string.
+ * @return result
+ */
     public String intPositionToString() {
         return "[X:%s, Y:%s, Z:%s]".formatted(
                 longX,

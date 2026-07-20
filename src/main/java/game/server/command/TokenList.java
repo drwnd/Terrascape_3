@@ -15,6 +15,10 @@ public final class TokenList extends ArrayList<Token> {
         return index >= size() ? null : get(index);
     }
 
+/**
+ * Returns the next.
+ * @return result
+ */
     Token getNext() {
         index++;
         return get();
@@ -41,11 +45,19 @@ public final class TokenList extends ArrayList<Token> {
     }
 
 
+/**
+ * Performs expect next key word.
+ * @return result
+ */
     KeywordToken expectNextKeyWord() {
         index++;
         return expectGetKeyWord();
     }
 
+/**
+ * Performs expect get key word.
+ * @return result
+ */
     KeywordToken expectGetKeyWord() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
         Token token = get();
@@ -53,11 +65,19 @@ public final class TokenList extends ArrayList<Token> {
         return (KeywordToken) token;
     }
 
+/**
+ * Performs next increment keyword.
+ * @return result
+ */
     Token nextIncrementKeyword() {
         index++;
         return getIncrementKeyword();
     }
 
+/**
+ * Returns the increment keyword.
+ * @return result
+ */
     Token getIncrementKeyword() {
         Token token = get();
         if (token instanceof KeywordToken) index++;
@@ -65,11 +85,19 @@ public final class TokenList extends ArrayList<Token> {
     }
 
 
+/**
+ * Performs expect next number.
+ * @return result
+ */
     NumberToken expectNextNumber() {
         index++;
         return expectGetNumber();
     }
 
+/**
+ * Performs expect get number.
+ * @return result
+ */
     NumberToken expectGetNumber() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
         Token token = get();
@@ -77,11 +105,19 @@ public final class TokenList extends ArrayList<Token> {
         return (NumberToken) token;
     }
 
+/**
+ * Performs next increment number.
+ * @return result
+ */
     Token nextIncrementNumber() {
         index++;
         return getIncrementNumber();
     }
 
+/**
+ * Returns the increment number.
+ * @return result
+ */
     Token getIncrementNumber() {
         Token token = get();
         if (token instanceof NumberToken) index++;
@@ -89,11 +125,19 @@ public final class TokenList extends ArrayList<Token> {
     }
 
 
+/**
+ * Performs expect next string.
+ * @return result
+ */
     StringToken expectNextString() {
         index++;
         return expectGetString();
     }
 
+/**
+ * Performs expect get string.
+ * @return result
+ */
     StringToken expectGetString() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
         Token token = get();
@@ -101,11 +145,19 @@ public final class TokenList extends ArrayList<Token> {
         return (StringToken) token;
     }
 
+/**
+ * Performs next increment string.
+ * @return result
+ */
     Token nextIncrementString() {
         index++;
         return getIncrementString();
     }
 
+/**
+ * Returns the increment string.
+ * @return result
+ */
     Token getIncrementString() {
         Token token = get();
         if (token instanceof StringToken) index++;
@@ -113,11 +165,19 @@ public final class TokenList extends ArrayList<Token> {
     }
 
 
+/**
+ * Performs expect next operator.
+ * @return result
+ */
     OperatorToken expectNextOperator() {
         index++;
         return expectGetOperator();
     }
 
+/**
+ * Performs expect get operator.
+ * @return result
+ */
     OperatorToken expectGetOperator() {
         if (index >= size()) throw SyntaxError.TOO_FEW_TOKENS;
         Token token = get();
@@ -125,11 +185,19 @@ public final class TokenList extends ArrayList<Token> {
         return (OperatorToken) token;
     }
 
+/**
+ * Performs next increment operator.
+ * @return result
+ */
     Token nextIncrementOperator() {
         index++;
         return getIncrementOperator();
     }
 
+/**
+ * Returns the increment operator.
+ * @return result
+ */
     Token getIncrementOperator() {
         Token token = get();
         if (token instanceof OperatorToken) index++;

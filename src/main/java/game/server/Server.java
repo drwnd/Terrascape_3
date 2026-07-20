@@ -33,12 +33,24 @@ public final class Server implements CrashCallback {
     public static final int TARGET_TPS = 20;
     public static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
 
+/**
+ * Creates a new Server instance.
+ *
+ * @param currentGameTick parameter
+ * @param dayTime parameter
+ * @param messages parameter
+ */
     public Server(long currentGameTick, float dayTime, ArrayList<ChatMessage> messages) {
         this.currentGameTick = currentGameTick;
         this.dayTime = dayTime;
         this.messages = messages;
     }
 
+/**
+ * Creates a new Server instance.
+ *
+ * @param oldServer parameter
+ */
     public Server(Server oldServer) {
         oldServer.cleanUp();
         currentGameTick = oldServer.currentGameTick;
@@ -47,6 +59,12 @@ public final class Server implements CrashCallback {
     }
 
 
+/**
+ * Performs notify.
+ *
+ * @param exception parameter
+ * @return result
+ */
     @Override
     public CrashAction notify(Exception exception) {
         Game.cleanUp();
@@ -57,6 +75,11 @@ public final class Server implements CrashCallback {
         ChunkGenerator.loadImmediateSurroundings();
     }
 
+/**
+ * Performs unload distant chunks.
+ *
+ * @param playerChunkPosition parameter
+ */
     public static void unloadDistantChunks(Vector3l playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
@@ -80,6 +103,9 @@ public final class Server implements CrashCallback {
         }
     }
 
+/**
+ * Performs unload all.
+ */
     public static void unloadAll() {
         ChunkSaver saver = new ChunkSaver();
 
@@ -92,6 +118,10 @@ public final class Server implements CrashCallback {
     }
 
 
+/**
+ * Returns the current game tick fraction.
+ * @return result
+ */
     public float getCurrentGameTickFraction() {
         long currentGameTickDuration = System.nanoTime() - gameTickStartTime;
         return (float) ((double) currentGameTickDuration / NANOSECONDS_PER_GAME_TICK);
@@ -109,6 +139,14 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
+/**
+ * Performs request break place interaction.
+ *
+ * @param position parameter
+ * @param placeable parameter
+ * @param side parameter
+ * @return true if the condition holds
+ */
     public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
         placeable.offsetPosition(position, side);
 
@@ -129,28 +167,45 @@ public final class Server implements CrashCallback {
         return true;
     }
 
+/**
+ * Performs pause ticks.
+ */
     public void pauseTicks() {
         if (executor != null) executor.shutdownNow();
         executor = null;
     }
 
+/**
+ * Performs start ticks.
+ */
     public void startTicks() {
         if (executor != null) return;
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
+/**
+ * Performs clean up.
+ */
     void cleanUp() {
         generator.cleanUp();
         pauseTicks();
     }
 
+/**
+ * Performs schedule generator restart.
+ */
     public void scheduleGeneratorRestart() {
         synchronized (generator) {
             generatorRestartScheduled = true;
         }
     }
 
+/**
+ * Performs send player message.
+ *
+ * @param message parameter
+ */
     public void sendPlayerMessage(String message) {
         if (message == null || message.isEmpty()) return;
         synchronized (messages) {
@@ -166,18 +221,33 @@ public final class Server implements CrashCallback {
         }
     }
 
+/**
+ * Returns the messages.
+ * @return result
+ */
     public ArrayList<ChatMessage> getMessages() {
         synchronized (messages) {
             return new ArrayList<>(messages);
         }
     }
 
+/**
+ * Performs send server message.
+ *
+ * @param message parameter
+ * @param color parameter
+ */
     public void sendServerMessage(String message, ColorOption color) {
         synchronized (messages) {
             messages.add(new ChatMessage(message, Sender.SERVER, color));
         }
     }
 
+/**
+ * Removes old chat messages.
+ *
+ * @param maxMessageCount parameter
+ */
     public void removeOldChatMessages(int maxMessageCount) {
         synchronized (messages) {
             int toRemoveMessagesCount = messages.size() - maxMessageCount;
@@ -187,12 +257,24 @@ public final class Server implements CrashCallback {
         }
     }
 
+/**
+ * Adds function.
+ *
+ * @param function parameter
+ * @param identifier parameter
+ */
     public void addFunction(Function function, Object identifier) {
         synchronized (functions) {
             functions.put(identifier, function);
         }
     }
 
+/**
+ * Removes function.
+ *
+ * @param identifier parameter
+ * @return result
+ */
     public Function removeFunction(Object identifier) {
         synchronized (functions) {
             return functions.remove(identifier);
@@ -200,6 +282,9 @@ public final class Server implements CrashCallback {
     }
 
 
+/**
+ * Performs execute game tick catch exception.
+ */
     private void executeGameTickCatchException() {
         try {
             gameTickStartTime = System.nanoTime();
@@ -211,6 +296,9 @@ public final class Server implements CrashCallback {
         }
     }
 
+/**
+ * Performs execute game tick.
+ */
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         Game.getPlayer().updateGameTick();
@@ -230,6 +318,9 @@ public final class Server implements CrashCallback {
         removeOldChatMessages(IntSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
+/**
+ * Performs increment time.
+ */
     private void incrementTime() {
         dayTime += FloatSettings.TIME_SPEED.value();
         if (dayTime > 1.0F) dayTime -= 2.0F;

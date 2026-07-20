@@ -20,6 +20,13 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         this(1 << sizeBits, 1 << sizeBits, 1 << sizeBits, new MaterialsData(sizeBits, material));
     }
 
+/**
+ * Creates a new Structure instance.
+ *
+ * @param sizeBits parameter
+ * @param material parameter
+ * @param bitMap parameter
+ */
     public Structure(int sizeBits, byte material, long[] bitMap) {
         this(1 << sizeBits, 1 << sizeBits, 1 << sizeBits,
                 MaterialsData.getCompressedMaterials(sizeBits, bitMap, material));
@@ -29,11 +36,28 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         this(sizeX, sizeY, sizeZ, MaterialsData.getCompressedMaterials(sizeBits, bitMap, material));
     }
 
+/**
+ * Returns the material.
+ *
+ * @param structureX X coordinate in local block coordinates
+ * @param structureY Y coordinate in local block coordinates
+ * @param structureZ Z coordinate in local block coordinates
+ * @return result
+ */
     public byte getMaterial(int structureX, int structureY, int structureZ) {
         if (!contains(structureX, structureY, structureZ)) return AIR;
         return materials.getMaterial(structureX, structureY, structureZ);
     }
 
+/**
+ * Returns the material.
+ *
+ * @param structureX X coordinate in local block coordinates
+ * @param structureY Y coordinate in local block coordinates
+ * @param structureZ Z coordinate in local block coordinates
+ * @param transform parameter
+ * @return result
+ */
     public byte getMaterial(int structureX, int structureY, int structureZ, byte transform) {
         if ((transform & MIRROR_X) != 0) structureX = sizeX(transform) - structureX - 1;
         if ((transform & MIRROR_Z) != 0) structureZ = sizeZ(transform) - structureZ - 1;
@@ -46,6 +70,14 @@ public record Structure(int sizeX, int sizeY, int sizeZ, MaterialsData materials
         return getMaterial(structureX, structureY, structureZ);
     }
 
+/**
+ * Performs contains.
+ *
+ * @param structureX X coordinate in local block coordinates
+ * @param structureY Y coordinate in local block coordinates
+ * @param structureZ Z coordinate in local block coordinates
+ * @return true if the condition holds
+ */
     public boolean contains(int structureX, int structureY, int structureZ) {
         return structureX >= 0 && structureX < sizeX
                 && structureY >= 0 && structureY < sizeY

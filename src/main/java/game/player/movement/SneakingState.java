@@ -13,6 +13,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class SneakingState extends MovementState {
 
+/**
+ * Computes next game tick acceleration.
+ *
+ * @param playerRotation parameter
+ * @param lastPosition parameter
+ * @return result
+ */
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.SNEAK)) next = new WalkingState();
@@ -33,6 +40,12 @@ public final class SneakingState extends MovementState {
         return velocityChange;
     }
 
+/**
+ * Performs handle input.
+ *
+ * @param key Y coordinate in local block coordinates
+ * @param action parameter
+ */
     @Override
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {

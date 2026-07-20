@@ -20,6 +20,11 @@ public final class ServerSaver extends Saver<Server> {
         super(128);
     }
 
+/**
+ * Performs save.
+ *
+ * @param server parameter
+ */
     @Override
     protected void save(Server server) {
         saveLong(server.getCurrentGameTick());
@@ -33,6 +38,10 @@ public final class ServerSaver extends Saver<Server> {
         }
     }
 
+/**
+ * Performs load.
+ * @return result
+ */
     @Override
     protected Server load() {
         long currentGameTick = loadLong();

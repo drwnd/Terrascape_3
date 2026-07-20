@@ -8,6 +8,9 @@ import org.joml.Vector2f;
 
 public final class ChatTextField extends TextField {
 
+/**
+ * Creates a new ChatTextField instance.
+ */
     public ChatTextField() {
         super(new Vector2f(1.0F, 0.05F), new Vector2f(0.0F, 0.0F), UiMessages.CHAT_MESSAGE_PROMPT);
         setVisible(false);

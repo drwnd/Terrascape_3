@@ -16,6 +16,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class WalkingState extends MovementState {
 
+/**
+ * Computes next game tick acceleration.
+ *
+ * @param playerRotation parameter
+ * @param lastPosition parameter
+ * @return result
+ */
     @Override
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (Input.isKeyPressed(KeySettings.SNEAK)) next = new SneakingState();
@@ -41,6 +48,12 @@ public final class WalkingState extends MovementState {
         return velocityChange;
     }
 
+/**
+ * Performs handle input.
+ *
+ * @param key Y coordinate in local block coordinates
+ * @param action parameter
+ */
     @Override
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
@@ -79,6 +92,11 @@ public final class WalkingState extends MovementState {
         return Input.isKeyPressed(KeySettings.SPRINT) ? 5 : 8;
     }
 
+/**
+ * Performs play jump sound.
+ *
+ * @param position parameter
+ */
     private void playJumpSound(Position position) {
         if (!movement.isWideGrounded()) return;
         byte standingMaterial = getStandingMaterial(position);

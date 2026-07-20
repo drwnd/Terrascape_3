@@ -12,6 +12,12 @@ final class TimeCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         if (tokens.size() == 1) {
             Game.getServer().sendServerMessage("Current Time : %s".formatted(Game.getServer().getDayTime()), ColorOption.WHITE);

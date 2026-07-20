@@ -37,6 +37,12 @@ public final class StructureSelector implements Placeable {
         return false;
     }
 
+/**
+ * Performs offset position.
+ *
+ * @param position parameter
+ * @param targetedSide parameter
+ */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();

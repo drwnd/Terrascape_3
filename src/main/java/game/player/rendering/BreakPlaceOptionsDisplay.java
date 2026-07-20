@@ -16,6 +16,9 @@ import org.joml.Vector2f;
 
 public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
 
+/**
+ * Creates a new BreakPlaceOptionsDisplay instance.
+ */
     public BreakPlaceOptionsDisplay() {
         super(new Vector2f(), new Vector2f());
         setRimThicknessMultiplier(0.2F);
@@ -27,6 +30,12 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
         addRenderable(breakPlaceAlign);
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         breakPlaceSize.setText(UiMessages.BREAK_PLACE_SIZE_FORMAT.get().formatted(1 << IntSettings.BREAK_PLACE_SIZE.value()));

@@ -12,6 +12,12 @@ import static game.utils.Constants.*;
 
 public final class Transformation {
 
+/**
+ * Creates projection rotation matrix.
+ *
+ * @param camera parameter
+ * @return result
+ */
     public static Matrix4f createProjectionRotationMatrix(Camera camera) {
         Vector3f rotation = camera.getRotation();
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.SECOND_PERSON) {
@@ -27,6 +33,12 @@ public final class Transformation {
         return matrix;
     }
 
+/**
+ * Returns the projection view matrix.
+ *
+ * @param camera parameter
+ * @return result
+ */
     public static Matrix4f getProjectionViewMatrix(Camera camera) {
         Vector3f position = camera.getPosition().getInChunkPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
@@ -35,6 +47,16 @@ public final class Transformation {
         return matrix;
     }
 
+/**
+ * Returns the structure display matrix.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @param zoom parameter
+ * @param rotation parameter
+ * @return result
+ */
     public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom, Vector3f rotation) {
         float centerX = x * 0.5F, centerY = y * 0.5F, centerZ = z * 0.5F;
         float frustumDistance = Math.max(x, Math.max(y, z)) / zoom;
@@ -47,6 +69,12 @@ public final class Transformation {
         return matrix;
     }
 
+/**
+ * Returns the frustum culling matrix.
+ *
+ * @param camera parameter
+ * @return result
+ */
     public static Matrix4f getFrustumCullingMatrix(Camera camera) {
         Position cameraPosition = camera.getPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
@@ -55,6 +83,12 @@ public final class Transformation {
         return matrix;
     }
 
+/**
+ * Returns the sun matrix.
+ *
+ * @param renderTime parameter
+ * @return result
+ */
     public static Matrix4f getSunMatrix(float renderTime) {
         Vector3f sunDirection = getSunDirection(renderTime);
         Matrix4f matrix = new Matrix4f();
@@ -65,6 +99,12 @@ public final class Transformation {
         return matrix;
     }
 
+/**
+ * Returns the sun direction.
+ *
+ * @param renderTime parameter
+ * @return result
+ */
     public static Vector3f getSunDirection(float renderTime) {
         float alpha = (float) (renderTime * Math.PI);
 
@@ -75,6 +115,13 @@ public final class Transformation {
         ).normalize();
     }
 
+/**
+ * Returns the model matrix.
+ *
+ * @param transform parameter
+ * @param structure parameter
+ * @return result
+ */
     public static Matrix4f getModelMatrix(byte transform, Structure structure) {
         Matrix4f matrix = new Matrix4f();
 

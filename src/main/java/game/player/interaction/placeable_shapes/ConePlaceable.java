@@ -13,6 +13,11 @@ import game.server.generation.Structure;
 
 public final class ConePlaceable extends ShapePlaceable {
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 8);
         saver.saveByte(getMaterial());
@@ -23,6 +28,12 @@ public final class ConePlaceable extends ShapePlaceable {
         saver.saveInt(thickness.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static ConePlaceable load(Saver<?> saver) {
         ConePlaceable placeable = new ConePlaceable(saver.loadByte());
         placeable.baseRadius.setValue(saver.loadInt());
@@ -33,11 +44,22 @@ public final class ConePlaceable extends ShapePlaceable {
         return placeable;
     }
 
+/**
+ * Creates a new ConePlaceable instance.
+ *
+ * @param material parameter
+ */
     public ConePlaceable(byte material) {
         super(ComputeShaders.CONE, material, Rotation6Way.ROTATION_5);
         loadSettings();
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         ConePlaceable copy = new ConePlaceable(material);
@@ -49,6 +71,10 @@ public final class ConePlaceable extends ShapePlaceable {
         return copy;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -60,6 +86,10 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length x.
+ * @return result
+ */
     @Override
     public int getLengthX() {
         return switch ((Rotation6Way) rotation()) {
@@ -68,6 +98,10 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length y.
+ * @return result
+ */
     @Override
     public int getLengthY() {
         return switch ((Rotation6Way) rotation()) {
@@ -76,6 +110,10 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length z.
+ * @return result
+ */
     @Override
     public int getLengthZ() {
         return switch ((Rotation6Way) rotation()) {

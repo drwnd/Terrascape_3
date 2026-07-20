@@ -21,6 +21,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class MainMenu extends UiBackgroundElement {
 
+/**
+ * Creates a new MainMenu instance.
+ */
     public MainMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         Vector2f sizeToParent = new Vector2f(0.25F, 0.1F);
@@ -65,12 +68,20 @@ public final class MainMenu extends UiBackgroundElement {
         addRenderable(cancelDeletionButton);
     }
 
+/**
+ * Performs move world buttons.
+ *
+ * @param movement parameter
+ */
     public void moveWorldButtons(float movement) {
         Vector2f offset = new Vector2f(0, movement);
         for (Renderable renderable : worldButtons) renderable.move(offset);
     }
 
 
+/**
+ * Sets on top.
+ */
     @Override
     public void setOnTop() {
         // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
@@ -80,6 +91,14 @@ public final class MainMenu extends UiBackgroundElement {
         hideWorldSpecificButtons();
     }
 
+/**
+ * Performs click on.
+ *
+ * @param pixelCoordinate parameter
+ * @param mouseButton parameter
+ * @param action parameter
+ * @return true if the condition holds
+ */
     @Override
     public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         boolean buttonFound = false;
@@ -95,6 +114,11 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
 
+/**
+ * Sets selected world.
+ *
+ * @param saveFile parameter
+ */
     private void setSelectedWorld(File saveFile) {
         hideWorldSpecificButtons();
 
@@ -111,6 +135,9 @@ public final class MainMenu extends UiBackgroundElement {
         optimizeWorldButton.setVisible(true);
     }
 
+/**
+ * Performs hide world specific buttons.
+ */
     private void hideWorldSpecificButtons() {
         playWorldButton.setVisible(false);
         deleteWorldButton.setVisible(false);
@@ -123,6 +150,9 @@ public final class MainMenu extends UiBackgroundElement {
         return FileManager.getChildren(new File("saves"));
     }
 
+/**
+ * Creates world buttons.
+ */
     private void createWorldButtons() {
         for (Renderable worldButton : worldButtons) removeRenderable(worldButton).delete();
 
@@ -137,6 +167,13 @@ public final class MainMenu extends UiBackgroundElement {
         }
     }
 
+/**
+ * Returns the play world button.
+ *
+ * @param index X coordinate in local block coordinates
+ * @param saveFile parameter
+ * @return result
+ */
     private UiButton getPlayWorldButton(int index, File saveFile) {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * (index + 1) + input.getScroll());
@@ -150,6 +187,12 @@ public final class MainMenu extends UiBackgroundElement {
         return button;
     }
 
+/**
+ * Returns the delete world action.
+ *
+ * @param saveFile parameter
+ * @return result
+ */
     private Clickable getDeleteWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -162,6 +205,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the confirm deletion action.
+ *
+ * @param saveFile parameter
+ * @return result
+ */
     private Clickable getConfirmDeletionAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -173,6 +222,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the optimize world action.
+ *
+ * @param saveFile parameter
+ * @return result
+ */
     private Clickable getOptimizeWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -183,6 +238,10 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
 
+/**
+ * Returns the settings action.
+ * @return result
+ */
     private static Clickable getSettingsAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -191,6 +250,10 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the create world action.
+ * @return result
+ */
     private static Clickable getCreateWorldAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -199,6 +262,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the play world action.
+ *
+ * @param saveFile parameter
+ * @return result
+ */
     private static Clickable getPlayWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

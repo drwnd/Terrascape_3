@@ -11,6 +11,12 @@ final class ClearCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         int sparedMessagesCount = 0;
 

@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class ArcPlaceable extends ShapePlaceable {
 
+/**
+ * Creates a new ArcPlaceable instance.
+ *
+ * @param material parameter
+ */
     public ArcPlaceable(byte material) {
         super(ComputeShaders.ARC, material, Rotation12Way.ROTATION_01);
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 15);
         saver.saveByte(getMaterial());
@@ -27,6 +37,12 @@ public final class ArcPlaceable extends ShapePlaceable {
         saver.saveFloat(exponent.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static ArcPlaceable load(Saver<?> saver) {
         ArcPlaceable placeable = new ArcPlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
@@ -36,6 +52,12 @@ public final class ArcPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         ArcPlaceable copy = new ArcPlaceable(material);
@@ -46,6 +68,10 @@ public final class ArcPlaceable extends ShapePlaceable {
         return copy;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -56,6 +82,10 @@ public final class ArcPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length x.
+ * @return result
+ */
     @Override
     public int getLengthX() {
         return switch ((Rotation12Way) rotation()) {
@@ -64,6 +94,10 @@ public final class ArcPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length y.
+ * @return result
+ */
     @Override
     public int getLengthY() {
         return switch ((Rotation12Way) rotation()) {
@@ -72,6 +106,10 @@ public final class ArcPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length z.
+ * @return result
+ */
     @Override
     public int getLengthZ() {
         return switch ((Rotation12Way) rotation()) {

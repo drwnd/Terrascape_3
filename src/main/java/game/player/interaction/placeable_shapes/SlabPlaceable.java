@@ -13,17 +13,33 @@ import game.server.generation.Structure;
 
 public final class SlabPlaceable extends ShapePlaceable {
 
+/**
+ * Creates a new SlabPlaceable instance.
+ *
+ * @param material parameter
+ */
     public SlabPlaceable(byte material) {
         super(ComputeShaders.SLAB, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 13);
         saver.saveByte(getMaterial());
         saver.saveInt(thickness.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static SlabPlaceable load(Saver<?> saver) {
         SlabPlaceable placeable = new SlabPlaceable(saver.loadByte());
         placeable.thickness.setValue(saver.loadInt());
@@ -45,6 +61,12 @@ public final class SlabPlaceable extends ShapePlaceable {
         return rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : super.getLengthZ();
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SlabPlaceable copy = new SlabPlaceable(material);
@@ -52,6 +74,10 @@ public final class SlabPlaceable extends ShapePlaceable {
         return copy;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -59,6 +85,10 @@ public final class SlabPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the small structure.
+ * @return result
+ */
     @Override
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];

@@ -50,6 +50,14 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
         this(folderPath, fileNamePrefix, 1.0F, 1.0F);
     }
 
+/**
+ * Creates a new MaterialSounds instance.
+ *
+ * @param folderPath parameter
+ * @param fileNamePrefix X coordinate in local block coordinates
+ * @param gainMultiplier parameter
+ * @param pitchMultiplier parameter
+ */
     MaterialSounds(String folderPath, String fileNamePrefix, float gainMultiplier, float pitchMultiplier) {
         this.folderPath = folderPath;
         this.fileNamePrefix = fileNamePrefix;
@@ -57,6 +65,12 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
         this.pitchMultiplier = pitchMultiplier;
     }
 
+/**
+ * Performs get.
+ *
+ * @param name parameter
+ * @return result
+ */
     public static MaterialSounds get(String name) {
         if (name == null) return NONE;
         try {
@@ -67,6 +81,10 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     }
 
 
+/**
+ * Generates asset.
+ * @return result
+ */
     @Override
     public SoundCollection generateAsset() {
         if (folderPath == null) return new SoundCollection(new SingleSoundIdentifier[0]);

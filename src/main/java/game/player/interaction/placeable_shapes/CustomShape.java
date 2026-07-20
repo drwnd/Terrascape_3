@@ -12,12 +12,23 @@ import game.player.interaction.ShapeSetting;
 
 public final class CustomShape extends ShapePlaceable {
 
+/**
+ * Creates a new CustomShape instance.
+ *
+ * @param material parameter
+ * @param shaderCode parameter
+ */
     public CustomShape(byte material, String shaderCode) {
         super(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
         this.shaderCode = shaderCode;
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 18);
         saver.saveByte(getMaterial());
@@ -27,6 +38,12 @@ public final class CustomShape extends ShapePlaceable {
         saver.saveInt(lengthZ.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static CustomShape load(Saver<?> saver) {
         CustomShape placeable = new CustomShape(saver.loadByte(), saver.loadString());
         placeable.lengthX.setValue(saver.loadInt());
@@ -36,6 +53,12 @@ public final class CustomShape extends ShapePlaceable {
     }
 
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CustomShape copy = new CustomShape(material, shaderCode);
@@ -45,6 +68,10 @@ public final class CustomShape extends ShapePlaceable {
         return copy;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[] {
@@ -69,6 +96,11 @@ public final class CustomShape extends ShapePlaceable {
         return lengthZ.value();
     }
 
+/**
+ * Sets shader code.
+ *
+ * @param shaderCode parameter
+ */
     public void setShaderCode(String shaderCode) {
         this.shaderCode = shaderCode;
         setShaderIdentifier(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"));

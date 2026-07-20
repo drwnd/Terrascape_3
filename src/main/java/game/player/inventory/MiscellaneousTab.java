@@ -12,6 +12,12 @@ import org.joml.Vector2i;
 
 public final class MiscellaneousTab extends Renderable implements InventoryTab {
 
+/**
+ * Creates a new MiscellaneousTab instance.
+ *
+ * @param sizeToParent parameter
+ * @param offsetToParent parameter
+ */
     public MiscellaneousTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -28,6 +34,12 @@ public final class MiscellaneousTab extends Renderable implements InventoryTab {
         addRenderable(structureSelectDisplay);
     }
 
+/**
+ * Returns the selected placeable.
+ *
+ * @param pixelCoordinate parameter
+ * @return result
+ */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         if (chunkRebuildDisplay.containsPixelCoordinate(pixelCoordinate)) return new ChunkRebuildPlaceable();

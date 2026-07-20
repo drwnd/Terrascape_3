@@ -24,6 +24,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class StructureTab extends Renderable implements InventoryTab {
 
+/**
+ * Creates a new StructureTab instance.
+ *
+ * @param sizeToParent parameter
+ * @param offsetToParent parameter
+ */
     public StructureTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -39,6 +45,12 @@ public final class StructureTab extends Renderable implements InventoryTab {
         addRenderable(filterTextField);
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -55,6 +67,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         addRenderable(selectedStructureDisplay);
     }
 
+/**
+ * Performs hover over.
+ *
+ * @param pixelCoordinate parameter
+ */
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
@@ -62,6 +79,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         structureButtonsContainer.hoverOver(pixelCoordinate);
     }
 
+/**
+ * Performs drag over.
+ *
+ * @param pixelCoordinate parameter
+ */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         if (selectedStructureDisplay == null) return;
@@ -70,6 +92,12 @@ public final class StructureTab extends Renderable implements InventoryTab {
         lastCursorPos.set(pixelCoordinate);
     }
 
+/**
+ * Performs resize self to.
+ *
+ * @param width parameter
+ * @param height parameter
+ */
     @Override
     public void resizeSelfTo(int width, int height) {
         if (selectedStructureDisplay == null) return;
@@ -78,6 +106,12 @@ public final class StructureTab extends Renderable implements InventoryTab {
         selectedStructureDisplay.setOffsetToParent(0.3F, 0.5F - 0.7F * Window.getAspectRatio() * 0.5F);
     }
 
+/**
+ * Returns the selected placeable.
+ *
+ * @param pixelCoordinate parameter
+ * @return result
+ */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (StructureSelectionButton button : structureButtons)
@@ -85,6 +119,12 @@ public final class StructureTab extends Renderable implements InventoryTab {
         return null;
     }
 
+/**
+ * Performs handle scroll.
+ *
+ * @param pixelCoordinate parameter
+ * @param yScroll parameter
+ */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) {
@@ -96,6 +136,9 @@ public final class StructureTab extends Renderable implements InventoryTab {
             selectedStructureDisplay.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
     }
 
+/**
+ * Performs reload structure buttons.
+ */
     void reloadStructureButtons() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         for (Renderable button : structureButtons) structureButtonsContainer.removeRenderable(button).delete();
@@ -120,11 +163,22 @@ public final class StructureTab extends Renderable implements InventoryTab {
         }
     }
 
+/**
+ * Performs move structure buttons.
+ *
+ * @param movement parameter
+ */
     private void moveStructureButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (StructureSelectionButton button : structureButtons) button.move(offset);
     }
 
+/**
+ * Returns the button action.
+ *
+ * @param selectionButton parameter
+ * @return result
+ */
     private Clickable getButtonAction(StructureSelectionButton selectionButton) {
         return (Vector2i pixelCoordinate, int _, int action) -> {
             if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return ButtonResult.IGNORE;

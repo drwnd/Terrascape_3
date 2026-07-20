@@ -9,6 +9,15 @@ import static game.server.generation.WorldGeneration.*;
 import static game.utils.Constants.SAND;
 
 public final class ColdOcean extends Biome {
+/**
+ * Performs place material.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param data parameter
+ * @return true if the condition holds
+ */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalX = data.totalX;
@@ -31,6 +40,13 @@ public final class ColdOcean extends Biome {
         return true;
     }
 
+/**
+ * Returns the special height.
+ *
+ * @param totalX X coordinate in local block coordinates
+ * @param totalZ Z coordinate in local block coordinates
+ * @return result
+ */
     @Override
     public int getSpecialHeight(long totalX, long totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);

@@ -14,6 +14,11 @@ import java.io.File;
 
 public final class Game {
 
+/**
+ * Performs play.
+ *
+ * @param saveFile parameter
+ */
     public static void play(File saveFile) {
         Material.loadMaterials();
         String worldName = saveFile.getName();
@@ -28,6 +33,9 @@ public final class Game {
         Window.setCrashCallback(server);
     }
 
+/**
+ * Performs quit.
+ */
     public static void quit() {
         Window.popRenderable();
         cleanUp();
@@ -38,6 +46,9 @@ public final class Game {
         server = null;
     }
 
+/**
+ * Performs clean up.
+ */
     public static void cleanUp() {
         if (world == null) return;
         String worldName = world.getName();
@@ -50,6 +61,11 @@ public final class Game {
         server.cleanUp();
     }
 
+/**
+ * Performs update render distance.
+ *
+ * @param oldRenderDistance parameter
+ */
     public static void updateRenderDistance(int oldRenderDistance) {
         if (world == null || oldRenderDistance == IntSettings.RENDER_DISTANCE.value()) return;
         server = new Server(server);
@@ -59,6 +75,11 @@ public final class Game {
         server.startTicks();
     }
 
+/**
+ * Performs update lod count.
+ *
+ * @param oldLodCount parameter
+ */
     public static void updateLodCount(int oldLodCount) {
         if (world == null || oldLodCount == IntSettings.LOD_COUNT.value()) return;
         server = new Server(server);
@@ -85,6 +106,12 @@ public final class Game {
     }
 
 
+/**
+ * Sets temporary world.
+ *
+ * @param world parameter
+ * @return true if the condition holds
+ */
     public static boolean setTemporaryWorld(World world) {
         if (Game.world != null || player != null || server != null) {
             Debug.err("Cannot set temporary World. The Game might be running");
@@ -94,6 +121,9 @@ public final class Game {
         return true;
     }
 
+/**
+ * Removes temporary world.
+ */
     public static void removeTemporaryWorld() {
         if (player != null || server != null) {
             Debug.err("Cannot remove temporary World. The Game might be running");

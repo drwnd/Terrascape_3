@@ -26,6 +26,12 @@ public final class ChunkRebuildPlaceable implements Placeable {
         return new ChunkRebuildPlaceable();
     }
 
+/**
+ * Performs place.
+ *
+ * @param position parameter
+ * @param lod parameter
+ */
     @Override
     public void place(Vector3l position, int lod) {
         if (lod == 0) {
@@ -79,6 +85,12 @@ public final class ChunkRebuildPlaceable implements Placeable {
         return false;
     }
 
+/**
+ * Performs offset position.
+ *
+ * @param position parameter
+ * @param targetedSide parameter
+ */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         position.x &= ~CHUNK_SIZE_MASK;

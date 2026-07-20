@@ -32,6 +32,15 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs debug screen line.
+ *
+ * @param visibility Y coordinate in local block coordinates
+ * @param color parameter
+ * @param string parameter
+ * @param name parameter
+ * @return result
+ */
 public record DebugScreenLine(OptionSetting visibility, OptionSetting color, StringGetter string, String name) {
 
     public boolean shouldShow(boolean debugScreenOpen) {

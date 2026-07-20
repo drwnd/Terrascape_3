@@ -18,11 +18,22 @@ enum ParticleType {
     TRANSPARENT_PLACE(10, false),
     SPLASH(20, true);
 
+/**
+ * Creates a new ParticleType instance.
+ *
+ * @param lifeTimeTicks parameter
+ * @param isOpaque parameter
+ */
     ParticleType(int lifeTimeTicks, boolean isOpaque) {
         this.lifeTimeTicks = lifeTimeTicks;
         this.isOpaque = isOpaque;
     }
 
+/**
+ * Performs play sound.
+ *
+ * @param toBufferParticleEffect parameter
+ */
     public static void playSound(ToBufferParticleEffect toBufferParticleEffect) {
         switch (toBufferParticleEffect.type()) {
             case SPLASH -> playSplashEffectSounds(toBufferParticleEffect);
@@ -40,6 +51,11 @@ enum ParticleType {
     }
 
 
+/**
+ * Performs play break effect sounds.
+ *
+ * @param toBufferParticleEffect parameter
+ */
     private static void playBreakEffectSounds(ToBufferParticleEffect toBufferParticleEffect) {
         long[] involvedMaterials = new long[4];
         Position center = new Position();
@@ -51,6 +67,11 @@ enum ParticleType {
         }
     }
 
+/**
+ * Performs play place effect sounds.
+ *
+ * @param toBufferParticleEffect parameter
+ */
     private static void playPlaceEffectSounds(ToBufferParticleEffect toBufferParticleEffect) {
         long[] involvedMaterials = new long[4];
         Position center = new Position();
@@ -66,6 +87,13 @@ enum ParticleType {
 
     }
 
+/**
+ * Computes involved materials and center.
+ *
+ * @param toBufferParticleEffect parameter
+ * @param involvedMaterials parameter
+ * @param center parameter
+ */
     private static void computeInvolvedMaterialsAndCenter(ToBufferParticleEffect toBufferParticleEffect, long[] involvedMaterials, Position center) {
         int[] particleData = toBufferParticleEffect.particlesData();
         Vector3i min = new Vector3i(Integer.MAX_VALUE), max = new Vector3i(Integer.MIN_VALUE);

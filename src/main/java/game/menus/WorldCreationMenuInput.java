@@ -6,6 +6,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenuInput extends Input {
 
+/**
+ * Creates a new WorldCreationMenuInput instance.
+ *
+ * @param menu parameter
+ */
     public WorldCreationMenuInput(WorldCreationMenu menu) {
         super(menu);
         this.menu = menu;
@@ -16,12 +21,27 @@ public final class WorldCreationMenuInput extends Input {
         setStandardInputMode();
     }
 
+/**
+ * Performs cursor pos callback.
+ *
+ * @param window parameter
+ * @param xPos parameter
+ * @param yPos parameter
+ */
     @Override
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
         menu.hoverOver(cursorPos);
     }
 
+/**
+ * Performs mouse button callback.
+ *
+ * @param window parameter
+ * @param button parameter
+ * @param action parameter
+ * @param mods parameter
+ */
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         if (action != GLFW_PRESS) return;

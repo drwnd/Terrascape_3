@@ -16,6 +16,14 @@ public final class Chunk {
     public final int LOD;
     public int INDEX;
 
+/**
+ * Creates a new Chunk instance.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ */
     public Chunk(long chunkX, long chunkY, long chunkZ, int lod) {
         materials = new MaterialsData(CHUNK_SIZE_BITS, AIR);
         X = chunkX & MAX_CHUNKS_MASK >> lod;
@@ -30,6 +38,10 @@ public final class Chunk {
         return materials.getMaterial(inChunkX, inChunkY, inChunkZ);
     }
 
+/**
+ * Returns the neighbors.
+ * @return result
+ */
     public ChunkNeighbors getNeighbors() {
         World world = Game.getWorld();
         return new ChunkNeighbors(
@@ -41,12 +53,32 @@ public final class Chunk {
                 world.getChunk(X - 1, Y, Z, LOD));
     }
 
+/**
+ * Stores material.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param countX extent along the X axis in local block coordinates
+ * @param countY extent along the Y axis in local block coordinates
+ * @param countZ extent along the Z axis in local block coordinates
+ * @param lod parameter
+ * @param placeable parameter
+ */
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
                               int countX, int countY, int countZ, int lod, ShapePlaceable placeable) {
         materials.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, lod, placeable);
         modified = true;
     }
 
+/**
+ * Generates to mesh faces maps.
+ *
+ * @param toMeshFacesMaps parameter
+ * @param uncompressedMaterials parameter
+ * @param adjacentChunkLayers parameter
+ * @param neighbors parameter
+ */
     public void generateToMeshFacesMaps(long[][][] toMeshFacesMaps, byte[] uncompressedMaterials, ByteArrayList[] adjacentChunkLayers, ChunkNeighbors neighbors) {
         neighbors.north().materials.fillSideLayerInto(adjacentChunkLayers[NORTH], SOUTH);
         neighbors.top().materials.fillSideLayerInto(adjacentChunkLayers[TOP], BOTTOM);
@@ -62,6 +94,22 @@ public final class Chunk {
         materials.generateToMeshFacesMaps(toMeshFacesMaps, uncompressedMaterials, adjacentChunkLayersData);
     }
 
+/**
+ * Stores structure materials.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param startX X coordinate in local block coordinates
+ * @param startY Y coordinate in local block coordinates
+ * @param startZ Z coordinate in local block coordinates
+ * @param lengthX extent along the X axis in local block coordinates
+ * @param lengthY extent along the Y axis in local block coordinates
+ * @param lengthZ extent along the Z axis in local block coordinates
+ * @param lod parameter
+ * @param structure parameter
+ * @param transform parameter
+ */
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                         int startX, int startY, int startZ,
                                         int lengthX, int lengthY, int lengthZ,

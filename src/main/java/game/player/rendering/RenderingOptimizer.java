@@ -29,6 +29,11 @@ public final class RenderingOptimizer {
 
     public static final int INDIRECT_COMMAND_SIZE = 16;
 
+/**
+ * Creates a new RenderingOptimizer instance.
+ *
+ * @param meshCollector parameter
+ */
     public RenderingOptimizer(MeshCollector meshCollector) {
         this.meshCollector = meshCollector;
         int chunksPerLod = Game.getWorld().CHUNKS_PER_LOD, lodCount = Game.getWorld().LOD_COUNT;
@@ -59,6 +64,13 @@ public final class RenderingOptimizer {
     }
 
     // Occlusion culling for normal rendering
+/**
+ * Computes visibility.
+ *
+ * @param player parameter
+ * @param cameraPosition parameter
+ * @param projectionViewMatrix X coordinate in local block coordinates
+ */
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
         if (cameraPosition == null || projectionViewMatrix == null) return;
         FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
@@ -120,6 +132,11 @@ public final class RenderingOptimizer {
     }
 
     // Shadow mapping interface
+/**
+ * Performs populate opaque shadow indirect buffer.
+ *
+ * @param renderTime parameter
+ */
     public void populateOpaqueShadowIndirectBuffer(float renderTime) {
         Vector3f sunDirection = Transformation.getSunDirection(renderTime);
         int xOffset = sunDirection.x < 0 ? 1 : -1;
@@ -141,6 +158,9 @@ public final class RenderingOptimizer {
         glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
     }
 
+/**
+ * Performs populate glass shadow indirect buffer.
+ */
     public void populateGlassShadowIndirectBuffer() {
         int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
 
@@ -163,6 +183,9 @@ public final class RenderingOptimizer {
         return shadowDrawCount;
     }
 
+/**
+ * Performs clean up.
+ */
     public void cleanUp() {
         glDeleteBuffers(opaqueIndirectBuffer);
         glDeleteBuffers(transparentIndirectBuffer);
@@ -176,6 +199,12 @@ public final class RenderingOptimizer {
     }
 
 
+/**
+ * Generates indirect commands with occlusion culling.
+ *
+ * @param cameraPosition parameter
+ * @param projectionViewMatrix X coordinate in local block coordinates
+ */
     private void generateIndirectCommandsWithOcclusionCulling(Position cameraPosition, Matrix4f projectionViewMatrix) {
         aabbs.clear();
         int lodCount = Game.getWorld().LOD_COUNT;
@@ -196,6 +225,9 @@ public final class RenderingOptimizer {
         renderOccludees(cameraPosition, projectionViewMatrix, occludeeCount);
     }
 
+/**
+ * Generates indirect commands without occlusion culling.
+ */
     private void generateIndirectCommandsWithoutOcclusionCulling() {
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
 
@@ -204,6 +236,12 @@ public final class RenderingOptimizer {
         glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
     }
 
+/**
+ * Computes lod visibility.
+ *
+ * @param lod parameter
+ * @param frustumIntersection parameter
+ */
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection) {
         lodVisibilityBits = visibilityBits[lod];
         Arrays.fill(lodVisibilityBits, 0L);
@@ -215,6 +253,16 @@ public final class RenderingOptimizer {
         fillVisibleChunks(lod, frustumIntersection, width, chunkX, chunkY, chunkZ);
     }
 
+/**
+ * Fills visible chunks.
+ *
+ * @param lod parameter
+ * @param intersection parameter
+ * @param length parameter
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ */
     private void fillVisibleChunks(int lod, FrustumIntersection intersection, int length, long chunkX, long chunkY, long chunkZ) {
         if (length < 1) throw new IllegalArgumentException("Length cannot be %d\n".formatted(length));
         int chunkSizeBits = CHUNK_SIZE_BITS + lod;
@@ -262,6 +310,11 @@ public final class RenderingOptimizer {
         }
     }
 
+/**
+ * Removes lod visibility overlap.
+ *
+ * @param lod parameter
+ */
     private void removeLodVisibilityOverlap(int lod) {
         long[] lodVisibilityBits = visibilityBits[lod];
 
@@ -292,6 +345,15 @@ public final class RenderingOptimizer {
             }
     }
 
+/**
+ * Performs model far enough away.
+ *
+ * @param lodModelX X coordinate in local block coordinates
+ * @param lodModelY Y coordinate in local block coordinates
+ * @param lodModelZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return true if the condition holds
+ */
     private boolean modelFarEnoughAway(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         int requiredDistance = (IntSettings.RENDER_DISTANCE.value() >> 1) + 1;
         long distanceX = Math.abs(Utils.getWrappedChunkCoordinate(lodModelX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod));
@@ -301,6 +363,15 @@ public final class RenderingOptimizer {
         return distanceX > requiredDistance || distanceZ > requiredDistance || distanceY > requiredDistance;
     }
 
+/**
+ * Performs model cube present.
+ *
+ * @param lodModelX X coordinate in local block coordinates
+ * @param lodModelY Y coordinate in local block coordinates
+ * @param lodModelZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return true if the condition holds
+ */
     private boolean modelCubePresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         return meshCollector.isModelPresent(lodModelX, lodModelY, lodModelZ, lod)
                 && meshCollector.isModelPresent(lodModelX, lodModelY, lodModelZ + 1, lod)
@@ -312,6 +383,15 @@ public final class RenderingOptimizer {
                 && meshCollector.isModelPresent(lodModelX + 1, lodModelY + 1, lodModelZ + 1, lod);
     }
 
+/**
+ * Checks whether lod border chunk.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return true if the condition holds
+ */
     private boolean isLodBorderChunk(long chunkX, long chunkY, long chunkZ, int lod) {
         if (lod == 0) return false;
         long distanceX = Utils.getWrappedChunkCoordinate(chunkX, cameraChunkX >> lod, lod) - (cameraChunkX >> lod);
@@ -328,6 +408,14 @@ public final class RenderingOptimizer {
         return (visibilityBits[lod][index >> 6] & 1L << index) == 0;
     }
 
+/**
+ * Performs clear model cube visibility.
+ *
+ * @param lodModelX X coordinate in local block coordinates
+ * @param lodModelY Y coordinate in local block coordinates
+ * @param lodModelZ Z coordinate in local block coordinates
+ * @param lod parameter
+ */
     private void clearModelCubeVisibility(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         long[] lodVisibilityBits = visibilityBits[lod];
         int chunkIndex;
@@ -341,6 +429,11 @@ public final class RenderingOptimizer {
         lodVisibilityBits[chunkIndex >> 6] &= ~(3L << chunkIndex);
     }
 
+/**
+ * Generates indirect commands with occlusion culling.
+ *
+ * @param lod parameter
+ */
     private void generateIndirectCommandsWithOcclusionCulling(int lod) {
         int drawCount = 0;
         lodStarts[lod * 3 + 0] = (long) opaqueCommands.size() / 4 * INDIRECT_COMMAND_SIZE;
@@ -387,6 +480,11 @@ public final class RenderingOptimizer {
         lodDrawCounts[lod * 3 + 2] = drawCount;
     }
 
+/**
+ * Generates indirect commands without occlusion culling.
+ *
+ * @param lod parameter
+ */
     private void generateIndirectCommandsWithoutOcclusionCulling(int lod) {
         int oldOpaqueDrawCount = opaqueCommands.size() / 4;
         int oldTransparentDrawCount = transparentCommands.size() / 4;
@@ -420,6 +518,11 @@ public final class RenderingOptimizer {
         lodDrawCounts[lod * 3 + 2] = glassCommands.size() / 4 - oldGlassDrawCount;
     }
 
+/**
+ * Performs populate occluder buffer.
+ *
+ * @param lod parameter
+ */
     private void populateOccluderBuffer(int lod) {
         long[] lodVisibilityBits = visibilityBits[lod];
 
@@ -438,6 +541,13 @@ public final class RenderingOptimizer {
             }
     }
 
+/**
+ * Performs render occluders.
+ *
+ * @param cameraPosition parameter
+ * @param projectionViewMatrix X coordinate in local block coordinates
+ * @param occluderCount parameter
+ */
     private void renderOccluders(Position cameraPosition, Matrix4f projectionViewMatrix, int occluderCount) {
         Shader shader = AssetManager.get(Shaders.AABB);
         shader.bind();
@@ -462,6 +572,13 @@ public final class RenderingOptimizer {
         glDrawArraysInstanced(GL_TRIANGLES, 0, 36, occluderCount);
     }
 
+/**
+ * Performs render occludees.
+ *
+ * @param cameraPosition parameter
+ * @param projectionViewMatrix X coordinate in local block coordinates
+ * @param occludeeCount parameter
+ */
     private void renderOccludees(Position cameraPosition, Matrix4f projectionViewMatrix, int occludeeCount) {
         Shader shader = AssetManager.get(Shaders.OCCLUSION_CULLING);
         shader.bind();

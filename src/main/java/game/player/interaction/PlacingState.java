@@ -16,6 +16,10 @@ public enum PlacingState {
     STRUCTURE_SELECT,
     STRUCTURE_SELECT_LOCKED;
 
+/**
+ * Checks whether locked.
+ * @return true if the condition holds
+ */
     public boolean isLocked() {
         return switch (this) {
             case REPEAT_LOCKED, SHAPE_LOCKED, STRUCTURE_PLACE_LOCKED, STRUCTURE_SELECT_LOCKED -> true;
@@ -23,6 +27,10 @@ public enum PlacingState {
         };
     }
 
+/**
+ * Performs should render.
+ * @return true if the condition holds
+ */
     public boolean shouldRender() {
         return switch (this) {
             case NONE, SHAPE_LOCKED -> false;

@@ -13,6 +13,12 @@ import java.util.ArrayList;
 
 public interface Placeable {
 
+/**
+ * Performs save placeable.
+ *
+ * @param placeable parameter
+ * @param saver parameter
+ */
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
         if (placeable == null) {
             saver.saveByte((byte) 0);
@@ -25,6 +31,12 @@ public interface Placeable {
         }
     }
 
+/**
+ * Performs load placeable.
+ *
+ * @param saver parameter
+ * @return result
+ */
     static Placeable loadPlaceable(Saver<?> saver) {
         Placeable placeable = switch (saver.loadByte()) {
             case 1 -> CubePlaceable.load(saver);

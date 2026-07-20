@@ -14,6 +14,13 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 public final class ShapeDisplay extends UiButton {
 
+/**
+ * Creates a new ShapeDisplay instance.
+ *
+ * @param index X coordinate in local block coordinates
+ * @param placeable parameter
+ * @param shapesTab parameter
+ */
     public ShapeDisplay(int index, ShapePlaceable placeable, ShapesTab shapesTab) {
         super(getSizeToParent(shapesTab), getOffsetToParent(index, shapesTab));
 
@@ -51,12 +58,24 @@ public final class ShapeDisplay extends UiButton {
         addRenderable(new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), placeable.updateBitMap(false).getSmallStructure()));
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         if (((ShapesTab) getParent()).getSelectedDisplay() == this) scaleForFocused(position, size);
         super.renderSelf(position, size);
     }
 
+/**
+ * Performs resize self to.
+ *
+ * @param width parameter
+ * @param height parameter
+ */
     @Override
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getSizeToParent(getParent());
@@ -74,6 +93,10 @@ public final class ShapeDisplay extends UiButton {
         return placeable;
     }
 
+/**
+ * Returns the action.
+ * @return result
+ */
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -89,6 +112,13 @@ public final class ShapeDisplay extends UiButton {
         return new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio() * parent.getAspectRatio());
     }
 
+/**
+ * Returns the offset to parent.
+ *
+ * @param index X coordinate in local block coordinates
+ * @param parent parameter
+ * @return result
+ */
     private static Vector2f getOffsetToParent(int index, Renderable parent) {
         int row = index / 6, column = index % 6;
         return new Vector2f(0.025F + column * 0.05F, 0.875F - (row + 1) * 0.05F * Window.getAspectRatio() * parent.getAspectRatio());

@@ -7,6 +7,19 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs transparent model.
+ *
+ * @param totalX X coordinate in local block coordinates
+ * @param totalY Y coordinate in local block coordinates
+ * @param totalZ Z coordinate in local block coordinates
+ * @param LOD parameter
+ * @param bufferOrStart parameter
+ * @param transparentVertexCount parameter
+ * @param glassVertexCount parameter
+ * @param index X coordinate in local block coordinates
+ * @return result
+ */
 public record TransparentModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int transparentVertexCount, int glassVertexCount, int index) {
 
     public TransparentModel(Vector3l position, int transparentVertexCount, int glassVertexCount, int bufferOrStart, int lod) {

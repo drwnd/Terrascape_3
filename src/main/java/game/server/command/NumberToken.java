@@ -2,6 +2,10 @@ package game.server.command;
 
 record NumberToken(double number) implements Token {
 
+/**
+ * Checks whether integer.
+ * @return true if the condition holds
+ */
     public boolean isInteger() {
         if (Double.isNaN(number) || Double.isInfinite(number) || number <= Integer.MIN_VALUE || number >= Integer.MAX_VALUE) return false;
         return number == Math.floor(number);

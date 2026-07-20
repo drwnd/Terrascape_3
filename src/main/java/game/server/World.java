@@ -23,6 +23,11 @@ public final class World {
     public final int CHUNKS_PER_LOD;
     public final int LOD_COUNT;
 
+/**
+ * Creates a new World instance.
+ *
+ * @param seed parameter
+ */
     public World(long seed) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
@@ -36,6 +41,12 @@ public final class World {
         chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
     }
 
+/**
+ * Creates a new World instance.
+ *
+ * @param oldWorld parameter
+ * @param updateRenderDistance parameter
+ */
     public World(World oldWorld, boolean updateRenderDistance) {
         if (updateRenderDistance) {
             int renderDistance = IntSettings.RENDER_DISTANCE.value();
@@ -81,6 +92,9 @@ public final class World {
         }
     }
 
+/**
+ * Performs init.
+ */
     public static void init() {
         ChunkSaver.generateHigherLODs();
         Server.loadImmediateSurroundings();
@@ -103,12 +117,30 @@ public final class World {
         chunks[chunk.LOD][chunk.getIndex()] = chunk;
     }
 
+/**
+ * Returns the generation status.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return result
+ */
     public Status getGenerationStatus(long chunkX, long chunkY, long chunkZ, int lod) {
         Chunk chunk = getChunk(chunkX, chunkY, chunkZ, lod);
         if (chunk == null) return Status.NOT_STARTED;
         return chunk.getGenerationStatus();
     }
 
+/**
+ * Returns the material.
+ *
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return result
+ */
     public byte getMaterial(long x, long y, long z, int lod) {
         Chunk chunk = getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, lod);
         if (chunk == null) return OUT_OF_WORLD;
@@ -119,6 +151,9 @@ public final class World {
         chunks[lod][chunkIndex] = null;
     }
 
+/**
+ * Performs clean up.
+ */
     public void cleanUp() {
         ChunkSaver saver = new ChunkSaver();
         for (Chunk[] lod : chunks)
@@ -130,6 +165,11 @@ public final class World {
         deleteHigherLODs(LOD_COUNT - 1);
     }
 
+/**
+ * Performs delete higher lo ds.
+ *
+ * @param maxKeptLod parameter
+ */
     public static void deleteHigherLODs(int maxKeptLod) {
         File[] lodFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation()));
         for (File file : lodFiles) {

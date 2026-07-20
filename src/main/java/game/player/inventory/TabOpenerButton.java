@@ -17,6 +17,14 @@ public final class TabOpenerButton extends UiButton {
 
     static final float SIZE = 0.13333334F;
 
+/**
+ * Creates a new TabOpenerButton instance.
+ *
+ * @param inventory Y coordinate in local block coordinates
+ * @param index X coordinate in local block coordinates
+ * @param toOpenTab parameter
+ * @param name parameter
+ */
     TabOpenerButton(Inventory inventory, int index, InventoryTab toOpenTab, StringGetter name) {
         super(getButtonSizeToParent(), getButtonOffsetToParent(index));
 
@@ -35,12 +43,24 @@ public final class TabOpenerButton extends UiButton {
         addRenderable(textElement);
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         if (Game.getPlayer().getInventory().getOpenTabButton() == this) scaleForFocused(position, size);
         super.renderSelf(position, size);
     }
 
+/**
+ * Performs resize self to.
+ *
+ * @param width parameter
+ * @param height parameter
+ */
     @Override
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getButtonSizeToParent();
@@ -50,6 +70,14 @@ public final class TabOpenerButton extends UiButton {
         setOffsetToParent(offsetToParent.x, offsetToParent.y);
     }
 
+/**
+ * Performs action.
+ *
+ * @param pixelCoordinate parameter
+ * @param button parameter
+ * @param action parameter
+ * @return result
+ */
     private ButtonResult action(Vector2i pixelCoordinate, int button, int action) {
         if (action != GLFW_PRESS) return ButtonResult.IGNORE;
         inventory.setOpenTab(toOpenTab, this);

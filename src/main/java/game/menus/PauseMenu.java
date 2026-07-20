@@ -21,6 +21,9 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class PauseMenu extends Renderable {
 
+/**
+ * Creates a new PauseMenu instance.
+ */
     public PauseMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -60,12 +63,21 @@ public final class PauseMenu extends Renderable {
         glDeleteFramebuffers(frameBuffer);
     }
 
+/**
+ * Sets on top.
+ */
     @Override
     public void setOnTop() {
         Window.setInput(new PauseMenuInput(this));
         Game.getServer().pauseTicks();
     }
 
+/**
+ * Performs render self.
+ *
+ * @param position parameter
+ * @param size parameter
+ */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
@@ -89,6 +101,10 @@ public final class PauseMenu extends Renderable {
         return () -> Window.pushRenderable(new SettingsMenu());
     }
 
+/**
+ * Returns the play button action.
+ * @return result
+ */
     private static Runnable getPlayButtonAction() {
         return () -> {
             Window.popRenderable();

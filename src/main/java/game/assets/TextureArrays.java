@@ -10,6 +10,12 @@ public enum TextureArrays implements TextureArrayIdentifier {
     MATERIALS("albedo", new FileIndexSet(Materials.values(), ".png")),
     PROPERTIES("properties", new FileIndexSet(Materials.values(), ".png"));
 
+/**
+ * Creates a new TextureArrays instance.
+ *
+ * @param folderName parameter
+ * @param indexSet parameter
+ */
     TextureArrays(String folderName, FileIndexSet indexSet) {
         this.folderName = folderName;
         this.indexSet = indexSet;

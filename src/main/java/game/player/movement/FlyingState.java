@@ -14,6 +14,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class FlyingState extends MovementState {
 
+/**
+ * Computes next game tick acceleration.
+ *
+ * @param playerRotation parameter
+ * @param lastPosition parameter
+ * @return result
+ */
     @Override
     protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
 
@@ -34,12 +41,26 @@ public final class FlyingState extends MovementState {
         return velocityChange;
     }
 
+/**
+ * Performs change velocity.
+ *
+ * @param velocity Y coordinate in local block coordinates
+ * @param acceleration parameter
+ * @param playerPosition parameter
+ * @param playerRotation parameter
+ */
     @Override
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
         if (movement.isThinGrounded() && !ToggleSettings.NO_CLIP.value()) next = new WalkingState();
     }
 
+/**
+ * Performs handle input.
+ *
+ * @param key Y coordinate in local block coordinates
+ * @param action parameter
+ */
     @Override
     protected void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {

@@ -26,24 +26,36 @@ public final class ParticleCollector {
 
     public static final int SHADER_PARTICLE_INT_SIZE = 3;
 
+    /**
+     * Performs upload particle effects.
+     */
     public void uploadParticleEffects() {
         synchronized (toBufferParticleEffects) {
             for (ToBufferParticleEffect particleEffect : toBufferParticleEffects) particleEffects.add(loadParticleEffect(particleEffect));
         }
     }
 
+    /**
+     * Performs play particle effect sounds.
+     */
     public void playParticleEffectSounds() {
         synchronized (toBufferParticleEffects) {
             for (ToBufferParticleEffect particleEffect : toBufferParticleEffects) ParticleType.playSound(particleEffect);
         }
     }
 
+    /**
+     * Performs clear to buffer particle effects.
+     */
     public void clearToBufferParticleEffects() {
         synchronized (toBufferParticleEffects) {
             toBufferParticleEffects.clear();
         }
     }
 
+    /**
+     * Performs unload particle effects.
+     */
     public void unloadParticleEffects() {
         long currentTick = Game.getServer().getCurrentGameTick();
         for (Iterator<ParticleEffect> iterator = particleEffects.iterator(); iterator.hasNext(); ) {
@@ -55,6 +67,9 @@ public final class ParticleCollector {
         }
     }
 
+    /**
+     * Performs clean up.
+     */
     public void cleanUp() {
         synchronized (particleEffects) {
             for (ParticleEffect particleEffect : particleEffects) glDeleteBuffers(particleEffect.buffer());
@@ -66,6 +81,17 @@ public final class ParticleCollector {
         return particleEffects;
     }
 
+    /**
+     * Adds break place particle effect.
+     *
+     * @param startX    X coordinate in local block coordinates
+     * @param startY    Y coordinate in local block coordinates
+     * @param startZ    Z coordinate in local block coordinates
+     * @param countX    extent along the X axis in local block coordinates
+     * @param countY    extent along the Y axis in local block coordinates
+     * @param countZ    extent along the Z axis in local block coordinates
+     * @param placeable parameter
+     */
     public void addBreakPlaceParticleEffect(long startX, long startY, long startZ, int countX, int countY, int countZ, ShapePlaceable placeable) {
         boolean addBreakEffect = ToggleSettings.SHOW_BREAK_PARTICLES.value();
         boolean addPlaceEffect = ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES.value() && placeable.getMaterial() != AIR;
@@ -93,6 +119,16 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, placeParticles, Material.isGlass(placeable.getMaterial()) ? ParticleType.TRANSPARENT_PLACE : ParticleType.OPAQUE_PLACE);
     }
 
+    /**
+     * Adds place particle effect.
+     *
+     * @param startX    X coordinate in local block coordinates
+     * @param startY    Y coordinate in local block coordinates
+     * @param startZ    Z coordinate in local block coordinates
+     * @param structure parameter
+     * @param lengths   3D vector in local block coordinates
+     * @param transform parameter
+     */
     public void addPlaceParticleEffect(long startX, long startY, long startZ, Structure structure, Vector3i lengths, byte transform) {
         if (!ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES.value()) return;
         IntArrayList opaqueParticles = new IntArrayList(structure.sizeX() * structure.sizeZ());
@@ -104,6 +140,14 @@ public final class ParticleCollector {
         addParticles(startX, startY, startZ, transparentParticles, ParticleType.TRANSPARENT_PLACE);
     }
 
+    /**
+     * Adds splash particle effect.
+     *
+     * @param x        X coordinate in local block coordinates
+     * @param y        Y coordinate in local block coordinates
+     * @param z        Z coordinate in local block coordinates
+     * @param material parameter
+     */
     public void addSplashParticleEffect(int x, int y, int z, byte material) {
         if (!ToggleSettings.SHOW_SPLASH_PARTICLES.value()) return;
         IntArrayList particles = new IntArrayList(SPLASH_PARTICLE_COUNT * SHADER_PARTICLE_INT_SIZE);
@@ -131,6 +175,15 @@ public final class ParticleCollector {
     }
 
 
+    /**
+     * Adds particles.
+     *
+     * @param startX    X coordinate in local block coordinates
+     * @param startY    Y coordinate in local block coordinates
+     * @param startZ    Z coordinate in local block coordinates
+     * @param particles parameter
+     * @param type      parameter
+     */
     private void addParticles(long startX, long startY, long startZ, IntArrayList particles, ParticleType type) {
         long currentTick = Game.getServer().getCurrentGameTick();
         if (particles.isEmpty()) return;
@@ -139,12 +192,29 @@ public final class ParticleCollector {
         addToBufferParticleEffect(effect);
     }
 
+    /**
+     * Adds to buffer particle effect.
+     *
+     * @param particleEffect parameter
+     */
     private void addToBufferParticleEffect(ToBufferParticleEffect particleEffect) {
         synchronized (toBufferParticleEffects) {
             toBufferParticleEffects.add(particleEffect);
         }
     }
 
+    /**
+     * Adds place effect loop.
+     *
+     * @param startX         X coordinate in local block coordinates
+     * @param startY         Y coordinate in local block coordinates
+     * @param startZ         Z coordinate in local block coordinates
+     * @param x              X coordinate in local block coordinates
+     * @param y              Y coordinate in local block coordinates
+     * @param z              Z coordinate in local block coordinates
+     * @param placeParticles parameter
+     * @param placeable      parameter
+     */
     private void addPlaceEffectLoop(int startX, int startY, int startZ,
                                     long x, long y, long z,
                                     IntArrayList placeParticles, ShapePlaceable placeable) {
@@ -173,6 +243,19 @@ public final class ParticleCollector {
                 }
     }
 
+    /**
+     * Adds break effect loop.
+     *
+     * @param startX               X coordinate in local block coordinates
+     * @param startY               Y coordinate in local block coordinates
+     * @param startZ               Z coordinate in local block coordinates
+     * @param x                    X coordinate in local block coordinates
+     * @param y                    Y coordinate in local block coordinates
+     * @param z                    Z coordinate in local block coordinates
+     * @param transparentParticles parameter
+     * @param opaqueParticles      parameter
+     * @param placeable            parameter
+     */
     private void addBreakEffectLoop(int startX, int startY, int startZ,
                                     long x, long y, long z,
                                     IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
@@ -207,6 +290,12 @@ public final class ParticleCollector {
         return random.nextFloat() * (max - min) + min;
     }
 
+    /**
+     * Performs pack particles into buffer.
+     *
+     * @param particles parameter
+     * @return array result
+     */
     private static int[] packParticlesIntoBuffer(IntArrayList particles) {
         int[] particlesData = new int[particles.size()];
         particles.copyInto(particlesData, 0);
@@ -214,6 +303,12 @@ public final class ParticleCollector {
         return particlesData;
     }
 
+    /**
+     * Performs load particle effect.
+     *
+     * @param particleEffect parameter
+     * @return result
+     */
     private static ParticleEffect loadParticleEffect(ToBufferParticleEffect particleEffect) {
         int particlesBuffer = glCreateBuffers();
         glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL_STATIC_DRAW);
@@ -223,6 +318,20 @@ public final class ParticleCollector {
                 particleEffect.type().isOpaque(), particleEffect.x(), particleEffect.y(), particleEffect.z());
     }
 
+    /**
+     * Adds place particle.
+     *
+     * @param particles parameter
+     * @param bitMap    parameter
+     * @param lengthX   extent along the X axis in local block coordinates
+     * @param lengthY   extent along the Y axis in local block coordinates
+     * @param lengthZ   extent along the Z axis in local block coordinates
+     * @param xOffset   parameter
+     * @param yOffset   parameter
+     * @param zOffset   parameter
+     * @param material  parameter
+     * @param transform parameter
+     */
     public void addPlaceParticle(IntArrayList particles, long[] bitMap,
                                  int lengthX, int lengthY, int lengthZ,
                                  int xOffset, int yOffset, int zOffset,
@@ -257,6 +366,19 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
+    /**
+     * Adds place particle.
+     *
+     * @param particles parameter
+     * @param bitMap    parameter
+     * @param lengthX   extent along the X axis in local block coordinates
+     * @param lengthY   extent along the Y axis in local block coordinates
+     * @param lengthZ   extent along the Z axis in local block coordinates
+     * @param xOffset   parameter
+     * @param yOffset   parameter
+     * @param zOffset   parameter
+     * @param material  parameter
+     */
     public void addPlaceParticle(IntArrayList particles, long[] bitMap,
                                  int lengthX, int lengthY, int lengthZ,
                                  int xOffset, int yOffset, int zOffset,
@@ -271,6 +393,15 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
+    /**
+     * Adds break particle.
+     *
+     * @param particles parameter
+     * @param xOffset   parameter
+     * @param yOffset   parameter
+     * @param zOffset   parameter
+     * @param material  parameter
+     */
     public void addBreakParticle(IntArrayList particles, int xOffset, int yOffset, int zOffset, byte material) {
         float velocityX = getRandom(-12F, 12F), velocityY = getRandom(-2F, 25F), velocityZ = getRandom(-12F, 12F);
         float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
@@ -280,6 +411,23 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
+    /**
+     * Performs add.
+     *
+     * @param particles         parameter
+     * @param xOffset           parameter
+     * @param yOffset           parameter
+     * @param zOffset           parameter
+     * @param velocityX         X coordinate in local block coordinates
+     * @param velocityY         Y coordinate in local block coordinates
+     * @param velocityZ         Z coordinate in local block coordinates
+     * @param rotationSpeedX    X coordinate in local block coordinates
+     * @param rotationSpeedY    Y coordinate in local block coordinates
+     * @param gravity           Y coordinate in local block coordinates
+     * @param material          parameter
+     * @param disableTimeScalar parameter
+     * @param invertMotion      parameter
+     */
     public static void add(IntArrayList particles,
                            int xOffset, int yOffset, int zOffset,
                            float velocityX, float velocityY, float velocityZ,
@@ -291,6 +439,21 @@ public final class ParticleCollector {
         particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
     }
 
+    /**
+     * Performs check particle visibility.
+     *
+     * @param bitMap    parameter
+     * @param lengthX   extent along the X axis in local block coordinates
+     * @param lengthY   extent along the Y axis in local block coordinates
+     * @param lengthZ   extent along the Z axis in local block coordinates
+     * @param xOffset   parameter
+     * @param yOffset   parameter
+     * @param zOffset   parameter
+     * @param velocityX X coordinate in local block coordinates
+     * @param velocityY Y coordinate in local block coordinates
+     * @param velocityZ Z coordinate in local block coordinates
+     * @return true if the condition holds
+     */
     private static boolean checkParticleVisibility(long[] bitMap, int lengthX, int lengthY, int lengthZ,
                                                    int xOffset, int yOffset, int zOffset,
                                                    float velocityX, float velocityY, float velocityZ) {
@@ -307,12 +470,31 @@ public final class ParticleCollector {
         return false;
     }
 
+    /**
+     * Performs pack offset.
+     *
+     * @param x                 X coordinate in local block coordinates
+     * @param y                 Y coordinate in local block coordinates
+     * @param z                 Z coordinate in local block coordinates
+     * @param disableTimeScalar parameter
+     * @param invertMotion      parameter
+     * @return result
+     */
     private static int packOffset(int x, int y, int z, boolean disableTimeScalar, boolean invertMotion) {
         int invertTimeScalarInt = disableTimeScalar ? 1 << 30 : 0;
         int invertMotionInt = invertMotion ? 1 << 31 : 0;
         return invertMotionInt | invertTimeScalarInt | (x + PARTICLE_OFFSET & 0x3FF) << 20 | (y + PARTICLE_OFFSET & 0x3FF) << 10 | z + PARTICLE_OFFSET & 0x3FF;
     }
 
+    /**
+     * Performs pack velocity gravity.
+     *
+     * @param velocityX X coordinate in local block coordinates
+     * @param velocityY Y coordinate in local block coordinates
+     * @param velocityZ Z coordinate in local block coordinates
+     * @param gravity   Y coordinate in local block coordinates
+     * @return result
+     */
     private static int packVelocityGravity(float velocityX, float velocityY, float velocityZ, float gravity) {
         velocityX = Math.clamp(velocityX, -31.99F, 31.99F);
         velocityY = Math.clamp(velocityY, -31.99F, 31.99F);
@@ -327,6 +509,14 @@ public final class ParticleCollector {
         return packedVelocityX << 24 | packedVelocityY << 16 | packedVelocityZ << 8 | packedGravity;
     }
 
+    /**
+     * Performs pack rotation material.
+     *
+     * @param rotationSpeedX X coordinate in local block coordinates
+     * @param rotationSpeedY Y coordinate in local block coordinates
+     * @param material       parameter
+     * @return result
+     */
     private static int packRotationMaterial(float rotationSpeedX, float rotationSpeedY, byte material) {
         rotationSpeedX = Math.clamp(rotationSpeedX, 0.0F, 15.99F);
         rotationSpeedY = Math.clamp(rotationSpeedY, 0.0F, 15.99F);

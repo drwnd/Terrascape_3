@@ -14,6 +14,11 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         return "saves/%s/records/%s".formatted(Game.getWorld().getName(), recordName);
     }
 
+/**
+ * Performs save.
+ *
+ * @param record parameter
+ */
     @Override
     protected void save(PlayerRecord record) {
         saveInt(record.positions().size());
@@ -23,6 +28,10 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         for (Vector3f rotation : record.rotations()) saveVector3f(rotation);
     }
 
+/**
+ * Performs load.
+ * @return result
+ */
     @Override
     protected PlayerRecord load() {
         int positionCount = loadInt();
@@ -47,6 +56,12 @@ public final class PlayerRecordSaver extends Saver<PlayerRecord> {
         return 1;
     }
 
+/**
+ * Performs load old version.
+ *
+ * @param versionNumber parameter
+ * @return result
+ */
     @Override
     protected PlayerRecord loadOldVersion(int versionNumber) {
         if (versionNumber == 0) {

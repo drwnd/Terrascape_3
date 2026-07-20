@@ -8,6 +8,12 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class ObjectLoader {
 
+/**
+ * Performs load opaque model.
+ *
+ * @param mesh parameter
+ * @return result
+ */
     public static OpaqueModel loadOpaqueModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod(), true);
@@ -16,6 +22,12 @@ public final class ObjectLoader {
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
+/**
+ * Performs load transparent model.
+ *
+ * @param mesh parameter
+ * @return result
+ */
     public static TransparentModel loadTransparentModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod());
@@ -24,6 +36,12 @@ public final class ObjectLoader {
         return new TransparentModel(position, mesh.transparentVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod());
     }
 
+/**
+ * Performs load combined model.
+ *
+ * @param mesh parameter
+ * @return result
+ */
     public static OpaqueModel loadCombinedModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0 && mesh.transparentVertices().length == 0)
@@ -39,6 +57,10 @@ public final class ObjectLoader {
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
+/**
+ * Generates skybox vertex array.
+ * @return result
+ */
     public static int generateSkyboxVertexArray() {
         int vao = AssetLoader.createVAO();
         AssetLoader.storeIndicesInBuffer(SKY_BOX_INDICES);

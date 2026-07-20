@@ -13,6 +13,14 @@ import org.joml.Vector2f;
 
 import java.util.Objects;
 
+/**
+ * Performs shape setting.
+ *
+ * @param setting parameter
+ * @param name parameter
+ * @param uniformName parameter
+ * @return result
+ */
 public record ShapeSetting(Setting setting, StringGetter name, String uniformName) {
 
     @Override

@@ -7,6 +7,15 @@ import static game.utils.Constants.*;
 import static game.server.generation.WorldGeneration.SEED;
 
 public final class CorrodedMesa extends Biome {
+/**
+ * Performs place material.
+ *
+ * @param inChunkX X coordinate in local block coordinates
+ * @param inChunkY Y coordinate in local block coordinates
+ * @param inChunkZ Z coordinate in local block coordinates
+ * @param data parameter
+ * @return true if the condition holds
+ */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalY = data.totalY;
@@ -28,6 +37,13 @@ public final class CorrodedMesa extends Biome {
         return true;
     }
 
+/**
+ * Returns the special height.
+ *
+ * @param totalX X coordinate in local block coordinates
+ * @param totalZ Z coordinate in local block coordinates
+ * @return result
+ */
     @Override
     public int getSpecialHeight(long totalX, long totalZ) {
         double noise = OpenSimplex2S.noise2(SEED ^ 0xDF860F2E2A604A17L, totalX * MESA_PILLAR_FREQUENCY, totalZ * MESA_PILLAR_FREQUENCY);
@@ -41,6 +57,12 @@ public final class CorrodedMesa extends Biome {
         return 128 + data.floorMaterialDepthMod;
     }
 
+/**
+ * Returns the generating terracotta type.
+ *
+ * @param terracottaIndex X coordinate in local block coordinates
+ * @return result
+ */
     private static byte getGeneratingTerracottaType(int terracottaIndex) {
         return switch (terracottaIndex) {
             case 3, 6, 10, 11, 15 -> RED_TERRACOTTA;

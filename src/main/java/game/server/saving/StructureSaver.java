@@ -17,6 +17,11 @@ public final class StructureSaver extends Saver<Structure> {
         return "assets/structures";
     }
 
+/**
+ * Performs save.
+ *
+ * @param structure parameter
+ */
     @Override
     protected void save(Structure structure) {
         saveInt(structure.sizeX());
@@ -26,6 +31,10 @@ public final class StructureSaver extends Saver<Structure> {
         saveByteArray(structure.materials().getBytes());
     }
 
+/**
+ * Performs load.
+ * @return result
+ */
     @Override
     protected Structure load() {
         int sizeX = loadInt();
@@ -37,6 +46,12 @@ public final class StructureSaver extends Saver<Structure> {
         return new Structure(sizeX, sizeY, sizeZ, new MaterialsData(totalSizeBits, data));
     }
 
+/**
+ * Performs load old version.
+ *
+ * @param versionNumber parameter
+ * @return result
+ */
     @Override
     protected Structure loadOldVersion(int versionNumber) {
         if (versionNumber == 0) {

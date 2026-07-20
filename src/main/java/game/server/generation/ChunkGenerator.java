@@ -24,6 +24,9 @@ public final class ChunkGenerator {
         executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
     }
 
+/**
+ * Performs load immediate surroundings.
+ */
     public static void loadImmediateSurroundings() {
         Vector3l playerPosition = Game.getPlayer().getPosition().longPosition();
 
@@ -51,6 +54,9 @@ public final class ChunkGenerator {
         }
     }
 
+/**
+ * Performs restart.
+ */
     public void restart() {
         Vector3l playerChunkPosition = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (this) {
@@ -66,6 +72,9 @@ public final class ChunkGenerator {
     }
 
 
+/**
+ * Performs wait until halt.
+ */
     private void waitUntilHalt() {
         synchronized (this) {
             executor.getQueue().clear();
@@ -80,6 +89,13 @@ public final class ChunkGenerator {
         }
     }
 
+/**
+ * Performs submit tasks.
+ *
+ * @param playerChunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param playerChunkZ Z coordinate in local block coordinates
+ */
     private void submitTasks(long playerChunkX, long playerChunkY, long playerChunkZ) {
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             long lodPlayerX = playerChunkX >> lod;
@@ -94,6 +110,15 @@ public final class ChunkGenerator {
         }
     }
 
+/**
+ * Performs submit ring meshing.
+ *
+ * @param playerChunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param playerChunkZ Z coordinate in local block coordinates
+ * @param ring parameter
+ * @param lod parameter
+ */
     private void submitRingMeshing(long playerChunkX, long playerChunkY, long playerChunkZ, int ring, int lod) {
         if (ring < 0) return;
         if (ring == 0) {
@@ -107,6 +132,15 @@ public final class ChunkGenerator {
         for (int chunkZ = -ring; chunkZ < ring; chunkZ++) submitColumnMeshing(-ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
     }
 
+/**
+ * Performs submit ring generation.
+ *
+ * @param playerChunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param playerChunkZ Z coordinate in local block coordinates
+ * @param ring parameter
+ * @param lod parameter
+ */
     private void submitRingGeneration(long playerChunkX, long playerChunkY, long playerChunkZ, int ring, int lod) {
         if (ring == 0) {
             submitColumnGeneration(playerChunkX, playerChunkY, playerChunkZ, lod);
@@ -119,18 +153,43 @@ public final class ChunkGenerator {
         for (int chunkZ = -ring; chunkZ < ring; chunkZ++) submitColumnGeneration(-ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
     }
 
+/**
+ * Performs submit column generation.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ */
     private void submitColumnGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
         if (columnRequiresGeneration(chunkX, playerChunkY, chunkZ, lod))
             executor.submit(new Generator(chunkX, playerChunkY, chunkZ, lod));
     }
 
+/**
+ * Performs submit column meshing.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ */
     private void submitColumnMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
         if (columnRequiresMeshing(chunkX, playerChunkY, chunkZ, lod))
             executor.submit(new MeshHandler(chunkX, playerChunkY, chunkZ, lod));
     }
 
+/**
+ * Performs column requires generation.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return true if the condition holds
+ */
     private static boolean columnRequiresGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
         World world = Game.getWorld();
         for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value() - 1; chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 2; chunkY++)
@@ -138,6 +197,15 @@ public final class ChunkGenerator {
         return false;
     }
 
+/**
+ * Performs column requires meshing.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param playerChunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @return true if the condition holds
+ */
     private static boolean columnRequiresMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
         World world = Game.getWorld();
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
@@ -154,6 +222,9 @@ public final class ChunkGenerator {
 
     private record Generator(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 
+/**
+ * Performs run.
+ */
         @Override
         public void run() {
 
@@ -179,6 +250,9 @@ public final class ChunkGenerator {
 
     private record MeshHandler(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 
+/**
+ * Performs run.
+ */
         @Override
         public void run() {
 

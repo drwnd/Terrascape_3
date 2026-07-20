@@ -16,6 +16,9 @@ public final class PlayerInput extends Input {
         this.player = player;
     }
 
+/**
+ * Sets input mode.
+ */
     @Override
     public void setInputMode() {
         cursorPos.set(getCursorPos());
@@ -34,6 +37,14 @@ public final class PlayerInput extends Input {
         standardCursorPosCallBack(xPos, yPos);
     }
 
+/**
+ * Performs mouse button callback.
+ *
+ * @param window parameter
+ * @param button parameter
+ * @param action parameter
+ * @param mods parameter
+ */
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
        player.handleActiveButtonInput(button | Input.IS_MOUSE_BUTTON, action);
@@ -45,6 +56,15 @@ public final class PlayerInput extends Input {
        player.handleScrollInput(yScroll);
     }
 
+/**
+ * Performs key callback.
+ *
+ * @param window parameter
+ * @param key Y coordinate in local block coordinates
+ * @param scancode parameter
+ * @param action parameter
+ * @param mods parameter
+ */
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Window.pushRenderable(new PauseMenu());
@@ -57,6 +77,10 @@ public final class PlayerInput extends Input {
 
     }
 
+/**
+ * Returns the cursor movement.
+ * @return result
+ */
     public Vector2i getCursorMovement() {
         Vector2i movement = new Vector2i(cursorPos).sub(lastCursorPos);
         lastCursorPos.set(cursorPos);

@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class EllipsoidPlaceable extends ShapePlaceable {
 
+/**
+ * Creates a new EllipsoidPlaceable instance.
+ *
+ * @param material parameter
+ */
     public EllipsoidPlaceable(byte material) {
         super(ComputeShaders.ELLIPSOID, material, Rotation6Way.ROTATION_2);
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 14);
         saver.saveByte(getMaterial());
@@ -30,6 +40,12 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         saver.saveFloat(exponentC.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static EllipsoidPlaceable load(Saver<?> saver) {
         EllipsoidPlaceable placeable = new EllipsoidPlaceable(saver.loadByte());
         placeable.thickness.setValue(saver.loadInt());
@@ -42,6 +58,12 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         EllipsoidPlaceable copy = new EllipsoidPlaceable(material);
@@ -55,6 +77,10 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         return copy;
     }
 
+/**
+ * Returns the length x.
+ * @return result
+ */
     @Override
     public int getLengthX() {
         return switch ((Rotation6Way) rotation()) {
@@ -64,6 +90,10 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length y.
+ * @return result
+ */
     @Override
     public int getLengthY() {
         return switch ((Rotation6Way) rotation()) {
@@ -73,6 +103,10 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Returns the length z.
+ * @return result
+ */
     @Override
     public int getLengthZ() {
         return switch ((Rotation6Way) rotation()) {
@@ -87,6 +121,10 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
         return getStructure();
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

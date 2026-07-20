@@ -4,6 +4,22 @@ import core.utils.Vector3l;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs mesh.
+ *
+ * @param opaqueVertices parameter
+ * @param vertexCounts parameter
+ * @param transparentVertices parameter
+ * @param transparentVertexCount parameter
+ * @param glassVertexCount parameter
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @param occluder parameter
+ * @param occludee parameter
+ * @return result
+ */
 public record Mesh(int[] opaqueVertices, int[] vertexCounts,
                    int[] transparentVertices, int transparentVertexCount, int glassVertexCount,
                    long chunkX, long chunkY, long chunkZ, int lod,

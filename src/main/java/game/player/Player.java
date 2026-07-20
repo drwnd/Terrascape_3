@@ -25,6 +25,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Player {
 
+/**
+ * Creates a new Player instance.
+ *
+ * @param position parameter
+ */
     public Player(Position position) {
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
@@ -45,6 +50,9 @@ public final class Player {
     }
 
 
+/**
+ * Performs update frame.
+ */
     public void updateFrame() {
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
@@ -67,6 +75,9 @@ public final class Player {
         }
     }
 
+/**
+ * Performs update game tick.
+ */
     public void updateGameTick() {
         synchronized (this) {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
@@ -75,11 +86,19 @@ public final class Player {
         renderer.updateGameTick();
     }
 
+/**
+ * Performs update render distance.
+ *
+ * @param oldRenderDistance parameter
+ */
     public void updateRenderDistance(int oldRenderDistance) {
         meshCollector = new MeshCollector(meshCollector, oldRenderDistance);
         renderer.reloadRenderingOptimizer();
     }
 
+/**
+ * Performs update lod count.
+ */
     public void updateLodCount() {
         meshCollector = new MeshCollector(meshCollector);
         renderer.reloadRenderingOptimizer();
@@ -118,6 +137,11 @@ public final class Player {
         if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
     }
 
+/**
+ * Performs handle scroll input.
+ *
+ * @param yScroll parameter
+ */
     public void handleScrollInput(double yScroll) {
         if (camera.isZoomed()) {
             final float zoomFactorChange = 0.9F;
@@ -133,11 +157,19 @@ public final class Player {
     }
 
 
+/**
+ * Returns the min coordinate.
+ * @return result
+ */
     public Vector3l getMinCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
         return new Position(this.position).add(-hitboxSize.x * 0.5F, 0.0F, -hitboxSize.z * 0.5F).longPosition();
     }
 
+/**
+ * Returns the max coordinate.
+ * @return result
+ */
     public Vector3l getMaxCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
         return new Position(this.position).add(hitboxSize.x * 0.5F, hitboxSize.y, hitboxSize.z * 0.5F).longPosition();
@@ -167,6 +199,10 @@ public final class Player {
         return movement;
     }
 
+/**
+ * Returns the position.
+ * @return result
+ */
     public Position getPosition() {
         synchronized (this) {
             return new Position(position);
@@ -185,12 +221,20 @@ public final class Player {
         return inventory;
     }
 
+/**
+ * Sets input.
+ */
     public void setInput() {
         if (inventory.isVisible()) Window.setInput(inventory.getInput());
         else if (chat.isVisible()) Window.setInput(chat.getInput());
         else Window.setInput(input);
     }
 
+/**
+ * Sets position.
+ *
+ * @param position parameter
+ */
     public void setPosition(Position position) {
         synchronized (this) {
             this.position = new Position(position);
@@ -205,11 +249,17 @@ public final class Player {
         return chat.isVisible();
     }
 
+/**
+ * Performs clean up.
+ */
     public void cleanUp() {
         meshCollector.cleanUp();
         particleCollector.cleanUp();
     }
 
+/**
+ * Performs start command.
+ */
     void startCommand() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
@@ -217,12 +267,18 @@ public final class Player {
         setInput();
     }
 
+/**
+ * Performs toggle chat.
+ */
     void toggleChat() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
         setInput();
     }
 
+/**
+ * Performs toggle inventory.
+ */
     public void toggleInventory() {
         if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());

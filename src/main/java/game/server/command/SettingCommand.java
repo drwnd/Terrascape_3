@@ -19,6 +19,12 @@ final class SettingCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
 
@@ -103,6 +109,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+/**
+ * Performs set.
+ *
+ * @param setting parameter
+ * @param value parameter
+ * @return result
+ */
     private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
         if (number < setting.min() || number > setting.max())
@@ -111,6 +124,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+/**
+ * Performs set.
+ *
+ * @param setting parameter
+ * @param value parameter
+ * @return result
+ */
     private static CommandResult set(IntSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number)) || (int) number != number)
             return CommandResult.fail("Value must be an Integer for that setting");
@@ -120,6 +140,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+/**
+ * Performs set.
+ *
+ * @param setting parameter
+ * @param value parameter
+ * @return result
+ */
     private static CommandResult set(KeySetting setting, Token value) {
         int codePoint;
         switch (value) {
@@ -141,6 +168,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+/**
+ * Performs set.
+ *
+ * @param setting parameter
+ * @param value parameter
+ * @return result
+ */
     private static CommandResult set(ToggleSetting setting, Token value) {
         if (!(value instanceof KeywordToken(String keyword)) || (!"true".equalsIgnoreCase(keyword) && !"false".equalsIgnoreCase(keyword)))
             return CommandResult.fail("Value must be true / false for that setting");
@@ -149,6 +183,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+/**
+ * Performs set.
+ *
+ * @param setting parameter
+ * @param value parameter
+ * @return result
+ */
     private static CommandResult set(OptionSetting setting, Token value) {
         String optionValue;
 

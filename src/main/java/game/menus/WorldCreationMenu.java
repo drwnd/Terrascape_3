@@ -19,6 +19,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenu extends UiBackgroundElement {
 
+/**
+ * Creates a new WorldCreationMenu instance.
+ */
     public WorldCreationMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -46,6 +49,10 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         Window.setInput(new WorldCreationMenuInput(this));
     }
 
+/**
+ * Returns the back button clickable.
+ * @return result
+ */
     private static Clickable getBackButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -54,6 +61,13 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the create button clickable.
+ *
+ * @param nameField parameter
+ * @param seedField parameter
+ * @return result
+ */
     private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -70,6 +84,12 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         };
     }
 
+/**
+ * Returns the seed.
+ *
+ * @param seedString parameter
+ * @return result
+ */
     private static long getSeed(String seedString) {
         if (seedString.isEmpty()) return getRandomSeed();
 
@@ -84,6 +104,10 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         return seed;
     }
 
+/**
+ * Returns the random seed.
+ * @return result
+ */
     private static long getRandomSeed() {
         byte[] bytes = new byte[8];
         new SecureRandom().nextBytes(bytes);    // Complete overkill but funny
@@ -91,6 +115,12 @@ public final class WorldCreationMenu extends UiBackgroundElement {
                 | (bytes[4] & 0xFFL) << 24 | (bytes[5] & 0xFFL) << 16 | (bytes[6] & 0xFFL) << 8 | (bytes[7] & 0xFFL);
     }
 
+/**
+ * Performs to long array.
+ *
+ * @param charArray Y coordinate in local block coordinates
+ * @return array result
+ */
     private static long[] toLongArray(char[] charArray) {
         long[] longs = new long[charArray.length / 8 + 1];
         for (int index = 0; index < longs.length; index++) {

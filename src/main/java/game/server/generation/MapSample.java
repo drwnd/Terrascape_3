@@ -4,6 +4,18 @@ import core.utils.OpenSimplex2S;
 
 import static game.server.generation.WorldGeneration.SEED;
 
+/**
+ * Performs map sample.
+ *
+ * @param temperature parameter
+ * @param humidity Y coordinate in local block coordinates
+ * @param height parameter
+ * @param erosion parameter
+ * @param continental parameter
+ * @param river parameter
+ * @param ridge parameter
+ * @return result
+ */
 public record MapSample(float temperature, float humidity,
                         float height, float erosion, float continental, float river, float ridge) {
 

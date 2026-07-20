@@ -19,11 +19,21 @@ import static game.utils.Constants.*;
 
 public final class Movement {
 
+/**
+ * Creates a new Movement instance.
+ */
     public Movement() {
         state = new WalkingState();
         state.movement = this;
     }
 
+/**
+ * Computes next game tick position.
+ *
+ * @param lastPosition parameter
+ * @param rotation parameter
+ * @return result
+ */
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
         wideGrounded = velocity.y == 0.0F && checkWideGrounded(position);
@@ -57,6 +67,11 @@ public final class Movement {
         this.velocity.set(velocity);
     }
 
+/**
+ * Sets state.
+ *
+ * @param identifier parameter
+ */
     public void setState(byte identifier) {
         MovementState state = MovementState.getStateFromIdentifier(identifier);
         if (state == null) return;
@@ -64,6 +79,11 @@ public final class Movement {
         this.state.movement = this;
     }
 
+/**
+ * Sets state.
+ *
+ * @param state parameter
+ */
     public void setState(MovementState state) {
         if (state == null) return;
         this.state = state;
@@ -83,6 +103,12 @@ public final class Movement {
     }
 
 
+/**
+ * Performs check wide grounded.
+ *
+ * @param position parameter
+ * @return true if the condition holds
+ */
     private boolean checkWideGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -93,6 +119,12 @@ public final class Movement {
         return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
+/**
+ * Performs check thin grounded.
+ *
+ * @param position parameter
+ * @return true if the condition holds
+ */
     private boolean checkThinGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -103,6 +135,12 @@ public final class Movement {
         return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
+/**
+ * Performs move.
+ *
+ * @param position parameter
+ * @return result
+ */
     private Vector3f move(Position position) {
         if (ToggleSettings.NO_CLIP.value()) {
             position.add(velocity.x, velocity.y, velocity.z);
@@ -123,6 +161,17 @@ public final class Movement {
         return nextGTVelocity;
     }
 
+/**
+ * Performs move.
+ *
+ * @param nextVelocity Y coordinate in local block coordinates
+ * @param toMoveDistance parameter
+ * @param position parameter
+ * @param direction 3D vector in local block coordinates
+ * @param units parameter
+ * @param lengths parameter
+ * @param component parameter
+ */
     private void move(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component) {
         float toMove = toMoveDistance.get(component);
         float moved;
@@ -142,6 +191,18 @@ public final class Movement {
         if (toMoveDistance.get(component) == 0) lengths.setComponent(component, Double.POSITIVE_INFINITY);
     }
 
+/**
+ * Resolves collision.
+ *
+ * @param nextVelocity Y coordinate in local block coordinates
+ * @param toMoveDistance parameter
+ * @param position parameter
+ * @param direction 3D vector in local block coordinates
+ * @param units parameter
+ * @param lengths parameter
+ * @param component parameter
+ * @param moved parameter
+ */
     private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         float requiredStepHeight = getRequiredStepHeight(position, component);
         if (canAutoStep(position, requiredStepHeight)) {
@@ -155,6 +216,18 @@ public final class Movement {
         stopAndUndoMove(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
     }
 
+/**
+ * Performs stop and undo move.
+ *
+ * @param nextVelocity Y coordinate in local block coordinates
+ * @param toMoveDistance parameter
+ * @param position parameter
+ * @param direction 3D vector in local block coordinates
+ * @param units parameter
+ * @param lengths parameter
+ * @param component parameter
+ * @param moved parameter
+ */
     private void stopAndUndoMove(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         nextVelocity.setComponent(component, 0);
         lengths.setComponent(component, Double.POSITIVE_INFINITY);
@@ -163,6 +236,13 @@ public final class Movement {
         computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
     }
 
+/**
+ * Returns the required step height.
+ *
+ * @param position parameter
+ * @param component parameter
+ * @return result
+ */
     private float getRequiredStepHeight(Position position, int component) {
         if (component == Y_COMPONENT) return Float.POSITIVE_INFINITY;
         Vector3i hitboxSize = state.getHitboxSize();
@@ -185,6 +265,13 @@ public final class Movement {
         return 0.0F;
     }
 
+/**
+ * Checks whether it can auto step.
+ *
+ * @param position parameter
+ * @param requiredStepHeight parameter
+ * @return true if the condition holds
+ */
     private boolean canAutoStep(Position position, float requiredStepHeight) {
         if (requiredStepHeight == 0.0F) return false;
 
@@ -197,6 +284,13 @@ public final class Movement {
         return noCollision(steppedPosition, state, -1);
     }
 
+/**
+ * Performs collides.
+ *
+ * @param position parameter
+ * @param component parameter
+ * @return true if the condition holds
+ */
     private boolean collides(Position position, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -211,6 +305,14 @@ public final class Movement {
         return collides(startX, startY, startZ, width, height, depth);
     }
 
+/**
+ * Performs should stop at edge.
+ *
+ * @param position parameter
+ * @param component parameter
+ * @param moved parameter
+ * @return true if the condition holds
+ */
     private boolean shouldStopAtEdge(Position position, int component, float moved) {
         Position originPosition = new Position(position).addComponent(component, -moved).addComponent(Y_COMPONENT, -state.getMaxAutoStepHeight());
         boolean grounded = wideCollides(originPosition, state, component);
@@ -220,6 +322,14 @@ public final class Movement {
         return noCollision(loweredPosition, state, component);
     }
 
+/**
+ * Performs no collision.
+ *
+ * @param position parameter
+ * @param state parameter
+ * @param component parameter
+ * @return true if the condition holds
+ */
     private boolean noCollision(Position position, MovementState state, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -232,6 +342,14 @@ public final class Movement {
         return !collides(startX, startY, startZ, hitboxSize.x + 1, hitboxSize.y, hitboxSize.z + 1);
     }
 
+/**
+ * Performs wide collides.
+ *
+ * @param position parameter
+ * @param state parameter
+ * @param component parameter
+ * @return true if the condition holds
+ */
     private boolean wideCollides(Position position, MovementState state, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -244,6 +362,15 @@ public final class Movement {
         return collides(startX, startY, startZ, hitboxSize.x + 2, hitboxSize.y, hitboxSize.z + 2);
     }
 
+/**
+ * Computes ray cast constants.
+ *
+ * @param position parameter
+ * @param velocity Y coordinate in local block coordinates
+ * @param direction 3D vector in local block coordinates
+ * @param units parameter
+ * @param lengths parameter
+ */
     private void computeRayCastConstants(Position position, Vector3f velocity, Vector3i direction, Vector3d units, Vector3d lengths) {
         Vector3f cornerFraction = getCornerFractionPosition(position);
         direction.x = velocity.x < 0 ? -1 : 1;
@@ -266,6 +393,12 @@ public final class Movement {
         if (Double.isNaN(lengths.z)) lengths.z = Double.POSITIVE_INFINITY;
     }
 
+/**
+ * Returns the corner fraction position.
+ *
+ * @param position parameter
+ * @return result
+ */
     private Vector3f getCornerFractionPosition(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
         Vector3f cornerFraction = position.fractionPosition();
@@ -276,21 +409,50 @@ public final class Movement {
         );
     }
 
+/**
+ * Returns the start x.
+ *
+ * @param position parameter
+ * @param hitboxSize 3D vector in local block coordinates
+ * @param component parameter
+ * @return result
+ */
     private long getStartX(Position position, Vector3i hitboxSize, int component) {
         float offset = component == X_COMPONENT && velocity.x > 0 ? hitboxSize.x * 0.5F + 0.5F : -hitboxSize.x * 0.5F;
         return position.longX + (int) Math.floor(position.fractionX + offset);
     }
 
+/**
+ * Returns the start y.
+ *
+ * @param position parameter
+ * @param hitboxSize 3D vector in local block coordinates
+ * @param component parameter
+ * @return result
+ */
     private long getStartY(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Y_COMPONENT && velocity.y > 0 ? hitboxSize.y : 0;
         return position.longY + (int) Math.floor(position.fractionY + offset);
     }
 
+/**
+ * Returns the start z.
+ *
+ * @param position parameter
+ * @param hitboxSize 3D vector in local block coordinates
+ * @param component parameter
+ * @return result
+ */
     private long getStartZ(Position position, Vector3i hitboxSize, int component) {
         float offset = component == Z_COMPONENT && velocity.z > 0 ? hitboxSize.z * 0.5F + 0.5F : -hitboxSize.z * 0.5F;
         return position.longZ + (int) Math.floor(position.fractionZ + offset);
     }
 
+/**
+ * Performs play footstep sound.
+ *
+ * @param position parameter
+ */
     private void playFootstepSound(Position position) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         int ticksBetweenFootsteps = state.ticksBetweenFootsteps();
@@ -302,6 +464,16 @@ public final class Movement {
     }
 
 
+/**
+ * Performs contains collidable voxel.
+ *
+ * @param y Y coordinate in local block coordinates
+ * @param minX X coordinate in local block coordinates
+ * @param minZ Z coordinate in local block coordinates
+ * @param maxX X coordinate in local block coordinates
+ * @param maxZ Z coordinate in local block coordinates
+ * @return true if the condition holds
+ */
     private static boolean containsCollidableVoxel(long y, long minX, long minZ, long maxX, long maxZ) {
         World world = Game.getWorld();
 
@@ -313,6 +485,17 @@ public final class Movement {
         return false;
     }
 
+/**
+ * Performs collides.
+ *
+ * @param startX X coordinate in local block coordinates
+ * @param startY Y coordinate in local block coordinates
+ * @param startZ Z coordinate in local block coordinates
+ * @param width parameter
+ * @param height parameter
+ * @param depth parameter
+ * @return true if the condition holds
+ */
     private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
         World world = Game.getWorld();
 
@@ -325,6 +508,13 @@ public final class Movement {
         return false;
     }
 
+/**
+ * Performs advance length.
+ *
+ * @param units parameter
+ * @param lengths parameter
+ * @param component parameter
+ */
     private static void advanceLength(Vector3d units, Vector3d lengths, int component) {
         double lengthComponent = lengths.get(component);
         lengths.setComponent(component, lengthComponent + units.get(component));

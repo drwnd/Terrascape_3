@@ -20,6 +20,11 @@ public final class PlayerSaver extends Saver<Player> {
         super(64);
     }
 
+/**
+ * Performs save.
+ *
+ * @param player parameter
+ */
     @Override
     protected void save(Player player) {
         saveGeneric(player.getPosition()::save);
@@ -30,6 +35,10 @@ public final class PlayerSaver extends Saver<Player> {
         for (Placeable placeable : player.getHotbar().getContents()) Placeable.savePlaceable(placeable, this);
     }
 
+/**
+ * Performs load.
+ * @return result
+ */
     @Override
     protected Player load() {
         Position position = loadGeneric(Position::load);
@@ -50,6 +59,10 @@ public final class PlayerSaver extends Saver<Player> {
         return player;
     }
 
+/**
+ * Returns the default.
+ * @return result
+ */
     @Override
     protected Player getDefault() {
         Vector3l worldCenter = new Vector3l(0, 0, 0);

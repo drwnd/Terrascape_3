@@ -18,6 +18,11 @@ public enum Properties {
     USE_TRANSPARENT_RENDERING(TRANSPARENT_RENDERING, TRANSPARENT, OCCLUDES_SELF_ONLY),
     USE_GLASS_RENDERING(GLASS_RENDERING, TRANSPARENT, OCCLUDES_SELF_ONLY);
 
+/**
+ * Creates a new Properties instance.
+ *
+ * @param properties parameter
+ */
     Properties(Properties... properties) {
         int value = 1 << ordinal();
         for (Properties property : properties) value |= property.value;
@@ -28,11 +33,23 @@ public enum Properties {
         value = 1 << ordinal();
     }
 
+/**
+ * Creates a new Properties instance.
+ *
+ * @param value parameter
+ * @param properties parameter
+ */
     Properties(int value, Properties... properties) {
         for (Properties property : properties) value |= property.value;
         this.value = value;
     }
 
+/**
+ * Returns the combined value.
+ *
+ * @param properties parameter
+ * @return result
+ */
     public static int getCombinedValue(List<String> properties) {
         if (properties == null) return 0;
         int value = 0;

@@ -8,6 +8,12 @@ import core.rendering_api.shaders.Shader;
 
 public final class ShaderLoader {
 
+/**
+ * Performs load shader.
+ *
+ * @param identifier parameter
+ * @return result
+ */
     public static Shader loadShader(ShaderIdentifier identifier) {
         return switch (identifier) {
             case Shaders.OPAQUE_GEOMETRY -> new RenderShader("Material.vert", "Opaque.frag", identifier);

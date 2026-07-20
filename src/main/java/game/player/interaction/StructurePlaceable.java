@@ -25,11 +25,21 @@ import static game.utils.Constants.*;
 
 public final class StructurePlaceable implements Placeable {
 
+/**
+ * Creates a new StructurePlaceable instance.
+ *
+ * @param identifier parameter
+ */
     public StructurePlaceable(StructureIdentifier identifier) {
         this.identifier = identifier;
         this.structure = AssetManager.get(identifier);
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 2);
         saver.saveString(identifier.structureName());
@@ -49,6 +59,12 @@ public final class StructurePlaceable implements Placeable {
         return new StructurePlaceable(new StructureIdentifier(saver.loadString()));
     }
 
+/**
+ * Performs place.
+ *
+ * @param position parameter
+ * @param lod parameter
+ */
     @Override
     public void place(Vector3l position, int lod) {
         byte transform = getTransform();
@@ -76,6 +92,12 @@ public final class StructurePlaceable implements Placeable {
         return structure;
     }
 
+/**
+ * Performs offset position.
+ *
+ * @param position parameter
+ * @param targetedSide parameter
+ */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         byte transform = getTransform();
@@ -89,6 +111,14 @@ public final class StructurePlaceable implements Placeable {
         position.z &= mask;
     }
 
+/**
+ * Performs intersects aabb.
+ *
+ * @param position parameter
+ * @param min parameter
+ * @param max X coordinate in local block coordinates
+ * @return true if the condition holds
+ */
     @Override
     public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
         min.sub(position);
@@ -104,6 +134,11 @@ public final class StructurePlaceable implements Placeable {
         return false;
     }
 
+/**
+ * Performs spawn particles.
+ *
+ * @param position parameter
+ */
     @Override
     public void spawnParticles(Vector3l position) {
         byte transform = getTransform();
@@ -129,6 +164,10 @@ public final class StructurePlaceable implements Placeable {
         return Transformation.getModelMatrix(getTransform(), structure);
     }
 
+/**
+ * Returns the side transform.
+ * @return array result
+ */
     public int[] getSideTransform() {
         boolean rotate90 = (rotation.ordinal() & Structure.ROTATE_90) != 0;
 
@@ -143,6 +182,12 @@ public final class StructurePlaceable implements Placeable {
     }
 
 
+/**
+ * Performs place in chunk.
+ *
+ * @param chunk parameter
+ * @param position parameter
+ */
     private void placeInChunk(Chunk chunk, Vector3l position) {
         byte transform = getTransform();
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;

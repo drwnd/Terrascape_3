@@ -4,6 +4,11 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class MemoryAllocator {
 
+/**
+ * Creates a new MemoryAllocator instance.
+ *
+ * @param initialCapacity Y coordinate in local block coordinates
+ */
     public MemoryAllocator(int initialCapacity) {
         capacity = initialCapacity;
 
@@ -13,6 +18,12 @@ public final class MemoryAllocator {
         free = new MemoryRegion(0, capacity);
     }
 
+/**
+ * Performs mem alloc.
+ *
+ * @param size parameter
+ * @return result
+ */
     public int memAlloc(int size) {
         if (size <= 0) return -1;
         MemoryRegion region = free;
@@ -40,6 +51,11 @@ public final class MemoryAllocator {
         return memAlloc(size);
     }
 
+/**
+ * Performs mem free.
+ *
+ * @param start parameter
+ */
     public void memFree(int start) {
         if (start == -1) return;
         MemoryRegion freed = removeFromUsed(start);
@@ -75,6 +91,10 @@ public final class MemoryAllocator {
         return buffer;
     }
 
+/**
+ * Returns the used.
+ * @return result
+ */
     public int getUsed() {
         int used = 0;
         MemoryRegion region = this.used;
@@ -85,6 +105,10 @@ public final class MemoryAllocator {
         return used;
     }
 
+/**
+ * Returns the free.
+ * @return result
+ */
     public int getFree() {
         int free = 0;
         MemoryRegion region = this.free;
@@ -99,6 +123,10 @@ public final class MemoryAllocator {
         return capacity;
     }
 
+/**
+ * Returns the highest allocated.
+ * @return result
+ */
     public int getHighestAllocated() {
         int max = -1;
         MemoryRegion region = used;
@@ -114,6 +142,12 @@ public final class MemoryAllocator {
     }
 
 
+/**
+ * Performs grow at least.
+ *
+ * @param size parameter
+ * @return true if the condition holds
+ */
     private boolean growAtLeast(int size) {
         int oldCapacity = capacity;
         int newCapacity = Math.clamp((long) capacity << 1L, capacity + size, glGetInteger(GL_MAX_SHADER_STORAGE_BLOCK_SIZE));
@@ -137,6 +171,12 @@ public final class MemoryAllocator {
         return true;
     }
 
+/**
+ * Removes free after.
+ *
+ * @param previous parameter
+ * @param region parameter
+ */
     private void removeFreeAfter(MemoryRegion previous, MemoryRegion region) {
         if (previous == null) {
             free = region.next;
@@ -145,6 +185,12 @@ public final class MemoryAllocator {
         previous.next = region.next;
     }
 
+/**
+ * Removes used after.
+ *
+ * @param previous parameter
+ * @param region parameter
+ */
     private void removeUsedAfter(MemoryRegion previous, MemoryRegion region) {
         if (previous == null) {
             used = region.next;
@@ -153,6 +199,12 @@ public final class MemoryAllocator {
         previous.next = region.next;
     }
 
+/**
+ * Removes from used.
+ *
+ * @param start parameter
+ * @return result
+ */
     private MemoryRegion removeFromUsed(int start) {
         MemoryRegion used = this.used;
         MemoryRegion previous = null;

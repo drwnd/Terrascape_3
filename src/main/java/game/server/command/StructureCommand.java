@@ -26,12 +26,24 @@ public final class StructureCommand {
     static final String SYNTAX = "save \"Structure Name\" [force]";
     static final String EXPLANATION = "Saves the selected Region as a structure with the given name";
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         KeywordToken action = tokens.expectNextKeyWord();
         if ("save".equalsIgnoreCase(action.keyword())) return executeSaveAction(tokens);
         return CommandResult.fail("unexpected keyword: " + action.keyword());
     }
 
+/**
+ * Performs execute save action.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     private static CommandResult executeSaveAction(TokenList tokens) {
         String fileName = Utils.sanitizeFileName(tokens.expectNextString().string());
         String saveFileLocation = StructureSaver.getSaveFileLocation(fileName);

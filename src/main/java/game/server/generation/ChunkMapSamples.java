@@ -2,6 +2,18 @@ package game.server.generation;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs chunk map samples.
+ *
+ * @param temperatureMap parameter
+ * @param humidityMap parameter
+ * @param heightMap parameter
+ * @param erosionMap parameter
+ * @param continentalMap parameter
+ * @param riverMap parameter
+ * @param ridgeMap parameter
+ * @return result
+ */
 public record ChunkMapSamples(float[] temperatureMap, float[] humidityMap,
                               float[] heightMap, float[] erosionMap, float[] continentalMap, float[] riverMap, float[] ridgeMap) {
 

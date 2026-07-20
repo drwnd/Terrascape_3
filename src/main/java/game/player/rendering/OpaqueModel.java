@@ -10,6 +10,19 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs opaque model.
+ *
+ * @param totalX X coordinate in local block coordinates
+ * @param totalY Y coordinate in local block coordinates
+ * @param totalZ Z coordinate in local block coordinates
+ * @param LOD parameter
+ * @param bufferOrStart parameter
+ * @param vertexCounts parameter
+ * @param toRenderVertexCounts parameter
+ * @param indices parameter
+ * @return result
+ */
 public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
     public static final int FACE_COUNT = 7;

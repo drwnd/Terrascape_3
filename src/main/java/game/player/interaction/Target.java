@@ -14,6 +14,14 @@ import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 
+/**
+ * Performs target.
+ *
+ * @param position parameter
+ * @param side parameter
+ * @param material parameter
+ * @return result
+ */
 public record Target(Vector3l position, int side, byte material) {
 
     public Target(Target target) {

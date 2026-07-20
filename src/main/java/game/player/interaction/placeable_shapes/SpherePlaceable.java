@@ -12,11 +12,21 @@ import game.server.generation.Structure;
 
 public final class SpherePlaceable extends ShapePlaceable {
 
+/**
+ * Creates a new SpherePlaceable instance.
+ *
+ * @param material parameter
+ */
     public SpherePlaceable(byte material) {
         super(ComputeShaders.SPHERE, material);
         loadSettings();
     }
 
+/**
+ * Performs save.
+ *
+ * @param saver parameter
+ */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 4);
         saver.saveByte(getMaterial());
@@ -25,6 +35,12 @@ public final class SpherePlaceable extends ShapePlaceable {
         saver.saveFloat(exponent.value());
     }
 
+/**
+ * Performs load.
+ *
+ * @param saver parameter
+ * @return result
+ */
     public static SpherePlaceable load(Saver<?> saver) {
         SpherePlaceable placeable = new SpherePlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
@@ -33,6 +49,10 @@ public final class SpherePlaceable extends ShapePlaceable {
         return placeable;
     }
 
+/**
+ * Returns the settings.
+ * @return array result
+ */
     @Override
     public ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -42,6 +62,12 @@ public final class SpherePlaceable extends ShapePlaceable {
         };
     }
 
+/**
+ * Copies with material unique.
+ *
+ * @param material parameter
+ * @return result
+ */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SpherePlaceable copy = new SpherePlaceable(material);

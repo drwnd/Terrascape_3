@@ -23,6 +23,12 @@ final class RecordCommand {
 
     }
 
+/**
+ * Performs execute.
+ *
+ * @param tokens parameter
+ * @return result
+ */
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         String recordName = tokens.expectNextKeyWord().keyword();
@@ -61,6 +67,10 @@ final class RecordCommand {
         private final ArrayList<Position> positions = new ArrayList<>();
         private final ArrayList<Vector3f> rotations = new ArrayList<>();
 
+/**
+ * Performs run.
+ * @return true if the condition holds
+ */
         public boolean run() {
 
             positions.add(Game.getPlayer().getPosition());
@@ -88,6 +98,10 @@ final class RecordCommand {
             this.playbackRotations = playbackRotations;
         }
 
+/**
+ * Performs run.
+ * @return true if the condition holds
+ */
         public boolean run() {
             Player player = Game.getPlayer();
             if (index >= positions.size() && index >= rotations.size()) return false;

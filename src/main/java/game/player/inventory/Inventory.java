@@ -29,6 +29,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Inventory extends UiElement {
 
+/**
+ * Creates a new Inventory instance.
+ */
     public Inventory() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), CoreTextures.OVERLAY);
         input = new InventoryInput(this);
@@ -65,12 +68,22 @@ public final class Inventory extends UiElement {
         return input;
     }
 
+/**
+ * Performs hover over.
+ *
+ * @param pixelCoordinate parameter
+ */
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         for (Renderable renderable : getChildren()) if (renderable.isVisible()) renderable.hoverOver(pixelCoordinate);
     }
 
+/**
+ * Sets visible.
+ *
+ * @param visible parameter
+ */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -84,6 +97,12 @@ public final class Inventory extends UiElement {
         return openTabButton;
     }
 
+/**
+ * Sets open tab.
+ *
+ * @param toOpenTab parameter
+ * @param button parameter
+ */
     void setOpenTab(InventoryTab toOpenTab, TabOpenerButton button) {
         structureTab.setVisible(false);
         shapesTab.setVisible(false);
@@ -96,6 +115,13 @@ public final class Inventory extends UiElement {
         openTabButton = button;
     }
 
+/**
+ * Performs handle input.
+ *
+ * @param button parameter
+ * @param action parameter
+ * @param pixelCoordinate parameter
+ */
     void handleInput(int button, int action, Vector2i pixelCoordinate) {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
@@ -116,6 +142,15 @@ public final class Inventory extends UiElement {
     }
 
 
+/**
+ * Performs hover over cube displays.
+ *
+ * @param pixelCoordinate parameter
+ * @param itemNameDisplay Y coordinate in local block coordinates
+ * @param cubeDisplays parameter
+ * @param lastCursorPos parameter
+ * @param tab parameter
+ */
     static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Vector2i lastCursorPos, Renderable tab) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         itemNameDisplay.setVisible(false);
@@ -136,6 +171,10 @@ public final class Inventory extends UiElement {
         for (Renderable renderable : tab.getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
+/**
+ * Returns the cube displays.
+ * @return result
+ */
     private static ArrayList<CubeDisplay> getCubeDisplays() {
         long start = System.nanoTime();
         ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>(AMOUNT_OF_MATERIALS);

@@ -21,6 +21,13 @@ public final class MeshGenerator {
     public static final int PROPERTIES_OFFSET = 24;
     public static final byte OPAQUE = GRASS;
 
+/**
+ * Checks whether visible.
+ *
+ * @param toTestMaterial parameter
+ * @param occludingMaterial parameter
+ * @return true if the condition holds
+ */
     public static boolean isVisible(byte toTestMaterial, byte occludingMaterial) {
         if (toTestMaterial == AIR) return false;
         if (occludingMaterial == AIR) return true;
@@ -32,6 +39,12 @@ public final class MeshGenerator {
         return true;
     }
 
+/**
+ * Generates mesh.
+ *
+ * @param chunk parameter
+ * @return result
+ */
     public Mesh generateMesh(Chunk chunk) {
         if (chunk.isAir()) return new Mesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
 
@@ -58,6 +71,12 @@ public final class MeshGenerator {
         return loadMesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD, occluder, occludee);
     }
 
+/**
+ * Generates mesh.
+ *
+ * @param structure parameter
+ * @return result
+ */
     public Mesh generateMesh(Structure structure) {
 
         int endX = structure.sizeX();
@@ -85,6 +104,9 @@ public final class MeshGenerator {
     }
 
 
+/**
+ * Performs clear.
+ */
     private void clear() {
         transparentVerticesList.clear();
         glassVerticesList.clear();
@@ -92,6 +114,17 @@ public final class MeshGenerator {
         for (ByteArrayList list : adjacentChunkLayers) list.clear();
     }
 
+/**
+ * Performs load mesh.
+ *
+ * @param chunkX X coordinate in local block coordinates
+ * @param chunkY Y coordinate in local block coordinates
+ * @param chunkZ Z coordinate in local block coordinates
+ * @param lod parameter
+ * @param occluder parameter
+ * @param occludee parameter
+ * @return result
+ */
     private Mesh loadMesh(long chunkX, long chunkY, long chunkZ, int lod, AABB occluder, AABB occludee) {
         int[] vertexCounts = new int[opaqueVerticesLists.length];
         int[] opaqueVertices = loadOpaqueVertices(vertexCounts);
@@ -103,6 +136,10 @@ public final class MeshGenerator {
                 chunkX, chunkY, chunkZ, lod, occluder, occludee);
     }
 
+/**
+ * Performs load transparent vertices.
+ * @return array result
+ */
     private int[] loadTransparentVertices() {
         int[] transparentVertices = new int[transparentVerticesList.size() + glassVerticesList.size()];
         transparentVerticesList.copyInto(transparentVertices, 0);
@@ -110,6 +147,12 @@ public final class MeshGenerator {
         return transparentVertices;
     }
 
+/**
+ * Performs load opaque vertices.
+ *
+ * @param vertexCounts parameter
+ * @return array result
+ */
     private int[] loadOpaqueVertices(int[] vertexCounts) {
         int totalVertexCount = 0, verticesIndex = 0;
         for (IntArrayList vertexList : opaqueVerticesLists) totalVertexCount += vertexList.size();
@@ -124,12 +167,20 @@ public final class MeshGenerator {
         return opaqueVertices;
     }
 
+/**
+ * Checks whether the object has opaque mesh.
+ * @return true if the condition holds
+ */
     private boolean hasOpaqueMesh() {
         for (IntArrayList verticesList : opaqueVerticesLists) if (!verticesList.isEmpty()) return true;
         return false;
     }
 
 
+/**
+ * Returns the occludee.
+ * @return result
+ */
     private AABB getOccludee() {
         AABB occludee = AABB.newMinChunkAABB();
 
@@ -146,6 +197,12 @@ public final class MeshGenerator {
         return occludee;
     }
 
+/**
+ * Adds to aabb.
+ *
+ * @param vertices parameter
+ * @param aabb parameter
+ */
     private static void addToAABB(IntArrayList vertices, AABB aabb) {
         int[] data = vertices.getData();
         for (int index = 0; index < vertices.size(); index += INTS_PER_VERTEX) {
@@ -157,6 +214,15 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Adds to aabb.
+ *
+ * @param aabb parameter
+ * @param x X coordinate in local block coordinates
+ * @param y Y coordinate in local block coordinates
+ * @param z Z coordinate in local block coordinates
+ * @param faceData parameter
+ */
     private static void addToAABB(AABB aabb, int x, int y, int z, int faceData) {
         int side = faceData >> 8 & 7;
         int faceSize1 = (faceData >> 17 & 63) + 1, faceSize2 = (faceData >> 11 & 63) + 1;
@@ -183,6 +249,9 @@ public final class MeshGenerator {
     }
 
 
+/**
+ * Adds north south faces.
+ */
     private void addNorthSouthFaces() {
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++) {
             copyMaterialsNorthSouth(materialZ);
@@ -191,6 +260,11 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Copies materials north south.
+ *
+ * @param materialZ Z coordinate in local block coordinates
+ */
     private void copyMaterialsNorthSouth(int materialZ) {
         long[] toMeshFaces1 = toMeshFacesMaps[NORTH][materialZ];
         long[] toMeshFaces2 = toMeshFacesMaps[SOUTH][materialZ];
@@ -206,6 +280,9 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Adds top bottom faces.
+ */
     private void addTopBottomFaces() {
         for (int materialY = 0; materialY < CHUNK_SIZE; materialY++) {
             copyMaterialsTopBottom(materialY);
@@ -214,6 +291,11 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Copies materials top bottom.
+ *
+ * @param materialY Y coordinate in local block coordinates
+ */
     private void copyMaterialsTopBottom(int materialY) {
         long[] toMeshFaces1 = toMeshFacesMaps[TOP][materialY];
         long[] toMeshFaces2 = toMeshFacesMaps[BOTTOM][materialY];
@@ -229,6 +311,9 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Adds west east faces.
+ */
     private void addWestEastFaces() {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++) {
             copyMaterialsWestEast(materialX);
@@ -237,6 +322,11 @@ public final class MeshGenerator {
         }
     }
 
+/**
+ * Copies materials west east.
+ *
+ * @param materialX X coordinate in local block coordinates
+ */
     private void copyMaterialsWestEast(int materialX) {
         long[] toMeshFaces1 = toMeshFacesMaps[WEST][materialX];
         long[] toMeshFaces2 = toMeshFacesMaps[EAST][materialX];
@@ -253,6 +343,13 @@ public final class MeshGenerator {
     }
 
 
+/**
+ * Adds north south layer.
+ *
+ * @param side parameter
+ * @param materialZ Z coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addNorthSouthLayer(int side, int materialZ, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
@@ -269,6 +366,13 @@ public final class MeshGenerator {
             }
     }
 
+/**
+ * Adds top bottom layer.
+ *
+ * @param side parameter
+ * @param materialY Y coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addTopBottomLayer(int side, int materialY, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
@@ -285,6 +389,13 @@ public final class MeshGenerator {
             }
     }
 
+/**
+ * Adds west east layer.
+ *
+ * @param side parameter
+ * @param materialX X coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addWestEastLayer(int side, int materialX, long[] toMeshFacesMap) {
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ]);
@@ -302,6 +413,9 @@ public final class MeshGenerator {
     }
 
 
+/**
+ * Adds side layers.
+ */
     private void addSideLayers() {
         long[] toMeshFacesMap = toMeshFacesMaps[0][0];
 
@@ -330,24 +444,46 @@ public final class MeshGenerator {
         addWestEastSideLayer(WEST, CHUNK_SIZE - 1, toMeshFacesMap);
     }
 
+/**
+ * Copies materials north south side layer.
+ *
+ * @param materialZ Z coordinate in local block coordinates
+ */
     private void copyMaterialsNorthSouthSideLayer(int materialZ) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
                 materialsLayer[materialX << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
     }
 
+/**
+ * Copies materials top bottom side layer.
+ *
+ * @param materialY Y coordinate in local block coordinates
+ */
     private void copyMaterialsTopBottomSideLayer(int materialY) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
                 materialsLayer[materialX << CHUNK_SIZE_BITS | materialZ] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
     }
 
+/**
+ * Copies materials west east side layer.
+ *
+ * @param materialX X coordinate in local block coordinates
+ */
     private void copyMaterialsWestEastSideLayer(int materialX) {
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
             for (int materialY = 0; materialY < CHUNK_SIZE; materialY++)
                 materialsLayer[materialZ << CHUNK_SIZE_BITS | materialY] = materials[MaterialsData.getUncompressedIndex(materialX, materialY, materialZ)];
     }
 
+/**
+ * Adds north south side layer.
+ *
+ * @param side parameter
+ * @param materialZ Z coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addNorthSouthSideLayer(int side, int materialZ, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
@@ -364,6 +500,13 @@ public final class MeshGenerator {
             }
     }
 
+/**
+ * Adds top bottom side layer.
+ *
+ * @param side parameter
+ * @param materialY Y coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addTopBottomSideLayer(int side, int materialY, long[] toMeshFacesMap) {
         for (int materialX = 0; materialX < CHUNK_SIZE; materialX++)
             for (int materialZ = Long.numberOfTrailingZeros(toMeshFacesMap[materialX]);
@@ -380,6 +523,13 @@ public final class MeshGenerator {
             }
     }
 
+/**
+ * Adds west east side layer.
+ *
+ * @param side parameter
+ * @param materialX X coordinate in local block coordinates
+ * @param toMeshFacesMap parameter
+ */
     private void addWestEastSideLayer(int side, int materialX, long[] toMeshFacesMap) {
         for (int materialZ = 0; materialZ < CHUNK_SIZE; materialZ++)
             for (int materialY = Long.numberOfTrailingZeros(toMeshFacesMap[materialZ]);
@@ -396,12 +546,34 @@ public final class MeshGenerator {
             }
     }
 
+/**
+ * Adds side face.
+ *
+ * @param side parameter
+ * @param materialX X coordinate in local block coordinates
+ * @param materialY Y coordinate in local block coordinates
+ * @param materialZ Z coordinate in local block coordinates
+ * @param material parameter
+ * @param faceSize1 parameter
+ * @param faceSize2 parameter
+ */
     private void addSideFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
         if ((Material.getProperties(material) & TRANSPARENT) != 0) return;
         addFace(opaqueVerticesLists[6], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
     }
 
 
+/**
+ * Adds face.
+ *
+ * @param side parameter
+ * @param materialX X coordinate in local block coordinates
+ * @param materialY Y coordinate in local block coordinates
+ * @param materialZ Z coordinate in local block coordinates
+ * @param material parameter
+ * @param faceSize1 parameter
+ * @param faceSize2 parameter
+ */
     private void addFace(int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
         int renderingType = Material.getProperties(material) & RENDERING_TYPE_MASK;
         if (renderingType == GLASS_RENDERING)
@@ -412,6 +584,15 @@ public final class MeshGenerator {
             addFace(opaqueVerticesLists[side], side, materialX, materialY, materialZ, material, faceSize1, faceSize2);
     }
 
+/**
+ * Performs grow face1st direction.
+ *
+ * @param toMeshFacesMap parameter
+ * @param growStart parameter
+ * @param fixedStart parameter
+ * @param material parameter
+ * @return result
+ */
     private int growFace1stDirection(long[] toMeshFacesMap, int growStart, int fixedStart, byte material) {
         for (; growStart < CHUNK_SIZE; growStart++) {
             int index = fixedStart << CHUNK_SIZE_BITS | growStart;
@@ -420,6 +601,17 @@ public final class MeshGenerator {
         return CHUNK_SIZE - 1;
     }
 
+/**
+ * Performs grow face2nd direction.
+ *
+ * @param toMeshFacesMap parameter
+ * @param growStart parameter
+ * @param mask parameter
+ * @param fixedStart parameter
+ * @param fixedEnd parameter
+ * @param material parameter
+ * @return result
+ */
     private int growFace2ndDirection(long[] toMeshFacesMap, int growStart, long mask, int fixedStart, int fixedEnd, byte material) {
         for (; growStart < CHUNK_SIZE && (toMeshFacesMap[growStart] & mask) == mask; growStart++)
             for (int index = fixedStart; index <= fixedEnd; index++)
@@ -432,11 +624,31 @@ public final class MeshGenerator {
         return length == CHUNK_SIZE ? -1L : (1L << length) - 1 << offset;
     }
 
+/**
+ * Removes from bit map.
+ *
+ * @param toMeshFacesMap parameter
+ * @param mask parameter
+ * @param start parameter
+ * @param end parameter
+ */
     private static void removeFromBitMap(long[] toMeshFacesMap, long mask, int start, int end) {
         mask = ~mask;
         for (int index = start; index <= end; index++) toMeshFacesMap[index] &= mask;
     }
 
+/**
+ * Adds face.
+ *
+ * @param vertices parameter
+ * @param side parameter
+ * @param materialX X coordinate in local block coordinates
+ * @param materialY Y coordinate in local block coordinates
+ * @param materialZ Z coordinate in local block coordinates
+ * @param material parameter
+ * @param faceSize1 parameter
+ * @param faceSize2 parameter
+ */
     private void addFace(IntArrayList vertices, int side, int materialX, int materialY, int materialZ, byte material, int faceSize1, int faceSize2) {
         vertices.add(xStart | materialX);
         vertices.add(yStart | materialY);

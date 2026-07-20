@@ -13,6 +13,12 @@ public enum Command {
     STRUCTURE(StructureCommand::execute, StructureCommand.EXPLANATION, StructureCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
+/**
+ * Performs execute.
+ *
+ * @param commandString parameter
+ * @return result
+ */
     public static CommandResult execute(String commandString) {
         try {
             TokenList tokens = Token.tokenize(commandString.substring(1));
@@ -30,6 +36,13 @@ public enum Command {
         }
     }
 
+/**
+ * Creates a new Command instance.
+ *
+ * @param executable parameter
+ * @param explanation parameter
+ * @param syntax X coordinate in local block coordinates
+ */
     Command(Executable executable, String explanation, String syntax) {
         this.executable = executable;
         this.explanation = explanation;
@@ -44,6 +57,12 @@ public enum Command {
         return syntax;
     }
 
+/**
+ * Returns the command.
+ *
+ * @param name parameter
+ * @return result
+ */
     static Command getCommand(String name) {
         try {
             return valueOf(name);
