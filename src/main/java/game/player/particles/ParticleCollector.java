@@ -6,6 +6,7 @@ import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
 import game.server.Game;
+import game.server.World;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
@@ -148,6 +149,7 @@ public final class ParticleCollector {
     private void addPlaceEffectLoop(int startX, int startY, int startZ,
                                     long x, long y, long z,
                                     IntArrayList placeParticles, ShapePlaceable placeable) {
+        if (OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) return;
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         int lengthX = placeable.getLengthX();
@@ -182,6 +184,9 @@ public final class ParticleCollector {
         int lengthZ = placeable.getLengthZ();
         long[] bitMap = placeable.getBitMap();
         byte material = placeable.getMaterial();
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte toPlaceMaterial = breakHeldOnly ? AIR : material;
+        World world = Game.getWorld();
 
         int stepLength = IntSettings.BREAK_PARTICLE_STEP_LENGTH.value();
         for (int xOffset = 0; xOffset < lengthX; xOffset += stepLength)
@@ -190,8 +195,10 @@ public final class ParticleCollector {
 
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
-                    byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD || previousMaterial == material) continue;
+                    byte previousMaterial = world.getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
+                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD
+                            || previousMaterial == toPlaceMaterial
+                            || breakHeldOnly && previousMaterial != material) continue;
 
                     addBreakParticle(Material.isGlass(previousMaterial) ? transparentParticles : opaqueParticles,
                             xOffset + startX, yOffset + startY, zOffset + startZ,

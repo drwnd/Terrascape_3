@@ -7,6 +7,7 @@ import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
+import game.settings.OptionSettings;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -86,7 +87,7 @@ public final class InteractionHandler {
 
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable == null) {
+        if (placeable == null || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) {
             useInfo.lastAction = Game.getServer().getCurrentGameTick();
             useInfo.forceAction = false;
             return;
@@ -96,13 +97,14 @@ public final class InteractionHandler {
 
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowBreak()) {
+        if (placeable != null && !placeable.allowBreak()
+                || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY && !(placeable instanceof ShapePlaceable)) {
             destroyInfo.forceAction = false;
             destroyInfo.lastAction = Game.getServer().getCurrentGameTick();
             return;
         }
         if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
-        else placeable = shapePlaceable.copyWithMaterial(AIR);
+        else placeable = shapePlaceable.copyWithMaterial(OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY ? shapePlaceable.getMaterial() : AIR);
         handleUseDestroy(destroyInfo, placeable, false);
     }
 

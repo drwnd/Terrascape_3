@@ -269,6 +269,8 @@ public final class MaterialsData {
         int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte toPlaceMaterial = breakHeldOnly ? AIR : material;
 
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
             for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
@@ -276,8 +278,9 @@ public final class MaterialsData {
                 int materialIndex = materialStartIndex + (index - bitMapStartIndex >> shiftCount);
                 if ((bitMap[bitsIndex] & 1L << index) == 0
                         || paint && uncompressedMaterials[materialIndex] == AIR
-                        || replaceAir && uncompressedMaterials[materialIndex] != AIR) continue;
-                uncompressedMaterials[materialIndex] = material;
+                        || replaceAir && uncompressedMaterials[materialIndex] != AIR
+                        || breakHeldOnly && uncompressedMaterials[materialIndex] != material) continue;
+                uncompressedMaterials[materialIndex] = toPlaceMaterial;
             }
     }
 
