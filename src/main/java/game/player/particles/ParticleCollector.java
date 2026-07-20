@@ -177,6 +177,8 @@ public final class ParticleCollector {
                                     long x, long y, long z,
                                     IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
         if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
@@ -191,7 +193,9 @@ public final class ParticleCollector {
                     int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
                     if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
                     byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD || previousMaterial == material) continue;
+                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD
+                            || previousMaterial == material
+                            || breakHeldOnly && previousMaterial != heldMaterial) continue;
 
                     addBreakParticle(Material.isGlass(previousMaterial) ? transparentParticles : opaqueParticles,
                             xOffset + startX, yOffset + startY, zOffset + startZ,

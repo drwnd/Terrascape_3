@@ -7,6 +7,7 @@ import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
+import game.settings.OptionSettings;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -61,10 +62,12 @@ public final class InteractionHandler {
 
     public PlacingState getState(Target currentTarget) {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT) || placeable == null;
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        boolean isBreak = Input.isKeyPressed(KeySettings.SPRINT) || placeable == null || breakHeldOnly;
         boolean isLocked = lockedTarget != null;
         boolean isRepeat = startTarget != null;
 
+        if (breakHeldOnly && !(placeable instanceof ShapePlaceable)) return PlacingState.NONE;
         if (placeable instanceof ChunkRebuildPlaceable) return PlacingState.NONE;
         if (placeable instanceof StructureSelector) return isLocked ? PlacingState.STRUCTURE_SELECT_LOCKED : PlacingState.STRUCTURE_SELECT;
 
@@ -86,7 +89,7 @@ public final class InteractionHandler {
 
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable == null) {
+        if (placeable == null || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) {
             useInfo.lastAction = Game.getServer().getCurrentGameTick();
             useInfo.forceAction = false;
             return;
@@ -96,9 +99,9 @@ public final class InteractionHandler {
 
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowBreak()) {
-            destroyInfo.forceAction = false;
+        if (placeable != null && !placeable.allowBreak() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY && !(placeable instanceof ShapePlaceable)) {
             destroyInfo.lastAction = Game.getServer().getCurrentGameTick();
+            destroyInfo.forceAction = false;
             return;
         }
         if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();

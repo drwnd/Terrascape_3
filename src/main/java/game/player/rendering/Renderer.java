@@ -689,7 +689,9 @@ public final class Renderer extends Renderable {
 
     private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget) {
         Placeable placeable = player.getHeldPlaceable();
-        byte material = placeable instanceof ShapePlaceable shapePlaceable && !Input.isKeyPressed(KeySettings.SPRINT) ? shapePlaceable.getMaterial() : AIR;
+        byte material = placeable instanceof ShapePlaceable shapePlaceable
+                && !Input.isKeyPressed(KeySettings.SPRINT)
+                && OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY ? shapePlaceable.getMaterial() : AIR;
 
         Vector3l startPositon = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();

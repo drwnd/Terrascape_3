@@ -5,7 +5,7 @@ import core.settings.optionSettings.Option;
 
 public enum PlaceMode implements Option, Translatable {
 
-    PAINT, REPLACE, REPLACE_AIR;
+    PAINT, REPLACE, REPLACE_AIR, BREAK_HELD_ONLY;
 
     @Override
     public String translationFileName() {

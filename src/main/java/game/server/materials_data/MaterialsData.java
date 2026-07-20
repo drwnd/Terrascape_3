@@ -9,6 +9,7 @@ import game.player.interaction.ShapePlaceable;
 import game.player.particles.ParticleCollector;
 import game.player.rendering.AABB;
 import game.player.rendering.MeshGenerator;
+import game.server.Game;
 import game.server.Chunk;
 import game.server.generation.Structure;
 import game.server.material.Material;
@@ -249,34 +250,44 @@ public final class MaterialsData {
 
         int inChunkAlign = Integer.numberOfTrailingZeros(inChunkX | inChunkY | inChunkZ);
         int align = MathUtils.min(totalSizeBits, inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2()));
+        int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
 
         int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
         int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);
         int startY = Math.max(0, -inChunkY), endY = Math.clamp(placeable.getLengthY() >> lod, 1, (1 << totalSizeBits) - inChunkY);
         int startZ = Math.max(0, -inChunkZ), endZ = Math.clamp(placeable.getLengthZ() >> lod, 1, (1 << totalSizeBits) - inChunkZ);
 
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+
         for (int x = startX; x < endX; x += alignLength)
             for (int y = startY; y < endY; y += alignLength)
                 for (int z = startZ; z < endZ; z += alignLength) {
                     int materialStartIndex = getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z);
                     int bitMapStartIndex = getUncompressedIndex(x << lod, y << lod, z << lod);
-                    storeMaterial(materialStartIndex, bitMapStartIndex, material, count, bitMap, uncompressedMaterials, lod);
+                    int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
+
+                    storeMaterial(bitMap, uncompressedMaterials,
+                            bitMapStartIndex, bitMapEndIndex, mask, endIndex, stride, materialStartIndex, shiftCount,
+                            paint, replaceAir, breakHeldOnly,
+                            heldMaterial, material);
                 }
     }
 
-    private static void storeMaterial(int materialStartIndex, int bitMapStartIndex, byte material, int count, long[] bitMap, byte[] uncompressedMaterials, int lod) {
-        int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
-        int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
-        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
-        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
-
+    private static void storeMaterial(long[] bitMap, byte[] uncompressedMaterials,
+                                      int bitMapStartIndex, int bitMapEndIndex, int mask, int endIndex, int stride, int materialStartIndex, int shiftCount,
+                                      boolean paint, boolean replaceAir, boolean breakHeldOnly,
+                                      byte heldMaterial, byte material) {
         for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
             for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
                  end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
                 int materialIndex = materialStartIndex + (index - bitMapStartIndex >> shiftCount);
                 if ((bitMap[bitsIndex] & 1L << index) == 0
                         || paint && uncompressedMaterials[materialIndex] == AIR
-                        || replaceAir && uncompressedMaterials[materialIndex] != AIR) continue;
+                        || replaceAir && uncompressedMaterials[materialIndex] != AIR
+                        || breakHeldOnly && uncompressedMaterials[materialIndex] != heldMaterial) continue;
                 uncompressedMaterials[materialIndex] = material;
             }
     }
