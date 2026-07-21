@@ -139,6 +139,7 @@ public final class InteractionHandler {
 
     private void handleLockPlacePosition() {
         Target currentTarget = Target.getPlayerTarget();
+        if (currentTarget == null) return;
         PlacingState state = getState(currentTarget);
         if (state.isLocked()) lockedTarget = startTarget = null;
         else {
