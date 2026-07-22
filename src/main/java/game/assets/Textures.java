@@ -8,7 +8,8 @@ public enum Textures implements TextureIdentifier {
     NIGHT_SKY("NightSky.png"),
     CROSSHAIR("CrossHair.png"),
     HOTBAR("HotBar.png"),
-    HOTBAR_SELECTION_INDICATOR("HotBarSelectionIndicator.png");
+    HOTBAR_SELECTION_INDICATOR("HotBarSelectionIndicator.png"),
+    RELOAD_ICON("Reload.png");
 
     Textures(String fileName) {
         this.filepath = fileName;

@@ -4,6 +4,7 @@ import core.renderables.*;
 import core.rendering_api.Window;
 import core.utils.FileManager;
 
+import game.assets.Textures;
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
@@ -40,6 +41,13 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         UiButton loadButton = new UiButton(new Vector2f(0.125F, 0.1F), new Vector2f(0.025F, 0.775F), getLoadButtonClickable());
         loadButton.addRenderable(new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.LOAD_SHADER_CODE, Color.WHITE));
         addRenderable(loadButton);
+
+        UiButton reloadButton = new UiButton(new Vector2f(0.125F, 0.1F), new Vector2f(0.2F, 0.775F), getReloadButtonClickable());
+        float reloadIconWidth = 1.0F / reloadButton.getAspectRatio() / getAspectRatio() / Window.getAspectRatio();
+        float reloadIconOffset = 0.5F - reloadIconWidth * 0.5F;
+        reloadIcon = new UiElement(new Vector2f(reloadIconWidth, 1.0F), new Vector2f(reloadIconOffset, 0.0F), Textures.RELOAD_ICON);
+        reloadButton.addRenderable(reloadIcon);
+        addRenderable(reloadButton);
 
         int index = 0;
         for (UiButton settingElement : shape.getSettingButtons()) {
@@ -86,6 +94,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         if (shapePreview == null) return;
         shapePreview.setSizeToParent(0.325F, 0.325F * Window.getAspectRatio() * getAspectRatio());
         shapePreview.setOffsetToParent(0.0F, 0.0F);
+
+        float reloadIconWidth = 1.0F / reloadIcon.getParent().getAspectRatio() / getAspectRatio() / Window.getAspectRatio();
+        float reloadIconOffset = 0.5F - reloadIconWidth * 0.5F;
+        reloadIcon.setSizeToParent(reloadIconWidth, 1.0F);
+        reloadIcon.setOffsetToParent(reloadIconOffset, 0.0F);
     }
 
     @Override
@@ -159,19 +172,34 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             int option = fileChooser.showOpenDialog(null);
             if (option != JFileChooser.APPROVE_OPTION) return ButtonResult.FAILURE;
 
-            File file = fileChooser.getSelectedFile();
-            String shaderCode = FileManager.loadFileContents(file.getPath());
-            shape.setShaderCode(shaderCode);
-            refreshShapePreview = true;
+            selectedFilepath = fileChooser.getSelectedFile().getPath();
+            loadShapeShader();
             return ButtonResult.SUCCESS;
         };
     }
 
+    private Clickable getReloadButtonClickable() {
+        return (Vector2i _, int _, int action) -> {
+            if (action != GLFW_PRESS) return ButtonResult.IGNORE;
+            if (selectedFilepath == null || !new File(selectedFilepath).exists()) return ButtonResult.FAILURE;
+            loadShapeShader();
+            return ButtonResult.SUCCESS;
+        };
+    }
+
+    private void loadShapeShader() {
+        String shaderCode = FileManager.loadFileContents(selectedFilepath);
+        shape.setShaderCode(shaderCode);
+        refreshShapePreview = true;
+    }
+
+    private final UiElement reloadIcon;
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 
     private final CustomShape shape = new CustomShape(STONE, "bool isInside(int x, int y, int z) {return true;}");
-    private StructureDisplay shapePreview;
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
+    private String selectedFilepath = null;
+    private StructureDisplay shapePreview;
     private boolean refreshShapePreview = true;
 }
