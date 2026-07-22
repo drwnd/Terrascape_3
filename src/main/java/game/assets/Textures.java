@@ -11,6 +11,11 @@ public enum Textures implements TextureIdentifier {
     HOTBAR_SELECTION_INDICATOR("HotBarSelectionIndicator.png"),
     RELOAD_ICON("Reload.png");
 
+    /**
+     * Constructs a texture identifier with a file name.
+     *
+     * @param fileName the name of the texture file
+     */
     Textures(String fileName) {
         this.filepath = fileName;
     }

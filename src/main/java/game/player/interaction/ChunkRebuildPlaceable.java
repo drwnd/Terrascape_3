@@ -26,6 +26,12 @@ public final class ChunkRebuildPlaceable implements Placeable {
         return new ChunkRebuildPlaceable();
     }
 
+    /**
+     * Places the chunk rebuild structure at the specified position and LOD.
+     * Generates a new chunk if at LOD 0 and stores its materials.
+     * @param position the position to place at in Absolute World Coordinates (LOD 0)
+     * @param lod the Level of Detail at which to place
+     */
     @Override
     public void place(Vector3l position, int lod) {
         if (lod == 0) {
@@ -79,6 +85,11 @@ public final class ChunkRebuildPlaceable implements Placeable {
         return false;
     }
 
+    /**
+     * Aligns the position to the chunk boundary at LOD 0.
+     * @param position the position to offset in Absolute World Coordinates (LOD 0)
+     * @param targetedSide the side being targeted (unused in this implementation)
+     */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         position.x &= ~CHUNK_SIZE_MASK;

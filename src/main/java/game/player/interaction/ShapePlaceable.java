@@ -27,18 +27,37 @@ import static org.lwjgl.opengl.GL46.*;
 
 public abstract class ShapePlaceable implements Placeable {
 
+    /**
+     * Initializes the shape placeable with a shader identifier and material.
+     *
+     * @param identifier the shader identifier
+     * @param material   the material of the shape
+     */
     protected ShapePlaceable(ShaderIdentifier identifier, byte material) {
         this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(null);
     }
 
+    /**
+     * Initializes the shape placeable with a shader identifier, material, and default rotation.
+     *
+     * @param identifier      the shader identifier
+     * @param material        the material of the shape
+     * @param defaultRotation the default rotation
+     */
     protected ShapePlaceable(ShaderIdentifier identifier, byte material, Option defaultRotation) {
         this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(defaultRotation);
     }
 
+    /**
+     * Creates a copy of this shape placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code ShapePlaceable} instance
+     */
     public final ShapePlaceable copyWithMaterial(byte material) {
         ShapePlaceable placeable = copyWithMaterialUnique(material);
         placeable.invert.setValue(invert.value());
@@ -47,6 +66,11 @@ public abstract class ShapePlaceable implements Placeable {
         return placeable;
     }
 
+    /**
+     * Returns a list of UI buttons for adjusting the shape's settings.
+     *
+     * @return a {@code List} of {@code UiButton} objects
+     */
     public final List<UiButton> getSettingButtons() {
         ArrayList<UiButton> settingElements = new ArrayList<>();
 
@@ -64,6 +88,11 @@ public abstract class ShapePlaceable implements Placeable {
         return bitMap;
     }
 
+    /**
+     * Creates a small structure representing the shape.
+     *
+     * @return a {@code Structure} object
+     */
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
         fillBitMap(bitMap, 16, true);
@@ -85,7 +114,11 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     /**
-     * Only call from main thread!
+     * Updates the bit map representing the shape's geometry.
+     * Only call from the main thread!
+     *
+     * @param force if {@code true}, forces the bit map to be recalculated
+     * @return this {@code ShapePlaceable}
      */
     public ShapePlaceable updateBitMap(boolean force) {
         int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
@@ -100,6 +133,11 @@ public abstract class ShapePlaceable implements Placeable {
         return this;
     }
 
+    /**
+     * Sets the bit map to be filled.
+     *
+     * @return this {@code ShapePlaceable}
+     */
     public ShapePlaceable setBitMapToFull() {
         int size = getPreferredSizePowOf2();
         long[] bitMap = new long[Math.max(1, size * size * size >> 6)];
@@ -108,6 +146,9 @@ public abstract class ShapePlaceable implements Placeable {
         return this;
     }
 
+    /**
+     * Deletes the GPU resources associated with the shape.
+     */
     public void delete() {
         AssetManager.delete(shaderIdentifier);
         glDeleteBuffers(buffer);
@@ -175,6 +216,9 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapeSetting[] getSettings();
 
+    /**
+     * Loads the settings for the shape, including invert and rotation.
+     */
     protected void loadSettings() {
         ShapeSetting[] baseSettings = getSettings();
 
@@ -214,6 +258,12 @@ public abstract class ShapePlaceable implements Placeable {
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
     }
 
+    /**
+     * Generates or retrieves a GPU buffer of the specified size.
+     *
+     * @param size the size of the buffer in bytes
+     * @return the GPU buffer handle
+     */
     private int genBuffer(int size) {
         if (size == bufferSize) return buffer;
         glDeleteBuffers(buffer);
@@ -231,6 +281,11 @@ public abstract class ShapePlaceable implements Placeable {
         return Objects.hash((Object[]) settings);
     }
 
+    /**
+     * Sets the bit map and updates the settings hash and preferred size.
+     *
+     * @param bitMap the new bit map
+     */
     private void setBitMap(long[] bitMap) {
         this.bitMap = bitMap;
         settingsHash = settingsHash();

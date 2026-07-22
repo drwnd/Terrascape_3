@@ -14,6 +14,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 public final class ShapeDisplay extends UiButton {
 
+    /**
+     * Constructs a ShapeDisplay for a specific shape, including its setting buttons.
+     * @param index the position index of the display
+     * @param placeable the shape placeable to display
+     * @param shapesTab the parent Shapes tab
+     */
     public ShapeDisplay(int index, ShapePlaceable placeable, ShapesTab shapesTab) {
         super(getSizeToParent(shapesTab), getOffsetToParent(index, shapesTab));
 
@@ -57,6 +63,11 @@ public final class ShapeDisplay extends UiButton {
         super.renderSelf(position, size);
     }
 
+    /**
+     * Resizes and repositions the display relative to the parent when the window size changes.
+     * @param width the new window width
+     * @param height the new window height
+     */
     @Override
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getSizeToParent(getParent());
@@ -74,6 +85,10 @@ public final class ShapeDisplay extends UiButton {
         return placeable;
     }
 
+    /**
+     * Returns the clickable action for selecting this shape display.
+     * @return a {@link Clickable} that sets this as the selected display and updates settings visibility
+     */
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

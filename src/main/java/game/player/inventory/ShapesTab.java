@@ -19,6 +19,11 @@ import static game.utils.Constants.*;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
+    /**
+     * Initializes the Shapes tab with shape displays and UI elements.
+     * @param sizeToParent the size relative to the parent element
+     * @param offsetToParent the offset relative to the parent element
+     */
     public ShapesTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -34,6 +39,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(itemNameDisplay);
     }
 
+    /**
+     * Updates display positions and sizes when the window is resized.
+     * @param width the new window width
+     * @param height the new window height
+     */
     @Override
     public void resizeSelfTo(int width, int height) {
         updateDisplayPositions();
@@ -45,6 +55,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         }
     }
 
+    /**
+     * Retrieves the placeable item selected at the given pixel coordinate.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @return the selected {@link Placeable}, or null if none selected
+     */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
@@ -55,6 +70,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return null;
     }
 
+    /**
+     * Handles scrolling for zooming the shape preview or scrolling material buttons.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @param yScroll the vertical scroll amount
+     */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
@@ -73,6 +93,10 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
+    /**
+     * Handles rotation of the shape preview during mouse drag.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
@@ -82,6 +106,11 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         lastCursorPos.set(pixelCoordinate);
     }
 
+    /**
+     * Renders the tab and refreshes the shape preview if necessary.
+     * @param position the screen position to render at
+     * @param size the size to render
+     */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -106,6 +135,12 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(shapePreview);
     }
 
+    /**
+     * Adds contents like material cube displays and toggles to the tab.
+     * @param cubeDisplays the list of material cube displays
+     * @param placeModeToggle the place mode toggle button
+     * @param offsetToggle the ground offset toggle button
+     */
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -120,6 +155,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         refreshShapePreview = true;
     }
 
+    /**
+     * Updates the positions of material displays based on inventory settings and current scroll.
+     */
     void updateDisplayPositions() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
@@ -150,6 +188,9 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return shapePlaceableSettingSliders;
     }
 
+    /**
+     * Loads the available shape displays and their setting elements.
+     */
     private void loadShapeDisplays() {
         for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
         for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();

@@ -19,6 +19,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenu extends UiBackgroundElement {
 
+    /**
+     * Initializes the world creation menu with fields for world name and seed.
+     */
     public WorldCreationMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -41,11 +44,19 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         addRenderable(seedField);
     }
 
+    /**
+     * Sets this menu as the active input listener.
+     */
     @Override
     public void setOnTop() {
         Window.setInput(new WorldCreationMenuInput(this));
     }
 
+    /**
+     * Returns the clickable action for the back button.
+     *
+     * @return the clickable action
+     */
     private static Clickable getBackButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -54,6 +65,13 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Returns the clickable action for the create world button.
+     *
+     * @param nameField the text field containing the world name
+     * @param seedField the text field containing the world seed
+     * @return the clickable action
+     */
     private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -70,6 +88,12 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Parses the seed from the given string. If the string is empty, a random seed is generated.
+     *
+     * @param seedString the string to parse
+     * @return the parsed or generated seed
+     */
     private static long getSeed(String seedString) {
         if (seedString.isEmpty()) return getRandomSeed();
 
@@ -84,6 +108,11 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         return seed;
     }
 
+    /**
+     * Generates a random 64-bit seed using a secure random number generator.
+     *
+     * @return the generated seed
+     */
     private static long getRandomSeed() {
         byte[] bytes = new byte[8];
         new SecureRandom().nextBytes(bytes);    // Complete overkill but funny
@@ -91,6 +120,12 @@ public final class WorldCreationMenu extends UiBackgroundElement {
                 | (bytes[4] & 0xFFL) << 24 | (bytes[5] & 0xFFL) << 16 | (bytes[6] & 0xFFL) << 8 | (bytes[7] & 0xFFL);
     }
 
+    /**
+     * Converts a character array to an array of longs.
+     *
+     * @param charArray the character array to convert
+     * @return the array of longs
+     */
     private static long[] toLongArray(char[] charArray) {
         long[] longs = new long[charArray.length / 8 + 1];
         for (int index = 0; index < longs.length; index++) {

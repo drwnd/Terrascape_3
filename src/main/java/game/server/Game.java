@@ -14,6 +14,10 @@ import java.io.File;
 
 public final class Game {
 
+    /**
+     * Loads and starts the game from a save file.
+     * @param saveFile the directory containing the save data
+     */
     public static void play(File saveFile) {
         Material.loadMaterials();
         String worldName = saveFile.getName();
@@ -28,6 +32,9 @@ public final class Game {
         Window.setCrashCallback(server);
     }
 
+    /**
+     * Stops the game, cleans up resources, and clears static references.
+     */
     public static void quit() {
         Window.popRenderable();
         cleanUp();
@@ -38,6 +45,9 @@ public final class Game {
         server = null;
     }
 
+    /**
+     * Saves the current game state and cleans up world, player, and server resources.
+     */
     public static void cleanUp() {
         if (world == null) return;
         String worldName = world.getName();
@@ -50,6 +60,10 @@ public final class Game {
         server.cleanUp();
     }
 
+    /**
+     * Updates the game state to reflect a change in render distance.
+     * @param oldRenderDistance the render distance before the update
+     */
     public static void updateRenderDistance(int oldRenderDistance) {
         if (world == null || oldRenderDistance == IntSettings.RENDER_DISTANCE.value()) return;
         server = new Server(server);
@@ -59,6 +73,10 @@ public final class Game {
         server.startTicks();
     }
 
+    /**
+     * Updates the game state to reflect a change in the number of levels of detail (LODs).
+     * @param oldLodCount the LOD count before the update
+     */
     public static void updateLodCount(int oldLodCount) {
         if (world == null || oldLodCount == IntSettings.LOD_COUNT.value()) return;
         server = new Server(server);
@@ -85,6 +103,11 @@ public final class Game {
     }
 
 
+    /**
+     * Sets a temporary world instance for use when the game is not fully running.
+     * @param world the temporary world to set
+     * @return true if the world was set successfully, false if the game is already running
+     */
     public static boolean setTemporaryWorld(World world) {
         if (Game.world != null || player != null || server != null) {
             Debug.err("Cannot set temporary World. The Game might be running");
@@ -94,6 +117,9 @@ public final class Game {
         return true;
     }
 
+    /**
+     * Removes the temporary world instance.
+     */
     public static void removeTemporaryWorld() {
         if (player != null || server != null) {
             Debug.err("Cannot remove temporary World. The Game might be running");

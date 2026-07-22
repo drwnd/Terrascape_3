@@ -26,12 +26,25 @@ public final class StructureCommand {
     static final String SYNTAX = "save \"Structure Name\" [force]";
     static final String EXPLANATION = "Saves the selected Region as a structure with the given name";
 
+    /**
+     * Executes the structure command, currently only supporting the "save" action.
+     *
+     * @param tokens the list of command tokens
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         KeywordToken action = tokens.expectNextKeyWord();
         if ("save".equalsIgnoreCase(action.keyword())) return executeSaveAction(tokens);
         return CommandResult.fail("unexpected keyword: " + action.keyword());
     }
 
+    /**
+     * Executes the save action, which saves a selected region of the world as a structure.
+     * Uses Absolute World Coordinates (LOD 0) for the region boundaries.
+     *
+     * @param tokens the list of command tokens containing the structure name and optional "force" flag
+     * @return the result of the save operation
+     */
     private static CommandResult executeSaveAction(TokenList tokens) {
         String fileName = Utils.sanitizeFileName(tokens.expectNextString().string());
         String saveFileLocation = StructureSaver.getSaveFileLocation(fileName);

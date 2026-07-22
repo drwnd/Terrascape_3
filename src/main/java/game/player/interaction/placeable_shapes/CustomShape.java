@@ -12,12 +12,23 @@ import game.player.interaction.ShapeSetting;
 
 public final class CustomShape extends ShapePlaceable {
 
+    /**
+     * Initializes the custom shape placeable with a material and shader code.
+     *
+     * @param material   the material of the shape
+     * @param shaderCode the compute shader code for the shape
+     */
     public CustomShape(byte material, String shaderCode) {
         super(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
         this.shaderCode = shaderCode;
         loadSettings();
     }
 
+    /**
+     * Saves the custom shape placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 18);
         saver.saveByte(getMaterial());
@@ -36,6 +47,12 @@ public final class CustomShape extends ShapePlaceable {
     }
 
 
+    /**
+     * Creates a copy of this custom shape placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code CustomShape} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CustomShape copy = new CustomShape(material, shaderCode);
@@ -45,6 +62,11 @@ public final class CustomShape extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the custom shape.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[] {
@@ -69,6 +91,11 @@ public final class CustomShape extends ShapePlaceable {
         return lengthZ.value();
     }
 
+    /**
+     * Sets the shader code for the custom shape and updates the GPU resources.
+     *
+     * @param shaderCode the new compute shader code
+     */
     public void setShaderCode(String shaderCode) {
         this.shaderCode = shaderCode;
         setShaderIdentifier(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"));

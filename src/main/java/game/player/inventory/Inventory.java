@@ -29,6 +29,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Inventory extends UiElement {
 
+    /**
+     * Initializes the inventory UI, setting up tabs for structures, shapes, and other items.
+     */
     public Inventory() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), CoreTextures.OVERLAY);
         input = new InventoryInput(this);
@@ -65,12 +68,20 @@ public final class Inventory extends UiElement {
         return input;
     }
 
+    /**
+     * Handles the hover event for the inventory and its children.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         for (Renderable renderable : getChildren()) if (renderable.isVisible()) renderable.hoverOver(pixelCoordinate);
     }
 
+    /**
+     * Sets the visibility of the inventory. When becoming visible, it reloads relevant UI elements.
+     * @param visible true to show the inventory, false to hide it
+     */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -84,6 +95,11 @@ public final class Inventory extends UiElement {
         return openTabButton;
     }
 
+    /**
+     * Switches the currently active inventory tab.
+     * @param toOpenTab the tab to be opened
+     * @param button the button associated with the tab
+     */
     void setOpenTab(InventoryTab toOpenTab, TabOpenerButton button) {
         structureTab.setVisible(false);
         shapesTab.setVisible(false);
@@ -96,6 +112,12 @@ public final class Inventory extends UiElement {
         openTabButton = button;
     }
 
+    /**
+     * Processes mouse button input for assigning items to the hotbar.
+     * @param button the mouse button or keybind pressed
+     * @param action the action (e.g., press, release)
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     void handleInput(int button, int action, Vector2i pixelCoordinate) {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
@@ -116,6 +138,14 @@ public final class Inventory extends UiElement {
     }
 
 
+    /**
+     * Handles hover logic for material cube displays, updating item names and playing sounds.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @param itemNameDisplay the UI element to display the item name
+     * @param cubeDisplays the list of cube displays to check
+     * @param lastCursorPos the previous cursor position to track movement
+     * @param tab the parent renderable tab
+     */
     static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Vector2i lastCursorPos, Renderable tab) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         itemNameDisplay.setVisible(false);
@@ -136,6 +166,10 @@ public final class Inventory extends UiElement {
         for (Renderable renderable : tab.getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
+    /**
+     * Creates and initializes the list of cube displays for all available materials.
+     * @return an {@link ArrayList} of {@link CubeDisplay}
+     */
     private static ArrayList<CubeDisplay> getCubeDisplays() {
         long start = System.nanoTime();
         ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>(AMOUNT_OF_MATERIALS);

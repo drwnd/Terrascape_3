@@ -16,6 +16,10 @@ public enum PlacingState {
     STRUCTURE_SELECT,
     STRUCTURE_SELECT_LOCKED;
 
+    /**
+     * Checks if the placing state is currently locked.
+     * @return true if the state is one of the locked variants, false otherwise
+     */
     public boolean isLocked() {
         return switch (this) {
             case REPEAT_LOCKED, SHAPE_LOCKED, STRUCTURE_PLACE_LOCKED, STRUCTURE_SELECT_LOCKED -> true;
@@ -23,6 +27,10 @@ public enum PlacingState {
         };
     }
 
+    /**
+     * Determines if the placeable preview should be rendered based on the current state and input.
+     * @return true if the preview should be rendered, false otherwise
+     */
     public boolean shouldRender() {
         return switch (this) {
             case NONE, SHAPE_LOCKED -> false;

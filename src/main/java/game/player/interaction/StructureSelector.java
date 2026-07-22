@@ -37,6 +37,11 @@ public final class StructureSelector implements Placeable {
         return false;
     }
 
+    /**
+     * Aligns the selection position based on the ground and alignment settings.
+     * @param position the position to offset in Absolute World Coordinates (LOD 0)
+     * @param targetedSide the side being targeted
+     */
     @Override
     public void offsetPosition(Vector3l position, int targetedSide) {
         int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();

@@ -20,12 +20,24 @@ public record Target(Vector3l position, int side, byte material) {
         this(new Vector3l(target.position), target.side, target.material);
     }
 
+    /**
+     * Retrieves the target the player is currently looking at.
+     *
+     * @return the {@code Target} or {@code null} if no target is found within reach
+     */
     public static Target getPlayerTarget() {
         Position playerPosition = Game.getPlayer().getCamera().getPosition();
         Vector3f playerDirection = Game.getPlayer().getCamera().getDirection();
         return Target.getTarget(playerPosition, playerDirection);
     }
 
+    /**
+     * Calculates the target from a given origin and direction.
+     *
+     * @param origin the origin position
+     * @param dir    the direction vector
+     * @return the {@code Target} or {@code null} if no target is found within reach
+     */
     public static Target getTarget(Position origin, Vector3f dir) {
 
         long x = origin.longX;
@@ -97,6 +109,11 @@ public record Target(Vector3l position, int side, byte material) {
                 position.z);
     }
 
+    /**
+     * Returns a string representation of the target information.
+     *
+     * @return a formatted string containing position, side, and material
+     */
     public String string() {
         return "Targeted Position:[X:%s, Y:%s, Z:%s], Intersected Side:%s, Targeted Material:%s".formatted(
                 position.x,

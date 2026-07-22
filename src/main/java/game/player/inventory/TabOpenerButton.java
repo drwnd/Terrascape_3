@@ -17,6 +17,13 @@ public final class TabOpenerButton extends UiButton {
 
     static final float SIZE = 0.13333334F;
 
+    /**
+     * Initializes a tab opener button for the inventory.
+     * @param inventory the parent inventory
+     * @param index the position index of the button
+     * @param toOpenTab the tab that this button will open
+     * @param name the translatable name of the tab
+     */
     TabOpenerButton(Inventory inventory, int index, InventoryTab toOpenTab, StringGetter name) {
         super(getButtonSizeToParent(), getButtonOffsetToParent(index));
 
@@ -41,6 +48,11 @@ public final class TabOpenerButton extends UiButton {
         super.renderSelf(position, size);
     }
 
+    /**
+     * Resizes and repositions the button when the window size changes.
+     * @param width the new window width
+     * @param height the new window height
+     */
     @Override
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getButtonSizeToParent();
@@ -50,6 +62,13 @@ public final class TabOpenerButton extends UiButton {
         setOffsetToParent(offsetToParent.x, offsetToParent.y);
     }
 
+    /**
+     * The action performed when the button is clicked.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @param button the mouse button
+     * @param action the action (press/release)
+     * @return the result of the button action
+     */
     private ButtonResult action(Vector2i pixelCoordinate, int button, int action) {
         if (action != GLFW_PRESS) return ButtonResult.IGNORE;
         inventory.setOpenTab(toOpenTab, this);

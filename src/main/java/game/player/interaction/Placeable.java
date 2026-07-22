@@ -13,6 +13,12 @@ import java.util.ArrayList;
 
 public interface Placeable {
 
+    /**
+     * Saves a placeable to a saver.
+     *
+     * @param placeable the placeable to save
+     * @param saver     the saver to use
+     */
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
         if (placeable == null) {
             saver.saveByte((byte) 0);
@@ -25,6 +31,12 @@ public interface Placeable {
         }
     }
 
+    /**
+     * Loads a placeable from a saver.
+     *
+     * @param saver the saver to load from
+     * @return the loaded placeable
+     */
     static Placeable loadPlaceable(Saver<?> saver) {
         Placeable placeable = switch (saver.loadByte()) {
             case 1 -> CubePlaceable.load(saver);
@@ -49,18 +61,53 @@ public interface Placeable {
         return placeable;
     }
 
+    /**
+     * Places the placeable in the world at the specified position and LOD.
+     *
+     * @param position the world block coordinates at the specified LOD
+     * @param lod      the Level of Detail
+     */
     void place(Vector3l position, int lod);
 
+    /**
+     * Returns a list of chunks affected by this placeable.
+     *
+     * @return an {@code ArrayList} of affected {@code Chunk} objects
+     */
     ArrayList<Chunk> getAffectedChunks();
 
     Structure getStructure();
 
+    /**
+     * Checks if the placeable at the given position intersects with an Axis-Aligned Bounding Box.
+     *
+     * @param position the world block coordinates (LOD 0) of the placeable's origin
+     * @param min      the minimum world block coordinates (LOD 0) of the AABB
+     * @param max      the maximum world block coordinates (LOD 0) of the AABB
+     * @return {@code true} if it intersects, {@code false} otherwise
+     */
     boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
 
+    /**
+     * Offsets the given position based on the targeted side and the placeable's properties.
+     *
+     * @param position     the world block coordinates (LOD 0) to offset
+     * @param targetedSide the side being targeted
+     */
     void offsetPosition(Vector3l position, int targetedSide);
 
+    /**
+     * Spawns particles at the specified position when the placeable is used.
+     *
+     * @param position the world block coordinates (LOD 0) where particles should spawn
+     */
     void spawnParticles(Vector3l position);
 
+    /**
+     * Saves the placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     void save(Saver<?> saver);
 
     default void rotateForwards() {

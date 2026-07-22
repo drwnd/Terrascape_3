@@ -21,6 +21,10 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class MainMenu extends UiBackgroundElement {
 
+    /**
+     * Constructs the main menu with its various UI components.
+     * Initializes buttons for quitting, world creation, settings, and world management.
+     */
     public MainMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         Vector2f sizeToParent = new Vector2f(0.25F, 0.1F);
@@ -65,12 +69,21 @@ public final class MainMenu extends UiBackgroundElement {
         addRenderable(cancelDeletionButton);
     }
 
+    /**
+     * Moves all world selection buttons by a specified vertical offset.
+     *
+     * @param movement the vertical distance to move the buttons
+     */
     public void moveWorldButtons(float movement) {
         Vector2f offset = new Vector2f(0, movement);
         for (Renderable renderable : worldButtons) renderable.move(offset);
     }
 
 
+    /**
+     * Called when the main menu becomes the active renderable.
+     * Sets up input handling and refreshes world buttons.
+     */
     @Override
     public void setOnTop() {
         // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
@@ -80,6 +93,15 @@ public final class MainMenu extends UiBackgroundElement {
         hideWorldSpecificButtons();
     }
 
+    /**
+     * Handles mouse clicks on the main menu.
+     * Forwards clicks to child elements and manages world-specific button visibility.
+     *
+     * @param pixelCoordinate the coordinates of the click in pixels
+     * @param mouseButton     the mouse button that was clicked
+     * @param action          the click action (press/release)
+     * @return always true to indicate the click was handled
+     */
     @Override
     public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         boolean buttonFound = false;
@@ -95,6 +117,11 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
 
+    /**
+     * Updates the UI to show world-specific actions for a selected save file.
+     *
+     * @param saveFile the file representing the selected world
+     */
     private void setSelectedWorld(File saveFile) {
         hideWorldSpecificButtons();
 
@@ -111,6 +138,9 @@ public final class MainMenu extends UiBackgroundElement {
         optimizeWorldButton.setVisible(true);
     }
 
+    /**
+     * Hides all buttons related to specific world actions.
+     */
     private void hideWorldSpecificButtons() {
         playWorldButton.setVisible(false);
         deleteWorldButton.setVisible(false);
@@ -123,6 +153,9 @@ public final class MainMenu extends UiBackgroundElement {
         return FileManager.getChildren(new File("saves"));
     }
 
+    /**
+     * Scans for saved world folders and creates buttons for each.
+     */
     private void createWorldButtons() {
         for (Renderable worldButton : worldButtons) removeRenderable(worldButton).delete();
 
@@ -137,6 +170,13 @@ public final class MainMenu extends UiBackgroundElement {
         }
     }
 
+    /**
+     * Creates a button for a specific saved world.
+     *
+     * @param index    the index of the world in the list
+     * @param saveFile the save file for the world
+     * @return a new UiButton for selecting the world
+     */
     private UiButton getPlayWorldButton(int index, File saveFile) {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.15F * (index + 1) + input.getScroll());
@@ -150,6 +190,12 @@ public final class MainMenu extends UiBackgroundElement {
         return button;
     }
 
+    /**
+     * Returns the action for deleting a specific world.
+     *
+     * @param saveFile the world save file to delete
+     * @return a Clickable action that shows confirmation buttons
+     */
     private Clickable getDeleteWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -162,6 +208,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Returns the action for confirming world deletion.
+     *
+     * @param saveFile the world save file to delete
+     * @return a Clickable action that performs the deletion
+     */
     private Clickable getConfirmDeletionAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -173,6 +225,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Returns the action for optimizing a world.
+     *
+     * @param saveFile the world save file to optimize
+     * @return a Clickable action that starts the optimization process
+     */
     private Clickable getOptimizeWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -183,6 +241,11 @@ public final class MainMenu extends UiBackgroundElement {
     }
 
 
+    /**
+     * Returns the action for opening the settings menu.
+     *
+     * @return a Clickable action that pushes the SettingsMenu
+     */
     private static Clickable getSettingsAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -191,6 +254,11 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Returns the action for opening the world creation menu.
+     *
+     * @return a Clickable action that pushes the WorldCreationMenu
+     */
     private static Clickable getCreateWorldAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -199,6 +267,12 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Returns the action for playing a specific world.
+     *
+     * @param saveFile the world save file to play
+     * @return a Clickable action that starts the game with the selected world
+     */
     private static Clickable getPlayWorldAction(File saveFile) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

@@ -15,6 +15,10 @@ import java.util.Objects;
 
 public record ShapeSetting(Setting setting, StringGetter name, String uniformName) {
 
+    /**
+     * Calculates the hash code for the setting based on its value.
+     * @return the hash code of the setting's value
+     */
     @Override
     public int hashCode() {
         return Objects.hashCode(switch (setting) {
@@ -26,6 +30,10 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
         });
     }
 
+    /**
+     * Creates a UI button corresponding to the type of setting.
+     * @return a {@link UiButton} for controlling this setting
+     */
     public UiButton getSettingButton() {
         Vector2f zero = new Vector2f();
         return switch (setting) {
@@ -36,6 +44,10 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
         };
     }
 
+    /**
+     * Sets the uniform value for this setting in the provided shader.
+     * @param shader the shader to update
+     */
     public void setUniform(Shader shader) {
         switch (setting) {
             case IntSetting intSetting -> shader.setUniform(uniformName, intSetting.value());

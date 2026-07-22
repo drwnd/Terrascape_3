@@ -25,6 +25,9 @@ public final class Hotbar extends UiElement {
 
     public static final int LENGTH = 9;
 
+    /**
+     * Initializes the hotbar with its background texture and selection indicator.
+     */
     public Hotbar() {
         super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
         setScaleWithGuiSize(false);
@@ -37,6 +40,12 @@ public final class Hotbar extends UiElement {
     }
 
 
+    /**
+     * Handles input for selecting hotbar slots and dropping items.
+     *
+     * @param button the key or mouse button pressed
+     * @param action the action (press, release, repeat)
+     */
     public void handleInput(int button, int action) {
         if (action != GLFW_PRESS) return;
 
@@ -62,6 +71,12 @@ public final class Hotbar extends UiElement {
         setContent(slotIndex, new CubePlaceable(material));
     }
 
+    /**
+     * Sets the content of a specific hotbar slot.
+     *
+     * @param slotIndex the index of the slot to set [0, 8]
+     * @param placeable the placeable item to put in the slot
+     */
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
 
@@ -83,6 +98,12 @@ public final class Hotbar extends UiElement {
     }
 
 
+    /**
+     * Renders the hotbar and the selection indicator.
+     *
+     * @param position the position to render at
+     * @param size     the size to render at
+     */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
@@ -97,12 +118,23 @@ public final class Hotbar extends UiElement {
     }
 
 
+    /**
+     * Finds the next available free slot starting from the currently selected slot.
+     *
+     * @return the index of the next free slot [0, 8]
+     */
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
             if (contents[slot % LENGTH] == null) return slot % LENGTH;
         return selectedSlot;
     }
 
+    /**
+     * Finds the index of the slot containing a specific material.
+     *
+     * @param material the material to look for
+     * @return the index of the slot [0, 8], or -1 if not found
+     */
     private int indexOf(byte material) {
         for (int slot = 0; slot < LENGTH; slot++) {
             Placeable placeable = contents[slot];
@@ -111,6 +143,10 @@ public final class Hotbar extends UiElement {
         return -1;
     }
 
+    /**
+     * Handles the "pick block" action, selecting the material the player is looking at if it's in the hotbar,
+     * or adding it to a free slot if not.
+     */
     private void handlePickBlock() {
         Target target = Target.getPlayerTarget();
         if (target == null) return;
@@ -146,6 +182,12 @@ public final class Hotbar extends UiElement {
     }
 
 
+    /**
+     * Clamps a slot index to the valid range [0, 8], wrapping around if necessary.
+     *
+     * @param slot the slot index to clamp
+     * @return the clamped slot index [0, 8]
+     */
     private static int clampSlot(int slot) {
         slot %= LENGTH;
         if (slot < 0) slot += LENGTH;

@@ -14,6 +14,11 @@ public enum OptionSettings implements OptionSetting {
     PERSPECTIVE(Camera.Perspective.FIRST_PERSON, GLFW_KEY_C),
     PLACE_MODE(PlaceMode.REPLACE);
 
+    /**
+     * Constructs an option setting with the specified default value.
+     *
+     * @param defaultValue the default option value
+     */
     OptionSettings(Option defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
@@ -21,6 +26,12 @@ public enum OptionSettings implements OptionSetting {
         this.keybind = defaultKeybind;
     }
 
+    /**
+     * Constructs an option setting with the specified default value and default keybind.
+     *
+     * @param defaultValue the default option value
+     * @param defaultKeybind the default keybind (GLFW key code)
+     */
     OptionSettings(Option defaultValue, int defaultKeybind) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;

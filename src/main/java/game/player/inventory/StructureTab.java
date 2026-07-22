@@ -24,6 +24,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class StructureTab extends Renderable implements InventoryTab {
 
+    /**
+     * Initializes the Structure tab with a search filter and a container for structure buttons.
+     * @param sizeToParent the size relative to the parent element
+     * @param offsetToParent the offset relative to the parent element
+     */
     public StructureTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -39,6 +44,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         addRenderable(filterTextField);
     }
 
+    /**
+     * Renders the tab and updates the structure preview if a new structure was selected.
+     * @param position the screen position to render at
+     * @param size the size to render
+     */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -55,6 +65,10 @@ public final class StructureTab extends Renderable implements InventoryTab {
         addRenderable(selectedStructureDisplay);
     }
 
+    /**
+     * Handles hover events, updating focus for the filter text field and structure buttons.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     @Override
     public void hoverOver(Vector2i pixelCoordinate) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
@@ -62,6 +76,10 @@ public final class StructureTab extends Renderable implements InventoryTab {
         structureButtonsContainer.hoverOver(pixelCoordinate);
     }
 
+    /**
+     * Handles rotation of the selected structure preview during mouse drag.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         if (selectedStructureDisplay == null) return;
@@ -70,6 +88,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         lastCursorPos.set(pixelCoordinate);
     }
 
+    /**
+     * Updates the preview display's position and size when the window is resized.
+     * @param width the new window width
+     * @param height the new window height
+     */
     @Override
     public void resizeSelfTo(int width, int height) {
         if (selectedStructureDisplay == null) return;
@@ -78,6 +101,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         selectedStructureDisplay.setOffsetToParent(0.3F, 0.5F - 0.7F * Window.getAspectRatio() * 0.5F);
     }
 
+    /**
+     * Retrieves the structure placeable selected at the given pixel coordinate.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @return a {@link StructurePlaceable} for the selected structure, or null
+     */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (StructureSelectionButton button : structureButtons)
@@ -85,6 +113,11 @@ public final class StructureTab extends Renderable implements InventoryTab {
         return null;
     }
 
+    /**
+     * Handles scrolling for structure buttons or zooming the selected structure preview.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @param yScroll the vertical scroll amount
+     */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) {
@@ -96,6 +129,9 @@ public final class StructureTab extends Renderable implements InventoryTab {
             selectedStructureDisplay.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
     }
 
+    /**
+     * Reloads and filters the list of structure buttons based on the search filter.
+     */
     void reloadStructureButtons() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         for (Renderable button : structureButtons) structureButtonsContainer.removeRenderable(button).delete();

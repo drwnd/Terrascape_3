@@ -24,20 +24,20 @@ public abstract class MovementState {
      * Only gets called when the Player is actively moving.
      *
      * @param playerRotation The rotation of the player (not necessarily the camera)
-     * @param lastPosition   The position of the player in the last Gametick
-     * @return The acceleration of the Player.
+     * @param lastPosition   The position of the player in the last Gametick in absolute world block coordinates (LOD 0)
+     * @return The acceleration of the Player in blocks per gametick^2 (LOD 0).
      */
     abstract Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition);
 
     /**
-     * Changes the current Velocity the Player has.
-     * Gets called every Gametick regardless of the Player being able to move actively.
+     * Changes the current velocity of the player.
+     * Gets called every gametick regardless of the player being able to move actively.
      * Therefore, no inputs should be queried in this method.
      *
-     * @param velocity       The current Velocity of the Player. This is also the output variable.
-     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Player can't move actively.
-     * @param playerPosition The position of the Player.
-     * @param playerRotation The rotation of the Player.
+     * @param velocity       The current velocity of the player. This is also the output variable. Measured in blocks per gametick (LOD 0).
+     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the player can't move actively. Measured in blocks per gametick (LOD 0).
+     * @param playerPosition The position of the player in absolute world block coordinates (LOD 0).
+     * @param playerRotation The rotation of the player.
      */
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         float waterIntersection = intersectedVolume(playerPosition, this, WATER);
@@ -51,6 +51,12 @@ public abstract class MovementState {
         velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY;
     }
 
+    /**
+     * Returns the material the player is currently standing on.
+     *
+     * @param position The position of the player in absolute world block coordinates (LOD 0).
+     * @return The material identifier of the block the player is standing on.
+     */
     byte getStandingMaterial(Position position) {
         Vector3i hitboxSize = getHitboxSize();
         World world = Game.getWorld();
@@ -100,11 +106,28 @@ public abstract class MovementState {
     }
 
 
+    /**
+     * Handles jumping logic based on current position and environment (e.g., ground vs. liquid).
+     *
+     * @param position       The current position of the player in absolute world block coordinates (LOD 0).
+     * @param velocityChange The vector to modify with the jump velocity. Measured in blocks per gametick (LOD 0).
+     * @param jumpStrength   The base jump strength to apply when on ground. Measured in blocks per gametick (LOD 0).
+     * @param swimStrength   The swim strength to apply when in liquid. Measured in blocks per gametick (LOD 0).
+     */
     void handleJump(Position position, Vector3f velocityChange, float jumpStrength, float swimStrength) {
         if (movement.isWideGrounded()) velocityChange.y = jumpStrength;
         else velocityChange.y += intersectedVolume(position, this, WATER) * swimStrength + intersectedVolume(position, this, LAVA) * swimStrength;
     }
 
+    /**
+     * Calculates the player's movement speed based on their state and environment.
+     *
+     * @param lastPosition  The player's position in the last gametick in absolute world block coordinates (LOD 0).
+     * @param movementSpeed The base movement speed. Measured in blocks per gametick (LOD 0).
+     * @param inAirSpeed    The movement speed when in the air. Measured in blocks per gametick (LOD 0).
+     * @param swimStrength  The multiplier applied when in liquid.
+     * @return The calculated movement speed in blocks per gametick (LOD 0).
+     */
     float getMovementSpeed(Position lastPosition, float movementSpeed, float inAirSpeed, float swimStrength) {
         float speed = movement.isWideGrounded() ? movementSpeed : inAirSpeed;
         speed += intersectedVolume(lastPosition, this, WATER) * swimStrength * movementSpeed * 0.25F;
@@ -113,12 +136,22 @@ public abstract class MovementState {
     }
 
 
+    /**
+     * Normalizes the velocity vector so that its maximum component is 1 (or -1), preserving direction.
+     *
+     * @param velocity The velocity vector to normalize.
+     */
     static void normalizeToMaxComponent(Vector3f velocity) {
         float max = Math.abs(velocity.get(velocity.maxComponent()));
         if (max < 1E-4F) return;
         velocity.normalize(max);
     }
 
+    /**
+     * Normalizes the X and Z components of the velocity vector so that the horizontal magnitude is consistent with the maximum component.
+     *
+     * @param velocity The velocity vector whose X and Z components should be normalized.
+     */
     static void normalizeXZToMaxComponent(Vector3f velocity) {
         float max = Math.max(Math.abs(velocity.x), Math.abs(velocity.z));
         if (max < 1E-4F) return;
@@ -127,6 +160,12 @@ public abstract class MovementState {
         velocity.z *= normalizer;
     }
 
+    /**
+     * Transforms a relative velocity into a world-space direction based on a given direction vector.
+     *
+     * @param relativeVelocity The relative velocity vector to transform.
+     * @param direction        The direction vector to use for the transformation (usually player rotation).
+     */
     static void toWorldDirection(Vector3f relativeVelocity, Vector3f direction) {
         relativeVelocity.set(
                 relativeVelocity.x * direction.x + relativeVelocity.z * direction.z,
@@ -135,6 +174,13 @@ public abstract class MovementState {
         );
     }
 
+    /**
+     * Applies horizontal (X and Z) movement acceleration based on user input.
+     *
+     * @param velocityChange      The vector to modify with the movement acceleration. Measured in blocks per gametick (LOD 0).
+     * @param speed               The base movement speed to apply.
+     * @param sprintSpeedModifier The multiplier to apply when sprinting.
+     */
     static void applyXZMovement(Vector3f velocityChange, float speed, float sprintSpeedModifier) {
         if (Input.isKeyPressed(KeySettings.MOVE_FORWARD)) velocityChange.x += speed;
         if (Input.isKeyPressed(KeySettings.SPRINT)) velocityChange.mul(sprintSpeedModifier);
@@ -149,6 +195,14 @@ public abstract class MovementState {
         velocity.y -= GRAVITY_ACCELERATION;
     }
 
+    /**
+     * Calculates the volume of a specific material that intersects with the player's hitbox.
+     *
+     * @param position       The current position of the player in absolute world block coordinates (LOD 0).
+     * @param state          The current movement state, used to determine hitbox size.
+     * @param targetMaterial The material identifier to check for intersections.
+     * @return The number of blocks of the target material intersecting the hitbox (LOD 0).
+     */
     static float intersectedVolume(Position position, MovementState state, byte targetMaterial) {
         if (ToggleSettings.NO_CLIP.value()) return 0;
 

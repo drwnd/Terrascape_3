@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class InsideArcPlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the inside arc placeable with a specific material and default rotation.
+     *
+     * @param material the material of the inside arc
+     */
     public InsideArcPlaceable(byte material) {
         super(ComputeShaders.INSIDE_ARC, material, Rotation8Way.ROTATION_1);
         loadSettings();
     }
 
+    /**
+     * Saves the inside arc placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 16);
         saver.saveByte(getMaterial());
@@ -34,6 +44,12 @@ public final class InsideArcPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Creates a copy of this inside arc placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code InsideArcPlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         InsideArcPlaceable copy = new InsideArcPlaceable(material);
@@ -43,6 +59,11 @@ public final class InsideArcPlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the inside arc placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

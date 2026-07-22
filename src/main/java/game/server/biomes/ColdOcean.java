@@ -9,6 +9,15 @@ import static game.server.generation.WorldGeneration.*;
 import static game.utils.Constants.SAND;
 
 public final class ColdOcean extends Biome {
+    /**
+     * Determines and stores the material at the specified in-chunk coordinates for the cold ocean biome.
+     * Includes logic for generating ice on the surface.
+     * @param inChunkX the x-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkY the y-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkZ the z-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param data the generation data for the current position
+     * @return true if a material was placed, false otherwise
+     */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalX = data.totalX;
@@ -31,6 +40,12 @@ public final class ColdOcean extends Biome {
         return true;
     }
 
+    /**
+     * Calculates the height of icebergs or ice planes at the specified world coordinates.
+     * @param totalX the x-coordinate (Absolute World Coordinates)
+     * @param totalZ the z-coordinate (Absolute World Coordinates)
+     * @return the special height in blocks (Absolute World Coordinates)
+     */
     @Override
     public int getSpecialHeight(long totalX, long totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);

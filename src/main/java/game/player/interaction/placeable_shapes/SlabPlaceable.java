@@ -13,17 +13,30 @@ import game.server.generation.Structure;
 
 public final class SlabPlaceable extends ShapePlaceable {
 
+    /**
+     * Constructs a new SlabPlaceable with the specified material.
+     * @param material the material to be used for the slab
+     */
     public SlabPlaceable(byte material) {
         super(ComputeShaders.SLAB, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 
+    /**
+     * Saves the state of this placeable using the provided saver.
+     * @param saver the saver used for data persistence
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 13);
         saver.saveByte(getMaterial());
         saver.saveInt(thickness.value());
     }
 
+    /**
+     * Loads a SlabPlaceable state from the provided saver.
+     * @param saver the saver to load from
+     * @return a new SlabPlaceable instance with loaded state
+     */
     public static SlabPlaceable load(Saver<?> saver) {
         SlabPlaceable placeable = new SlabPlaceable(saver.loadByte());
         placeable.thickness.setValue(saver.loadInt());
@@ -45,6 +58,11 @@ public final class SlabPlaceable extends ShapePlaceable {
         return rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : super.getLengthZ();
     }
 
+    /**
+     * Creates a copy of this placeable with a different material.
+     * @param material the material for the new copy
+     * @return a new SlabPlaceable instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SlabPlaceable copy = new SlabPlaceable(material);
@@ -52,6 +70,10 @@ public final class SlabPlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the configurable settings for this shape.
+     * @return an array of {@link ShapeSetting} for the slab properties
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -59,6 +81,12 @@ public final class SlabPlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Generates a small-scale representation of the slab for UI display or other purposes.
+     * The structure is generated at LOD 4.
+     * The coordinates used for bitmap generation are local to the 16x16x16 grid.
+     * @return a {@link Structure} representing the slab at LOD 4
+     */
     @Override
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];

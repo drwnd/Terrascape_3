@@ -12,11 +12,21 @@ import game.server.generation.Structure;
 
 public final class SpherePlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the sphere placeable with a specific material.
+     *
+     * @param material the material of the sphere
+     */
     public SpherePlaceable(byte material) {
         super(ComputeShaders.SPHERE, material);
         loadSettings();
     }
 
+    /**
+     * Saves the sphere placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 4);
         saver.saveByte(getMaterial());
@@ -25,6 +35,12 @@ public final class SpherePlaceable extends ShapePlaceable {
         saver.saveFloat(exponent.value());
     }
 
+    /**
+     * Loads a sphere placeable from a saver.
+     *
+     * @param saver the saver to load from
+     * @return the loaded sphere placeable
+     */
     public static SpherePlaceable load(Saver<?> saver) {
         SpherePlaceable placeable = new SpherePlaceable(saver.loadByte());
         placeable.radius.setValue(saver.loadInt());
@@ -33,6 +49,11 @@ public final class SpherePlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Returns the shape settings for the sphere placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     public ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -42,6 +63,12 @@ public final class SpherePlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Creates a copy of this sphere placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code SpherePlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         SpherePlaceable copy = new SpherePlaceable(material);

@@ -18,6 +18,9 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class SettingsMenu extends UiBackgroundElement {
 
+    /**
+     * Initializes the settings menu with sections for controls, rendering, UI, sound, and debug.
+     */
     public SettingsMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -34,12 +37,20 @@ public final class SettingsMenu extends UiBackgroundElement {
         addSection(++index, SettingsMenu::createDebugScreenSection, UiMessages.DEBUG_SCREEN_SECTION);
     }
 
+    /**
+     * Updates the position of the section buttons based on the scroll amount.
+     *
+     * @param scroll the vertical offset to move the buttons by, in normalized UI coordinates
+     */
     public void scrollSectionButtons(float scroll) {
         Vector2f offset = new Vector2f(0.0F, scroll);
 
         for (Renderable renderable : sectionButtons) renderable.move(offset);
     }
 
+    /**
+     * Sets this menu as the active input listener and restores its scroll position.
+     */
     @Override
     public void setOnTop() {
         float scroll = input == null ? 0.0F : input.getScroll();
@@ -49,6 +60,11 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
 
+    /**
+     * Creates the controls section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createControlsSection() {
         SettingsRenderable section = new SettingsRenderable();
 
@@ -96,6 +112,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    /**
+     * Creates the rendering section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createRenderingSection() {
         SettingsRenderable section = new SettingsRenderable();
 
@@ -124,6 +145,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    /**
+     * Creates the UI customization section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createUiSection() {
         SettingsRenderable section = new SettingsRenderable();
 
@@ -144,6 +170,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    /**
+     * Creates the sound section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createSoundSection() {
         SettingsRenderable section = new SettingsRenderable();
 
@@ -158,6 +189,11 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    /**
+     * Creates the debug section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createDebugSection() {
         SettingsRenderable section = new SettingsRenderable();
 
@@ -191,12 +227,22 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    /**
+     * Creates the debug screen section of the settings menu.
+     *
+     * @return the created settings renderable
+     */
     private static SettingsRenderable createDebugScreenSection() {
         SettingsRenderable section = new SettingsRenderable();
         for (DebugScreenOptions debugOptions : DebugScreenOptions.values()) section.addDebugLineSetting(debugOptions);
         return section;
     }
 
+    /**
+     * Returns the clickable action for the back button.
+     *
+     * @return the clickable action
+     */
     private static Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -205,6 +251,13 @@ public final class SettingsMenu extends UiBackgroundElement {
         };
     }
 
+    /**
+     * Adds a section button to the menu.
+     *
+     * @param sectionNumber the index of the section, used to calculate its vertical position
+     * @param sectionCreator the creator for the section's content
+     * @param name the name of the section
+     */
     private void addSection(int sectionNumber, SectionCreator sectionCreator, StringGetter name) {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - sectionNumber * 0.15F);
@@ -216,6 +269,12 @@ public final class SettingsMenu extends UiBackgroundElement {
         sectionButtons.add(sectionButton);
     }
 
+    /**
+     * Returns the clickable action for a section button.
+     *
+     * @param sectionCreator the creator for the section's content
+     * @return the clickable action
+     */
     private static Clickable sectionButtonAction(SectionCreator sectionCreator) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

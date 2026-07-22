@@ -25,6 +25,13 @@ public final class GenerationData {
     public long chunkX, chunkY, chunkZ;
     public final int LOD;
 
+    /**
+     * Initializes generation data for a specific chunk at a given level of detail (LOD).
+     *
+     * @param chunkX the x-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param chunkZ the z-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param lod the level of detail (LOD) for generation
+     */
     public GenerationData(long chunkX, long chunkZ, int lod) {
         this.LOD = lod;
 
@@ -51,6 +58,11 @@ public final class GenerationData {
         maxSpecialHeight = Math.max(maxHeight, getMaxSpecialHeight(resultingHeightMap, specialHeightMap));
     }
 
+    /**
+     * Sets the current chunk for which data is being generated.
+     *
+     * @param chunk the chunk being processed
+     */
     public void setChunk(Chunk chunk) {
         chunkX = chunk.X;
         chunkY = chunk.Y;
@@ -59,6 +71,12 @@ public final class GenerationData {
         Arrays.fill(cachedMaterials, AIR);
     }
 
+    /**
+     * Sets the current horizontal position within the chunk and updates relevant generation fields.
+     *
+     * @param inChunkX the x-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param inChunkZ the z-coordinate in In-Chunk Block Coordinates [0, 63]
+     */
     public void set(int inChunkX, int inChunkZ) {
         int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
         int mapIndex = getMapIndex(inChunkX, inChunkZ);
@@ -76,18 +94,43 @@ public final class GenerationData {
         floorMaterialDepth = biome.getFloorMaterialDepth(this);
     }
 
+    /**
+     * Computes the absolute world y-coordinate for a given in-chunk y-coordinate.
+     *
+     * @param inChunkY the y-coordinate in In-Chunk Block Coordinates [0, 63]
+     */
     public void computeTotalY(int inChunkY) {
         totalY = (chunkY << CHUNK_SIZE_BITS | inChunkY) << LOD;
     }
 
+    /**
+     * Checks if the given absolute world y-coordinate is below the floor material level.
+     *
+     * @param totalY the absolute world y-coordinate (LOD 0)
+     * @param floorMaterialDepth the depth of the floor material in blocks (LOD 0)
+     * @return true if the position is below the floor material level
+     */
     public boolean isBelowFloorMaterialLevel(long totalY, int floorMaterialDepth) {
         return totalY >> LOD < height - floorMaterialDepth >> LOD;
     }
 
+    /**
+     * Checks if the given absolute world y-coordinate is within the surface material level.
+     *
+     * @param totalY the absolute world y-coordinate (LOD 0)
+     * @param surfaceMaterialDepth the depth of the surface material in blocks (LOD 0)
+     * @return true if the position is within the surface material level
+     */
     public boolean isInsideSurfaceMaterialLevel(long totalY, int surfaceMaterialDepth) {
         return totalY >> LOD >= height - surfaceMaterialDepth >> LOD;
     }
 
+    /**
+     * Checks if the given absolute world y-coordinate is above the surface height.
+     *
+     * @param totalY the absolute world y-coordinate (LOD 0)
+     * @return true if the position is above the surface
+     */
     public boolean isAboveSurface(long totalY) {
         return totalY >> LOD > height >> LOD;
     }
@@ -96,23 +139,59 @@ public final class GenerationData {
         return treeMap != null;
     }
 
+    /**
+     * Maps in-chunk coordinates to an index for padded maps (like heightMap).
+     *
+     * @param mapX the x-coordinate (usually in-chunk x + 1 for padding)
+     * @param mapZ the z-coordinate (usually in-chunk z + 1 for padding)
+     * @return the index in the padded map array
+     */
     public static int getMapIndex(int mapX, int mapZ) {
         return mapX * CHUNK_SIZE_PADDED + mapZ;
     }
 
+    /**
+     * Stores a material in the uncompressed buffer at the specified in-chunk position.
+     *
+     * @param inChunkX the x-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param inChunkY the y-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param inChunkZ the z-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param material the material byte to store
+     */
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
         uncompressedMaterials[MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ)] = material;
     }
 
+    /**
+     * Fills a range of the uncompressed materials buffer with a specific material.
+     *
+     * @param startIndex the starting index in the buffer
+     * @param count the number of elements to fill
+     * @param material the material byte to store
+     */
     public void storeConsecutive(int startIndex, int count, byte material) {
         Arrays.fill(uncompressedMaterials, startIndex, startIndex + count, material);
     }
 
+    /**
+     * Fills the remainder of the chunk column above the specified position with air.
+     *
+     * @param inChunkX the x-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param inChunkY the starting y-coordinate in In-Chunk Block Coordinates [0, 63]
+     * @param inChunkZ the z-coordinate in In-Chunk Block Coordinates [0, 63]
+     */
     public void fillAboveWithAir(int inChunkX, int inChunkY, int inChunkZ) {
         int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = AIR;
     }
 
+    /**
+     * Places a tree into the uncompressed materials buffer if it intersects with the current chunk.
+     *
+     * @param tree the tree structure to place
+     * @param clearBeforeGenerating whether to clear the chunk with air before placement
+     * @return true if the tree was successfully placed (intersects with the chunk)
+     */
     public boolean storeTree(Tree tree, boolean clearBeforeGenerating) {
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + LOD;
         long chunkStartY = chunkY << CHUNK_SIZE_BITS + LOD;
@@ -173,6 +252,14 @@ public final class GenerationData {
     }
 
 
+    /**
+     * Determines the stone type at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the stone type
+     */
     public static byte getGeneratingStoneType(long x, long y, long z) {
         double noise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0x1FCA4F81678D9EFEL, x * STONE_TYPE_FREQUENCY, y * STONE_TYPE_FREQUENCY, z * STONE_TYPE_FREQUENCY);
         if (Math.abs(noise) < ANDESITE_THRESHOLD) return ANDESITE;
@@ -181,6 +268,14 @@ public final class GenerationData {
         else return STONE;
     }
 
+    /**
+     * Determines the ocean floor material at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the ocean floor
+     */
     public byte getOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -198,6 +293,14 @@ public final class GenerationData {
         return material;
     }
 
+    /**
+     * Determines the warm ocean floor material at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the warm ocean floor
+     */
     public byte getWarmOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -215,6 +318,14 @@ public final class GenerationData {
         return material;
     }
 
+    /**
+     * Determines the cold ocean floor material at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the cold ocean floor
+     */
     public byte getColdOceanFloorMaterial(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -232,6 +343,14 @@ public final class GenerationData {
         return material;
     }
 
+    /**
+     * Determines the dirt type at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the dirt type
+     */
     public byte getGeneratingDirtType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -247,6 +366,14 @@ public final class GenerationData {
         return material;
     }
 
+    /**
+     * Determines the ice type at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the ice type
+     */
     public byte getGeneratingIceType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -262,6 +389,14 @@ public final class GenerationData {
         return material;
     }
 
+    /**
+     * Determines the grass type at a given world position using noise.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the material byte for the grass type
+     */
     public byte getGeneratingGrassType(long x, long y, long z) {
         int index = getCompressedIndex(x, y, z);
         byte material = cachedMaterials[index];
@@ -279,6 +414,14 @@ public final class GenerationData {
     }
 
 
+    /**
+     * Generates a feature noise map for the current chunk.
+     *
+     * @param chunkX the x-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param chunkZ the z-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param lod the level of detail (LOD)
+     * @return an array of noise values for each column in the chunk
+     */
     private static double[] featureMap(long chunkX, long chunkZ, int lod) {
         double[] featureMap = new double[CHUNK_SIZE * CHUNK_SIZE];
         double inverseMaxValue = 1.0 / Integer.MAX_VALUE;
@@ -293,6 +436,13 @@ public final class GenerationData {
         return featureMap;
     }
 
+    /**
+     * Generates a steepness map based on the height differences between adjacent blocks.
+     *
+     * @param heightMapPadded a padded height map (LOD 0)
+     * @param lod the level of detail (LOD)
+     * @return an array of steepness values for each column in the chunk
+     */
     private static byte[] steepnessMap(int[] heightMapPadded, int lod) {
         byte[] steepnessMap = new byte[CHUNK_SIZE * CHUNK_SIZE];
 
@@ -307,6 +457,15 @@ public final class GenerationData {
         return steepnessMap;
     }
 
+    /**
+     * Generates a special height map (e.g., for biome-specific features like trees or structures).
+     *
+     * @param chunkX the x-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param chunkZ the z-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param lod the level of detail (LOD)
+     * @param biomeMap the array of biomes for each column in the chunk
+     * @return an array of special height values for each column in the chunk
+     */
     private static int[] specialHeightMap(long chunkX, long chunkZ, int lod, Biome[] biomeMap) {
         int[] specialHeightMap = new int[CHUNK_SIZE * CHUNK_SIZE];
         long chunkStartX = chunkX << CHUNK_SIZE_BITS + lod;
@@ -321,6 +480,14 @@ public final class GenerationData {
         return specialHeightMap;
     }
 
+    /**
+     * Generates a tree map for the current chunk and its immediate surroundings.
+     *
+     * @param chunkX the x-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param chunkZ the z-coordinate of the chunk in Chunk Coordinates at the specified LOD
+     * @param lod the level of detail (LOD)
+     * @return an array of trees for the chunk area
+     */
     private static Tree[] treeMap(long chunkX, long chunkZ, int lod) {
         if (lod > MAX_TREE_LOD) return null;
 
@@ -340,6 +507,13 @@ public final class GenerationData {
         return treeMap;
     }
 
+    /**
+     * Determines if a tree should be placed at the specified world position.
+     *
+     * @param totalX the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param totalZ the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the tree to be placed, or null if no tree
+     */
     private static Tree treeMapValue(long totalX, long totalZ) {
         MapSample sample = new MapSample(totalX, totalZ, true, true);
 
@@ -392,6 +566,14 @@ public final class GenerationData {
     }
 
 
+    /**
+     * Calculates the compressed index for cached materials based on world coordinates.
+     *
+     * @param x the x-coordinate in Absolute World Coordinates (LOD 0)
+     * @param y the y-coordinate in Absolute World Coordinates (LOD 0)
+     * @param z the z-coordinate in Absolute World Coordinates (LOD 0)
+     * @return the index in the cachedMaterials array
+     */
     private int getCompressedIndex(long x, long y, long z) {
         // >> 2 for compression and performance improvement
         int compressedX = (int) (x >> LOD & CHUNK_SIZE_MASK) >> 2;

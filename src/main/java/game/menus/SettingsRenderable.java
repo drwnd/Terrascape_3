@@ -15,6 +15,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class SettingsRenderable extends CoreSettingsRenderable {
 
+    /**
+     * Adds a setting for a debug screen option, including its name, color, and visibility toggle.
+     *
+     * @param debugLine the debug screen option to add
+     */
     public void addDebugLineSetting(DebugScreenOptions debugLine) {
         settingsCount++;
 

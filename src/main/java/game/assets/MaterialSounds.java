@@ -50,6 +50,14 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
         this(folderPath, fileNamePrefix, 1.0F, 1.0F);
     }
 
+    /**
+     * Constructs a material sound collection identifier with specified parameters.
+     *
+     * @param folderPath      the relative path to the folder containing the sound files
+     * @param fileNamePrefix  the prefix for sound files within the folder
+     * @param gainMultiplier  the multiplier for sound gain (volume)
+     * @param pitchMultiplier the multiplier for sound pitch
+     */
     MaterialSounds(String folderPath, String fileNamePrefix, float gainMultiplier, float pitchMultiplier) {
         this.folderPath = folderPath;
         this.fileNamePrefix = fileNamePrefix;
@@ -57,6 +65,12 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
         this.pitchMultiplier = pitchMultiplier;
     }
 
+    /**
+     * Retrieves a MaterialSounds instance by its name.
+     *
+     * @param name the name of the sound identifier
+     * @return the corresponding MaterialSounds instance, or NONE if not found or name is null
+     */
     public static MaterialSounds get(String name) {
         if (name == null) return NONE;
         try {
@@ -67,6 +81,12 @@ public enum MaterialSounds implements SoundCollectionIdentifier {
     }
 
 
+    /**
+     * Generates a SoundCollection asset from the identified sound files.
+     * Scans the specified folder for files matching the prefix.
+     *
+     * @return a new SoundCollection containing all matching sounds
+     */
     @Override
     public SoundCollection generateAsset() {
         if (folderPath == null) return new SoundCollection(new SingleSoundIdentifier[0]);

@@ -16,6 +16,9 @@ public final class PlayerInput extends Input {
         this.player = player;
     }
 
+    /**
+     * Sets the input mode for the player, disabling the cursor and enabling raw mouse motion if supported.
+     */
     @Override
     public void setInputMode() {
         cursorPos.set(getCursorPos());
@@ -34,6 +37,14 @@ public final class PlayerInput extends Input {
         standardCursorPosCallBack(xPos, yPos);
     }
 
+    /**
+     * Handles mouse button input, passing it to the player's active and inactive input handlers.
+     *
+     * @param window the window handle
+     * @param button the mouse button
+     * @param action the action (press, release, repeat)
+     * @param mods   bitfield of modifier keys
+     */
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
        player.handleActiveButtonInput(button | Input.IS_MOUSE_BUTTON, action);
@@ -45,6 +56,15 @@ public final class PlayerInput extends Input {
        player.handleScrollInput(yScroll);
     }
 
+    /**
+     * Handles key input, passing it to the player's active and inactive input handlers.
+     *
+     * @param window   the window handle
+     * @param key      the keyboard key
+     * @param scancode the platform-specific scancode
+     * @param action   the key action (press, release, repeat)
+     * @param mods     bitfield of modifier keys
+     */
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Window.pushRenderable(new PauseMenu());
@@ -57,6 +77,11 @@ public final class PlayerInput extends Input {
 
     }
 
+    /**
+     * Calculates the cursor movement since the last call to this method.
+     *
+     * @return the cursor movement as a {@code Vector2i}
+     */
     public Vector2i getCursorMovement() {
         Vector2i movement = new Vector2i(cursorPos).sub(lastCursorPos);
         lastCursorPos.set(cursorPos);

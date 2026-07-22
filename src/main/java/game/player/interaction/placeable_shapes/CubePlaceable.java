@@ -11,11 +11,21 @@ import game.server.generation.Structure;
 
 public final class CubePlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the cube placeable with a specific material.
+     *
+     * @param material the material of the cube
+     */
     public CubePlaceable(byte material) {
         super(ComputeShaders.CUBE, material);
         loadSettings();
     }
 
+    /**
+     * Saves the cube placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 1);
         saver.saveByte(getMaterial());
@@ -23,6 +33,12 @@ public final class CubePlaceable extends ShapePlaceable {
         saver.saveInt(thickness.value());
     }
 
+    /**
+     * Loads a cube placeable from a saver.
+     *
+     * @param saver the saver to load from
+     * @return the loaded cube placeable
+     */
     public static CubePlaceable load(Saver<?> saver) {
         CubePlaceable placeable = new CubePlaceable(saver.loadByte());
         placeable.sizeReduction.setValue(saver.loadInt());
@@ -45,6 +61,12 @@ public final class CubePlaceable extends ShapePlaceable {
         return super.getLengthZ() - 2 * sizeReduction.value();
     }
 
+    /**
+     * Creates a copy of this cube placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code CubePlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CubePlaceable copy = new CubePlaceable(material);
@@ -53,6 +75,11 @@ public final class CubePlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the cube placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

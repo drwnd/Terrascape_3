@@ -11,6 +11,11 @@ final class ClearCommand {
 
     }
 
+    /**
+     * Executes the clear command to remove old chat messages.
+     * @param tokens the list of tokens from the command string
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         int sparedMessagesCount = 0;
 

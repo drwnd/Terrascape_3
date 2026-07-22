@@ -19,6 +19,12 @@ final class SettingCommand {
 
     }
 
+    /**
+     * Executes the setting command, allowing querying, setting, resetting, reloading, or listing of settings.
+     *
+     * @param tokens the list of command tokens
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
 
@@ -103,6 +109,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    /**
+     * Sets a float setting to a new value.
+     *
+     * @param setting the float setting to update
+     * @param value the token containing the new value
+     * @return the result of the setting operation
+     */
     private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
         if (number < setting.min() || number > setting.max())
@@ -111,6 +124,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    /**
+     * Sets an integer setting to a new value.
+     *
+     * @param setting the integer setting to update
+     * @param value the token containing the new value
+     * @return the result of the setting operation
+     */
     private static CommandResult set(IntSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number)) || (int) number != number)
             return CommandResult.fail("Value must be an Integer for that setting");
@@ -120,6 +140,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    /**
+     * Sets a key setting to a new value (keybind).
+     *
+     * @param setting the key setting to update
+     * @param value the token containing the new key or character code
+     * @return the result of the setting operation
+     */
     private static CommandResult set(KeySetting setting, Token value) {
         int codePoint;
         switch (value) {
@@ -141,6 +168,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    /**
+     * Sets a toggle (boolean) setting to a new value.
+     *
+     * @param setting the toggle setting to update
+     * @param value the token containing the new boolean value
+     * @return the result of the setting operation
+     */
     private static CommandResult set(ToggleSetting setting, Token value) {
         if (!(value instanceof KeywordToken(String keyword)) || (!"true".equalsIgnoreCase(keyword) && !"false".equalsIgnoreCase(keyword)))
             return CommandResult.fail("Value must be true / false for that setting");
@@ -149,6 +183,13 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    /**
+     * Sets an option setting to a new value.
+     *
+     * @param setting the option setting to update
+     * @param value the token containing the new option name
+     * @return the result of the setting operation
+     */
     private static CommandResult set(OptionSetting setting, Token value) {
         String optionValue;
 

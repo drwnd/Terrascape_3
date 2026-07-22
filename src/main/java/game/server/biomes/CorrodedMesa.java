@@ -7,6 +7,14 @@ import static game.utils.Constants.*;
 import static game.server.generation.WorldGeneration.SEED;
 
 public final class CorrodedMesa extends Biome {
+    /**
+     * Places materials for the corroded mesa biome, including tall pillars of terracotta.
+     * @param inChunkX the x-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkY the y-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkZ the z-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param data the generation data
+     * @return true if a material was placed, false otherwise
+     */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalY = data.totalY;
@@ -28,6 +36,12 @@ public final class CorrodedMesa extends Biome {
         return true;
     }
 
+    /**
+     * Calculates the height of mesa pillars at the specified horizontal coordinates.
+     * @param totalX the x-coordinate (Absolute World Coordinates)
+     * @param totalZ the z-coordinate (Absolute World Coordinates)
+     * @return the pillar height in blocks
+     */
     @Override
     public int getSpecialHeight(long totalX, long totalZ) {
         double noise = OpenSimplex2S.noise2(SEED ^ 0xDF860F2E2A604A17L, totalX * MESA_PILLAR_FREQUENCY, totalZ * MESA_PILLAR_FREQUENCY);
@@ -41,6 +55,11 @@ public final class CorrodedMesa extends Biome {
         return 128 + data.floorMaterialDepthMod;
     }
 
+    /**
+     * Determines the terracotta type based on the vertical position index.
+     * @param terracottaIndex the vertical index for terracotta banding
+     * @return the material ID for the terracotta type
+     */
     private static byte getGeneratingTerracottaType(int terracottaIndex) {
         return switch (terracottaIndex) {
             case 3, 6, 10, 11, 15 -> RED_TERRACOTTA;

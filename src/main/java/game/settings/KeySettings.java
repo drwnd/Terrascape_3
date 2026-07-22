@@ -43,6 +43,11 @@ public enum KeySettings implements KeySetting {
     ROTATE_SHAPE_BACKWARD(GLFW_KEY_F2),
     SHOW_PLACEABLE_PREVIEW(GLFW_KEY_X);
 
+    /**
+     * Constructs a key setting with the specified default keybind.
+     *
+     * @param defaultValue the default keybind (GLFW key code)
+     */
     KeySettings(int defaultValue) {
         this.defaultKeybind = defaultValue;
         this.keybind = defaultValue;

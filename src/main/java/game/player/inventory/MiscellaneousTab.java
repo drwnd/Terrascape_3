@@ -12,6 +12,11 @@ import org.joml.Vector2i;
 
 public final class MiscellaneousTab extends Renderable implements InventoryTab {
 
+    /**
+     * Initializes the Miscellaneous tab with displays for special placeables.
+     * @param sizeToParent the size relative to the parent element
+     * @param offsetToParent the offset relative to the parent element
+     */
     public MiscellaneousTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -28,6 +33,11 @@ public final class MiscellaneousTab extends Renderable implements InventoryTab {
         addRenderable(structureSelectDisplay);
     }
 
+    /**
+     * Retrieves the placeable selected at the given pixel coordinate.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @return a {@link Placeable} corresponding to the selection, or null
+     */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         if (chunkRebuildDisplay.containsPixelCoordinate(pixelCoordinate)) return new ChunkRebuildPlaceable();

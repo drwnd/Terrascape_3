@@ -17,6 +17,10 @@ public final class CallbackSlider<T extends Number> extends Slider<T> {
         this.callback = callback;
     }
 
+    /**
+     * Sets the value of the slider and triggers the callback if the value has changed.
+     * @param value the new value
+     */
     @Override
     public void setValue(T value) {
         if (callback != null && !Objects.equals(getValue(), value)) callback.run();

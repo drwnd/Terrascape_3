@@ -12,6 +12,13 @@ import static game.utils.Constants.*;
 
 public final class Transformation {
 
+    /**
+     * Creates a combined projection and rotation matrix for the specified camera.
+     * Takes into account the camera's perspective mode.
+     *
+     * @param camera the camera used to determine the projection and rotation
+     * @return a Matrix4f representing the projection multiplied by rotation
+     */
     public static Matrix4f createProjectionRotationMatrix(Camera camera) {
         Vector3f rotation = camera.getRotation();
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.SECOND_PERSON) {
@@ -27,6 +34,13 @@ public final class Transformation {
         return matrix;
     }
 
+    /**
+     * Calculates the projection-view matrix for the specified camera.
+     * The view part is centered at the camera's position within its chunk.
+     *
+     * @param camera the camera used for the view and projection
+     * @return the combined projection-view matrix
+     */
     public static Matrix4f getProjectionViewMatrix(Camera camera) {
         Vector3f position = camera.getPosition().getInChunkPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
@@ -35,6 +49,17 @@ public final class Transformation {
         return matrix;
     }
 
+    /**
+     * Calculates a transformation matrix for displaying a structure.
+     * The structure is centered and viewed according to the provided zoom and rotation.
+     *
+     * @param x        the width of the structure in blocks
+     * @param y        the height of the structure in blocks
+     * @param z        the depth of the structure in blocks
+     * @param zoom     the zoom level for the structure view
+     * @param rotation the rotation of the structure display
+     * @return a Matrix4f for rendering the structure
+     */
     public static Matrix4f getStructureDisplayMatrix(int x, int y, int z, float zoom, Vector3f rotation) {
         float centerX = x * 0.5F, centerY = y * 0.5F, centerZ = z * 0.5F;
         float frustumDistance = Math.max(x, Math.max(y, z)) / zoom;
@@ -47,6 +72,13 @@ public final class Transformation {
         return matrix;
     }
 
+    /**
+     * Calculates the matrix used for frustum culling.
+     * It uses the camera's projection and rotation, translated by the camera's fractional position.
+     *
+     * @param camera the camera to use for culling
+     * @return the frustum culling matrix
+     */
     public static Matrix4f getFrustumCullingMatrix(Camera camera) {
         Position cameraPosition = camera.getPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
@@ -55,6 +87,12 @@ public final class Transformation {
         return matrix;
     }
 
+    /**
+     * Calculates the projection-view matrix for the sun (shadow mapping).
+     *
+     * @param renderTime the current time used to determine sun position
+     * @return the sun's transformation matrix
+     */
     public static Matrix4f getSunMatrix(float renderTime) {
         Vector3f sunDirection = getSunDirection(renderTime);
         Matrix4f matrix = new Matrix4f();
@@ -65,6 +103,12 @@ public final class Transformation {
         return matrix;
     }
 
+    /**
+     * Calculates the direction of the sun based on the render time.
+     *
+     * @param renderTime the current time [0, 1]
+     * @return a normalized Vector3f representing sun direction
+     */
     public static Vector3f getSunDirection(float renderTime) {
         float alpha = (float) (renderTime * Math.PI);
 
@@ -75,6 +119,13 @@ public final class Transformation {
         ).normalize();
     }
 
+    /**
+     * Calculates the model matrix for a structure based on its transformation (rotation/mirroring).
+     *
+     * @param transform the bitmask representing structure transformations
+     * @param structure the structure object containing size information
+     * @return the model matrix for the transformed structure
+     */
     public static Matrix4f getModelMatrix(byte transform, Structure structure) {
         Matrix4f matrix = new Matrix4f();
 

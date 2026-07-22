@@ -14,11 +14,19 @@ import static game.utils.Constants.CHUNK_SIZE;
 
 public final class InsideStairPlaceable extends ShapePlaceable {
 
+    /**
+     * Constructs a new InsideStairPlaceable with the specified material.
+     * @param material the material to be used for the stair
+     */
     public InsideStairPlaceable(byte material) {
         super(ComputeShaders.INSIDE_STAIR, material, Rotation24Way.ROTATION_17);
         loadSettings();
     }
 
+    /**
+     * Saves the state of this placeable using the provided saver.
+     * @param saver the saver used for data persistence
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 9);
         saver.saveByte(getMaterial());
@@ -28,6 +36,11 @@ public final class InsideStairPlaceable extends ShapePlaceable {
         saver.saveFloat(slope.value());
     }
 
+    /**
+     * Loads an InsideStairPlaceable state from the provided saver.
+     * @param saver the saver to load from
+     * @return a new InsideStairPlaceable instance with loaded state
+     */
     public static InsideStairPlaceable load(Saver<?> saver) {
         InsideStairPlaceable placeable = new InsideStairPlaceable(saver.loadByte());
         placeable.stepHeight.setValue(saver.loadInt());
@@ -37,6 +50,11 @@ public final class InsideStairPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Creates a copy of this placeable with a different material.
+     * @param material the material for the new copy
+     * @return a new InsideStairPlaceable instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         InsideStairPlaceable copy = new InsideStairPlaceable(material);
@@ -47,6 +65,10 @@ public final class InsideStairPlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the configurable settings for this shape.
+     * @return an array of {@link ShapeSetting} for the stair properties
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

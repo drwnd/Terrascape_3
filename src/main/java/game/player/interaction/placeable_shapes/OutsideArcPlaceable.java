@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class OutsideArcPlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the outside arc placeable with a specific material and default rotation.
+     *
+     * @param material the material of the outside arc
+     */
     public OutsideArcPlaceable(byte material) {
         super(ComputeShaders.OUTSIDE_ARC, material, Rotation8Way.ROTATION_1);
         loadSettings();
     }
 
+    /**
+     * Saves the outside arc placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 17);
         saver.saveByte(getMaterial());
@@ -34,6 +44,12 @@ public final class OutsideArcPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Creates a copy of this outside arc placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code OutsideArcPlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         OutsideArcPlaceable copy = new OutsideArcPlaceable(material);
@@ -43,6 +59,11 @@ public final class OutsideArcPlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the outside arc placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

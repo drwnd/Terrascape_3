@@ -25,6 +25,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Player {
 
+    /**
+     * Initializes the player at the specified position.
+     *
+     * @param position the initial position of the player
+     */
     public Player(Position position) {
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
@@ -45,6 +50,9 @@ public final class Player {
     }
 
 
+    /**
+     * Updates the player's state for each frame, including camera rotation and rendering position.
+     */
     public void updateFrame() {
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
@@ -67,6 +75,9 @@ public final class Player {
         }
     }
 
+    /**
+     * Updates the player's state for each game tick, including movement and interaction handling.
+     */
     public void updateGameTick() {
         synchronized (this) {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
@@ -75,11 +86,19 @@ public final class Player {
         renderer.updateGameTick();
     }
 
+    /**
+     * Updates the mesh collector and renderer when the render distance changes.
+     *
+     * @param oldRenderDistance the previous render distance in chunks
+     */
     public void updateRenderDistance(int oldRenderDistance) {
         meshCollector = new MeshCollector(meshCollector, oldRenderDistance);
         renderer.reloadRenderingOptimizer();
     }
 
+    /**
+     * Updates the mesh collector and renderer when the LOD count changes.
+     */
     public void updateLodCount() {
         meshCollector = new MeshCollector(meshCollector);
         renderer.reloadRenderingOptimizer();
@@ -118,6 +137,11 @@ public final class Player {
         if (button == KeySettings.RELOAD_MATERIALS.keybind() && action == GLFW_PRESS) Material.loadMaterials();
     }
 
+    /**
+     * Handles scroll input, used for zooming the camera, adjusting interaction states, or switching hotbar slots.
+     *
+     * @param yScroll the amount of scroll
+     */
     public void handleScrollInput(double yScroll) {
         if (camera.isZoomed()) {
             final float zoomFactorChange = 0.9F;
@@ -133,11 +157,21 @@ public final class Player {
     }
 
 
+    /**
+     * Calculates the minimum world block coordinates of the player's hitbox.
+     *
+     * @return the minimum world block coordinates (LOD 0)
+     */
     public Vector3l getMinCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
         return new Position(this.position).add(-hitboxSize.x * 0.5F, 0.0F, -hitboxSize.z * 0.5F).longPosition();
     }
 
+    /**
+     * Calculates the maximum world block coordinates of the player's hitbox.
+     *
+     * @return the maximum world block coordinates (LOD 0)
+     */
     public Vector3l getMaxCoordinate() {
         Vector3i hitboxSize = movement.getState().getHitboxSize();
         return new Position(this.position).add(hitboxSize.x * 0.5F, hitboxSize.y, hitboxSize.z * 0.5F).longPosition();
@@ -185,6 +219,9 @@ public final class Player {
         return inventory;
     }
 
+    /**
+     * Sets the input mode based on whether menus are visible.
+     */
     public void setInput() {
         if (inventory.isVisible()) Window.setInput(inventory.getInput());
         else if (chat.isVisible()) Window.setInput(chat.getInput());
@@ -205,11 +242,17 @@ public final class Player {
         return chat.isVisible();
     }
 
+    /**
+     * Cleans up the player's resources.
+     */
     public void cleanUp() {
         meshCollector.cleanUp();
         particleCollector.cleanUp();
     }
 
+    /**
+     * Starts the command input mode.
+     */
     void startCommand() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
@@ -217,12 +260,18 @@ public final class Player {
         setInput();
     }
 
+    /**
+     * Toggles the chat visibility.
+     */
     void toggleChat() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
         setInput();
     }
 
+    /**
+     * Toggles the inventory visibility.
+     */
     public void toggleInventory() {
         if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());

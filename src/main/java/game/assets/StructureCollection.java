@@ -8,6 +8,11 @@ import static game.utils.Constants.*;
 
 public final class StructureCollection implements Asset {
 
+    /**
+     * Constructs a collection of structures.
+     *
+     * @param structures the array of structures to include in this collection
+     */
     public StructureCollection(Structure[] structures) {
         this.structures = structures;
     }

@@ -26,6 +26,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class CustomShapeTab extends Renderable implements InventoryTab {
 
+    /**
+     * Initializes the Custom Shape tab, setting up preview, load, and reload buttons.
+     * @param sizeToParent the size relative to the parent element
+     * @param offsetToParent the offset relative to the parent element
+     */
     public CustomShapeTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -69,6 +74,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         }
     }
 
+    /**
+     * Retrieves the custom placeable selected at the given pixel coordinate.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @return a {@link CustomShape} for the selected material, or null
+     */
     @Override
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
@@ -76,6 +86,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         return null;
     }
 
+    /**
+     * Handles scrolling for material buttons or zooming the shape preview.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     * @param yScroll the vertical scroll amount
+     */
     @Override
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
@@ -89,6 +104,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         input.materialScroll = newScroll;
     }
 
+    /**
+     * Updates UI element sizes and positions when the window is resized.
+     * @param width the new window width
+     * @param height the new window height
+     */
     @Override
     protected void resizeSelfTo(int width, int height) {
         if (shapePreview == null) return;
@@ -101,6 +121,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         reloadIcon.setOffsetToParent(reloadIconOffset, 0.0F);
     }
 
+    /**
+     * Renders the tab and updates the custom shape preview if settings changed.
+     * @param position the screen position to render at
+     * @param size the size to render
+     */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
@@ -136,6 +161,10 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
+    /**
+     * Handles rotation of the custom shape preview during mouse drag.
+     * @param pixelCoordinate the current mouse position in screen pixels
+     */
     @Override
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
@@ -146,6 +175,12 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
 
+    /**
+     * Adds contents like material cube displays and itemNameDisplay to the tab.
+     * @param cubeDisplays the list of material cube displays
+     * @param placeModeToggle the place mode toggle button
+     * @param offsetToggle the ground offset toggle button
+     */
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -161,6 +196,10 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         for (CubeDisplay button : cubeDisplays) button.display().move(offset);
     }
 
+    /**
+     * Returns a clickable action for loading shader code from a file.
+     * @return a {@link Clickable} that opens a file chooser
+     */
     private Clickable getLoadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -178,6 +217,10 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         };
     }
 
+    /**
+     * Returns a clickable action for reloading the current shader code.
+     * @return a {@link Clickable} for reloading the shader
+     */
     private Clickable getReloadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

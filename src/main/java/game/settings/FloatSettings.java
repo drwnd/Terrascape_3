@@ -23,6 +23,14 @@ public enum FloatSettings implements FloatSetting {
     TIME_SPEED(0.0F, 0.001F, 0.00008333F, 0.000001F),
     DOWNWARD_SUN_DIRECTION(-1.0F, 1.0F, 0.3F);
 
+    /**
+     * Constructs a float setting with the specified range, default value, and accuracy.
+     *
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param defaultValue the default value
+     * @param accuracy the step size or accuracy for rounding values
+     */
     FloatSettings(float min, float max, float defaultValue, float accuracy) {
         this.min = min;
         this.max = max;
@@ -31,6 +39,13 @@ public enum FloatSettings implements FloatSetting {
         this.accuracy = accuracy;
     }
 
+    /**
+     * Constructs a float setting with the specified range and default value, using a default accuracy.
+     *
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param defaultValue the default value
+     */
     FloatSettings(float min, float max, float defaultValue) {
         this.min = min;
         this.max = max;
@@ -59,6 +74,12 @@ public enum FloatSettings implements FloatSetting {
         return max;
     }
 
+    /**
+     * Calculates the setting value from a normalized fraction (0 to 1).
+     *
+     * @param fraction the normalized fraction
+     * @return the calculated setting value
+     */
     @Override
     public Float valueFromFraction(float fraction) {
         float unroundedValue = min + fraction * (max - min);
@@ -66,6 +87,12 @@ public enum FloatSettings implements FloatSetting {
         return unroundedValue + roundingOffset;
     }
 
+    /**
+     * Calculates the normalized fraction (0 to 1) from a setting value.
+     *
+     * @param value the setting value
+     * @return the calculated normalized fraction
+     */
     @Override
     public float fractionFromValue(Float value) {
         return (value - min) / (max - min);

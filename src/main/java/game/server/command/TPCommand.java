@@ -12,6 +12,11 @@ final class TPCommand {
 
     }
 
+    /**
+     * Executes the teleport command to move the player to a specified position.
+     * @param tokens the list of tokens from the command string
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         Position position = Game.getPlayer().getPosition();
 

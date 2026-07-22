@@ -11,6 +11,10 @@ import java.util.Arrays;
 
 public final class WorldOptimizer {
 
+    /**
+     * Optimizes a save file by deleting redundant chunks and regenerating higher LODs.
+     * @param saveFile the directory containing the save data
+     */
     public static void optimize(File saveFile) {
         String worldName = saveFile.getName();
         World world = new WorldSaver().load(WorldSaver.getSaveFileLocation(worldName));
@@ -34,6 +38,10 @@ public final class WorldOptimizer {
         World.deleteHigherLODs(0);
     }
 
+    /**
+     * Identifies and deletes saved chunks that are identical to their naturally generated state.
+     * @return the number of deleted redundant chunks
+     */
     private static int deleteRedundantChunks() {
         File[] chunkFiles = FileManager.getChildren(new File(ChunkSaver.getSaveFileLocation(0)));
         if (chunkFiles == null) return 0;
@@ -48,6 +56,12 @@ public final class WorldOptimizer {
         return counter;
     }
 
+    /**
+     * Compares a saved chunk with its naturally generated counterpart and deletes the file if they match.
+     * @param saver the chunk saver instance
+     * @param chunkFile the file representing the saved chunk
+     * @return true if the chunk was redundant and deleted, false otherwise
+     */
     private static boolean deleteIfRedundant(ChunkSaver saver, File chunkFile) {
         Chunk savedChunk = saver.load(chunkFile.getPath());
         if (savedChunk == null) return delete(chunkFile);

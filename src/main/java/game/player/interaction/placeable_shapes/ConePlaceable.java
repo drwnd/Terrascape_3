@@ -13,6 +13,11 @@ import game.server.generation.Structure;
 
 public final class ConePlaceable extends ShapePlaceable {
 
+    /**
+     * Saves the cone placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 8);
         saver.saveByte(getMaterial());
@@ -23,6 +28,12 @@ public final class ConePlaceable extends ShapePlaceable {
         saver.saveInt(thickness.value());
     }
 
+    /**
+     * Loads a cone placeable from a saver.
+     *
+     * @param saver the saver to load from
+     * @return the loaded cone placeable
+     */
     public static ConePlaceable load(Saver<?> saver) {
         ConePlaceable placeable = new ConePlaceable(saver.loadByte());
         placeable.baseRadius.setValue(saver.loadInt());
@@ -33,11 +44,22 @@ public final class ConePlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Initializes the cone placeable with a specific material and default rotation.
+     *
+     * @param material the material of the cone
+     */
     public ConePlaceable(byte material) {
         super(ComputeShaders.CONE, material, Rotation6Way.ROTATION_5);
         loadSettings();
     }
 
+    /**
+     * Creates a copy of this cone placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code ConePlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         ConePlaceable copy = new ConePlaceable(material);
@@ -49,6 +71,11 @@ public final class ConePlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the cone placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -60,6 +87,11 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cone in the X direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthX() {
         return switch ((Rotation6Way) rotation()) {
@@ -68,6 +100,11 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cone in the Y direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthY() {
         return switch ((Rotation6Way) rotation()) {
@@ -76,6 +113,11 @@ public final class ConePlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cone in the Z direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthZ() {
         return switch ((Rotation6Way) rotation()) {

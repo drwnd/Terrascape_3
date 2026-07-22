@@ -23,6 +23,11 @@ final class RecordCommand {
 
     }
 
+    /**
+     * Executes the record command to start, stop, play, or cancel recording of player movements.
+     * @param tokens the list of tokens from the command string
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         String recordName = tokens.expectNextKeyWord().keyword();
@@ -61,6 +66,10 @@ final class RecordCommand {
         private final ArrayList<Position> positions = new ArrayList<>();
         private final ArrayList<Vector3f> rotations = new ArrayList<>();
 
+        /**
+         * Captures the player's current position and rotation.
+         * @return true to continue recording
+         */
         public boolean run() {
 
             positions.add(Game.getPlayer().getPosition());
@@ -88,6 +97,10 @@ final class RecordCommand {
             this.playbackRotations = playbackRotations;
         }
 
+        /**
+         * Plays back the recorded positions and rotations to the player.
+         * @return true if there are more frames to play back, false otherwise
+         */
         public boolean run() {
             Player player = Game.getPlayer();
             if (index >= positions.size() && index >= rotations.size()) return false;

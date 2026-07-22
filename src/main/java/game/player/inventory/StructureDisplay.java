@@ -21,6 +21,12 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class StructureDisplay extends Renderable {
 
+    /**
+     * Initializes a StructureDisplay with the specified structure, generating its meshes.
+     * @param sizeToParent the size relative to the parent element
+     * @param offsetToParent the offset relative to the parent element
+     * @param structure the structure to be displayed
+     */
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
         super(sizeToParent, offsetToParent);
         sizeX = structure.sizeX();
@@ -37,6 +43,10 @@ public final class StructureDisplay extends Renderable {
         zoom *= factor;
     }
 
+    /**
+     * Rotates the structure display based on cursor movement and sensitivity settings.
+     * @param cursorMovement the change in cursor position in screen pixels
+     */
     public void rotate(Vector2i cursorMovement) {
         float sensitivityFactor = FloatSettings.SENSITIVITY.value() * 0.6F + 0.2F;
         sensitivityFactor = 7.0F * sensitivityFactor * sensitivityFactor * sensitivityFactor;
@@ -63,6 +73,11 @@ public final class StructureDisplay extends Renderable {
         return zoom;
     }
 
+    /**
+     * Renders the structure using opaque, transparent, and glass passes.
+     * @param position the screen position to render at
+     * @param size the size to render
+     */
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
@@ -94,12 +109,20 @@ public final class StructureDisplay extends Renderable {
         glViewport(0, 0, Window.getWidth(), Window.getHeight());
     }
 
+    /**
+     * Deletes the meshes and models associated with this display.
+     */
     @Override
     public void deleteSelf() {
         if (opaqueModel != null) opaqueModel.delete();
         if (transparentModel != null) transparentModel.delete();
     }
 
+    /**
+     * Renders the opaque portion of the model.
+     * @param model the opaque model to render
+     * @param shader the shader to use for rendering
+     */
     private static void renderOpaqueModel(OpaqueModel model, Shader shader) {
         if (model.isEmpty()) return;
 
@@ -108,6 +131,11 @@ public final class StructureDisplay extends Renderable {
         glMultiDrawArrays(GL_TRIANGLES, model.indices(), model.vertexCounts());
     }
 
+    /**
+     * Renders the transparent portion of the model.
+     * @param model the transparent model to render
+     * @param shader the shader to use for rendering
+     */
     private static void renderTransparentModel(TransparentModel model, Shader shader) {
         if (model.isTransparentEmpty()) return;
 
@@ -117,6 +145,11 @@ public final class StructureDisplay extends Renderable {
         glDrawArrays(GL_TRIANGLES, 0, model.transparentVertexCount());
     }
 
+    /**
+     * Renders the glass portion of the model.
+     * @param model the glass model to render
+     * @param shader the shader to use for rendering
+     */
     private static void renderGlassModel(TransparentModel model, Shader shader) {
         if (model.isGlassEmpty()) return;
 

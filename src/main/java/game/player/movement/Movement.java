@@ -24,6 +24,13 @@ public final class Movement {
         state.movement = this;
     }
 
+    /**
+     * Computes the player's position for the next gametick based on current velocity, state, and rotation.
+     *
+     * @param lastPosition The player's position in the last gametick in absolute world block coordinates (LOD 0).
+     * @param rotation     The player's current rotation vector.
+     * @return The newly calculated position in absolute world block coordinates (LOD 0).
+     */
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
         wideGrounded = velocity.y == 0.0F && checkWideGrounded(position);
@@ -57,6 +64,11 @@ public final class Movement {
         this.velocity.set(velocity);
     }
 
+    /**
+     * Updates the current movement state of the player based on the provided identifier.
+     *
+     * @param identifier The identifier of the movement state to switch to.
+     */
     public void setState(byte identifier) {
         MovementState state = MovementState.getStateFromIdentifier(identifier);
         if (state == null) return;
@@ -64,6 +76,11 @@ public final class Movement {
         this.state.movement = this;
     }
 
+    /**
+     * Sets the current movement state of the player.
+     *
+     * @param state The new movement state.
+     */
     public void setState(MovementState state) {
         if (state == null) return;
         this.state = state;
@@ -83,6 +100,12 @@ public final class Movement {
     }
 
 
+    /**
+     * Checks if the player's hitbox is broadly supported by collidable blocks below it.
+     *
+     * @param position The current position of the player in absolute world block coordinates (LOD 0).
+     * @return true if the player is supported by collidable blocks, false otherwise.
+     */
     private boolean checkWideGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -93,6 +116,12 @@ public final class Movement {
         return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
+    /**
+     * Checks if the player's hitbox is narrowly supported by collidable blocks below it.
+     *
+     * @param position The current position of the player in absolute world block coordinates (LOD 0).
+     * @return true if the player is narrowly supported, false otherwise.
+     */
     private boolean checkThinGrounded(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -103,6 +132,12 @@ public final class Movement {
         return containsCollidableVoxel(position.longY - 1, minX, minZ, maxX, maxZ);
     }
 
+    /**
+     * Moves the player position according to current velocity, handling collisions.
+     *
+     * @param position The position to update, in absolute world block coordinates (LOD 0).
+     * @return The actual velocity achieved during this move, in blocks per gametick (LOD 0).
+     */
     private Vector3f move(Position position) {
         if (ToggleSettings.NO_CLIP.value()) {
             position.add(velocity.x, velocity.y, velocity.z);
@@ -123,6 +158,17 @@ public final class Movement {
         return nextGTVelocity;
     }
 
+    /**
+     * Performs a single movement step in one dimension and handles collision/stepping.
+     *
+     * @param nextVelocity   The target velocity for the gametick, which may be modified upon collision.
+     * @param toMoveDistance The remaining distance to move in this gametick (LOD 0 blocks).
+     * @param position       The position to update (LOD 0 blocks).
+     * @param direction      The direction of movement for each axis.
+     * @param units          Pre-calculated raycasting step units.
+     * @param lengths        Current ray length to next block boundary on each axis.
+     * @param component      The axis index (X, Y, or Z) to move along.
+     */
     private void move(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component) {
         float toMove = toMoveDistance.get(component);
         float moved;
@@ -142,6 +188,18 @@ public final class Movement {
         if (toMoveDistance.get(component) == 0) lengths.setComponent(component, Double.POSITIVE_INFINITY);
     }
 
+    /**
+     * Resolves a collision by attempting to auto-step or stopping the movement.
+     *
+     * @param nextVelocity   The target velocity to modify.
+     * @param toMoveDistance The remaining distance to move (LOD 0 blocks).
+     * @param position       The current position (LOD 0 blocks).
+     * @param direction      The movement direction.
+     * @param units          Raycasting step units.
+     * @param lengths        Current ray lengths.
+     * @param component      The axis of collision.
+     * @param moved          The distance moved before collision (LOD 0 blocks).
+     */
     private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         float requiredStepHeight = getRequiredStepHeight(position, component);
         if (canAutoStep(position, requiredStepHeight)) {
@@ -155,6 +213,18 @@ public final class Movement {
         stopAndUndoMove(nextVelocity, toMoveDistance, position, direction, units, lengths, component, moved);
     }
 
+    /**
+     * Stops the movement on a specific axis and reverts the last step.
+     *
+     * @param nextVelocity   The velocity to zero out for the component.
+     * @param toMoveDistance The remaining distance to zero out for the component (LOD 0 blocks).
+     * @param position       The position to revert (LOD 0 blocks).
+     * @param direction      The movement direction.
+     * @param units          Raycasting units.
+     * @param lengths        Ray lengths.
+     * @param component      The axis to stop.
+     * @param moved          The distance to revert (LOD 0 blocks).
+     */
     private void stopAndUndoMove(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3i direction, Vector3d units, Vector3d lengths, int component, float moved) {
         nextVelocity.setComponent(component, 0);
         lengths.setComponent(component, Double.POSITIVE_INFINITY);
@@ -163,6 +233,13 @@ public final class Movement {
         computeRayCastConstants(position, toMoveDistance, direction, units, lengths);
     }
 
+    /**
+     * Calculates the height required to step over a collision on a given axis.
+     *
+     * @param position  The current position (LOD 0 blocks).
+     * @param component The axis of the collision.
+     * @return The height required to clear the obstacle, in LOD 0 blocks.
+     */
     private float getRequiredStepHeight(Position position, int component) {
         if (component == Y_COMPONENT) return Float.POSITIVE_INFINITY;
         Vector3i hitboxSize = state.getHitboxSize();
@@ -185,6 +262,13 @@ public final class Movement {
         return 0.0F;
     }
 
+    /**
+     * Determines if the player can automatically step up an obstacle of the given height.
+     *
+     * @param position           The current position (LOD 0 blocks).
+     * @param requiredStepHeight The height of the obstacle (LOD 0 blocks).
+     * @return true if the step is possible, false otherwise.
+     */
     private boolean canAutoStep(Position position, float requiredStepHeight) {
         if (requiredStepHeight == 0.0F) return false;
 
@@ -197,6 +281,13 @@ public final class Movement {
         return noCollision(steppedPosition, state, -1);
     }
 
+    /**
+     * Checks for collisions at the given position along a specific axis.
+     *
+     * @param position  The position to check (LOD 0 blocks).
+     * @param component The axis to check for collision.
+     * @return true if a collision is detected, false otherwise.
+     */
     private boolean collides(Position position, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -211,6 +302,14 @@ public final class Movement {
         return collides(startX, startY, startZ, width, height, depth);
     }
 
+    /**
+     * Determines if the player should stop at an edge to prevent falling.
+     *
+     * @param position  The current position (LOD 0 blocks).
+     * @param component The axis of movement.
+     * @param moved     The distance moved in the last step (LOD 0 blocks).
+     * @return true if the player should stop, false otherwise.
+     */
     private boolean shouldStopAtEdge(Position position, int component, float moved) {
         Position originPosition = new Position(position).addComponent(component, -moved).addComponent(Y_COMPONENT, -state.getMaxAutoStepHeight());
         boolean grounded = wideCollides(originPosition, state, component);
@@ -220,6 +319,14 @@ public final class Movement {
         return noCollision(loweredPosition, state, component);
     }
 
+    /**
+     * Checks if the player's hitbox would collide at the given position, with optional axis offset.
+     *
+     * @param position  The position to check (LOD 0 blocks).
+     * @param state     The movement state (defines hitbox).
+     * @param component The axis that might have an offset due to movement.
+     * @return true if no collision is detected, false otherwise.
+     */
     private boolean noCollision(Position position, MovementState state, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -232,6 +339,14 @@ public final class Movement {
         return !collides(startX, startY, startZ, hitboxSize.x + 1, hitboxSize.y, hitboxSize.z + 1);
     }
 
+    /**
+     * Checks for collisions in a slightly expanded area around the player.
+     *
+     * @param position  The position to check (LOD 0 blocks).
+     * @param state     The movement state.
+     * @param component The axis of movement.
+     * @return true if a collision is detected in the expanded area, false otherwise.
+     */
     private boolean wideCollides(Position position, MovementState state, int component) {
         Vector3i hitboxSize = state.getHitboxSize();
 
@@ -244,6 +359,15 @@ public final class Movement {
         return collides(startX, startY, startZ, hitboxSize.x + 2, hitboxSize.y, hitboxSize.z + 2);
     }
 
+    /**
+     * Pre-calculates constants for 3D raycasting based on movement velocity.
+     *
+     * @param position  The current position (LOD 0 blocks).
+     * @param velocity  The movement velocity (LOD 0 blocks per gametick).
+     * @param direction Output parameter for movement direction per axis.
+     * @param units     Output parameter for raycasting step units.
+     * @param lengths   Output parameter for initial ray lengths to block boundaries.
+     */
     private void computeRayCastConstants(Position position, Vector3f velocity, Vector3i direction, Vector3d units, Vector3d lengths) {
         Vector3f cornerFraction = getCornerFractionPosition(position);
         direction.x = velocity.x < 0 ? -1 : 1;
@@ -266,6 +390,12 @@ public final class Movement {
         if (Double.isNaN(lengths.z)) lengths.z = Double.POSITIVE_INFINITY;
     }
 
+    /**
+     * Calculates the fractional position of the relevant hitbox corner for raycasting.
+     *
+     * @param position The current position (LOD 0 blocks).
+     * @return The fractional coordinates [0, 1) of the corner within its block (LOD 0).
+     */
     private Vector3f getCornerFractionPosition(Position position) {
         Vector3i hitboxSize = state.getHitboxSize();
         Vector3f cornerFraction = position.fractionPosition();
@@ -291,6 +421,11 @@ public final class Movement {
         return position.longZ + (int) Math.floor(position.fractionZ + offset);
     }
 
+    /**
+     * Plays the appropriate footstep sound based on the material the player is standing on.
+     *
+     * @param position The current player position (LOD 0 blocks).
+     */
     private void playFootstepSound(Position position) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         int ticksBetweenFootsteps = state.ticksBetweenFootsteps();
@@ -302,6 +437,16 @@ public final class Movement {
     }
 
 
+    /**
+     * Checks if a range of blocks contains any collidable material.
+     *
+     * @param y    The y-coordinate in absolute world block coordinates (LOD 0).
+     * @param minX The minimum x-coordinate (LOD 0 blocks).
+     * @param minZ The minimum z-coordinate (LOD 0 blocks).
+     * @param maxX The maximum x-coordinate (LOD 0 blocks).
+     * @param maxZ The maximum z-coordinate (LOD 0 blocks).
+     * @return true if any collidable block is found, false otherwise.
+     */
     private static boolean containsCollidableVoxel(long y, long minX, long minZ, long maxX, long maxZ) {
         World world = Game.getWorld();
 
@@ -313,6 +458,17 @@ public final class Movement {
         return false;
     }
 
+    /**
+     * Checks if a specified volume contains any collidable material.
+     *
+     * @param startX The starting x-coordinate in absolute world block coordinates (LOD 0).
+     * @param startY The starting y-coordinate in absolute world block coordinates (LOD 0).
+     * @param startZ The starting z-coordinate in absolute world block coordinates (LOD 0).
+     * @param width  The width of the volume (LOD 0 blocks).
+     * @param height The height of the volume (LOD 0 blocks).
+     * @param depth  The depth of the volume (LOD 0 blocks).
+     * @return true if any collidable block is found, false otherwise.
+     */
     private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
         World world = Game.getWorld();
 

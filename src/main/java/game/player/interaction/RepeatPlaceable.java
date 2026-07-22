@@ -21,6 +21,13 @@ import static game.utils.Constants.*;
 
 public final class RepeatPlaceable implements Placeable {
 
+    /**
+     * Initializes the repeat placeable with a shape, start position, and end position.
+     *
+     * @param placeable     the shape to repeat
+     * @param startPosition the world block coordinates (LOD 0) of the starting point
+     * @param endPosition   the world block coordinates (LOD 0) of the ending point
+     */
     public RepeatPlaceable(ShapePlaceable placeable, Vector3l startPosition, Vector3l endPosition) {
         this.placeable = placeable;
         this.startPosition = startPosition;
@@ -29,6 +36,15 @@ public final class RepeatPlaceable implements Placeable {
         this.maxPosition = Utils.max(startPosition, endPosition);
     }
 
+    /**
+     * Offsets a position based on whether it should be aligned with the ground.
+     *
+     * @param position     the world block coordinates (LOD 0) to offset
+     * @param targetedSide the side being targeted
+     * @param lengthX      the length of the placeable in X direction
+     * @param lengthY      the length of the placeable in Y direction
+     * @param lengthZ      the length of the placeable in Z direction
+     */
     public static void offsetPositionFromGround(Vector3l position, int targetedSide, int lengthX, int lengthY, int lengthZ) {
         int offset = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
         if (!ToggleSettings.OFFSET_FROM_GROUND.value() || targetedSide != WEST && targetedSide != EAST) position.x += offset - lengthX >> 1;
@@ -41,6 +57,14 @@ public final class RepeatPlaceable implements Placeable {
         if (ToggleSettings.OFFSET_FROM_GROUND.value() && targetedSide == SOUTH) position.z += offset - lengthZ;
     }
 
+    /**
+     * Offsets the start and end positions for repeated placement based on the targeted side and placeable dimensions.
+     *
+     * @param startPosition the start world block coordinates (LOD 0)
+     * @param endPosition   the end world block coordinates (LOD 0)
+     * @param targetedSide  the side being targeted
+     * @param placeable     the placeable being used
+     */
     public static void offsetPositions(Vector3l startPosition, Vector3l endPosition, int targetedSide, Placeable placeable) {
         int lengthX = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthX();
         int lengthY = placeable == null ? 1 << IntSettings.BREAK_PLACE_SIZE.value() : placeable.getLengthY();
@@ -135,6 +159,14 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
+    /**
+     * Internal method to place the shape repeatedly within a specific chunk.
+     *
+     * @param chunk  the chunk to place in
+     * @param countX number of repetitions in X
+     * @param countY number of repetitions in Y
+     * @param countZ number of repetitions in Z
+     */
     private void placeInChunk(Chunk chunk, int countX, int countY, int countZ) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;

@@ -25,11 +25,21 @@ import static game.utils.Constants.*;
 
 public final class StructurePlaceable implements Placeable {
 
+    /**
+     * Initializes the structure placeable with a structure identifier.
+     *
+     * @param identifier the identifier of the structure
+     */
     public StructurePlaceable(StructureIdentifier identifier) {
         this.identifier = identifier;
         this.structure = AssetManager.get(identifier);
     }
 
+    /**
+     * Saves the structure placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 2);
         saver.saveString(identifier.structureName());
@@ -129,6 +139,11 @@ public final class StructurePlaceable implements Placeable {
         return Transformation.getModelMatrix(getTransform(), structure);
     }
 
+    /**
+     * Returns the side transformations for the structure based on its current rotation.
+     *
+     * @return an array of side indices
+     */
     public int[] getSideTransform() {
         boolean rotate90 = (rotation.ordinal() & Structure.ROTATE_90) != 0;
 
@@ -143,6 +158,12 @@ public final class StructurePlaceable implements Placeable {
     }
 
 
+    /**
+     * Internal method to place the structure within a specific chunk.
+     *
+     * @param chunk    the chunk to place in
+     * @param position the world block coordinates (LOD 0) of the structure's origin
+     */
     private void placeInChunk(Chunk chunk, Vector3l position) {
         byte transform = getTransform();
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;

@@ -14,11 +14,19 @@ import static game.utils.Constants.CHUNK_SIZE;
 
 public final class OutsideStairPlaceable extends ShapePlaceable{
 
+    /**
+     * Constructs a new OutsideStairPlaceable with the specified material.
+     * @param material the material to be used for the stair
+     */
     public OutsideStairPlaceable(byte material) {
         super(ComputeShaders.OUTSIDE_STAIR, material, Rotation24Way.ROTATION_17);
         loadSettings();
     }
 
+    /**
+     * Saves the state of this placeable using the provided saver.
+     * @param saver the saver used for data persistence
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 10);
         saver.saveByte(getMaterial());
@@ -28,6 +36,11 @@ public final class OutsideStairPlaceable extends ShapePlaceable{
         saver.saveFloat(slope.value());
     }
 
+    /**
+     * Loads an OutsideStairPlaceable state from the provided saver.
+     * @param saver the saver to load from
+     * @return a new OutsideStairPlaceable instance with loaded state
+     */
     public static OutsideStairPlaceable load(Saver<?> saver) {
         OutsideStairPlaceable placeable = new OutsideStairPlaceable(saver.loadByte());
         placeable.stepHeight.setValue(saver.loadInt());
@@ -37,6 +50,11 @@ public final class OutsideStairPlaceable extends ShapePlaceable{
         return placeable;
     }
 
+    /**
+     * Creates a copy of this placeable with a different material.
+     * @param material the material for the new copy
+     * @return a new OutsideStairPlaceable instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         OutsideStairPlaceable copy = new OutsideStairPlaceable(material);
@@ -47,6 +65,10 @@ public final class OutsideStairPlaceable extends ShapePlaceable{
         return copy;
     }
 
+    /**
+     * Returns the configurable settings for this shape.
+     * @return an array of {@link ShapeSetting} for the stair properties
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

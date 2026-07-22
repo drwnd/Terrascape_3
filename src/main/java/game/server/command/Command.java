@@ -13,6 +13,11 @@ public enum Command {
     STRUCTURE(StructureCommand::execute, StructureCommand.EXPLANATION, StructureCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
+    /**
+     * Parses and executes a command string.
+     * @param commandString the command string to execute (including the leading slash)
+     * @return the result of the command execution
+     */
     public static CommandResult execute(String commandString) {
         try {
             TokenList tokens = Token.tokenize(commandString.substring(1));
@@ -44,6 +49,12 @@ public enum Command {
         return syntax;
     }
 
+    /**
+     * Resolves a command by its name.
+     * @param name the name of the command
+     * @return the corresponding Command enum constant
+     * @throws SyntaxError if the command name is unrecognized
+     */
     static Command getCommand(String name) {
         try {
             return valueOf(name);

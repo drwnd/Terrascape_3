@@ -20,6 +20,13 @@ public enum IntSettings implements IntSetting {
     REACH(0, 500, 112),
     BREAK_PLACE_INTERVALL(1, 20, 4);
 
+    /**
+     * Constructs an integer setting with the specified range and default value.
+     *
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param defaultValue the default value
+     */
     IntSettings(int min, int max, int defaultValue) {
         this.min = min;
         this.max = max;
@@ -28,6 +35,14 @@ public enum IntSettings implements IntSetting {
         this.callback = null;
     }
 
+    /**
+     * Constructs an integer setting with the specified range, default value, and change callback.
+     *
+     * @param min the minimum allowed value
+     * @param max the maximum allowed value
+     * @param defaultValue the default value
+     * @param callback the callback to run when the value changes
+     */
     IntSettings(int min, int max, int defaultValue, ChangeCallback callback) {
         this.min = min;
         this.max = max;
@@ -36,6 +51,11 @@ public enum IntSettings implements IntSetting {
         this.callback = callback;
     }
 
+    /**
+     * Sets the value of this setting and triggers the callback if the value changed.
+     *
+     * @param value the new setting value
+     */
     @Override
     public void setValue(int value) {
         int oldValue = this.value;
@@ -58,11 +78,23 @@ public enum IntSettings implements IntSetting {
         return max;
     }
 
+    /**
+     * Calculates the setting value from a normalized fraction (0 to 1).
+     *
+     * @param fraction the normalized fraction
+     * @return the calculated setting value
+     */
     @Override
     public Integer valueFromFraction(float fraction) {
         return Math.round(min + fraction * (max - min));
     }
 
+    /**
+     * Calculates the normalized fraction (0 to 1) from a setting value.
+     *
+     * @param value the setting value
+     * @return the calculated normalized fraction
+     */
     @Override
     public float fractionFromValue(Integer value) {
         return (float) (value - min) / (max - min);

@@ -10,6 +10,11 @@ public enum VertexArrays implements VertexArrayIdentifier {
     SKYBOX(ObjectLoader::generateSkyboxVertexArray);
 
 
+    /**
+     * Constructs a vertex array identifier with an object generator.
+     *
+     * @param generator the generator used to create the vertex array
+     */
     VertexArrays(ObjectGenerator generator) {
         this.generator = generator;
     }

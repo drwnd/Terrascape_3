@@ -12,6 +12,12 @@ final class TimeCommand {
 
     }
 
+    /**
+     * Executes the time command, allowing querying or setting of the current daytime.
+     *
+     * @param tokens the list of command tokens
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         if (tokens.size() == 1) {
             Game.getServer().sendServerMessage("Current Time : %s".formatted(Game.getServer().getDayTime()), ColorOption.WHITE);

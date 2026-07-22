@@ -13,11 +13,21 @@ import game.server.generation.Structure;
 
 public final class CylinderPlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the cylinder placeable with a specific material and default rotation.
+     *
+     * @param material the material of the cylinder
+     */
     public CylinderPlaceable(byte material) {
         super(ComputeShaders.CYLINDER, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 
+    /**
+     * Saves the cylinder placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 5);
         saver.saveByte(getMaterial());
@@ -36,6 +46,11 @@ public final class CylinderPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Returns the shape settings for the cylinder placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
@@ -46,6 +61,11 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cylinder in the X direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthX() {
         return switch ((Rotation3Way) rotation()) {
@@ -54,6 +74,11 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cylinder in the Y direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthY() {
         return switch ((Rotation3Way) rotation()) {
@@ -62,6 +87,11 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Returns the length of the cylinder in the Z direction based on its rotation.
+     *
+     * @return the length in blocks at the relevant LOD
+     */
     @Override
     public int getLengthZ() {
         return switch ((Rotation3Way) rotation()) {
@@ -70,6 +100,12 @@ public final class CylinderPlaceable extends ShapePlaceable {
         };
     }
 
+    /**
+     * Creates a copy of this cylinder placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code CylinderPlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CylinderPlaceable copy = new CylinderPlaceable(material);

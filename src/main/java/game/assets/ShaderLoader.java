@@ -8,6 +8,14 @@ import core.rendering_api.shaders.Shader;
 
 public final class ShaderLoader {
 
+    /**
+     * Loads a shader based on the provided identifier.
+     * Supports both render shaders and compute shaders.
+     *
+     * @param identifier the shader identifier specifying the source files
+     * @return the loaded and compiled Shader instance
+     * @throws IllegalStateException if the identifier is not recognized
+     */
     public static Shader loadShader(ShaderIdentifier identifier) {
         return switch (identifier) {
             case Shaders.OPAQUE_GEOMETRY -> new RenderShader("Material.vert", "Opaque.frag", identifier);

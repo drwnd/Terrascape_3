@@ -31,6 +31,11 @@ public enum ToggleSettings implements ToggleSetting {
     RENDER_ACCUMULATION_TEXTURE(false),
     RENDER_REVEAL_TEXTURE(false);
 
+    /**
+     * Constructs a toggle setting with the specified default value.
+     *
+     * @param defaultValue the default boolean value
+     */
     ToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;
@@ -38,6 +43,12 @@ public enum ToggleSettings implements ToggleSetting {
         this.keybind = defaultKeybind;
     }
 
+    /**
+     * Constructs a toggle setting with the specified default value and default keybind.
+     *
+     * @param defaultValue the default boolean value
+     * @param defaultKeybind the default keybind (GLFW key code)
+     */
     ToggleSettings(boolean defaultValue, int defaultKeybind) {
         this.defaultValue = defaultValue;
         this.value = defaultValue;

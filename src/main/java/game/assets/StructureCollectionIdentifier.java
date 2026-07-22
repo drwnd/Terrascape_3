@@ -17,10 +17,20 @@ public enum StructureCollectionIdentifier implements AssetIdentifier<StructureCo
     REDWOOD_TREES("RedwoodTree"),
     BLACK_WOOD_TREES("BlackWoodTree");
 
+    /**
+     * Constructs a structure collection identifier with a base name.
+     *
+     * @param structureBaseName the base name used to filter structure files
+     */
     StructureCollectionIdentifier(String structureBaseName) {
         this.structureBaseName = structureBaseName.toLowerCase();
     }
 
+    /**
+     * Generates a StructureCollection asset by loading all structures with the matching base name.
+     *
+     * @return a new StructureCollection containing the loaded structures
+     */
     @Override
     public StructureCollection generateAsset() {
         File[] structureFiles = FileManager.getChildren(new File(StructureSaver.getSaveFileLocation()));

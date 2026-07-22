@@ -33,12 +33,22 @@ public final class Server implements CrashCallback {
     public static final int TARGET_TPS = 20;
     public static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
 
+    /**
+     * Constructs a new Server with specified initial state.
+     * @param currentGameTick the current game tick
+     * @param dayTime the current day-night cycle time
+     * @param messages the list of chat messages
+     */
     public Server(long currentGameTick, float dayTime, ArrayList<ChatMessage> messages) {
         this.currentGameTick = currentGameTick;
         this.dayTime = dayTime;
         this.messages = messages;
     }
 
+    /**
+     * Constructs a new Server based on an existing one.
+     * @param oldServer the server instance to copy state from
+     */
     public Server(Server oldServer) {
         oldServer.cleanUp();
         currentGameTick = oldServer.currentGameTick;
@@ -47,6 +57,11 @@ public final class Server implements CrashCallback {
     }
 
 
+    /**
+     * Handles exceptions by cleaning up the game state.
+     * @param exception the exception that occurred
+     * @return the action to take after the crash (print and close)
+     */
     @Override
     public CrashAction notify(Exception exception) {
         Game.cleanUp();
@@ -57,6 +72,10 @@ public final class Server implements CrashCallback {
         ChunkGenerator.loadImmediateSurroundings();
     }
 
+    /**
+     * Unloads chunks that are far from the player to free memory.
+     * @param playerChunkPosition the current player position in Chunk Coordinates (LOD 0)
+     */
     public static void unloadDistantChunks(Vector3l playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
@@ -80,6 +99,9 @@ public final class Server implements CrashCallback {
         }
     }
 
+    /**
+     * Unloads all currently loaded chunks from the world.
+     */
     public static void unloadAll() {
         ChunkSaver saver = new ChunkSaver();
 
@@ -92,6 +114,10 @@ public final class Server implements CrashCallback {
     }
 
 
+    /**
+     * Calculates the fraction of the current game tick that has elapsed.
+     * @return the elapsed fraction of the current game tick [0.0, 1.0]
+     */
     public float getCurrentGameTickFraction() {
         long currentGameTickDuration = System.nanoTime() - gameTickStartTime;
         return (float) ((double) currentGameTickDuration / NANOSECONDS_PER_GAME_TICK);
@@ -109,6 +135,13 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
+    /**
+     * Processes a block breaking or placing interaction.
+     * @param position the position where the interaction occurs (Absolute World Coordinates)
+     * @param placeable the object being placed or the tool being used
+     * @param side the side of the block being interacted with
+     * @return true if the interaction was successful, false otherwise
+     */
     public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
         placeable.offsetPosition(position, side);
 
@@ -129,28 +162,44 @@ public final class Server implements CrashCallback {
         return true;
     }
 
+    /**
+     * Stops the execution of game ticks.
+     */
     public void pauseTicks() {
         if (executor != null) executor.shutdownNow();
         executor = null;
     }
 
+    /**
+     * Starts or resumes the execution of game ticks at a fixed rate.
+     */
     public void startTicks() {
         if (executor != null) return;
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
+    /**
+     * Cleans up server resources and stops game ticks.
+     */
     void cleanUp() {
         generator.cleanUp();
         pauseTicks();
     }
 
+    /**
+     * Schedules a restart of the chunk generator.
+     */
     public void scheduleGeneratorRestart() {
         synchronized (generator) {
             generatorRestartScheduled = true;
         }
     }
 
+    /**
+     * Processes a message sent by the player, executing it as a command if it starts with '/'.
+     * @param message the message text
+     */
     public void sendPlayerMessage(String message) {
         if (message == null || message.isEmpty()) return;
         synchronized (messages) {
@@ -166,18 +215,31 @@ public final class Server implements CrashCallback {
         }
     }
 
+    /**
+     * Retrieves a copy of all current chat messages.
+     * @return a list of chat messages
+     */
     public ArrayList<ChatMessage> getMessages() {
         synchronized (messages) {
             return new ArrayList<>(messages);
         }
     }
 
+    /**
+     * Sends a message from the server to the chat.
+     * @param message the message text
+     * @param color the color to display the message in
+     */
     public void sendServerMessage(String message, ColorOption color) {
         synchronized (messages) {
             messages.add(new ChatMessage(message, Sender.SERVER, color));
         }
     }
 
+    /**
+     * Trims the chat history to the specified maximum number of messages.
+     * @param maxMessageCount the maximum number of messages to keep
+     */
     public void removeOldChatMessages(int maxMessageCount) {
         synchronized (messages) {
             int toRemoveMessagesCount = messages.size() - maxMessageCount;
@@ -187,12 +249,22 @@ public final class Server implements CrashCallback {
         }
     }
 
+    /**
+     * Registers a function to be executed every game tick.
+     * @param function the function to run
+     * @param identifier an object used to identify and later remove the function
+     */
     public void addFunction(Function function, Object identifier) {
         synchronized (functions) {
             functions.put(identifier, function);
         }
     }
 
+    /**
+     * Removes a registered function.
+     * @param identifier the identifier of the function to remove
+     * @return the removed function, or null if not found
+     */
     public Function removeFunction(Object identifier) {
         synchronized (functions) {
             return functions.remove(identifier);
@@ -200,6 +272,9 @@ public final class Server implements CrashCallback {
     }
 
 
+    /**
+     * Executes a game tick and handles any exceptions that occur during its execution.
+     */
     private void executeGameTickCatchException() {
         try {
             gameTickStartTime = System.nanoTime();
@@ -211,6 +286,9 @@ public final class Server implements CrashCallback {
         }
     }
 
+    /**
+     * Performs the logic for a single game tick, including player updates and scheduled functions.
+     */
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         Game.getPlayer().updateGameTick();
@@ -230,6 +308,9 @@ public final class Server implements CrashCallback {
         removeOldChatMessages(IntSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
+    /**
+     * Advances the in-game time.
+     */
     private void incrementTime() {
         dayTime += FloatSettings.TIME_SPEED.value();
         if (dayTime > 1.0F) dayTime -= 2.0F;

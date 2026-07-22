@@ -14,11 +14,21 @@ import static game.utils.Constants.CHUNK_SIZE;
 
 public final class StairPlaceable extends ShapePlaceable {
 
+    /**
+     * Initializes the stair placeable with a specific material and default rotation.
+     *
+     * @param material the material of the stair
+     */
     public StairPlaceable(byte material) {
         super(ComputeShaders.STAIR, material, Rotation24Way.ROTATION_01);
         loadSettings();
     }
 
+    /**
+     * Saves the stair placeable's state to a saver.
+     *
+     * @param saver the saver to use
+     */
     public void save(Saver<?> saver) {
         saver.saveByte((byte) 6);
         saver.saveByte(getMaterial());
@@ -37,6 +47,12 @@ public final class StairPlaceable extends ShapePlaceable {
         return placeable;
     }
 
+    /**
+     * Creates a copy of this stair placeable with a different material.
+     *
+     * @param material the new material
+     * @return a new {@code StairPlaceable} instance
+     */
     @Override
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         StairPlaceable copy = new StairPlaceable(material);
@@ -47,6 +63,11 @@ public final class StairPlaceable extends ShapePlaceable {
         return copy;
     }
 
+    /**
+     * Returns the shape settings for the stair placeable.
+     *
+     * @return an array of {@code ShapeSetting}
+     */
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{

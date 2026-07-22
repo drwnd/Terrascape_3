@@ -22,6 +22,9 @@ public final class ChatInput extends TextFieldInput {
         return scroll;
     }
 
+    /**
+     * Initializes the chat input mode, resetting the scroll and setting the cursor to the end of the current text.
+     */
     @Override
     public void setInputMode() {
         setStandardInputMode();
@@ -41,6 +44,12 @@ public final class ChatInput extends TextFieldInput {
 
     }
 
+    /**
+     * Handles character input, skipping the next input if {@code skipNextInput} is set.
+     *
+     * @param window    the window handle
+     * @param codePoint the Unicode code point of the character
+     */
     @Override
     public void charCallback(long window, int codePoint) {
         if (!skipNextInput) super.charCallback(window, codePoint);
@@ -52,6 +61,15 @@ public final class ChatInput extends TextFieldInput {
         scroll = Math.max((float) (scroll + yScroll * 0.05), 0.0F);
     }
 
+    /**
+     * Handles key input for the chat, including closing the chat, sending messages, and navigating message history.
+     *
+     * @param window   the window handle
+     * @param key      the keyboard key
+     * @param scancode the platform-specific scancode
+     * @param action   the key action (press, release, repeat)
+     * @param mods     bitfield of modifier keys
+     */
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
@@ -67,6 +85,12 @@ public final class ChatInput extends TextFieldInput {
         super.keyCallback(window, key, scancode, action, mods);
     }
 
+    /**
+     * Retrieves the next message from the player's message history.
+     *
+     * @param increment the direction to move in history (positive for older, negative for newer)
+     * @return the message string from history, or an empty string if out of bounds
+     */
     private String nextPlayerMessage(int increment) {
         ArrayList<ChatMessage> messages = Game.getServer().getMessages();
         do {
@@ -80,6 +104,11 @@ public final class ChatInput extends TextFieldInput {
         return messages.get(messages.size() - messageIndex).message();
     }
 
+    /**
+     * Replaces the current text in the chat field and moves the cursor to the end.
+     *
+     * @param text the new text to set
+     */
     private void replaceText(String text) {
         cursorIndex = text.length();
         field.setText(text);

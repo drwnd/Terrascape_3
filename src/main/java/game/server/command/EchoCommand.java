@@ -12,6 +12,11 @@ final class EchoCommand {
 
     }
 
+    /**
+     * Executes the echo command to print server messages.
+     * @param tokens the list of tokens from the command string
+     * @return the result of the command execution
+     */
     static CommandResult execute(TokenList tokens) {
         ColorOption color = null;
         int printCount = 1;

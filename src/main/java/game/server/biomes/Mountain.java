@@ -8,6 +8,14 @@ import static game.server.generation.WorldGeneration.WATER_LEVEL;
 import static game.utils.Constants.*;
 
 public final class Mountain extends Biome {
+    /**
+     * Places materials specific to the mountain biome, including snow at high altitudes and grass/dirt near water level.
+     * @param inChunkX the x-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkY the y-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param inChunkZ the z-coordinate within the chunk (In-Chunk Block Coordinates)
+     * @param data the generation data
+     * @return true if a material was placed, false otherwise
+     */
     @Override
     public boolean placeMaterial(int inChunkX, int inChunkY, int inChunkZ, GenerationData data) {
         long totalY = data.totalY;
