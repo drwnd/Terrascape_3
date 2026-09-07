@@ -15,7 +15,7 @@ public final class PerformanceTester {
     public static void main(String[] args) {
         IntSettings.RENDER_DISTANCE.setValue(CHUNK_COUNT_XZ / 2 - 3);
         IntSettings.LOD_COUNT.setValue(Integer.numberOfTrailingZeros(CHUNK_COUNT_XZ) + 1);
-        Game.setTemporaryWorld(new World(0x9EF6E7FAF3299DDDL, null, null));
+        Game.setTemporaryWorld(new World(0x9EF6E7FAF3299DDDL, null, null, true));
         long totalStart = System.nanoTime();
 
         int chunkCountY = CHUNK_COUNT_Y;

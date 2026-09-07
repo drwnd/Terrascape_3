@@ -58,7 +58,7 @@ public final class WorldCreationMenu extends UiBackgroundElement {
             for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(worldName)) return ButtonResult.FAILURE;
 
             long seed = getSeed(seedField.getText());
-            new WorldSaver().save(new World(seed, new Date(), new Date(0)), WorldSaver.getSaveFileLocation(worldName));
+            new WorldSaver().save(new World(seed, new Date(), new Date(0), false), WorldSaver.getSaveFileLocation(worldName));
 
             Window.popRenderable();
             return ButtonResult.SUCCESS;

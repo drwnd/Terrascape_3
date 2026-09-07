@@ -28,18 +28,18 @@ public final class WorldSaver extends Saver<World> {
         long seed = loadLong();
         Date created = new Date(loadLong());
         Date lastPlayed = new Date(loadLong());
-        return new World(seed, created, lastPlayed);
+        return new World(seed, created, lastPlayed, false);
     }
 
     @Override
     protected World loadOldVersion(int versionNumber) {
-        if (versionNumber == 0) return new World(loadLong(), new Date(0), new Date(0));
+        if (versionNumber == 0) return new World(loadLong(), new Date(0), new Date(0), false);
         return getDefault();
     }
 
     @Override
     protected World getDefault() {
-        return new World(0, new Date(0), new Date(0));
+        return new World(0, new Date(0), new Date(0), false);
     }
 
     @Override

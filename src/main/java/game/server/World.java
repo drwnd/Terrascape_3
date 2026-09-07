@@ -27,7 +27,12 @@ public final class World {
     public final Date created, lastPlayed;
     public final long seed;
 
-    public World(long seed, Date created, Date lastPlayed) {
+    public World(World world) {
+        this(world.seed, world.created, world.lastPlayed, true);
+        this.name = world.name;
+    }
+
+    public World(long seed, Date created, Date lastPlayed, boolean createChunksArray) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
         LOD_COUNT = IntSettings.LOD_COUNT.value();
@@ -37,7 +42,7 @@ public final class World {
         CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
 
         WorldGeneration.SEED = seed;
-        chunks = new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH];
+        chunks = createChunksArray ? new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH] : null;
         this.created = created;
         this.lastPlayed = lastPlayed;
         this.seed = seed;

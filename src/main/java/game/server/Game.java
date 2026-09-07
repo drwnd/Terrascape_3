@@ -27,7 +27,7 @@ public final class Game {
         String worldName = toPlayWorld.getName();
         Material.loadMaterials();
 
-        world = toPlayWorld;
+        world = new World(toPlayWorld);
         server = new ServerSaver().load(ServerSaver.getSaveFileLocation(worldName));
         player = new PlayerSaver().load(PlayerSaver.getSaveFileLocation(worldName));
 
@@ -99,7 +99,7 @@ public final class Game {
             Debug.err("Cannot set temporary World. The Game might be running");
             return false;
         }
-        Game.world = world;
+        Game.world = new World(world);
         return true;
     }
 
