@@ -103,6 +103,7 @@ public class Renderable {
             else return null;
 
         Vector2f position = getPosition(), size = getSize();
+        scaleForFocused(position, size);
 
         position = Window.toPixelCoordinate(position, scalesWithGuiSize());
         size = Window.toPixelSize(size, scalesWithGuiSize());

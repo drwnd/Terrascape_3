@@ -92,10 +92,10 @@ public final class World {
     }
 
     public static void init() {
+        WorldGeneration.SEED = Game.getWorld().seed;
         ChunkSaver.generateHigherLODs();
         Server.loadImmediateSurroundings();
         Sound.setDistanceScaler(0.0625F);
-        WorldGeneration.SEED = Game.getWorld().seed;
     }
 
     public Chunk getChunk(long chunkX, long chunkY, long chunkZ, int lod) {

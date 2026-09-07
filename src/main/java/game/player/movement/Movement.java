@@ -1,5 +1,6 @@
 package game.player.movement;
 
+import core.rendering_api.Input;
 import core.sound.Sound;
 
 import game.server.Game;
@@ -7,6 +8,7 @@ import game.server.World;
 import game.server.material.Material;
 import game.server.material.Properties;
 import game.settings.FloatSettings;
+import game.settings.KeySettings;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 
@@ -174,7 +176,7 @@ public final class Movement {
         int width = component == X_COMPONENT ? 1 : hitboxSize.x;
         int depth = component == Z_COMPONENT ? 1 : hitboxSize.z;
 
-        for (long y = startY + maxStepHeight - 1; y != startY - 1; y--)
+        for (long y = startY + maxStepHeight + 2; y != startY - 1; y--)
             for (long x = startX; x != startX + width; x++)
                 for (long z = startZ; z != startZ + depth; z++) {
                     byte material = world.getMaterial(x, y, z, 0);
@@ -188,6 +190,7 @@ public final class Movement {
         if (autoSteppedHeight + requiredStepHeight > maxStepHeight * MAX_STEP_HEIGHT_CAP_MULTIPLIER) return false;
 
         boolean swimming = MovementState.intersectsLiquid(position, state);
+        if (swimming && Input.isKeyPressed(KeySettings.JUMP)) maxStepHeight+=2;
         if ((!checkGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
 
         Position steppedPosition = new Position(position);
