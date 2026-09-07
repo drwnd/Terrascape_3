@@ -21,8 +21,8 @@ public final class ColdOcean implements Biome {
     public void placeSpecialFeatures(int inChunkX, int inChunkZ, GenerationData data) {
         int iceHeight = Math.min(data.specialHeight, WATER_LEVEL - data.height);
         if (iceHeight == 0) return;
-        int start = data.clampEndHeightToInChunkY(WATER_LEVEL - iceHeight);
-        int end = data.clampEndHeightToInChunkY(WATER_LEVEL + (iceHeight >> 3));
+        int start = data.clampStartHeightToInChunkY(WATER_LEVEL - iceHeight);
+        int end = data.clampStartHeightToInChunkY(WATER_LEVEL + (iceHeight >> 3));
         data.storeColumn(inChunkX, inChunkZ, start, end, iceHeight == 1 ? ICE : HEAVY_ICE);
     }
 

@@ -59,7 +59,7 @@ public abstract class MovementState {
 
         velocity.add(acceleration).mul(drag).mul(liquidDrag);
         applyGravity(velocity);
-        velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY * (Input.isKeyPressed(KeySettings.JUMP) ? 2 : 1);
+        velocity.y += (waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY) * (Input.isKeyPressed(KeySettings.JUMP) ? 2 : 1);
     }
 
     /**
