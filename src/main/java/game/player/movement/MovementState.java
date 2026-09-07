@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import core.assets.AssetManager;
 import core.rendering_api.Input;
 import core.utils.FileManager;
-import core.utils.MathUtils;
 
 import game.assets.Model;
 import game.player.rendering.Camera;
@@ -52,15 +51,15 @@ public abstract class MovementState {
      * @param playerRotation The rotation of the Player.
      */
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        float waterIntersection = intersectedVolume(playerPosition, this, WATER);
-        float lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
+        int waterIntersection = intersectedVolume(playerPosition, this, WATER);
+        int lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
 
         float drag = movement.isGrounded() ? WALKING_DRAG : AIR_DRAG;
         float liquidDrag = (float) (Math.pow(WATER_DRAG, waterIntersection)) * (float) (Math.pow(LAVA_DRAG, lavaIntersection));
 
         velocity.add(acceleration).mul(drag).mul(liquidDrag);
         applyGravity(velocity);
-        velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY;
+        velocity.y += waterIntersection * WATER_BUOYANCY + lavaIntersection * LAVA_BUOYANCY * (Input.isKeyPressed(KeySettings.JUMP) ? 2 : 1);
     }
 
     /**
@@ -77,14 +76,14 @@ public abstract class MovementState {
     byte getStandingMaterial(Position position) {
         World world = Game.getWorld();
 
-        byte centerMaterial = world.getMaterial(position.longX, position.longY, position.longZ, 0);
+        byte centerMaterial = world.getMaterial(position.longX, position.longY - 1, position.longZ, 0);
         if (Properties.doesntHaveProperties(centerMaterial, NO_COLLISION)) return centerMaterial;
 
-        long minX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        long minZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long minX = Movement.minX(position, hitboxSize);
+        long minZ = Movement.minZ(position, hitboxSize);
         long y = position.longY - 1;
-        int width = hitboxSize.x + 1;
-        int depth = hitboxSize.z + 1;
+        int width = hitboxSize.x;
+        int depth = hitboxSize.z;
 
         for (long x = minX; x != minX + width; x++)
             for (long z = minZ; z != minZ + depth; z++) {
@@ -189,32 +188,30 @@ public abstract class MovementState {
         velocity.y -= GRAVITY_ACCELERATION;
     }
 
-    static float intersectedVolume(Position position, MovementState state, byte targetMaterial) {
+    static int intersectedVolume(Position position, MovementState state, byte targetMaterial) {
         if (ToggleSettings.NO_CLIP.value()) return 0;
 
         World world = Game.getWorld();
         Vector3i hitboxSize = state.hitboxSize;
 
-        long startX = position.longX + MathUtils.floor(position.fractionX - hitboxSize.x * 0.5F);
-        long startY = position.longY;
-        long startZ = position.longZ + MathUtils.floor(position.fractionZ - hitboxSize.z * 0.5F);
+        long startX = Movement.minX(position, hitboxSize);
+        long startY = Movement.minY(position, hitboxSize);
+        long startZ = Movement.minZ(position, hitboxSize);
 
-        int width = hitboxSize.x + 1;
+        int width = hitboxSize.x;
         int height = hitboxSize.y;
-        int depth = hitboxSize.z + 1;
+        int depth = hitboxSize.z;
 
-        float volume = 0.0F;
+        int volume = 0;
         for (long x = startX; x < startX + width; x++)
             for (long y = startY; y < startY + height; y++)
-                for (long z = startZ; z < startZ + depth; z++) {
-                    if (targetMaterial != world.getMaterial(x, y, z, 0)) continue;
-                    volume++;
-                }
+                for (long z = startZ; z < startZ + depth; z++)
+                    if (targetMaterial == world.getMaterial(x, y, z, 0)) volume++;
         return volume;
     }
 
     static boolean intersectsLiquid(Position position, MovementState state) {
-        return intersectedVolume(position, state, WATER) != 0.0F || intersectedVolume(position, state, LAVA) != 0.0F;
+        return intersectedVolume(position, state, WATER) != 0 || intersectedVolume(position, state, LAVA) != 0;
     }
 
     protected Movement movement;

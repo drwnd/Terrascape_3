@@ -190,7 +190,7 @@ public final class Movement {
         if (autoSteppedHeight + requiredStepHeight > maxStepHeight * MAX_STEP_HEIGHT_CAP_MULTIPLIER) return false;
 
         boolean swimming = MovementState.intersectsLiquid(position, state);
-        if (swimming && Input.isKeyPressed(KeySettings.JUMP)) maxStepHeight+=2;
+        if (swimming && Input.isKeyPressed(KeySettings.JUMP)) maxStepHeight += 2;
         if ((!checkGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
 
         Position steppedPosition = new Position(position);
