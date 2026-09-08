@@ -119,10 +119,7 @@ public final class Movement {
         Vector3d units = new Vector3d(), lengths = new Vector3d();
         groundSnappedHeight = autoSteppedHeight = 0;
         computeRayCastConstants(toMoveDistance, units, lengths);
-        while (toMoveDistance.lengthSquared() != 0) {
-            int minComponent = lengths.minComponent();
-            move(nextGTVelocity, toMoveDistance, position, units, lengths, minComponent);
-        }
+        while (toMoveDistance.lengthSquared() != 0) move(nextGTVelocity, toMoveDistance, position, units, lengths, lengths.minComponent());
         return nextGTVelocity;
     }
 
@@ -130,6 +127,7 @@ public final class Movement {
         float toMove = toMoveDistance.get(component), moved;
         if (toMove == 0) {
             advanceLength(units, lengths, component);
+            lengths.setComponent(component, Double.POSITIVE_INFINITY);
             return;
         }
         if (Math.abs(toMove) <= 1) {
@@ -154,13 +152,8 @@ public final class Movement {
         int requiredStepHeight = getRequiredStepHeight(position, component);
         if (canAutoStep(position, requiredStepHeight)) {
             position.addComponent(Y_COMPONENT, requiredStepHeight);
-            advanceLength(units, lengths, component);
-            toMoveDistance.y = 0.0F;
-            computeRayCastConstants(toMoveDistance, units, lengths);
             autoSteppedHeight += requiredStepHeight;
-            return;
-        }
-        stopAndUndoMove(nextVelocity, toMoveDistance, position, units, lengths, component, moved);
+        } else stopAndUndoMove(nextVelocity, toMoveDistance, position, units, lengths, component, moved);
     }
 
     private int getRequiredStepHeight(Position position, int component) {
