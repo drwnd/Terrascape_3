@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public final class FileManager {
@@ -81,31 +82,23 @@ public final class FileManager {
     }
 
     public static String loadFileContents(Path filepath) {
-        String result;
-
-        try {
-            InputStream in = new FileInputStream(filepath.toFile());
-            Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
-            result = scanner.useDelimiter("\\A").next();
-
-        } catch (FileNotFoundException exception) {
+        try (InputStream in = new FileInputStream(filepath.toFile());
+             Scanner scanner = new Scanner(in, StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").next();
+        } catch (IOException | NoSuchElementException exception) {
             throw new RuntimeException(exception);
         }
-
-        return result;
     }
 
     public static String loadJson(Path filepath) {
         File file = filepath.toFile();
         if (!file.exists()) return "{}";
 
-        InputStream in;
-        try {
-            in = new FileInputStream(file);
-        } catch (FileNotFoundException _) {
+        try (InputStream in = new FileInputStream(file);
+             Scanner scanner = new Scanner(in, StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").next();
+        } catch (IOException | NoSuchElementException _) {
             return "{}";
         }
-        Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
-        return scanner.useDelimiter("\\A").next();
     }
 }

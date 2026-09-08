@@ -42,7 +42,7 @@ public final class IntArrayList {
     public int[] toArray() {
         int[] array = new int[size];
         copyInto(array, 0);
-        return data;
+        return array;
     }
 
 

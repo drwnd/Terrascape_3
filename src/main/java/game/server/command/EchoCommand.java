@@ -17,7 +17,7 @@ final class EchoCommand {
         int printCount = 1;
 
         if (tokens.nextIncrementNumber() instanceof NumberToken number) {
-            if (!number.isInteger() || number.number() < 0) return CommandResult.fail("Number must be a positiv integer");
+            if (!number.isInteger() || number.number() < 0) return CommandResult.fail("Number must be a positive integer");
             printCount = (int) number.number();
         }
         if (tokens.getIncrementKeyword() instanceof KeywordToken(String keyword)) color = ColorOption.valueOf(keyword.toUpperCase());

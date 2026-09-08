@@ -30,6 +30,8 @@ public final class AssetLoader {
         STBVorbisInfo info = STBVorbisInfo.malloc();
         ShortBuffer pcm = readVorbis(filepath, info);
         alBufferData(buffer, info.channels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, info.sample_rate());
+        info.free();
+        MemoryUtil.memFree(pcm);
 
         return buffer;
     }
@@ -72,9 +74,9 @@ public final class AssetLoader {
 
         int[] vbos = new int[floatAttributes.length + intAttributes.length];
         for (int index = 0; index < floatAttributes.length; index++)
-            vbos[index] = storeDateInAttributeList(index, attributeSizes[index], floatAttributes[index]);
+            vbos[index] = storeDataInAttributeList(index, attributeSizes[index], floatAttributes[index]);
         for (int index = floatAttributes.length; index < attributeSizes.length; index++)
-            vbos[index] = storeDateInAttributeList(index, attributeSizes[index], intAttributes[index - floatAttributes.length]);
+            vbos[index] = storeDataInAttributeList(index, attributeSizes[index], intAttributes[index - floatAttributes.length]);
 
         glBindVertexArray(0);
         for (int vbo : vbos) {
@@ -118,7 +120,7 @@ public final class AssetLoader {
             textData[i + 2] = i >> 2 | offsetY;
             textData[i + 3] = i >> 2 | offsetX | offsetY;
         }
-        int vbo = storeDateInAttributeList(0, 1, textData);
+        int vbo = storeDataInAttributeList(0, 1, textData);
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -134,7 +136,7 @@ public final class AssetLoader {
         return vao;
     }
 
-    public static int storeDateInAttributeList(int attributeNo, int size, float[] data) {
+    public static int storeDataInAttributeList(int attributeNo, int size, float[] data) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
@@ -143,7 +145,7 @@ public final class AssetLoader {
         return vbo;
     }
 
-    public static int storeDateInAttributeList(int attributeNo, int size, int[] data) {
+    public static int storeDataInAttributeList(int attributeNo, int size, int[] data) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
@@ -155,11 +157,11 @@ public final class AssetLoader {
     public static void storeIndicesInBuffer(int[] indices) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-        IntBuffer buffer = storeDateInIntBuffer(indices);
+        IntBuffer buffer = storeDataInIntBuffer(indices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
     }
 
-    public static IntBuffer storeDateInIntBuffer(int[] data) {
+    public static IntBuffer storeDataInIntBuffer(int[] data) {
         IntBuffer buffer = MemoryUtil.memAllocInt(data.length);
         buffer.put(data).flip();
         return buffer;
@@ -167,12 +169,13 @@ public final class AssetLoader {
 
     //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
     private static ShortBuffer readVorbis(Path filepath, STBVorbisInfo info) throws RuntimeException {
-        MemoryStack stack = MemoryStack.stackPush();
-        IntBuffer error = stack.mallocInt(1);
-        // IDE has no idea what it's talking about
-        @SuppressWarnings("DataFlowIssue")
-        long decoder = STBVorbis.stb_vorbis_open_filename(filepath.toString(), error, null);
-        if (decoder == MemoryUtil.NULL) throw new RuntimeException("Failed to open Ogg Vorbis file " + filepath + ". Error: " + error.get(0));
+        long decoder;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer error = stack.mallocInt(1);
+            // IDE has no idea what it's talking about
+            decoder = STBVorbis.stb_vorbis_open_filename(filepath.toString(), error, null);
+            if (decoder == MemoryUtil.NULL) throw new RuntimeException("Failed to open Ogg Vorbis file " + filepath + ". Error: " + error.get(0));
+        }
 
         STBVorbis.stb_vorbis_get_info(decoder, info);
 

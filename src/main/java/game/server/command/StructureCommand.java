@@ -96,7 +96,7 @@ public final class StructureCommand {
             return CommandResult.fail("CenterXYZ must be within the bounds of the Structure");
 
         if (sizeX > MAX_STRUCTURE_SIZE || sizeY > MAX_STRUCTURE_SIZE || sizeZ > MAX_STRUCTURE_SIZE)
-            return CommandResult.fail("Structure cannot be larget than %d voxels along one axis".formatted(MAX_STRUCTURE_SIZE));
+            return CommandResult.fail("Structure cannot be larger than %d voxels along one axis".formatted(MAX_STRUCTURE_SIZE));
 
         int sizeBits = Integer.numberOfTrailingZeros(MathUtils.nextLargestPowOf2(MathUtils.max(sizeX, sizeY, sizeZ)));
         byte[] uncompressedMaterials = new byte[1 << sizeBits * 3];

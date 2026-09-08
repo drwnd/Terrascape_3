@@ -167,6 +167,7 @@ public final class RenderingOptimizer {
         glDeleteBuffers(opaqueIndirectBuffer);
         glDeleteBuffers(transparentIndirectBuffer);
         glDeleteBuffers(glassIndirectBuffer);
+        glDeleteBuffers(shadowIndirectBuffer);
         glDeleteBuffers(occluderBuffer);
         glDeleteBuffers(occludeeBuffer);
     }

@@ -38,7 +38,7 @@ public final class MaterialsData {
 
     // Static API
     public static int getUncompressedIndex(int inChunkX, int inChunkY, int inChunkZ) {
-        return Z_ORDER_3D_TABLE_X[inChunkX] | Z_ORDER_3D_TABLE_Y[inChunkY] | T_ORDER_3D_TABLE_Z[inChunkZ];
+        return Z_ORDER_3D_TABLE_X[inChunkX] | Z_ORDER_3D_TABLE_Y[inChunkY] | Z_ORDER_3D_TABLE_Z[inChunkZ];
     }
 
     public static MaterialsData getCompressedMaterials(int sizeBits, byte[] uncompressedMaterials) {
@@ -1394,7 +1394,7 @@ public final class MaterialsData {
 
     public static final int[] Z_ORDER_3D_TABLE_X = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 2);
     public static final int[] Z_ORDER_3D_TABLE_Y = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 1);
-    public static final int[] T_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 0);
+    public static final int[] Z_ORDER_3D_TABLE_Z = Utils.zOrderCurveLookupTable(MAX_STRUCTURE_SIZE, 3, 0);
 
     public static final byte HOMOGENOUS = 0;
     public static final byte DETAIL = 1;
