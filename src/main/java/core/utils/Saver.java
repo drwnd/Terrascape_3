@@ -20,13 +20,12 @@ public abstract class Saver<T> {
 
     public final void save(T object, Path filepath) {
         data.clear();
+        currentIndex = 0;
         saveInt(getVersionNumber());
         save(object);
         File saveFile = FileManager.loadAndCreateFile(filepath);
-        try {
-            FileOutputStream writer = new FileOutputStream(saveFile);
+        try (FileOutputStream writer = new FileOutputStream(saveFile)) {
             writer.write(data.getData(), 0, data.size());
-            writer.close();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -35,10 +34,8 @@ public abstract class Saver<T> {
     public final T load(Path filepath) {
         File saveFile = filepath.toFile();
         if (!saveFile.exists()) return getDefault();
-        try {
-            FileInputStream reader = new FileInputStream(saveFile);
+        try (FileInputStream reader = new FileInputStream(saveFile)) {
             data.setData(reader.readAllBytes());
-            reader.close();
         } catch (IOException exception) {
             exception.printStackTrace();
             throw new RuntimeException(exception);

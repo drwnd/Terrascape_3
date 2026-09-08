@@ -148,10 +148,13 @@ public abstract class Shader implements Asset {
         glShaderSource(shaderID, shaderCode);
         glCompileShader(shaderID);
 
-        if (glGetShaderi(shaderID, GL_COMPILE_STATUS) == 0)
+        if (glGetShaderi(shaderID, GL_COMPILE_STATUS) == 0) {
+            glDeleteShader(shaderID);
             throw new Exception("Error compiling shader code: Type: " + shaderType + "Info: " + glGetShaderInfoLog(shaderID, 1024));
+        }
 
         glAttachShader(programID, shaderID);
+        glDeleteShader(shaderID);
 
         return shaderID;
     }

@@ -47,9 +47,8 @@ public final class FileManager {
 
     public static File[] getChildren(Path filepath) {
         File file = filepath.toFile();
-        if (!file.exists()) return new File[0];
-        file.mkdirs();
-        return file.listFiles();
+        File[] children = file.listFiles();
+        return children == null ? new File[0] : children;
     }
 
     public static File loadAndCreateDirectory(Path filepath) {

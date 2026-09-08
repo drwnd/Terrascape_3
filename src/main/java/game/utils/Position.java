@@ -37,22 +37,17 @@ public final class Position implements Distanceable {
         this.fractionZ = 0.0F;
     }
 
-    public Position(long intX, long intY, long intZ, float fractionX, float fractionY, float fractionZ) {
-        this.longX = intX;
-        this.longY = intY;
-        this.longZ = intZ;
-        this.fractionX = fractionX;
-        this.fractionY = fractionY;
-        this.fractionZ = fractionZ;
+    public Position(long longX, long longY, long longZ, float fractionX, float fractionY, float fractionZ) {
+        this.longX = longX + MathUtils.floor(fractionX);
+        this.longY = longY + MathUtils.floor(fractionY);
+        this.longZ = longZ + MathUtils.floor(fractionZ);
+        this.fractionX = MathUtils.fraction(fractionX);
+        this.fractionY = MathUtils.fraction(fractionY);
+        this.fractionZ = MathUtils.fraction(fractionZ);
     }
 
     public Position(Vector3l longPosition, Vector3f fractionPosition) {
-        this.longX = longPosition == null ? 0L : longPosition.x;
-        this.longY = longPosition == null ? 0L : longPosition.y;
-        this.longZ = longPosition == null ? 0L : longPosition.z;
-        this.fractionX = fractionPosition == null ? 0.0F : fractionPosition.x;
-        this.fractionY = fractionPosition == null ? 0.0F : fractionPosition.y;
-        this.fractionZ = fractionPosition == null ? 0.0F : fractionPosition.z;
+        this(longPosition.x, longPosition.y, longPosition.z, fractionPosition.x, fractionPosition.y, fractionPosition.z);
     }
 
     public Position(Position position) {

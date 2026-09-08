@@ -159,6 +159,7 @@ public final class AssetLoader {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
         IntBuffer buffer = storeDataInIntBuffer(indices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+        MemoryUtil.memFree(buffer);
     }
 
     public static IntBuffer storeDataInIntBuffer(int[] data) {
