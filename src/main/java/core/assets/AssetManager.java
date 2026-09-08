@@ -88,6 +88,7 @@ public final class AssetManager {
     }
 
     public static void setActiveAssetPackNames(ArrayList<String> assetPackNames) {
+        if (AssetManager.assetPackNames.equals(assetPackNames)) return;
         AssetManager.assetPackNames.clear();
         AssetManager.assetPackNames.addAll(assetPackNames);
         deleteAll();
@@ -95,7 +96,6 @@ public final class AssetManager {
 
     private static void addAssetFilePathsInFolder(ArrayList<Path> filePaths, Path folderPath) {
         File[] files = FileManager.getChildren(folderPath);
-        if (files == null) return;
         for (File file : files) filePaths.add(file.toPath());
     }
 

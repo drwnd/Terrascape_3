@@ -149,10 +149,10 @@ public final class Window {
     }
 
     public static void cleanUp() {
+        Settings.writeToFile();
         AssetManager.cleanUp();
         glfwDestroyWindow(window);
         Sound.cleanUp();
-        Settings.writeToFile();
     }
 
     public static Vector2f toPixelCoordinate(Vector2f position, boolean scalesWithGuiSize) {

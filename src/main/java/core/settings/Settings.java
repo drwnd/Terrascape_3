@@ -1,8 +1,6 @@
 package core.settings;
 
 import core.assets.AssetManager;
-import core.assets.SettingsFile;
-import core.assets.identifiers.AssetIdentifier;
 import core.rendering_api.Debug;
 import core.utils.FileManager;
 
@@ -15,11 +13,10 @@ import java.util.List;
 public final class Settings {
 
     static {
-        fileIdentifier = Settings::loadSettingsFile;
         settings = new ArrayList<>();
+        settingTokens = loadSettingsFile();
         registerSettingsEnums(CoreFloatSettings.class, CoreKeySettings.class, CoreToggleSettings.class, CoreOptionSettings.class);
         registerSettings(List.of(new AssetPackSetting()));
-        AssetManager.addDeleteAllCallback(Settings::loadFromFile);
     }
 
     @SafeVarargs
@@ -36,17 +33,14 @@ public final class Settings {
     }
 
     public static void loadFromFile() {
-        AssetManager.delete(fileIdentifier);
+        settingTokens = loadSettingsFile();
         initSettings(settings);
     }
 
     public static void writeToFile() {
         File file = FileManager.loadAndCreateFile(Path.of("Settings"));
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()))) {
             for (Setting setting : settings) writer.write("%s:%s%n".formatted(setting.name(), setting.toSaveValue()));
-            writer.close();
-
         } catch (Exception exception) {
             exception.printStackTrace();
             Debug.err("Failed to save Settings to File");
@@ -62,11 +56,11 @@ public final class Settings {
         return settings;
     }
 
-    private static SettingsFile loadSettingsFile() {
+    private static String[][] loadSettingsFile() {
         String[] settingsFileContents = FileManager.readAllLines(Path.of("Settings"));
         String[][] settings = new String[settingsFileContents.length][0];
         for (int index = 0; index < settingsFileContents.length; index++) settings[index] = settingsFileContents[index].split(":");
-        return new SettingsFile(settings);
+        return settings;
     }
 
     private static void registerSettingsEnum(Class<? extends Setting> settings) {
@@ -77,7 +71,7 @@ public final class Settings {
     }
 
     private static void initSettings(Iterable<Setting> settings) {
-        for (String[] tokens : AssetManager.get(fileIdentifier).tokens())
+        for (String[] tokens : settingTokens)
             for (Setting setting : settings) {
                 if (tokens.length != 2) continue;
                 try {
@@ -89,7 +83,7 @@ public final class Settings {
     }
 
     private static final ArrayList<Setting> settings;
-    private static final AssetIdentifier<SettingsFile> fileIdentifier;
+    private static String[][] settingTokens;
 
     private static class AssetPackSetting implements Setting {
 
