@@ -13,6 +13,11 @@ final class ByteArrayCompressor {
     }
 
     static void compressMaterials(ByteArrayList data, byte[] uncompressedMaterials, int sizeBits) {
+        if (sizeBits <= 0 || uncompressedMaterials.length != 1 << sizeBits * 3) {
+            data.add((byte) (getType(uncompressedMaterials[0]) | HOMOGENOUS));
+            data.add(uncompressedMaterials[0]);
+            return;
+        }
         ByteBuffer byteBuffer = ByteBuffer.wrap(uncompressedMaterials);
         compressMaterials(data, byteBuffer, sizeBits, 0, 0, 0, 0);
     }

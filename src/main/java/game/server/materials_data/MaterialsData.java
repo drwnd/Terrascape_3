@@ -51,7 +51,7 @@ public final class MaterialsData {
     public static MaterialsData getCompressedMaterials(int sizeBits, long[] bitMap, byte material) {
         if (sizeBits == 0) return new MaterialsData(0, material);
         ByteArrayList dataList = new ByteArrayList(1000);
-        BitMapCompressor.compressMaterials(dataList, bitMap, material, sizeBits, 0, 0, 0, 0);
+        BitMapCompressor.compressMaterials(dataList, bitMap, material, sizeBits);
         return new MaterialsData(sizeBits, dataList.toArray());
     }
 
@@ -190,7 +190,7 @@ public final class MaterialsData {
     }
 
     public long[] getBitMap() {
-        long[] bitMap = new long[(1 << totalSizeBits * 3) / Long.SIZE];
+        long[] bitMap = new long[Math.max(1, (1 << totalSizeBits * 3) / Long.SIZE)];
         fillBitMap(bitMap, totalSizeBits, 0, 0, 0, 0);
         return bitMap;
     }

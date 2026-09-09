@@ -11,7 +11,18 @@ final class BitMapCompressor {
 
     }
 
-    static int compressMaterials(ByteArrayList data, long[] bitMap, byte material, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+    static void compressMaterials(ByteArrayList data, long[] bitMap, byte material, int sizeBits) {
+        if (sizeBits <= 0 || bitMap.length * Long.SIZE != 1 << sizeBits * 3) {
+            material = (bitMap[0] & 1) == 0 ? AIR : material;
+            data.add((byte) (getType(material) | HOMOGENOUS));
+            data.add(material);
+            return;
+        }
+        compressMaterials(data, bitMap, material, sizeBits, 0, 0, 0, 0);
+    }
+
+
+    private static int compressMaterials(ByteArrayList data, long[] bitMap, byte material, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         if (isHomogenous(MaterialsData.getUncompressedIndex(inChunkX, inChunkY, inChunkZ), 1 << sizeBits * 3, bitMap))
             return addHomogenous(data, bitMap, material, inChunkX, inChunkY, inChunkZ);
         if (sizeBits <= 1) {
@@ -53,7 +64,6 @@ final class BitMapCompressor {
         data.set((byte) (getSplitterTypes(data, index) | SPLITTER), index);
         return offset;
     }
-
 
     private static int addHomogenous(ByteArrayList data, long[] bitMap, byte material, int inChunkX, int inChunkY, int inChunkZ) {
         material = getBitMapByte(bitMap, getUncompressedIndex(inChunkX, inChunkY, inChunkZ) >> 3) == -1 ? material : AIR;
