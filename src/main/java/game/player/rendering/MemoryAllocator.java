@@ -52,23 +52,24 @@ public final class MemoryAllocator {
             after = after.next;
         }
 
-        boolean merged = false;
-        if (before != null && before.start + before.size == freed.start) {
+        boolean mergeBefore = before != null && before.start + before.size == freed.start;
+        boolean mergeAfter = after != null && freed.start + freed.size == after.start;
+
+        if (mergeBefore) {
             before.size += freed.size;
-            freed = before;
-            merged = true;
+            if (mergeAfter) {
+                before.size += after.size;
+                before.next = after.next;
+            }
+            return;
         }
-        if (after != null && freed.start + freed.size == after.start) {
+        if (mergeAfter) {
             freed.size += after.size;
-            if (before != null) before.next = freed;
             freed.next = after.next;
-            merged = true;
-        }
-        if (!merged) {
-            if (before == null) free = freed;
-            else before.next = freed;
-            freed.next = after;
-        }
+        } else freed.next = after;
+
+        if (before == null) free = freed;
+        else before.next = freed;
     }
 
     public int getBuffer() {

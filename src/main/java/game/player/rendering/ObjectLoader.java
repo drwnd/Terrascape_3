@@ -42,8 +42,8 @@ public final class ObjectLoader {
     public static int generateSkyboxVertexArray() {
         int vao = AssetLoader.createVAO();
         AssetLoader.storeIndicesInBuffer(SKY_BOX_INDICES);
-        AssetLoader.storeDateInAttributeList(0, 3, SKY_BOX_VERTICES);
-        AssetLoader.storeDateInAttributeList(1, 2, SKY_BOX_TEXTURE_COORDINATES);
+        AssetLoader.storeDataInAttributeList(0, 3, SKY_BOX_VERTICES);
+        AssetLoader.storeDataInAttributeList(1, 2, SKY_BOX_TEXTURE_COORDINATES);
         return vao;
     }
 }

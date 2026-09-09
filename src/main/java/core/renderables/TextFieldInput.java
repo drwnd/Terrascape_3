@@ -3,7 +3,6 @@ package core.renderables;
 import core.rendering_api.Input;
 
 import core.rendering_api.Window;
-import org.joml.Vector2i;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -166,5 +165,4 @@ public class TextFieldInput extends Input {
 
     protected final TextField field;
     protected int cursorIndex;
-    private final Vector2i cursorPos = new Vector2i();
 }

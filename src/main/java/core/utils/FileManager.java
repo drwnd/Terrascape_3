@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public final class FileManager {
@@ -15,14 +16,12 @@ public final class FileManager {
     public static String[] readAllLines(Path filepath) {
         ArrayList<String> lines = new ArrayList<>();
         File file = loadAndCreateFile(filepath);
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) break;
                 lines.add(line);
             }
-            reader.close();
         } catch (IOException exception) {
             exception.printStackTrace();
             return new String[0];
@@ -46,9 +45,8 @@ public final class FileManager {
 
     public static File[] getChildren(Path filepath) {
         File file = filepath.toFile();
-        if (!file.exists()) return new File[0];
-        file.mkdirs();
-        return file.listFiles();
+        File[] children = file.listFiles();
+        return children == null ? new File[0] : children;
     }
 
     public static File loadAndCreateDirectory(Path filepath) {
@@ -81,31 +79,21 @@ public final class FileManager {
     }
 
     public static String loadFileContents(Path filepath) {
-        String result;
-
-        try {
-            InputStream in = new FileInputStream(filepath.toFile());
-            Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
-            result = scanner.useDelimiter("\\A").next();
-
-        } catch (FileNotFoundException exception) {
+        try (Scanner scanner = new Scanner(filepath, StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").next();
+        } catch (IOException | NoSuchElementException exception) {
             throw new RuntimeException(exception);
         }
-
-        return result;
     }
 
     public static String loadJson(Path filepath) {
         File file = filepath.toFile();
         if (!file.exists()) return "{}";
 
-        InputStream in;
-        try {
-            in = new FileInputStream(file);
-        } catch (FileNotFoundException _) {
+        try (Scanner scanner = new Scanner(filepath, StandardCharsets.UTF_8)) {
+            return scanner.useDelimiter("\\A").next();
+        } catch (IOException | NoSuchElementException _) {
             return "{}";
         }
-        Scanner scanner = new Scanner(in, StandardCharsets.UTF_8);
-        return scanner.useDelimiter("\\A").next();
     }
 }

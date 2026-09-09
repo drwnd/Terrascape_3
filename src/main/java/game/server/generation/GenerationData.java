@@ -110,13 +110,13 @@ public final class GenerationData {
     }
 
     public void storeColumn(int inChunkX, int inChunkZ, int inChunkStartY, int inChunkEndY, byte material) {
-        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
+        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.Z_ORDER_3D_TABLE_Z[inChunkZ];
         for (int inChunkY = inChunkStartY; inChunkY < inChunkEndY; inChunkY++)
             uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = material;
     }
 
     public void storeColumn(int inChunkX, int inChunkZ, int inChunkStartY, int inChunkEndY, MaterialFunction materialFunction) {
-        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
+        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.Z_ORDER_3D_TABLE_Z[inChunkZ];
         for (int inChunkY = inChunkStartY; inChunkY < inChunkEndY; inChunkY++) {
             byte material = materialFunction.getGeneratingMaterial(this, totalX, computeTotalY(inChunkY), totalZ);
             uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = material;
@@ -128,7 +128,7 @@ public final class GenerationData {
     }
 
     public void fillAboveWith(int inChunkX, int inChunkY, int inChunkZ, byte material) {
-        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.T_ORDER_3D_TABLE_Z[inChunkZ];
+        int xzIndex = MaterialsData.Z_ORDER_3D_TABLE_X[inChunkX] | MaterialsData.Z_ORDER_3D_TABLE_Z[inChunkZ];
         for (; inChunkY < CHUNK_SIZE; inChunkY++) uncompressedMaterials[xzIndex | MaterialsData.Z_ORDER_3D_TABLE_Y[inChunkY]] = material;
     }
 

@@ -71,7 +71,7 @@ final class SettingCommand {
             switch (setting) {
                 case FloatSetting floatSetting -> floatSetting.setValue(floatSetting.defaultValue());
                 case IntSetting intSetting -> intSetting.setValue(intSetting.defaultValue());
-                case ToggleSetting toggleSetting -> toggleSetting.setValue(toggleSetting.value());
+                case ToggleSetting toggleSetting -> toggleSetting.setValue(toggleSetting.defaultValue());
                 case OptionSetting optionSetting -> optionSetting.setValue(optionSetting.defaultValue());
                 case KeySetting keySetting -> keySetting.setKeybind(keySetting.defaultKeybind());
                 default -> {

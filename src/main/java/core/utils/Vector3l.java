@@ -580,7 +580,7 @@ public final class Vector3l {
         return dest;
     }
 
-    public long maxComponent() {
+    public int maxComponent() {
         float absX = Math.abs(x);
         float absY = Math.abs(y);
         float absZ = Math.abs(z);
@@ -592,7 +592,7 @@ public final class Vector3l {
         return 2;
     }
 
-    public long minComponent() {
+    public int minComponent() {
         float absX = Math.abs(x);
         float absY = Math.abs(y);
         float absZ = Math.abs(z);
