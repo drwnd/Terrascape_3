@@ -19,7 +19,9 @@ import game.utils.Utils;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 
+import java.nio.IntBuffer;
 import java.util.Arrays;
 
 import static game.utils.Constants.*;
@@ -138,7 +140,7 @@ public final class RenderingOptimizer {
                     model.chunkZ() + zOffset, false);
         }
         shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
-        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
+        glNamedBufferSubData(shadowIndirectBuffer, 0, intoDirectBuffer(opaqueCommands));
     }
 
     public void populateGlassShadowIndirectBuffer() {
@@ -152,7 +154,7 @@ public final class RenderingOptimizer {
             model.addGlassData(opaqueCommands);
         }
         shadowDrawCount = opaqueCommands.size() * 4 / INDIRECT_COMMAND_SIZE;
-        glNamedBufferSubData(shadowIndirectBuffer, 0, opaqueCommands.toArray());
+        glNamedBufferSubData(shadowIndirectBuffer, 0, intoDirectBuffer(opaqueCommands));
     }
 
     public int getShadowIndirectBuffer() {
@@ -182,14 +184,14 @@ public final class RenderingOptimizer {
         for (int lod = 0; lod < lodCount; lod++) generateIndirectCommandsWithOcclusionCulling(lod);
         int occludeeCount = aabbs.size() / AABB_INT_SIZE;
 
-        glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
-        glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
-        glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
-        glNamedBufferSubData(occludeeBuffer, 0, aabbs.toArray());
+        glNamedBufferSubData(opaqueIndirectBuffer, 0, intoDirectBuffer(opaqueCommands));
+        glNamedBufferSubData(transparentIndirectBuffer, 0, intoDirectBuffer(transparentCommands));
+        glNamedBufferSubData(glassIndirectBuffer, 0, intoDirectBuffer(glassCommands));
+        glNamedBufferSubData(occludeeBuffer, 0, intoDirectBuffer(aabbs));
 
         aabbs.clear();
         for (int lod = 0; lod < lodCount; lod++) populateOccluderBuffer(lod);
-        glNamedBufferSubData(occluderBuffer, 0, aabbs.toArray());
+        glNamedBufferSubData(occluderBuffer, 0, intoDirectBuffer(aabbs));
         int occluderCount = aabbs.size() / AABB_INT_SIZE;
 
         renderOccluders(cameraPosition, projectionViewMatrix, occluderCount);
@@ -199,9 +201,9 @@ public final class RenderingOptimizer {
     private void generateIndirectCommandsWithoutOcclusionCulling() {
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) generateIndirectCommandsWithoutOcclusionCulling(lod);
 
-        glNamedBufferSubData(opaqueIndirectBuffer, 0, opaqueCommands.toArray());
-        glNamedBufferSubData(transparentIndirectBuffer, 0, transparentCommands.toArray());
-        glNamedBufferSubData(glassIndirectBuffer, 0, glassCommands.toArray());
+        glNamedBufferSubData(opaqueIndirectBuffer, 0, intoDirectBuffer(opaqueCommands));
+        glNamedBufferSubData(transparentIndirectBuffer, 0, intoDirectBuffer(transparentCommands));
+        glNamedBufferSubData(glassIndirectBuffer, 0, intoDirectBuffer(glassCommands));
     }
 
     private void computeLodVisibility(int lod, FrustumIntersection frustumIntersection) {
@@ -486,6 +488,12 @@ public final class RenderingOptimizer {
         glDisable(GL_BLEND);
     }
 
+    private IntBuffer intoDirectBuffer(IntArrayList list) {
+        if (directBuffer.capacity() < list.size())
+            directBuffer = BufferUtils.createIntBuffer(Math.max(directBuffer.capacity() * 2, list.size()));
+        return directBuffer.clear().put(list.getData(), 0, list.size()).limit(list.size()).flip();
+    }
+
 
     private long[] lodVisibilityBits;
     private final MeshCollector meshCollector;
@@ -495,7 +503,7 @@ public final class RenderingOptimizer {
     private final int opaqueIndirectBuffer, transparentIndirectBuffer, glassIndirectBuffer, shadowIndirectBuffer;
     private final int occluderBuffer, occludeeBuffer;
 
-    private final int LONGS_PER_LOD_BITS = Game.getWorld().CHUNKS_PER_LOD / 64;
+    private final int LONGS_PER_LOD_BITS = Game.getWorld().CHUNKS_PER_LOD / Long.SIZE;
 
     private final long[][] visibilityBits = new long[Game.getWorld().LOD_COUNT][LONGS_PER_LOD_BITS];
     private final long[] lodStarts = new long[Game.getWorld().LOD_COUNT * 3];
@@ -506,6 +514,7 @@ public final class RenderingOptimizer {
     private final IntArrayList transparentCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList glassCommands = new IntArrayList(INDIRECT_COMMAND_SIZE * 128);
     private final IntArrayList aabbs = new IntArrayList(AABB_INT_SIZE * 256);
+    private IntBuffer directBuffer = BufferUtils.createIntBuffer(INDIRECT_COMMAND_SIZE * 256);
 
     private static final int AABB_INT_SIZE = 4;
 

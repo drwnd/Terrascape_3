@@ -1,7 +1,7 @@
 package core.utils;
 
 /**
- * {@code ArrayList<Integer>} is nice and all but the performance sucks compared to this.
+ * {@code ArrayList<Integer>} is nice and all, but the performance sucks compared to this.
  */
 public final class IntArrayList {
 
@@ -36,12 +36,6 @@ public final class IntArrayList {
     }
 
     public int[] getData() {
-        return data;
-    }
-
-    public int[] toArray() {
-        int[] array = new int[size];
-        copyInto(array, 0);
         return data;
     }
 
