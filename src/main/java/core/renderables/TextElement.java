@@ -44,17 +44,12 @@ public final class TextElement extends Renderable {
 
         float textSize = CoreFloatSettings.TEXT_SIZE.value() * this.textSize;
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
-        float charWidth = defaultTextSize.x * textSize;
-        float charHeight = defaultTextSize.y * textSize;
-
         float maxAllowedLength = getParent().getPosition().x + getParent().getSize().x - position.x;
-        int maxLength = TextShader.getMaxLength(text, maxAllowedLength, defaultTextSize.x, scalesWithGuiSize());
 
         position = new Vector2f(position.x, position.y - defaultTextSize.y * 0.5F * textSize / guiSize);
         TextShader textShader = (TextShader) AssetManager.get(CoreShaders.TEXT);
         textShader.bind();
-        textShader.setUniform("charSize", charWidth, charHeight);
-        textShader.drawText(position, text.substring(0, maxLength), color, addTransparentBackground, scalesWithGuiSize());
+        textShader.drawText(position, text, textSize, maxAllowedLength, color, addTransparentBackground, scalesWithGuiSize());
     }
 
     public float getLength() {
