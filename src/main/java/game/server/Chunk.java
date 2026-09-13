@@ -108,5 +108,5 @@ public final class Chunk {
 
     private MaterialsData materials;
     private boolean modified;
-    private Status generationStatus = Status.NOT_STARTED;
+    private volatile Status generationStatus = Status.NOT_STARTED;
 }

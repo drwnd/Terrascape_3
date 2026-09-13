@@ -49,11 +49,6 @@ public final class ChunkSaver extends Saver<Chunk> {
         else thisLodFile = FileManager.loadAndCreateDirectory(thisLodFile.toPath());
         File[] lowerLodChunkFiles = FileManager.getChildren(lowerLodFile.toPath());
 
-        if (lowerLodChunkFiles == null) {
-            Debug.err("Error occurred when listing lod " + lowerLOD + " chunk files.");
-            return;
-        }
-
         for (File chunkFile : lowerLodChunkFiles) {
             Chunk chunk = saver.load(chunkFile.toPath());
             if (chunk == null) continue;

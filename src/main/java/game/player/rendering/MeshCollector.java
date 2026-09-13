@@ -9,6 +9,7 @@ import game.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
@@ -124,12 +125,12 @@ public final class MeshCollector {
     }
 
     public boolean isMeshed(int chunkIndex, int lod) {
-        return (isMeshed[lod][chunkIndex >> 6] & 1L << chunkIndex) != 0;
+        return (isMeshed[lod].get(chunkIndex >> 6) & 1L << chunkIndex) != 0;
     }
 
     public void setMeshed(boolean meshed, int chunkIndex, int lod) {
-        if (meshed) isMeshed[lod][chunkIndex >> 6] |= 1L << chunkIndex;
-        else isMeshed[lod][chunkIndex >> 6] &= ~(1L << chunkIndex);
+        if (meshed) isMeshed[lod].accumulateAndGet(chunkIndex >> 6, 1L << chunkIndex, (left, right) -> left | right);
+        else isMeshed[lod].accumulateAndGet(chunkIndex >> 6, ~(1L << chunkIndex), (left, right) -> left & right);
     }
 
     public void removeMesh(int chunkIndex, int lod) {
@@ -191,7 +192,7 @@ public final class MeshCollector {
             Arrays.fill(opaqueModels[lod], null);
             Arrays.fill(transparentModels[lod], null);
 
-            Arrays.fill(isMeshed[lod], 0L);
+            for (int index = 0; index < isMeshed[lod].length(); index++) isMeshed[lod].setPlain(index, 0L);
         }
     }
 
@@ -257,6 +258,14 @@ public final class MeshCollector {
         return new TransparentModel(mesh.getWorldCoordinate(), mesh.transparentVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
     }
 
+
+    private static AtomicLongArray[] getMeshedArray() {
+        AtomicLongArray[] array = new AtomicLongArray[Game.getWorld().LOD_COUNT];
+        for (int index = 0; index < array.length; index++) array[index] = new AtomicLongArray(Game.getWorld().CHUNKS_PER_LOD / Long.SIZE);
+        return array;
+    }
+
+
     private final MemoryAllocator allocator;
     private final ArrayList<Mesh> meshQueue = new ArrayList<>();
     private final ArrayList<OpaqueModel> toDeleteOpaqueModels = new ArrayList<>();
@@ -266,5 +275,5 @@ public final class MeshCollector {
     private final TransparentModel[][] transparentModels = new TransparentModel[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
     private final AABB[][] occluders = new AABB[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
     private final AABB[][] occludees = new AABB[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD];
-    private final long[][] isMeshed = new long[Game.getWorld().LOD_COUNT][Game.getWorld().CHUNKS_PER_LOD / 64];
+    private final AtomicLongArray[] isMeshed = getMeshedArray();
 }
