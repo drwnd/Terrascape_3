@@ -150,7 +150,7 @@ public final class Movement {
     private void resolveCollision(Vector3f nextVelocity, Vector3f toMoveDistance, Position position, Vector3d units, Vector3d lengths,
                                   int component, float moved) {
         int requiredStepHeight = getRequiredStepHeight(position, component);
-        if (canAutoStep(position, requiredStepHeight)) {
+        if (canAutoStep(position, requiredStepHeight, component, moved)) {
             position.addComponent(Y_COMPONENT, requiredStepHeight);
             autoSteppedHeight += requiredStepHeight;
         } else stopAndUndoMove(nextVelocity, toMoveDistance, position, units, lengths, component, moved);
@@ -178,16 +178,16 @@ public final class Movement {
         return Integer.MAX_VALUE;
     }
 
-    private boolean canAutoStep(Position position, int requiredStepHeight) {
+    private boolean canAutoStep(Position position, int requiredStepHeight, int component, float moved) {
         int maxStepHeight = state.getMaxAutoStepHeight();
         if (autoSteppedHeight + requiredStepHeight > maxStepHeight * MAX_STEP_HEIGHT_CAP_MULTIPLIER) return false;
 
-        boolean swimming = MovementState.intersectsLiquid(position, state);
+        Position originPosition = new Position(position).addComponent(component, -moved);
+        boolean swimming = MovementState.intersectsLiquid(originPosition, state);
         if (swimming && Input.isKeyPressed(KeySettings.JUMP)) maxStepHeight += 2;
-        if ((!checkGrounded(position) && !swimming) || requiredStepHeight > maxStepHeight) return false;
+        if ((!checkGrounded(originPosition) && !swimming) || requiredStepHeight > maxStepHeight) return false;
 
-        Position steppedPosition = new Position(position);
-        steppedPosition.addComponent(Y_COMPONENT, requiredStepHeight);
+        Position steppedPosition = originPosition.set(position).addComponent(Y_COMPONENT, requiredStepHeight);
         return noCollision(steppedPosition, state);
     }
 
@@ -195,10 +195,10 @@ public final class Movement {
         if (component == Y_COMPONENT || velocity.y > 0.0F) return false;
         int maxStepHeight = state.getMaxAutoStepHeight();
         Position originPosition = new Position(position).addComponent(component, -moved).addComponent(Y_COMPONENT, -maxStepHeight);
-        if (!wideCollides(originPosition, state)) return false;
+        if (noCollision(originPosition, state)) return false;
 
         if (groundSnappedHeight > maxStepHeight * MAY_SNAP_HEIGHT_CAP_MULTIPLIER) return true;
-        Position loweredPosition = new Position(position).addComponent(Y_COMPONENT, -maxStepHeight - 1);
+        Position loweredPosition = originPosition.set(position).addComponent(Y_COMPONENT, -maxStepHeight - 1);
         return state.preventsFallingFromEdge() && noCollision(loweredPosition, state);
     }
 
@@ -208,11 +208,11 @@ public final class Movement {
         Position originPosition = new Position(position).addComponent(component, -moved);
         if (!checkGrounded(originPosition)) return;
 
-        Position loweredPosition = new Position(position).addComponent(Y_COMPONENT, -maxStepHeight - 1);
+        Position loweredPosition = originPosition.set(position).addComponent(Y_COMPONENT, -maxStepHeight - 1);
         if (noCollision(loweredPosition, state)) return;
 
         int requiredSnapHeight = 0;
-        Position snappedPosition = new Position(position);
+        Position snappedPosition = originPosition.set(position);
 
         while (!checkGrounded(snappedPosition)) {
             snappedPosition.addComponent(Y_COMPONENT, -1);
@@ -276,16 +276,6 @@ public final class Movement {
         long startZ = minZ(position, hitboxSize);
 
         return !collides(startX, startY, startZ, hitboxSize.x, hitboxSize.y, hitboxSize.z);
-    }
-
-    private static boolean wideCollides(Position position, MovementState state) {
-        Vector3i hitboxSize = state.getHitboxSize();
-
-        long startX = minX(position, hitboxSize) - 1;
-        long startY = minY(position, hitboxSize);
-        long startZ = minZ(position, hitboxSize) - 1;
-
-        return collides(startX, startY, startZ, hitboxSize.x + 2, hitboxSize.y, hitboxSize.z + 2);
     }
 
     private static boolean collides(long startX, long startY, long startZ, int width, int height, int depth) {
