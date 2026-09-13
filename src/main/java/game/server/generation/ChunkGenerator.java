@@ -3,11 +3,8 @@ package game.server.generation;
 import core.rendering_api.Debug;
 import core.utils.Vector3l;
 
-import game.player.rendering.Mesh;
 import game.player.rendering.MeshCollector;
-import game.player.rendering.MeshGenerator;
 import game.server.*;
-import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
@@ -32,15 +29,15 @@ public final class ChunkGenerator {
         long playerChunkZ = playerPosition.z >>> CHUNK_SIZE_BITS;
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ - 1, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 0, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 0, playerChunkY, playerChunkZ - 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 1, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX - 1, playerChunkY, playerChunkZ + 0, 0));
+        executor.submit(new ChunkColumnGenerator(playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0));
 
         executor.shutdown();
         try {
@@ -122,13 +119,13 @@ public final class ChunkGenerator {
     private void submitColumnGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
         if (columnRequiresGeneration(chunkX, playerChunkY, chunkZ, lod))
-            executor.submit(new Generator(chunkX, playerChunkY, chunkZ, lod));
+            executor.submit(new ChunkColumnGenerator(chunkX, playerChunkY, chunkZ, lod));
     }
 
     private void submitColumnMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
         if (columnRequiresMeshing(chunkX, playerChunkY, chunkZ, lod))
-            executor.submit(new MeshHandler(chunkX, playerChunkY, chunkZ, lod));
+            executor.submit(new ChunkColumnMesher(chunkX, playerChunkY, chunkZ, lod));
     }
 
     private static boolean columnRequiresGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
@@ -151,84 +148,4 @@ public final class ChunkGenerator {
 
 
     private final ThreadPoolExecutor executor;
-
-    private record Generator(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
-
-        @Override
-        public void run() {
-
-            GenerationData generationData;
-            ChunkSaver saver = new ChunkSaver();
-            try {
-                generationData = new GenerationData(chunkX, chunkZ, lod);
-            } catch (Exception exception) {
-                Debug.err("Failed to create GenerationData");
-                Debug.err(exception.getClass());
-                exception.printStackTrace();
-                Debug.err("X:%d Z:%d%n", chunkX, chunkZ);
-                return;
-            }
-
-            for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value() - 1; chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 2; chunkY++) {
-                try {
-                    Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-                    if (chunk.getGenerationStatus() == Status.NOT_STARTED) {
-                        WorldGeneration.generate(chunk, generationData);
-                        Game.getWorld().storeChunk(chunk);
-                    }
-                } catch (Exception exception) {
-                    Debug.err("Generation:");
-                    Debug.err(exception.getClass());
-                    exception.printStackTrace();
-                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
-                }
-            }
-        }
-    }
-
-    private record MeshHandler(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
-
-        @Override
-        public void run() {
-
-            MeshGenerator meshGenerator = new MeshGenerator();
-            World world = Game.getWorld();
-            MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
-
-            for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value(); chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 1; chunkY++) {
-                try {
-                    int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-                    ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
-                    Chunk chunk = world.getChunk(chunkIndex, lod);
-
-                    if (chunk == null) {
-                        Debug.err("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                        continue;
-                    }
-                    if (!chunk.ID.equals(expectedId)) {
-                        Debug.err("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
-                        continue;
-                    }
-                    if (chunk.getGenerationStatus() != Status.DONE) {
-                        Debug.err("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
-                        Debug.err("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                        continue;
-                    }
-
-                    if (meshCollector.isMeshed(chunkIndex, lod)) continue;
-                    meshCollector.setMeshed(true, chunkIndex, lod);
-
-                    Mesh mesh = meshGenerator.generateMesh(chunk);
-                    if (mesh == null) meshCollector.setMeshed(false, chunkIndex, lod);
-                    else meshCollector.queueMesh(mesh);
-
-                } catch (Exception exception) {
-                    Debug.err("Meshing:");
-                    Debug.err(exception.getClass());
-                    exception.printStackTrace();
-                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
-                }
-            }
-        }
-    }
 }

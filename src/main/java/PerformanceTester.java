@@ -56,8 +56,9 @@ public final class PerformanceTester {
         World world = Game.getWorld();
 
         for (int chunkY = -chunkCount + 1; chunkY < chunkCount - 1; chunkY++) {
-            Mesh mesh = meshGenerator.generateMesh(world.getChunk(chunkX, chunkY, chunkZ, 0));
-            if (mesh == null) System.err.printf("Chunk at x:%d, y:%d, z:%d couldn't generate a mesh", chunkX, chunkY, chunkZ);
+            Chunk chunk = world.getChunk(chunkX, chunkY, chunkZ, 0);
+            Mesh mesh = meshGenerator.generateMesh(chunk, chunk.getNeighbors());
+            if (mesh.glassVertexCount() == 1234567890) System.out.println("Use mesh for something");
         }
     }
 

@@ -128,9 +128,11 @@ public final class MeshCollector {
         return (isMeshed[lod].get(chunkIndex >> 6) & 1L << chunkIndex) != 0;
     }
 
-    public void setMeshed(boolean meshed, int chunkIndex, int lod) {
-        if (meshed) isMeshed[lod].accumulateAndGet(chunkIndex >> 6, 1L << chunkIndex, (left, right) -> left | right);
-        else isMeshed[lod].accumulateAndGet(chunkIndex >> 6, ~(1L << chunkIndex), (left, right) -> left & right);
+    public boolean setMeshed(boolean meshed, int chunkIndex, int lod) {
+        long previous;
+        if (meshed) previous = isMeshed[lod].getAndAccumulate(chunkIndex >> 6, 1L << chunkIndex, (left, right) -> left | right);
+        else previous = isMeshed[lod].getAndAccumulate(chunkIndex >> 6, ~(1L << chunkIndex), (left, right) -> left & right);
+        return (previous & 1L << chunkIndex) != 0;
     }
 
     public void removeMesh(int chunkIndex, int lod) {

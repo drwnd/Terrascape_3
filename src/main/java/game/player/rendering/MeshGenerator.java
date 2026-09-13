@@ -5,7 +5,6 @@ import core.utils.IntArrayList;
 
 import game.server.Chunk;
 import game.server.ChunkNeighbors;
-import game.server.Game;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
@@ -32,14 +31,8 @@ public final class MeshGenerator {
         return true;
     }
 
-    public Mesh generateMesh(Chunk chunk) {
+    public Mesh generateMesh(Chunk chunk, ChunkNeighbors neighbors) {
         if (chunk.isAir()) return new Mesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
-
-        ChunkNeighbors neighbors = chunk.getNeighbors();
-        if (neighbors.areUnGenerated()) {
-            Game.getServer().scheduleGeneratorRestart();
-            return null;
-        }
 
         AABB occluder = chunk.getMaterials().getOccluder();
         chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, neighbors);
