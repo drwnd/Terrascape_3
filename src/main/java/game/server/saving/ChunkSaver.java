@@ -49,11 +49,6 @@ public final class ChunkSaver extends Saver<Chunk> {
         else thisLodFile = FileManager.loadAndCreateDirectory(thisLodFile.toPath());
         File[] lowerLodChunkFiles = FileManager.getChildren(lowerLodFile.toPath());
 
-        if (lowerLodChunkFiles == null) {
-            Debug.err("Error occurred when listing lod " + lowerLOD + " chunk files.");
-            return;
-        }
-
         for (File chunkFile : lowerLodChunkFiles) {
             Chunk chunk = saver.load(chunkFile.toPath());
             if (chunk == null) continue;
@@ -68,7 +63,7 @@ public final class ChunkSaver extends Saver<Chunk> {
             generateChunk(thisLodChunk, saver);
             saver.save(thisLodChunk, getSaveFileLocation(thisLodChunkId, lod));
         }
-       Debug.log("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
+        Debug.log("Finished generating lod %s, generated from %s lowerLod chunks. Took %sms%n", lod, lowerLodChunkFiles.length, (System.nanoTime() - start) / 1_000_000);
     }
 
     private static void generateChunk(Chunk chunk, ChunkSaver saver) {

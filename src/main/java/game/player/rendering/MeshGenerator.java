@@ -32,17 +32,17 @@ public final class MeshGenerator {
         return true;
     }
 
-    public Mesh generateMesh(Chunk chunk) {
+    public Mesh generateMesh(ChunkNeighbors chunks) {
+        Chunk chunk = chunks.center();
         if (chunk.isAir()) return new Mesh(chunk.X, chunk.Y, chunk.Z, chunk.LOD);
 
-        ChunkNeighbors neighbors = chunk.getNeighbors();
-        if (neighbors.areUnGenerated()) {
+        if (chunks.areUnGenerated()) {
             Game.getServer().scheduleGeneratorRestart();
             return null;
         }
 
         AABB occluder = chunk.getMaterials().getOccluder();
-        chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, neighbors);
+        chunk.generateToMeshFacesMaps(toMeshFacesMaps, materials, adjacentChunkLayers, chunks);
 
         startX = (int) chunk.X << CHUNK_SIZE_BITS;
         startY = (int) chunk.Y << CHUNK_SIZE_BITS;

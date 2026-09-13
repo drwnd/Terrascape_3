@@ -32,7 +32,7 @@ public final class Chunk {
 
     public ChunkNeighbors getNeighbors() {
         World world = Game.getWorld();
-        return new ChunkNeighbors(
+        return new ChunkNeighbors(this,
                 world.getChunk(X, Y, Z + 1, LOD),
                 world.getChunk(X, Y + 1, Z, LOD),
                 world.getChunk(X + 1, Y, Z, LOD),

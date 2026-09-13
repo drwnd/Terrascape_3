@@ -142,8 +142,8 @@ public final class Server implements CrashCallback {
     }
 
     void cleanUp() {
-        generator.cleanUp();
         pauseTicks();
+        generator.cleanUp();
     }
 
     public void scheduleGeneratorRestart() {
@@ -223,6 +223,7 @@ public final class Server implements CrashCallback {
         }
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
+            generator.updateGameTick();
             if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSettings.CULLING_COMPUTATION.value()) {
                 generator.restart();
                 generatorRestartScheduled = false;

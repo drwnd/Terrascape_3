@@ -12,9 +12,9 @@ import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.*;
 
 import static game.utils.Constants.*;
 
@@ -32,15 +32,16 @@ public final class ChunkGenerator {
         long playerChunkZ = playerPosition.z >>> CHUNK_SIZE_BITS;
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(NUMBER_OF_GENERATION_THREADS);
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX + 0, playerChunkY, playerChunkZ - 1, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ + 0, 0));
-        executor.submit(new Generator(playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0));
+        ChunkSaver saver = new ChunkSaver();
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 0, playerChunkY, playerChunkZ + 1, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 0, playerChunkY, playerChunkZ + 0, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 0, playerChunkY, playerChunkZ - 1, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 1, playerChunkY, playerChunkZ + 1, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 1, playerChunkY, playerChunkZ + 0, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX + 1, playerChunkY, playerChunkZ - 1, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX - 1, playerChunkY, playerChunkZ + 1, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX - 1, playerChunkY, playerChunkZ + 0, 0)));
+        executor.submit(new Generator(getToGenerateChunks(saver, playerChunkX - 1, playerChunkY, playerChunkZ - 1, 0)));
 
         executor.shutdown();
         try {
@@ -54,21 +55,51 @@ public final class ChunkGenerator {
     public void restart() {
         Vector3l playerChunkPosition = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (this) {
-            executor.getQueue().clear();
+            for (Future<Mesh[]> future : meshHandlerFutures) future.cancel(false);
+            for (Future<?> future : generatorFutures) future.cancel(false);
         }
         Server.unloadDistantChunks(playerChunkPosition);
-
-        submitTasks(playerChunkPosition.x, playerChunkPosition.y, playerChunkPosition.z);
+        submitGeneratorTasks(playerChunkPosition.x, playerChunkPosition.y, playerChunkPosition.z);
     }
 
     public void cleanUp() {
         waitUntilHalt();
     }
 
+    public void updateGameTick() {
+        meshHandlerFutures.removeIf(Future::isCancelled);
+        generatorFutures.removeIf(Future::isCancelled);
+        storeFinishedMeshes(meshHandlerFutures);
+        Vector3l playerChunkPosition = Game.getPlayer().getPosition().getChunkCoordinate();
+        for (Future<Mesh[]> future : meshHandlerFutures) future.cancel(false);
+        submitMeshingTasks(playerChunkPosition.x, playerChunkPosition.y, playerChunkPosition.z);
+    }
+
+    private static void storeFinishedMeshes(ArrayList<Future<Mesh[]>> futures) {
+        MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+        for (Iterator<Future<Mesh[]>> iterator = futures.iterator(); iterator.hasNext(); ) {
+            Future<Mesh[]> future = iterator.next();
+            if (!future.isDone()) continue;
+            iterator.remove();
+
+            try {
+                Mesh[] meshes = future.get();
+                for (Mesh mesh : meshes) {
+                    if (mesh == null) continue;
+                    meshCollector.setMeshed(true, Utils.getChunkIndex(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod()), mesh.lod());
+                    meshCollector.queueMesh(mesh);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     private void waitUntilHalt() {
         synchronized (this) {
-            executor.getQueue().clear();
+            for (Future<Mesh[]> future : meshHandlerFutures) future.cancel(false);
+            for (Future<?> future : generatorFutures) future.cancel(false);
         }
         executor.shutdown();
         try {
@@ -80,17 +111,26 @@ public final class ChunkGenerator {
         }
     }
 
-    private void submitTasks(long playerChunkX, long playerChunkY, long playerChunkZ) {
+    private void submitGeneratorTasks(long playerChunkX, long playerChunkY, long playerChunkZ) {
+        ChunkSaver saver = new ChunkSaver();
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             long lodPlayerX = playerChunkX >> lod;
             long lodPlayerY = playerChunkY >> lod;
             long lodPlayerZ = playerChunkZ >> lod;
 
-            for (int ring = 0; ring <= IntSettings.RENDER_DISTANCE.value() + 1; ring++) {
-                submitRingGeneration(lodPlayerX, lodPlayerY, lodPlayerZ, ring, lod);
-                submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, ring - 2, lod);
-            }
-            submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, IntSettings.RENDER_DISTANCE.value(), lod);
+            for (int ring = 0; ring <= IntSettings.RENDER_DISTANCE.value() + 1; ring++)
+                submitRingGeneration(saver, lodPlayerX, lodPlayerY, lodPlayerZ, ring, lod);
+        }
+    }
+
+    private void submitMeshingTasks(long playerChunkX, long playerChunkY, long playerChunkZ) {
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
+            long lodPlayerX = playerChunkX >> lod;
+            long lodPlayerY = playerChunkY >> lod;
+            long lodPlayerZ = playerChunkZ >> lod;
+
+            for (int ring = 0; ring <= IntSettings.RENDER_DISTANCE.value(); ring++)
+                submitRingMeshing(lodPlayerX, lodPlayerY, lodPlayerZ, ring, lod);
         }
     }
 
@@ -107,58 +147,89 @@ public final class ChunkGenerator {
         for (int chunkZ = -ring; chunkZ < ring; chunkZ++) submitColumnMeshing(-ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
     }
 
-    private void submitRingGeneration(long playerChunkX, long playerChunkY, long playerChunkZ, int ring, int lod) {
+    private void submitRingGeneration(ChunkSaver saver, long playerChunkX, long playerChunkY, long playerChunkZ, int ring, int lod) {
         if (ring == 0) {
-            submitColumnGeneration(playerChunkX, playerChunkY, playerChunkZ, lod);
+            submitColumnGeneration(saver, playerChunkX, playerChunkY, playerChunkZ, lod);
             return;
         }
 
-        for (int chunkX = -ring; chunkX < ring; chunkX++) submitColumnGeneration(chunkX + playerChunkX, playerChunkY, ring + playerChunkZ, lod);
-        for (int chunkZ = ring; chunkZ > -ring; chunkZ--) submitColumnGeneration(ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
-        for (int chunkX = ring; chunkX > -ring; chunkX--) submitColumnGeneration(chunkX + playerChunkX, playerChunkY, -ring + playerChunkZ, lod);
-        for (int chunkZ = -ring; chunkZ < ring; chunkZ++) submitColumnGeneration(-ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
+        for (int chunkX = -ring; chunkX < ring; chunkX++) submitColumnGeneration(saver, chunkX + playerChunkX, playerChunkY, ring + playerChunkZ, lod);
+        for (int chunkZ = ring; chunkZ > -ring; chunkZ--) submitColumnGeneration(saver, ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
+        for (int chunkX = ring; chunkX > -ring; chunkX--) submitColumnGeneration(saver, chunkX + playerChunkX, playerChunkY, -ring + playerChunkZ, lod);
+        for (int chunkZ = -ring; chunkZ < ring; chunkZ++) submitColumnGeneration(saver, -ring + playerChunkX, playerChunkY, chunkZ + playerChunkZ, lod);
     }
 
-    private void submitColumnGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
+    private void submitColumnGeneration(ChunkSaver saver, long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
-        if (columnRequiresGeneration(chunkX, playerChunkY, chunkZ, lod))
-            executor.submit(new Generator(chunkX, playerChunkY, chunkZ, lod));
+        Chunk[] requiredChunks = getToGenerateChunks(saver, chunkX, playerChunkY, chunkZ, lod);
+        if (requiredChunks.length == 0) return;
+
+        Future<?> future = executor.submit(new Generator(requiredChunks));
+        generatorFutures.add(future);
     }
 
     private void submitColumnMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
         if (executor.isShutdown()) return;
-        if (columnRequiresMeshing(chunkX, playerChunkY, chunkZ, lod))
-            executor.submit(new MeshHandler(chunkX, playerChunkY, chunkZ, lod));
+        ChunkNeighbors[] toMeshChunks = getToMeshChunks(chunkX, playerChunkY, chunkZ, lod);
+        if (toMeshChunks.length == 0) return;
+
+        Future<Mesh[]> future = executor.submit(new MeshHandler(toMeshChunks));
+        meshHandlerFutures.add(future);
     }
 
-    private static boolean columnRequiresGeneration(long chunkX, long playerChunkY, long chunkZ, int lod) {
-        World world = Game.getWorld();
-        for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value() - 1; chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 2; chunkY++)
-            if (world.getGenerationStatus(chunkX, chunkY, chunkZ, lod) == Status.NOT_STARTED) return true;
-        return false;
+    private static Chunk[] getToGenerateChunks(ChunkSaver saver, long chunkX, long playerChunkY, long chunkZ, int lod) {
+        Chunk[] chunks = new Chunk[IntSettings.RENDER_DISTANCE.value() * 2 + 3];
+
+        int count = 0;
+        for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value() - 1; chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 2; chunkY++) {
+            Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
+            if (chunk.getGenerationStatus() != Status.NOT_STARTED) continue;
+            chunk.setGenerationStatus(Status.IN_PROGRESS);
+            chunks[count++] = chunk;
+        }
+
+        if (count == chunks.length) return chunks;
+        Chunk[] requiredChunks = new Chunk[count];
+        System.arraycopy(chunks, 0, requiredChunks, 0, count);
+        return requiredChunks;
     }
 
-    private static boolean columnRequiresMeshing(long chunkX, long playerChunkY, long chunkZ, int lod) {
+    private static ChunkNeighbors[] getToMeshChunks(long chunkX, long playerChunkY, long chunkZ, int lod) {
         World world = Game.getWorld();
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+        ChunkNeighbors[] chunks = new ChunkNeighbors[IntSettings.RENDER_DISTANCE.value() * 2 + 1];
+
+        int count = 0;
         for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value(); chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 1; chunkY++) {
             int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
             Chunk chunk = world.getChunk(chunkIndex, lod);
-            if (chunk == null || !meshCollector.isMeshed(chunkIndex, lod)) return true;
+            if (chunk == null || meshCollector.isMeshed(chunkIndex, lod)) continue;
+            ChunkNeighbors neighbors = chunk.getNeighbors();
+            if (neighbors.areUnGenerated()) continue;
+            chunks[count++] = neighbors;
         }
-        return false;
+
+        if (count == chunks.length) return chunks;
+        ChunkNeighbors[] requiredChunks = new ChunkNeighbors[count];
+        System.arraycopy(chunks, 0, requiredChunks, 0, count);
+        return requiredChunks;
     }
 
 
     private final ThreadPoolExecutor executor;
+    private final ArrayList<Future<Mesh[]>> meshHandlerFutures = new ArrayList<>();
+    private final ArrayList<Future<?>> generatorFutures = new ArrayList<>();
 
-    private record Generator(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
+    private record Generator(Chunk[] result) implements Runnable {
 
         @Override
         public void run() {
 
+            long chunkX = result[0].X;
+            long chunkZ = result[0].Z;
+            int lod = result[0].LOD;
+
             GenerationData generationData;
-            ChunkSaver saver = new ChunkSaver();
             try {
                 generationData = new GenerationData(chunkX, chunkZ, lod);
             } catch (Exception exception) {
@@ -169,66 +240,38 @@ public final class ChunkGenerator {
                 return;
             }
 
-            for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value() - 1; chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 2; chunkY++) {
+            for (Chunk chunk : result) {
                 try {
-                    Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
-                    if (chunk.getGenerationStatus() == Status.NOT_STARTED) {
-                        WorldGeneration.generate(chunk, generationData);
-                        Game.getWorld().storeChunk(chunk);
-                    }
+                    WorldGeneration.generate(chunk, generationData);
                 } catch (Exception exception) {
                     Debug.err("Generation:");
                     Debug.err(exception.getClass());
                     exception.printStackTrace();
-                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
+                    Debug.err("%d %d %d%n", chunk.X, chunk.Y, chunk.Z);
                 }
             }
         }
     }
 
-    private record MeshHandler(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
+    private record MeshHandler(ChunkNeighbors[] chunks) implements Callable<Mesh[]> {
 
         @Override
-        public void run() {
+        public Mesh[] call() {
 
             MeshGenerator meshGenerator = new MeshGenerator();
-            World world = Game.getWorld();
-            MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
+            Mesh[] result = new Mesh[chunks.length];
 
-            for (long chunkY = playerChunkY - IntSettings.RENDER_DISTANCE.value(); chunkY != playerChunkY + IntSettings.RENDER_DISTANCE.value() + 1; chunkY++) {
+            for (int index = 0; index < result.length; index++) {
                 try {
-                    int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
-                    ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);
-                    Chunk chunk = world.getChunk(chunkIndex, lod);
-
-                    if (chunk == null) {
-                        Debug.err("to mesh chunk is null %d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                        continue;
-                    }
-                    if (!chunk.ID.equals(expectedId)) {
-                        Debug.err("Chunk has wrong ID %d %d %d %d is %s should be %s%n", chunkX, chunkY, chunkZ, lod, chunk.ID, expectedId);
-                        continue;
-                    }
-                    if (chunk.getGenerationStatus() != Status.DONE) {
-                        Debug.err("to mesh chunk hasn't been generated %s%n", chunk.getGenerationStatus().name());
-                        Debug.err("%d %d %d %d%n", chunkX, chunkY, chunkZ, lod);
-                        continue;
-                    }
-
-                    if (meshCollector.isMeshed(chunkIndex, lod)) continue;
-                    meshCollector.setMeshed(true, chunkIndex, lod);
-
-                    Mesh mesh = meshGenerator.generateMesh(chunk);
-                    if (mesh == null) meshCollector.setMeshed(false, chunkIndex, lod);
-                    else meshCollector.queueMesh(mesh);
-
+                    result[index] = meshGenerator.generateMesh(chunks[index]);
                 } catch (Exception exception) {
                     Debug.err("Meshing:");
                     Debug.err(exception.getClass());
                     exception.printStackTrace();
-                    Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
+                    Debug.err("%d %d %d%n", chunks[index].center().X, chunks[index].center().Y, chunks[index].center().Z);
                 }
             }
+            return result;
         }
     }
 }

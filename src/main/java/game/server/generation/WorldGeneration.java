@@ -18,12 +18,10 @@ public final class WorldGeneration {
     public static long SEED;
 
     public static void generate(Chunk chunk) {
-        if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
         generate(chunk, new GenerationData(chunk.X, chunk.Z, chunk.LOD));
     }
 
     public static void generate(Chunk chunk, GenerationData data) {
-        if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
         chunk.setGenerationStatus(Status.IN_PROGRESS);
 
         data.setChunk(chunk);
