@@ -127,8 +127,22 @@ public final class World {
 
     public byte getMaterial(long x, long y, long z, int lod) {
         Chunk chunk = getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, lod);
-        if (chunk == null) return OUT_OF_WORLD;
-        return chunk.getSaveMaterial((int) x & CHUNK_SIZE_MASK, (int) y & CHUNK_SIZE_MASK, (int) z & CHUNK_SIZE_MASK);
+        if (chunk != null && chunk.containsCoordinate(x, y, z))
+            return chunk.getSaveMaterial((int) x & CHUNK_SIZE_MASK, (int) y & CHUNK_SIZE_MASK, (int) z & CHUNK_SIZE_MASK);
+        return OUT_OF_WORLD;
+    }
+
+    public byte getMaterial(long x, long y, long z) {
+        for (int lod = 0; lod < LOD_COUNT; lod++) {
+            Chunk chunk = getChunk(x >> CHUNK_SIZE_BITS, y >> CHUNK_SIZE_BITS, z >> CHUNK_SIZE_BITS, lod);
+            if (chunk != null && chunk.containsCoordinate(x, y, z))
+                return chunk.getSaveMaterial((int) x & CHUNK_SIZE_MASK, (int) y & CHUNK_SIZE_MASK, (int) z & CHUNK_SIZE_MASK);
+
+            x >>>= 1;
+            y >>>= 1;
+            z >>>= 1;
+        }
+        return OUT_OF_WORLD;
     }
 
     public void setNull(int chunkIndex, int lod) {

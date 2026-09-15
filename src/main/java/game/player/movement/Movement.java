@@ -172,7 +172,7 @@ public final class Movement {
         for (long y = startY + maxStepHeight + 2; y != startY - 1; y--)
             for (long x = startX; x != startX + width; x++)
                 for (long z = startZ; z != startZ + depth; z++) {
-                    byte material = world.getMaterial(x, y, z, 0);
+                    byte material = world.getMaterial(x, y, z);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return (int) (y - position.longY + 1);
                 }
         return Integer.MAX_VALUE;
@@ -284,7 +284,7 @@ public final class Movement {
         for (long x = startX; x != startX + width; x++)
             for (long y = startY; y != startY + height; y++)
                 for (long z = startZ; z != startZ + depth; z++) {
-                    byte material = world.getMaterial(x, y, z, 0);
+                    byte material = world.getMaterial(x, y, z);
                     if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
                 }
         return false;

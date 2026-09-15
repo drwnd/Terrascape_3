@@ -58,7 +58,7 @@ public record Target(Vector3l position, int side, byte material) {
         float reach = IntSettings.REACH.value();
         while (length < reach) {
 
-            byte material = Game.getWorld().getMaterial(x, y, z, 0);
+            byte material = Game.getWorld().getMaterial(x, y, z);
             if (material == OUT_OF_WORLD) return null;
 
             if (Properties.doesntHaveProperties(material, NO_COLLISION))

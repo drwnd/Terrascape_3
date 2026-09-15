@@ -76,7 +76,7 @@ public abstract class MovementState {
     byte getStandingMaterial(Position position) {
         World world = Game.getWorld();
 
-        byte centerMaterial = world.getMaterial(position.longX, position.longY - 1, position.longZ, 0);
+        byte centerMaterial = world.getMaterial(position.longX, position.longY - 1, position.longZ);
         if (Properties.doesntHaveProperties(centerMaterial, NO_COLLISION)) return centerMaterial;
 
         long minX = Movement.minX(position, hitboxSize);
@@ -87,7 +87,7 @@ public abstract class MovementState {
 
         for (long x = minX; x != minX + width; x++)
             for (long z = minZ; z != minZ + depth; z++) {
-                byte material = world.getMaterial(x, y, z, 0);
+                byte material = world.getMaterial(x, y, z);
                 if (Properties.doesntHaveProperties(material, NO_COLLISION)) return material;
             }
 
@@ -206,7 +206,7 @@ public abstract class MovementState {
         for (long x = startX; x < startX + width; x++)
             for (long y = startY; y < startY + height; y++)
                 for (long z = startZ; z < startZ + depth; z++)
-                    if (targetMaterial == world.getMaterial(x, y, z, 0)) volume++;
+                    if (targetMaterial == world.getMaterial(x, y, z)) volume++;
         return volume;
     }
 

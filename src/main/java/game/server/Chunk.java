@@ -94,6 +94,10 @@ public final class Chunk {
         return materials.isHomogenous(AIR);
     }
 
+    public boolean containsCoordinate(long x, long y, long z) {
+        return (x >>> CHUNK_SIZE_BITS) == X && (y >>> CHUNK_SIZE_BITS) == Y && (z >>> CHUNK_SIZE_BITS) == Z;
+    }
+
     public Status getGenerationStatus() {
         return generationStatus;
     }

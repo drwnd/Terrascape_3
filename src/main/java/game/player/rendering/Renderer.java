@@ -997,7 +997,7 @@ public final class Renderer extends Renderable {
     }
 
     private static int getFlags(Position cameraPosition) {
-        boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, 0) == WATER;
+        boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ) == WATER;
         boolean useShadowMapping = ToggleSettings.USE_SHADOW_MAPPING.value();
         boolean doGlassShadows = ToggleSettings.GLASS_CASTS_SHADOWS.value();
         return (doGlassShadows ? DO_GLASS_SHADOWS_BIT : 0) | (useShadowMapping ? DO_SHADOW_MAPPING_BIT : 0) | (headUnderWater ? HEAD_UNDER_WATER_BIT : 0);
