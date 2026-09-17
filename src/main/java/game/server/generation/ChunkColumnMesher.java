@@ -7,7 +7,7 @@ import game.server.*;
 import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
-import core.utils.WorkerThread;
+import game.utils.WorkerThread;
 
 record ChunkColumnMesher(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 

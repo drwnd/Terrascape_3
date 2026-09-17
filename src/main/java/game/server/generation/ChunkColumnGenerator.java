@@ -6,7 +6,7 @@ import game.server.Game;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Status;
-import core.utils.WorkerThread;
+import game.utils.WorkerThread;
 
 record ChunkColumnGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 

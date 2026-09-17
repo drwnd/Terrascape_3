@@ -1,4 +1,4 @@
-package core.utils;
+package game.utils;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Target;
