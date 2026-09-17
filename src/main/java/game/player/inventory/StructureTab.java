@@ -10,6 +10,7 @@ import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.server.Game;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -21,6 +22,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class StructureTab extends Renderable implements InventoryTab {
 
+    @MainThread
     public StructureTab(Vector2f sizeToParent, Vector2f offsetToParent, InventoryInput input) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -38,6 +40,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         if (!reloadDisplay || toLoadStructureButton == null) return;
@@ -54,6 +57,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         filterTextField.setFocused(filterTextField.containsPixelCoordinate(pixelCoordinate));
@@ -61,6 +65,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         if (selectedStructureDisplay == null || selectedDraggable != null) return;
 
@@ -69,6 +74,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void resizeSelfTo(int width, int height) {
         if (selectedStructureDisplay == null) return;
 
@@ -77,6 +83,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (StructureSelectionButton button : structureButtons)
             if (button.containsPixelCoordinate(pixelCoordinate)) return new StructurePlaceable(button.getStructure());
@@ -84,6 +91,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) {
             InventoryInput input = Game.getPlayer().getInventory().getInput();
@@ -96,11 +104,13 @@ public final class StructureTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public float getMaxScroll(Vector2i pixelCoordinate) {
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) return getMaxScroll(structureButtons);
         return Float.POSITIVE_INFINITY;
     }
 
+    @MainThread
     void reloadStructureButtons() {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         for (Renderable button : structureButtons) structureButtonsContainer.removeRenderable(button).delete();
@@ -126,11 +136,13 @@ public final class StructureTab extends Renderable implements InventoryTab {
         }
     }
 
+    @MainThread
     private void moveStructureButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (StructureSelectionButton button : structureButtons) button.move(offset);
     }
 
+    @MainThread
     private Clickable getButtonAction(StructureSelectionButton selectionButton) {
         return (Vector2i pixelCoordinate, int _, int action) -> {
             if (action != GLFW_PRESS || !selectionButton.containsPixelCoordinate(pixelCoordinate)) return ButtonResult.IGNORE;
@@ -156,12 +168,14 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     private static class StructureScroller extends SideScroller {
 
+        @MainThread
         private StructureScroller(InventoryInput input, StructureTab structureTab) {
             super(new Vector2f(0.2F, 0.9F), new Vector2f(0.025F, 0.05F), input);
             this.structureTab = structureTab;
         }
 
         @Override
+        @MainThread
         protected void renderSelf(Vector2f position, Vector2f size) {
             InventoryInput input = (InventoryInput) this.input;
             super.renderSelf(position, size);
@@ -171,6 +185,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
         }
 
         @Override
+        @MainThread
         protected void applyScrolling(Vector2i cursorPos, Vector2f position, Vector2f size) {
             InventoryInput input = (InventoryInput) this.input;
             float fraction = 1 - (cursorPos.y - position.y) / size.y;
@@ -191,11 +206,13 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     private static class StructureButtonsContainer extends Renderable {
 
+        @MainThread
         private StructureButtonsContainer(Vector2f sizeToParent, Vector2f offsetToParent) {
             super(sizeToParent, offsetToParent);
         }
 
         @Override
+        @MainThread
         public void hoverOver(Vector2i pixelCoordinate) {
             for (Renderable renderable : getChildren()) {
                 if (!renderable.isVisible()) continue;

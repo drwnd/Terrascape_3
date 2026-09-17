@@ -5,6 +5,7 @@ import core.rendering_api.Window;
 import core.settings.CoreFloatSettings;
 import core.sound.Sound;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -14,11 +15,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Renderable {
 
+    @MainThread
     public Renderable(Vector2f sizeToParent, Vector2f offsetToParent) {
         this.sizeToParent = new Vector2f(sizeToParent);
         this.offsetToParent = new Vector2f(offsetToParent);
     }
 
+    @MainThread
     public void scaleForFocused(Vector2f position, Vector2f size) {
         float dx = (size.x - size.x * scalingFactor) * 0.5F;
         float dy = (size.y - size.y * scalingFactor) * 0.5F;
@@ -27,6 +30,7 @@ public class Renderable {
         position.add(dx, dy);
     }
 
+    @MainThread
     public final void render(Vector2f parentPosition, Vector2f parentSize) {
         if (!isVisible()) return;
         Vector2f thisSize = new Vector2f(parentSize.x, parentSize.y).mul(sizeToParent);
@@ -39,6 +43,7 @@ public class Renderable {
         for (Renderable child : children) child.render(thisPosition, thisSize);
     }
 
+    @MainThread
     public final void resize(Vector2i size, float parentSizeX, float parentSizeY) {
         float sizeX = parentSizeX * sizeToParent.x;
         float sizeY = parentSizeY * sizeToParent.y;
@@ -46,20 +51,24 @@ public class Renderable {
         for (Renderable child : children) child.resize(size, sizeX, sizeY);
     }
 
+    @MainThread
     public final void delete() {
         deleteSelf();
         for (Renderable renderable : children) renderable.delete();
     }
 
+    @MainThread
     public void addRenderable(Renderable renderable) {
         children.add(renderable);
         renderable.parent = this;
     }
 
+    @MainThread
     public Renderable removeRenderable(Renderable renderable) {
         return children.remove(renderable) && renderable != null ? renderable : DummyRenderable.dummy;
     }
 
+    @MainThread
     public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         for (Renderable renderable : children)
             if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate) && renderable.clickOn(pixelCoordinate, mouseButton, action))
@@ -67,12 +76,14 @@ public class Renderable {
         return false;
     }
 
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         if (isFocused()) return;
         for (Renderable renderable : children)
             renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
+    @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         if (selectedDraggable != null) selectedDraggable.dragOver(pixelCoordinate);
         hoverOver(pixelCoordinate);
@@ -80,10 +91,12 @@ public class Renderable {
             if (renderable.isVisible() && renderable.containsPixelCoordinate(pixelCoordinate)) renderable.dragOver(pixelCoordinate);
     }
 
+    @MainThread
     public void move(Vector2f offset) {
         offsetToParent.add(offset);
     }
 
+    @MainThread
     public boolean containsPixelCoordinate(Vector2i pixelCoordinate) {
         Vector2f position = getPosition(), size = getSize();
         if (isFocused()) scaleForFocused(position, size);
@@ -95,6 +108,7 @@ public class Renderable {
     }
 
 
+    @MainThread
     protected final DraggableInfo getOwnDraggableInfo(int action) {
         if (action == GLFW_HOVERED && selectedDraggable != this) return null;
         if (action == GLFW_PRESS) selectedDraggable = this;
@@ -111,64 +125,78 @@ public class Renderable {
     }
 
     // Override if needed
+    @MainThread
     protected void renderSelf(Vector2f position, Vector2f size) {
 
     }
 
     // Override if needed
+    @MainThread
     protected void resizeSelfTo(int width, int height) {
 
     }
 
     // Override if needed
+    @MainThread
     protected void deleteSelf() {
 
     }
 
     // Override if needed
+    @MainThread
     public void setOnTop() {
 
     }
 
+    @MainThread
     public float getAspectRatio() {
         Vector2f size = getSize();
         return size.x / size.y;
     }
 
+    @MainThread
     public Vector2f getPosition() {
         return parent.getPosition().add(parent.getSize().mul(offsetToParent));
     }
 
+    @MainThread
     public Vector2f getSize() {
         return parent.getSize().mul(sizeToParent);
     }
 
+    @MainThread
     public Vector2f getOffsetToParent() {
         return offsetToParent;
     }
 
+    @MainThread
     public Vector2f getSizeToParent() {
         return sizeToParent;
     }
 
+    @MainThread
     public ArrayList<Renderable> getChildren() {
         return children;
     }
 
     @SuppressWarnings("unchecked")
+    @MainThread
     public <T extends Renderable> T firstChildOf(Class<T> type) {
         for (Renderable child : children) if (type.isInstance(child)) return (T) child;
         return null;
     }
 
+    @MainThread
     public Renderable getParent() {
         return parent;
     }
 
+    @MainThread
     public void setOffsetToParent(float x, float y) {
         this.offsetToParent.set(x, y);
     }
 
+    @MainThread
     public void setSizeToParent(float x, float y) {
         this.sizeToParent.set(x, y);
     }
@@ -177,35 +205,43 @@ public class Renderable {
         return isFlag(VISIBILITY_MASK);
     }
 
+    @MainThread
     public boolean isFocused() {
         return isFlag(FOCUSSED_MASK);
     }
 
+    @MainThread
     public boolean allowsFocusScaling() {
         return isFlag(DO_AUTO_FOCUS_SCALING);
     }
 
+    @MainThread
     public boolean scalesWithGuiSize() {
         return isFlag(SCALES_WITH_GUI_SIZE_MASK) && parent.scalesWithGuiSize();
     }
 
+    @MainThread
     public void setPlayFocusSound(boolean playFocusSound) {
         setFlag(playFocusSound, PLAY_FOCUS_SOUNDS_MASK);
     }
 
+    @MainThread
     public void setScaleWithGuiSize(boolean scaleWithGuiSize) {
         setFlag(scaleWithGuiSize, SCALES_WITH_GUI_SIZE_MASK);
     }
 
+    @MainThread
     public void setDoAutoFocusScaling(boolean allowScaling) {
         setFlag(allowScaling, DO_AUTO_FOCUS_SCALING);
         if (!isFlag(DO_AUTO_FOCUS_SCALING)) setFlag(false, FOCUSSED_MASK);
     }
 
+    @MainThread
     public void setVisible(boolean visible) {
         setFlag(visible, VISIBILITY_MASK);
     }
 
+    @MainThread
     public void setFocused(boolean focused) {
         if (!isVisible() || !isFlag(DO_AUTO_FOCUS_SCALING) || isFocused() == focused) return;
 
@@ -217,10 +253,12 @@ public class Renderable {
         for (Renderable renderable : children) renderable.setFocused(false);
     }
 
+    @MainThread
     public void setScalingFactor(float scalingFactor) {
         this.scalingFactor = scalingFactor;
     }
 
+    @MainThread
     public float getScalingFactor() {
         return scalingFactor;
     }
@@ -229,12 +267,14 @@ public class Renderable {
         return (flags & flagMask) == flagMask;
     }
 
+    @MainThread
     private void setFlag(boolean value, int mask) {
         if (value) flags |= mask;
         else flags &= ~mask;
     }
 
 
+    @MainThread
     public static void releaseSelectedDraggable() {
         selectedDraggable = null;
     }

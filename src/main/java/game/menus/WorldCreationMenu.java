@@ -9,6 +9,7 @@ import game.language.UiMessages;
 import game.server.World;
 import game.server.saving.WorldSaver;
 
+import core.utils.MainThread;
 import game.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
@@ -21,6 +22,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class WorldCreationMenu extends UiBackgroundElement {
 
+    @MainThread
     public WorldCreationMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -43,12 +45,14 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         addRenderable(seedField);
     }
 
+    @MainThread
     @Override
     public void setOnTop() {
         Window.setInput(new MenuInput<>(this));
     }
 
 
+    @MainThread
     private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -100,5 +104,4 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         }
         return longs;
     }
-
 }

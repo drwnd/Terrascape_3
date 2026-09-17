@@ -4,9 +4,11 @@ import core.settings.Settings;
 import game.menus.MainMenu;
 import game.server.Game;
 import game.settings.*;
+import core.utils.MainThread;
 
 public final class Launcher {
 
+    @MainThread
     public static void main(String[] args) {
         Settings.registerSettingsEnums(FloatSettings.class, IntSettings.class, KeySettings.class, ToggleSettings.class, OptionSettings.class);
         Settings.registerSettings(DebugScreenOptions.getVisibilitySettings(), DebugScreenOptions.getColorSettings());

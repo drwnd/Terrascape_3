@@ -6,6 +6,7 @@ import core.settings.CoreFloatSettings;
 import core.settings.Settings;
 import core.sound.Sound;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -27,6 +28,7 @@ public final class Window {
     private Window() {
     }
 
+    @MainThread
     public static void init(String title) {
         Sound.init();
         Window.maximized = true;
@@ -47,6 +49,7 @@ public final class Window {
         glCullFace(GL_BACK);
     }
 
+    @MainThread
     private static void createWindow(String title) {
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
@@ -72,7 +75,7 @@ public final class Window {
 
         if (window == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
 
-        glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
+        close(glfwSetFramebufferSizeCallback(window, (long _, int width, int height) -> {
             try {
                 Window.width = width;
                 Window.height = height;
@@ -81,26 +84,28 @@ public final class Window {
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
+        }));
 
         glfwMakeContextCurrent(window);
         glfwShowWindow(window);
         glfwSwapInterval(1);
     }
 
+    @MainThread
     private static void handleException(Exception exception) {
         CrashAction action = crashCallback.notify(exception);
         switch (action) {
-            case PRINT -> exception.printStackTrace();
+            case PRINT -> Debug.err(exception);
             case CLOSE -> glfwSetWindowShouldClose(window, true);
             case THROW -> throw new RuntimeException(exception);
             case PRINT_AND_CLOSE -> {
-                exception.printStackTrace();
+                Debug.err(exception);
                 glfwSetWindowShouldClose(window, true);
             }
         }
     }
 
+    @MainThread
     public static void renderLoop() {
         while (!glfwWindowShouldClose(window)) {
             if (renderablesStack.isEmpty()) throw new IllegalStateException("You must push a Renderable to render things.");
@@ -123,6 +128,7 @@ public final class Window {
         }
     }
 
+    @MainThread
     public static void toggleFullScreen() {
         maximized = !maximized;
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -132,6 +138,7 @@ public final class Window {
         else glfwSetWindowMonitor(window, MemoryUtil.NULL, width / 4, height / 4, width / 2, height / 2, GLFW_DONT_CARE);
     }
 
+    @MainThread
     public static String takeScreenShot() {
         String name = new Date().toString().replace(':', '_') + ".png";
         String filepath = Path.of("Screenshots", name).toString();
@@ -148,6 +155,7 @@ public final class Window {
         return name;
     }
 
+    @MainThread
     public static void cleanUp() {
         Settings.writeToFile();
         AssetManager.cleanUp();
@@ -185,12 +193,14 @@ public final class Window {
         return frameTime;
     }
 
+    @MainThread
     public static void pushRenderable(Renderable element) {
         renderablesStack.add(element);
         element.setOnTop();
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
+    @MainThread
     public static void popRenderable() {
         renderablesStack.removeLast().delete();
         if (renderablesStack.isEmpty()) glfwSetWindowShouldClose(window, true);
@@ -205,50 +215,51 @@ public final class Window {
         return input;
     }
 
+    @MainThread
     public static void setInput(Input input) {
         Window.input.unset();
         Window.input = input;
         input.setInputMode();
-        glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
+        close(glfwSetCursorPosCallback(window, (long window, double xPos, double yPos) -> {
             try {
                 standardInput.cursorPosCallback(window, xPos, yPos);
                 input.cursorPosCallback(window, xPos, yPos);
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
-        glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
+        }));
+        close(glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
             try {
                 standardInput.mouseButtonCallback(window, button, action, mods);
                 input.mouseButtonCallback(window, button, action, mods);
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
-        glfwSetScrollCallback(window, (long window, double xScroll, double yScroll) -> {
+        }));
+        close(glfwSetScrollCallback(window, (long window, double xScroll, double yScroll) -> {
             try {
                 standardInput.scrollCallback(window, xScroll, yScroll);
                 input.scrollCallback(window, xScroll, yScroll);
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
-        glfwSetKeyCallback(window, (long window, int key, int scancode, int action, int mods) -> {
+        }));
+        close(glfwSetKeyCallback(window, (long window, int key, int scancode, int action, int mods) -> {
             try {
                 standardInput.keyCallback(window, key, scancode, action, mods);
                 input.keyCallback(window, key, scancode, action, mods);
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
-        glfwSetCharCallback(window, (long window, int codePoint) -> {
+        }));
+        close(glfwSetCharCallback(window, (long window, int codePoint) -> {
             try {
                 standardInput.charCallback(window, codePoint);
                 input.charCallback(window, codePoint);
             } catch (Exception exception) {
                 handleException(exception);
             }
-        });
+        }));
     }
 
     public static boolean isMaximized() {
@@ -258,6 +269,18 @@ public final class Window {
     public static void setCrashCallback(CrashCallback crashCallback) {
         Window.crashCallback = crashCallback;
     }
+
+
+    private static void close(AutoCloseable autoCloseable) {
+        if (autoCloseable != null) {
+            try {
+                autoCloseable.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
     private static final StandardWindowInput standardInput = new StandardWindowInput();

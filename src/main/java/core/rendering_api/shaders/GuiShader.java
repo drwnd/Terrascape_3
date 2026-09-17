@@ -7,16 +7,20 @@ import core.assets.Texture;
 import core.assets.CoreGuiElements;
 import core.settings.CoreFloatSettings;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 import static org.lwjgl.opengl.GL46.*;
 
 public final class GuiShader extends RenderShader {
+
+    @MainThread
     public GuiShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }
 
     @Override
+    @MainThread
     public void bind() {
         glUseProgram(programID);
         glDisable(GL_DEPTH_TEST);
@@ -30,14 +34,17 @@ public final class GuiShader extends RenderShader {
         flipNextDrawVertically = true;
     }
 
+    @MainThread
     public void drawQuad(Vector2f position, Vector2f size, Texture texture) {
         drawQuadCustomScale(position, size, texture, CoreFloatSettings.GUI_SIZE.value());
     }
 
+    @MainThread
     public void drawQuadNoGuiScale(Vector2f position, Vector2f size, Texture texture) {
         drawQuadCustomScale(position, size, texture, 1.0F);
     }
 
+    @MainThread
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.id());
@@ -54,6 +61,7 @@ public final class GuiShader extends RenderShader {
         draw();
     }
 
+    @MainThread
     public void drawFullScreenQuad() {
         if (flipNextDrawVertically) {
             setUniform("position", -0.5F, 0.5F);
@@ -67,6 +75,7 @@ public final class GuiShader extends RenderShader {
     }
 
 
+    @MainThread
     private void draw() {
         GuiElement quad = AssetManager.get(CoreGuiElements.QUAD);
 

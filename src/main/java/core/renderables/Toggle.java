@@ -8,6 +8,7 @@ import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.CoreFloatSettings;
 import core.settings.ToggleSetting;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -17,6 +18,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Toggle extends UiButton {
 
+    @MainThread
     public Toggle(Vector2f sizeToParent, Vector2f offsetToParent, ToggleSetting setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
@@ -41,6 +43,7 @@ public final class Toggle extends UiButton {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
 

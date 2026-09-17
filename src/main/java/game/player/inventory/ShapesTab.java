@@ -9,6 +9,7 @@ import game.server.Game;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -19,6 +20,7 @@ import static game.utils.Constants.*;
 
 public final class ShapesTab extends Renderable implements InventoryTab {
 
+    @MainThread
     public ShapesTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -35,6 +37,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void resizeSelfTo(int width, int height) {
         updateDisplayPositions(cubeDisplays, getAspectRatio());
         for (ShapeDisplay shapeDisplay : shapeDisplays) shapeDisplay.setSizeToParent(0.0475F, 0.0475F * Window.getAspectRatio() * getAspectRatio());
@@ -46,6 +49,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
             if (display.display().containsPixelCoordinate(pixelCoordinate)) {
@@ -56,6 +60,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public float getMaxScroll(Vector2i pixelCoordinate) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) return Float.POSITIVE_INFINITY;
 
@@ -66,6 +71,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
             shapePreview.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
@@ -80,11 +86,13 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
     @Override
+    @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
         if (shapePreview == null || pixelCoordinate.x > Window.getWidth() * (shapePreview.getPosition().x + shapePreview.getSize().x)) return;
@@ -94,6 +102,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         if (!refreshShapePreview && !selectedDisplay.getPlaceable().isBitMapInvalid()) return;
@@ -117,6 +126,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         addRenderable(shapePreview);
     }
 
+    @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -131,6 +141,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         refreshShapePreview = true;
     }
 
+    @MainThread
     static void updateDisplayPositions(ArrayList<CubeDisplay> cubeDisplays, float aspectRatio) {
         InventoryInput input = Game.getPlayer().getInventory().getInput();
         float itemSize = FloatSettings.INVENTORY_ITEM_SIZE.value();
@@ -161,6 +172,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return shapePlaceableSettingSliders;
     }
 
+    @MainThread
     private void loadShapeDisplays() {
         for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
         for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
@@ -186,6 +198,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         for (Renderable renderable : selectedDisplay.getSettingElements()) renderable.setVisible(true);
     }
 
+    @MainThread
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (CubeDisplay button : cubeDisplays) button.display().move(offset);

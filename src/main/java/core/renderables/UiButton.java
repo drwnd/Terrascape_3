@@ -4,6 +4,7 @@ import core.assets.CoreSounds;
 import core.rendering_api.Debug;
 import core.settings.CoreFloatSettings;
 import core.sound.Sound;
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -11,6 +12,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class UiButton extends UiBackgroundElement {
 
+    @MainThread
     public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Runnable runnable) {
         super(sizeToParent, offsetToParent);
         clickable = (_, _, action) -> {
@@ -20,11 +22,13 @@ public class UiButton extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     public UiButton(Vector2f sizeToParent, Vector2f offsetToParent, Clickable clickable) {
         super(sizeToParent, offsetToParent);
         this.clickable = clickable;
     }
 
+    @MainThread
     public UiButton(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         clickable = (_, _, _) -> {
@@ -52,6 +56,7 @@ public class UiButton extends UiBackgroundElement {
     }
 
     @Override
+    @MainThread
     public boolean clickOn(Vector2i cursorPos, int button, int action) {
         ButtonResult result = clickable.clickOn(cursorPos, button, action);
         if (result == ButtonResult.SUCCESS) Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO);

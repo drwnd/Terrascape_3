@@ -17,6 +17,7 @@ import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -25,6 +26,7 @@ public final class Hotbar extends UiElement {
 
     public static final int LENGTH = 9;
 
+    @MainThread
     public Hotbar() {
         super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
         setScaleWithGuiSize(false);
@@ -36,7 +38,7 @@ public final class Hotbar extends UiElement {
         addRenderable(hotBarSelectionIndicator);
     }
 
-
+    @MainThread
     public void handleInput(int button, int action) {
         if (action != GLFW_PRESS) return;
 
@@ -58,10 +60,12 @@ public final class Hotbar extends UiElement {
         return contents[selectedSlot];
     }
 
+    @MainThread
     public void setContent(int slotIndex, byte material) {
         setContent(slotIndex, new CubePlaceable(material));
     }
 
+    @MainThread
     public void setContent(int slotIndex, Placeable placeable) {
         slotIndex = clampSlot(slotIndex);
 
@@ -84,6 +88,7 @@ public final class Hotbar extends UiElement {
 
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         float hotbarSize = FloatSettings.HOTBAR_SIZE.value();
         setOffsetToParent(0.5F - hotbarSize * Hotbar.LENGTH * 0.5F, 0);
@@ -111,6 +116,7 @@ public final class Hotbar extends UiElement {
         return -1;
     }
 
+    @MainThread
     private void handlePickBlock() {
         Target target = Target.getPlayerTarget();
         if (target == null) return;
@@ -132,7 +138,6 @@ public final class Hotbar extends UiElement {
 
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
-        if (contents[this.selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
         playSound(contents[this.selectedSlot]);
     }
 
@@ -140,6 +145,7 @@ public final class Hotbar extends UiElement {
         return contents;
     }
 
+    @MainThread
     public void setContents(Placeable[] contents) {
         if (contents.length != LENGTH) return;
         for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);

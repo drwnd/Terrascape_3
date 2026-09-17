@@ -8,8 +8,10 @@ import game.player.rendering.Camera;
 import game.server.Game;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -20,6 +22,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class SwimmingState extends MovementState {
 
     @Override
+    @ServerThread
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.SPRINT) || !Input.isKeyPressed(KeySettings.MOVE_FORWARD)) next = MovementState.load(CrawlingState.class);
 
@@ -35,6 +38,7 @@ public final class SwimmingState extends MovementState {
     }
 
     @Override
+    @ServerThread
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         if (!intersectsLiquid(playerPosition, this)) next = MovementState.load(CrawlingState.class);
 
@@ -52,6 +56,7 @@ public final class SwimmingState extends MovementState {
     }
 
     @Override
+    @MainThread
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(FlyingState.class);
@@ -60,6 +65,7 @@ public final class SwimmingState extends MovementState {
     }
 
     @Override
+    @MainThread
     public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
@@ -86,6 +92,7 @@ public final class SwimmingState extends MovementState {
         return animationTimer + frameTime * amplitude * 0.0025;
     }
 
+    @MainThread
     static void applyBasicAnimation(Vector3f cameraRotation, Vector3f velocity, Matrix4f[] transforms, Model.ModelBox[] boxes) {
         Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
         float angle = (float) -Math.toRadians(cameraRotation.y);
@@ -111,6 +118,7 @@ public final class SwimmingState extends MovementState {
                 .translate(0, 0, 6);
     }
 
+    @MainThread
     static void applyLegAnimation(double animationTimer, Matrix4f[] transforms, float amplitude) {
         transforms[LEFT_LEG].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
                 .rotate((float) -Math.sin(animationTimer * 2) * amplitude * 0.35F, 1, 0, 0);

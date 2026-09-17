@@ -11,8 +11,10 @@ import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -22,6 +24,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class WalkingState extends MovementState {
 
     @Override
+    @ServerThread
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (Input.isKeyPressed(KeySettings.SNEAK)) next = MovementState.load(SneakingState.class);
         if (Input.isKeyPressed(KeySettings.CRAWL)) next = MovementState.load(CrawlingState.class);
@@ -48,6 +51,7 @@ public final class WalkingState extends MovementState {
     }
 
     @Override
+    @MainThread
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(FlyingState.class);
@@ -61,11 +65,13 @@ public final class WalkingState extends MovementState {
     }
 
     @Override
+    @ServerThread
     public int ticksBetweenFootsteps() {
         return Input.isKeyPressed(KeySettings.SPRINT) ? ticksBetweenFootstepsWhenSprinting : super.ticksBetweenFootsteps();
     }
 
     @Override
+    @MainThread
     public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
         Model.ModelBox[] boxes = playerCharacter.boxes();
@@ -88,6 +94,7 @@ public final class WalkingState extends MovementState {
         return animationTimer + (Input.isKeyPressed(KeySettings.SPRINT) ? 1.5 : 1) * frameTime * 0.01;
     }
 
+    @MainThread
     static void rotateBody(Matrix4f[] transforms, Model.ModelBox[] boxes, Vector3f cameraRotation, Vector3f velocity) {
         Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
         float angle = (float) -Math.toRadians(cameraRotation.y);
@@ -109,6 +116,7 @@ public final class WalkingState extends MovementState {
         else transforms[HEAD].rotate(sidewaysTilt, 0, 1, 0);
     }
 
+    @ServerThread
     private void playJumpSound(Position position) {
         if (!movement.isGrounded()) return;
         byte standingMaterial = getStandingMaterial(position);

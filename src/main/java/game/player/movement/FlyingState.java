@@ -8,8 +8,10 @@ import game.player.rendering.Camera;
 import game.server.Game;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -19,6 +21,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class FlyingState extends MovementState {
 
     @Override
+    @ServerThread
     protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
 
         Vector3f velocityChange = new Vector3f();
@@ -39,12 +42,14 @@ public final class FlyingState extends MovementState {
     }
 
     @Override
+    @ServerThread
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
         if (movement.isGrounded() && !ToggleSettings.NO_CLIP.value()) next = MovementState.load(WalkingState.class);
     }
 
     @Override
+    @MainThread
     protected void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(WalkingState.class);
@@ -53,6 +58,7 @@ public final class FlyingState extends MovementState {
     }
 
     @Override
+    @MainThread
     public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
         Model.ModelBox[] boxes = playerCharacter.boxes();

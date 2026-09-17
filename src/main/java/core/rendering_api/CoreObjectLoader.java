@@ -2,6 +2,7 @@ package core.rendering_api;
 
 import core.assets.Texture;
 import core.assets.TextureArray;
+import core.utils.MainThread;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_NEAREST;
@@ -27,6 +28,7 @@ public final class CoreObjectLoader {
 
     }
 
+    @MainThread
     public static TextureArray generateTextureArray(Texture[] textures) {
         int textureSize = 0;
         for (Texture texture : textures) textureSize = Math.max(textureSize, texture.width());
@@ -55,6 +57,7 @@ public final class CoreObjectLoader {
         return new TextureArray(textureArray, textureSizes);
     }
 
+    @MainThread
     public static int createTexture2D(int internalFormat, int width, int height, int format, int type, int sampling) {
         int texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, texture);

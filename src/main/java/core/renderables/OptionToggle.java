@@ -4,6 +4,7 @@ import core.language.Translatable;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -12,6 +13,8 @@ import org.joml.Vector2i;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class OptionToggle extends UiButton {
+
+    @MainThread
     public OptionToggle(Vector2f sizeToParent, Vector2f offsetToParent, OptionSetting setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());

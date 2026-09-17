@@ -12,8 +12,10 @@ import game.server.World;
 import game.server.material.Properties;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -38,6 +40,7 @@ public abstract class MovementState {
      * @param lastPosition   The position of the player in the last GameTick
      * @return The acceleration of the Player.
      */
+    @ServerThread
     abstract Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition);
 
     /**
@@ -50,6 +53,7 @@ public abstract class MovementState {
      * @param playerPosition The position of the Player.
      * @param playerRotation The rotation of the Player.
      */
+    @ServerThread
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
         int waterIntersection = intersectedVolume(playerPosition, this, WATER);
         int lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
@@ -71,8 +75,10 @@ public abstract class MovementState {
      * @param frameTime       The time since the last frame in ms.
      * @return The new value of {@code animationTimer}
      */
+    @MainThread
     public abstract double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime);
 
+    @ServerThread
     byte getStandingMaterial(Position position) {
         World world = Game.getWorld();
 
@@ -94,6 +100,7 @@ public abstract class MovementState {
         return centerMaterial;
     }
 
+    @MainThread
     abstract void handleInput(int key, int action);
 
     public abstract byte getIdentifier();
@@ -139,11 +146,13 @@ public abstract class MovementState {
     }
 
 
+    @ServerThread
     void handleJump(Position position, Vector3f velocityChange, float jumpStrength, float swimStrength) {
         if (movement.isGrounded()) velocityChange.y = jumpStrength;
         else velocityChange.y += intersectedVolume(position, this, WATER) * swimStrength + intersectedVolume(position, this, LAVA) * swimStrength;
     }
 
+    @ServerThread
     float getMovementSpeed(Position lastPosition, float movementSpeed, float inAirSpeed, float swimStrength) {
         float speed = movement.isGrounded() ? movementSpeed : inAirSpeed;
         speed += intersectedVolume(lastPosition, this, WATER) * swimStrength * movementSpeed * 0.25F;

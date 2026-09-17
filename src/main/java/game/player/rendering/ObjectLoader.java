@@ -2,12 +2,14 @@ package game.player.rendering;
 
 import core.assets.AssetLoader;
 import core.utils.Vector3l;
+import core.utils.MainThread;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public final class ObjectLoader {
 
+    @MainThread
     public static OpaqueModel loadOpaqueModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod(), true);
@@ -16,6 +18,7 @@ public final class ObjectLoader {
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
+    @MainThread
     public static TransparentModel loadTransparentModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod());
@@ -24,6 +27,7 @@ public final class ObjectLoader {
         return new TransparentModel(position, mesh.transparentVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod());
     }
 
+    @MainThread
     public static OpaqueModel loadCombinedModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0 && mesh.transparentVertices().length == 0)
@@ -39,6 +43,7 @@ public final class ObjectLoader {
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
+    @MainThread
     public static int generateSkyboxVertexArray() {
         int vao = AssetLoader.createVAO();
         AssetLoader.storeIndicesInBuffer(SKY_BOX_INDICES);

@@ -2,6 +2,7 @@ package game.assets;
 
 import core.assets.identifiers.ShaderIdentifier;
 import core.rendering_api.shaders.Shader;
+import core.utils.MainThread;
 
 public enum ComputeShaders implements ShaderIdentifier {
 
@@ -19,6 +20,7 @@ public enum ComputeShaders implements ShaderIdentifier {
     STAIR;
 
     @Override
+    @MainThread
     public Shader generateAsset() {
         return ShaderLoader.loadShader(this);
     }

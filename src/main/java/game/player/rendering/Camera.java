@@ -11,8 +11,10 @@ import game.server.World;
 import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.OptionSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.*;
 
 import java.lang.Math;
@@ -21,6 +23,7 @@ import static game.utils.Constants.*;
 
 public final class Camera {
 
+    @MainThread
     public Camera() {
         position = new Position(new Vector3l(), new Vector3f());
         rotation = new Vector3f(0.0F, 0.0F, 0.0F);
@@ -28,12 +31,14 @@ public final class Camera {
     }
 
 
+    @ServerThread
     public void updateGameTick() {
         oldRotationSpeed.set(rotationSpeed);
         rotationSpeed.set(oldRotation.sub(rotation));
         oldRotation.set(rotation);
     }
 
+    @MainThread
     public void updateProjectionMatrix() {
         projectionMatrix
                 .identity()
@@ -42,7 +47,7 @@ public final class Camera {
 
     public void setPosition(Position position) {
         synchronized (this) {
-            this.position = new Position(position);
+            this.position.set(position);
         }
     }
 
@@ -112,6 +117,7 @@ public final class Camera {
     }
 
 
+    @MainThread
     public Position applyPerspectiveOffset(Position position) {
         if (OptionSettings.PERSPECTIVE.value() == Perspective.FIRST_PERSON) return position;
         Vector3f direction = getDirection().mul(OptionSettings.PERSPECTIVE.value() == Perspective.SECOND_PERSON ? 1 : -1);
@@ -157,7 +163,7 @@ public final class Camera {
 
     private boolean zoomed = false;
     private float zoomFactor = 1.0F;
-    private Position position;
+    private final Position position;
     private final Vector3f rotation, oldRotation = new Vector3f();
     private final Vector3f rotationSpeed = new Vector3f(), oldRotationSpeed = new Vector3f();
 

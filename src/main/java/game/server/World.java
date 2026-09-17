@@ -7,6 +7,7 @@ import core.utils.MathUtils;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 import game.utils.Status;
 import game.utils.Utils;
@@ -27,11 +28,13 @@ public final class World {
     public final Date created, lastPlayed;
     public final long seed;
 
+    @MainThread
     public World(World world) {
         this(world.seed, world.created, world.lastPlayed, true);
         this.name = world.name;
     }
 
+    @MainThread
     public World(long seed, Date created, Date lastPlayed, boolean createChunksArray) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
@@ -48,6 +51,7 @@ public final class World {
         this.seed = seed;
     }
 
+    @MainThread
     public World(World oldWorld, boolean updateRenderDistance) {
         if (updateRenderDistance) {
             int renderDistance = IntSettings.RENDER_DISTANCE.value();
@@ -96,6 +100,7 @@ public final class World {
         seed = oldWorld.seed;
     }
 
+    @MainThread
     public static void init() {
         WorldGeneration.SEED = Game.getWorld().seed;
         ChunkSaver.generateHigherLODs();

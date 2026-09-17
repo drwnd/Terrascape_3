@@ -7,8 +7,10 @@ import game.assets.Model;
 import game.player.rendering.Camera;
 import game.server.Game;
 import game.settings.KeySettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -18,6 +20,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public final class CrawlingState extends MovementState {
 
     @Override
+    @ServerThread
     Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.CRAWL)) next = MovementState.load(SneakingState.class);
         if (Input.isKeyPressed(KeySettings.SPRINT) && Input.isKeyPressed(KeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this))
@@ -38,6 +41,7 @@ public final class CrawlingState extends MovementState {
     }
 
     @Override
+    @MainThread
     void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(FlyingState.class);
@@ -46,6 +50,7 @@ public final class CrawlingState extends MovementState {
     }
 
     @Override
+    @MainThread
     public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);

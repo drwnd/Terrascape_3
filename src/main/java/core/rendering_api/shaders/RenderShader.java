@@ -4,11 +4,13 @@ import core.assets.AssetManager;
 import core.assets.identifiers.ShaderIdentifier;
 import core.rendering_api.Debug;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import static org.lwjgl.opengl.GL46.*;
 
 public class RenderShader extends Shader {
 
+    @MainThread
     public RenderShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
 
         String vertexShaderCode = FileManager.loadFileContents(AssetManager.getAssetFilepath(SHADER_FOLDER_PATH.resolve(vertexShaderFilePath)));
@@ -27,14 +29,17 @@ public class RenderShader extends Shader {
         }
     }
 
+    @MainThread
     private static int createVertexShader(String shaderCode, int programID) throws Exception {
         return createShader(shaderCode, GL_VERTEX_SHADER, programID);
     }
 
+    @MainThread
     private static int createFragmentShader(String shaderCode, int programID) throws Exception {
         return createShader(shaderCode, GL_FRAGMENT_SHADER, programID);
     }
 
+    @MainThread
     private static void link(int programID, int vertexShaderID, int fragmentShaderID) throws Exception {
         glLinkProgram(programID);
 

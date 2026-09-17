@@ -4,12 +4,14 @@ import core.rendering_api.Debug;
 import core.utils.FileManager;
 import game.server.generation.WorldGeneration;
 import game.server.saving.ChunkSaver;
+import core.utils.MainThread;
 
 import java.io.File;
 import java.util.Arrays;
 
 public final class WorldOptimizer {
 
+    @MainThread
     public static void optimize(World world) {
         if (!Game.setTemporaryWorld(world)) return;
 
@@ -26,13 +28,14 @@ public final class WorldOptimizer {
         Game.removeTemporaryWorld();
     }
 
+    @MainThread
     private static void deleteHigherLODs() {
         World.deleteHigherLODs(0);
     }
 
+    @MainThread
     private static int deleteRedundantChunks() {
         File[] chunkFiles = FileManager.getChildren(ChunkSaver.getSaveFileLocation(0));
-        if (chunkFiles == null) return 0;
         ChunkSaver saver = new ChunkSaver();
 
         int counter = 0;
@@ -44,6 +47,7 @@ public final class WorldOptimizer {
         return counter;
     }
 
+    @MainThread
     private static boolean deleteIfRedundant(ChunkSaver saver, File chunkFile) {
         Chunk savedChunk = saver.load(chunkFile.toPath());
         if (savedChunk == null) return delete(chunkFile);
@@ -61,6 +65,7 @@ public final class WorldOptimizer {
         return delete(chunkFile);
     }
 
+    @MainThread
     private static boolean delete(File chunkFile) {
         FileManager.delete(chunkFile);
         return true;

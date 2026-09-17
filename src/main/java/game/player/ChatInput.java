@@ -9,6 +9,7 @@ import game.server.Game;
 
 import game.server.Sender;
 import game.settings.KeySettings;
+import core.utils.MainThread;
 
 import java.util.ArrayList;
 
@@ -16,15 +17,17 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class ChatInput extends TextFieldInput {
 
+    @MainThread
     public ChatInput(TextField field) {
         super(field);
     }
 
+    @MainThread
     public float getScroll() {
         return scroll;
     }
 
-    @Override
+    @MainThread
     public void setInputMode() {
         setStandardInputMode();
         skipNextInput = true;
@@ -34,27 +37,32 @@ public final class ChatInput extends TextFieldInput {
     }
 
     @Override
+    @MainThread
     public void unset() {
         scroll = 0;
     }
 
     @Override
+    @MainThread
     public void mouseButtonCallback(long window, int button, int action, int mods) {
 
     }
 
     @Override
+    @MainThread
     public void charCallback(long window, int codePoint) {
         if (!skipNextInput) super.charCallback(window, codePoint);
         else skipNextInput = false;
     }
 
     @Override
+    @MainThread
     public void scrollCallback(long window, double xScroll, double yScroll) {
         scroll = Math.max((float) (scroll + yScroll * 0.05), 0.0F);
     }
 
     @Override
+    @MainThread
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == KeySettings.TAKE_SCREENSHOT.keybind() && action == GLFW_PRESS) Renderer.takeScreenshot();
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
@@ -83,6 +91,7 @@ public final class ChatInput extends TextFieldInput {
         return messages.get(messages.size() - messageIndex).message();
     }
 
+    @MainThread
     private void replaceText(String text) {
         cursorIndex = text.length();
         field.setText(text);

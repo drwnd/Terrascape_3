@@ -6,6 +6,7 @@ import core.rendering_api.shaders.TextShader;
 import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -17,11 +18,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class TextField extends UiButton {
 
+    @MainThread
     public TextField(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter name) {
         this(sizeToParent, offsetToParent, name, () -> {
         });
     }
 
+    @MainThread
     public TextField(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter name, Runnable onTextChange) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
@@ -48,6 +51,7 @@ public class TextField extends UiButton {
         return text;
     }
 
+    @MainThread
     public void setText(String text) {
         String oldText = this.text;
         this.text = text;
@@ -61,6 +65,7 @@ public class TextField extends UiButton {
 
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         textElement.setText(text);
@@ -106,10 +111,12 @@ public class TextField extends UiButton {
     }
 
     @Override
+    @MainThread
     public void setOnTop() {
         Window.setInput(new TextFieldInput(this));
     }
 
+    @MainThread
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

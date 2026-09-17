@@ -5,6 +5,7 @@ import core.assets.AssetLoader;
 import core.assets.GuiElement;
 import core.assets.GuiElementData;
 
+import core.utils.MainThread;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transforms) implements Asset {
 
+    @MainThread
     Model(ModelData data) {
         this(AssetLoader.loadGuiElement(data.toGuiElementData()), data.boxes(), getTransforms(data.boxes()));
     }

@@ -15,6 +15,7 @@ import core.settings.CoreOptionSettings;
 import core.settings.CoreToggleSettings;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.FontOption;
+import core.utils.MainThread;
 import core.utils.Vector3l;
 
 import game.assets.*;
@@ -27,9 +28,7 @@ import game.player.particles.ParticleEffect;
 import game.server.*;
 import game.server.generation.Structure;
 import game.settings.*;
-import game.utils.Position;
-import game.utils.Transformation;
-import game.utils.Utils;
+import game.utils.*;
 
 import org.joml.*;
 
@@ -45,6 +44,7 @@ public final class Renderer extends Renderable {
 
     public int renderedOpaqueModels, renderedTransparentModels, renderedGlassModels;
 
+    @MainThread
     public Renderer(Player player, MeshCollector meshCollector) {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         this.player = player;
@@ -64,15 +64,18 @@ public final class Renderer extends Renderable {
     }
 
 
+    @MainThread
     public void addHUDRenderable(Renderable renderable) {
         hudElements.add(renderable);
         addRenderable(renderable);
     }
 
+    @MainThread
     public ArrayList<Long> getFrameTimes() {
         return frameTimes;
     }
 
+    @MainThread
     public static float getRenderTime() {
         Server server = Game.getServer();
         float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
@@ -80,26 +83,31 @@ public final class Renderer extends Renderable {
         return renderTime;
     }
 
+    @ServerThread
     public void updateGameTick() {
         messages = Game.getServer().getMessages();
     }
 
+    @MainThread
     public void invalidateHologram() {
         hologramModelsValid = false;
     }
 
+    @MainThread
     public void reloadRenderingOptimizer() {
         renderingOptimizer.cleanUp();
         renderingOptimizer = new RenderingOptimizer(player.getMeshCollector());
     }
 
 
+    @MainThread
     public static void takeScreenshot() {
         String screenshotName = Window.takeScreenShot();
         if (screenshotName == null) Game.getServer().sendServerMessage("Could not save Screenshot", ColorOption.RED);
         else Game.getServer().sendServerMessage("Saved Screenshot as " + screenshotName, ColorOption.WHITE);
     }
 
+    @MainThread
     public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
@@ -125,6 +133,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.PROPERTIES).id());
     }
 
+    @MainThread
     public static void setUpTransparentRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
@@ -145,6 +154,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
+    @MainThread
     public static void setUpGlassRendering(Shader shader, Matrix4f matrix, long x, long y, long z) {
         TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
@@ -165,6 +175,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
+    @MainThread
     private void setUpShadowMappedRendering(Matrix4f sunMatrix, Shader shader) {
         shader.setUniform("shadowMap", 2);
         shader.setUniform("shadowColor", 3);
@@ -177,6 +188,7 @@ public final class Renderer extends Renderable {
 
 
     @Override
+    @MainThread
     protected void renderSelf(Vector2f position, Vector2f size) {
         glDepthFunc(GL_GREATER);
 
@@ -248,16 +260,19 @@ public final class Renderer extends Renderable {
     }
 
     @Override
+    @MainThread
     public void setOnTop() {
         player.setInput();
     }
 
     @Override
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         if (player.getInventory().isVisible()) player.getInventory().hoverOver(pixelCoordinate);
     }
 
     @Override
+    @MainThread
     protected void resizeSelfTo(int width, int height) {
         if (width == 0 || height == 0) return;
 
@@ -271,6 +286,7 @@ public final class Renderer extends Renderable {
     }
 
     @Override
+    @MainThread
     public void deleteSelf() {
         deleteFrameBuffers();
         deleteTextures();
@@ -278,6 +294,7 @@ public final class Renderer extends Renderable {
     }
 
 
+    @MainThread
     private void setupRenderState() {
         for (Renderable renderable : hudElements) renderable.setVisible(ToggleSettings.RENDER_HUD.value());
 
@@ -302,6 +319,7 @@ public final class Renderer extends Renderable {
         crosshair.setSizeToParent(crosshairSize, crosshairSize * Window.getAspectRatio());
     }
 
+    @MainThread
     private static void renderSkybox(Camera camera) {
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
@@ -330,6 +348,7 @@ public final class Renderer extends Renderable {
         glDepthMask(true);
     }
 
+    @MainThread
     private void computeShadowMap(Position cameraPosition, Matrix4f sunMatrix, Position playerPosition) {
         Vector3f sunDirection = Transformation.getSunDirection(getRenderTime()).mul(-4096);
         int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
@@ -442,6 +461,7 @@ public final class Renderer extends Renderable {
         glViewport(0, 0, Window.getWidth(), Window.getHeight());
     }
 
+    @MainThread
     private void renderOpaqueGeometry(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
         renderedOpaqueModels = 0;
 
@@ -468,6 +488,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
         Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
@@ -481,6 +502,7 @@ public final class Renderer extends Renderable {
         renderParticles(shader, currentTick, true);
     }
 
+    @MainThread
     private void renderPlayerCharacter(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix, Position playerPosition) {
         Shader shader = AssetManager.get(Shaders.MODEL);
         shader.bind();
@@ -506,6 +528,7 @@ public final class Renderer extends Renderable {
         glEnable(GL_CULL_FACE);
     }
 
+    @MainThread
     private static void renderPlayerCharacter(Shader shader, Position cameraPosition, Position playerPosition, Matrix4f matrix) {
         Model playerCharacter = AssetManager.get(Models.PLAYER_MODEL);
         Vector3l cameraChunkPosition = new Vector3l(
@@ -529,6 +552,7 @@ public final class Renderer extends Renderable {
         glDrawArrays(GL_TRIANGLES, 0, playerCharacter.guiElement().vertexCount());
     }
 
+    @MainThread
     private void applyAmbientOcclusion(Position cameraPosition, Matrix4f projectionViewMatrix) {
         GuiShader shader = (GuiShader) AssetManager.get(Shaders.SSAO);
         shader.bind();
@@ -551,6 +575,7 @@ public final class Renderer extends Renderable {
         shader.drawFullScreenQuad();
     }
 
+    @MainThread
     private void startTransparentRendering() {
         glDepthMask(false);
         glEnable(GL_BLEND);
@@ -563,6 +588,7 @@ public final class Renderer extends Renderable {
         glClearBufferfv(GL_COLOR, 1, new float[]{1, 1, 1, 1});
     }
 
+    @MainThread
     private void renderTransparentGeometry(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix) {
         renderedTransparentModels = 0;
 
@@ -588,6 +614,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void finishTransparentRendering() {
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
@@ -610,6 +637,7 @@ public final class Renderer extends Renderable {
         shader.drawFullScreenQuad();
     }
 
+    @MainThread
     private void renderGlass(Position cameraPosition, Matrix4f projectionViewMatrix) {
         renderedGlassModels = 0;
 
@@ -630,6 +658,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderGlassParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
@@ -641,6 +670,7 @@ public final class Renderer extends Renderable {
         renderParticles(shader, currentTick, false);
     }
 
+    @MainThread
     private void renderParticles(Shader shader, long currentTick, boolean opaque) {
         for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
             if (particleEffect.isOpaque() != opaque) continue;
@@ -652,6 +682,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderPlaceableHologram(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Target currentTarget = Target.getPlayerTarget();
         Target lockedTarget = player.getInteractionHandler().getLockedTarget();
@@ -676,6 +707,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target endTarget) {
         if (startTarget == null || endTarget == null) return;
 
@@ -697,6 +729,7 @@ public final class Renderer extends Renderable {
                 placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ(), 1, 1, 1);
     }
 
+    @MainThread
     private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target) {
         StructurePlaceable placeable = (StructurePlaceable) player.getHeldPlaceable();
         Vector3l position = target.offsetPosition();
@@ -710,6 +743,7 @@ public final class Renderer extends Renderable {
                 hologramSize, hologramSize, hologramSize, 1, 1, 1);
     }
 
+    @MainThread
     private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget, Placeable placeable) {
         byte material = placeable instanceof ShapePlaceable shapePlaceable
                 && !Input.isKeyPressed(KeySettings.SPRINT)
@@ -749,6 +783,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private static void setupHologramRendering() {
         TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         glEnable(GL_DEPTH_TEST);
@@ -761,6 +796,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
+    @MainThread
     private void renderHologram(Position cameraPosition, Matrix4f projectionViewMatrix, Vector3l startPosition, Matrix4f modelMatrix,
                                 int[] sideTransform, byte material,
                                 int lengthX, int lengthY, int lengthZ,
@@ -788,6 +824,7 @@ public final class Renderer extends Renderable {
         glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
     }
 
+    @MainThread
     private void renderChat() {
         long currentTime = System.nanoTime();
 
@@ -827,12 +864,14 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderDebugInfo() {
         boolean debugScreenOpen = ToggleSettings.OPEN_DEBUG_MENU.value();
         int textLine = 0;
         for (DebugScreenLine debugLine : debugLines) if (debugLine.shouldShow(debugScreenOpen)) debugLine.render(++textLine);
     }
 
+    @MainThread
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
@@ -852,6 +891,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
         int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
         if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
@@ -873,6 +913,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private static void renderDebugTexture(int texture) {
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
         shader.bind();
@@ -881,6 +922,7 @@ public final class Renderer extends Renderable {
         shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), new Texture(texture));
     }
 
+    @MainThread
     private static void renderVolume(Shader shader, Chunk chunk, AABB aabb, int lod) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
@@ -894,6 +936,7 @@ public final class Renderer extends Renderable {
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
+    @MainThread
     private static void setUpVolumeRendering(Position cameraPositon, Matrix4f projectionViewMatrix, Shader shader) {
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -912,6 +955,7 @@ public final class Renderer extends Renderable {
     }
 
 
+    @MainThread
     private void createTextures(int width, int height) {
         colorTexture = CoreObjectLoader.createTexture2D(GL_RGBA8, width, height, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
         intPosTexture = CoreObjectLoader.createTexture2D(GL_RGBA16I, width, height, GL_RGBA_INTEGER, GL_SHORT, GL_NEAREST);
@@ -934,6 +978,7 @@ public final class Renderer extends Renderable {
         revealTexture = CoreObjectLoader.createTexture2D(GL_R8, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
     }
 
+    @MainThread
     private void createFrameBuffers() {
         framebuffer = glCreateFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -964,6 +1009,7 @@ public final class Renderer extends Renderable {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    @MainThread
     private void deleteTextures() {
         glDeleteTextures(colorTexture);
         glDeleteTextures(depthTexture);
@@ -974,12 +1020,14 @@ public final class Renderer extends Renderable {
         glDeleteTextures(revealTexture);
     }
 
+    @MainThread
     private void deleteFrameBuffers() {
         glDeleteFramebuffers(framebuffer);
         glDeleteFramebuffers(shadowFramebuffer);
         glDeleteFramebuffers(transparencyFramebuffer);
     }
 
+    @MainThread
     private void synchronizeHologramModel(Placeable placeable) {
         int preferredSize = placeable.getPreferredSizePowOf2();
         int hologramHash = placeable.hashCode();
@@ -996,6 +1044,7 @@ public final class Renderer extends Renderable {
         }
     }
 
+    @MainThread
     private static int getFlags(Position cameraPosition) {
         boolean headUnderWater = Game.getWorld().getMaterial(cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, 0) == WATER;
         boolean useShadowMapping = ToggleSettings.USE_SHADOW_MAPPING.value();

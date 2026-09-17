@@ -6,16 +6,19 @@ import core.settings.CoreToggleSettings;
 
 import game.menus.PauseMenu;
 
+import core.utils.MainThread;
 import org.joml.Vector2i;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class PlayerInput extends Input {
 
+    @MainThread
     public PlayerInput(Player player) {
         this.player = player;
     }
 
+    @MainThread
     @Override
     public void setInputMode() {
         cursorPos.set(getCursorPos());
@@ -29,22 +32,26 @@ public final class PlayerInput extends Input {
         }
     }
 
+    @MainThread
     @Override
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
     }
 
+    @MainThread
     @Override
     public void mouseButtonCallback(long window, int button, int action, int mods) {
        player.handleActiveButtonInput(button | Input.IS_MOUSE_BUTTON, action);
        player.handleInactiveKeyInput(button | Input.IS_MOUSE_BUTTON, action);
     }
 
+    @MainThread
     @Override
     public void scrollCallback(long window, double xScroll, double yScroll) {
        player.handleScrollInput(yScroll);
     }
 
+    @MainThread
     @Override
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) Window.pushRenderable(new PauseMenu());
@@ -52,11 +59,13 @@ public final class PlayerInput extends Input {
        player.handleInactiveKeyInput(key, action);
     }
 
+    @MainThread
     @Override
     public void charCallback(long window, int codePoint) {
 
     }
 
+    @MainThread
     public Vector2i getCursorMovement() {
         Vector2i movement = new Vector2i(cursorPos).sub(lastCursorPos);
         lastCursorPos.set(cursorPos);

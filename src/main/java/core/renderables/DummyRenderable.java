@@ -1,11 +1,13 @@
 package core.renderables;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 public final class DummyRenderable extends Renderable {
 
     static final DummyRenderable dummy = new DummyRenderable();
 
+    @MainThread
     public DummyRenderable() {
         super(new Vector2f(), new Vector2f());
     }

@@ -6,10 +6,12 @@ import game.server.Game;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import game.utils.Status;
+import core.utils.WorkerThread;
 
 record ChunkColumnGenerator(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 
     @Override
+    @WorkerThread
     public void run() {
         GenerationData generationData;
         ChunkSaver saver = new ChunkSaver();
@@ -19,7 +21,7 @@ record ChunkColumnGenerator(long chunkX, long playerChunkY, long chunkZ, int lod
         } catch (Exception exception) {
             Debug.err("Failed to create GenerationData");
             Debug.err(exception.getClass());
-            exception.printStackTrace();
+            Debug.err(exception);
             Debug.err("X:%d Z:%d%n", chunkX, chunkZ);
             return;
         }
@@ -30,12 +32,13 @@ record ChunkColumnGenerator(long chunkX, long playerChunkY, long chunkZ, int lod
             } catch (Exception exception) {
                 Debug.err("Generation:");
                 Debug.err(exception.getClass());
-                exception.printStackTrace();
+                Debug.err(exception);
                 Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
             }
         }
     }
 
+    @WorkerThread
     private void generateChunk(ChunkSaver saver, long chunkY, GenerationData generationData) {
         Chunk chunk = saver.load(chunkX, chunkY, chunkZ, lod);
         if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;

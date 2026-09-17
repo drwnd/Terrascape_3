@@ -6,6 +6,7 @@ import core.rendering_api.Window;
 import game.player.interaction.ShapePlaceable;
 
 import game.server.generation.Structure;
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -15,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 public final class ShapeDisplay extends UiButton {
 
+    @MainThread
     public ShapeDisplay(int index, ShapePlaceable placeable, ShapesTab shapesTab) {
         super(getSizeToParent(shapesTab), getOffsetToParent(index, shapesTab));
 
@@ -56,12 +58,14 @@ public final class ShapeDisplay extends UiButton {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         if (((ShapesTab) getParent()).getSelectedDisplay() == this) scaleForFocused(position, size);
         super.renderSelf(position, size);
     }
 
     @Override
+    @MainThread
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getSizeToParent(getParent());
         Vector2f offsetToParent = getOffsetToParent(index, getParent());
@@ -78,6 +82,7 @@ public final class ShapeDisplay extends UiButton {
         return placeable;
     }
 
+    @MainThread
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -89,10 +94,12 @@ public final class ShapeDisplay extends UiButton {
         };
     }
 
+    @MainThread
     private static Vector2f getSizeToParent(Renderable parent) {
         return new Vector2f(0.0475F, 0.0475F * Window.getAspectRatio() * parent.getAspectRatio());
     }
 
+    @MainThread
     private static Vector2f getOffsetToParent(int index, Renderable parent) {
         int row = index / 6, column = index % 6;
         return new Vector2f(0.025F + column * 0.05F, 0.875F - (row + 1) * 0.05F * Window.getAspectRatio() * parent.getAspectRatio());

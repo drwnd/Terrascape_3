@@ -1,13 +1,6 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
-    <inspection_tool class="AbstractClassWithOnlyOneDirectInheritor" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AmbiguousFieldAccess" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AmbiguousMethodCall" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AnonymousClassVariableHidesContainingMethodVariable" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AutoCloseableResource" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="METHOD_MATCHER_CONFIG" value="java.util.Formatter,format,java.io.Writer,append,com.google.common.base.Preconditions,checkNotNull,org.hibernate.Session,close,java.io.PrintWriter,printf,java.io.PrintStream,printf,java.lang.foreign.Arena,ofAuto,java.lang.foreign.Arena,global,org.lwjgl.glfw.GLFW,glfwSetFramebufferSizeCallback|glfwSetCursorPosCallback|glfwSetMouseButtonCallback|glfwSetScrollCallback|glfwSetKeyCallback|glfwSetCharCallback|glfwSetErrorCallback,java.util.concurrent.Executors,newFixedThreadPool" />
-    </inspection_tool>
     <inspection_tool class="BadOddness" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="BigDecimalEquals" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CallToSimpleGetterInClass" enabled="true" level="WARNING" enabled_by_default="true">
@@ -18,73 +11,38 @@
       <option name="ignoreSetterCallsOnOtherObjects" value="false" />
       <option name="onlyReportPrivateSetter" value="false" />
     </inspection_tool>
-    <inspection_tool class="ClassInitializerMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ClassOnlyUsedInOnePackage" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassUnconnectedToPackage" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConnectionResource" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="DisjointPackage" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="DoubleLiteralMayBeFloatLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
       <Languages>
         <language minSize="49" name="Java" />
       </Languages>
     </inspection_tool>
-    <inspection_tool class="DynamicRegexReplaceableByCompiledPattern" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ExceptionPackage" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="FieldMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="HardcodedFileSeparators" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_recognizeExampleMediaType" value="false" />
-    </inspection_tool>
-    <inspection_tool class="HardcodedLineSeparators" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="InnerClassVariableHidesOuterClassVariable" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreInvisibleFields" value="true" />
     </inspection_tool>
     <inspection_tool class="IntLiteralMayBeLongLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="InterfaceWithOnlyOneDirectInheritor" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="JavaPrintToLogpoint" enabled="false" level="DEBUGGER_SUGGESTION" enabled_by_default="false" />
-    <inspection_tool class="KeySetIterationMayUseEntrySet" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="LengthOneStringInIndexOf" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MapReplaceableByEnumMap" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="MethodMayBeStatic" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_onlyPrivateOrFinal" value="false" />
-      <option name="m_ignoreEmptyMethods" value="true" />
-    </inspection_tool>
-    <inspection_tool class="MethodOverloadsParentMethod" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MethodOverridesStaticMethod" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ObjectInstantiationInEqualsHashCode" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="OctalAndDecimalIntegersMixed" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="PackageInMultipleModules" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="PointlessArithmeticExpression" enabled="true" level="INFORMATION" enabled_by_default="true">
+    <inspection_tool class="PointlessArithmeticExpression" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_ignoreExpressionsContainingConstants" value="true" />
     </inspection_tool>
     <inspection_tool class="PointlessBitwiseExpression" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_ignoreExpressionsContainingConstants" value="true" />
     </inspection_tool>
     <inspection_tool class="PrivateMemberAccessBetweenOuterAndInnerClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="PublicConstructorInNonPublicClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="RandomDoubleForRandomInteger" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="RecordStoreResource" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="RuntimeExec" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SSBasedInspection" enabled="true" level="WARNING" enabled_by_default="true">
-      <searchConfiguration name="Confused Thead specific Methods" description="Calls to a Method annotated with @MainThread, @ServerThread or @WorkerThread from a Method not annotated with that specific annotation." text="$Expr$" recursive="true" caseInsensitive="false" type="JAVA" pattern_context="default">
+      <searchConfiguration name="Cross-calls from thread-specific methods." uuid="b3cce1b5-f442-3d9c-a515-7e0a8d5d5147" description="Calls to a Method annotated with @MainThread, @ServerThread or @WorkerThread from a Method not annotated with that specific annotation." text="$Expr$" recursive="true" caseInsensitive="false" type="JAVA" pattern_context="default">
         <constraint name="__context__" within="" contains="" />
-        <constraint name="Expr" script="&quot;// 1. Ensure the element is a call (method call, new expression, or explicit constructor call)&#10;if (!(Expr instanceof com.intellij.psi.PsiCall)) return false&#10;&#10;// 2. Resolve the target method or constructor being invoked&#10;def target = Expr.resolveMethod()&#10;if (target == null) return false&#10;&#10;def threadAnns = [&#10;    &quot;game.utils.MainThread&quot;,&#10;    &quot;game.utils.ServerThread&quot;,&#10;    &quot;game.utils.WorkerThread&quot;&#10;]&#10;&#10;// 3. Find which specific annotation the target method/constructor requires&#10;def requiredAnn = threadAnns.find { ann -&gt; target.hasAnnotation(ann) }&#10;if (requiredAnn == null) return false // Target has no thread restrictions&#10;&#10;// 4. Find the caller method or constructor containing this call&#10;def caller = com.intellij.psi.util.PsiTreeUtil.getParentOfType(Expr, com.intellij.psi.PsiMethod.class)&#10;if (caller == null) return false // Ignore calls made in field initializers outside methods/constructors&#10;&#10;// 5. Report if the caller lacks the exact annotation required by the target&#10;return !caller.hasAnnotation(requiredAnn)&quot;" within="" contains="" />
+        <constraint name="Expr" script="&quot;// 1. Ensure the element is a call (method call, new expression, or explicit constructor call)&#10;if (!(Expr instanceof com.intellij.psi.PsiCall)) return false&#10;&#10;// 2. Resolve the target method or constructor being invoked&#10;def target = Expr.resolveMethod()&#10;if (target == null) return false&#10;&#10;def threadAnns = [&#10;        &quot;game.utils.ServerThread&quot;,&#10;        &quot;core.utils.MainThread&quot;,&#10;        &quot;core.utils.WorkerThread&quot;&#10;]&#10;&#10;// 3. Find which specific annotation the target method/constructor requires&#10;def requiredAnn = threadAnns.find { ann -&gt; target.hasAnnotation(ann) }&#10;if (requiredAnn == null) return false // Target has no thread restrictions&#10;&#10;// 4. Find the caller method or constructor containing this call&#10;def caller = com.intellij.psi.util.PsiTreeUtil.getParentOfType(Expr, com.intellij.psi.PsiMethod.class)&#10;if (caller == null) return false // Ignore calls made in field initializers outside methods/constructors&#10;&#10;// 5. Report if the caller lacks the exact annotation required by the target&#10;return !caller.hasAnnotation(requiredAnn)&quot;" within="" contains="" />
       </searchConfiguration>
     </inspection_tool>
     <inspection_tool class="SetReplaceableByEnumSet" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="SingleCharacterStartsWith" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="StringReplaceableByStringBuffer" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="onlyWarnOnLoop" value="true" />
-    </inspection_tool>
     <inspection_tool class="SuspiciousLiteralUnderscore" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="SystemExit" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="SystemGetenv" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ThrowablePrintStackTrace" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="UnnecessaryExplicitNumericCast" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UseOfAWTPeerClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UseOfJDBCDriverClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UseOfProcessBuilder" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="UseOfSunClasses" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="b3cce1b5-f442-3d9c-a515-7e0a8d5d5147" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
   </profile>
 </component>

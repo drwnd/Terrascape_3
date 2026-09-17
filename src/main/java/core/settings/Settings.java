@@ -3,6 +3,7 @@ package core.settings;
 import core.assets.AssetManager;
 import core.rendering_api.Debug;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -20,11 +21,13 @@ public final class Settings {
     }
 
     @SafeVarargs
+    @MainThread
     public static void registerSettingsEnums(Class<? extends Setting>... settings) {
         for (Class<? extends Setting> setting : settings) registerSettingsEnum(setting);
     }
 
     @SafeVarargs
+    @MainThread
     public static void registerSettings(List<Setting>... settings) {
         for (List<Setting> settingList : settings) {
             Settings.settings.addAll(settingList);
@@ -32,26 +35,30 @@ public final class Settings {
         }
     }
 
+    @MainThread
     public static void loadFromFile() {
         settingTokens = loadSettingsFile();
         initSettings(settings);
     }
 
+    @MainThread
     public static void writeToFile() {
         File file = FileManager.loadAndCreateFile(Path.of("Settings"));
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file.getPath()))) {
             for (Setting setting : settings) writer.write("%s:%s%n".formatted(setting.name(), setting.toSaveValue()));
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
             Debug.err("Failed to save Settings to File");
         }
     }
 
+    @MainThread
     public static Setting getSettingWithName(String name) {
         for (Setting setting : settings) if (setting.name().equalsIgnoreCase(name)) return setting;
         return null;
     }
 
+    @MainThread
     public static ArrayList<Setting> getSettings() {
         return settings;
     }

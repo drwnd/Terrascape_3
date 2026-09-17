@@ -7,10 +7,12 @@ import game.server.*;
 import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
+import core.utils.WorkerThread;
 
 record ChunkColumnMesher(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 
     @Override
+    @WorkerThread
     public void run() {
         MeshGenerator meshGenerator = new MeshGenerator();
 
@@ -20,12 +22,13 @@ record ChunkColumnMesher(long chunkX, long playerChunkY, long chunkZ, int lod) i
             } catch (Exception exception) {
                 Debug.err("Meshing:");
                 Debug.err(exception.getClass());
-                exception.printStackTrace();
+                Debug.err(exception);
                 Debug.err("%d %d %d%n", chunkX, chunkY, chunkZ);
             }
         }
     }
 
+    @WorkerThread
     private void generateMesh(MeshGenerator generator, long chunkY) {
         int chunkIndex = Utils.getChunkIndex(chunkX, chunkY, chunkZ, lod);
         ChunkID expectedId = new ChunkID(chunkX, chunkY, chunkZ, lod);

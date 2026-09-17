@@ -21,6 +21,7 @@ import game.server.Game;
 import game.server.generation.MapSample;
 import game.server.generation.WorldGeneration;
 import game.settings.DebugScreenOptions;
+import core.utils.MainThread;
 import game.utils.Position;
 import game.utils.Status;
 
@@ -38,6 +39,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         return visibility.value() == Visibility.ALWAYS || debugScreenOpen && visibility.value() == Visibility.WHEN_SCREEN_OPEN;
     }
 
+    @MainThread
     public void render(int textLine) {
         Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         TextShader shader = (TextShader) AssetManager.get(CoreShaders.TEXT);
@@ -50,6 +52,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         shader.drawText(position, string.get(), color, true, false);
     }
 
+    @MainThread
     public static ArrayList<DebugScreenLine> getDebugLines() {
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
 

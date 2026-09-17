@@ -5,14 +5,17 @@ import core.assets.identifiers.ShaderIdentifier;
 import core.rendering_api.Debug;
 import core.utils.FileManager;
 
+import core.utils.MainThread;
 import org.lwjgl.opengl.GL46;
 
 public class ComputeShader extends Shader {
 
+    @MainThread
     public ComputeShader(String computeShaderFilepath, ShaderIdentifier identifier) {
         this(FileManager.loadFileContents(AssetManager.getAssetFilepath(SHADER_FOLDER_PATH.resolve(computeShaderFilepath))), identifier.toString());
     }
 
+    @MainThread
     public ComputeShader(String computeShaderCode, String shaderName) {
         try {
             programID = createProgram();
@@ -27,10 +30,12 @@ public class ComputeShader extends Shader {
         }
     }
 
+    @MainThread
     private static int createComputeShader(String shaderCode, int programID) throws Exception {
         return createShader(shaderCode, GL46.GL_COMPUTE_SHADER, programID);
     }
 
+    @MainThread
     private static void link(int programID, int computeShaderID) throws Exception {
         GL46.glLinkProgram(programID);
 

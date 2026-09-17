@@ -3,6 +3,7 @@ package core.rendering_api.shaders;
 import core.assets.Asset;
 
 import core.rendering_api.Debug;
+import core.utils.MainThread;
 import core.utils.Vector3l;
 
 import org.joml.*;
@@ -21,16 +22,19 @@ public abstract class Shader implements Asset {
     static final Path SHADER_FOLDER_PATH = Path.of("shaders");
 
 
+    @MainThread
     public void bind() {
         glUseProgram(programID);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Matrix4f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(getUniform(uniformName), false, value.get(stack.mallocFloat(16)));
         }
     }
 
+    @MainThread
     public void setUniform(String uniformName, Matrix4f[] values) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             FloatBuffer buffer = stack.mallocFloat(16 * values.length);
@@ -39,108 +43,132 @@ public abstract class Shader implements Asset {
         }
     }
 
+    @MainThread
     public void setUniform(String uniformName, Matrix3f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             glUniformMatrix3fv(getUniform(uniformName), false, value.get(stack.mallocFloat(9)));
         }
     }
 
+    @MainThread
     public void setUniform(String uniformName, int[] data) {
         glUniform1iv(getUniform(uniformName), data);
     }
 
+    @MainThread
     public void setUniform(String uniformName, float[] data) {
         glUniform1fv(getUniform(uniformName), data);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Color color) {
         glUniform3f(getUniform(uniformName), color.getRed() * 0.003921569F, color.getGreen() * 0.003921569F, color.getBlue() * 0.003921569F);
     }
 
+    @MainThread
     public void setUniform(String uniformName, boolean value) {
         glUniform1i(getUniform(uniformName), value ? 1 : 0);
     }
 
 
+    @MainThread
     public void setUniform(String uniformName, int value) {
         glUniform1i(getUniform(uniformName), value);
     }
 
+    @MainThread
     public void setUniform(String uniformName, int x, int y) {
         glUniform2i(getUniform(uniformName), x, y);
     }
 
+    @MainThread
     public void setUniform(String uniformName, int x, int y, int z) {
         glUniform3i(getUniform(uniformName), x, y, z);
     }
 
+    @MainThread
     public void setUniform(String uniformName, int x, int y, int z, int w) {
         glUniform4i(getUniform(uniformName), x, y, z, w);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector2i value) {
         glUniform2i(getUniform(uniformName), value.x, value.y);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector3i value) {
         glUniform3i(getUniform(uniformName), value.x, value.y, value.z);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector4i value) {
         glUniform4i(getUniform(uniformName), value.x, value.y, value.z, value.w);
     }
 
+    @MainThread
     public void setUniform(String uniformName, long x, long y, long z) {
         glUniform3i(getUniform(uniformName), (int) x, (int) y, (int) z);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector3l value) {
         glUniform3i(getUniform(uniformName), (int) value.x, (int) value.y, (int) value.z);
     }
 
 
+    @MainThread
     public void setUniform(String uniformName, float value) {
         glUniform1f(getUniform(uniformName), value);
     }
 
+    @MainThread
     public void setUniform(String uniformName, float x, float y) {
         glUniform2f(getUniform(uniformName), x, y);
     }
 
+    @MainThread
     public void setUniform(String uniformName, float x, float y, float z) {
         glUniform3f(getUniform(uniformName), x, y, z);
     }
 
+    @MainThread
     public void setUniform(String uniformName, float x, float y, float z, float w) {
         glUniform4f(getUniform(uniformName), x, y, z, w);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector2f value) {
         glUniform2f(getUniform(uniformName), value.x, value.y);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector3f value) {
         glUniform3f(getUniform(uniformName), value.x, value.y, value.z);
     }
 
+    @MainThread
     public void setUniform(String uniformName, Vector4f value) {
         glUniform4f(getUniform(uniformName), value.x, value.y, value.z, value.w);
     }
 
 
     @Override
+    @MainThread
     public void delete() {
         uniforms.clear();
         if (programID != 0) glDeleteProgram(programID);
     }
 
 
+    @MainThread
     static int createProgram() throws Exception {
         int programID = glCreateProgram();
         if (programID == 0) throw new Exception("Could not create Shader");
         return programID;
     }
 
+    @MainThread
     static int createShader(String shaderCode, int shaderType, int programID) throws Exception {
         int shaderID = glCreateShader(shaderType);
         if (shaderID == 0) throw new Exception("Error creating shader. Type: " + shaderType);
@@ -159,6 +187,7 @@ public abstract class Shader implements Asset {
         return shaderID;
     }
 
+    @MainThread
     void createUniforms(String shaderCode, String shaderName) {
         String[] lines = shaderCode.split("\n");
 
@@ -171,6 +200,7 @@ public abstract class Shader implements Asset {
         }
     }
 
+    @MainThread
     private void createUniform(String uniformName, String shaderName) {
         int uniformLocation = glGetUniformLocation(programID, uniformName);
         if (uniformLocation == -1) Debug.err("Could not find uniform %s in shader %s%n", uniformName, shaderName);
@@ -178,6 +208,7 @@ public abstract class Shader implements Asset {
         Debug.log("-Created uniform %s with binding %s%n", uniformName, uniformLocation);
     }
 
+    @MainThread
     private int getUniform(String uniformName) {
         Integer location = uniforms.get(uniformName);
         return location == null ? -1 : location;

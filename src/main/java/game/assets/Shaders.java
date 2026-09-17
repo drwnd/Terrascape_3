@@ -2,6 +2,7 @@ package game.assets;
 
 import core.assets.identifiers.ShaderIdentifier;
 import core.rendering_api.shaders.Shader;
+import core.utils.MainThread;
 
 public enum Shaders implements ShaderIdentifier {
 
@@ -23,6 +24,7 @@ public enum Shaders implements ShaderIdentifier {
     MODEL_SHADOW;
 
     @Override
+    @MainThread
     public Shader generateAsset() {
         return ShaderLoader.loadShader(this);
     }

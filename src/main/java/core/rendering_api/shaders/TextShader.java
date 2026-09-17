@@ -7,6 +7,7 @@ import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 import static org.lwjgl.opengl.GL46.*;
@@ -16,11 +17,13 @@ import java.awt.*;
 public final class TextShader extends RenderShader {
     public static final int MAX_TEXT_LENGTH = 128;
 
+    @MainThread
     public TextShader(String vertexShaderFilePath, String fragmentShaderFilePath, ShaderIdentifier identifier) {
         super(vertexShaderFilePath, fragmentShaderFilePath, identifier);
     }
 
     @Override
+    @MainThread
     public void bind() {
         glUseProgram(programID);
         glDisable(GL_DEPTH_TEST);
@@ -29,10 +32,12 @@ public final class TextShader extends RenderShader {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    @MainThread
     public void drawText(Vector2f position, String text, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
         drawText(position, text, 1, 1 - position.x, color, addTransparentBackground, scalesWithGuiSize);
     }
 
+    @MainThread
     public void drawText(Vector2f position, String text, float textSize, float maxAllowedLength, Color color, boolean addTransparentBackground, boolean scalesWithGuiSize) {
         float guiSize = scalesWithGuiSize ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
         FontOption font = (FontOption) CoreOptionSettings.FONT.value();

@@ -6,6 +6,7 @@ import core.rendering_api.shaders.TextShader;
 import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
+import core.utils.MainThread;
 import core.utils.Message;
 import core.utils.StringGetter;
 
@@ -15,21 +16,25 @@ import java.awt.*;
 
 public final class TextElement extends Renderable {
 
+    @MainThread
     public TextElement(Vector2f offsetToParent) {
         super(new Vector2f(1.0F, 1.0F), offsetToParent);
         text = new Message("");
     }
 
+    @MainThread
     public TextElement(Vector2f offsetToParent, StringGetter text) {
         super(new Vector2f(1.0F, 1.0F), offsetToParent);
         this.text = text;
     }
 
+    @MainThread
     public TextElement(Vector2f sizeToParent, Vector2f offsetToParent, StringGetter text) {
         super(sizeToParent, offsetToParent);
         this.text = text;
     }
 
+    @MainThread
     public TextElement(Vector2f offsetToParent, StringGetter text, Color color) {
         super(new Vector2f(1.0F, 1.0F), offsetToParent);
         this.text = text;
@@ -38,6 +43,7 @@ public final class TextElement extends Renderable {
 
 
     @Override
+    @MainThread
     protected void renderSelf(Vector2f position, Vector2f size) {
         Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         String text = this.text.get();
@@ -52,6 +58,7 @@ public final class TextElement extends Renderable {
         textShader.drawText(position, text, textSize, maxAllowedLength, color, addTransparentBackground, scalesWithGuiSize());
     }
 
+    @MainThread
     public float getLength() {
         Vector2f defaultTextSize = ((FontOption) CoreOptionSettings.FONT.value()).getDefaultTextSize();
         return TextShader.getTextLength(text.get(), defaultTextSize.x, scalesWithGuiSize());
