@@ -35,17 +35,20 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
         public GuiElementData toGuiElementData() {
             ArrayList<Float> vertices = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 3);
             ArrayList<Float> textureCoordinates = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 2);
-            ArrayList<Integer> transformIndices = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 1);
+            ArrayList<Integer> intData = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 1);
 
             for (int index = 0; index < boxes.length; index++) {
                 ModelBox box = boxes[index];
+                int amount = box.hasOuterLayer ? VERTICES_PER_BOX * 2 : VERTICES_PER_BOX * 1;
+
                 generateModelPart(vertices, textureCoordinates, box.size, box.center, false, box.textureCoordinate);
                 if (box.hasOuterLayer) generateModelPart(vertices, textureCoordinates, box.size, box.center, true, box.outerTextureCoordinate);
-                for (int count = box.hasOuterLayer ? VERTICES_PER_BOX * 2 : VERTICES_PER_BOX * 1; count != 0; count--) transformIndices.add(index);
+
+                for (int count = 0; count < amount; count++) intData.add((count / 6 % 6) << 29 | index);
             }
             return new GuiElementData(
                     new float[][]{toFloatArray(vertices), toFloatArray(textureCoordinates)},
-                    new int[][]{toIntArray(transformIndices)},
+                    new int[][]{toIntArray(intData)},
                     new int[]{3, 2, 1});
         }
 
@@ -59,37 +62,13 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
             float pz = size.z + padding - center.z, nz = -center.z - padding;
 
             vert.addAll(List.of(
-                    // front
-                    nx, ny, nz,
-                    nx, py, nz,
-                    px, ny, nz,
-                    nx, py, nz,
-                    px, py, nz,
-                    px, ny, nz,
-
-                    //back
+                    // north
                     nx, py, pz,
                     nx, ny, pz,
                     px, ny, pz,
                     px, py, pz,
                     nx, py, pz,
                     px, ny, pz,
-
-                    // left
-                    px, ny, nz,
-                    px, py, nz,
-                    px, ny, pz,
-                    px, py, nz,
-                    px, py, pz,
-                    px, ny, pz,
-
-                    // right
-                    nx, py, nz,
-                    nx, ny, nz,
-                    nx, ny, pz,
-                    nx, py, pz,
-                    nx, py, nz,
-                    nx, ny, pz,
 
                     // top
                     nx, py, nz,
@@ -99,46 +78,46 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
                     nx, py, nz,
                     px, py, pz,
 
+                    // west
+                    px, ny, nz,
+                    px, py, nz,
+                    px, ny, pz,
+                    px, py, nz,
+                    px, py, pz,
+                    px, ny, pz,
+
+                    // south
+                    nx, ny, nz,
+                    nx, py, nz,
+                    px, ny, nz,
+                    nx, py, nz,
+                    px, py, nz,
+                    px, ny, nz,
+
                     // bottom
                     px, ny, pz,
                     nx, ny, pz,
                     nx, ny, nz,
                     px, ny, nz,
                     px, ny, pz,
-                    nx, ny, nz
+                    nx, ny, nz,
+
+                    // east
+                    nx, py, nz,
+                    nx, ny, nz,
+                    nx, ny, pz,
+                    nx, py, pz,
+                    nx, py, nz,
+                    nx, ny, pz
             ));
             text.addAll(List.of(
-                    // front
-                    u + dx + dz, v + dz + dy,
-                    u + dx + dz, v + dz,
-                    u + dz, v + dz + dy,
-                    u + dx + dz, v + dz,
-                    u + dz, v + dz,
-                    u + dz, v + dz + dy,
-
-                    //back
+                    // north
                     u + 2 * dz + 1 * dx, v + dz,
                     u + 2 * dz + 1 * dx, v + dy + dz,
                     u + 2 * dz + 2 * dx, v + dy + dz,
                     u + 2 * dz + 2 * dx, v + dz,
                     u + 2 * dz + 1 * dx, v + dz,
                     u + 2 * dz + 2 * dx, v + dy + dz,
-
-                    // left
-                    u + dz, v + dy + dz,
-                    u + dz, v + dz,
-                    u, v + dy + dz,
-                    u + dz, v + dz,
-                    u, v + dz,
-                    u, v + dy + dz,
-
-                    // right
-                    u + dx + 1 * dz, v + dz,
-                    u + dx + 1 * dz, v + dy + dz,
-                    u + dx + 2 * dz, v + dy + dz,
-                    u + dx + 2 * dz, v + dz,
-                    u + dx + 1 * dz, v + dz,
-                    u + dx + 2 * dz, v + dy + dz,
 
                     // top
                     u + dx + dz, v + dz,
@@ -148,13 +127,37 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
                     u + dx + dz, v + dz,
                     u + dz, v,
 
+                    // west
+                    u + dz, v + dy + dz,
+                    u + dz, v + dz,
+                    u, v + dy + dz,
+                    u + dz, v + dz,
+                    u, v + dz,
+                    u, v + dy + dz,
+
+                    // south
+                    u + dx + dz, v + dz + dy,
+                    u + dx + dz, v + dz,
+                    u + dz, v + dz + dy,
+                    u + dx + dz, v + dz,
+                    u + dz, v + dz,
+                    u + dz, v + dz + dy,
+
                     // bottom
                     u + dz + 2 * dx, v + dz,
                     u + dz + dx, v + dz,
                     u + dz + dx, v,
                     u + dz + 2 * dx, v,
                     u + dz + 2 * dx, v + dz,
-                    u + dz + dx, v
+                    u + dz + dx, v,
+
+                    // east
+                    u + dx + 1 * dz, v + dz,
+                    u + dx + 1 * dz, v + dy + dz,
+                    u + dx + 2 * dz, v + dy + dz,
+                    u + dx + 2 * dz, v + dz,
+                    u + dx + 1 * dz, v + dz,
+                    u + dx + 2 * dz, v + dy + dz
             ));
         }
 
@@ -172,7 +175,7 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
     }
 
     public record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, boolean hasOuterLayer,
-                            Vector2f outerTextureCoordinate) {
+                           Vector2f outerTextureCoordinate) {
     }
 
     private static final int VERTICES_PER_BOX = 36;

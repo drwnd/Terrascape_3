@@ -13,9 +13,12 @@ uniform float nightBrightness;
 uniform float time;
 uniform vec3 sunDirection;
 uniform vec3 cameraPosition;
+uniform vec3 position;
 
-in vec3 voxelPosition;
 in vec2 fragTextureCoordinate;
+in vec3 offset;
+in vec3 normal;
+in mat4 transfromationMatrix;
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out ivec4 intPos;
@@ -49,7 +52,7 @@ vec3 getSkyLight(vec3 position, vec3 normal) {
     return currentDepth + bias < closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
 }
 
-vec3 getColor(vec3 color) {
+vec3 getColor(vec3 color, vec3 voxelPosition) {
     float absTime = abs(time);
     float timeLight = max(nightBrightness, easeInOutQuart(absTime));
     float nightLight = 0.6 * (1 - absTime) * (1 - absTime);
@@ -57,10 +60,11 @@ vec3 getColor(vec3 color) {
     float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
     float fogMultiplier = 1 - exp(-distance * 0.000005);
 
+    vec3 transfromedNormal = (transfromationMatrix * vec4(normal, 0)).xyz;
     vec3 nightLightVec = vec3(nightLight, nightLight, nightLight);
     vec3 nightBrightnessVec = vec3(nightBrightness);
-    vec3 skyLight = getSkyLight(voxelPosition, vec3(0, 0, 0));
-    vec3 sunIllumination = 0.2 * absTime * skyLight;
+    vec3 skyLight = getSkyLight(voxelPosition, transfromedNormal);
+    vec3 sunIllumination = dot(transfromedNormal, sunDirection) * 0.2 * absTime * skyLight;
     vec3 light = max(nightBrightnessVec, skyLight) * timeLight + sunIllumination;
 
     light = max(nightBrightnessVec, light);
@@ -74,8 +78,9 @@ vec3 getColor(vec3 color) {
 }
 
 void main() {
+    vec3 voxelPosition = (transfromationMatrix * vec4(floor(offset + normal * 0.5), 1)).xyz + position;
     vec4 color = texture(image, fragTextureCoordinate);
     if (color.a == 0.0) discard;
-    fragColor = vec4(getColor(color.rgb), 1);
+    fragColor = vec4(getColor(color.rgb, voxelPosition), 1);
     intPos = ivec4(floor(voxelPosition), 7);
 }
