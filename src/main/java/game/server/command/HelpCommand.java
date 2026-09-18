@@ -1,6 +1,7 @@
 package game.server.command;
 
 import core.settings.optionSettings.ColorOption;
+import core.utils.MainThread;
 import game.server.Game;
 
 final class HelpCommand {
@@ -12,6 +13,7 @@ final class HelpCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         if (tokens.size() == 1) {
             for (Command command : Command.values()) Game.getServer().sendServerMessage(command.name(), ColorOption.WHITE);

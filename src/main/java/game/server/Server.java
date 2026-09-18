@@ -88,6 +88,7 @@ public final class Server implements CrashCallback {
         }
     }
 
+    @MainThread
     public static void unloadAll() {
         ChunkSaver saver = new ChunkSaver();
 
@@ -164,6 +165,7 @@ public final class Server implements CrashCallback {
         }
     }
 
+    @MainThread
     public void sendPlayerMessage(String message) {
         if (message == null || message.isEmpty()) return;
         synchronized (messages) {

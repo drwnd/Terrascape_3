@@ -1,5 +1,6 @@
 package game.server.command;
 
+import core.utils.MainThread;
 import game.player.Player;
 import game.player.movement.FlyingState;
 import game.player.movement.MovementState;
@@ -24,6 +25,7 @@ final class RecordCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         String recordName = tokens.expectNextKeyWord().keyword();

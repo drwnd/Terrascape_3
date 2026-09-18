@@ -1,13 +1,14 @@
 package game.server.generation;
 
 import core.rendering_api.Debug;
+import core.utils.WorkerThread;
+
 import game.player.rendering.MeshCollector;
 import game.player.rendering.MeshGenerator;
 import game.server.*;
 import game.settings.IntSettings;
 import game.utils.Status;
 import game.utils.Utils;
-import core.utils.WorkerThread;
 
 record ChunkColumnMesher(long chunkX, long playerChunkY, long chunkZ, int lod) implements Runnable {
 

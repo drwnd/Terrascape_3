@@ -1,5 +1,6 @@
 package game.server.command;
 
+import core.utils.MainThread;
 import game.server.Game;
 import game.utils.Position;
 
@@ -12,6 +13,7 @@ final class TPCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         Position position = Game.getPlayer().getPosition();
 

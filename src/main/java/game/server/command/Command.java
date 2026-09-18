@@ -1,5 +1,8 @@
 package game.server.command;
 
+import core.rendering_api.Debug;
+import core.utils.MainThread;
+
 public enum Command {
 
     ECHO(EchoCommand::execute, EchoCommand.EXPLANATION, EchoCommand.SYNTAX),
@@ -13,10 +16,10 @@ public enum Command {
     STRUCTURE(StructureCommand::execute, StructureCommand.EXPLANATION, StructureCommand.SYNTAX),
     HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
 
+    @MainThread
     public static CommandResult execute(String commandString) {
         try {
             TokenList tokens = Token.tokenize(commandString.substring(1));
-//            printTokens(tokens);
             Command command = getCommand(tokens.expectNextKeyWord().keyword().toUpperCase());
 
             return command.executable.execute(tokens);
@@ -25,7 +28,7 @@ public enum Command {
         } catch (SyntaxError syntaxError) {
             return CommandResult.fail(syntaxError.getMessage());
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
             return CommandResult.fail(exception.getClass().getSimpleName() + " " + exception.getMessage());
         }
     }
@@ -44,6 +47,7 @@ public enum Command {
         return syntax;
     }
 
+    @MainThread
     static Command getCommand(String name) {
         try {
             return valueOf(name);
@@ -52,22 +56,12 @@ public enum Command {
         }
     }
 
-//    private static void printTokens(TokenList tokens) {
-//        for (Token token : tokens) {
-//            switch (token.type()) {
-//                case STRING -> System.out.println("String   #" + ((StringToken) token).string() + '#');
-//                case KEYWORD -> System.out.println("Keyword  #" + ((KeywordToken) token).keyword() + '#');
-//                case NUMBER -> System.out.println("Number   #" + ((NumberToken) token).number() + '#');
-//                case OPERATOR -> System.out.println("Operator #" + ((OperatorToken) token).operator() + '#');
-//            }
-//        }
-//    }
-
     private final Executable executable;
     private final String explanation, syntax;
 
     private interface Executable {
 
+        @MainThread
         CommandResult execute(TokenList tokens);
 
     }

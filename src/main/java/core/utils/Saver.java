@@ -1,5 +1,6 @@
 package core.utils;
 
+import core.rendering_api.Debug;
 import org.joml.*;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public abstract class Saver<T> {
         try (FileOutputStream writer = new FileOutputStream(saveFile)) {
             writer.write(data.getData(), 0, data.size());
         } catch (IOException exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
         }
     }
 
@@ -37,7 +38,7 @@ public abstract class Saver<T> {
         try (FileInputStream reader = new FileInputStream(saveFile)) {
             data.setData(reader.readAllBytes());
         } catch (IOException exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
             throw new RuntimeException(exception);
         }
         currentIndex = 0;

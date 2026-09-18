@@ -2,6 +2,7 @@ package game.server.command;
 
 import core.assets.AssetManager;
 import core.settings.optionSettings.ColorOption;
+import core.utils.MainThread;
 import core.utils.MathUtils;
 import core.utils.Vector3l;
 
@@ -27,6 +28,7 @@ public final class StructureCommand {
     static final String SYNTAX = "info | (save \"Structure Name\" [centerX centerY centerZ] [force])";
     static final String EXPLANATION = "Saves the selected Region as a structure with the given name";
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         String action = tokens.expectNextKeyWord().keyword();
         if ("info".equalsIgnoreCase(action)) return executeInfoAction(tokens);
@@ -34,6 +36,7 @@ public final class StructureCommand {
         return CommandResult.fail("unexpected keyword: " + action);
     }
 
+    @MainThread
     private static CommandResult executeInfoAction(TokenList tokens) {
         tokens.expectFinishedLess();
 
@@ -49,6 +52,7 @@ public final class StructureCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult executeSaveAction(TokenList tokens) {
         String fileName = Utils.sanitizeFileName(tokens.expectNextString().string());
         Path saveFileLocation = StructureSaver.getSaveFileLocation(fileName);
@@ -75,6 +79,7 @@ public final class StructureCommand {
         return saveStructure(tokens, centerDefined, centerX, centerY, centerZ, forceSave, saveFileLocation, fileName);
     }
 
+    @MainThread
     private static CommandResult saveStructure(TokenList tokens, boolean centerDefined, int centerX, int centerY, int centerZ, boolean forceSave, Path saveFileLocation, String fileName) {
         tokens.expectFinishedLess();
         if (!forceSave && saveFileLocation.toFile().exists())
@@ -118,6 +123,7 @@ public final class StructureCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult getMinMaxPosition(Vector3l minPosition, Vector3l maxPosition) {
         Player player = Game.getPlayer();
         Target lockedTarget = player.getInteractionHandler().getLockedTarget();
