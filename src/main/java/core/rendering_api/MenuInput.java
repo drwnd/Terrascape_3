@@ -1,6 +1,7 @@
 package core.rendering_api;
 
 import core.renderables.Renderable;
+import core.utils.MainThread;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -10,6 +11,7 @@ public class MenuInput<T extends Renderable> extends Input {
     public final MaxScrollGetter maxScrollGetter;
     protected T menu;
 
+    @MainThread
     public MenuInput(T menu) {
         super(menu);
         this.menu = menu;
@@ -18,6 +20,7 @@ public class MenuInput<T extends Renderable> extends Input {
         };
     }
 
+    @MainThread
     public MenuInput(T menu, ScrollCallback scrollCallback, MaxScrollGetter maxScrollGetter) {
         super(menu);
         this.menu = menu;
@@ -38,11 +41,13 @@ public class MenuInput<T extends Renderable> extends Input {
     }
 
     @Override
+    @MainThread
     public void setInputMode() {
         setStandardInputMode();
     }
 
     @Override
+    @MainThread
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
         if (Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | IS_MOUSE_BUTTON) || Input.isKeyPressed(GLFW_MOUSE_BUTTON_RIGHT | IS_MOUSE_BUTTON))
@@ -51,11 +56,13 @@ public class MenuInput<T extends Renderable> extends Input {
     }
 
     @Override
+    @MainThread
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         menu.clickOn(cursorPos, button, action);
     }
 
     @Override
+    @MainThread
     public void scrollCallback(long window, double xScroll, double yScroll) {
         float maxScroll = maxScrollGetter.getMaxScroll();
         float newScroll = maxScroll <= 0.0F ? 0.0F : Math.clamp((float) (scroll - yScroll * 0.05), 0.0F, maxScroll);
@@ -65,11 +72,13 @@ public class MenuInput<T extends Renderable> extends Input {
     }
 
     @Override
+    @MainThread
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
 
     }
 
     @Override
+    @MainThread
     public void charCallback(long window, int codePoint) {
 
     }

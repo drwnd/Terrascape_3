@@ -2,11 +2,13 @@ package core.rendering_api;
 
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.LogMessages;
+import core.utils.MainThread;
 
 import static org.lwjgl.opengl.GL46.*;
 
 public final class Debug {
 
+    @MainThread
     public static void checkError(String lastAction) {
         int error = glGetError();
         System.out.println(lastAction + " : " + switch (error) {
@@ -21,10 +23,12 @@ public final class Debug {
         });
     }
 
+    @MainThread
     public static void clearErrors() {
         while (glGetError() != GL_NO_ERROR) ;
     }
 
+    @MainThread
     public static int getError() {
         return glGetError();
     }
@@ -57,5 +61,10 @@ public final class Debug {
     public static void err(Object object) {
         if (CoreOptionSettings.LOG_MESSAGES.value() == LogMessages.NONE) return;
         System.err.println(object);
+    }
+
+    public static void err(Exception exception) {
+        if (CoreOptionSettings.LOG_MESSAGES.value() == LogMessages.NONE) return;
+        exception.printStackTrace();
     }
 }

@@ -13,6 +13,7 @@ import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 
+import core.utils.MainThread;
 import org.joml.Random;
 import org.joml.Vector3i;
 
@@ -26,6 +27,7 @@ public final class ParticleCollector {
 
     public static final int SHADER_PARTICLE_INT_SIZE = 3;
 
+    @MainThread
     public void uploadParticleEffects() {
         synchronized (toBufferParticleEffects) {
             for (ToBufferParticleEffect particleEffect : toBufferParticleEffects) particleEffects.add(loadParticleEffect(particleEffect));
@@ -38,6 +40,7 @@ public final class ParticleCollector {
         }
     }
 
+    @MainThread
     public void unloadParticleEffects() {
         long currentTick = Game.getServer().getCurrentGameTick();
         for (Iterator<ParticleEffect> iterator = particleEffects.iterator(); iterator.hasNext(); ) {
@@ -49,6 +52,7 @@ public final class ParticleCollector {
         }
     }
 
+    @MainThread
     public void cleanUp() {
         synchronized (particleEffects) {
             for (ParticleEffect particleEffect : particleEffects) glDeleteBuffers(particleEffect.buffer());

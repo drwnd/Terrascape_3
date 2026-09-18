@@ -1,10 +1,11 @@
 package game.utils;
 
 import core.utils.MathUtils;
-import game.player.rendering.Camera;
 
+import game.player.rendering.Camera;
 import game.server.generation.Structure;
 import game.settings.OptionSettings;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

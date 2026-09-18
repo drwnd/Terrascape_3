@@ -19,6 +19,7 @@ import game.settings.KeySettings;
 
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -29,6 +30,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Inventory extends UiElement {
 
+    @MainThread
     public Inventory() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), CoreTextures.OVERLAY);
         input = new InventoryInput(this);
@@ -66,12 +68,14 @@ public final class Inventory extends UiElement {
     }
 
     @Override
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         super.hoverOver(pixelCoordinate);
         for (Renderable renderable : getChildren()) if (renderable.isVisible()) renderable.hoverOver(pixelCoordinate);
     }
 
     @Override
+    @MainThread
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (!isVisible()) return;
@@ -84,6 +88,7 @@ public final class Inventory extends UiElement {
         return openTabButton;
     }
 
+    @MainThread
     void setOpenTab(InventoryTab toOpenTab, TabOpenerButton button) {
         structureTab.setVisible(false);
         shapesTab.setVisible(false);
@@ -96,6 +101,7 @@ public final class Inventory extends UiElement {
         openTabButton = button;
     }
 
+    @MainThread
     void handleInput(int button, int action, Vector2i pixelCoordinate) {
         if (action != GLFW_PRESS || !isVisible()) return;
         Hotbar hotbar = Game.getPlayer().getHotbar();
@@ -120,6 +126,7 @@ public final class Inventory extends UiElement {
     }
 
 
+    @MainThread
     static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Vector2i lastCursorPos, Renderable tab) {
         if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
         itemNameDisplay.setVisible(false);
@@ -140,6 +147,7 @@ public final class Inventory extends UiElement {
         for (Renderable renderable : tab.getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
     }
 
+    @MainThread
     private static ArrayList<CubeDisplay> getCubeDisplays() {
         long start = System.nanoTime();
         ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>(AMOUNT_OF_MATERIALS);

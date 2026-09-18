@@ -1,11 +1,15 @@
 package game.server.command;
 
+import core.utils.MainThread;
+
 import java.util.ArrayList;
 
 interface Token {
 
+    @MainThread
     TokenType type();
 
+    @MainThread
     static TokenList tokenize(String command) {
         TokenList tokens = new TokenList(command);
         command += ' ';

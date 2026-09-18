@@ -1,6 +1,7 @@
 package game.player.inventory;
 
 import core.renderables.*;
+import core.rendering_api.Debug;
 import core.rendering_api.Window;
 import core.utils.FileManager;
 
@@ -12,6 +13,7 @@ import game.server.Game;
 import game.server.generation.Structure;
 
 import game.settings.FloatSettings;
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -27,6 +29,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class CustomShapeTab extends Renderable implements InventoryTab {
 
+    @MainThread
     public CustomShapeTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -71,6 +74,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
             if (display.display().containsPixelCoordinate(pixelCoordinate)) return shape.copyWithMaterial(display.material());
@@ -78,6 +82,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public float getMaxScroll(Vector2i pixelCoordinate) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) return Float.POSITIVE_INFINITY;
 
@@ -88,6 +93,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void handleScroll(Vector2i pixelCoordinate, double yScroll) {
         if (shapePreview != null && shapePreview.containsPixelCoordinate(pixelCoordinate)) {
             shapePreview.changeZoom(yScroll > 0 ? 1.05F : 1 / 1.05F);
@@ -103,6 +109,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
 
     @Override
+    @MainThread
     protected void resizeSelfTo(int width, int height) {
         ShapesTab.updateDisplayPositions(cubeDisplays, getAspectRatio());
         if (shapePreview == null) return;
@@ -116,6 +123,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         super.renderSelf(position, size);
         if (!refreshShapePreview) return;
@@ -131,7 +139,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         try {
             structure = shape.updateBitMap(true).getStructure();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
             shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
             return;
         }
@@ -146,11 +154,13 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
         Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
     }
 
     @Override
+    @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
         if (shapePreview == null || pixelCoordinate.x > Window.getWidth() * (shapePreview.getPosition().x + shapePreview.getSize().x)) return;
@@ -160,6 +170,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     }
 
 
+    @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -170,11 +181,13 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         addRenderable(removeRenderable(itemNameDisplay));
     }
 
+    @MainThread
     private void moveMaterialButtons(float movement) {
         Vector2f offset = new Vector2f(0.0F, movement);
         for (CubeDisplay button : cubeDisplays) button.display().move(offset);
     }
 
+    @MainThread
     private Clickable getLoadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

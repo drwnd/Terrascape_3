@@ -5,6 +5,7 @@ import core.settings.*;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
 
+import core.utils.MainThread;
 import game.server.Game;
 import game.server.Server;
 
@@ -19,6 +20,7 @@ final class SettingCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
 
@@ -103,6 +105,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult set(FloatSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number))) return CommandResult.fail("Value must be a Number for that setting");
         if (number < setting.min() || number > setting.max())
@@ -111,6 +114,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult set(IntSetting setting, Token value) {
         if (!(value instanceof NumberToken(double number)) || (int) number != number)
             return CommandResult.fail("Value must be an Integer for that setting");
@@ -120,6 +124,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult set(KeySetting setting, Token value) {
         int codePoint;
         switch (value) {
@@ -141,6 +146,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult set(ToggleSetting setting, Token value) {
         if (!(value instanceof KeywordToken(String keyword)) || (!"true".equalsIgnoreCase(keyword) && !"false".equalsIgnoreCase(keyword)))
             return CommandResult.fail("Value must be true / false for that setting");
@@ -149,6 +155,7 @@ final class SettingCommand {
         return CommandResult.success();
     }
 
+    @MainThread
     private static CommandResult set(OptionSetting setting, Token value) {
         String optionValue;
 

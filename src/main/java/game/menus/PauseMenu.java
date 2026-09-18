@@ -14,6 +14,7 @@ import game.language.UiMessages;
 import game.server.Game;
 import game.settings.FloatSettings;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -23,6 +24,7 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class PauseMenu extends Renderable {
 
+    @MainThread
     public PauseMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -62,12 +64,14 @@ public final class PauseMenu extends Renderable {
         glDeleteFramebuffers(frameBuffer);
     }
 
+    @MainThread
     @Override
     public void setOnTop() {
         Window.setInput(new PauseMenuInput(this));
         Game.getServer().pauseTicks();
     }
 
+    @MainThread
     @Override
     public void renderSelf(Vector2f position, Vector2f size) {
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
@@ -78,11 +82,13 @@ public final class PauseMenu extends Renderable {
     }
 
     @Override
+    @MainThread
     public void deleteSelf() {
         backGround.delete();
     }
 
 
+    @MainThread
     private static Clickable getPlayButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -96,11 +102,13 @@ public final class PauseMenu extends Renderable {
 
     private static final class PauseMenuInput extends MenuInput<PauseMenu> {
 
+        @MainThread
         private PauseMenuInput(PauseMenu menu) {
             super(menu);
         }
 
         @Override
+        @MainThread
         public void keyCallback(long window, int key, int scancode, int action, int mods) {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
                 Window.popRenderable();

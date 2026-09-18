@@ -5,13 +5,14 @@ import core.rendering_api.shaders.Shader;
 import core.assets.CoreShaders;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.TextShader;
+import core.utils.MainThread;
 
 public final class CoreShaderLoader {
 
     private CoreShaderLoader() {
     }
 
-
+    @MainThread
     public static Shader loadShader(ShaderIdentifier identifier) {
         return switch (identifier) {
             case CoreShaders.GUI -> new GuiShader("Gui.vert", "Gui.frag", identifier);

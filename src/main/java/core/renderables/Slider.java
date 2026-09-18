@@ -2,6 +2,7 @@ package core.renderables;
 
 import core.assets.CoreTextures;
 import core.settings.NumberSetting;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import org.joml.Vector2f;
@@ -11,6 +12,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Slider<T extends Number> extends UiButton {
 
+    @MainThread
     public Slider(Vector2f sizeToParent, Vector2f offsetToParent, NumberSetting<T> setting, StringGetter settingName, boolean updateImmediately) {
         super(sizeToParent, offsetToParent);
         setAction(this::setValueOnClick);
@@ -28,6 +30,7 @@ public class Slider<T extends Number> extends UiButton {
         matchSetting();
     }
 
+    @MainThread
     public void setToDefault() {
         setValue(setting.defaultValueGeneric());
     }
@@ -40,6 +43,7 @@ public class Slider<T extends Number> extends UiButton {
         return value;
     }
 
+    @MainThread
     public void setValue(T value) {
         this.value = value;
         textElement.setText("%s %s".formatted(settingName.get(), value));
@@ -48,15 +52,18 @@ public class Slider<T extends Number> extends UiButton {
     }
 
     @Override
+    @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         setValueOnClick(pixelCoordinate, GLFW_MOUSE_BUTTON_LEFT, GLFW_HOVERED);
     }
 
+    @MainThread
     public void matchSetting() {
         setValue(setting.valueGeneric());
     }
 
 
+    @MainThread
     private ButtonResult setValueOnClick(Vector2i cursorPos, int button, int action) {
         DraggableInfo info = getOwnDraggableInfo(action);
         if (info == null) return ButtonResult.IGNORE;

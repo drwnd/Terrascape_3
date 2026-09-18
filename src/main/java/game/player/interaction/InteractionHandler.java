@@ -9,6 +9,8 @@ import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
+import core.utils.MainThread;
+import game.utils.ServerThread;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -16,6 +18,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class InteractionHandler {
 
+    @MainThread
     public void handleActiveInput(int button, int action) {
         if (action == GLFW_PRESS && button == KeySettings.LOCK_PLACE_POSITION.keybind()) handleLockPlacePosition();
         if (action == GLFW_PRESS && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleSetPlaceStartPosition();
@@ -25,6 +28,7 @@ public final class InteractionHandler {
         if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
     }
 
+    @MainThread
     public static void handleInactiveInput(int button, int action) {
         if (action == GLFW_PRESS && button == KeySettings.INCREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(1);
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_SIZE.keybind()) changeBreakPlaceSize(-1);
@@ -32,6 +36,7 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
     }
 
+    @MainThread
     public void handleScroll(double yScroll) {
         int primaryDirection = Game.getPlayer().getCamera().getPrimaryDirection();
         Vector3i movement = new Vector3i(
@@ -45,6 +50,7 @@ public final class InteractionHandler {
         if (lockedTarget != null) lockedTarget.shiftPosition(movement);
     }
 
+    @ServerThread
     public void updateGameTick() {
         if (!Input.isKeyPressed(KeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
         if (!Input.isKeyPressed(KeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
@@ -92,7 +98,7 @@ public final class InteractionHandler {
         return PlacingState.SHAPE;
     }
 
-
+    @ServerThread
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         if (placeable == null || !placeable.allowPlace() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) {
@@ -103,6 +109,7 @@ public final class InteractionHandler {
         handleUseDestroy(useInfo, placeable, placeable.offsetOnPlace());
     }
 
+    @ServerThread
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         if (placeable != null && !placeable.allowBreak() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY && !(placeable instanceof ShapePlaceable)) {
@@ -115,6 +122,7 @@ public final class InteractionHandler {
         handleUseDestroy(destroyInfo, placeable, placeable.offsetOnBreak());
     }
 
+    @ServerThread
     private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
@@ -151,6 +159,7 @@ public final class InteractionHandler {
         startTarget = lockedTarget = null;
     }
 
+    @MainThread
     private void handleLockPlacePosition() {
         Target currentTarget = Target.getPlayerTarget();
         PlacingState state = getState(currentTarget);
@@ -161,6 +170,7 @@ public final class InteractionHandler {
         }
     }
 
+    @MainThread
     private void handleSetPlaceStartPosition() {
         Target currentTarget = Target.getPlayerTarget();
         PlacingState state = getState(currentTarget);
@@ -168,17 +178,20 @@ public final class InteractionHandler {
         startTarget = currentTarget;
     }
 
+    @MainThread
     private void handleReleasePlaceStartPosition() {
         if (getState(Target.getPlayerTarget()).isLocked()) return;
         startTarget = null;
     }
 
+    @MainThread
     private static void changeBreakPlaceSize(int addend) {
         IntSettings.BREAK_PLACE_SIZE.setValue(Math.clamp(IntSettings.BREAK_PLACE_SIZE.value() + addend, 0, CHUNK_SIZE_BITS + 2));
         IntSettings.BREAK_PLACE_ALIGN.setValue(Math.min(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));
         if (Game.getPlayer().getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
     }
 
+    @MainThread
     private static void changeBreakPlaceAlign(int addend) {
         IntSettings.BREAK_PLACE_ALIGN.setValue(Math.clamp(IntSettings.BREAK_PLACE_ALIGN.value() + addend, 0, CHUNK_SIZE_BITS + 2));
         IntSettings.BREAK_PLACE_SIZE.setValue(Math.max(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));

@@ -10,12 +10,14 @@ import core.rendering_api.Window;
 import game.language.UiMessages;
 import game.settings.*;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class SettingsMenu extends UiBackgroundElement {
 
+    @MainThread
     public SettingsMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
 
@@ -33,6 +35,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         addSection(++index, SettingsMenu::createDebugScreenSection, UiMessages.DEBUG_SCREEN_SECTION);
     }
 
+    @MainThread
     @Override
     public void setOnTop() {
         float scroll = input == null ? 0.0F : input.getScroll();
@@ -42,6 +45,7 @@ public final class SettingsMenu extends UiBackgroundElement {
     }
 
 
+    @MainThread
     private static CoreSettingsRenderable createControlsSection() {
         CoreSettingsRenderable section = new CoreSettingsRenderable();
 
@@ -90,6 +94,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    @MainThread
     private static CoreSettingsRenderable createRenderingSection() {
         CoreSettingsRenderable section = new CoreSettingsRenderable();
 
@@ -118,6 +123,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    @MainThread
     private static CoreSettingsRenderable createUiSection() {
         CoreSettingsRenderable section = new CoreSettingsRenderable();
 
@@ -138,6 +144,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    @MainThread
     private static CoreSettingsRenderable createSoundSection() {
         CoreSettingsRenderable section = new CoreSettingsRenderable();
 
@@ -152,6 +159,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    @MainThread
     private static CoreSettingsRenderable createDebugSection() {
         CoreSettingsRenderable section = new CoreSettingsRenderable();
 
@@ -182,12 +190,14 @@ public final class SettingsMenu extends UiBackgroundElement {
         return section;
     }
 
+    @MainThread
     private static CoreSettingsRenderable createDebugScreenSection() {
         SettingsRenderable section = new SettingsRenderable();
         for (DebugScreenOptions debugOptions : DebugScreenOptions.values()) section.addDebugLineSetting(debugOptions);
         return section;
     }
 
+    @MainThread
     private void addSection(int sectionNumber, SectionCreator sectionCreator, StringGetter name) {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.35F, 0.975F - sectionNumber * 0.125F);
@@ -206,11 +216,13 @@ public final class SettingsMenu extends UiBackgroundElement {
 
     private static final class SettingsMenuInput extends MenuInput<SettingsMenu> {
 
+        @MainThread
         private SettingsMenuInput(SettingsMenu menu) {
             super(menu);
         }
 
         @Override
+        @MainThread
         public void keyCallback(long window, int key, int scancode, int action, int mods) {
             if (action == GLFW_PRESS && key == GLFW_KEY_ESCAPE) Window.popRenderable();
         }

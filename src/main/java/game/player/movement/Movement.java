@@ -10,8 +10,10 @@ import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -20,11 +22,13 @@ import static game.utils.Constants.*;
 
 public final class Movement {
 
+    @MainThread
     public Movement() {
         state = MovementState.load(WalkingState.class);
         state.movement = this;
     }
 
+    @ServerThread
     public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
         Position position = new Position(lastPosition);
         grounded = velocity.y == 0.0F && checkGrounded(position);
@@ -42,6 +46,7 @@ public final class Movement {
         return position;
     }
 
+    @MainThread
     public void handleInput(int button, int action) {
         state.handleInput(button, action);
     }
@@ -223,6 +228,7 @@ public final class Movement {
         if (groundSnappedHeight <= maxStepHeight * MAY_SNAP_HEIGHT_CAP_MULTIPLIER) position.addComponent(Y_COMPONENT, -requiredSnapHeight);
     }
 
+    @ServerThread
     private void playFootstepSound(Position position) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         int ticksBetweenFootsteps = state.ticksBetweenFootsteps();

@@ -3,6 +3,7 @@ package core.renderables;
 import core.rendering_api.MenuInput;
 import core.rendering_api.Window;
 import core.settings.*;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 import core.language.CoreUiMessages;
 
@@ -15,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class CoreSettingsRenderable extends UiBackgroundElement {
 
+    @MainThread
     public CoreSettingsRenderable() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         input = new SettingsRenderableInput(this);
@@ -39,6 +41,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         addRenderable(scroller);
     }
 
+    @MainThread
     public void scrollSettingButtons(float scroll) {
         Vector2f offset = new Vector2f(0, scroll);
 
@@ -57,28 +60,34 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         return settingCount * SETTING_DISTANCE - 1 + 0.025F;
     }
 
+    @MainThread
     public static void cancelSelection() {
         Window.popRenderable();
     }
 
 
+    @MainThread
     public <T extends Number> void addSlider(NumberSetting<T> setting) {
         addSlider(setting, setting);
     }
 
+    @MainThread
     public void addKeySelector(KeySetting setting) {
         addKeySelector(setting, setting);
     }
 
+    @MainThread
     public void addToggle(ToggleSetting setting) {
         addToggle(setting, setting);
     }
 
+    @MainThread
     public void addOption(OptionSetting setting) {
         addOption(setting, setting);
     }
 
 
+    @MainThread
     public <T extends Number> void addSlider(NumberSetting<T> setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
@@ -95,6 +104,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
+    @MainThread
     public void addKeySelector(KeySetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.6F, 0.1F);
@@ -111,6 +121,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
+    @MainThread
     public void addToggle(ToggleSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.2875F, 0.1F);
@@ -133,6 +144,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         });
     }
 
+    @MainThread
     public void addOption(OptionSetting setting, StringGetter settingName) {
         settingsCount++;
         Vector2f sizeToParent = new Vector2f(0.18333334F, 0.1F);
@@ -162,6 +174,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
 
+    @MainThread
     protected UiButton createResetButton(int counter) {
         Vector2f sizeToParent = new Vector2f(0.1F, 0.1F);
         Vector2f offsetToParent = new Vector2f(0.1875F, 1.0F - SETTING_DISTANCE * counter);
@@ -176,6 +189,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
     @Override
+    @MainThread
     public void setOnTop() {
         float scroll = input == null ? 0.0F : input.getScroll();
         input = new SettingsRenderableInput(this);
@@ -184,6 +198,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         Window.setInput(input);
     }
 
+    @MainThread
     Clickable getApplyChangesButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -199,6 +214,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     Clickable getResetSettingsButtonAction() {
         return (Vector2i pixelCoordinate, int button, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -207,6 +223,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -237,11 +254,13 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     protected static final class SettingsRenderableInput extends MenuInput<CoreSettingsRenderable> {
 
+        @MainThread
         public SettingsRenderableInput(CoreSettingsRenderable menu) {
             super(menu, menu::scrollSettingButtons, menu::getMaxScroll);
         }
 
         @Override
+        @MainThread
         public void keyCallback(long window, int key, int scancode, int action, int mods) {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) CoreSettingsRenderable.cancelSelection();
         }

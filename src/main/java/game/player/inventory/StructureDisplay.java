@@ -10,6 +10,7 @@ import game.assets.Shaders;
 import game.player.rendering.*;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
+import core.utils.MainThread;
 import game.utils.Transformation;
 
 import org.joml.Matrix4f;
@@ -21,6 +22,7 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class StructureDisplay extends Renderable {
 
+    @MainThread
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
         super(sizeToParent, offsetToParent);
         sizeX = structure.sizeX();
@@ -64,6 +66,7 @@ public final class StructureDisplay extends Renderable {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
         Matrix4f matrix = Transformation.getStructureDisplayMatrix(sizeX, sizeY, sizeZ, zoom, rotation);
@@ -100,6 +103,7 @@ public final class StructureDisplay extends Renderable {
         if (transparentModel != null) transparentModel.delete();
     }
 
+    @MainThread
     private static void renderOpaqueModel(OpaqueModel model, Shader shader) {
         if (model.isEmpty()) return;
 
@@ -108,6 +112,7 @@ public final class StructureDisplay extends Renderable {
         glMultiDrawArrays(GL_TRIANGLES, model.indices(), model.vertexCounts());
     }
 
+    @MainThread
     private static void renderTransparentModel(TransparentModel model, Shader shader) {
         if (model.isTransparentEmpty()) return;
 
@@ -117,6 +122,7 @@ public final class StructureDisplay extends Renderable {
         glDrawArrays(GL_TRIANGLES, 0, model.transparentVertexCount());
     }
 
+    @MainThread
     private static void renderGlassModel(TransparentModel model, Shader shader) {
         if (model.isGlassEmpty()) return;
 

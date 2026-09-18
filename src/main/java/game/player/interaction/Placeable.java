@@ -8,11 +8,14 @@ import game.player.interaction.placeable_shapes.*;
 import game.server.Chunk;
 import game.server.generation.Structure;
 import game.settings.IntSettings;
+import core.utils.MainThread;
+import game.utils.ServerThread;
 
 import java.util.ArrayList;
 
 public interface Placeable {
 
+    @MainThread
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
         if (placeable == null) {
             saver.saveByte((byte) 0);
@@ -25,6 +28,7 @@ public interface Placeable {
         }
     }
 
+    @MainThread
     static Placeable loadPlaceable(Saver<?> saver) {
         Placeable placeable = switch (saver.loadByte()) {
             case 1 -> CubePlaceable.load(saver);
@@ -50,20 +54,28 @@ public interface Placeable {
         return placeable;
     }
 
+    @ServerThread
     void place(Vector3l position, int lod);
 
+    @ServerThread
     ArrayList<Chunk> getAffectedChunks();
 
+    @MainThread
     Structure getStructure();
 
+    @ServerThread
     boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
 
+    @ServerThread
     void offsetPosition(Vector3l position, int targetedSide);
 
+    @ServerThread
     void spawnParticles(Vector3l position);
 
+    @ServerThread
     void playSounds(Vector3l position);
 
+    @MainThread
     void save(Saver<?> saver);
 
     default void rotateForwards() {

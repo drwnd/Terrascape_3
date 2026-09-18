@@ -3,6 +3,7 @@ package core.assets;
 import core.rendering_api.Debug;
 import core.rendering_api.shaders.TextShader;
 
+import core.utils.MainThread;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
@@ -24,6 +25,7 @@ public final class AssetLoader {
     }
 
     //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
+    @MainThread
     public static int loadSound(Path filepath) {
         int buffer = alGenBuffers();
 
@@ -36,6 +38,7 @@ public final class AssetLoader {
         return buffer;
     }
 
+    @MainThread
     public static Texture loadTexture2D(Path filepath) {
         int width, height;
         ByteBuffer buffer;
@@ -65,6 +68,7 @@ public final class AssetLoader {
         return new Texture(id, width, height);
     }
 
+    @MainThread
     public static GuiElement loadGuiElement(GuiElementData data) {
         verifyGuiElementData(data);
         int vertexCount = data.getVertexCount(), vao = createVAO();
@@ -87,6 +91,7 @@ public final class AssetLoader {
         return new GuiElement(vao, vertexCount);
     }
 
+    @MainThread
     public static int generateModelIndexBuffer(int quadCount) {
         int length = quadCount * 6;
         int[] indices = new int[length];
@@ -107,6 +112,7 @@ public final class AssetLoader {
         return id;
     }
 
+    @MainThread
     public static int generateTextRowVertexArray() {
         int vao = createVAO();
 
@@ -130,12 +136,14 @@ public final class AssetLoader {
     }
 
 
+    @MainThread
     public static int createVAO() {
         int vao = glGenVertexArrays();
         glBindVertexArray(vao);
         return vao;
     }
 
+    @MainThread
     public static int storeDataInAttributeList(int attributeNo, int size, float[] data) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -145,6 +153,7 @@ public final class AssetLoader {
         return vbo;
     }
 
+    @MainThread
     public static int storeDataInAttributeList(int attributeNo, int size, int[] data) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -154,6 +163,7 @@ public final class AssetLoader {
         return vbo;
     }
 
+    @MainThread
     public static void storeIndicesInBuffer(int[] indices) {
         int vbo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
@@ -162,6 +172,7 @@ public final class AssetLoader {
         MemoryUtil.memFree(buffer);
     }
 
+    @MainThread
     public static IntBuffer storeDataInIntBuffer(int[] data) {
         IntBuffer buffer = MemoryUtil.memAllocInt(data.length);
         buffer.put(data).flip();
@@ -169,6 +180,7 @@ public final class AssetLoader {
     }
 
     //https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16
+    @MainThread
     private static ShortBuffer readVorbis(Path filepath, STBVorbisInfo info) throws RuntimeException {
         long decoder;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -190,6 +202,7 @@ public final class AssetLoader {
         return result;
     }
 
+    @MainThread
     private static void verifyGuiElementData(GuiElementData data) {
         if (data == null || data.floatAttributes() == null || data.intAttributes() == null || data.attributeSizes() == null) throw new NullPointerException();
         float[][] floatAttributes = data.floatAttributes();

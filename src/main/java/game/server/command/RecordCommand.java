@@ -1,5 +1,6 @@
 package game.server.command;
 
+import core.utils.MainThread;
 import game.player.Player;
 import game.player.movement.FlyingState;
 import game.player.movement.MovementState;
@@ -10,6 +11,7 @@ import game.server.saving.PlayerRecordSaver;
 import game.settings.ToggleSettings;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ final class RecordCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         String recordName = tokens.expectNextKeyWord().keyword();
@@ -61,6 +64,7 @@ final class RecordCommand {
         private final ArrayList<Position> positions = new ArrayList<>();
         private final ArrayList<Vector3f> rotations = new ArrayList<>();
 
+        @ServerThread
         public boolean run() {
 
             positions.add(Game.getPlayer().getPosition());
@@ -88,6 +92,7 @@ final class RecordCommand {
             this.playbackRotations = playbackRotations;
         }
 
+        @ServerThread
         public boolean run() {
             Player player = Game.getPlayer();
             if (index >= positions.size() && index >= rotations.size()) return false;

@@ -14,6 +14,7 @@ import game.server.World;
 import game.server.WorldOptimizer;
 
 import game.server.saving.WorldSaver;
+import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -26,6 +27,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class MainMenu extends UiBackgroundElement {
 
+    @MainThread
     public MainMenu() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
         Vector2f sizeToParent = new Vector2f(0.25F, 0.1F);
@@ -70,12 +72,14 @@ public final class MainMenu extends UiBackgroundElement {
         addRenderable(cancelDeletionButton);
     }
 
+    @MainThread
     public void moveWorldButtons(float movement) {
         Vector2f offset = new Vector2f(0, movement);
         for (Renderable renderable : worldButtons) renderable.move(offset);
     }
 
 
+    @MainThread
     @Override
     public void setOnTop() {
         // IDK why but sometimes it doesn't find MainMenuInput without the package declaration
@@ -85,6 +89,7 @@ public final class MainMenu extends UiBackgroundElement {
         hideWorldSpecificButtons();
     }
 
+    @MainThread
     @Override
     public boolean clickOn(Vector2i pixelCoordinate, int mouseButton, int action) {
         boolean buttonFound = false;
@@ -99,7 +104,7 @@ public final class MainMenu extends UiBackgroundElement {
         return true;
     }
 
-
+    @MainThread
     private void setSelectedWorld(World world) {
         hideWorldSpecificButtons();
 
@@ -116,6 +121,7 @@ public final class MainMenu extends UiBackgroundElement {
         optimizeWorldButton.setVisible(true);
     }
 
+    @MainThread
     private void hideWorldSpecificButtons() {
         playWorldButton.setVisible(false);
         deleteWorldButton.setVisible(false);
@@ -124,10 +130,12 @@ public final class MainMenu extends UiBackgroundElement {
         cancelDeletionButton.setVisible(false);
     }
 
+    @MainThread
     public static File[] getSavedWorlds() {
         return FileManager.getChildren(Path.of("saves"));
     }
 
+    @MainThread
     private void createWorldButtons() {
         for (Renderable worldButton : worldButtons) removeRenderable(worldButton).delete();
         worldButtons.clear();
@@ -146,6 +154,7 @@ public final class MainMenu extends UiBackgroundElement {
         }
     }
 
+    @MainThread
     private UiButton getPlayWorldButton(int index, World world) {
         Vector2f sizeToParent = new Vector2f(0.6F, 0.125F);
         Vector2f offsetToParent = new Vector2f(0.35F, 1.0F - 0.035F - 0.14F * (index + 1) + input.getScroll());
@@ -163,6 +172,7 @@ public final class MainMenu extends UiBackgroundElement {
         return button;
     }
 
+    @MainThread
     private Clickable getDeleteWorldAction(World world) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -175,6 +185,7 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     private Clickable getConfirmDeletionAction(World world) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -186,6 +197,7 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     private Clickable getOptimizeWorldAction(World world) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -195,11 +207,13 @@ public final class MainMenu extends UiBackgroundElement {
         };
     }
 
+    @MainThread
     private float getMaxScroll() {
         return worldButtons.size() * 0.14F - 1 + 0.0825F;
     }
 
 
+    @MainThread
     private static Clickable getSettingsAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;

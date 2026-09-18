@@ -18,8 +18,10 @@ import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import game.utils.Position;
 
+import game.utils.ServerThread;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -28,6 +30,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class Player {
 
+    @MainThread
     public Player(Position position) {
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
@@ -47,7 +50,7 @@ public final class Player {
         Window.pushRenderable(renderer);
     }
 
-
+    @MainThread
     public Position updateFrame() {
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
@@ -68,6 +71,7 @@ public final class Player {
         return toRenderPosition;
     }
 
+    @ServerThread
     public void updateGameTick() {
         synchronized (this) {
             position = movement.computeNextGameTickPosition(position, camera.getRotation());
@@ -82,11 +86,13 @@ public final class Player {
             lastInteractionTick = currentGameTick;
     }
 
+    @MainThread
     public void updateRenderDistance(int oldRenderDistance) {
         meshCollector = new MeshCollector(meshCollector, oldRenderDistance);
         renderer.reloadRenderingOptimizer();
     }
 
+    @MainThread
     public void updateLodCount() {
         meshCollector = new MeshCollector(meshCollector);
         renderer.reloadRenderingOptimizer();
@@ -94,8 +100,9 @@ public final class Player {
 
     /**
      * Intended for actions that should not be taken when a menu is displayed.
-     * For example movement, block interactions etc.
+     * For example, movement, block interactions, etc.
      */
+    @MainThread
     public void handleActiveButtonInput(int button, int action) {
         movement.handleInput(button, action);
         interactionHandler.handleActiveInput(button, action);
@@ -116,8 +123,9 @@ public final class Player {
 
     /**
      * Intended for actions that could always be taken.
-     * For example Closing a menu or toggling the debug screen.
+     * For example, Closing a menu or toggling the debug screen.
      */
+    @MainThread
     public void handleInactiveKeyInput(int button, int action) {
         InteractionHandler.handleInactiveInput(button, action);
 
@@ -127,6 +135,7 @@ public final class Player {
         if (button == KeySettings.TAKE_SCREENSHOT.keybind() && action == GLFW_PRESS) Renderer.takeScreenshot();
     }
 
+    @MainThread
     public void handleScrollInput(double yScroll) {
         if (camera.isZoomed()) {
             final float zoomFactorChange = 0.9F;
@@ -141,6 +150,7 @@ public final class Player {
         if (ToggleSettings.SCROLL_HOTBAR.value()) hotbar.setSelectedSlot(hotbar.getSelectedSlot() + (yScroll < 0.0 ? 1 : -1));
     }
 
+    @MainThread
     public void applyAnimation(Model playerCharacter) {
         final int animationLength = 8;
         long currentTick = Game.getServer().getCurrentGameTick();
@@ -206,6 +216,7 @@ public final class Player {
         return inventory;
     }
 
+    @MainThread
     public void setInput() {
         if (inventory.isVisible()) Window.setInput(inventory.getInput());
         else if (chat.isVisible()) Window.setInput(chat.getInput());
@@ -222,15 +233,18 @@ public final class Player {
         return !inventory.isVisible() && !chat.isVisible();
     }
 
+    @MainThread
     public boolean isChatOpen() {
         return chat.isVisible();
     }
 
+    @MainThread
     public void cleanUp() {
         meshCollector.cleanUp();
         particleCollector.cleanUp();
     }
 
+    @MainThread
     void startCommand() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
@@ -238,12 +252,14 @@ public final class Player {
         setInput();
     }
 
+    @MainThread
     void toggleChat() {
         if (inventory.isVisible()) return;
         chat.setVisible(!chat.isVisible());
         setInput();
     }
 
+    @MainThread
     public void toggleInventory() {
         if (chat.isVisible()) return;
         inventory.setVisible(!inventory.isVisible());
@@ -261,6 +277,6 @@ public final class Player {
     private final Inventory inventory;
     private final ChatTextField chat;
 
-    private Position position; // Center of the players feet
+    private Position position; // Center of the players' feet
     private long lastInteractionTick = 0;
 }

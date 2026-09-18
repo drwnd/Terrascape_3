@@ -16,6 +16,7 @@ import game.server.Chunk;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Properties;
+import core.utils.MainThread;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +48,7 @@ public abstract class ShapePlaceable implements Placeable {
         return placeable;
     }
 
+    @MainThread
     public final List<UiButton> getSettingButtons() {
         ArrayList<UiButton> settingElements = new ArrayList<>();
 
@@ -64,6 +66,7 @@ public abstract class ShapePlaceable implements Placeable {
         return bitMap;
     }
 
+    @MainThread
     public Structure getSmallStructure() {
         long[] bitMap = new long[64];
         fillBitMap(bitMap, 16, true);
@@ -71,6 +74,7 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     @Override
+    @MainThread
     public void rotateForwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().next());
@@ -78,15 +82,14 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     @Override
+    @MainThread
     public void rotateBackwards() {
         if (rotation.value() == null) return;
         rotation.setValue(rotation.value().previous());
         updateBitMap(false);
     }
 
-    /**
-     * Only call from main thread!
-     */
+    @MainThread
     public ShapePlaceable updateBitMap(boolean force) {
         int preferredSize = getPreferredSize(), preferredSizePowOf2 = MathUtils.nextLargestPowOf2(preferredSize);
         int settingsHash = settingsHash();
@@ -108,6 +111,7 @@ public abstract class ShapePlaceable implements Placeable {
         return this;
     }
 
+    @MainThread
     public void delete() {
         AssetManager.delete(shaderIdentifier);
         glDeleteBuffers(buffer);
@@ -214,6 +218,7 @@ public abstract class ShapePlaceable implements Placeable {
         preferredSize = getPreferredSize();
     }
 
+    @MainThread
     protected void fillBitMap(long[] bitMap, int size, boolean forceSize) {
         int lengthX = forceSize ? size : Math.min(getLengthX(), size);
         int lengthY = forceSize ? size : Math.min(getLengthY(), size);
@@ -232,7 +237,7 @@ public abstract class ShapePlaceable implements Placeable {
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
     }
 
-
+    @MainThread
     private int genBuffer(int size) {
         if (size == bufferSize) return buffer;
         glDeleteBuffers(buffer);

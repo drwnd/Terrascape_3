@@ -4,7 +4,9 @@ import core.utils.Vector3l;
 
 import game.server.Game;
 import game.settings.IntSettings;
+import core.utils.MainThread;
 import game.utils.Position;
+import game.utils.ServerThread;
 import game.utils.Utils;
 
 import java.util.ArrayList;
@@ -16,10 +18,12 @@ import static org.lwjgl.opengl.GL46.*;
 
 public final class MeshCollector {
 
+    @MainThread
     public MeshCollector() {
         allocator = new MemoryAllocator(1 << 29);
     }
 
+    @MainThread
     public MeshCollector(MeshCollector oldMeshCollector, int oldRenderDistance) {
         oldMeshCollector.deleteOldMeshes();
         allocator = oldMeshCollector.allocator;
@@ -73,6 +77,7 @@ public final class MeshCollector {
         }
     }
 
+    @MainThread
     public MeshCollector(MeshCollector oldMeshCollector) {
         oldMeshCollector.deleteOldMeshes();
         oldMeshCollector.uploadAllMeshes();
@@ -91,6 +96,7 @@ public final class MeshCollector {
         }
     }
 
+    @MainThread
     public void uploadAllMeshes() {
         Vector3l playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
         synchronized (meshQueue) {
@@ -107,6 +113,7 @@ public final class MeshCollector {
         }
     }
 
+    @MainThread
     public void deleteOldMeshes() {
         synchronized (toDeleteOpaqueModels) {
             for (OpaqueModel model : toDeleteOpaqueModels) allocator.memFree(model.bufferOrStart());
@@ -128,11 +135,14 @@ public final class MeshCollector {
         return (isMeshed[lod].get(chunkIndex >> 6) & 1L << chunkIndex) != 0;
     }
 
-    public void setMeshed(boolean meshed, int chunkIndex, int lod) {
-        if (meshed) isMeshed[lod].accumulateAndGet(chunkIndex >> 6, 1L << chunkIndex, (left, right) -> left | right);
-        else isMeshed[lod].accumulateAndGet(chunkIndex >> 6, ~(1L << chunkIndex), (left, right) -> left & right);
+    public boolean setMeshed(boolean meshed, int chunkIndex, int lod) {
+        long previous;
+        if (meshed) previous = isMeshed[lod].getAndAccumulate(chunkIndex >> 6, 1L << chunkIndex, (left, right) -> left | right);
+        else previous = isMeshed[lod].getAndAccumulate(chunkIndex >> 6, ~(1L << chunkIndex), (left, right) -> left & right);
+        return (previous & 1L << chunkIndex) != 0;
     }
 
+    @ServerThread
     public void removeMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         if (opaqueModel != null) {
@@ -160,18 +170,22 @@ public final class MeshCollector {
         return transparentModels[lod][chunkIndex];
     }
 
+    @MainThread
     public AABB getOccluder(int chunkIndex, int lod) {
         return occluders[lod][chunkIndex];
     }
 
+    @MainThread
     public AABB getOccludee(int chunkIndex, int lod) {
         return occludees[lod][chunkIndex];
     }
 
+    @MainThread
     public boolean isModelPresent(long lodModelX, long lodModelY, long lodModelZ, int lod) {
         return getOpaqueModel(Utils.getChunkIndex(lodModelX, lodModelY, lodModelZ, lod), lod) != null;
     }
 
+    @MainThread
     public int getBuffer() {
         return allocator.getBuffer();
     }
@@ -180,10 +194,12 @@ public final class MeshCollector {
         return allocator;
     }
 
+    @MainThread
     public void cleanUp() {
         allocator.cleanUp();
     }
 
+    @MainThread
     public void removeAll() {
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             for (OpaqueModel model : opaqueModels[lod]) if (model != null) allocator.memFree(model.bufferOrStart());
@@ -196,6 +212,7 @@ public final class MeshCollector {
         }
     }
 
+    @MainThread
     public boolean isIsolated(long chunkX, long chunkY, long chunkZ, int lod) {
         OpaqueModel model;
         return ((model = getOpaqueModel(Utils.getChunkIndex(chunkX - 1, chunkY, chunkZ, lod), lod)) == null || model.isEmpty())
@@ -207,6 +224,7 @@ public final class MeshCollector {
     }
 
 
+    @MainThread
     private void deleteMesh(int chunkIndex, int lod) {
         OpaqueModel opaqueModel = getOpaqueModel(chunkIndex, lod);
         TransparentModel transparentModel = getTransparentModel(chunkIndex, lod);
@@ -227,6 +245,7 @@ public final class MeshCollector {
         transparentModels[lod][index] = model;
     }
 
+    @MainThread
     private void upload(Mesh mesh) {
         int chunkIndex = Utils.getChunkIndex(mesh.chunkX(), mesh.chunkY(), mesh.chunkZ(), mesh.lod());
         deleteMesh(chunkIndex, mesh.lod());
@@ -242,6 +261,7 @@ public final class MeshCollector {
         occludees[mesh.lod()][chunkIndex] = mesh.occludee();
     }
 
+    @MainThread
     private OpaqueModel loadOpaqueModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getOpaqueByteSize());
         if (start == -1) return new OpaqueModel(mesh.getWorldCoordinate(), null, -1, mesh.lod(), false);
@@ -250,6 +270,7 @@ public final class MeshCollector {
         return new OpaqueModel(mesh.getWorldCoordinate(), mesh.vertexCounts(), start, mesh.lod(), false);
     }
 
+    @MainThread
     private TransparentModel loadTransparentModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getTransparentByteSize());
         if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), 0, 0, -1, mesh.lod());

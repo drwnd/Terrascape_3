@@ -3,6 +3,7 @@ package game.server;
 import core.assets.CoreSounds;
 import core.rendering_api.CrashAction;
 import core.rendering_api.CrashCallback;
+import core.rendering_api.Debug;
 import core.settings.CoreFloatSettings;
 import core.settings.optionSettings.ColorOption;
 import core.sound.Sound;
@@ -18,7 +19,9 @@ import game.server.saving.ChunkSaver;
 import game.settings.FloatSettings;
 import game.settings.IntSettings;
 import game.settings.ToggleSettings;
+import core.utils.MainThread;
 import game.utils.Position;
+import game.utils.ServerThread;
 import game.utils.Utils;
 
 import java.util.ArrayList;
@@ -33,12 +36,14 @@ public final class Server implements CrashCallback {
     public static final int TARGET_TPS = 20;
     public static final int NANOSECONDS_PER_SECOND = 1_000_000_000;
 
+    @MainThread
     public Server(long currentGameTick, float dayTime, ArrayList<ChatMessage> messages) {
         this.currentGameTick = currentGameTick;
         this.dayTime = dayTime;
         this.messages = messages;
     }
 
+    @MainThread
     public Server(Server oldServer) {
         oldServer.cleanUp();
         currentGameTick = oldServer.currentGameTick;
@@ -48,15 +53,18 @@ public final class Server implements CrashCallback {
 
 
     @Override
+    @MainThread
     public CrashAction notify(Exception exception) {
         Game.cleanUp();
         return CrashAction.PRINT_AND_CLOSE;
     }
 
+    @MainThread
     public static void loadImmediateSurroundings() {
         ChunkGenerator.loadImmediateSurroundings();
     }
 
+    @ServerThread
     public static void unloadDistantChunks(Vector3l playerChunkPosition) {
         MeshCollector meshCollector = Game.getPlayer().getMeshCollector();
         ChunkSaver saver = new ChunkSaver();
@@ -80,6 +88,7 @@ public final class Server implements CrashCallback {
         }
     }
 
+    @MainThread
     public static void unloadAll() {
         ChunkSaver saver = new ChunkSaver();
 
@@ -109,6 +118,7 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
+    @ServerThread
     public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
         placeable.offsetPosition(position, side);
 
@@ -130,17 +140,20 @@ public final class Server implements CrashCallback {
         return true;
     }
 
+    @MainThread
     public void pauseTicks() {
         if (executor != null) executor.shutdownNow();
         executor = null;
     }
 
+    @MainThread
     public void startTicks() {
         if (executor != null) return;
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(this::executeGameTickCatchException, 0, NANOSECONDS_PER_GAME_TICK, TimeUnit.NANOSECONDS);
     }
 
+    @MainThread
     void cleanUp() {
         generator.cleanUp();
         pauseTicks();
@@ -152,6 +165,7 @@ public final class Server implements CrashCallback {
         }
     }
 
+    @MainThread
     public void sendPlayerMessage(String message) {
         if (message == null || message.isEmpty()) return;
         synchronized (messages) {
@@ -201,6 +215,7 @@ public final class Server implements CrashCallback {
     }
 
 
+    @ServerThread
     private void executeGameTickCatchException() {
         try {
             gameTickStartTime = System.nanoTime();
@@ -208,10 +223,11 @@ public final class Server implements CrashCallback {
             currentGameTick++;
             incrementTime();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
         }
     }
 
+    @ServerThread
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         Game.getPlayer().updateGameTick();

@@ -5,9 +5,11 @@ import core.rendering_api.shaders.ComputeShader;
 import core.rendering_api.shaders.GuiShader;
 import core.rendering_api.shaders.RenderShader;
 import core.rendering_api.shaders.Shader;
+import core.utils.MainThread;
 
 public final class ShaderLoader {
 
+    @MainThread
     public static Shader loadShader(ShaderIdentifier identifier) {
         return switch (identifier) {
             case Shaders.OPAQUE_GEOMETRY -> new RenderShader("Material.vert", "Opaque.frag", identifier);

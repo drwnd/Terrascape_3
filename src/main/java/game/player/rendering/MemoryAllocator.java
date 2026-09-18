@@ -1,9 +1,12 @@
 package game.player.rendering;
 
+import core.utils.MainThread;
+
 import static org.lwjgl.opengl.GL46.*;
 
 public final class MemoryAllocator {
 
+    @MainThread
     public MemoryAllocator(int initialCapacity) {
         capacity = initialCapacity;
 
@@ -13,6 +16,7 @@ public final class MemoryAllocator {
         free = new MemoryRegion(0, capacity);
     }
 
+    @MainThread
     public int memAlloc(int size) {
         if (size <= 0) return -1;
         MemoryRegion region = free;
@@ -40,6 +44,7 @@ public final class MemoryAllocator {
         return memAlloc(size);
     }
 
+    @MainThread
     public void memFree(int start) {
         if (start == -1) return;
         MemoryRegion freed = removeFromUsed(start);
@@ -72,10 +77,12 @@ public final class MemoryAllocator {
         else before.next = freed;
     }
 
+    @MainThread
     public int getBuffer() {
         return buffer;
     }
 
+    @MainThread
     public int getUsed() {
         int used = 0;
         MemoryRegion region = this.used;
@@ -86,6 +93,7 @@ public final class MemoryAllocator {
         return used;
     }
 
+    @MainThread
     public int getFree() {
         int free = 0;
         MemoryRegion region = this.free;
@@ -100,6 +108,7 @@ public final class MemoryAllocator {
         return capacity;
     }
 
+    @MainThread
     public int getHighestAllocated() {
         int max = -1;
         MemoryRegion region = used;
@@ -110,6 +119,7 @@ public final class MemoryAllocator {
         return max;
     }
 
+    @MainThread
     public void cleanUp() {
         glDeleteBuffers(buffer);
     }

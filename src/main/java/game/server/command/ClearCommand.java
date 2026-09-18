@@ -1,5 +1,6 @@
 package game.server.command;
 
+import core.utils.MainThread;
 import game.server.Game;
 
 final class ClearCommand {
@@ -11,6 +12,7 @@ final class ClearCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         int sparedMessagesCount = 0;
 

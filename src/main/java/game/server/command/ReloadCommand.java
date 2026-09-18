@@ -1,5 +1,6 @@
 package game.server.command;
 
+import core.utils.MainThread;
 import game.server.Game;
 import game.server.Server;
 
@@ -12,6 +13,7 @@ final class ReloadCommand {
 
     }
 
+    @MainThread
     static CommandResult execute(TokenList tokens) {
         String keyword = tokens.expectNextKeyWord().keyword();
         tokens.expectFinishedLess();

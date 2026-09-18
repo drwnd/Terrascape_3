@@ -9,16 +9,20 @@ import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.CoreFloatSettings;
 
+import core.utils.MainThread;
 import org.joml.Vector2f;
 
 import java.awt.*;
 
 public class UiBackgroundElement extends Renderable {
+
+    @MainThread
     public UiBackgroundElement(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
     }
 
     @Override
+    @MainThread
     protected void renderSelf(Vector2f position, Vector2f size) {
         float guiSize = scalesWithGuiSize() ? CoreFloatSettings.GUI_SIZE.value() : 1.0F;
 

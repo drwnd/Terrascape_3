@@ -9,6 +9,7 @@ import core.settings.NumberSetting;
 import core.settings.OptionSetting;
 import core.settings.ToggleSetting;
 import core.utils.FileManager;
+import core.utils.MainThread;
 import core.utils.Message;
 import core.utils.StringGetter;
 import org.joml.Vector2f;
@@ -22,6 +23,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class AssetPackSection extends CoreSettingsRenderable {
 
+    @MainThread
     public AssetPackSection() {
         super();
         ArrayList<String> activePacks = AssetManager.getActiveAssetPackNames();
@@ -41,6 +43,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
         return inactivePacks;
     }
 
+    @MainThread
     private void loadButtons(ArrayList<String> inactivePacks, ArrayList<String> activePacks) {
         for (Renderable renderable : inactivePackElements) removeRenderable(renderable).delete();
         for (Renderable renderable : activePackElements) removeRenderable(renderable).delete();
@@ -55,6 +58,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
         setButtonsVerticalPosition();
     }
 
+    @MainThread
     private void setButtonsVerticalPosition() {
         float scroll = input.getScroll();
 
@@ -67,14 +71,17 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
 
+    @MainThread
     private void addInactivePack(String packName) {
         inactivePackElements.add(new InactivePackElement(packName));
     }
 
+    @MainThread
     private void addActivePack(String pack) {
         activePackElements.add(new ActivePackElement(pack));
     }
 
+    @MainThread
     private Clickable activatePack(InactivePackElement inactivePackElement) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -91,6 +98,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
         };
     }
 
+    @MainThread
     private Clickable deactivatePack(ActivePackElement activePackElement) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -108,6 +116,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
     @Override
+    @MainThread
     Clickable getApplyChangesButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -122,6 +131,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
     @Override
+    @MainThread
     Clickable getResetSettingsButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -135,6 +145,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
     @Override
+    @MainThread
     Clickable getBackButtonAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -144,6 +155,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
     @Override
+    @MainThread
     public void scrollSettingButtons(float scroll) {
         Vector2f offset = new Vector2f(0, scroll);
         for (Renderable renderable : inactivePackElements) renderable.move(offset);
@@ -191,6 +203,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
     }
 
     @Override
+    @MainThread
     protected void resizeSelfTo(int width, int height) {
         for (ActivePackElement activePackElement : activePackElements) {
             float sizeToParentX = 0.5F / activePackElement.getAspectRatio() / Window.getAspectRatio();
@@ -209,6 +222,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
 
     private class ActivePackElement extends Renderable {
 
+        @MainThread
         private ActivePackElement(String packName) {
             super(new Vector2f(0.35F, 0.1F), new Vector2f(0.6F, 0));
             this.packName = packName;
@@ -232,6 +246,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
             setPlayFocusSound(false);
         }
 
+        @MainThread
         private Clickable upClickable(ActivePackElement activePackElement) {
             return (Vector2i _, int _, int action) -> {
                 if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -248,6 +263,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
             };
         }
 
+        @MainThread
         private Clickable downClickable(ActivePackElement activePackElement) {
             return (Vector2i _, int _, int action) -> {
                 if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -266,6 +282,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
 
 
         @Override
+        @MainThread
         public void setFocused(boolean focused) {
             Vector2i pixelCoordinate = Input.getCursorPos();
             for (Renderable renderable : getChildren()) renderable.setFocused(renderable.containsPixelCoordinate(pixelCoordinate));
@@ -277,6 +294,7 @@ public class AssetPackSection extends CoreSettingsRenderable {
 
     private class InactivePackElement extends UiButton {
 
+        @MainThread
         private InactivePackElement(String packName) {
             super(new Vector2f(0.3F, 0.1F), new Vector2f(0.2F, 0));
             this.packName = packName;

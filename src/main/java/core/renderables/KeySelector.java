@@ -5,6 +5,7 @@ import core.rendering_api.Input;
 import core.rendering_api.MenuInput;
 import core.rendering_api.Window;
 import core.settings.KeySetting;
+import core.utils.MainThread;
 import core.utils.Message;
 import core.utils.StringGetter;
 
@@ -15,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public final class KeySelector extends UiButton {
 
+    @MainThread
     public KeySelector(Vector2f sizeToParent, Vector2f offsetToParent, KeySetting setting, StringGetter settingName) {
         super(sizeToParent, offsetToParent);
         setAction(getAction());
@@ -98,6 +100,7 @@ public final class KeySelector extends UiButton {
         };
     }
 
+    @MainThread
     private Clickable getAction() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -112,11 +115,13 @@ public final class KeySelector extends UiButton {
 
     private static final class KeySelectorInput extends MenuInput<KeySelector> {
 
+        @MainThread
         private KeySelectorInput(KeySelector selector) {
             super(selector);
         }
 
         @Override
+        @MainThread
         public void mouseButtonCallback(long window, int button, int action, int mods) {
             if (action != GLFW_PRESS) return;
             menu.setValue(button | Input.IS_MOUSE_BUTTON);
@@ -125,6 +130,7 @@ public final class KeySelector extends UiButton {
         }
 
         @Override
+        @MainThread
         public void keyCallback(long window, int key, int scancode, int action, int mods) {
             if (action != GLFW_PRESS) return;
             if (key == GLFW_KEY_ESCAPE) menu.setValue(GLFW_KEY_UNKNOWN);

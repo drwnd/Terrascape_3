@@ -10,6 +10,7 @@ import game.server.saving.PlayerSaver;
 import game.server.saving.ServerSaver;
 import game.server.saving.WorldSaver;
 import game.settings.IntSettings;
+import core.utils.MainThread;
 
 public final class Game {
 
@@ -23,6 +24,7 @@ public final class Game {
         });
     }
 
+    @MainThread
     public static void play(World toPlayWorld) {
         String worldName = toPlayWorld.getName();
         Material.loadMaterials();
@@ -36,6 +38,7 @@ public final class Game {
         Window.setCrashCallback(server);
     }
 
+    @MainThread
     public static void quit() {
         Window.popRenderable();
         cleanUp();
@@ -46,6 +49,7 @@ public final class Game {
         server = null;
     }
 
+    @MainThread
     public static void cleanUp() {
         if (world == null) return;
         String worldName = world.getName();
@@ -58,6 +62,7 @@ public final class Game {
         server.cleanUp();
     }
 
+    @MainThread
     public static void updateRenderDistance(int oldRenderDistance) {
         if (world == null || oldRenderDistance == IntSettings.RENDER_DISTANCE.value()) return;
         server = new Server(server);
@@ -68,6 +73,7 @@ public final class Game {
         server.startTicks();
     }
 
+    @MainThread
     public static void updateLodCount(int oldLodCount) {
         if (world == null || oldLodCount == IntSettings.LOD_COUNT.value()) return;
         server = new Server(server);
@@ -93,7 +99,7 @@ public final class Game {
         return server;
     }
 
-
+    @MainThread
     public static boolean setTemporaryWorld(World world) {
         if (Game.world != null || player != null || server != null) {
             Debug.err("Cannot set temporary World. The Game might be running");
@@ -103,6 +109,7 @@ public final class Game {
         return true;
     }
 
+    @MainThread
     public static void removeTemporaryWorld() {
         if (player != null || server != null) {
             Debug.err("Cannot remove temporary World. The Game might be running");

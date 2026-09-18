@@ -3,39 +3,46 @@ package core.renderables;
 import core.rendering_api.Input;
 
 import core.rendering_api.Window;
+import core.utils.MainThread;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class TextFieldInput extends Input {
 
+    @MainThread
     public TextFieldInput(TextField field) {
         super(field);
         this.field = field;
     }
 
     @Override
+    @MainThread
     public void setInputMode() {
         setStandardInputMode();
         cursorIndex = field.getText().length();
     }
 
     @Override
+    @MainThread
     public void cursorPosCallback(long window, double xPos, double yPos) {
         standardCursorPosCallBack(xPos, yPos);
     }
 
     @Override
+    @MainThread
     public void mouseButtonCallback(long window, int button, int action, int mods) {
         if (action != GLFW_PRESS) return;
         if (!field.containsPixelCoordinate(cursorPos)) unselect();
     }
 
     @Override
+    @MainThread
     public void scrollCallback(long window, double xScroll, double yScroll) {
 
     }
 
     @Override
+    @MainThread
     public void keyCallback(long window, int key, int scancode, int action, int mods) {
         if (action != GLFW_PRESS && action != GLFW_REPEAT) return;
         if (key == GLFW_KEY_ESCAPE) unselect();
@@ -46,6 +53,7 @@ public class TextFieldInput extends Input {
     }
 
     @Override
+    @MainThread
     public void charCallback(long window, int codePoint) {
         char[] chars = Character.toChars(codePoint);
         field.setText(insert(field.getText(), toString(chars)));
@@ -56,12 +64,14 @@ public class TextFieldInput extends Input {
     }
 
 
+    @MainThread
     private void unselect() {
         Renderable renderable = Window.topRenderable();
         renderable.setOnTop();
         renderable.hoverOver(cursorPos);
     }
 
+    @MainThread
     private void handleBackspace() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
@@ -72,6 +82,7 @@ public class TextFieldInput extends Input {
         } else field.setText(cutBefore(currentText));
     }
 
+    @MainThread
     private void handleDelete() {
         String currentText = field.getText();
         if (currentText.isEmpty()) return;
