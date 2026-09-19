@@ -1,6 +1,5 @@
 package core.renderables;
 
-import core.language.Translatable;
 import core.settings.OptionSetting;
 import core.settings.optionSettings.ColorOption;
 import core.settings.optionSettings.Option;
@@ -49,7 +48,7 @@ public final class OptionToggle extends UiButton {
     private void setValue(Option value) {
         this.value = value;
 
-        String valueText = value instanceof Translatable translatable ? translatable.get() : value.name();
+        String valueText = value instanceof StringGetter stringGetter ? stringGetter.get() : value.name();
         if (settingName != null) textElement.setText(settingName.get() + ": " + valueText);
         else textElement.setText(valueText);
 

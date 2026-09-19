@@ -29,10 +29,14 @@ public final class WorldGeneration {
     public static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
 
     public static long SEED;
+    public static int BLOCK_SIZE_BITS, BLOCK_SIZE, BLOCK_SIZE_MASK;
     private static BiomeSamplers.BiomeSampler BIOME_SAMPLER;
 
     public static void setSettings(WorldGenerationSettings settings) {
         SEED = settings.seed();
+        BLOCK_SIZE = MathUtils.nextLargestPowOf2(settings.blockSize());
+        BLOCK_SIZE_BITS = Integer.numberOfTrailingZeros(BLOCK_SIZE);
+        BLOCK_SIZE_MASK = -BLOCK_SIZE;
         BIOME_SAMPLER = settings.biomeSampler().biomeSampler;
     }
 
