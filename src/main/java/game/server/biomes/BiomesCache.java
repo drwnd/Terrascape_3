@@ -103,7 +103,7 @@ public final class BiomesCache {
                     48, 128, SAND, SANDSTONE
             );
 
-    public static Biome getBiome(MapSample sample, int height, double feature) {
+    public static Biome getAllBiomes(MapSample sample, int height, double feature) {
         double dither = feature * 0.05 - 0.025;
 
         double temperature = sample.temperature() + dither;
@@ -126,15 +126,7 @@ public final class BiomesCache {
             return BiomesCache.MOUNTAIN;
         }
 
-        if (temperature > 0.33) {
-            if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
-                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return BiomesCache.CORRODED_MESA;
-            if (temperature > 0.55 && humidity < 0.15) return BiomesCache.MESA;
-            if (humidity < 0.15) return BiomesCache.DESERT;
-            if (humidity > 0.5 && temperature > 0.5) return BiomesCache.BLACK_WOOD_FOREST;
-            if (humidity > 0.4 && temperature > 0.4) return BiomesCache.DARK_OAK_FOREST;
-            return BiomesCache.WASTELAND;
-        }
+        if (temperature > 0.33) return getWarmBiome(sample, height, temperature, humidity);
         if (humidity > 0.33) {
             if (temperature > -0.1) return BiomesCache.REDWOOD_FOREST;
             if (temperature > -0.4) return BiomesCache.SPRUCE_FOREST;
@@ -145,6 +137,70 @@ public final class BiomesCache {
         if (humidity < -0.33 && temperature > -0.5) return BiomesCache.PINE_FOREST;
         return BiomesCache.SNOWY_PLAINS;
     }
+
+    public static Biome getColdBiomes(MapSample sample, int height, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        double humidity = sample.humidity() + dither;
+        double continental = sample.continental() - Math.abs(dither);
+        double erosion = sample.erosion() + dither;
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
+
+        if (height < WATER_LEVEL) return COLD_OCEAN;
+        if (height < beachHeight) return BiomesCache.BEACH;
+        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) return SNOWY_MOUNTAIN;
+        if (humidity > 0.33) return SNOWY_SPRUCE_FOREST;
+        return SNOWY_PLAINS;
+    }
+
+    public static Biome getWarmBiomes(MapSample sample, int height, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        double temperature = sample.temperature() + dither;
+        double humidity = sample.humidity() + dither;
+        double continental = sample.continental() - Math.abs(dither);
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
+        int sandHeight = (int) (feature * 64.0) + WATER_LEVEL - 80;
+
+        if (height < WATER_LEVEL && height <= sandHeight) return WARM_OCEAN;
+        if (height < MathUtils.max(WATER_LEVEL, sandHeight, beachHeight)) return BiomesCache.BEACH;
+        if (continental > MOUNTAIN_THRESHOLD) return DRY_MOUNTAIN;
+
+        return getWarmBiome(sample, height, temperature, humidity);
+    }
+
+    public static Biome getModerateBiomes(MapSample sample, int height, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        double temperature = sample.temperature() + dither;
+        double humidity = sample.humidity() + dither;
+        double continental = sample.continental() - Math.abs(dither);
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
+        int sandHeight = (int) (feature * 64.0) + WATER_LEVEL - 80;
+
+        if (height < WATER_LEVEL && height <= sandHeight) return OCEAN;
+        if (height < MathUtils.max(WATER_LEVEL, sandHeight, beachHeight)) return BiomesCache.BEACH;
+        if (continental > MOUNTAIN_THRESHOLD) return MOUNTAIN;
+
+        if (humidity > 0.33) {
+            if (temperature > -0.1) return BiomesCache.REDWOOD_FOREST;
+            return BiomesCache.SPRUCE_FOREST;
+        }
+        if (humidity < 0.0 && temperature > -0.25) return BiomesCache.PLAINS;
+        if (humidity > -0.33 && temperature > -0.33) return BiomesCache.OAK_FOREST;
+        return BiomesCache.PINE_FOREST;
+    }
+
+    private static Biome getWarmBiome(MapSample sample, int height, double temperature, double humidity) {
+        if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
+                && sample.temperature() > 0.45 && sample.humidity() < -0.3) return BiomesCache.CORRODED_MESA;
+        if (temperature > 0.55 && humidity < 0.15) return BiomesCache.MESA;
+        if (humidity < 0.15) return BiomesCache.DESERT;
+        if (humidity > 0.5 && temperature > 0.5) return BiomesCache.BLACK_WOOD_FOREST;
+        if (humidity > 0.4 && temperature > 0.4) return BiomesCache.DARK_OAK_FOREST;
+        return BiomesCache.WASTELAND;
+    }
+
 
     private static int getSpecialIceHeight(long totalX, long totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);

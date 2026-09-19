@@ -22,7 +22,7 @@ public final class WorldSaver extends Saver<World> {
     @Override
     protected void save(World world) {
         saveLong(world.worldGenerationSettings.seed());
-        saveLong(world.worldGenerationSettings.preset().ordinal());
+        saveInt(world.worldGenerationSettings.biomeSampler().ordinal());
         saveLong(world.created.getTime());
         saveLong(new Date().getTime());
     }

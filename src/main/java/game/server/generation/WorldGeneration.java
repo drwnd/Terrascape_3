@@ -33,7 +33,7 @@ public final class WorldGeneration {
 
     public static void setSettings(WorldGenerationSettings settings) {
         SEED = settings.seed();
-        BIOME_SAMPLER = settings.preset().biomeSampler;
+        BIOME_SAMPLER = settings.biomeSampler().biomeSampler;
     }
 
     public static void generate(Chunk chunk) {

@@ -7,7 +7,10 @@ import game.server.biomes.BiomesCache;
 
 public enum BiomeSamplers implements Option, Translatable {
 
-    DEFAULT(BiomesCache::getBiome);
+    DEFAULT(BiomesCache::getAllBiomes),
+    COLD_BIOMES(BiomesCache::getColdBiomes),
+    WARM_BIOMES(BiomesCache::getWarmBiomes),
+    MODERATE_BIOMES(BiomesCache::getModerateBiomes);
 
     public static BiomeSamplers getSaved(int savedOrdinal) {
         BiomeSamplers[] values = BiomeSamplers.values();
