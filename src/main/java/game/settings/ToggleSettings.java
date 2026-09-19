@@ -18,6 +18,7 @@ public enum ToggleSettings implements ToggleSetting {
     GLASS_CASTS_SHADOWS(true),
     OFFSET_FROM_GROUND(true),
     RENDER_HUD(true, GLFW_KEY_F4),
+    HIDE_BODY_IN_FIRST_PERSON(false),
 
     NO_CLIP(false),
     CULLING_COMPUTATION(true),

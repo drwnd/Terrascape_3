@@ -504,6 +504,7 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderPlayerCharacter(Position cameraPosition, Matrix4f projectionViewMatrix, Matrix4f sunMatrix, Position playerPosition) {
+        if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value() && OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) return;
         Shader shader = AssetManager.get(Shaders.MODEL);
         shader.bind();
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
