@@ -483,4 +483,8 @@ public final class GenerationData {
     public interface MaterialFunction {
         byte getGeneratingMaterial(GenerationData data, long x, long y, long z);
     }
+
+    public interface SpecialHeightFunction {
+        int getSpecialHeight(long totalX, long totalY);
+    }
 }

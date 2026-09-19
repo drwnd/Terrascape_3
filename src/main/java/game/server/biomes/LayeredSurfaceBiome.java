@@ -52,7 +52,6 @@ public class LayeredSurfaceBiome implements Biome {
 
     @Override
     public WorldGenStructure getStructureFeature(long totalX, long height, long totalZ) {
-        if (structureFeatures == null) return null;
         return Biome.getRandomStructure(totalX, height, totalZ, structureFeatures);
     }
 
@@ -61,8 +60,8 @@ public class LayeredSurfaceBiome implements Biome {
         return name;
     }
 
-    private final String name;
-    private final AssetIdentifier<StructureCollection> structures, structureFeatures;
-    private final int structureChance, structureFeatureChance, surfaceMaterialDepth, biomeDepth;
-    private final byte topMaterial, bottomMaterial;
+    protected final String name;
+    protected final AssetIdentifier<StructureCollection> structures, structureFeatures;
+    protected final int structureChance, structureFeatureChance, surfaceMaterialDepth, biomeDepth;
+    protected final byte topMaterial, bottomMaterial;
 }
