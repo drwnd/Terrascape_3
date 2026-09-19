@@ -60,8 +60,9 @@ public final class WorldGeneration {
 
         if (!containsBiome && !containsGround && containsRiver) data.fillUncompressedMaterialsWithAir();
         if (containsBiome || containsRiver) {
-            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
-                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
+            int stepSize = Math.max(1, BLOCK_SIZE >> data.LOD);
+            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX += stepSize)
+                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ += stepSize) {
                     data.set(inChunkX, inChunkZ);
                     if (containsBiome) generateBiome(inChunkX, inChunkZ, data);
                     if (containsRiver) generateUndergroundRiver(inChunkX, inChunkZ, data);
