@@ -36,15 +36,16 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         TextField nameField = new TextField(sizeToParent, new Vector2f(0.35F, 0.85F), UiMessages.WORLD_NAME);
         TextField seedField = new TextField(sizeToParent, new Vector2f(0.35F, 0.7F), UiMessages.WORLD_SEED);
 
+        sizeToParent = new Vector2f(0.275F, 0.1F);
+        OptionSetting biomeSetting = new StandAloneOptionSetting(BiomeSamplers.DEFAULT);
+        OptionSetting blockSizeSetting = new StandAloneOptionSetting(BlockSizes.LOD_0);
+        UiButton biomeSamplerButton = new OptionToggle(sizeToParent, new Vector2f(0.35F, 0.55F), biomeSetting, UiMessages.BIOME_OPTION, true);
+        UiButton blockSizeButton = new OptionToggle(sizeToParent, new Vector2f(0.675F, 0.55F), blockSizeSetting, UiMessages.BLOCK_SIZE_OPTION, true);
+
         sizeToParent = new Vector2f(0.25F, 0.1F);
         UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), Window::popRenderable);
         TextElement text = new TextElement(new Vector2f(0.05F, 0.5F), CoreUiMessages.BACK);
         backButton.addRenderable(text);
-
-        OptionSetting biomeSetting = new StandAloneOptionSetting(BiomeSamplers.DEFAULT);
-        OptionSetting blockSizeSetting = new StandAloneOptionSetting(BlockSizes.LOD_0);
-        UiButton biomeSamplerButton = new OptionToggle(sizeToParent, new Vector2f(0.35F, 0.55F), biomeSetting, UiMessages.BIOME_OPTION, true);
-        UiButton blockSizeButton = new OptionToggle(sizeToParent, new Vector2f(0.65F, 0.55F), blockSizeSetting, UiMessages.BLOCK_SIZE_OPTION, true);
 
         UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7F), getCreateButtonClickable(nameField, seedField, biomeSetting, blockSizeSetting));
         text = new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.CREATE_WORLD);
