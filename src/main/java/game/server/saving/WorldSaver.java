@@ -32,11 +32,11 @@ public final class WorldSaver extends Saver<World> {
     @MainThread
     protected World load() {
         long seed = loadLong();
-        BiomeSamplers preset = BiomeSamplers.getSaved(loadInt());
+        BiomeSamplers biomeSampler = BiomeSamplers.getSaved(loadInt());
         int blockSize = loadInt();
         Date created = new Date(loadLong());
         Date lastPlayed = new Date(loadLong());
-        return new World(new WorldGenerationSettings(seed, preset, blockSize), created, lastPlayed, false);
+        return new World(new WorldGenerationSettings(seed, biomeSampler, blockSize), created, lastPlayed, false);
     }
 
     @Override
@@ -59,6 +59,6 @@ public final class WorldSaver extends Saver<World> {
 
     @Override
     protected int getVersionNumber() {
-        return 2;
+        return 3;
     }
 }
