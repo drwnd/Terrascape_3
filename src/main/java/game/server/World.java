@@ -5,6 +5,7 @@ import core.utils.FileManager;
 import core.utils.MathUtils;
 
 import game.server.generation.WorldGeneration;
+import game.server.generation.WorldGenerationSettings;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
 import core.utils.MainThread;
@@ -26,16 +27,16 @@ public final class World {
     public final int LOD_COUNT;
 
     public final Date created, lastPlayed;
-    public final long seed;
+    public final WorldGenerationSettings worldGenerationSettings;
 
     @MainThread
     public World(World world) {
-        this(world.seed, world.created, world.lastPlayed, true);
+        this(world.worldGenerationSettings, world.created, world.lastPlayed, true);
         this.name = world.name;
     }
 
     @MainThread
-    public World(long seed, Date created, Date lastPlayed, boolean createChunksArray) {
+    public World(WorldGenerationSettings worldGenerationSettings, Date created, Date lastPlayed, boolean createChunksArray) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
         LOD_COUNT = IntSettings.LOD_COUNT.value();
@@ -44,11 +45,11 @@ public final class World {
         RENDERED_WORLD_WIDTH_BITS = Integer.numberOfTrailingZeros(RENDERED_WORLD_WIDTH);
         CHUNKS_PER_LOD = RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH;
 
-        WorldGeneration.SEED = seed;
+        WorldGeneration.setSettings(worldGenerationSettings);
         chunks = createChunksArray ? new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH] : null;
         this.created = created;
         this.lastPlayed = lastPlayed;
-        this.seed = seed;
+        this.worldGenerationSettings = worldGenerationSettings;
     }
 
     @MainThread
@@ -97,12 +98,12 @@ public final class World {
         name = oldWorld.name;
         created = oldWorld.created;
         lastPlayed = oldWorld.lastPlayed;
-        seed = oldWorld.seed;
+        worldGenerationSettings = oldWorld.worldGenerationSettings;
     }
 
     @MainThread
     public static void init() {
-        WorldGeneration.SEED = Game.getWorld().seed;
+        WorldGeneration.setSettings(Game.getWorld().worldGenerationSettings);
         ChunkSaver.generateHigherLODs();
         Server.loadImmediateSurroundings();
         Sound.setDistanceScaler(0.0625F);

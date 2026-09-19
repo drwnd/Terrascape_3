@@ -4,8 +4,10 @@ import core.utils.MathUtils;
 import core.utils.OpenSimplex2S;
 import game.assets.StructureCollectionIdentifier;
 import game.server.generation.GenerationData;
+import game.server.generation.MapSample;
 
-import static game.server.generation.WorldGeneration.SEED;
+
+import static game.server.generation.WorldGeneration.*;
 import static game.utils.Constants.*;
 import static game.assets.StructureCollectionIdentifier.*;
 
@@ -100,6 +102,49 @@ public final class BiomesCache {
                     StructureCollectionIdentifier.merge(new StructureCollectionIdentifier[]{CACTUS, SHRUB}, new float[]{0.5F, 0.5F}), 64,
                     48, 128, SAND, SANDSTONE
             );
+
+    public static Biome getBiome(MapSample sample, int height, double feature) {
+        double dither = feature * 0.05 - 0.025;
+
+        double temperature = sample.temperature() + dither;
+        double humidity = sample.humidity() + dither;
+        double continental = sample.continental() - Math.abs(dither);
+        double erosion = sample.erosion() + dither;
+        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
+        int sandHeight = (int) (feature * 64.0) + WATER_LEVEL - 80;
+
+        if (height < WATER_LEVEL) {
+            if (sample.temperature() < -0.33) return BiomesCache.COLD_OCEAN;
+            if (height > sandHeight) return BiomesCache.BEACH;
+            if (temperature > 0.33) return BiomesCache.WARM_OCEAN;
+            return BiomesCache.OCEAN;
+        }
+        if (height < beachHeight) return BiomesCache.BEACH;
+        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) {
+            if (temperature > 0.33) return BiomesCache.DRY_MOUNTAIN;
+            else if (temperature < -0.33) return BiomesCache.SNOWY_MOUNTAIN;
+            return BiomesCache.MOUNTAIN;
+        }
+
+        if (temperature > 0.33) {
+            if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
+                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return BiomesCache.CORRODED_MESA;
+            if (temperature > 0.55 && humidity < 0.15) return BiomesCache.MESA;
+            if (humidity < 0.15) return BiomesCache.DESERT;
+            if (humidity > 0.5 && temperature > 0.5) return BiomesCache.BLACK_WOOD_FOREST;
+            if (humidity > 0.4 && temperature > 0.4) return BiomesCache.DARK_OAK_FOREST;
+            return BiomesCache.WASTELAND;
+        }
+        if (humidity > 0.33) {
+            if (temperature > -0.1) return BiomesCache.REDWOOD_FOREST;
+            if (temperature > -0.4) return BiomesCache.SPRUCE_FOREST;
+            return BiomesCache.SNOWY_SPRUCE_FOREST;
+        }
+        if (humidity < 0.0 && temperature > -0.25) return BiomesCache.PLAINS;
+        if (humidity > -0.33 && temperature > -0.33) return BiomesCache.OAK_FOREST;
+        if (humidity < -0.33 && temperature > -0.5) return BiomesCache.PINE_FOREST;
+        return BiomesCache.SNOWY_PLAINS;
+    }
 
     private static int getSpecialIceHeight(long totalX, long totalZ) {
         double iceBergNoise = OpenSimplex2S.noise3_ImproveXY(SEED ^ 0xF90C1662F77EE4DFL, totalX * ICE_BERG_FREQUENCY, totalZ * ICE_BERG_FREQUENCY, 0);
