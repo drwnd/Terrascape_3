@@ -98,11 +98,11 @@ public final class GenerationData {
     }
 
     public int clampStartHeightToInChunkY(int height) {
-        return Math.clamp(height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD, 0, CHUNK_SIZE);
+        return Math.clamp(height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD, 0, CHUNK_SIZE) & (BLOCK_SIZE_MASK >> LOD);
     }
 
     public int clampEndHeightToInChunkY(int height) {
-        return Math.clamp((height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD) + 1, 0, CHUNK_SIZE);
+        return Math.clamp((height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD) + 1, 0, CHUNK_SIZE) & (BLOCK_SIZE_MASK >> LOD);
     }
 
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {

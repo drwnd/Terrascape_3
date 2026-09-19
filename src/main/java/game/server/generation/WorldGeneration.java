@@ -96,17 +96,18 @@ public final class WorldGeneration {
                 int mapIndex = GenerationData.getMapIndex(mapX, mapZ);
                 double resultingHeight = getResultingHeight(samples.getSample(mapIndex));
                 exactHeightMap[mapIndex] = resultingHeight;
-                resultingHeightMap[mapIndex] = MathUtils.floor(resultingHeight);
+                resultingHeightMap[mapIndex] = MathUtils.floor(resultingHeight) & BLOCK_SIZE_MASK;
             }
 
-        float lodNormalizer = 1.0F / (1 << lod);
-        for (int mapX = 0; mapX < CHUNK_SIZE; mapX++)
-            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ++) {
+        int stepSize = Math.max(1, BLOCK_SIZE >> lod);
+        float normalizer = 1.0F / (1 << lod);
+        for (int mapX = 0; mapX < CHUNK_SIZE; mapX += stepSize)
+            for (int mapZ = 0; mapZ < CHUNK_SIZE; mapZ += stepSize) {
                 double height = exactHeightMap[GenerationData.getMapIndex(mapX, mapZ)];
 
-                double steepnessX = Math.abs(height - exactHeightMap[GenerationData.getMapIndex(mapX + 1, mapZ)]);
-                double steepnessZ = Math.abs(height - exactHeightMap[GenerationData.getMapIndex(mapX, mapZ + 1)]);
-                steepnessMap[mapX << CHUNK_SIZE_BITS | mapZ] = (float) Math.max(steepnessX, steepnessZ) * lodNormalizer;
+                double steepnessX = Math.abs(height - exactHeightMap[GenerationData.getMapIndex(mapX + stepSize, mapZ)]);
+                double steepnessZ = Math.abs(height - exactHeightMap[GenerationData.getMapIndex(mapX, mapZ + stepSize)]);
+                steepnessMap[mapX << CHUNK_SIZE_BITS | mapZ] = (float) Math.max(steepnessX, steepnessZ) * normalizer;
             }
         return resultingHeightMap;
     }
