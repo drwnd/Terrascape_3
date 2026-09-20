@@ -105,19 +105,20 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addOption(OptionSettings.PERSPECTIVE);
         section.addSlider(FloatSettings.CROSSHAIR_SIZE);
         section.addSlider(FloatSettings.HOTBAR_SIZE);
-        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES);
-        section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH);
-        section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH);
         section.addToggle(ToggleSettings.RENDER_HUD);
         section.addToggle(ToggleSettings.USE_SHADOW_MAPPING);
         section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS);
         section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS);
         section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS);
+        section.addSlider(IntSettings.SHADOW_CASCADES_COUNT);
         section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION);
+        section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES);
         section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES);
+        section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH);
+        section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH);
         section.addToggle(ToggleSettings.HIDE_BODY_IN_FIRST_PERSON);
         section.addOption(OptionSettings.OCCLUSION_CULLING);
 
