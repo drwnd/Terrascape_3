@@ -110,6 +110,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS);
         section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS);
         section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS);
+        section.addToggle(ToggleSettings.PLAYER_CASTS_SHADOWS);
         section.addSlider(IntSettings.SHADOW_CASCADES_COUNT);
         section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION);
         section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES);

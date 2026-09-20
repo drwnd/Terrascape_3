@@ -15,8 +15,8 @@ layout (location = 1) out ivec4 intPos;
 
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
-uniform sampler2D shadowMap;
-uniform sampler2D shadowColor;
+uniform sampler2DArray shadowMap;
+uniform sampler2DArray shadowColor;
 uniform mat4 sunMatrix;
 
 uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
@@ -55,9 +55,15 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-vec3 getLightColor(vec2 shadowCoord) {
+vec3 getLightColor(vec2 shadowCoord, int shadowCascades) {
     if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
-    return max(texture(shadowColor, shadowCoord).rgb, vec3(0.5));
+
+    for (int cascade = 0; cascade < shadowCascades; cascade++) {
+        vec3 color = texture(shadowColor, vec3(shadowCoord.xy, cascade)).rgb;
+        if (color != vec3(1, 1, 1)) return max(color, vec3(0.5));
+    }
+
+    return vec3(1, 1, 1);
 }
 
 vec3 getSkyLight(vec3 position, vec3 normal) {
@@ -66,12 +72,18 @@ vec3 getSkyLight(vec3 position, vec3 normal) {
     shadowCoord.xyz /= shadowCoord.w;
     shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
 
-    float closestDepth = texture(shadowMap, shadowCoord.xy).r;
-    if (closestDepth == 0.0) return getLightColor(shadowCoord.xy);
-    float currentDepth = shadowCoord.z;
-    float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005);
+    int shadowCascades = textureSize(shadowMap, 0).z;
 
-    return currentDepth + bias < closestDepth ? vec3(0.5) : getLightColor(shadowCoord.xy);
+    for (int cascade = 0; cascade < shadowCascades; cascade++) {
+        float closestDepth = texture(shadowMap, vec3(shadowCoord.xy, cascade)).r;
+        if (closestDepth == 0.0) return getLightColor(shadowCoord.xy, shadowCascades);
+        float currentDepth = shadowCoord.z;
+        float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005);
+
+        if (currentDepth + bias < closestDepth) return vec3(0.5);
+    }
+
+    return getLightColor(shadowCoord.xy, shadowCascades);
 }
 
 vec3 getColor(vec3 color, vec3 textureCoord) {

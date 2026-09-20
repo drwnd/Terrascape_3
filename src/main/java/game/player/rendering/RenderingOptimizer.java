@@ -135,12 +135,11 @@ public final class RenderingOptimizer {
 
     // Shadow mapping interface
     @MainThread
-    public void populateOpaqueShadowIndirectBuffer(float renderTime) {
+    public void populateOpaqueShadowIndirectBuffer(int shadowLod, float renderTime) {
         Vector3f sunDirection = Transformation.getSunDirection(renderTime);
         int xOffset = sunDirection.x < 0 ? 1 : -1;
         int yOffset = sunDirection.y < 0 ? 1 : -1;
         int zOffset = sunDirection.z < 0 ? 1 : -1;
-        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
 
         opaqueCommands.clear();
         for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
@@ -157,9 +156,7 @@ public final class RenderingOptimizer {
     }
 
     @MainThread
-    public void populateGlassShadowIndirectBuffer() {
-        int shadowLod = Math.min(SHADOW_LOD, IntSettings.LOD_COUNT.value() - 1);
-
+    public void populateGlassShadowIndirectBuffer(int shadowLod) {
         opaqueCommands.clear();
         for (int chunkIndex = 0; chunkIndex < Game.getWorld().CHUNKS_PER_LOD; chunkIndex++) {
             TransparentModel model = meshCollector.getTransparentModel(chunkIndex, shadowLod);

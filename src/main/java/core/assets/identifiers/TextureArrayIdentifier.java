@@ -6,6 +6,7 @@ import core.assets.Texture;
 import core.assets.TextureArray;
 import core.rendering_api.CoreObjectLoader;
 import core.utils.FileIndexSet;
+import core.utils.MainThread;
 
 import java.nio.file.Path;
 
@@ -15,11 +16,13 @@ public interface TextureArrayIdentifier extends AssetIdentifier<TextureArray> {
 
     FileIndexSet<?> indexSet();
 
+    @MainThread
     default TextureArray generateAsset() {
         Texture[] textures = getTextures(indexSet());
         return CoreObjectLoader.generateTextureArray(textures);
     }
 
+    @MainThread
     private Texture[] getTextures(FileIndexSet<?> indexSet) {
         Texture[] textures = new Texture[indexSet.getCount()];
 
