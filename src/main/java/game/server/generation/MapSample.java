@@ -9,14 +9,14 @@ public record MapSample(float temperature, float humidity,
 
     public MapSample(long totalX, long totalZ, boolean biomes, boolean height) {
         this(
-                !biomes ? 0.0F : (float) temperatureMapValue(totalX, totalZ),
-                !biomes ? 0.0F : (float) humidityMapValue(totalX, totalZ),
+                !biomes ? 0.0F : (float) temperatureMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
+                !biomes ? 0.0F : (float) humidityMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
 
-                !height ? 0.0F : (float) heightMapValue(totalX, totalZ),
-                !height ? 0.0F : (float) erosionMapValue(totalX, totalZ),
-                !height ? 0.0F : (float) continentalMapValue(totalX, totalZ),
-                !height ? 0.0F : (float) riverMapValue(totalX, totalZ),
-                !height ? 0.0F : (float) ridgeMapValue(totalX, totalZ)
+                !height ? 0.0F : (float) heightMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
+                !height ? 0.0F : (float) erosionMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
+                !height ? 0.0F : (float) continentalMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
+                !height ? 0.0F : (float) riverMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK),
+                !height ? 0.0F : (float) ridgeMapValue(totalX & WorldGeneration.BLOCK_SIZE_MASK, totalZ & WorldGeneration.BLOCK_SIZE_MASK)
         );
     }
 

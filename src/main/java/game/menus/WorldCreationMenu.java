@@ -4,13 +4,19 @@ import core.renderables.*;
 import core.rendering_api.MenuInput;
 import core.rendering_api.Window;
 import core.language.CoreUiMessages;
+import core.settings.OptionSetting;
+import core.settings.stand_alones.StandAloneOptionSetting;
 
 import game.language.UiMessages;
 import game.server.World;
+import game.server.generation.BiomeSamplers;
+import game.server.generation.BlockSizes;
+import game.server.generation.WorldGenerationSettings;
 import game.server.saving.WorldSaver;
-
 import core.utils.MainThread;
+
 import game.utils.Utils;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -30,12 +36,18 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         TextField nameField = new TextField(sizeToParent, new Vector2f(0.35F, 0.85F), UiMessages.WORLD_NAME);
         TextField seedField = new TextField(sizeToParent, new Vector2f(0.35F, 0.7F), UiMessages.WORLD_SEED);
 
+        sizeToParent = new Vector2f(0.275F, 0.1F);
+        OptionSetting biomeSetting = new StandAloneOptionSetting(BiomeSamplers.DEFAULT);
+        OptionSetting blockSizeSetting = new StandAloneOptionSetting(BlockSizes.LOD_0);
+        UiButton biomeSamplerButton = new OptionToggle(sizeToParent, new Vector2f(0.35F, 0.55F), biomeSetting, UiMessages.BIOME_OPTION, true);
+        UiButton blockSizeButton = new OptionToggle(sizeToParent, new Vector2f(0.675F, 0.55F), blockSizeSetting, UiMessages.BLOCK_SIZE_OPTION, true);
+
         sizeToParent = new Vector2f(0.25F, 0.1F);
         UiButton backButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.85F), Window::popRenderable);
         TextElement text = new TextElement(new Vector2f(0.05F, 0.5F), CoreUiMessages.BACK);
         backButton.addRenderable(text);
 
-        UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7F), getCreateButtonClickable(nameField, seedField));
+        UiButton createButton = new UiButton(sizeToParent, new Vector2f(0.05F, 0.7F), getCreateButtonClickable(nameField, seedField, biomeSetting, blockSizeSetting));
         text = new TextElement(new Vector2f(0.05F, 0.5F), UiMessages.CREATE_WORLD);
         createButton.addRenderable(text);
 
@@ -43,6 +55,8 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         addRenderable(createButton);
         addRenderable(nameField);
         addRenderable(seedField);
+        addRenderable(biomeSamplerButton);
+        addRenderable(blockSizeButton);
     }
 
     @MainThread
@@ -53,7 +67,7 @@ public final class WorldCreationMenu extends UiBackgroundElement {
 
 
     @MainThread
-    private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField) {
+    private static Clickable getCreateButtonClickable(TextField nameField, TextField seedField, OptionSetting biomeSetting, OptionSetting blockSizeSetting) {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (nameField.getText().isEmpty()) return ButtonResult.FAILURE;
@@ -62,7 +76,9 @@ public final class WorldCreationMenu extends UiBackgroundElement {
             for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(worldName)) return ButtonResult.FAILURE;
 
             long seed = getSeed(seedField.getText());
-            new WorldSaver().save(new World(seed, new Date(), new Date(0), false), WorldSaver.getSaveFileLocation(worldName));
+            new WorldSaver().save(new World(
+                    new WorldGenerationSettings(seed, (BiomeSamplers) biomeSetting.value(), (1 << blockSizeSetting.value().ordinal())),
+                    new Date(), new Date(0), false), WorldSaver.getSaveFileLocation(worldName));
 
             Window.popRenderable();
             return ButtonResult.SUCCESS;

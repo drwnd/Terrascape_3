@@ -98,11 +98,11 @@ public final class GenerationData {
     }
 
     public int clampStartHeightToInChunkY(int height) {
-        return Math.clamp(height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD, 0, CHUNK_SIZE);
+        return Math.clamp((height & BLOCK_SIZE_MASK) - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD, 0, CHUNK_SIZE);
     }
 
     public int clampEndHeightToInChunkY(int height) {
-        return Math.clamp((height - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD) + 1, 0, CHUNK_SIZE);
+        return Math.clamp(((height & BLOCK_SIZE_MASK) - (chunkY << CHUNK_SIZE_BITS + LOD) >> LOD) + 1, 0, CHUNK_SIZE);
     }
 
     public void store(int inChunkX, int inChunkY, int inChunkZ, byte material) {
@@ -167,6 +167,7 @@ public final class GenerationData {
     }
 
     public MaterialsData getCompressedMaterials() {
+        downScaleUncompressedMaterials();
         return MaterialsData.getCompressedMaterials(CHUNK_SIZE_BITS, uncompressedMaterials);
     }
 
@@ -302,6 +303,50 @@ public final class GenerationData {
     }
 
 
+    private WorldGenStructure[] structureFeatureMap() {
+        if (LOD > MAX_STRUCTURE_FEATURE_LOD) return null;
+
+        int sideLength = (2 << LOD);
+        WorldGenStructure[] structureFeatureMap = new WorldGenStructure[sideLength * sideLength];
+
+        int inChunkDistance = CHUNK_SIZE / 2 >> LOD;
+        int inChunkStart = CHUNK_SIZE / 4 >> LOD;
+        if (inChunkDistance == 0) return null;
+
+        for (int x = 0; x < sideLength; x++)
+            for (int z = 0; z < sideLength; z++) {
+                int inChunkX = inChunkStart + x * inChunkDistance;
+                int inChunkZ = inChunkStart + z * inChunkDistance;
+                structureFeatureMap[x * sideLength + z] = structureFeatureMapValue(inChunkX, inChunkZ);
+            }
+
+        return structureFeatureMap;
+    }
+
+    private WorldGenStructure structureFeatureMapValue(int inChunkX, int inChunkZ) {
+        int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
+        Biome biome = biomeMap[index];
+
+        long totalX = chunkX << CHUNK_SIZE_BITS + LOD | ((long) inChunkX << LOD);
+        long totalZ = chunkZ << CHUNK_SIZE_BITS + LOD | ((long) inChunkZ << LOD);
+
+        int riverDepth = WorldGeneration.getRiverDepth(MapSample.riverMapValue(totalX, totalZ));
+        int resultingHeight = resultingHeightMap[getMapIndex(inChunkX, inChunkZ)];
+
+        if (steepnessMap[index] > 1 || riverDepth >= Math.abs(resultingHeight) - 16) return null;
+        if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & 1023) >= biome.getStructureFeatureChancePromille()) return null;
+        return biome.getStructureFeature(totalX, resultingHeight, totalZ);
+    }
+
+    private void downScaleUncompressedMaterials() {
+        int blockSize = BLOCK_SIZE >> LOD;
+        if (blockSize <= 1) return;
+        int blockByteLength = blockSize * blockSize * blockSize;
+        for (int index = 0; index < uncompressedMaterials.length; index += blockByteLength)
+            storeConsecutive(index, blockByteLength, uncompressedMaterials[index]);
+    }
+
+
     private static double[] featureMap(long chunkX, long chunkZ, int lod) {
         double[] featureMap = new double[CHUNK_SIZE * CHUNK_SIZE];
         double inverseMaxValue = 1.0 / Integer.MAX_VALUE;
@@ -363,41 +408,6 @@ public final class GenerationData {
 
         if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & 1023) >= biome.getStructureChancePromille()) return null;
         return biome.getStructure(totalX, MathUtils.floor(resultingHeight) - 8, totalZ);
-    }
-
-    private WorldGenStructure[] structureFeatureMap() {
-        if (LOD > MAX_STRUCTURE_FEATURE_LOD) return null;
-
-        int sideLength = (2 << LOD);
-        WorldGenStructure[] structureFeatureMap = new WorldGenStructure[sideLength * sideLength];
-
-        int inChunkDistance = CHUNK_SIZE / 2 >> LOD;
-        int inChunkStart = CHUNK_SIZE / 4 >> LOD;
-        if (inChunkDistance == 0) return null;
-
-        for (int x = 0; x < sideLength; x++)
-            for (int z = 0; z < sideLength; z++) {
-                int inChunkX = inChunkStart + x * inChunkDistance;
-                int inChunkZ = inChunkStart + z * inChunkDistance;
-                structureFeatureMap[x * sideLength + z] = structureFeatureMapValue(inChunkX, inChunkZ);
-            }
-
-        return structureFeatureMap;
-    }
-
-    private WorldGenStructure structureFeatureMapValue(int inChunkX, int inChunkZ) {
-        int index = inChunkX << CHUNK_SIZE_BITS | inChunkZ;
-        Biome biome = biomeMap[index];
-
-        long totalX = chunkX << CHUNK_SIZE_BITS + LOD | ((long) inChunkX << LOD);
-        long totalZ = chunkZ << CHUNK_SIZE_BITS + LOD | ((long) inChunkZ << LOD);
-
-        int riverDepth = WorldGeneration.getRiverDepth(MapSample.riverMapValue(totalX, totalZ));
-        int resultingHeight = resultingHeightMap[getMapIndex(inChunkX, inChunkZ)];
-
-        if (steepnessMap[index] > 1 || riverDepth >= Math.abs(resultingHeight) - 16) return null;
-        if ((MathUtils.hash((int) totalX, (int) totalZ, (int) (SEED ^ 0x264F6E393FE89AAFL)) & 1023) >= biome.getStructureFeatureChancePromille()) return null;
-        return biome.getStructureFeature(totalX, resultingHeight, totalZ);
     }
 
     private static int getMinHeight(int[] resultingHeightMap) {
@@ -482,5 +492,9 @@ public final class GenerationData {
 
     public interface MaterialFunction {
         byte getGeneratingMaterial(GenerationData data, long x, long y, long z);
+    }
+
+    public interface SpecialHeightFunction {
+        int getSpecialHeight(long totalX, long totalY);
     }
 }

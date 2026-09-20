@@ -51,7 +51,6 @@ public class NoisyLayeredSurfaceBiome implements Biome {
 
     @Override
     public WorldGenStructure getStructureFeature(long totalX, long height, long totalZ) {
-        if (structureFeatures == null) return null;
         return Biome.getRandomStructure(totalX, height, totalZ, structureFeatures);
     }
 
@@ -60,9 +59,9 @@ public class NoisyLayeredSurfaceBiome implements Biome {
         return name;
     }
 
-    private final String name;
-    private final AssetIdentifier<StructureCollection> structures, structureFeatures;
-    private final int structureChance, structureFeatureChance, surfaceMaterialDepth, biomeDepth;
-    private final byte bottomMaterial;
-    private final  GenerationData.MaterialFunction materialFunction;
+    protected final String name;
+    protected final AssetIdentifier<StructureCollection> structures, structureFeatures;
+    protected final int structureChance, structureFeatureChance, surfaceMaterialDepth, biomeDepth;
+    protected final byte bottomMaterial;
+    protected final  GenerationData.MaterialFunction materialFunction;
 }

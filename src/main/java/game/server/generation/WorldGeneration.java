@@ -5,7 +5,6 @@ import core.utils.MathUtils;
 import game.server.Chunk;
 import game.server.materials_data.MaterialsData;
 import game.server.biomes.Biome;
-import game.server.biomes.*;
 import game.utils.Status;
 import game.utils.Utils;
 
@@ -15,7 +14,31 @@ public final class WorldGeneration {
 
     public static final int WATER_LEVEL = 0;
     public static final int MAX_SURFACE_MATERIALS_DEPTH = 132;
+
+    public static final int OCEAN_FLOOR_OFFSET = -480;
+    public static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
+    public static final int FLATLAND_HEIGHT = 55;
+    public static final int HIGHLAND_OFFSET = 500;
+    public static final int RIVER_OFFSET = -200;
+
+    public static final double MOUNTAIN_THRESHOLD = 0.3;
+    public static final double OCEAN_THRESHOLD = -0.3;
+    public static final double FLATLAND_THRESHOLD = 0.3;
+    public static final double RIVER_THRESHOLD = 0.1;
+    public static final double INNER_RIVER_THRESHOLD = 0.005;
+    public static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
+
     public static long SEED;
+    public static int BLOCK_SIZE_BITS, BLOCK_SIZE, BLOCK_SIZE_MASK;
+    private static BiomeSamplers.BiomeSampler BIOME_SAMPLER;
+
+    public static void setSettings(WorldGenerationSettings settings) {
+        SEED = settings.seed();
+        BLOCK_SIZE = MathUtils.nextLargestPowOf2(settings.blockSize());
+        BLOCK_SIZE_BITS = Integer.numberOfTrailingZeros(BLOCK_SIZE);
+        BLOCK_SIZE_MASK = -BLOCK_SIZE;
+        BIOME_SAMPLER = settings.biomeSampler().biomeSampler;
+    }
 
     public static void generate(Chunk chunk) {
         if (chunk.getGenerationStatus() != Status.NOT_STARTED) return;
@@ -37,8 +60,9 @@ public final class WorldGeneration {
 
         if (!containsBiome && !containsGround && containsRiver) data.fillUncompressedMaterialsWithAir();
         if (containsBiome || containsRiver) {
-            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX++)
-                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ++) {
+            int stepSize = Math.max(1, BLOCK_SIZE >> data.LOD);
+            for (int inChunkX = 0; inChunkX < CHUNK_SIZE; inChunkX += stepSize)
+                for (int inChunkZ = 0; inChunkZ < CHUNK_SIZE; inChunkZ += stepSize) {
                     data.set(inChunkX, inChunkZ);
                     if (containsBiome) generateBiome(inChunkX, inChunkZ, data);
                     if (containsRiver) generateUndergroundRiver(inChunkX, inChunkZ, data);
@@ -111,46 +135,7 @@ public final class WorldGeneration {
     }
 
     public static Biome getBiome(MapSample sample, int height, double feature) {
-        double dither = feature * 0.05 - 0.025;
-
-        double temperature = sample.temperature() + dither;
-        double humidity = sample.humidity() + dither;
-        double continental = sample.continental() - Math.abs(dither);
-        double erosion = sample.erosion() + dither;
-        int beachHeight = WATER_LEVEL + 64 + (int) (feature * 64 - sample.erosion() * 64);
-        int sandHeight = (int) (feature * 64.0) + WATER_LEVEL - 80;
-
-        if (height < WATER_LEVEL) {
-            if (sample.temperature() < -0.33) return BiomesCache.COLD_OCEAN;
-            if (height > sandHeight) return BiomesCache.BEACH;
-            if (temperature > 0.33) return BiomesCache.WARM_OCEAN;
-            return BiomesCache.OCEAN;
-        }
-        if (height < beachHeight) return BiomesCache.BEACH;
-        if (continental > MOUNTAIN_THRESHOLD && erosion < 0.51) {
-            if (temperature > 0.33) return BiomesCache.DRY_MOUNTAIN;
-            else if (temperature < -0.33) return BiomesCache.SNOWY_MOUNTAIN;
-            return BiomesCache.MOUNTAIN;
-        }
-
-        if (temperature > 0.33) {
-            if (height > 128 && sample.continental() < MOUNTAIN_THRESHOLD
-                    && sample.temperature() > 0.45 && sample.humidity() < -0.3) return BiomesCache.CORRODED_MESA;
-            if (temperature > 0.55 && humidity < 0.15) return BiomesCache.MESA;
-            if (humidity < 0.15) return BiomesCache.DESERT;
-            if (humidity > 0.5 && temperature > 0.5) return BiomesCache.BLACK_WOOD_FOREST;
-            if (humidity > 0.4 && temperature > 0.4) return BiomesCache.DARK_OAK_FOREST;
-            return BiomesCache.WASTELAND;
-        }
-        if (humidity > 0.33) {
-            if (temperature > -0.1) return BiomesCache.REDWOOD_FOREST;
-            if (temperature > -0.4) return BiomesCache.SPRUCE_FOREST;
-            return BiomesCache.SNOWY_SPRUCE_FOREST;
-        }
-        if (humidity < 0.0 && temperature > -0.25) return BiomesCache.PLAINS;
-        if (humidity > -0.33 && temperature > -0.33) return BiomesCache.OAK_FOREST;
-        if (humidity < -0.33 && temperature > -0.5) return BiomesCache.PINE_FOREST;
-        return BiomesCache.SNOWY_PLAINS;
+        return BIOME_SAMPLER.getBiome(sample, height, feature);
     }
 
 
@@ -266,20 +251,6 @@ public final class WorldGeneration {
         else if (sample.erosion() >= FLATLAND_THRESHOLD + 0.25) riverThinning = 0;
         return riverThinning;
     }
-
-
-    private static final int OCEAN_FLOOR_OFFSET = -480;
-    private static final int DEEP_OCEAN_FLOOR_OFFSET = -1120;
-    private static final int FLATLAND_HEIGHT = 55;
-    private static final int HIGHLAND_OFFSET = 500;
-    private static final int RIVER_OFFSET = -200;
-
-    private static final double MOUNTAIN_THRESHOLD = 0.3;
-    private static final double OCEAN_THRESHOLD = -0.3;
-    private static final double FLATLAND_THRESHOLD = 0.3;
-    private static final double RIVER_THRESHOLD = 0.1;
-    private static final double INNER_RIVER_THRESHOLD = 0.005;
-    static final double UNDERGROUND_RIVER_THRESHOLD = 0.012;
 
     private WorldGeneration() {
     }

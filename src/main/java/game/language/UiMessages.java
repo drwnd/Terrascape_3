@@ -47,7 +47,9 @@ public enum UiMessages implements Translatable {
     LENGTH_X,
     LENGTH_Y,
     LENGTH_Z,
-    WORLD_INFO_TEMPLATE;
+    WORLD_INFO_TEMPLATE,
+    BIOME_OPTION,
+    BLOCK_SIZE_OPTION;
 
     @Override
     public String translationFileName() {
