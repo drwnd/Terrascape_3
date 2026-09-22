@@ -11,6 +11,7 @@ import org.lwjgl.system.MemoryStack;
 
 import java.awt.*;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -52,12 +53,18 @@ public abstract class Shader implements Asset {
 
     @MainThread
     public void setUniform(String uniformName, int[] data) {
-        glUniform1iv(getUniform(uniformName), data);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer buffer = stack.mallocInt(data.length).put(data).flip();
+            glUniform1iv(getUniform(uniformName), buffer);
+        }
     }
 
     @MainThread
     public void setUniform(String uniformName, float[] data) {
-        glUniform1fv(getUniform(uniformName), data);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(data.length).put(data).flip();
+            glUniform1fv(getUniform(uniformName), buffer);
+        }
     }
 
     @MainThread
@@ -177,8 +184,9 @@ public abstract class Shader implements Asset {
         glCompileShader(shaderID);
 
         if (glGetShaderi(shaderID, GL_COMPILE_STATUS) == 0) {
+            Exception exception = new Exception("Error compiling shader code: Type: " + shaderType + "Info: " + glGetShaderInfoLog(shaderID, 1024));
             glDeleteShader(shaderID);
-            throw new Exception("Error compiling shader code: Type: " + shaderType + "Info: " + glGetShaderInfoLog(shaderID, 1024));
+            throw exception;
         }
 
         glAttachShader(programID, shaderID);

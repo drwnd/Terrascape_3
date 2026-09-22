@@ -56,14 +56,20 @@ public final class Transformation {
         return matrix;
     }
 
-    public static Matrix4f getSunMatrix(float renderTime) {
+    public static void updateSunMatrix(Matrix4f sunMatrix, Position snapshotPosition, Position cameraPosition, float renderTime, int cascade) {
         Vector3f sunDirection = getSunDirection(renderTime);
-        Matrix4f matrix = new Matrix4f();
-        matrix.ortho(-SHADOW_RANGE, SHADOW_RANGE, -SHADOW_RANGE, SHADOW_RANGE, SHADOW_RANGE * 2, 100, true);
-        matrix.lookAt(-sunDirection.x * SHADOW_RANGE, -sunDirection.y * SHADOW_RANGE, -sunDirection.z * SHADOW_RANGE,
+        int shadowRange = SHADOW_RANGE << cascade;
+        Vector3f movement = snapshotPosition == null ? new Vector3f() : new Vector3f(
+                (cameraPosition.longX & ~CHUNK_SIZE_MASK) - (snapshotPosition.longX & ~CHUNK_SIZE_MASK),
+                (cameraPosition.longY & ~CHUNK_SIZE_MASK) - (snapshotPosition.longY & ~CHUNK_SIZE_MASK),
+                (cameraPosition.longZ & ~CHUNK_SIZE_MASK) - (snapshotPosition.longZ & ~CHUNK_SIZE_MASK)
+        );
+        sunMatrix.identity()
+                .ortho(-shadowRange, shadowRange, -shadowRange, shadowRange, shadowRange * 2, 100, true)
+                .lookAt(-sunDirection.x * shadowRange, -sunDirection.y * shadowRange, -sunDirection.z * shadowRange,
                 0.0F, 0.0F, 0.0F,
-                0.0F, 1.0F, 0.0F);
-        return matrix;
+                0.0F, 1.0F, 0.0F)
+                .translate(movement);
     }
 
     public static Vector3f getSunDirection(float renderTime) {

@@ -17,11 +17,12 @@ uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
 uniform sampler2DArray shadowMap;
 uniform sampler2DArray shadowColor;
-uniform mat4 sunMatrix;
+uniform mat4[5] sunMatrices;
 
 uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
 uniform int maxTextureSize;
 
+uniform int shadowStartIndex;
 uniform int flags;
 uniform float nightBrightness;
 uniform float time;
@@ -55,10 +56,14 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-vec3 getLightColor(vec2 shadowCoord, int shadowCascades) {
+vec3 getLightColor(vec3 position, int shadowCascades) {
     if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
 
-    for (int cascade = 0; cascade < shadowCascades; cascade++) {
+    for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
+        vec4 shadowCoord = sunMatrices[cascade] * vec4(floor(position + normal * 0.5), 1);
+        shadowCoord.xyz /= shadowCoord.w;
+        shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
+
         vec3 color = texture(shadowColor, vec3(shadowCoord.xy, cascade)).rgb;
         if (color != vec3(1, 1, 1)) return max(color, vec3(0.5));
     }
@@ -68,22 +73,22 @@ vec3 getLightColor(vec2 shadowCoord, int shadowCascades) {
 
 vec3 getSkyLight(vec3 position, vec3 normal) {
     if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1.0);
-    vec4 shadowCoord = sunMatrix * vec4(floor(position + normal * 0.5), 1);
-    shadowCoord.xyz /= shadowCoord.w;
-    shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
-
     int shadowCascades = textureSize(shadowMap, 0).z;
 
-    for (int cascade = 0; cascade < shadowCascades; cascade++) {
+    for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
+        vec4 shadowCoord = sunMatrices[cascade] * vec4(floor(position + normal * 0.5), 1);
+        shadowCoord.xyz /= shadowCoord.w;
+        shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
+
         float closestDepth = texture(shadowMap, vec3(shadowCoord.xy, cascade)).r;
-        if (closestDepth == 0.0) return getLightColor(shadowCoord.xy, shadowCascades);
+        if (closestDepth == 0.0) return getLightColor(position, shadowCascades);
         float currentDepth = shadowCoord.z;
         float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005);
 
         if (currentDepth + bias < closestDepth) return vec3(0.5);
     }
 
-    return getLightColor(shadowCoord.xy, shadowCascades);
+    return getLightColor(position, shadowCascades);
 }
 
 vec3 getColor(vec3 color, vec3 textureCoord) {
