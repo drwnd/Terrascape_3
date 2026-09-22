@@ -42,30 +42,30 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-vec3 getShadowCoord(mat4 matrix, vec4 samplePosition) {
-    vec4 shadowCoord = matrix * samplePosition;
+vec3 getShadowCoord(int cascade, vec4 samplePosition) {
+    vec4 shadowCoord = sunMatrices[cascade] * samplePosition;
     shadowCoord.xyz /= shadowCoord.w;
     shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
     return shadowCoord.xyz;
 }
 
 vec3 getSkyLight(vec3 position, vec3 normal) {
-    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1.0);
+    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1);
     int shadowCascades = textureSize(shadowMap, 0).z;
     vec4 samplePosition = vec4(floor(position + normal * 0.5), 1);
 
     for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
-        vec3 shadowCoord = getShadowCoord(sunMatrices[cascade], samplePosition);
+        vec3 shadowCoord = getShadowCoord(cascade, samplePosition);
 
         float closestDepth = texture(shadowMap, vec3(shadowCoord.xy, cascade)).r;
-        float currentDepth = shadowCoord.z;
-        float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005) * (1 << cascade - shadowStartIndex);
+        float currentDepth = abs(shadowCoord.z);
+        float bias = 0.005 * max(1, 1 - dot(normal, sunDirection)) * (1 << cascade - shadowStartIndex);
 
         if (currentDepth + bias < closestDepth) return vec3(0.5);
     }
 
-    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
-    vec3 shadowCoord = getShadowCoord(sunMatrices[shadowStartIndex], samplePosition);
+    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1);
+    vec3 shadowCoord = getShadowCoord(shadowStartIndex, samplePosition);
     vec3 color = texture(shadowColor, vec3(shadowCoord.xy, shadowStartIndex)).rgb;
     return max(color, vec3(0.5));
 }
