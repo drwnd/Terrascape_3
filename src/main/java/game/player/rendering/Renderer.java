@@ -99,15 +99,12 @@ public final class Renderer extends Renderable {
         renderingOptimizer = new RenderingOptimizer(player.getMeshCollector());
     }
 
-    @MainThread
-    public void reloadShadowMaps(int ignore) {
-        glDeleteTextures(shadowTexture);
-        glDeleteTextures(shadowColorTexture);
-        glDeleteFramebuffers(shadowFramebuffers);
-        createShadowTextures();
-        createShadowFrameBuffers();
-    }
 
+    @MainThread
+    public static void reloadShadowMaps(int ignore) {
+        if (Game.getPlayer() == null) return;
+        Game.getPlayer().getRenderer().reloadShadowMaps();
+    }
 
     @MainThread
     public static void takeScreenshot() {
@@ -1056,6 +1053,7 @@ public final class Renderer extends Renderable {
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 throw new IllegalStateException("Shadow Frame buffer " + index + " not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
         }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     @MainThread
@@ -1074,6 +1072,15 @@ public final class Renderer extends Renderable {
         glDeleteFramebuffers(framebuffer);
         glDeleteFramebuffers(shadowFramebuffers);
         glDeleteFramebuffers(transparencyFramebuffer);
+    }
+
+    @MainThread
+    private void reloadShadowMaps() {
+        glDeleteTextures(shadowTexture);
+        glDeleteTextures(shadowColorTexture);
+        glDeleteFramebuffers(shadowFramebuffers);
+        createShadowTextures();
+        createShadowFrameBuffers();
     }
 
     @MainThread
