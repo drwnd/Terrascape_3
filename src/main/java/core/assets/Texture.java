@@ -4,15 +4,20 @@ import core.utils.MainThread;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public record Texture(int id, int width, int height) implements Asset {
+public interface Texture extends Asset {
 
-    public Texture(int id) {
-        this(id, 0, 0);
-    }
+    int id();
+
+    int target();
 
     @Override
     @MainThread
-    public void delete() {
-        glDeleteTextures(id);
+    default void delete() {
+        glDeleteTextures(id());
+    }
+
+    @MainThread
+    default void bind() {
+        glBindTexture(target(), id());
     }
 }

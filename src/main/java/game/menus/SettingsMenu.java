@@ -188,7 +188,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(IntSettings.BREAK_PLACE_INTERVALL);
         section.addSlider(FloatSettings.TIME_SPEED);
         section.addSlider(FloatSettings.DOWNWARD_SUN_DIRECTION);
-        section.addSlider(IntSettings.OCCLUDERS_OCCLUDEES_LOD);
+        section.addSlider(IntSettings.DEBUG_VISUALIZATION_LOD);
 
         return section;
     }

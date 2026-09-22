@@ -21,7 +21,8 @@ public enum Shaders implements ShaderIdentifier {
     VOLUME_INDICATOR,
     TRANSPARENCY_APPLIER,
     MODEL,
-    MODEL_SHADOW;
+    MODEL_SHADOW,
+    TEXTURE_LAYER;
 
     @Override
     @MainThread

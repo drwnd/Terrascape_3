@@ -2,6 +2,7 @@ package game.menus;
 
 import core.assets.AssetManager;
 import core.assets.Texture;
+import core.assets.Texture2D;
 import core.language.CoreUiMessages;
 import core.renderables.*;
 import core.rendering_api.CoreObjectLoader;
@@ -58,7 +59,7 @@ public final class PauseMenu extends Renderable {
             throw new IllegalStateException("Frame buffer not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
 
         glBlitNamedFramebuffer(0, frameBuffer, 0, 0, Window.getWidth(), Window.getHeight(), 0, 0, backGroundWidth, backGroundHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-        this.backGround = new Texture(backGround);
+        this.backGround = new Texture2D(backGround);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDeleteFramebuffers(frameBuffer);

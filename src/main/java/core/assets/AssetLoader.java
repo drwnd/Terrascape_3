@@ -39,7 +39,7 @@ public final class AssetLoader {
     }
 
     @MainThread
-    public static Texture loadTexture2D(Path filepath) {
+    public static Texture2D loadTexture2D(Path filepath) {
         int width, height;
         ByteBuffer buffer;
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -50,7 +50,7 @@ public final class AssetLoader {
             buffer = STBImage.stbi_load(filepath.toString(), w, h, c, 4);
             if (buffer == null) {
                 Debug.err("Image File %s not loaded %s%n", filepath, STBImage.stbi_failure_reason());
-                return new Texture(0);
+                return new Texture2D(0);
             }
 
             width = w.get();
@@ -65,7 +65,7 @@ public final class AssetLoader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         STBImage.stbi_image_free(buffer);
-        return new Texture(id, width, height);
+        return new Texture2D(id, GL_TEXTURE_2D, width, height);
     }
 
     @MainThread

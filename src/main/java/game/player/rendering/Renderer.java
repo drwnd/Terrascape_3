@@ -256,11 +256,11 @@ public final class Renderer extends Renderable {
 
         if (ToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
         if (ToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
-        if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture(depthTexture);
-        if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture(shadowTexture);
-        if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture(shadowColorTexture);
-        if (ToggleSettings.RENDER_ACCUMULATION_TEXTURE.value()) renderDebugTexture(accumulationTexture);
-        if (ToggleSettings.RENDER_REVEAL_TEXTURE.value()) renderDebugTexture(revealTexture);
+        if (ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP.value()) renderDebugTexture2D(depthTexture);
+        if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture3D(shadowTexture, IntSettings.DEBUG_VISUALIZATION_LOD.value());
+        if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture3D(shadowColorTexture, IntSettings.DEBUG_VISUALIZATION_LOD.value());
+        if (ToggleSettings.RENDER_ACCUMULATION_TEXTURE.value()) renderDebugTexture2D(accumulationTexture);
+        if (ToggleSettings.RENDER_REVEAL_TEXTURE.value()) renderDebugTexture2D(revealTexture);
 
         renderChat();
         renderDebugInfo();
@@ -343,9 +343,9 @@ public final class Renderer extends Renderable {
         glEnableVertexAttribArray(1);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get(Textures.DAY_SKY).id());
+        AssetManager.get(Textures.DAY_SKY).bind();
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get(Textures.NIGHT_SKY).id());
+        AssetManager.get(Textures.NIGHT_SKY).bind();
 
         glDepthMask(false);
         glDisable(GL_DEPTH_TEST);
@@ -527,7 +527,7 @@ public final class Renderer extends Renderable {
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, AssetManager.get((TextureIdentifier) OptionSettings.SKIN.value()).id());
+        AssetManager.get((TextureIdentifier) OptionSettings.SKIN.value()).bind();
 
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
             Model playerCharacter = AssetManager.get(Models.PLAYER_MODEL);
@@ -885,7 +885,7 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderOccluders(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = IntSettings.DEBUG_VISUALIZATION_LOD.value();
         if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
@@ -905,7 +905,7 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderOccludees(Position cameraPositon, Matrix4f projectionViewMatrix) {
-        int lod = IntSettings.OCCLUDERS_OCCLUDEES_LOD.value();
+        int lod = IntSettings.DEBUG_VISUALIZATION_LOD.value();
         if (lod < 0 || lod >= Game.getWorld().LOD_COUNT) return;
 
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
@@ -926,12 +926,22 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private static void renderDebugTexture(int texture) {
+    private static void renderDebugTexture2D(int texture) {
         GuiShader shader = (GuiShader) AssetManager.get(CoreShaders.GUI);
         shader.bind();
         shader.flipNextDrawVertically();
         glDisable(GL_BLEND);
-        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), new Texture(texture));
+        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), new Texture2D(texture));
+    }
+
+    @MainThread
+    private static void renderDebugTexture3D(int texture, int layer) {
+        GuiShader shader = (GuiShader) AssetManager.get(Shaders.TEXTURE_LAYER);
+        shader.bind();
+        shader.setUniform("layer", layer);
+        shader.flipNextDrawVertically();
+        glDisable(GL_BLEND);
+        shader.drawQuad(new Vector2f(0.0F, 0.0F), new Vector2f(0.5F, 0.5F), new Texture3D(texture, GL_TEXTURE_2D_ARRAY));
     }
 
     @MainThread

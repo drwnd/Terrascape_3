@@ -1,9 +1,6 @@
 package core.assets.identifiers;
 
-import core.assets.AssetLoader;
-import core.assets.AssetManager;
-import core.assets.Texture;
-import core.assets.TextureArray;
+import core.assets.*;
 import core.rendering_api.CoreObjectLoader;
 import core.utils.FileIndexSet;
 import core.utils.MainThread;
@@ -18,13 +15,13 @@ public interface TextureArrayIdentifier extends AssetIdentifier<TextureArray> {
 
     @MainThread
     default TextureArray generateAsset() {
-        Texture[] textures = getTextures(indexSet());
+        Texture2D[] textures = getTextures(indexSet());
         return CoreObjectLoader.generateTextureArray(textures);
     }
 
     @MainThread
-    private Texture[] getTextures(FileIndexSet<?> indexSet) {
-        Texture[] textures = new Texture[indexSet.getCount()];
+    private Texture2D[] getTextures(FileIndexSet<?> indexSet) {
+        Texture2D[] textures = new Texture2D[indexSet.getCount()];
 
         for (int index = 0; index < textures.length; index++) {
             String fileName = indexSet.getFileName(index);

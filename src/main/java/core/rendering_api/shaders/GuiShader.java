@@ -47,7 +47,7 @@ public final class GuiShader extends RenderShader {
     @MainThread
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.id());
+        texture.bind();
 
         setUniform("image", 0);
         if (flipNextDrawVertically) {

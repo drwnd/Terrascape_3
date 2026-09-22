@@ -1,6 +1,7 @@
 package core.rendering_api;
 
 import core.assets.Texture;
+import core.assets.Texture2D;
 import core.assets.TextureArray;
 import core.utils.MainThread;
 
@@ -13,9 +14,9 @@ public final class CoreObjectLoader {
     }
 
     @MainThread
-    public static TextureArray generateTextureArray(Texture[] textures) {
+    public static TextureArray generateTextureArray(Texture2D[] textures) {
         int textureSize = 0;
-        for (Texture texture : textures) textureSize = Math.max(textureSize, texture.width());
+        for (Texture2D texture : textures) textureSize = Math.max(textureSize, texture.width());
 
         int textureArray = createTexture2DArray(GL_RGBA8, textureSize, textureSize, textures.length, GL_RGBA, GL_FLOAT, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -23,8 +24,8 @@ public final class CoreObjectLoader {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         for (int index = 0; index < textures.length; index++) {
-            Texture texture = textures[index];
-            glCopyImageSubData(texture.id(), GL_TEXTURE_2D, 0, 0, 0, 0,
+            Texture2D texture = textures[index];
+            glCopyImageSubData(texture.id(), texture.target(), 0, 0, 0, 0,
                     textureArray, GL_TEXTURE_2D_ARRAY, 0, 0, 0, index,
                     texture.width(), texture.width(), 1);
         }
@@ -33,7 +34,7 @@ public final class CoreObjectLoader {
         for (int index = 0; index < textures.length; index++)
             textureSizes[index] = textures[index].width();
 
-        for (Texture texture : textures) glDeleteTextures(texture.id());
+        for (Texture texture : textures) texture.delete();
         return new TextureArray(textureArray, textureSizes);
     }
 

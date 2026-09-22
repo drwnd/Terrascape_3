@@ -15,7 +15,7 @@ public enum IntSettings implements IntSetting {
     LOD_COUNT(1, 20, 10, Game::updateLodCount),
     SHADOW_CASCADES_COUNT(0, 5, 1, (oldValue) -> Game.getPlayer().getRenderer().reloadShadowMaps(oldValue)),
 
-    OCCLUDERS_OCCLUDEES_LOD(0, LOD_COUNT.max - 1, 0),
+    DEBUG_VISUALIZATION_LOD(0, LOD_COUNT.max - 1, 0),
     BREAK_PLACE_SIZE(0, CHUNK_SIZE_BITS + 2, 4),
     BREAK_PLACE_ALIGN(0, CHUNK_SIZE_BITS + 2, 4),
     REACH(0, 500, 112),
