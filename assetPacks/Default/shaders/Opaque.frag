@@ -56,39 +56,32 @@ float easeInOutQuart(float x) {
     return step(inValue, 0.5) * inValue + step(0.5, outValue) * outValue;
 }
 
-vec3 getLightColor(vec3 position, int shadowCascades) {
-    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
-
-    for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
-        vec4 shadowCoord = sunMatrices[cascade] * vec4(floor(position + normal * 0.5), 1);
-        shadowCoord.xyz /= shadowCoord.w;
-        shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
-
-        vec3 color = texture(shadowColor, vec3(shadowCoord.xy, cascade)).rgb;
-        if (color != vec3(1, 1, 1)) return max(color, vec3(0.5));
-    }
-
-    return vec3(1, 1, 1);
+vec3 getShadowCoord(mat4 matrix, vec4 samplePosition) {
+    vec4 shadowCoord = matrix * samplePosition;
+    shadowCoord.xyz /= shadowCoord.w;
+    shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
+    return shadowCoord.xyz;
 }
 
 vec3 getSkyLight(vec3 position, vec3 normal) {
     if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1.0);
     int shadowCascades = textureSize(shadowMap, 0).z;
+    vec4 samplePosition = vec4(floor(position + normal * 0.5), 1);
 
     for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
-        vec4 shadowCoord = sunMatrices[cascade] * vec4(floor(position + normal * 0.5), 1);
-        shadowCoord.xyz /= shadowCoord.w;
-        shadowCoord.xy = shadowCoord.xy * 0.5 + 0.5;
+        vec3 shadowCoord = getShadowCoord(sunMatrices[cascade], samplePosition);
 
         float closestDepth = texture(shadowMap, vec3(shadowCoord.xy, cascade)).r;
-        if (closestDepth == 0.0) return getLightColor(position, shadowCascades);
         float currentDepth = shadowCoord.z;
-        float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005);
+        float bias = max(0.005 * (1.0 - dot(normal, sunDirection)), 0.005) * (1 << cascade - shadowStartIndex);
 
         if (currentDepth + bias < closestDepth) return vec3(0.5);
     }
 
-    return getLightColor(position, shadowCascades);
+    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1.0);
+    vec3 shadowCoord = getShadowCoord(sunMatrices[shadowStartIndex], samplePosition);
+    vec3 color = texture(shadowColor, vec3(shadowCoord.xy, shadowStartIndex)).rgb;
+    return max(color, vec3(0.5));
 }
 
 vec3 getColor(vec3 color, vec3 textureCoord) {

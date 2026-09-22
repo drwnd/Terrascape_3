@@ -399,7 +399,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (ToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
+        if (ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.PARTICLE_SHADOW);
             shader.bind();
@@ -452,7 +452,7 @@ public final class Renderer extends Renderable {
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 
-        if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.PARTICLES_CAST_SHADOWS.value()) {
+        if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             shader.bind();
