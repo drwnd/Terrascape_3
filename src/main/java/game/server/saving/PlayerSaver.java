@@ -1,5 +1,6 @@
 package game.server.saving;
 
+import core.utils.MainThread;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
@@ -23,6 +24,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     @Override
+    @MainThread
     protected void save(Player player) {
         saveGeneric(player.getPosition()::save);
         saveVector3f(player.getCamera().getRotation());
@@ -33,6 +35,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     @Override
+    @MainThread
     protected Player load() {
         Position position = loadGeneric(Position::load);
         Vector3f rotation = loadVector3f();
@@ -53,6 +56,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     @Override
+    @MainThread
     protected Player getDefault() {
         Vector3l worldCenter = new Vector3l(0, 0, 0);
         return new Player(new Position(worldCenter, new Vector3f()));
