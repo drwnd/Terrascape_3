@@ -251,7 +251,6 @@ public final class Renderer extends Renderable {
                 0, 0, Window.getWidth(), Window.getHeight(),
                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawBuffers(GL_COLOR_ATTACHMENT0);
 
         if (ToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
         if (ToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
@@ -394,6 +393,7 @@ public final class Renderer extends Renderable {
             glBindBuffer(GL_DRAW_INDIRECT_BUFFER, renderingOptimizer.getShadowIndirectBuffer());
 
             int drawCount = renderingOptimizer.getShadowDrawCount();
+            glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).id());
             glMultiDrawArraysIndirect(GL_TRIANGLES, 0, drawCount, RenderingOptimizer.INDIRECT_COMMAND_SIZE);
         }
 

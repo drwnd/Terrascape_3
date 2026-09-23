@@ -38,9 +38,6 @@ public final class SettingsMenu extends UiBackgroundElement {
     @MainThread
     @Override
     public void setOnTop() {
-        float scroll = input == null ? 0.0F : input.getScroll();
-        input = new SettingsMenuInput(this);
-        input.setScroll(scroll);
         Window.setInput(input);
     }
 
@@ -211,7 +208,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         addRenderable(sectionButton);
     }
 
-    private SettingsMenuInput input;
+    private final SettingsMenuInput input = new SettingsMenuInput(this);
 
     private interface SectionCreator {
         Renderable getSection();

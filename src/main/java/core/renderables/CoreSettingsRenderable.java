@@ -19,7 +19,6 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     @MainThread
     public CoreSettingsRenderable() {
         super(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F));
-        input = new SettingsRenderableInput(this);
         scroller = new SideScroller(new Vector2f(0.05F, 0.95F), new Vector2f(0.95F, 0.025F), input);
         Vector2f sizeToParent = new Vector2f(0.1F, 0.1F);
 
@@ -191,9 +190,6 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     @Override
     @MainThread
     public void setOnTop() {
-        float scroll = input == null ? 0.0F : input.getScroll();
-        input = new SettingsRenderableInput(this);
-        input.setScroll(scroll);
         scroller.setInput(input);
         Window.setInput(input);
     }
@@ -239,7 +235,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
     }
 
     protected int settingsCount = 0;
-    protected SettingsRenderableInput input;
+    protected final SettingsRenderableInput input = new SettingsRenderableInput(this);
     protected SideScroller scroller;
 
     protected final ArrayList<Slider<? extends Number>> sliders = new ArrayList<>();

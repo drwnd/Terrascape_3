@@ -242,8 +242,9 @@ public abstract class ShapePlaceable implements Placeable {
         if (size == bufferSize) return buffer;
         glDeleteBuffers(buffer);
         buffer = glGenBuffers();
+        bufferSize = size;
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_DYNAMIC_READ);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, size, GL_STREAM_READ);
         return buffer;
     }
 
