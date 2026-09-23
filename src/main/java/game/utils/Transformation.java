@@ -65,7 +65,7 @@ public final class Transformation {
                 (cameraPosition.longZ & ~CHUNK_SIZE_MASK) - (snapshotPosition.longZ & ~CHUNK_SIZE_MASK)
         );
         sunMatrix.identity()
-                .ortho(-shadowRange, shadowRange, -shadowRange, shadowRange, shadowRange * 2, 100, true)
+                .ortho(-shadowRange, shadowRange, -shadowRange, shadowRange, shadowRange * 3, 100, true)
                 .lookAt(-sunDirection.x * shadowRange, -sunDirection.y * shadowRange, -sunDirection.z * shadowRange,
                 0.0F, 0.0F, 0.0F,
                 0.0F, 1.0F, 0.0F)

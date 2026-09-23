@@ -15,8 +15,9 @@ layout (location = 1) out ivec4 intPos;
 
 uniform sampler2DArray textures;
 uniform sampler2DArray propertiesTextures;
-uniform sampler2DArray shadowMap;
+uniform sampler2DArrayShadow shadowMap;
 uniform sampler2DArray shadowColor;
+uniform sampler2DArray shadowColorDepthMap;
 uniform mat4[5] sunMatrices;
 
 uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
@@ -63,25 +64,40 @@ vec3 getShadowCoord(int cascade, vec4 samplePosition) {
     return shadowCoord.xyz;
 }
 
-vec3 getSkyLight(vec3 position, vec3 normal) {
-    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1);
+float getSkyVisibility(vec4 samplePosition) {
     int shadowCascades = textureSize(shadowMap, 0).z;
-    vec4 samplePosition = vec4(floor(position + normal * 0.5), 1);
-
     for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
         vec3 shadowCoord = getShadowCoord(cascade, samplePosition);
 
-        float closestDepth = texture(shadowMap, vec3(shadowCoord.xy, cascade)).r;
         float currentDepth = abs(shadowCoord.z);
-        float bias = 0.005 * max(1, 1 - dot(normal, sunDirection)) * (1 << cascade - shadowStartIndex);
+        float bias = max(0.0002 * (1 - dot(normal, sunDirection)), 0.002) * (1 << (cascade - shadowStartIndex));
+        float visibility = texture(shadowMap, vec4(shadowCoord.xy, cascade, currentDepth + bias));
 
-        if (currentDepth + bias < closestDepth) return vec3(0.5);
+        if (visibility > 0.01) return 1 - visibility;
     }
+    return 1;
+}
 
-    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(1);
+vec3 getShadowColor(vec3 shadowCoord) {
+    float currentDepth = abs(shadowCoord.z);
+    float bias = max(0.0002 * (1 - dot(normal, sunDirection)), 0.002);
+    float closestDepth = texture(shadowColorDepthMap, vec3(shadowCoord.xy, shadowStartIndex)).x;
+
+    if (currentDepth + bias > closestDepth) return vec3(1);
+    return texture(shadowColor, vec3(shadowCoord.xy, shadowStartIndex)).rgb;
+}
+
+vec3 getSkyLight(vec3 position, vec3 normal) {
+    if (isFlag(DO_SHADOW_MAPPING_BIT) == 0) return vec3(1);
+    vec4 samplePosition = vec4(floor(position + normal * 0.5), 1);
+
+    float visibility = getSkyVisibility(samplePosition);
+
+    if (isFlag(DO_GLASS_SHADOWS_BIT) == 0) return vec3(max(0.5, visibility));
     vec3 shadowCoord = getShadowCoord(shadowStartIndex, samplePosition);
-    vec3 color = texture(shadowColor, vec3(shadowCoord.xy, shadowStartIndex)).rgb;
-    return max(color, vec3(0.5));
+    vec3 color = getShadowColor(shadowCoord);
+    vec3 blendedColor = mix(vec3(0.5), color, visibility);
+    return max(min(blendedColor, color), vec3(0.5));
 }
 
 vec3 getColor(vec3 color, vec3 textureCoord) {
