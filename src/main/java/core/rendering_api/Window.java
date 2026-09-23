@@ -12,10 +12,12 @@ import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLDebugMessageCallback;
 import org.lwjgl.stb.STBImageWrite;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,24 +42,36 @@ public final class Window {
         createWindow(title);
         GL.createCapabilities();
 
+        glDebugMessageCallback((source, type, id, severity, length, messageAddress, userParam) -> {
+            String message = GLDebugMessageCallback.getMessage(length, messageAddress);
+            String formattedMessage = Debug.debugMessageToString(source, type, id, severity, message);
+            if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM)
+                Debug.log(new Exception(formattedMessage));
+            if (severity == GL_DEBUG_SEVERITY_HIGH)
+                Debug.err(new Exception(formattedMessage));
+        }, 0);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, (IntBuffer) null, true);
+
         glClearColor(0, 0, 0, 1);
         glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
         glClearDepth(0.0F);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_GREATER);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glCullFace(GL_BACK);
     }
 
     @MainThread
     private static void createWindow(String title) {
         glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode == null) throw new RuntimeException("Could not get video mode");
