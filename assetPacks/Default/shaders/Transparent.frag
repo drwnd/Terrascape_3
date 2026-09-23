@@ -52,6 +52,7 @@ vec3 getShadowCoord(int cascade, vec4 samplePosition) {
 
 float getSkyVisibility(vec4 samplePosition) {
     int shadowCascades = textureSize(shadowMap, 0).z;
+    float skyVisibility = 0;
     for (int cascade = shadowStartIndex; cascade < shadowCascades; cascade++) {
         vec3 shadowCoord = getShadowCoord(cascade, samplePosition);
 
@@ -59,9 +60,9 @@ float getSkyVisibility(vec4 samplePosition) {
         float bias = max(0.0002 * (1 - dot(normal, sunDirection)), 0.002) * (1 << (cascade - shadowStartIndex));
         float visibility = texture(shadowMap, vec4(shadowCoord.xy, cascade, currentDepth + bias));
 
-        if (visibility > 0.01) return 1 - visibility;
+        skyVisibility = max(skyVisibility, visibility);
     }
-    return 1;
+    return 1 - skyVisibility;
 }
 
 vec3 getShadowColor(vec3 shadowCoord) {
