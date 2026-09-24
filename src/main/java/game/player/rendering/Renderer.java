@@ -240,9 +240,11 @@ public final class Renderer extends Renderable {
         renderTransparentGeometry(cameraPosition, projectionViewMatrix);
         finishTransparentRendering();
 
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
         renderGlass(cameraPosition, projectionViewMatrix);
         renderGlassParticles(cameraPosition, projectionViewMatrix);
         renderPlaceableHologram(cameraPosition, projectionViewMatrix);
+        glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1});
 
         glDisable(GL_STENCIL_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -315,6 +317,8 @@ public final class Renderer extends Renderable {
         glDepthFunc(GL_GREATER);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glDisable(GL_STENCIL_TEST);
+        glDisable(GL_BLEND);
+        glDisable(GL_DITHER);
         glPolygonMode(GL_FRONT_AND_BACK, ToggleSettings.TOGGLE_X_RAY.value() ? GL_LINE : GL_FILL);
         if (vSync != CoreToggleSettings.V_SYNC.value()) {
             vSync = CoreToggleSettings.V_SYNC.value();
@@ -657,6 +661,7 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D, accumulationTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, revealTexture);
+        glDisable(GL_BLEND);
 
         shader.flipNextDrawVertically();
         shader.drawFullScreenQuad();
@@ -1005,6 +1010,7 @@ public final class Renderer extends Renderable {
 
         accumulationTexture = CoreObjectLoader.createTexture2D(GL_RGBA16F, width, height, GL_RGBA, GL_HALF_FLOAT, GL_NEAREST);
         revealTexture = CoreObjectLoader.createTexture2D(GL_R8, width, height, GL_RED, GL_FLOAT, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
         createShadowTextures();
     }
 
@@ -1044,12 +1050,12 @@ public final class Renderer extends Renderable {
         glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
 
         shadowColorDepthTexture = CoreObjectLoader.createTexture2DArray(GL_DEPTH_COMPONENT32F, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowCascades, GL_DEPTH_COMPONENT, GL_FLOAT, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
         shadowColorTexture = CoreObjectLoader.createTexture2DArray(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowCascades, GL_RGB, GL_UNSIGNED_BYTE, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
 
     @MainThread

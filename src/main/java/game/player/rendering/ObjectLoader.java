@@ -14,17 +14,17 @@ public final class ObjectLoader {
         Vector3l position = mesh.getWorldCoordinate();
         if (mesh.opaqueVertices().length == 0) return new OpaqueModel(position, null, 0, mesh.lod(), true);
         int vertexBuffer = glCreateBuffers();
-        glNamedBufferData(vertexBuffer, mesh.opaqueVertices(), GL_STATIC_DRAW);
+        glNamedBufferData(vertexBuffer, mesh.opaqueVertices(), GL_STATIC_COPY);
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 
     @MainThread
     public static TransparentModel loadTransparentModel(Mesh mesh) {
         Vector3l position = mesh.getWorldCoordinate();
-        if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod());
+        if (mesh.transparentVertices().length == 0) return new TransparentModel(position, 0, 0, 0, mesh.lod(), false);
         int vertexBuffer = glCreateBuffers();
-        glNamedBufferData(vertexBuffer, mesh.transparentVertices(), GL_STATIC_DRAW);
-        return new TransparentModel(position, mesh.transparentVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod());
+        glNamedBufferData(vertexBuffer, mesh.transparentVertices(), GL_STATIC_COPY);
+        return new TransparentModel(position, mesh.transparentVertexCount(), mesh.glassVertexCount(), vertexBuffer, mesh.lod(), true);
     }
 
     @MainThread

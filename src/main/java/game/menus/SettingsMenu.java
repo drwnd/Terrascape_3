@@ -172,6 +172,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.CULLING_COMPUTATION);
         section.addToggle(ToggleSettings.TOGGLE_X_RAY);
         section.addToggle(CoreToggleSettings.V_SYNC);
+        section.addToggle(CoreToggleSettings.ENABLE_OPENGL_DEBUG_CONTEXT);
         section.addToggle(ToggleSettings.RENDER_OCCLUDERS);
         section.addToggle(ToggleSettings.RENDER_OCCLUDEES);
         section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP);

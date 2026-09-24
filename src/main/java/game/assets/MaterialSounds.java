@@ -6,6 +6,7 @@ import core.assets.SoundCollection;
 import core.assets.identifiers.SoundCollectionIdentifier;
 import core.assets.identifiers.SoundIdentifier;
 import core.sound.Sound;
+import core.utils.MainThread;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public final class MaterialSounds implements SoundCollectionIdentifier {
 
     public static String print(MaterialSounds sound) {
         if (sound == null) return "null";
-        return "path: %s, prefix: %s, gain: %f, pitch: %f%n".formatted(sound.folderPath, sound.fileNamePrefix, sound.gainMultiplier, sound.pitchMultiplier);
+        return "path: %s, prefix: %s, gain: %f, pitch: %f".formatted(sound.folderPath, sound.fileNamePrefix, sound.gainMultiplier, sound.pitchMultiplier);
     }
 
     @Override
@@ -35,6 +36,7 @@ public final class MaterialSounds implements SoundCollectionIdentifier {
 
     private record SingleSoundIdentifier(Path filepath, float gainMultiplier, float pitchMultiplier) implements SoundIdentifier {
         @Override
+        @MainThread
         public Sound generateAsset() {
             return new Sound(AssetLoader.loadSound(filepath), gainMultiplier, pitchMultiplier);
         }

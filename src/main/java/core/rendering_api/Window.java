@@ -3,6 +3,7 @@ package core.rendering_api;
 import core.assets.AssetManager;
 import core.renderables.Renderable;
 import core.settings.CoreFloatSettings;
+import core.settings.CoreToggleSettings;
 import core.settings.Settings;
 import core.sound.Sound;
 
@@ -21,6 +22,7 @@ import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -42,15 +44,10 @@ public final class Window {
         createWindow(title);
         GL.createCapabilities();
 
-        glDebugMessageCallback((source, type, id, severity, length, messageAddress, userParam) -> {
-            String message = GLDebugMessageCallback.getMessage(length, messageAddress);
-            String formattedMessage = Debug.debugMessageToString(source, type, id, severity, message);
-            if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM)
-                Debug.log(new Exception(formattedMessage));
-            if (severity == GL_DEBUG_SEVERITY_HIGH)
-                Debug.err(new Exception(formattedMessage));
-        }, 0);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, (IntBuffer) null, true);
+        if (CoreToggleSettings.ENABLE_OPENGL_DEBUG_CONTEXT.value()) {
+            glDebugMessageCallback(Window::debugMessageCallback, 0);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, (IntBuffer) null, true);
+        }
 
         glClearColor(0, 0, 0, 1);
         glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
@@ -71,7 +68,7 @@ public final class Window {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        if (CoreToggleSettings.ENABLE_OPENGL_DEBUG_CONTEXT.value()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         if (vidMode == null) throw new RuntimeException("Could not get video mode");
@@ -295,9 +292,19 @@ public final class Window {
         }
     }
 
+    private static void debugMessageCallback(int source, int type, int id, int severity, int length, long messageAddress, long userParam) {
+        boolean isHighSeverity = severity == GL_DEBUG_SEVERITY_HIGH || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR;
+        boolean isLowSeverity = !isHighSeverity && severity == GL_DEBUG_SEVERITY_NOTIFICATION || severity == GL_DEBUG_SEVERITY_LOW || severity == GL_DEBUG_SEVERITY_MEDIUM;
+        if (isLowSeverity && knownDebugCallbacks.contains(id)) return;
+        knownDebugCallbacks.add(id);
+        String formattedMessage = Debug.debugMessageToString(source, type, id, severity, GLDebugMessageCallback.getMessage(length, messageAddress));
+        if (isHighSeverity) Debug.err(new Exception(formattedMessage));
+        else if (isLowSeverity) Debug.log(new Exception(formattedMessage));
+    }
 
     private static final ArrayList<Renderable> renderablesStack = new ArrayList<>();
     private static final StandardWindowInput standardInput = new StandardWindowInput();
+    private static final HashSet<Integer> knownDebugCallbacks = new HashSet<>();
 
     private static int width, height;
     private static long window;

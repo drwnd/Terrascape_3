@@ -273,10 +273,10 @@ public final class MeshCollector {
     @MainThread
     private TransparentModel loadTransparentModel(Mesh mesh) {
         int start = allocator.memAlloc(mesh.getTransparentByteSize());
-        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), 0, 0, -1, mesh.lod());
+        if (start == -1) return new TransparentModel(mesh.getWorldCoordinate(), 0, 0, -1, mesh.lod(), false);
 
         glNamedBufferSubData(allocator.getBuffer(), start, mesh.transparentVertices());
-        return new TransparentModel(mesh.getWorldCoordinate(), mesh.transparentVertexCount(), mesh.glassVertexCount(), start, mesh.lod());
+        return new TransparentModel(mesh.getWorldCoordinate(), mesh.transparentVertexCount(), mesh.glassVertexCount(), start, mesh.lod(), false);
     }
 
 

@@ -4,7 +4,8 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public enum CoreToggleSettings implements ToggleSetting {
     RAW_MOUSE_INPUT(true),
-    V_SYNC(true);
+    V_SYNC(true),
+    ENABLE_OPENGL_DEBUG_CONTEXT(false);
 
     CoreToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;

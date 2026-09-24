@@ -10,13 +10,14 @@ import static org.lwjgl.opengl.GL46.*;
 
 import static game.utils.Constants.*;
 
-public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
+public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bufferOrStart, boolean isBuffer,
+                          int[] vertexCounts, int[] toRenderVertexCounts, int[] indices) {
 
     public static final int FACE_COUNT = 7;
 
     public OpaqueModel(Vector3l position, int[] vertexCounts, int bufferOrStart, int lod, boolean isBuffer) {
         this(position.x << lod, position.y << lod, position.z << lod,
-                lod, bufferOrStart, vertexCounts, new int[FACE_COUNT],
+                lod, bufferOrStart, isBuffer, vertexCounts, new int[FACE_COUNT],
                 getIndices(vertexCounts, bufferOrStart, isBuffer));
     }
 
@@ -55,7 +56,7 @@ public record OpaqueModel(long totalX, long totalY, long totalZ, int LOD, int bu
     }
 
     public void delete() {
-        glDeleteBuffers(bufferOrStart);
+        if (isBuffer) glDeleteBuffers(bufferOrStart);
     }
 
     public long chunkX() {
