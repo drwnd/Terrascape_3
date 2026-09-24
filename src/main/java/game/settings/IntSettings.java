@@ -14,7 +14,7 @@ public enum IntSettings implements IntSetting {
     PLACE_PARTICLE_STEP_LENGTH(1, 16, 1),
     RENDER_DISTANCE(2, 16, 6, Game::updateRenderDistance),
     LOD_COUNT(1, 20, 10, Game::updateLodCount),
-    SHADOW_CASCADES_COUNT(1, 5, 1, Renderer::reloadShadowMaps),
+    SHADOW_CASCADES_COUNT(1, 10, 1, Renderer::reloadShadowMaps),
 
     DEBUG_VISUALIZATION_LOD(0, LOD_COUNT.max - 1, 0),
     BREAK_PLACE_SIZE(0, CHUNK_SIZE_BITS + 2, 4),

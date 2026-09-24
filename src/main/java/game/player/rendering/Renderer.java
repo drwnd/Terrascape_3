@@ -363,13 +363,14 @@ public final class Renderer extends Renderable {
     private void computeShadowMap(Position cameraPosition, Position playerPosition) {
         currentShadowIndex = (currentShadowIndex + 1) % shadowFramebuffers.length;
         float renderTime = getRenderTime();
-        Vector3f sunDirection = Transformation.getSunDirection(renderTime).mul(-4096);
-        int shadowLod = SHADOW_LOD + currentShadowIndex;
-        if (shadowLod >= IntSettings.LOD_COUNT.value()) return;
 
         shadowSnapshotPositions[currentShadowIndex] = cameraPosition;
         for (int cascade = 0; cascade < sunMatrices.length; cascade++)
             Transformation.updateSunMatrix(sunMatrices[cascade], shadowSnapshotPositions[cascade], cameraPosition, renderTime, cascade);
+
+        Vector3f sunDirection = Transformation.getSunDirection(renderTime).mul(-4096);
+        int shadowLod = SHADOW_LOD + currentShadowIndex;
+        if (shadowLod >= Game.getWorld().LOD_COUNT) return;
 
         glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffers[currentShadowIndex]);
@@ -498,12 +499,13 @@ public final class Renderer extends Renderable {
 
         int flags = getFlags(cameraPosition);
         int maxShadowLod = SHADOW_LOD + IntSettings.SHADOW_CASCADES_COUNT.value();
+        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             glStencilFunc(GL_GEQUAL, lodCount - lod, 0xFF);
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > maxShadowLod ? ~DO_SHADOW_MAPPING_BIT : -1));
-            shader.setUniform("shadowStartIndex", Math.max(0, lod - 1));
+            shader.setUniform("shadowIndices", Math.max(0, lod - SHADOW_LOD), maxShadowCascade);
 
             long start = renderingOptimizer.getOpaqueLodStart(lod);
             int drawCount = renderingOptimizer.getOpaqueLodDrawCount(lod);
@@ -519,11 +521,14 @@ public final class Renderer extends Renderable {
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
         setUpShadowMappedRendering(shader);
         glDisable(GL_STENCIL_TEST);
+
         long currentTick = Game.getServer().getCurrentGameTick();
+        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
+
         shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
         shader.setUniform("flags", getFlags(cameraPosition));
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
-        shader.setUniform("shadowStartIndex", 0);
+        shader.setUniform("shadowIndices", 0, maxShadowCascade);
 
         renderParticles(shader, currentTick, true);
     }
@@ -531,6 +536,7 @@ public final class Renderer extends Renderable {
     @MainThread
     private void renderPlayerCharacter(Position cameraPosition, Matrix4f projectionViewMatrix, Position playerPosition) {
         if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value() && OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) return;
+        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
         Shader shader = AssetManager.get(Shaders.MODEL);
         shader.bind();
         setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
@@ -538,7 +544,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("image", 0);
         shader.setUniform("flags", getFlags(cameraPosition));
-        shader.setUniform("shadowStartIndex", 0);
+        shader.setUniform("shadowIndices", 0, maxShadowCascade);
 
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
@@ -629,11 +635,12 @@ public final class Renderer extends Renderable {
 
         int flags = getFlags(cameraPosition);
         int maxShadowLod = SHADOW_LOD + IntSettings.SHADOW_CASCADES_COUNT.value();
+        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
         for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) {
             shader.setUniform("lodSize", 1 << lod);
             shader.setUniform("flags", flags & (lod > maxShadowLod ? ~DO_SHADOW_MAPPING_BIT : -1));
-            shader.setUniform("shadowStartIndex", Math.max(0, lod - 1));
+            shader.setUniform("shadowIndices", Math.max(0, lod - 1), maxShadowCascade);
 
             long start = renderingOptimizer.getTransparentLodStart(lod);
             int drawCount = renderingOptimizer.getTransparentLodDrawCount(lod);
