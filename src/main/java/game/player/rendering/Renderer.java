@@ -661,7 +661,6 @@ public final class Renderer extends Renderable {
         glBindTexture(GL_TEXTURE_2D, accumulationTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, revealTexture);
-        glDisable(GL_BLEND);
 
         shader.flipNextDrawVertically();
         shader.drawFullScreenQuad();
