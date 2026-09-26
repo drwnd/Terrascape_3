@@ -5,14 +5,15 @@ import core.utils.Vector3l;
 
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
+import game.server.Chunk;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Material;
-import game.server.materials_data.MaterialsData;
 import game.settings.FloatSettings;
 import game.settings.OptionSettings;
 import game.utils.Position;
 
+import game.utils.Utils;
 import org.joml.Vector3f;
 
 import static game.utils.Constants.*;
@@ -67,26 +68,26 @@ public final class PlaceBreakSound {
 
     private static void findInvolvedMaterials(long startX, long startY, long startZ, boolean[] involvedMaterials, ShapePlaceable placeable) {
         if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
-        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
-        long[] bitMap = placeable.getBitMap();
-        byte material = placeable.getMaterial();
 
-        for (int xOffset = 0; xOffset < lengthX; xOffset ++)
-            for (int yOffset = 0; yOffset < lengthY; yOffset ++)
-                for (int zOffset = 0; zOffset < lengthZ; zOffset ++) {
+        long chunkStartX = startX >>> CHUNK_SIZE_BITS;
+        long chunkStartY = startY >>> CHUNK_SIZE_BITS;
+        long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
+        long chunkEndX = Utils.getWrappedChunkCoordinate((startX + lengthX) >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate((startY + lengthY) >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate((startZ + lengthZ) >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
-                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
-                    byte previousMaterial = Game.getWorld().getMaterial(startX + xOffset, startY + yOffset, startZ + zOffset, 0);
-                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD
-                            || previousMaterial == material
-                            || breakHeldOnly && previousMaterial != heldMaterial) continue;
-
-                    involvedMaterials[previousMaterial & 0xFF] = true;
+        for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
+            for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
+                for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
+                    Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
+                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    chunk.getMaterials().findIntersectingMaterials(involvedMaterials, placeable,
+                            (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
+                            (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
+                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)));
                 }
     }
 }
