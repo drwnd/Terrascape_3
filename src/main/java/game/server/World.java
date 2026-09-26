@@ -14,7 +14,6 @@ import game.utils.Status;
 import game.utils.Utils;
 
 import java.io.File;
-import java.util.Date;
 
 import static game.utils.Constants.*;
 
@@ -26,17 +25,17 @@ public final class World {
     public final int CHUNKS_PER_LOD;
     public final int LOD_COUNT;
 
-    public final Date created, lastPlayed;
+    public final long lastPlayedAsMs;
+    public final String name, fileName, created, lastPlayed;
     public final WorldGenerationSettings worldGenerationSettings;
 
     @MainThread
     public World(World world) {
-        this(world.worldGenerationSettings, world.created, world.lastPlayed, true);
-        this.name = world.name;
+        this(world.worldGenerationSettings, world.name, world.created, world.lastPlayed, world.lastPlayedAsMs, true);
     }
 
     @MainThread
-    public World(WorldGenerationSettings worldGenerationSettings, Date created, Date lastPlayed, boolean createChunksArray) {
+    public World(WorldGenerationSettings worldGenerationSettings, String name, String created, String lastPlayed, long lastPlayedAsMs, boolean createChunksArray) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
         LOD_COUNT = IntSettings.LOD_COUNT.value();
@@ -49,7 +48,10 @@ public final class World {
         chunks = createChunksArray ? new Chunk[LOD_COUNT][RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH * RENDERED_WORLD_WIDTH] : null;
         this.created = created;
         this.lastPlayed = lastPlayed;
+        this.name = name;
         this.worldGenerationSettings = worldGenerationSettings;
+        this.lastPlayedAsMs = lastPlayedAsMs;
+        this.fileName = Utils.sanitizeFileName(name);
     }
 
     @MainThread
@@ -99,6 +101,8 @@ public final class World {
         created = oldWorld.created;
         lastPlayed = oldWorld.lastPlayed;
         worldGenerationSettings = oldWorld.worldGenerationSettings;
+        lastPlayedAsMs = oldWorld.lastPlayedAsMs;
+        this.fileName = Utils.sanitizeFileName(name);
     }
 
     @MainThread
@@ -174,14 +178,5 @@ public final class World {
         }
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    private String name;
     private final Chunk[][] chunks;
 }

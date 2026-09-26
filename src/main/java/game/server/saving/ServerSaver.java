@@ -1,6 +1,7 @@
 package game.server.saving;
 
 import core.settings.optionSettings.ColorOption;
+import core.utils.MainThread;
 import core.utils.Saver;
 
 import game.server.ChatMessage;
@@ -35,6 +36,7 @@ public final class ServerSaver extends Saver<Server> {
     }
 
     @Override
+    @MainThread
     protected Server load() {
         long currentGameTick = loadLong();
         float dayTime = loadFloat();
@@ -52,6 +54,7 @@ public final class ServerSaver extends Saver<Server> {
     }
 
     @Override
+    @MainThread
     protected Server getDefault() {
         return new Server(0L, 1.0F, new ArrayList<>());
     }

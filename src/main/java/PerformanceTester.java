@@ -19,11 +19,13 @@ public final class PerformanceTester {
     public static void main(String[] args) {
         IntSettings.RENDER_DISTANCE.setValue(CHUNK_COUNT_XZ / 2 - 3);
         IntSettings.LOD_COUNT.setValue(Integer.numberOfTrailingZeros(CHUNK_COUNT_XZ) + 1);
-        Game.setTemporaryWorld(new World(new WorldGenerationSettings(0x9EF6E7FAF3299DDDL, BiomeSamplers.DEFAULT, 1), null, null, true));
+        Game.setTemporaryWorld(new World(new WorldGenerationSettings(0x9EF6E7FAF3299DDDL, BiomeSamplers.DEFAULT, 1), null, null, null, 0, true));
         long totalStart = System.nanoTime();
 
         int chunkCountY = CHUNK_COUNT_Y;
         int chunkCountXZ = CHUNK_COUNT_XZ;
+
+        System.out.println("Started generating lod 0");
 
         long generationStart = System.nanoTime();
         for (int chunkX = 28; chunkX < chunkCountXZ + 28; chunkX++)

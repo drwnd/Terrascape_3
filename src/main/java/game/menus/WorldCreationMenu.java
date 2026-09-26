@@ -71,14 +71,17 @@ public final class WorldCreationMenu extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (nameField.getText().isEmpty()) return ButtonResult.FAILURE;
-            String worldName = Utils.sanitizeFileName(nameField.getText());
+            String worldName = nameField.getText();
+            String fileName = Utils.sanitizeFileName(worldName);
             File[] savedWorlds = MainMenu.getSavedWorlds();
-            for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(worldName)) return ButtonResult.FAILURE;
+            for (File file : savedWorlds) if (file.getName().equalsIgnoreCase(fileName)) return ButtonResult.FAILURE;
 
             long seed = getSeed(seedField.getText());
+            Date defaultData = new Date(0);
             new WorldSaver().save(new World(
                     new WorldGenerationSettings(seed, (BiomeSamplers) biomeSetting.value(), (1 << blockSizeSetting.value().ordinal())),
-                    new Date(), new Date(0), false), WorldSaver.getSaveFileLocation(worldName));
+                    worldName, defaultData.toString(), defaultData.toString(), defaultData.getTime(), false),
+                    WorldSaver.getSaveFileLocation(fileName));
 
             Window.popRenderable();
             return ButtonResult.SUCCESS;

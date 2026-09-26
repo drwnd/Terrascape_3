@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public final class PlayerRecordSaver extends Saver<PlayerRecord> {
 
     public static Path getSaveFileLocation(String recordName) {
-        return Path.of("saves", Game.getWorld().getName(), "records", recordName);
+        return Path.of("saves", Game.getWorld().fileName, "records", recordName);
     }
 
     @Override

@@ -22,6 +22,7 @@ import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -112,9 +113,9 @@ public final class MainMenu extends UiBackgroundElement {
         deleteWorldButton.setAction(getDeleteWorldAction(world));
         optimizeWorldButton.setAction(getOptimizeWorldAction(world));
 
-        playWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.PLAY_WORLD).formatted(world.getName()));
-        deleteWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.DELETE_WORLD).formatted(world.getName()));
-        optimizeWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.OPTIMIZE_WORLD).formatted(world.getName()));
+        playWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.PLAY_WORLD).formatted(world.name));
+        deleteWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.DELETE_WORLD).formatted(world.name));
+        optimizeWorldButton.firstChildOf(TextElement.class).setText(Language.getTranslation(UiMessages.OPTIMIZE_WORLD).formatted(world.name));
 
         playWorldButton.setVisible(true);
         deleteWorldButton.setVisible(true);
@@ -142,12 +143,15 @@ public final class MainMenu extends UiBackgroundElement {
 
         WorldSaver saver = new WorldSaver();
         File[] savedWorlds = getSavedWorlds();
-        for (int index = 0; index < savedWorlds.length; index++) {
-            File saveFile = savedWorlds[index];
-            World world = saver.load(WorldSaver.getSaveFileLocation(saveFile.getName()));
-            world.setName(saveFile.getName());
+        World[] worlds = new World[savedWorlds.length];
 
-            UiButton button = getPlayWorldButton(index, world);
+        for (int index = 0; index < savedWorlds.length; index++)
+            worlds[index] = saver.load(WorldSaver.getSaveFileLocation(savedWorlds[index].getName()));
+
+        Arrays.sort(worlds, (World a, World b) -> Long.signum(b.lastPlayedAsMs - a.lastPlayedAsMs));
+
+        for (int index = 0; index < worlds.length; index++) {
+            UiButton button = getPlayWorldButton(index, worlds[index]);
 
             addRenderable(button);
             worldButtons.add(button);
@@ -161,9 +165,9 @@ public final class MainMenu extends UiBackgroundElement {
 
         UiButton button = new UiButton(sizeToParent, offsetToParent, () -> setSelectedWorld(world));
 
-        String worldInfo = UiMessages.WORLD_INFO_TEMPLATE.get().formatted(world.created.toString(), world.lastPlayed.toString());
+        String worldInfo = UiMessages.WORLD_INFO_TEMPLATE.get().formatted(world.created, world.lastPlayed);
         TextElement worldInfoText = new TextElement(new Vector2f(0.05F, 1 / 3F), new Message(worldInfo), Color.LIGHT_GRAY);
-        TextElement worldNameText = new TextElement(new Vector2f(0.05F, 2 / 3F), new Message(world.getName()));
+        TextElement worldNameText = new TextElement(new Vector2f(0.05F, 2 / 3F), new Message(world.name));
         worldNameText.setTextSize(1.5F);
 
         button.addRenderable(worldNameText);
@@ -190,7 +194,7 @@ public final class MainMenu extends UiBackgroundElement {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
 
-            FileManager.delete(WorldSaver.getSaveFileLocation(world.getName()).getParent().toFile());
+            FileManager.delete(WorldSaver.getSaveFileLocation(world.fileName).getParent().toFile());
             createWorldButtons();
             hideWorldSpecificButtons();
             return ButtonResult.SUCCESS;

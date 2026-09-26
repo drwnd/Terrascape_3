@@ -168,6 +168,7 @@ public final class Utils {
 
 
     public static String sanitizeFileName(String fileName) {
+        if (fileName == null) return null;
         char[] chars = fileName.strip().toCharArray();
         for (int index = 0; index < chars.length; index++) if (!isAllowedChar(chars[index])) chars[index] = '_';
         return String.valueOf(chars);
