@@ -56,7 +56,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
     public static ArrayList<DebugScreenLine> getDebugLines() {
         ArrayList<DebugScreenLine> lines = new ArrayList<>();
 
-        add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().getName());
+        add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().name);
 
         add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()));
 

@@ -18,15 +18,15 @@ import static game.utils.Constants.*;
 public final class ChunkSaver extends Saver<Chunk> {
 
     public static Path getSaveFileLocation(ChunkID id, int lod) {
-        return Path.of("saves", Game.getWorld().getName(), "chunks", String.valueOf(lod), String.valueOf(id));
+        return Path.of("saves", Game.getWorld().fileName, "chunks", String.valueOf(lod), String.valueOf(id));
     }
 
     public static Path getSaveFileLocation(int lod) {
-        return Path.of("saves", Game.getWorld().getName(), "chunks", String.valueOf(lod));
+        return Path.of("saves", Game.getWorld().fileName, "chunks", String.valueOf(lod));
     }
 
     public static Path getSaveFileLocation() {
-        return Path.of("saves", Game.getWorld().getName(), "chunks");
+        return Path.of("saves", Game.getWorld().fileName, "chunks");
     }
 
     public static void generateHigherLODs() {

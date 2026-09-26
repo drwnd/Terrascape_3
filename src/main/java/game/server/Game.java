@@ -26,7 +26,7 @@ public final class Game {
 
     @MainThread
     public static void play(World toPlayWorld) {
-        String worldName = toPlayWorld.getName();
+        String worldName = toPlayWorld.fileName;
         Material.loadMaterials();
 
         world = new World(toPlayWorld);
@@ -52,7 +52,7 @@ public final class Game {
     @MainThread
     public static void cleanUp() {
         if (world == null) return;
-        String worldName = world.getName();
+        String worldName = world.fileName;
         new PlayerSaver().save(player, PlayerSaver.getSaveFileLocation(worldName));
         new ServerSaver().save(server, ServerSaver.getSaveFileLocation(worldName));
         new WorldSaver().save(world, WorldSaver.getSaveFileLocation(worldName));
