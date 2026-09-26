@@ -5,15 +5,16 @@ import core.utils.IntArrayList;
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
+import game.server.Chunk;
 import game.server.Game;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
-import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 
 import core.utils.MainThread;
+import game.utils.Utils;
 import org.joml.Random;
 import org.joml.Vector3i;
 
@@ -80,10 +81,8 @@ public final class ParticleCollector {
         for (long x = startX; x != startX + (long) countX * lengthX; x += lengthX)
             for (long y = startY; y != startY + (long) countY * lengthY; y += lengthY)
                 for (long z = startZ; z != startZ + (long) countZ * lengthZ; z += lengthZ) {
-                    if (addBreakEffect)
-                        addBreakEffectLoop((int) (x - startX), (int) (y - startY), (int) (z - startZ), x, y, z, transparentParticles, opaqueParticles, placeable);
-                    if (addPlaceEffect)
-                        addPlaceEffectLoop((int) (x - startX), (int) (y - startY), (int) (z - startZ), x, y, z, placeParticles, placeable);
+                    if (addBreakEffect) addBreakEffectLoop(x, y, z, transparentParticles, opaqueParticles, placeable);
+                    if (addPlaceEffect) addPlaceEffectLoop(x, y, z, placeParticles, placeable);
                 }
 
         addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
@@ -143,61 +142,54 @@ public final class ParticleCollector {
         }
     }
 
-    private void addPlaceEffectLoop(int startX, int startY, int startZ,
-                                    long x, long y, long z,
+    private void addPlaceEffectLoop(long startX, long startY, long startZ,
                                     IntArrayList placeParticles, ShapePlaceable placeable) {
-        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
-        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
-        long[] bitMap = placeable.getBitMap();
-        byte material = placeable.getMaterial();
 
-        int stepLength = IntSettings.PLACE_PARTICLE_STEP_LENGTH.value();
-        for (int xOffset = 0; xOffset < lengthX; xOffset += stepLength)
-            for (int yOffset = 0; yOffset < lengthY; yOffset += stepLength)
-                for (int zOffset = 0; zOffset < lengthZ; zOffset += stepLength) {
+        long chunkStartX = startX >>> CHUNK_SIZE_BITS;
+        long chunkStartY = startY >>> CHUNK_SIZE_BITS;
+        long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
-                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
-                    byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == material || paint && previousMaterial == AIR || replaceAir && previousMaterial != AIR) continue;
-
-                    addPlaceParticle(placeParticles, bitMap,
-                            lengthX, lengthY, lengthZ,
-                            xOffset + startX, yOffset + startY, zOffset + startZ,
-                            material);
+        for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
+            for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
+                for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
+                    Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
+                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    chunk.getMaterials().addPlaceParticles(this, placeParticles, placeable,
+                            (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
+                            (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
+                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)));
                 }
     }
 
-    private void addBreakEffectLoop(int startX, int startY, int startZ,
-                                    long x, long y, long z,
+    private void addBreakEffectLoop(long startX, long startY, long startZ,
                                     IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
         if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
-        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
         int lengthZ = placeable.getLengthZ();
-        long[] bitMap = placeable.getBitMap();
-        byte material = placeable.getMaterial();
 
-        int stepLength = IntSettings.BREAK_PARTICLE_STEP_LENGTH.value();
-        for (int xOffset = 0; xOffset < lengthX; xOffset += stepLength)
-            for (int yOffset = 0; yOffset < lengthY; yOffset += stepLength)
-                for (int zOffset = 0; zOffset < lengthZ; zOffset += stepLength) {
+        long chunkStartX = startX >>> CHUNK_SIZE_BITS;
+        long chunkStartY = startY >>> CHUNK_SIZE_BITS;
+        long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
-                    int bitMapIndex = MaterialsData.getUncompressedIndex(xOffset, yOffset, zOffset);
-                    if ((bitMap[bitMapIndex >> 6] & 1L << bitMapIndex) == 0) continue;
-                    byte previousMaterial = Game.getWorld().getMaterial(x + xOffset, y + yOffset, z + zOffset, 0);
-                    if (previousMaterial == AIR || previousMaterial == OUT_OF_WORLD
-                            || previousMaterial == material
-                            || breakHeldOnly && previousMaterial != heldMaterial) continue;
-
-                    addBreakParticle(Material.isGlass(previousMaterial) ? transparentParticles : opaqueParticles,
-                            xOffset + startX, yOffset + startY, zOffset + startZ,
-                            previousMaterial);
+        for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
+            for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
+                for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
+                    Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
+                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    chunk.getMaterials().addBreakParticles(this, opaqueParticles, transparentParticles, placeable,
+                            (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
+                            (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
+                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)));
                 }
     }
 

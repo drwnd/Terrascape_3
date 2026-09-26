@@ -75,9 +75,9 @@ public final class PlaceBreakSound {
         long chunkStartX = startX >>> CHUNK_SIZE_BITS;
         long chunkStartY = startY >>> CHUNK_SIZE_BITS;
         long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
-        long chunkEndX = Utils.getWrappedChunkCoordinate((startX + lengthX) >>> CHUNK_SIZE_BITS, chunkStartX, 0);
-        long chunkEndY = Utils.getWrappedChunkCoordinate((startY + lengthY) >>> CHUNK_SIZE_BITS, chunkStartY, 0);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate((startZ + lengthZ) >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)

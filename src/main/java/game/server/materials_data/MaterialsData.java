@@ -189,8 +189,24 @@ public final class MaterialsData {
         addPlaceParticles(collector, getBitMap(), transform, lengths, opaque, transparent, totalSizeBits, 0, 0, 0, 0);
     }
 
+    public void addBreakParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent, ShapePlaceable placeable,
+                                  int startX, int startY, int startZ) {
+        Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
+        Vector3i start = new Vector3i(startX, startY, startZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+    }
+
+    public void addPlaceParticles(ParticleCollector collector, IntArrayList particles, ShapePlaceable placeable,
+                                  int startX, int startY, int startZ) {
+        Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
+        Vector3i start = new Vector3i(startX, startY, startZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+    }
+
     public void findIntersectingMaterials(boolean[] involvedMaterials, ShapePlaceable placeable, int startX, int startY, int startZ) {
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, totalSizeBits, 0, 0, 0, 0);
+        Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
+        Vector3i start = new Vector3i(startX, startY, startZ);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
     }
 
     public long[] getBitMap() {
@@ -389,6 +405,68 @@ public final class MaterialsData {
         putPresentMaterials(presentMaterials, startIndex + getOffset(startIndex + 13));
         putPresentMaterials(presentMaterials, startIndex + getOffset(startIndex + 16));
         putPresentMaterials(presentMaterials, startIndex + getOffset(startIndex + 19));
+    }
+
+    private void findIntersectingMaterials(boolean[] involvedMaterials, ShapePlaceable placeable, Vector3i lengths, Vector3i start,
+                                           int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int length = 1 << sizeBits;
+        if (inChunkX + length < start.x
+                || inChunkY + length < start.y
+                || inChunkZ + length < start.z
+                || inChunkX >= start.x + lengths.x
+                || inChunkY >= start.y + lengths.y
+                || inChunkZ >= start.z + lengths.z) return;
+
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        long[] bitMap = placeable.getBitMap();
+
+        int minX = Math.max(inChunkX - start.x, 0), maxX = Math.min(inChunkX - start.x + length, lengths.x);
+        int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY - start.y + length, lengths.y);
+        int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ - start.z + length, lengths.z);
+
+        int identifier = getIdentifier(startIndex);
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR || material == OUT_OF_WORLD
+                    || material == placeable.getMaterial()
+                    || breakHeldOnly && material != heldMaterial) return;
+
+            for (int x = minX; x < maxX; x++)
+                for (int y = minY; y < maxY; y++)
+                    for (int z = minZ; z < maxZ; z++) {
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        involvedMaterials[material & 0xFF] = true;
+                    }
+            return;
+        }
+
+        if (identifier == DETAIL) {
+            for (int x = minX; x < maxX; x++)
+                for (int y = minY; y < maxY; y++)
+                    for (int z = minZ; z < maxZ; z++) {
+                        byte material = data[startIndex + getInDetailIndex(start.x + x, start.y + y, start.z + z)];
+                        if (material == AIR || material == OUT_OF_WORLD
+                                || material == placeable.getMaterial()
+                                || breakHeldOnly && material != heldMaterial) continue;
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        involvedMaterials[material & 0xFF] = true;
+                    }
+            return;
+        }
+
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     // Functions to store data into something
@@ -748,6 +826,130 @@ public final class MaterialsData {
         addPlaceParticles(collector, bitMap, transform, lengths, opaque, transparent, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
+    private void addBreakParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent,
+                                   ShapePlaceable placeable, Vector3i lengths, Vector3i start,
+                                   int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int length = 1 << sizeBits;
+        if (inChunkX + length < start.x
+                || inChunkY + length < start.y
+                || inChunkZ + length < start.z
+                || inChunkX >= start.x + lengths.x
+                || inChunkY >= start.y + lengths.y
+                || inChunkZ >= start.z + lengths.z) return;
+
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        int stepLength = IntSettings.BREAK_PARTICLE_STEP_LENGTH.value();
+        long[] bitMap = placeable.getBitMap();
+
+        int minX = Math.max(inChunkX - start.x, 0), maxX = Math.min(inChunkX + length - start.x, lengths.x);
+        int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY + length - start.y, lengths.y);
+        int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ + length - start.z, lengths.z);
+
+        int identifier = getIdentifier(startIndex);
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR || material == OUT_OF_WORLD
+                    || material == placeable.getMaterial()
+                    || breakHeldOnly && material != heldMaterial) return;
+
+            for (int x = minX; x < maxX; x += stepLength)
+                for (int y = minY; y < maxY; y += stepLength)
+                    for (int z = minZ; z < maxZ; z += stepLength) {
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque, x, y, z, material);
+                    }
+            return;
+        }
+
+        if (identifier == DETAIL) {
+            for (int x = minX; x < maxX; x += stepLength)
+                for (int y = minY; y < maxY; y += stepLength)
+                    for (int z = minZ; z < maxZ; z += stepLength) {
+                        byte material = data[startIndex + getInDetailIndex(start.x + x, start.y + y, start.z + z)];
+                        if (material == AIR || material == OUT_OF_WORLD
+                                || material == placeable.getMaterial()
+                                || breakHeldOnly && material != heldMaterial) continue;
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque, x, y, z, material);
+                    }
+            return;
+        }
+
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+    }
+
+    private void addPlaceParticles(ParticleCollector collector, IntArrayList particles,
+                                   ShapePlaceable placeable, Vector3i lengths, Vector3i start,
+                                   int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        int length = 1 << sizeBits;
+        if (inChunkX + length < start.x
+                || inChunkY + length < start.y
+                || inChunkZ + length < start.z
+                || inChunkX >= start.x + lengths.x
+                || inChunkY >= start.y + lengths.y
+                || inChunkZ >= start.z + lengths.z) return;
+
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
+        int stepLength = IntSettings.PLACE_PARTICLE_STEP_LENGTH.value();
+        long[] bitMap = placeable.getBitMap();
+
+        int minX = Math.max(inChunkX - start.x, 0), maxX = Math.min(inChunkX + length - start.x, lengths.x);
+        int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY + length - start.y, lengths.y);
+        int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ + length - start.z, lengths.z);
+
+        int identifier = getIdentifier(startIndex);
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == placeable.getMaterial() || paint && material == AIR || replaceAir && material != AIR) return;
+
+            for (int x = minX; x < maxX; x += stepLength)
+                for (int y = minY; y < maxY; y += stepLength)
+                    for (int z = minZ; z < maxZ; z += stepLength) {
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z, x, y, z, placeable.getMaterial());
+                    }
+            return;
+        }
+
+        if (identifier == DETAIL) {
+            for (int x = minX; x < maxX; x += stepLength)
+                for (int y = minY; y < maxY; y += stepLength)
+                    for (int z = minZ; z < maxZ; z += stepLength) {
+                        byte material = data[startIndex + getInDetailIndex(start.x + x, start.y + y, start.z + z)];
+                        if (material == placeable.getMaterial() || paint && material == AIR || replaceAir && material != AIR) continue;
+                        int bitIndex = getUncompressedIndex(x, y, z);
+                        if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
+                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z, x, y, z, placeable.getMaterial());
+                    }
+            return;
+        }
+
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+    }
+
     private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         byte types = getTypes(startIndex);
         if (types == CONTAINS_TRANSPARENT) return;
@@ -789,68 +991,6 @@ public final class MaterialsData {
         fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
         fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
         fillBitMap(bitMap, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
-    }
-
-    private void findIntersectingMaterials(boolean[] involvedMaterials, ShapePlaceable placeable, int startX, int startY, int startZ,
-                                           int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
-        int length = 1 << sizeBits;
-        if (inChunkX + length < startX
-                || inChunkY + length < startY
-                || inChunkZ + length < startZ
-                || inChunkX >= startX + placeable.getLengthX()
-                || inChunkY >= startY + placeable.getLengthY()
-                || inChunkZ >= startZ + placeable.getLengthZ()) return;
-
-        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
-        long[] bitMap = placeable.getBitMap();
-
-        int minX = Math.max(inChunkX - startX, 0), maxX = Math.min(inChunkX + length - startX, placeable.getLengthX());
-        int minY = Math.max(inChunkY - startY, 0), maxY = Math.min(inChunkY + length - startY, placeable.getLengthY());
-        int minZ = Math.max(inChunkZ - startZ, 0), maxZ = Math.min(inChunkZ + length - startZ, placeable.getLengthZ());
-
-        int identifier = getIdentifier(startIndex);
-        if (identifier == HOMOGENOUS) {
-            byte material = data[startIndex + 1];
-            if (material == AIR || material == OUT_OF_WORLD
-                    || material == placeable.getMaterial()
-                    || breakHeldOnly && material != heldMaterial) return;
-
-            for (int x = minX; x < maxX; x++)
-                for (int y = minY; y < maxY; y++)
-                    for (int z = minZ; z < maxZ; z++) {
-                        int bitIndex = getUncompressedIndex(x, y, z);
-                        if ((bitMap[bitIndex >> 6] | 1L << bitIndex) == 0) continue;
-                        involvedMaterials[material & 0xFF] = true;
-                    }
-            return;
-        }
-
-        if (identifier == DETAIL) {
-            for (int x = minX; x < maxX; x++)
-                for (int y = minY; y < maxY; y++)
-                    for (int z = minZ; z < maxZ; z++) {
-                        byte material = data[startIndex + getInDetailIndex(startX + x, startY + y, startZ + z)];
-                        if (material == AIR || material == OUT_OF_WORLD
-                                || material == placeable.getMaterial()
-                                || breakHeldOnly && material != heldMaterial) continue;
-                        int bitIndex = getUncompressedIndex(x, y, z);
-                        if ((bitMap[bitIndex >> 6] | 1L << bitIndex) == 0) continue;
-                        involvedMaterials[material & 0xFF] = true;
-                    }
-            return;
-        }
-
-//        if (identifier == SPLITTER)
-        int nextSize = 1 << --sizeBits;
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        findIntersectingMaterials(involvedMaterials, placeable, startX, startY, startZ, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     // Helper functions
