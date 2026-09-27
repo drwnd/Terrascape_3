@@ -190,17 +190,19 @@ public final class MaterialsData {
     }
 
     public void addBreakParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent, ShapePlaceable placeable,
-                                  int startX, int startY, int startZ) {
+                                  int startX, int startY, int startZ, int offsetX, int offsetY, int offsetZ) {
         Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
         Vector3i start = new Vector3i(startX, startY, startZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+        Vector3i offset = new Vector3i(offsetX, offsetY, offsetZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
     }
 
     public void addPlaceParticles(ParticleCollector collector, IntArrayList particles, ShapePlaceable placeable,
-                                  int startX, int startY, int startZ) {
+                                  int startX, int startY, int startZ, int offsetX, int offsetY, int offsetZ) {
         Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
         Vector3i start = new Vector3i(startX, startY, startZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+        Vector3i offset = new Vector3i(offsetX, offsetY, offsetZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
     }
 
     public void findIntersectingMaterials(boolean[] involvedMaterials, ShapePlaceable placeable, int startX, int startY, int startZ) {
@@ -827,7 +829,7 @@ public final class MaterialsData {
     }
 
     private void addBreakParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent,
-                                   ShapePlaceable placeable, Vector3i lengths, Vector3i start,
+                                   ShapePlaceable placeable, Vector3i lengths, Vector3i start, Vector3i offset,
                                    int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int length = 1 << sizeBits;
         if (inChunkX + length < start.x
@@ -858,7 +860,8 @@ public final class MaterialsData {
                     for (int z = minZ; z < maxZ; z += stepLength) {
                         int bitIndex = getUncompressedIndex(x, y, z);
                         if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
-                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque, x, y, z, material);
+                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque,
+                                x + offset.x, y + offset.y, z + offset.z, material);
                     }
             return;
         }
@@ -873,26 +876,27 @@ public final class MaterialsData {
                                 || breakHeldOnly && material != heldMaterial) continue;
                         int bitIndex = getUncompressedIndex(x, y, z);
                         if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
-                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque, x, y, z, material);
+                        collector.addBreakParticle(Material.isGlass(material) ? transparent : opaque,
+                                x + offset.x, y + offset.y, z + offset.z, material);
                     }
             return;
         }
 
 //        if (identifier == SPLITTER)
         int nextSize = 1 << --sizeBits;
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     private void addPlaceParticles(ParticleCollector collector, IntArrayList particles,
                                    ShapePlaceable placeable, Vector3i lengths, Vector3i start,
-                                   int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+                                   Vector3i offset, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         int length = 1 << sizeBits;
         if (inChunkX + length < start.x
                 || inChunkY + length < start.y
@@ -920,7 +924,8 @@ public final class MaterialsData {
                     for (int z = minZ; z < maxZ; z += stepLength) {
                         int bitIndex = getUncompressedIndex(x, y, z);
                         if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
-                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z, x, y, z, placeable.getMaterial());
+                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z,
+                                x + offset.x, y + offset.y, z + offset.z, placeable.getMaterial());
                     }
             return;
         }
@@ -933,21 +938,22 @@ public final class MaterialsData {
                         if (material == placeable.getMaterial() || paint && material == AIR || replaceAir && material != AIR) continue;
                         int bitIndex = getUncompressedIndex(x, y, z);
                         if ((bitMap[bitIndex >> 6] & 1L << bitIndex) == 0) continue;
-                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z, x, y, z, placeable.getMaterial());
+                        collector.addPlaceParticle(particles, bitMap, lengths.x, lengths.y, lengths.z,
+                                x + offset.x, y + offset.y, z + offset.z, placeable.getMaterial());
                     }
             return;
         }
 
 //        if (identifier == SPLITTER)
         int nextSize = 1 << --sizeBits;
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {

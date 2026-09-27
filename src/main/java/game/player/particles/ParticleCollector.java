@@ -81,8 +81,8 @@ public final class ParticleCollector {
         for (long x = startX; x != startX + (long) countX * lengthX; x += lengthX)
             for (long y = startY; y != startY + (long) countY * lengthY; y += lengthY)
                 for (long z = startZ; z != startZ + (long) countZ * lengthZ; z += lengthZ) {
-                    if (addBreakEffect) addBreakEffectLoop(x, y, z, transparentParticles, opaqueParticles, placeable);
-                    if (addPlaceEffect) addPlaceEffectLoop(x, y, z, placeParticles, placeable);
+                    if (addBreakEffect) addBreakEffectLoop(x, y, z, startX, startY, startZ, transparentParticles, opaqueParticles, placeable);
+                    if (addPlaceEffect) addPlaceEffectLoop(x, y, z, startX, startY, startZ, placeParticles, placeable);
                 }
 
         addParticles(startX, startY, startZ, opaqueParticles, ParticleType.OPAQUE_BREAK);
@@ -142,7 +142,7 @@ public final class ParticleCollector {
         }
     }
 
-    private void addPlaceEffectLoop(long startX, long startY, long startZ,
+    private void addPlaceEffectLoop(long startX, long startY, long startZ, long originX, long originY, long originZ,
                                     IntArrayList placeParticles, ShapePlaceable placeable) {
         int lengthX = placeable.getLengthX();
         int lengthY = placeable.getLengthY();
@@ -163,11 +163,14 @@ public final class ParticleCollector {
                     chunk.getMaterials().addPlaceParticles(this, placeParticles, placeable,
                             (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
                             (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
-                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)));
+                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)),
+                            (int) (startX - originX),
+                            (int) (startY - originY),
+                            (int) (startZ - originZ));
                 }
     }
 
-    private void addBreakEffectLoop(long startX, long startY, long startZ,
+    private void addBreakEffectLoop(long startX, long startY, long startZ, long originX, long originY, long originZ,
                                     IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
         if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
         int lengthX = placeable.getLengthX();
@@ -189,7 +192,10 @@ public final class ParticleCollector {
                     chunk.getMaterials().addBreakParticles(this, opaqueParticles, transparentParticles, placeable,
                             (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
                             (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
-                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)));
+                            (int) (startZ - (chunkZ << CHUNK_SIZE_BITS)),
+                            (int) (startX - originX),
+                            (int) (startY - originY),
+                            (int) (startZ - originZ));
                 }
     }
 
