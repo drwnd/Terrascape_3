@@ -83,7 +83,7 @@ public final class PlaceBreakSound {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
                     Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
-                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    if (chunk == null || !chunk.ID.equals(chunkX, chunkY, chunkZ)) continue;
                     chunk.getMaterials().findIntersectingMaterials(involvedMaterials, placeable,
                             (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
                             (int) (startY - (chunkY << CHUNK_SIZE_BITS)),

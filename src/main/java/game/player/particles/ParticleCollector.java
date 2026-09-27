@@ -159,7 +159,7 @@ public final class ParticleCollector {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
                     Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
-                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    if (chunk == null || !chunk.ID.equals(chunkX, chunkY, chunkZ)) continue;
                     chunk.getMaterials().addPlaceParticles(this, placeParticles, placeable,
                             (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
                             (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
@@ -185,7 +185,7 @@ public final class ParticleCollector {
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++) {
                     Chunk chunk = Game.getWorld().getChunk(chunkX, chunkY, chunkZ, 0);
-                    if (chunk == null || chunk.X != chunkX || chunk.Y != chunkY || chunk.Z != chunkZ) continue;
+                    if (chunk == null || !chunk.ID.equals(chunkX, chunkY, chunkZ)) continue;
                     chunk.getMaterials().addBreakParticles(this, opaqueParticles, transparentParticles, placeable,
                             (int) (startX - (chunkX << CHUNK_SIZE_BITS)),
                             (int) (startY - (chunkY << CHUNK_SIZE_BITS)),
