@@ -144,16 +144,12 @@ public final class ParticleCollector {
 
     private void addPlaceEffectLoop(long startX, long startY, long startZ, long originX, long originY, long originZ,
                                     IntArrayList placeParticles, ShapePlaceable placeable) {
-        int lengthX = placeable.getLengthX();
-        int lengthY = placeable.getLengthY();
-        int lengthZ = placeable.getLengthZ();
-
         long chunkStartX = startX >>> CHUNK_SIZE_BITS;
         long chunkStartY = startY >>> CHUNK_SIZE_BITS;
         long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + placeable.getLengthX() - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + placeable.getLengthY() - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + placeable.getLengthZ() - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
@@ -173,16 +169,12 @@ public final class ParticleCollector {
     private void addBreakEffectLoop(long startX, long startY, long startZ, long originX, long originY, long originZ,
                                     IntArrayList transparentParticles, IntArrayList opaqueParticles, ShapePlaceable placeable) {
         if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
-        int lengthX = placeable.getLengthX();
-        int lengthY = placeable.getLengthY();
-        int lengthZ = placeable.getLengthZ();
-
         long chunkStartX = startX >>> CHUNK_SIZE_BITS;
         long chunkStartY = startY >>> CHUNK_SIZE_BITS;
         long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + placeable.getLengthX() - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + placeable.getLengthY() - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + placeable.getLengthZ() - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
@@ -258,9 +250,8 @@ public final class ParticleCollector {
                                  int xOffset, int yOffset, int zOffset,
                                  byte material) {
         float velocityX = getRandom(-8F, 8F), velocityY = getRandom(-8F, 8F), velocityZ = getRandom(-8F, 8F);
-        float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
-
         if (checkParticleVisibility(bitMap, lengthX, lengthY, lengthZ, xOffset, yOffset, zOffset, velocityX, velocityY, velocityZ)) return;
+        float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
 
         particles.add(packOffset(xOffset, yOffset, zOffset, true, true));
         particles.add(packVelocityGravity(velocityX, velocityY, velocityZ, 0.0F));

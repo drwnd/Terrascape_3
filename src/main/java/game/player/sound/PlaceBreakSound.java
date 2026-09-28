@@ -3,14 +3,12 @@ package game.player.sound;
 import core.sound.Sound;
 import core.utils.Vector3l;
 
-import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.settings.FloatSettings;
-import game.settings.OptionSettings;
 import game.utils.Position;
 
 import game.utils.Utils;
@@ -67,17 +65,12 @@ public final class PlaceBreakSound {
     }
 
     private static void findInvolvedMaterials(long startX, long startY, long startZ, boolean[] involvedMaterials, ShapePlaceable placeable) {
-        if (OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR) return;
-        int lengthX = placeable.getLengthX();
-        int lengthY = placeable.getLengthY();
-        int lengthZ = placeable.getLengthZ();
-
         long chunkStartX = startX >>> CHUNK_SIZE_BITS;
         long chunkStartY = startY >>> CHUNK_SIZE_BITS;
         long chunkStartZ = startZ >>> CHUNK_SIZE_BITS;
-        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + lengthX - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + lengthY - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
-        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + lengthZ - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
+        long chunkEndX = Utils.getWrappedChunkCoordinate(startX + placeable.getLengthX() - 1 >>> CHUNK_SIZE_BITS, chunkStartX, 0);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(startY + placeable.getLengthY() - 1 >>> CHUNK_SIZE_BITS, chunkStartY, 0);
+        long chunkEndZ = Utils.getWrappedChunkCoordinate(startZ + placeable.getLengthZ() - 1 >>> CHUNK_SIZE_BITS, chunkStartZ, 0);
 
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
