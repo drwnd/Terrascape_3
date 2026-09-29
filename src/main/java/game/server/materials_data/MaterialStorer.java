@@ -18,7 +18,8 @@ final class MaterialStorer {
         int align = MathUtils.min(totalSizeBits + lod, inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2()));
         int alignLength = 1 << Math.max(0, align - lod);
 
-        if (alignLength >= 1) storeMaterial1Aligned(inChunkX, inChunkY, inChunkZ, uncompressedMaterials, totalSizeBits, lod, placeable);
+        if (alignLength == 1) storeMaterial1Aligned(inChunkX, inChunkY, inChunkZ, uncompressedMaterials, totalSizeBits, lod, placeable);
+        else if (alignLength == 2) storeMaterial2Aligned(inChunkX, inChunkY, inChunkZ, uncompressedMaterials, totalSizeBits, lod, placeable);
         else storeMaterialAnyAligned(inChunkX, inChunkY, inChunkZ, uncompressedMaterials, totalSizeBits, lod, placeable, align);
     }
 
@@ -41,6 +42,36 @@ final class MaterialStorer {
                     int bitmapIndex = MaterialsData.getUncompressedIndex(x << lod, y << lod, z << lod);
                     int materialIndex = MaterialsData.getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z);
                     storeMaterial(uncompressedMaterials, bitMap, bitmapIndex, materialIndex, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                }
+    }
+
+    private static void storeMaterial2Aligned(int inChunkX, int inChunkY, int inChunkZ, byte[] uncompressedMaterials, int totalSizeBits, int lod, ShapePlaceable placeable) {
+        byte material = placeable.getMaterial();
+        long[] bitMap = placeable.getBitMap();
+
+        int stride = 1 << lod * 3;
+        int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);
+        int startY = Math.max(0, -inChunkY), endY = Math.clamp(placeable.getLengthY() >> lod, 1, (1 << totalSizeBits) - inChunkY);
+        int startZ = Math.max(0, -inChunkZ), endZ = Math.clamp(placeable.getLengthZ() >> lod, 1, (1 << totalSizeBits) - inChunkZ);
+
+        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
+        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
+        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+
+        for (int x = startX; x < endX; x += 2)
+            for (int y = startY; y < endY; y += 2)
+                for (int z = startZ; z < endZ; z += 2) {
+                    int bitmapIndex = MaterialsData.getUncompressedIndex(x << lod, y << lod, z << lod);
+                    int materialIndex = MaterialsData.getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex, materialIndex, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 1, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 2, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 3, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 4, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 5, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex += stride, materialIndex + 6, paint, replaceAir, breakHeldOnly, heldMaterial, material);
+                    storeMaterial(uncompressedMaterials, bitMap, bitmapIndex + stride, materialIndex + 7, paint, replaceAir, breakHeldOnly, heldMaterial, material);
                 }
     }
 
