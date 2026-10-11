@@ -57,7 +57,7 @@ public final class StructurePlaceable implements Placeable {
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
         long chunkStartZ = position.z >>> CHUNK_SIZE_BITS + lod;
         long chunkEndX = Utils.getWrappedChunkCoordinate(position.x + structure.sizeX(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartX, lod);
-        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY() >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
+        long chunkEndY = Utils.getWrappedChunkCoordinate(position.y + structure.sizeY(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartY, lod);
         long chunkEndZ = Utils.getWrappedChunkCoordinate(position.z + structure.sizeZ(transform) >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
@@ -165,7 +165,7 @@ public final class StructurePlaceable implements Placeable {
         int startZ = (int) (chunkStartZ + (inChunkZ << chunk.LOD) - position.z);
 
         int lengthX = MathUtils.min(structure.sizeX(transform) - startX, CHUNK_SIZE - inChunkX << chunk.LOD, structure.sizeX(transform));
-        int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY());
+        int lengthY = MathUtils.min(structure.sizeY(transform) - startY, CHUNK_SIZE - inChunkY << chunk.LOD, structure.sizeY(transform));
         int lengthZ = MathUtils.min(structure.sizeZ(transform) - startZ, CHUNK_SIZE - inChunkZ << chunk.LOD, structure.sizeZ(transform));
         if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
 

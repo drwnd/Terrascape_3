@@ -508,7 +508,7 @@ public final class MaterialsData {
     private void fillUncompressedMaterialsInto(byte[] uncompressedMaterials, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
                                                int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
-        if (isInValidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
+        if (isInvalidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = getIdentifier(startIndex);
 
         if (identifier == SPLITTER) {
@@ -559,7 +559,7 @@ public final class MaterialsData {
     private void fillStructureMaterialsInto(byte[] uncompressedMaterials, byte transform, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
                                             boolean forceOverride, int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
-        if (isInValidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
+        if (isInvalidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = getIdentifier(startIndex);
 
         if (identifier == SPLITTER) {
@@ -1524,7 +1524,7 @@ public final class MaterialsData {
     }
 
 
-    private static boolean isInValidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
+    private static boolean isInvalidCoordinate(int lod, Vector3i sourceStart, Vector3i size, int currentX, int currentY, int currentZ, int length) {
         return Integer.numberOfTrailingZeros(currentX | currentY | currentZ) < lod
                 || currentX + length <= sourceStart.x || sourceStart.x + size.x <= currentX
                 || currentY + length <= sourceStart.y || sourceStart.y + size.y <= currentY

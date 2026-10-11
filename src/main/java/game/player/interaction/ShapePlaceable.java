@@ -99,6 +99,7 @@ public abstract class ShapePlaceable implements Placeable {
             this.bitMap = bitMap;
             this.settingsHash = settingsHash;
             this.preferredSize = preferredSize;
+            buildStructure();
         }
         return this;
     }
@@ -125,11 +126,7 @@ public abstract class ShapePlaceable implements Placeable {
 
     @Override
     public Structure getStructure() {
-        int preferredSize = getPreferredSizePowOf2();
-        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
-
-        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
-        return new Structure(lengthX, lengthY, lengthZ, 0, 0, 0, preferredSizeBits, material, bitMap);
+        return structure;
     }
 
     @Override
@@ -216,6 +213,7 @@ public abstract class ShapePlaceable implements Placeable {
         this.bitMap = bitMap;
         settingsHash = settingsHash();
         preferredSize = getPreferredSize();
+        buildStructure();
     }
 
     @MainThread
@@ -248,10 +246,19 @@ public abstract class ShapePlaceable implements Placeable {
         return buffer;
     }
 
+    private void buildStructure() {
+        int preferredSize = getPreferredSizePowOf2();
+        int preferredSizeBits = Integer.numberOfTrailingZeros(preferredSize);
+
+        int lengthX = getLengthX(), lengthY = getLengthY(), lengthZ = getLengthZ();
+        structure = new Structure(lengthX, lengthY, lengthZ, 0, 0, 0, preferredSizeBits, material, bitMap);
+    }
+
 
     private int buffer, bufferSize = -1;
     protected int settingsHash, preferredSize;
     protected long[] bitMap;
+    private Structure structure;
     private final byte material;
     protected ShapeSetting[] settings;
 
