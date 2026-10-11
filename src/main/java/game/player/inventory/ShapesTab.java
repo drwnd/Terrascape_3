@@ -4,6 +4,7 @@ import core.renderables.*;
 import core.rendering_api.Window;
 
 import game.player.interaction.Placeable;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
 import game.server.generation.Structure;
@@ -127,6 +128,17 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @MainThread
+    public void selectDisplayOfClass(ShapePlaceable placeable) {
+        Class<?> tClass = placeable.getClass();
+        for (ShapeDisplay shapeDisplay : shapeDisplays) {
+            if (!tClass.isInstance(shapeDisplay.getPlaceable())) continue;
+            shapeDisplay.setSettingsToPlaceableSettings(placeable);
+            setSelectedDisplay(shapeDisplay);
+            break;
+        }
+    }
+
+    @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
         for (CubeDisplay display : cubeDisplays) {
             this.cubeDisplays.add(display);
@@ -164,20 +176,24 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return selectedDisplay;
     }
 
+    @MainThread
     void setSelectedDisplay(ShapeDisplay selectedDisplay) {
         this.selectedDisplay = selectedDisplay;
+        for (UiBackgroundElement settingElement : shapePlaceableSettings) settingElement.setVisible(false);
+        for (UiBackgroundElement settingElement : selectedDisplay.getSettingElements()) settingElement.setVisible(true);
+        refreshShapePreview();
     }
 
-    ArrayList<UiBackgroundElement> getShapePlaceableSettingSliders() {
-        return shapePlaceableSettingSliders;
+    ArrayList<UiBackgroundElement> getShapePlaceableSettings() {
+        return shapePlaceableSettings;
     }
 
     @MainThread
     private void loadShapeDisplays() {
         for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
-        for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
+        for (Renderable slider : shapePlaceableSettings) removeRenderable(slider).delete();
         shapeDisplays.clear();
-        shapePlaceableSettingSliders.clear();
+        shapePlaceableSettings.clear();
 
         shapeDisplays.add(new ShapeDisplay(0, new CubePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(1, new SpherePlaceable(STONE), this));
@@ -206,7 +222,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
-    private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
+    private final ArrayList<UiBackgroundElement> shapePlaceableSettings = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 

@@ -184,6 +184,10 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapeSetting[] getSettings();
 
+    public ShapeSetting[] getAllSettings() {
+        return settings;
+    }
+
     protected void loadSettings() {
         ShapeSetting[] baseSettings = getSettings();
 

@@ -2,17 +2,19 @@ package game.player.inventory;
 
 import core.renderables.*;
 import core.rendering_api.Window;
+import core.settings.*;
+import core.utils.MainThread;
 
 import game.player.interaction.ShapePlaceable;
-
+import game.player.interaction.ShapeSetting;
 import game.server.generation.Structure;
-import core.utils.MainThread;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
+import static org.lwjgl.glfw.GLFW.*;
 
 public final class ShapeDisplay extends UiButton {
 
@@ -48,13 +50,29 @@ public final class ShapeDisplay extends UiButton {
             settingElements.add(settingElement);
         }
 
-        shapesTab.getShapePlaceableSettingSliders().addAll(settingElements);
+        shapesTab.getShapePlaceableSettings().addAll(settingElements);
         for (UiBackgroundElement settingElement : settingElements) shapesTab.addRenderable(settingElement);
 
         Structure shapeStructure = placeable.updateBitMap(false).getSmallStructure();
         StructureDisplay structureDisplay = new StructureDisplay(new Vector2f(1.0F, 1.0F), new Vector2f(0.0F, 0.0F), shapeStructure);
         structureDisplay.setDoAutoFocusScaling(false);
         addRenderable(structureDisplay);
+    }
+
+    @SuppressWarnings("unchecked")
+    @MainThread
+    void setSettingsToPlaceableSettings(ShapePlaceable placeable) {
+        ShapeSetting[] settings = placeable.getAllSettings();
+
+        for (int index = 0; index < settings.length; index++) {
+            switch (settings[index].setting()) {
+                case FloatSetting setting -> ((Slider<Float>) settingElements.get(index)).setValue(setting.value());
+                case IntSetting setting -> ((Slider<Integer>) settingElements.get(index)).setValue(setting.value());
+                case OptionSetting setting -> ((OptionToggle) settingElements.get(index)).setValue(setting.value());
+                case ToggleSetting setting -> ((Toggle) settingElements.get(index)).setValue(setting.value());
+                default -> throw new IllegalStateException("Unexpected value: " + settings[index].setting());
+            }
+        }
     }
 
     @Override
@@ -87,9 +105,6 @@ public final class ShapeDisplay extends UiButton {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             ((ShapesTab) getParent()).setSelectedDisplay(this);
-            for (UiBackgroundElement settingElement : ((ShapesTab) getParent()).getShapePlaceableSettingSliders()) settingElement.setVisible(false);
-            for (UiBackgroundElement settingElement : settingElements) settingElement.setVisible(true);
-            ((ShapesTab) getParent()).refreshShapePreview();
             return ButtonResult.SUCCESS;
         };
     }

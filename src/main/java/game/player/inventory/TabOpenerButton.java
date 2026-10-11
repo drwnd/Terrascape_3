@@ -4,6 +4,7 @@ import core.renderables.ButtonResult;
 import core.renderables.TextElement;
 import core.renderables.UiButton;
 import core.rendering_api.Window;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import game.server.Game;
@@ -17,12 +18,14 @@ public final class TabOpenerButton extends UiButton {
 
     static final float SIZE = 0.13333334F;
 
-    TabOpenerButton(Inventory inventory, int index, InventoryTab toOpenTab, StringGetter name) {
+    @MainThread
+    TabOpenerButton(Inventory inventory, int index, InventoryTab toOpenTab, StringGetter name, InventoryTab.Types tabType) {
         super(getButtonSizeToParent(), getButtonOffsetToParent(index));
 
         this.index = index;
         this.inventory = inventory;
         this.toOpenTab = toOpenTab;
+        this.tabType = tabType;
 
         setScaleWithGuiSize(false);
         setRimThicknessMultiplier(0.75F);
@@ -36,12 +39,14 @@ public final class TabOpenerButton extends UiButton {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         if (Game.getPlayer().getInventory().getOpenTabButton() == this) scaleForFocused(position, size);
         super.renderSelf(position, size);
     }
 
     @Override
+    @MainThread
     public void resizeSelfTo(int width, int height) {
         Vector2f sizeToParent = getButtonSizeToParent();
         Vector2f offsetToParent = getButtonOffsetToParent(index);
@@ -50,9 +55,14 @@ public final class TabOpenerButton extends UiButton {
         setOffsetToParent(offsetToParent.x, offsetToParent.y);
     }
 
+    public InventoryTab getToOpenTab() {
+        return toOpenTab;
+    }
+
+    @MainThread
     private ButtonResult action(Vector2i pixelCoordinate, int button, int action) {
         if (action != GLFW_PRESS) return ButtonResult.IGNORE;
-        inventory.setOpenTab(toOpenTab, this);
+        inventory.setOpenTab(tabType);
         return ButtonResult.SUCCESS;
     }
 
@@ -67,4 +77,5 @@ public final class TabOpenerButton extends UiButton {
     private final int index;
     private final Inventory inventory;
     private final InventoryTab toOpenTab;
+    private final InventoryTab.Types tabType;
 }
