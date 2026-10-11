@@ -9,6 +9,7 @@ import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Material;
 import game.settings.FloatSettings;
+import game.settings.IntSettings;
 import game.utils.Position;
 
 import game.utils.Utils;
@@ -53,9 +54,16 @@ public final class PlaceBreakSound {
                 startZ + ((long) countZ * lengthZ >> 1));
         boolean[] involvedMaterials = new boolean[AMOUNT_OF_MATERIALS];
 
+        Vector3l playerPosition = Game.getPlayer().getCamera().getPosition().longPosition();
+        long maxParticleDistance = IntSettings.MAX_SOUND_DISTANCE.value();
+
         for (long x = startX; x != startX + (long) countX * lengthX; x += lengthX)
             for (long y = startY; y != startY + (long) countY * lengthY; y += lengthY)
-                for (long z = startZ; z != startZ + (long) countZ * lengthZ; z += lengthZ) findInvolvedMaterials(x, y, z, involvedMaterials, placeable);
+                for (long z = startZ; z != startZ + (long) countZ * lengthZ; z += lengthZ) {
+                    if (playerPosition.distanceSquared(x + (lengthX >> 1), y + (lengthY >> 1), z + (lengthZ >> 1)) > maxParticleDistance * maxParticleDistance)
+                        continue;
+                    findInvolvedMaterials(x, y, z, involvedMaterials, placeable);
+                }
 
         Position centerPosition = new Position(center, new Vector3f());
         for (int index = 0; index < AMOUNT_OF_MATERIALS; index++) {

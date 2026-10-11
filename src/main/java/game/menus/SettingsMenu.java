@@ -111,6 +111,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(IntSettings.SHADOW_CASCADES_COUNT);
         section.addToggle(ToggleSettings.USE_AMBIENT_OCCLUSION);
         section.addSlider(IntSettings.AMBIENT_OCCLUSION_SAMPLES);
+        section.addSlider(IntSettings.MAX_PARTICLE_DISTANCE);
         section.addToggle(ToggleSettings.SHOW_BREAK_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_SHAPE_PLACE_PARTICLES);
         section.addToggle(ToggleSettings.SHOW_STRUCTURE_PLACE_PARTICLES);
@@ -151,6 +152,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(CoreFloatSettings.MASTER_AUDIO);
         section.addSlider(FloatSettings.FOOTSTEPS_AUDIO);
         section.addSlider(FloatSettings.JUMP_AUDIO);
+        section.addSlider(IntSettings.MAX_SOUND_DISTANCE);
         section.addSlider(FloatSettings.PLACE_AUDIO);
         section.addSlider(FloatSettings.DIG_AUDIO);
         section.addSlider(FloatSettings.INVENTORY_AUDIO);

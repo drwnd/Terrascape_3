@@ -2,6 +2,7 @@ package game.player.particles;
 
 import core.utils.IntArrayList;
 
+import core.utils.Vector3l;
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
@@ -10,6 +11,7 @@ import game.server.Game;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Material;
+import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 
@@ -78,9 +80,15 @@ public final class ParticleCollector {
         IntArrayList transparentParticles = new IntArrayList(addBreakEffect ? placeable.getPreferredSize() * countX * countY * countZ : 0);
         IntArrayList placeParticles = new IntArrayList(addPlaceEffect ? placeable.getPreferredSize() * countX * countY * countZ : 0);
 
+        Vector3l playerPosition = Game.getPlayer().getCamera().getPosition().longPosition();
+        long maxParticleDistance = IntSettings.MAX_PARTICLE_DISTANCE.value();
+
         for (long x = startX; x != startX + (long) countX * lengthX; x += lengthX)
             for (long y = startY; y != startY + (long) countY * lengthY; y += lengthY)
                 for (long z = startZ; z != startZ + (long) countZ * lengthZ; z += lengthZ) {
+                    if (playerPosition.distanceSquared(x + (lengthX >> 1), y + (lengthY >> 1), z + (lengthZ >> 1)) > maxParticleDistance * maxParticleDistance)
+                        continue;
+
                     if (addBreakEffect) addBreakEffectLoop(x, y, z, startX, startY, startZ, transparentParticles, opaqueParticles, placeable);
                     if (addPlaceEffect) addPlaceEffectLoop(x, y, z, startX, startY, startZ, placeParticles, placeable);
                 }
