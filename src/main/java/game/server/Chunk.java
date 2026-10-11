@@ -1,6 +1,7 @@
 package game.server;
 
 import core.utils.ByteArrayList;
+import core.utils.Vector3l;
 import game.player.interaction.ShapePlaceable;
 import game.server.generation.Structure;
 import game.server.materials_data.MaterialsData;
@@ -42,8 +43,9 @@ public final class Chunk {
     }
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
-                              int countX, int countY, int countZ, int lod, ShapePlaceable placeable) {
-        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, lod, placeable);
+                              int countX, int countY, int countZ,
+                              int lod, ShapePlaceable placeable, Vector3l minPosition, MaterialsData.OverrideFunction overrideFunction) {
+        materials.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, X, Y, Z, lod, placeable, minPosition, overrideFunction);
         modified = true;
     }
 
@@ -65,12 +67,12 @@ public final class Chunk {
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                         int startX, int startY, int startZ,
                                         int lengthX, int lengthY, int lengthZ,
-                                        int lod, Structure structure, byte transform, boolean forceOverride) {
+                                        int lod, Structure structure, byte transform, MaterialsData.OverrideFunction overrideFunction) {
         this.materials.storeStructureMaterials(
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                lod, structure, transform, forceOverride);
+                lod, structure, transform, overrideFunction);
         modified = true;
     }
 

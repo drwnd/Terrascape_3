@@ -55,7 +55,7 @@ public interface Placeable {
     }
 
     @ServerThread
-    void place(Vector3l position, int lod);
+    void place(Vector3l position, int lod, boolean isBreak);
 
     @ServerThread
     ArrayList<Chunk> getAffectedChunks();

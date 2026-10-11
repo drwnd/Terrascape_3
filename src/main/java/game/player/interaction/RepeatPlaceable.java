@@ -11,8 +11,10 @@ import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
 import game.server.material.Properties;
+import game.server.materials_data.MaterialsData;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 import game.utils.Utils;
 
@@ -67,7 +69,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
         int countX = (int) (maxPosition.x - minPosition.x + placeable.getLengthX()) / placeable.getLengthX();
         int countY = (int) (maxPosition.y - minPosition.y + placeable.getLengthY()) / placeable.getLengthY();
         int countZ = (int) (maxPosition.z - minPosition.z + placeable.getLengthZ()) / placeable.getLengthZ();
@@ -80,10 +82,11 @@ public final class RepeatPlaceable implements Placeable {
         long chunkEndZ = Utils.getWrappedChunkCoordinate(maxPosition.z >>> CHUNK_SIZE_BITS + lod, chunkStartZ, lod);
         ChunkSaver saver = new ChunkSaver();
 
+        MaterialsData.OverrideFunction overrideFunction = ((PlaceMode) OptionSettings.PLACE_MODE.value()).getOverrideFunction(isBreak);
         for (long chunkX = chunkStartX; chunkX <= chunkEndX; chunkX++)
             for (long chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++)
                 for (long chunkZ = chunkStartZ; chunkZ <= chunkEndZ; chunkZ++)
-                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), countX, countY, countZ);
+                    placeInChunk(saver.loadAndGenerate(chunkX, chunkY, chunkZ, lod), countX, countY, countZ, overrideFunction);
     }
 
     @Override
@@ -147,7 +150,7 @@ public final class RepeatPlaceable implements Placeable {
     }
 
 
-    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ) {
+    private void placeInChunk(Chunk chunk, int countX, int countY, int countZ, MaterialsData.OverrideFunction overrideFunction) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartY = chunk.Y << CHUNK_SIZE_BITS + chunk.LOD;
         long chunkStartZ = chunk.Z << CHUNK_SIZE_BITS + chunk.LOD;
@@ -156,7 +159,7 @@ public final class RepeatPlaceable implements Placeable {
         int inChunkY = (int) (minPosition.y - chunkStartY) >> chunk.LOD;
         int inChunkZ = (int) (minPosition.z - chunkStartZ) >> chunk.LOD;
 
-        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, chunk.LOD, placeable);
+        chunk.storeMaterial(inChunkX, inChunkY, inChunkZ, countX, countY, countZ, chunk.LOD, placeable, minPosition, overrideFunction);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

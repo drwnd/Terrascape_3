@@ -149,7 +149,7 @@ public abstract class ShapePlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
         throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 

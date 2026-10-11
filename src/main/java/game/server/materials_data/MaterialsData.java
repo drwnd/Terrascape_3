@@ -4,6 +4,7 @@ import core.utils.ByteArrayList;
 import core.utils.IntArrayList;
 import core.utils.MathUtils;
 
+import core.utils.Vector3l;
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.particles.ParticleCollector;
@@ -56,14 +57,14 @@ public final class MaterialsData {
     }
 
     public static void fillStructureMaterialsInto(byte[] uncompressedMaterials, Structure structure, byte transform, int lod,
-                                                  Vector3i targetStart, Vector3i sourceStart, Vector3i size, boolean forceOverride) {
+                                                  Vector3i targetStart, Vector3i sourceStart, Vector3i size, OverrideFunction overrideFunction) {
         MaterialsData source = structure.materials();
         if ((transform & Structure.MIRROR_X) != 0) sourceStart.x = sourceStart.x + (1 << source.totalSizeBits) - structure.sizeX(transform);
         if (((transform & Structure.MIRROR_Z) == 0) == ((transform & Structure.ROTATE_90) != 0))
             sourceStart.z = sourceStart.z + (1 << source.totalSizeBits) - structure.sizeZ(transform);
 
         synchronized (source) {
-            source.fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, source.totalSizeBits, 0, 0, 0, 0);
+            source.fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, source.totalSizeBits, 0, 0, 0, 0);
         }
     }
 
@@ -117,7 +118,8 @@ public final class MaterialsData {
 
     public void storeMaterial(int inChunkX, int inChunkY, int inChunkZ,
                               int countX, int countY, int countZ,
-                              int lod, ShapePlaceable placeable) {
+                              long chunkX, long chunkY, long chunkZ,
+                              int lod, ShapePlaceable placeable, Vector3l minPosition, OverrideFunction overrideFunction) {
         if (countX <= 0 || countY <= 0 || countZ <= 0) return;
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         fillUncompressedMaterialsInto(uncompressedMaterials);
@@ -129,23 +131,47 @@ public final class MaterialsData {
         int startX = Math.max(0, -inChunkX / Math.max(1, lengthX >> lod));
         int startY = Math.max(0, -inChunkY / Math.max(1, lengthY >> lod));
         int startZ = Math.max(0, -inChunkZ / Math.max(1, lengthZ >> lod));
+        Vector3l position = new Vector3l();
 
         for (int x = startX; x < countX && inChunkX + (x * lengthX >> lod) < 1 << totalSizeBits; x++)
             for (int y = startY; y < countY && inChunkY + (y * lengthY >> lod) < 1 << totalSizeBits; y++)
                 for (int z = startZ; z < countZ && inChunkZ + (z * lengthZ >> lod) < 1 << totalSizeBits; z++) {
-                    int shapeInChunkX = inChunkX + (x * lengthX >> lod);
-                    int shapeInChunkY = inChunkY + (y * lengthY >> lod);
-                    int shapeInChunkZ = inChunkZ + (z * lengthZ >> lod);
-                    storeMaterial(shapeInChunkX, shapeInChunkY, shapeInChunkZ, uncompressedMaterials, lod, placeable);
+                    position.set(minPosition).add((long) x * lengthX, (long) y * lengthY, (long) z * lengthZ);
+                    storeMaterial(uncompressedMaterials, chunkX, chunkY, chunkZ, lod, position, placeable.getStructure(), overrideFunction);
                 }
 
         compressIntoData(uncompressedMaterials);
     }
 
+    private static void storeMaterial(byte[] uncompressedMaterials, long chunkX, long chunkY, long chunkZ, int lod,
+                                      Vector3l position, Structure structure, OverrideFunction overrideFunction) {
+        long chunkStartX = chunkX << CHUNK_SIZE_BITS + lod;
+        long chunkStartY = chunkY << CHUNK_SIZE_BITS + lod;
+        long chunkStartZ = chunkZ << CHUNK_SIZE_BITS + lod;
+
+        int inChunkX = (int) Utils.wrappedMax(chunkStartX, position.x) >> lod & CHUNK_SIZE_MASK;
+        int inChunkY = (int) Utils.wrappedMax(chunkStartY, position.y) >> lod & CHUNK_SIZE_MASK;
+        int inChunkZ = (int) Utils.wrappedMax(chunkStartZ, position.z) >> lod & CHUNK_SIZE_MASK;
+
+        int startX = (int) (chunkStartX + (inChunkX << lod) - position.x);
+        int startY = (int) (chunkStartY + (inChunkY << lod) - position.y);
+        int startZ = (int) (chunkStartZ + (inChunkZ << lod) - position.z);
+
+        int lengthX = MathUtils.min(structure.sizeX() - startX, CHUNK_SIZE - inChunkX << lod, structure.sizeX());
+        int lengthY = MathUtils.min(structure.sizeY() - startY, CHUNK_SIZE - inChunkY << lod, structure.sizeY());
+        int lengthZ = MathUtils.min(structure.sizeZ() - startZ, CHUNK_SIZE - inChunkZ << lod, structure.sizeZ());
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) return;
+
+        Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
+        Vector3i sourceStart = new Vector3i(startX, startY, startZ);
+        Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
+        fillStructureMaterialsInto(uncompressedMaterials, structure, (byte) 0, lod, targetStart, sourceStart, size, overrideFunction);
+    }
+
     public void storeStructureMaterials(int inChunkX, int inChunkY, int inChunkZ,
                                         int startX, int startY, int startZ,
                                         int lengthX, int lengthY, int lengthZ,
-                                        int lod, Structure structure, byte transform, boolean forceOverride) {
+                                        int lod, Structure structure, byte transform, OverrideFunction overrideFunction) {
 
         byte[] uncompressedMaterials = new byte[1 << totalSizeBits * 3];
         Vector3i targetStart = new Vector3i(inChunkX, inChunkY, inChunkZ);
@@ -153,7 +179,7 @@ public final class MaterialsData {
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
         fillUncompressedMaterialsInto(uncompressedMaterials);
-        fillStructureMaterialsInto(uncompressedMaterials, structure, transform, lod, targetStart, sourceStart, size, forceOverride);
+        fillStructureMaterialsInto(uncompressedMaterials, structure, transform, lod, targetStart, sourceStart, size, overrideFunction);
         compressIntoData(uncompressedMaterials);
     }
 
@@ -296,54 +322,6 @@ public final class MaterialsData {
         synchronized (chunk.getMaterials()) {
             chunk.getMaterials().fillUncompressedMaterialsInto(uncompressedMaterials, 1, targetStart, sourceStart, size, CHUNK_SIZE_BITS, 0, 0, 0, 0);
         }
-    }
-
-    private void storeMaterial(int inChunkX, int inChunkY, int inChunkZ, byte[] uncompressedMaterials, int lod, ShapePlaceable placeable) {
-        byte material = placeable.getMaterial();
-        long[] bitMap = placeable.getBitMap();
-
-        int inChunkAlign = Integer.numberOfTrailingZeros(inChunkX | inChunkY | inChunkZ);
-        int align = MathUtils.min(totalSizeBits, inChunkAlign, Integer.numberOfTrailingZeros(placeable.getPreferredSizePowOf2()));
-        int shiftCount = lod * 3, stride = 1 << shiftCount, mask = -stride;
-
-        int alignLength = 1 << Math.max(0, align - lod), count = 1 << align * 3;
-        int startX = Math.max(0, -inChunkX), endX = Math.clamp(placeable.getLengthX() >> lod, 1, (1 << totalSizeBits) - inChunkX);
-        int startY = Math.max(0, -inChunkY), endY = Math.clamp(placeable.getLengthY() >> lod, 1, (1 << totalSizeBits) - inChunkY);
-        int startZ = Math.max(0, -inChunkZ), endZ = Math.clamp(placeable.getLengthZ() >> lod, 1, (1 << totalSizeBits) - inChunkZ);
-
-        boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
-        boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
-        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
-
-        for (int x = startX; x < endX; x += alignLength)
-            for (int y = startY; y < endY; y += alignLength)
-                for (int z = startZ; z < endZ; z += alignLength) {
-                    int materialStartIndex = getUncompressedIndex(inChunkX + x, inChunkY + y, inChunkZ + z);
-                    int bitMapStartIndex = getUncompressedIndex(x << lod, y << lod, z << lod);
-                    int endIndex = bitMapStartIndex + count, bitMapEndIndex = Math.max(bitMapStartIndex + count >> 6, (bitMapStartIndex >> 6) + 1);
-
-                    storeMaterial(bitMap, uncompressedMaterials,
-                            bitMapStartIndex, bitMapEndIndex, mask, endIndex, stride, materialStartIndex, shiftCount,
-                            paint, replaceAir, breakHeldOnly,
-                            heldMaterial, material);
-                }
-    }
-
-    private static void storeMaterial(long[] bitMap, byte[] uncompressedMaterials,
-                                      int bitMapStartIndex, int bitMapEndIndex, int mask, int endIndex, int stride, int materialStartIndex, int shiftCount,
-                                      boolean paint, boolean replaceAir, boolean breakHeldOnly,
-                                      byte heldMaterial, byte material) {
-        for (int bitsIndex = bitMapStartIndex >> 6; bitsIndex < bitMapEndIndex; bitsIndex++)
-            for (int index = Math.max((bitsIndex << 6) + Long.numberOfTrailingZeros(bitMap[bitsIndex]) & mask, bitMapStartIndex),
-                 end = Math.min(bitsIndex + 1 << 6, endIndex); index < end; index += stride) {
-                int materialIndex = materialStartIndex + (index - bitMapStartIndex >> shiftCount);
-                if ((bitMap[bitsIndex] & 1L << index) == 0
-                        || paint && uncompressedMaterials[materialIndex] == AIR
-                        || replaceAir && uncompressedMaterials[materialIndex] != AIR
-                        || breakHeldOnly && uncompressedMaterials[materialIndex] != heldMaterial) continue;
-                uncompressedMaterials[materialIndex] = material;
-            }
     }
 
     private byte recomputeTypes(int startIndex) {
@@ -557,21 +535,21 @@ public final class MaterialsData {
     }
 
     private void fillStructureMaterialsInto(byte[] uncompressedMaterials, byte transform, int lod, Vector3i targetStart, Vector3i sourceStart, Vector3i size,
-                                            boolean forceOverride, int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
+                                            OverrideFunction overrideFunction, int sizeBits, int startIndex, int currentX, int currentY, int currentZ) {
         int length = 1 << sizeBits;
         if (isInvalidCoordinate(lod, sourceStart, size, currentX, currentY, currentZ, length)) return;
         byte identifier = getIdentifier(startIndex);
 
         if (identifier == SPLITTER) {
             int nextSize = 1 << --sizeBits;
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b000), currentX, currentY, currentZ);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b001), currentX, currentY, currentZ + nextSize);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b010), currentX, currentY + nextSize, currentZ);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b011), currentX, currentY + nextSize, currentZ + nextSize);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b100), currentX + nextSize, currentY, currentZ);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b101), currentX + nextSize, currentY, currentZ + nextSize);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b110), currentX + nextSize, currentY + nextSize, currentZ);
-            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, forceOverride, sizeBits, startIndex + getOffset(startIndex, transform, 0b111), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b000), currentX, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b001), currentX, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b010), currentX, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b011), currentX, currentY + nextSize, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b100), currentX + nextSize, currentY, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b101), currentX + nextSize, currentY, currentZ + nextSize);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b110), currentX + nextSize, currentY + nextSize, currentZ);
+            fillStructureMaterialsInto(uncompressedMaterials, transform, lod, targetStart, sourceStart, size, overrideFunction, sizeBits, startIndex + getOffset(startIndex, transform, 0b111), currentX + nextSize, currentY + nextSize, currentZ + nextSize);
             return;
         }
 
@@ -589,14 +567,11 @@ public final class MaterialsData {
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-            if (material == AIR && !forceOverride) return;
             for (int x = 0; x < lengthX; x++)
                 for (int z = 0; z < lengthZ; z++)
                     for (int y = 0; y < lengthY; y++) {
                         int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
-                        if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
-                                && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
-                        uncompressedMaterials[targetIndex] = material;
+                        uncompressedMaterials[targetIndex] = overrideFunction.replace(uncompressedMaterials[targetIndex], material);
                     }
             return;
         }
@@ -606,10 +581,7 @@ public final class MaterialsData {
                 for (int y = 0; y < lengthY; y++) {
                     int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
                     byte material = data[startIndex + getInDetailIndex(transform, x, y, z)];
-                    if (material == AIR && !forceOverride) continue;
-                    if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
-                            && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
-                    uncompressedMaterials[targetIndex] = material;
+                    uncompressedMaterials[targetIndex] = overrideFunction.replace(uncompressedMaterials[targetIndex], material);
                 }
     }
 
@@ -1629,4 +1601,8 @@ public final class MaterialsData {
 
     private byte[] data;
     private final int totalSizeBits;
+
+    public interface OverrideFunction {
+        byte replace(byte previousMaterial, byte material);
+    }
 }

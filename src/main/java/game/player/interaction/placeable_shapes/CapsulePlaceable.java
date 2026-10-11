@@ -1,6 +1,7 @@
 package game.player.interaction.placeable_shapes;
 
 import core.settings.stand_alones.StandAloneIntSetting;
+import core.utils.MainThread;
 import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;
@@ -83,7 +84,7 @@ public final class CapsulePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
         if (positionsInvalid()) return;
 
         int radius = this.radius.value();
@@ -138,6 +139,7 @@ public final class CapsulePlaceable extends ShapePlaceable {
     }
 
     @Override
+    @MainThread
     public void spawnParticles(Vector3l position) {
         if (positionsInvalid()) return;
 
@@ -147,6 +149,7 @@ public final class CapsulePlaceable extends ShapePlaceable {
     }
 
     @Override
+    @MainThread
     public void playSounds(Vector3l position) {
         if (positionsInvalid()) return;
 

@@ -27,7 +27,7 @@ public final class ChunkRebuildPlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
         if (lod == 0) {
             Chunk toPlaceChunk = new Chunk(position.x >>> CHUNK_SIZE_BITS, position.y >>> CHUNK_SIZE_BITS, position.z >>> CHUNK_SIZE_BITS, 0);
             WorldGeneration.generate(toPlaceChunk);
@@ -47,7 +47,7 @@ public final class ChunkRebuildPlaceable implements Placeable {
                 inChunkX, inChunkY, inChunkZ,
                 0, 0, 0,
                 CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE,
-                lod, toPlaceChunk, (byte) 0, true);
+                lod, toPlaceChunk, (byte) 0, Structure.FORCE_OVERRIDE);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

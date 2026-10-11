@@ -106,7 +106,7 @@ public final class InteractionHandler {
             useInfo.forceAction = false;
             return;
         }
-        handleUseDestroy(useInfo, placeable, placeable.offsetOnPlace());
+        handleUseDestroy(useInfo, placeable, placeable.offsetOnPlace(), false);
     }
 
     @ServerThread
@@ -117,13 +117,12 @@ public final class InteractionHandler {
             destroyInfo.forceAction = false;
             return;
         }
-        if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
-        else placeable = shapePlaceable.copyWithMaterial(AIR);
-        handleUseDestroy(destroyInfo, placeable, placeable.offsetOnBreak());
+        if (!(placeable instanceof ShapePlaceable)) placeable = new CubePlaceable(STONE).setBitMapToFull();
+        handleUseDestroy(destroyInfo, placeable, placeable.offsetOnBreak(), true);
     }
 
     @ServerThread
-    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
+    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition, boolean isBreak) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
@@ -154,7 +153,7 @@ public final class InteractionHandler {
             targetedSide = target.side();
         }
 
-        if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) return;
+        if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide, isBreak)) return;
         info.lastAction = currentGameTick;
         startTarget = lockedTarget = null;
     }

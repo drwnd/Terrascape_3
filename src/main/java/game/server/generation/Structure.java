@@ -1,6 +1,7 @@
 package game.server.generation;
 
 import core.assets.Asset;
+import game.server.material.Properties;
 import game.server.materials_data.MaterialsData;
 
 import static game.utils.Constants.*;
@@ -10,6 +11,11 @@ public record Structure(int sizeX, int sizeY, int sizeZ, int centerX, int center
     public static final byte MIRROR_Z = 2;
     public static final byte ROTATE_90 = 4;
     public static final byte ALL_TRANSFORMS = MIRROR_X | MIRROR_Z | ROTATE_90;
+
+    public static final MaterialsData.OverrideFunction FORCE_OVERRIDE = (_, material) -> material;
+    public static final MaterialsData.OverrideFunction WORLD_GENERATION_OVERRIDE = ((previousMaterial, material) ->
+            material != AIR && (Properties.hasProperties(previousMaterial, STRUCTURE_REPLACEABLE) || Properties.doesntHaveProperties(material, STRUCTURE_REPLACEABLE))
+                    ? material : previousMaterial);
 
 
     public Structure(byte material) {

@@ -51,7 +51,7 @@ public final class StructurePlaceable implements Placeable {
     }
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
         byte transform = getTransform();
         long chunkStartX = position.x >>> CHUNK_SIZE_BITS + lod;
         long chunkStartY = position.y >>> CHUNK_SIZE_BITS + lod;
@@ -173,7 +173,7 @@ public final class StructurePlaceable implements Placeable {
                 inChunkX, inChunkY, inChunkZ,
                 startX, startY, startZ,
                 lengthX, lengthY, lengthZ,
-                chunk.LOD, structure, transform, false);
+                chunk.LOD, structure, transform, Structure.WORLD_GENERATION_OVERRIDE);
 
         affectedChunks.add(chunk);
         World world = Game.getWorld();

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public final class StructureSelector implements Placeable {
 
     @Override
-    public void place(Vector3l position, int lod) {
+    public void place(Vector3l position, int lod, boolean isBreak) {
 
     }
 

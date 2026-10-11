@@ -158,7 +158,8 @@ public final class GenerationData {
         Vector3i size = new Vector3i(lengthX, lengthY, lengthZ);
 
         if (clearBeforeGenerating) fillUncompressedMaterialsWithAir();
-        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, worldGenStructure.structure(), worldGenStructure.transform(), LOD, targetStart, sourceStart, size, false);
+        MaterialsData.fillStructureMaterialsInto(uncompressedMaterials, worldGenStructure.structure(), worldGenStructure.transform(),
+                LOD, targetStart, sourceStart, size, Structure.WORLD_GENERATION_OVERRIDE);
         return true;
     }
 

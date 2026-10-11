@@ -119,7 +119,7 @@ public final class Server implements CrashCallback {
     }
 
     @ServerThread
-    public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
+    public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side, boolean isBreak) {
         placeable.offsetPosition(position, side);
 
         Player player = Game.getPlayer();
@@ -129,7 +129,7 @@ public final class Server implements CrashCallback {
         placeable.spawnParticles(position);
 
         MeshCollector meshCollector = player.getMeshCollector();
-        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) placeable.place(position, lod);
+        for (int lod = 0, lodCount = Game.getWorld().LOD_COUNT; lod < lodCount; lod++) placeable.place(position, lod, isBreak);
         for (Chunk chunk : placeable.getAffectedChunks()) {
             if (chunk == null) continue;
             meshCollector.setMeshed(false, chunk.INDEX, chunk.LOD);
