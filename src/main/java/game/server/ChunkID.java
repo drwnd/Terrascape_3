@@ -2,10 +2,21 @@ package game.server;
 
 import static game.utils.Constants.*;
 
-public record ChunkID(long chunkX, long chunkY, long chunkZ) {
+public record ChunkID(long chunkX, long chunkY, long chunkZ, int lod) {
 
     public ChunkID(long chunkX, long chunkY, long chunkZ, int lod) {
-        this(chunkX & MAX_CHUNKS_MASK >> lod, chunkY & MAX_CHUNKS_MASK >> lod, chunkZ & MAX_CHUNKS_MASK >> lod);
+        long chunksMask = MAX_CHUNKS_MASK >> lod;
+        this.chunkX = chunkX & chunksMask;
+        this.chunkY = chunkY & chunksMask;
+        this.chunkZ = chunkZ & chunksMask;
+        this.lod = lod;
+    }
+
+    public boolean equals(long chunkX, long chunkY, long chunkZ) {
+        long chunksMask = MAX_CHUNKS_MASK >> lod;
+        return this.chunkX == (chunkX & chunksMask)
+                && this.chunkY == (chunkY & chunksMask)
+                && this.chunkZ == (chunkZ & chunksMask);
     }
 
     @Override
