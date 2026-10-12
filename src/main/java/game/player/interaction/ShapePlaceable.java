@@ -236,19 +236,18 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected void loadSettings() {
         ShapeSetting[] baseSettings = getSettings();
-        int defaultSettingsCount = rotation.value() == null ? 2 : 6;
+        int defaultSettingsCount = rotation.value() == null ? 5 : 6;
         settings = new ShapeSetting[baseSettings.length + defaultSettingsCount];
         System.arraycopy(baseSettings, 0, settings, defaultSettingsCount, baseSettings.length);
 
         settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
         settings[1] = new ShapeSetting(blockSize, UiMessages.BLOCK_SIZE_OPTION, "blockSize");
+        settings[2] = new ShapeSetting(rotationPitch, UiMessages.ROTATION_PITCH, "pitch");
+        settings[3] = new ShapeSetting(rotationYaw, UiMessages.ROTATION_YAW, "yaw");
+        settings[4] = new ShapeSetting(rotationRoll, UiMessages.ROTATION_ROLL, "roll");
 
-        if (rotation.value() != null) {
-            settings[defaultSettingsCount - 4] = new ShapeSetting(rotationPitch, UiMessages.ROTATION_PITCH, "pitch");
-            settings[defaultSettingsCount - 3] = new ShapeSetting(rotationYaw, UiMessages.ROTATION_YAW, "yaw");
-            settings[defaultSettingsCount - 2] = new ShapeSetting(rotationRoll, UiMessages.ROTATION_ROLL, "roll");
+        if (rotation.value() != null)
             settings[defaultSettingsCount - 1] = new ShapeSetting(rotation, UiMessages.SHAPE_ROTATION, "rotation");
-        }
     }
 
     protected void setShaderIdentifier(ShaderIdentifier shaderIdentifier) {
