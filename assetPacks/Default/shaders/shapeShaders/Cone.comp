@@ -9,6 +9,8 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
+uniform int blockSize;
+uniform mat4 rotationMatrix;
 
 uniform int baseRadius;
 uniform int topRadius;
@@ -26,14 +28,18 @@ uint zOrderCurveValue(uint value) {
     return zOrderValue;
 }
 
-bool isValidCoord(int x, int y, int z) {
-    return x < size.x && y < size.y && z < size.z;
+bool isValidCoord(vec3 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.z >= 0 && coord.x < size.x && coord.y < size.y && coord.z < size.z;
 }
 
-bool isInside(int x, int y, int z);
+bool isInside(float x, float y, float z);
 
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    x = x / blockSize * blockSize;
+    y = y / blockSize * blockSize;
+    z = z / blockSize * blockSize;
+    vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
+    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -88,8 +94,8 @@ void main() {
     bitMap[index * 2 + 1] = computeBits(x + 2, y, z);
 }
 
-bool isInsideRotated(int a, int b, int c) {
-    float heightFraction = float(a) / height;
+bool isInsideRotated(float a, float b, float c) {
+    float heightFraction = a / height;
     if (heightFraction > 1) return false;
     float outerRadius = (1 - heightFraction) * baseRadius + heightFraction * topRadius;
     float innerRadius = max(0, outerRadius - thickness);
@@ -97,16 +103,16 @@ bool isInsideRotated(int a, int b, int c) {
     float outerThreshold = pow(outerRadius, exponent);
     float innerThreshold = pow(innerRadius, exponent);
 
-    float distanceB = pow(abs(b + 0.5), exponent);
-    float distanceC = pow(abs(c + 0.5), exponent);
+    float distanceB = pow(abs(b), exponent);
+    float distanceC = pow(abs(c), exponent);
     return distanceB + distanceC <= outerThreshold + 0.01 && distanceB + distanceC >= innerThreshold - 0.01;
 }
 
-bool isInside(int x, int y, int z) {
+bool isInside(float x, float y, float z) {
     switch (rotation) {
-        case 0: return isInsideRotated(size.z - 1 - z, x - (size.x >> 1), y - (size.y >> 1));
-        case 1: return isInsideRotated(size.y - 1 - y, x - (size.x >> 1), z - (size.z >> 1));
-        case 2: return isInsideRotated(size.x - 1 - x, y - (size.y >> 1), z - (size.z >> 1));
+        case 0: return isInsideRotated(size.z - z, x - (size.x >> 1), y - (size.y >> 1));
+        case 1: return isInsideRotated(size.y - y, x - (size.x >> 1), z - (size.z >> 1));
+        case 2: return isInsideRotated(size.x - x, y - (size.y >> 1), z - (size.z >> 1));
         case 3: return isInsideRotated(z, x - (size.x >> 1), y - (size.y >> 1));
         case 4: return isInsideRotated(y, x - (size.x >> 1), z - (size.z >> 1));
         case 5: return isInsideRotated(x, y - (size.y >> 1), z - (size.z >> 1));

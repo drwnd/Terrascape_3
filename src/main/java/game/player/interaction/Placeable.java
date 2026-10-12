@@ -24,6 +24,10 @@ public interface Placeable {
         saver.saveGeneric(placeable::save);
         if (placeable instanceof ShapePlaceable shapePlaceable) {
             saver.saveBoolean(shapePlaceable.invert.value());
+            saver.saveInt(shapePlaceable.blockSize.value());
+            saver.saveInt(shapePlaceable.rotationPitch.value());
+            saver.saveInt(shapePlaceable.rotationYaw.value());
+            saver.saveInt(shapePlaceable.rotationRoll.value());
             shapePlaceable.delete();
         }
     }
@@ -50,7 +54,13 @@ public interface Placeable {
             case 20 -> CapsulePlaceable.load(saver);
             default -> null;
         };
-        if (placeable instanceof ShapePlaceable shapePlaceable) shapePlaceable.invert.setValue(saver.loadBoolean());
+        if (placeable instanceof ShapePlaceable shapePlaceable) {
+            shapePlaceable.invert.setValue(saver.loadBoolean());
+            shapePlaceable.blockSize.setValue(saver.loadInt());
+            shapePlaceable.rotationPitch.setValue(saver.loadInt());
+            shapePlaceable.rotationYaw.setValue(saver.loadInt());
+            shapePlaceable.rotationRoll.setValue(saver.loadInt());
+        }
         return placeable;
     }
 

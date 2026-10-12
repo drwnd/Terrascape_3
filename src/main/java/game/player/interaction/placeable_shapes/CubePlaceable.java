@@ -8,6 +8,7 @@ import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.generation.Structure;
+import game.settings.IntSettings;
 
 public final class CubePlaceable extends ShapePlaceable {
 
@@ -31,18 +32,18 @@ public final class CubePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
-        return super.getLengthX() - 2 * sizeReduction.value();
+    public int unrotatedLengthX() {
+        return (1 << IntSettings.BREAK_PLACE_SIZE.value()) - 2 * sizeReduction.value();
     }
 
     @Override
-    public int getLengthY() {
-        return super.getLengthY() - 2 * sizeReduction.value();
+    public int unrotatedLengthY() {
+        return (1 << IntSettings.BREAK_PLACE_SIZE.value()) - 2 * sizeReduction.value();
     }
 
     @Override
-    public int getLengthZ() {
-        return super.getLengthZ() - 2 * sizeReduction.value();
+    public int unrotatedLengthZ() {
+        return (1 << IntSettings.BREAK_PLACE_SIZE.value()) - 2 * sizeReduction.value();
     }
 
     @Override

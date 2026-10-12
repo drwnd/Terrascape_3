@@ -57,7 +57,7 @@ public final class ArcPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return switch ((Rotation12Way) rotation()) {
             case ROTATION_01, ROTATION_03, ROTATION_09, ROTATION_11 -> height.value();
             case ROTATION_02, ROTATION_04, ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08, ROTATION_10, ROTATION_12 -> radius.value();
@@ -65,7 +65,7 @@ public final class ArcPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return switch ((Rotation12Way) rotation()) {
             case ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08 -> height.value();
             case ROTATION_01, ROTATION_02, ROTATION_03, ROTATION_04, ROTATION_09, ROTATION_10, ROTATION_11, ROTATION_12 -> radius.value();
@@ -73,7 +73,7 @@ public final class ArcPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return switch ((Rotation12Way) rotation()) {
             case ROTATION_02, ROTATION_04, ROTATION_10, ROTATION_12 -> height.value();
             case ROTATION_01, ROTATION_03, ROTATION_05, ROTATION_06, ROTATION_07, ROTATION_08, ROTATION_09, ROTATION_11 -> radius.value();

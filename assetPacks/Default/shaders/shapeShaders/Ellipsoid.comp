@@ -9,6 +9,8 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
+uniform int blockSize;
+uniform mat4 rotationMatrix;
 
 uniform int thickness;
 uniform int radiusA;
@@ -28,14 +30,18 @@ uint zOrderCurveValue(uint value) {
     return zOrderValue;
 }
 
-bool isValidCoord(int x, int y, int z) {
-    return x < size.x && y < size.y && z < size.z;
+bool isValidCoord(vec3 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.z >= 0 && coord.x < size.x && coord.y < size.y && coord.z < size.z;
 }
 
-bool isInside(int x, int y, int z);
+bool isInside(float x, float y, float z);
 
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    x = x / blockSize * blockSize;
+    y = y / blockSize * blockSize;
+    z = z / blockSize * blockSize;
+    vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
+    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -98,18 +104,18 @@ bool isInsideRotated(float a, float b, float c) {
     distanceC = pow(abs(c / radiusC), exponentC);
     float outerDistance = distanceA + distanceB + distanceC;
 
-        distanceA = pow(abs(a / max(0, float(radiusA - thickness))), exponentA);
-        distanceB = pow(abs(b / max(0, float(radiusB - thickness))), exponentB);
-        distanceC = pow(abs(c / max(0, float(radiusC - thickness))), exponentC);
-        float innerDistance = distanceA + distanceB + distanceC;
+    distanceA = pow(abs(a / max(0, float(radiusA - thickness))), exponentA);
+    distanceB = pow(abs(b / max(0, float(radiusB - thickness))), exponentB);
+    distanceC = pow(abs(c / max(0, float(radiusC - thickness))), exponentC);
+    float innerDistance = distanceA + distanceB + distanceC;
 
     return outerDistance <= 1.01 && innerDistance >= 0.99;
 }
 
-bool isInside(int x, int y, int z) {
-    float xOff = x + 0.5 - size.x * 0.5;
-    float yOff = y + 0.5 - size.y * 0.5;
-    float zOff = z + 0.5 - size.z * 0.5;
+bool isInside(float x, float y, float z) {
+    float xOff = x - size.x * 0.5;
+    float yOff = y - size.y * 0.5;
+    float zOff = z - size.z * 0.5;
 
     switch (rotation) {
         case 0: return isInsideRotated(xOff, yOff, zOff);

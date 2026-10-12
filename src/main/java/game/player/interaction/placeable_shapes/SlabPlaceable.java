@@ -10,6 +10,7 @@ import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
 import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
+import game.settings.IntSettings;
 
 public final class SlabPlaceable extends ShapePlaceable {
 
@@ -31,18 +32,18 @@ public final class SlabPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
-        return rotation() == Rotation3Way.ROTATION_1 ? thickness.value() : super.getLengthX();
+    public int unrotatedLengthX() {
+        return rotation() == Rotation3Way.ROTATION_1 ? thickness.value() : 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override
-    public int getLengthY() {
-        return rotation() == Rotation3Way.ROTATION_2 ? thickness.value() : super.getLengthY();
+    public int unrotatedLengthY() {
+        return rotation() == Rotation3Way.ROTATION_2 ? thickness.value() : 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override
-    public int getLengthZ() {
-        return rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : super.getLengthZ();
+    public int unrotatedLengthZ() {
+        return rotation() == Rotation3Way.ROTATION_3 ? thickness.value() : 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override

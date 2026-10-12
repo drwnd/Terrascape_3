@@ -56,7 +56,7 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_2 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_5 -> radiusB.value() * 2;
@@ -65,7 +65,7 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_4 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_6 -> radiusB.value() * 2;
@@ -74,7 +74,7 @@ public final class EllipsoidPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_6 -> radiusA.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_4 -> radiusB.value() * 2;

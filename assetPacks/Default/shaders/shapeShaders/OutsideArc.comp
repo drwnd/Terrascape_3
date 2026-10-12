@@ -9,6 +9,8 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
+uniform int blockSize;
+uniform mat4 rotationMatrix;
 
 uniform int radius;
 uniform int thickness;
@@ -24,14 +26,18 @@ uint zOrderCurveValue(uint value) {
     return zOrderValue;
 }
 
-bool isValidCoord(int x, int y, int z) {
-    return x < size.x && y < size.y && z < size.z;
+bool isValidCoord(vec3 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.z >= 0 && coord.x < size.x && coord.y < size.y && coord.z < size.z;
 }
 
-bool isInside(int x, int y, int z);
+bool isInside(float x, float y, float z);
 
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    x = x / blockSize * blockSize;
+    y = y / blockSize * blockSize;
+    z = z / blockSize * blockSize;
+    vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
+    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -86,31 +92,27 @@ void main() {
     bitMap[index * 2 + 1] = computeBits(x + 2, y, z);
 }
 
-bool isInsideRotated(int x, int y, int z) {
+bool isInsideRotated(float x, float y, float z) {
     float outerThreshold = pow(radius, exponent);
     float innerThreshold = pow(max(0, radius - thickness), exponent);
 
-    float distanceX = pow(x + 0.5, exponent);
-    float distanceY = pow(y + 0.5, exponent);
-    float distanceZ = pow(z + 0.5, exponent);
+    float distanceX = pow(x, exponent);
+    float distanceY = pow(y, exponent);
+    float distanceZ = pow(z, exponent);
     float distance = distanceX + distanceY + distanceZ;
     return distance < outerThreshold + 0.01 && distance >= innerThreshold - 0.01;
 }
 
-bool isInside(int x, int y, int z) {
-    int invertX = size.x - 1;
-    int invertY = size.y - 1;
-    int invertZ = size.z - 1;
-
+bool isInside(float x, float y, float z) {
     switch (rotation) {
         case 0: return isInsideRotated(x, y, z);
-        case 1: return isInsideRotated(x, y, invertZ - z);
-        case 2: return isInsideRotated(x, invertY - y, z);
-        case 3: return isInsideRotated(x, invertY - y, invertZ - z);
-        case 4: return isInsideRotated(invertX - x, y, z);
-        case 5: return isInsideRotated(invertX - x, y, invertZ - z);
-        case 6: return isInsideRotated(invertX - x, invertY - y, z);
-        case 7: return isInsideRotated(invertX - x, invertY - y, invertZ - z);
+        case 1: return isInsideRotated(x, y,  size.z - z);
+        case 2: return isInsideRotated(x, size.y - y, z);
+        case 3: return isInsideRotated(x, size.y - y,  size.z - z);
+        case 4: return isInsideRotated(size.x - x, y, z);
+        case 5: return isInsideRotated(size.x - x, y,  size.z - z);
+        case 6: return isInsideRotated(size.x - x, size.y - y, z);
+        case 7: return isInsideRotated(size.x - x, size.y - y,  size.z - z);
     }
     return false;
 }

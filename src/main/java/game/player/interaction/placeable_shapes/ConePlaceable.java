@@ -61,7 +61,7 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> baseRadius.value() * 2;
             case Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> height.value();
@@ -69,7 +69,7 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5 -> height.value();
@@ -77,7 +77,7 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return switch ((Rotation6Way) rotation()) {
             case Rotation6Way.ROTATION_1, Rotation6Way.ROTATION_4 -> height.value();
             case Rotation6Way.ROTATION_2, Rotation6Way.ROTATION_5, Rotation6Way.ROTATION_3, Rotation6Way.ROTATION_6 -> baseRadius.value() * 2;

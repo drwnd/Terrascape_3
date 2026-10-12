@@ -43,8 +43,8 @@ public final class ShapeDisplay extends UiButton {
                     return ButtonResult.SUCCESS;
                 });
             }
-            settingElement.setSizeToParent(0.3F, 0.075F);
-            settingElement.setOffsetToParent(0.35F, 1.0F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
+            settingElement.setSizeToParent(0.3F, 0.065F);
+            settingElement.setOffsetToParent(0.35F, 1.0F - 0.05F * Window.getAspectRatio() - index++ * 0.07F);
             settingElement.setVisible(false);
             settingElement.setRimThicknessMultiplier(0.5F);
             settingElements.add(settingElement);
