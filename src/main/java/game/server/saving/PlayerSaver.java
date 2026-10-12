@@ -64,6 +64,6 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected int getVersionNumber() {
-        return 12;
+        return 13;
     }
 }

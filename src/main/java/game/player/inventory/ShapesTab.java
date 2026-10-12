@@ -199,7 +199,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         shapeDisplays.add(new ShapeDisplay(1, new SpherePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(2, new CylinderPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(3, new ConePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(4, new SlabPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(4, new CuboidPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(5, new EllipsoidPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(6, new StairPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(7, new InsideStairPlaceable(STONE), this));

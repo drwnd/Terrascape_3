@@ -91,5 +91,7 @@ void main() {
 }
 
 bool isInside(float x, float y, float z) {
-    return true;
+    return x < thickness || x > size.x - thickness
+    || y < thickness || y > size.y - thickness
+    || z < thickness || z > size.z - thickness;
 }
