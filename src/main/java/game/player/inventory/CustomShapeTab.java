@@ -205,6 +205,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         };
     }
 
+    @MainThread
     private Clickable getReloadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -214,6 +215,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         };
     }
 
+    @MainThread
     private void loadShapeShader() {
         String shaderCode = FileManager.loadFileContents(selectedFilepath);
         shape.setShaderCode(shaderCode);
@@ -224,7 +226,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 
-    private final CustomShape shape = new CustomShape(STONE, "bool isInside(int x, int y, int z) {return true;}");
+    private final CustomShape shape = new CustomShape(STONE, "bool isInside(float x, float y, float z) {return true;}");
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private Path selectedFilepath = null;
     private StructureDisplay shapePreview;
