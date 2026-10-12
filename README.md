@@ -6,17 +6,17 @@ Download and install the Gradle project.
 
 Run Launcher.main().
 
-Should you experience any difficulties try using IntelliJ IDEA.
+Should you experience any difficulties, try using IntelliJ IDEA.
 
 ## Getting Started
 
-Once you started the game click on the **New World** button on the top left.
+Once you started the game, click on the **New World** button on the top left.
 
 Click on the **World Name** field and give your world a name!
 
 The **World Seed** field is optional, leaving it empty will generate a random seed.
 
-Press **Create**. (You might need to unselect the text field first, click outside of it or press escape to do that.)
+Press **Create**. (You might need to unselect the text field first, click outside it or press escape to do that.)
 
 Click on the button with your world name.
 
@@ -29,9 +29,9 @@ Use *Control*, *Tab* and *Shift* to modify your movement speed.
 
 Go to the inventory by pressing *E*, Navigate to the **Shapes** tab.
 There you can select a geometric primitive to place in the world.
-Change that primitves settings, then hover over the material of your choice.
-Press the hotkey of the hotbar slot that primitve sould go to.
-This will place that primitve in the selected slot to be used when building.
+Change that primitive's settings, then hover over the material of your choice.
+Press the hotkey of the hotbar slot that primitive should go to.
+This will place that primitive in the selected slot to be used when building.
 
 Use *Left Click* and *Right Click* to place or destroy voxels.
 Pressing *X* will show you a preview of the primitive you will place.
@@ -56,32 +56,32 @@ Press *Y* (or *Z*) again to cancel the locked position.
 
 ### Structure placing
 
-When in the inventory go to the **Structures** tab.
-There you will see a list of buttons labeled with a structures name.
+When in the inventory, go to the **Structures** tab.
+There you will see a list of buttons labeled with a structure's name.
 Click on a button to see a preview of that structure.
-Similarly with primitives hover over a button, then press a hotkey to put that structure into the corresponding hotbar slot.
+Similarly, with primitives hover over a button, then press a hotkey to put that structure into the corresponding hotbar slot.
 The text field at the top may be used to filter structures.
 Only buttons corresponding to structures whose name includes the text fields content will be shown.
 
 ### Custom shape creation
 
-When in the inventory go to the **Custom Shape** tab.
+When in the inventory, go to the **Custom Shape** tab.
 There you can select a file containing code that describes the shape you want.
-Similarly with primitives hover over a button, then press a hotkey to put that structure into the corresponding hotbar slot.
+Similarly, with primitives hover over a button, then press a hotkey to put that structure into the corresponding hotbar slot.
 
-When writing your own code you must remember the following:
+When writing your own code, you must remember the following:
 - You must define a method with the signature "bool isInside(int x, int y, int z)".
 - The compiler can only recognize methods that are defined before they are used. Also, recursion is not supported.
 - There is the global uniform "size" with .x, .y and .z int values indicating the Length X, Length Y and Length Z values respectively.
-- You can use all GLSL functions to write your code. Those include min, max, pow, exp, sin, cos, tan, asin, acos, atan, distance etc.
-- Compilation errors are printed to the console.
-- As your code is compiled to a GLSL shader you may use matrices, vectors and swizzling.
+- You can use all GLSL functions to write your code. Those include min, max, pow, exp, sin, cos, tan, asin, acos, atan, distance, etc.
+- Compilation errors are printed in the console.
+- As your code is compiled to a GLSL shader, you may use matrices, vectors and swizzling.
 - There are also the uniforms "int rotation" and "bool invert" those are handled automatically.
 - YOU ARE RESPONSIBLE FOR WHAT CODE YOU WRITE.
 
 ## Customizing (almost) everything
 
-When in the main menu or when having the game paused press **Settings**.
+When in the main menu or when having the game paused, press **Settings**.
 
 Change the settings you're looking for.
 
@@ -90,7 +90,7 @@ To change a setting related to controls, click on it, then press the keyboard- o
 Pressing **Back** in any menu will discard all changes you made since entering that menu.
 Pressing **Apply** will immediately apply all changes.
 Pressing **Reset All** will reset all settings in that menu to their default value.
-Alternatively press the **Reset** button next to any setting to only reset that setting.
+Alternatively, press the **Reset** button next to any setting to only reset that setting.
 
 ## Credits
 
