@@ -47,7 +47,7 @@ public final class CylinderPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_2 -> radius.value() * 2;
             case Rotation3Way.ROTATION_1 -> height.value();
@@ -55,7 +55,7 @@ public final class CylinderPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3, Rotation3Way.ROTATION_1 -> radius.value() * 2;
             case Rotation3Way.ROTATION_2 -> height.value();
@@ -63,7 +63,7 @@ public final class CylinderPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return switch ((Rotation3Way) rotation()) {
             case Rotation3Way.ROTATION_3 -> height.value();
             case Rotation3Way.ROTATION_2, Rotation3Way.ROTATION_1 -> radius.value() * 2;

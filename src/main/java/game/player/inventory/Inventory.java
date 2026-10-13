@@ -54,11 +54,12 @@ public final class Inventory extends UiElement {
         shapesTab.addContents(cubeDisplays, placeModeToggle, offsetToggle);
         customShapeTab.addContents(cubeDisplays, placeModeToggle, offsetToggle);
 
-        addRenderable(openTabButton = new TabOpenerButton(this, 0, shapesTab, UiMessages.SHAPES_TAB_NAME));
-        addRenderable(new TabOpenerButton(this, 1, structureTab, UiMessages.STRUCTURE_TAB_NAME));
-        addRenderable(new TabOpenerButton(this, 2, customShapeTab, UiMessages.CUSTOM_SHAPES_TAB_NAME));
-        addRenderable(new TabOpenerButton(this, 3, miscellaneousTab, UiMessages.MISCELLANEOUS_TAB_NAME));
+        addRenderable(InventoryTab.Types.SHAPES.createButton(this, 0, shapesTab, UiMessages.SHAPES_TAB_NAME));
+        addRenderable(InventoryTab.Types.STRUCTURES.createButton(this, 1, structureTab, UiMessages.STRUCTURE_TAB_NAME));
+        addRenderable(InventoryTab.Types.CUSTOM_SHAPES.createButton(this, 2, customShapeTab, UiMessages.CUSTOM_SHAPES_TAB_NAME));
+        addRenderable(InventoryTab.Types.MISCELLANEOUS.createButton(this, 3, miscellaneousTab, UiMessages.MISCELLANEOUS_TAB_NAME));
 
+        openTabButton = InventoryTab.Types.SHAPES.getButton();
         openInventoryTab = shapesTab;
         openInventoryTab.setVisible(true);
     }
@@ -84,21 +85,28 @@ public final class Inventory extends UiElement {
         ShapesTab.updateDisplayPositions(cubeDisplays, shapesTab.getAspectRatio());
     }
 
+    @Override
+    @MainThread
+    public boolean clickOn(Vector2i pixelCoordinate, int button, int action) {
+        Hotbar hotbar = Game.getPlayer().getHotbar();
+        if (hotbar.containsPixelCoordinate(pixelCoordinate) && hotbar.clickOn(pixelCoordinate, button, action)) return true;
+        return super.clickOn(pixelCoordinate, button, action);
+    }
+
     public TabOpenerButton getOpenTabButton() {
         return openTabButton;
     }
 
     @MainThread
-    void setOpenTab(InventoryTab toOpenTab, TabOpenerButton button) {
+    public void setOpenTab(InventoryTab.Types tab) {
         structureTab.setVisible(false);
         shapesTab.setVisible(false);
         miscellaneousTab.setVisible(false);
         customShapeTab.setVisible(false);
 
-        openInventoryTab = toOpenTab;
+        openTabButton = tab.getButton();
+        openInventoryTab = openTabButton.getToOpenTab();
         openInventoryTab.setVisible(true);
-
-        openTabButton = button;
     }
 
     @MainThread
@@ -154,17 +162,25 @@ public final class Inventory extends UiElement {
         Vector2f sizeToParent = new Vector2f(), offsetToParent = new Vector2f();
 
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
-            Structure structure = new Structure((byte) material);
-
-            StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
-            display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
-            display.setScaleWithGuiSize(false);
-            display.setPlayFocusSound(false);
-
+            StructureDisplay display = getDisplay((byte) material, sizeToParent, offsetToParent);
             cubeDisplays.add(new CubeDisplay(display, (byte) material));
         }
         Debug.log("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         return cubeDisplays;
+    }
+
+    @MainThread
+    private static StructureDisplay getDisplay(byte material, Vector2f sizeToParent, Vector2f offsetToParent) {
+        Structure structure = new Structure(material);
+        StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
+        display.setAction((_, _, action) -> {
+            if (action == GLFW_PRESS) Sound.playUI(Material.getStepSounds(material), FloatSettings.INVENTORY_AUDIO);
+            return ButtonResult.IGNORE;
+        });
+        display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
+        display.setScaleWithGuiSize(false);
+        display.setPlayFocusSound(false);
+        return display;
     }
 
 

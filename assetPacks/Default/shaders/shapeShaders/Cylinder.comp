@@ -9,6 +9,8 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 uniform ivec3 size;
 uniform bool invert;
 uniform int rotation;
+uniform int blockSize;
+uniform mat4 rotationMatrix;
 
 uniform int radius;
 uniform int height;
@@ -25,14 +27,18 @@ uint zOrderCurveValue(uint value) {
     return zOrderValue;
 }
 
-bool isValidCoord(int x, int y, int z) {
-    return x < size.x && y < size.y && z < size.z;
+bool isValidCoord(vec3 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.z >= 0 && coord.x < size.x && coord.y < size.y && coord.z < size.z;
 }
 
-bool isInside(int x, int y, int z);
+bool isInside(float x, float y, float z);
 
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    x = x / blockSize * blockSize;
+    y = y / blockSize * blockSize;
+    z = z / blockSize * blockSize;
+    vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
+    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -87,21 +93,21 @@ void main() {
     bitMap[index * 2 + 1] = computeBits(x + 2, y, z);
 }
 
-bool isInsideRotated(int a, int b, int c) {
-    if (a >= height) return false;
+bool isInsideRotated(float a, float b, float c) {
+    if (a >= height || a < 0) return false;
 
     float offset = (rotation == 0 ? size.y : size.x) / 2.0;
     float outerThreshold = pow(radius, exponent);
     float innerThreshold = pow(max(0, radius - thickness), exponent);
 
-    float distanceB = pow(abs(b - offset + 0.5), exponent);
-    float distanceC = pow(abs(c - offset + 0.5), exponent);
+    float distanceB = pow(abs(b - offset), exponent);
+    float distanceC = pow(abs(c - offset), exponent);
     float distance = distanceC + distanceB;
 
     return distance <= outerThreshold + 0.01 && distance >= innerThreshold - 0.01;
 }
 
-bool isInside(int x, int y, int z) {
+bool isInside(float x, float y, float z) {
     switch (rotation) {
         case 0: return isInsideRotated(x, y, z);
         case 1: return isInsideRotated(y, x, z);

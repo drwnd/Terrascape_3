@@ -4,6 +4,7 @@ import core.renderables.*;
 import core.rendering_api.Debug;
 import core.rendering_api.Window;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import game.assets.Textures;
 import game.language.UiMessages;
@@ -11,9 +12,8 @@ import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
 import game.server.Game;
 import game.server.generation.Structure;
-
 import game.settings.FloatSettings;
-import core.utils.MainThread;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -125,7 +125,6 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
-        super.renderSelf(position, size);
         if (!refreshShapePreview) return;
 
         refreshShapePreview = false;
@@ -140,7 +139,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             structure = shape.updateBitMap(true).getStructure();
         } catch (Exception exception) {
             Debug.err(exception);
-            shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
+            shape.setShaderCode(DEFAULT_CUSTOM_SHAPE_SHADER_CODE);
             return;
         }
 
@@ -172,10 +171,8 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
     @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
-        for (CubeDisplay display : cubeDisplays) {
-            this.cubeDisplays.add(display);
-            addRenderable(display.display());
-        }
+        this.cubeDisplays.addAll(cubeDisplays);
+        for (CubeDisplay display : cubeDisplays) addRenderable(display.display());
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
         addRenderable(removeRenderable(itemNameDisplay));
@@ -193,7 +190,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (Window.isMaximized()) Window.toggleFullScreen();
 
-            JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeShaders");
+            JFileChooser fileChooser = new JFileChooser(Path.of("assets", "shaders", "customShapeShaders").toFile());
             fileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt", "comp", "glsl"));
 
             int option = fileChooser.showOpenDialog(null);
@@ -205,6 +202,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         };
     }
 
+    @MainThread
     private Clickable getReloadButtonClickable() {
         return (Vector2i _, int _, int action) -> {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
@@ -214,6 +212,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
         };
     }
 
+    @MainThread
     private void loadShapeShader() {
         String shaderCode = FileManager.loadFileContents(selectedFilepath);
         shape.setShaderCode(shaderCode);
@@ -224,9 +223,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 
-    private final CustomShape shape = new CustomShape(STONE, "bool isInside(int x, int y, int z) {return true;}");
+    private final CustomShape shape = new CustomShape(STONE, DEFAULT_CUSTOM_SHAPE_SHADER_CODE);
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private Path selectedFilepath = null;
     private StructureDisplay shapePreview;
     private boolean refreshShapePreview = true;
+
+    private static final String DEFAULT_CUSTOM_SHAPE_SHADER_CODE = "bool isInside(float x, float y, float z) {return true;}";
 }

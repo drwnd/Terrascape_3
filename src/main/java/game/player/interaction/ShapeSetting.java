@@ -5,6 +5,7 @@ import core.renderables.Toggle;
 import core.renderables.UiButton;
 import core.rendering_api.shaders.Shader;
 import core.settings.*;
+import core.utils.MainThread;
 import core.utils.StringGetter;
 
 import game.player.inventory.CallbackSlider;
@@ -26,6 +27,7 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
         });
     }
 
+    @MainThread
     public UiButton getSettingButton() {
         Vector2f zero = new Vector2f();
         return switch (setting) {
@@ -36,6 +38,7 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
         };
     }
 
+    @MainThread
     public void setUniform(Shader shader) {
         switch (setting) {
             case IntSetting intSetting -> shader.setUniform(uniformName, intSetting.value());

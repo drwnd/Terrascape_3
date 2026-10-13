@@ -3,6 +3,7 @@ package game.player.interaction.placeable_shapes;
 import core.rendering_api.shaders.ComputeShader;
 import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.FileManager;
+import core.utils.MainThread;
 import core.utils.Saver;
 
 import game.language.UiMessages;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 
 public final class CustomShape extends ShapePlaceable {
 
+    @MainThread
     public CustomShape(byte material, String shaderCode) {
         super(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
         this.shaderCode = shaderCode;
@@ -29,6 +31,7 @@ public final class CustomShape extends ShapePlaceable {
         saver.saveInt(lengthZ.value());
     }
 
+    @MainThread
     public static CustomShape load(Saver<?> saver) {
         CustomShape placeable = new CustomShape(saver.loadByte(), saver.loadString());
         placeable.lengthX.setValue(saver.loadInt());
@@ -39,6 +42,7 @@ public final class CustomShape extends ShapePlaceable {
 
 
     @Override
+    @MainThread
     protected ShapePlaceable copyWithMaterialUnique(byte material) {
         CustomShape copy = new CustomShape(material, shaderCode);
         copy.lengthX.setValue(lengthX.value());
@@ -57,20 +61,21 @@ public final class CustomShape extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return lengthX.value();
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return lengthY.value();
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return lengthZ.value();
     }
 
+    @MainThread
     public void setShaderCode(String shaderCode) {
         this.shaderCode = shaderCode;
         setShaderIdentifier(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"));

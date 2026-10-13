@@ -8,6 +8,8 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 
 uniform ivec3 size;
 uniform bool invert;
+uniform int blockSize;
+uniform mat4 rotationMatrix;
 
 uniform int sizeReduction;
 uniform int thickness;
@@ -22,14 +24,18 @@ uint zOrderCurveValue(uint value) {
     return zOrderValue;
 }
 
-bool isValidCoord(int x, int y, int z) {
-    return x < size.x && y < size.y && z < size.z;
+bool isValidCoord(vec3 coord) {
+    return coord.x >= 0 && coord.y >= 0 && coord.z >= 0 && coord.x < size.x && coord.y < size.y && coord.z < size.z;
 }
 
-bool isInside(int x, int y, int z);
+bool isInside(float x, float y, float z);
 
 bool check(int x, int y, int z) {
-    return isValidCoord(x, y, z) && isInside(x, y, z) != invert;
+    x = x / blockSize * blockSize;
+    y = y / blockSize * blockSize;
+    z = z / blockSize * blockSize;
+    vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
+    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 uint computeBits(int x, int y, int z) {
@@ -84,13 +90,13 @@ void main() {
     bitMap[index * 2 + 1] = computeBits(x + 2, y, z);
 }
 
-bool isInside(int x, int y, int z) {
+bool isInside(float x, float y, float z) {
     float offset = size.x * 0.5;
     float innerThreshold = offset - thickness;;
 
-    float distanceX = abs(x - offset + 0.5);
-    float distanceY = abs(y - offset + 0.5);
-    float distanceZ = abs(z - offset + 0.5);
+    float distanceX = abs(x - offset);
+    float distanceY = abs(y - offset);
+    float distanceZ = abs(z - offset);
     float distance = max(distanceX, max(distanceY, distanceZ));
 
     return distance >= innerThreshold;

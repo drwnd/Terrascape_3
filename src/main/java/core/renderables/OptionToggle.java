@@ -44,8 +44,7 @@ public final class OptionToggle extends UiButton {
         setValue(setting.value());
     }
 
-
-    private void setValue(Option value) {
+    public void setValue(Option value) {
         this.value = value;
 
         String valueText = value instanceof StringGetter stringGetter ? stringGetter.get() : value.name();
@@ -55,6 +54,7 @@ public final class OptionToggle extends UiButton {
         if (value instanceof ColorOption colorOption) textElement.setColor(colorOption.getColor());
         if (updateImmediately) setting.setValue(value);
     }
+
 
     private Clickable getAction() {
         return (Vector2i _, int button, int action) -> {

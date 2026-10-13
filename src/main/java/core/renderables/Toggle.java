@@ -34,6 +34,11 @@ public final class Toggle extends UiButton {
         value = setting.defaultValue();
     }
 
+    public void setValue(boolean value) {
+        this.value = value;
+        if (updateImmediately) setting.setValue(value);
+    }
+
     public ToggleSetting getSetting() {
         return setting;
     }

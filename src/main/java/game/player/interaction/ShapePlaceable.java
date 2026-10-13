@@ -4,8 +4,10 @@ import core.assets.AssetManager;
 import core.assets.identifiers.ShaderIdentifier;
 import core.renderables.UiButton;
 import core.rendering_api.shaders.Shader;
+import core.settings.IntSetting;
 import core.settings.ToggleSetting;
 import core.settings.optionSettings.Option;
+import core.settings.stand_alones.StandAloneIntSetting;
 import core.settings.stand_alones.StandAloneOptionSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
 import core.utils.MathUtils;
@@ -17,6 +19,8 @@ import game.server.materials_data.MaterialsData;
 import game.server.generation.Structure;
 import game.server.material.Properties;
 import core.utils.MainThread;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +48,10 @@ public abstract class ShapePlaceable implements Placeable {
         ShapePlaceable placeable = copyWithMaterialUnique(material);
         placeable.invert.setValue(invert.value());
         placeable.rotation.setValue(rotation.value());
+        placeable.blockSize.setValue(blockSize.value());
+        placeable.rotationPitch.setValue(rotationPitch.value());
+        placeable.rotationYaw.setValue(rotationYaw.value());
+        placeable.rotationRoll.setValue(rotationRoll.value());
         placeable.setBitMap(bitMap);
         return placeable;
     }
@@ -171,6 +179,38 @@ public abstract class ShapePlaceable implements Placeable {
         throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
 
+    @Override
+    public final int getLengthX() {
+        return getMax(X_COMPONENT);
+    }
+
+    @Override
+    public final int getLengthY() {
+        return getMax(Y_COMPONENT);
+    }
+
+    @Override
+    public final int getLengthZ() {
+        return getMax(Z_COMPONENT);
+    }
+
+    private int getMax(int component) {
+        int lengthX = unrotatedLengthX(), lengthY = unrotatedLengthY(), lengthZ = unrotatedLengthZ();
+        if (lengthX == 0 || lengthY == 0 || lengthZ == 0) return 0;
+        Matrix4f rotationMatrix = getRotationMatrix(lengthX, lengthY, lengthZ);
+        Vector4f max = new Vector4f(0), min = new Vector4f(0), current = new Vector4f();
+
+        for (int x = 0; x <= lengthX; x += lengthX)
+            for (int y = 0; y <= lengthY; y += lengthY)
+                for (int z = 0; z <= lengthZ; z += lengthZ) {
+                    current.set(x, y, z, 1).mul(rotationMatrix);
+                    max.max(current);
+                    min.min(current);
+                }
+
+        return (int) Math.ceil(max.get(component) - min.get(component));
+    }
+
     public void playSounds(Vector3l position) {
         throw new UnsupportedOperationException("Delegated to RepeatPlaceable");
     }
@@ -184,19 +224,30 @@ public abstract class ShapePlaceable implements Placeable {
 
     protected abstract ShapeSetting[] getSettings();
 
+    public abstract int unrotatedLengthX();
+
+    public abstract int unrotatedLengthY();
+
+    public abstract int unrotatedLengthZ();
+
+    public ShapeSetting[] getAllSettings() {
+        return settings;
+    }
+
     protected void loadSettings() {
         ShapeSetting[] baseSettings = getSettings();
+        int defaultSettingsCount = rotation.value() == null ? 5 : 6;
+        settings = new ShapeSetting[baseSettings.length + defaultSettingsCount];
+        System.arraycopy(baseSettings, 0, settings, defaultSettingsCount, baseSettings.length);
 
-        if (rotation.value() == null) {
-            settings = new ShapeSetting[baseSettings.length + 1];
-            System.arraycopy(baseSettings, 0, settings, 1, baseSettings.length);
-            settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
-        } else {
-            settings = new ShapeSetting[baseSettings.length + 2];
-            System.arraycopy(baseSettings, 0, settings, 2, baseSettings.length);
-            settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
-            settings[1] = new ShapeSetting(rotation, UiMessages.SHAPE_ROTATION, "rotation");
-        }
+        settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
+        settings[1] = new ShapeSetting(blockSize, UiMessages.BLOCK_SIZE_OPTION, "blockSize");
+        settings[2] = new ShapeSetting(rotationPitch, UiMessages.ROTATION_PITCH, "pitch");
+        settings[3] = new ShapeSetting(rotationYaw, UiMessages.ROTATION_YAW, "yaw");
+        settings[4] = new ShapeSetting(rotationRoll, UiMessages.ROTATION_ROLL, "roll");
+
+        if (rotation.value() != null)
+            settings[defaultSettingsCount - 1] = new ShapeSetting(rotation, UiMessages.SHAPE_ROTATION, "rotation");
     }
 
     protected void setShaderIdentifier(ShaderIdentifier shaderIdentifier) {
@@ -220,21 +271,47 @@ public abstract class ShapePlaceable implements Placeable {
 
     @MainThread
     protected void fillBitMap(long[] bitMap, int size, boolean forceSize) {
-        int lengthX = forceSize ? size : Math.min(getLengthX(), size);
-        int lengthY = forceSize ? size : Math.min(getLengthY(), size);
-        int lengthZ = forceSize ? size : Math.min(getLengthZ(), size);
+        int lengthX = forceSize ? size : Math.min(unrotatedLengthX(), size);
+        int lengthY = forceSize ? size : Math.min(unrotatedLengthY(), size);
+        int lengthZ = forceSize ? size : Math.min(unrotatedLengthZ(), size);
+        if (lengthX <= 0 || lengthY <= 0 || lengthZ <= 0) {
+            Arrays.fill(bitMap, 0L);
+            return;
+        }
         int numGroups = Math.max(1, size >> 4);
         int buffer = genBuffer(bitMap.length << 3);
+
+        Matrix4f rotationMatrix = getRotationMatrix(lengthX, lengthY, lengthZ);
+        Vector4f min = new Vector4f(0), current = new Vector4f();
+
+        for (int x = 0; x <= lengthX; x += lengthX)
+            for (int y = 0; y <= lengthY; y += lengthY)
+                for (int z = 0; z <= lengthZ; z += lengthZ)
+                    min.min(current.set(x, y, z, 1).mul(rotationMatrix));
+        rotationMatrix.invert().translate(min.x, min.y, min.z);
 
         Shader shader = AssetManager.get(shaderIdentifier);
         shader.bind();
         for (ShapeSetting setting : settings) setting.setUniform(shader);
-        shader.setUniform("size", lengthX, lengthY, lengthZ);
+        shader.setUniform("size",
+                forceSize ? size : unrotatedLengthX(),
+                forceSize ? size : unrotatedLengthY(),
+                forceSize ? size : unrotatedLengthZ());
+        shader.setUniform("rotationMatrix", rotationMatrix);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffer);
         glDispatchCompute(numGroups, numGroups, numGroups);
 
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, bitMap);
+    }
+
+    private Matrix4f getRotationMatrix(int unrotatedLengthX, int unrotatedLengthY, int unrotatedLengthZ) {
+        return new Matrix4f()
+                .translate(unrotatedLengthX >> 1, unrotatedLengthY >> 1, unrotatedLengthZ >> 1)
+                .rotate((float) Math.toRadians(rotationPitch.value()), 1, 0, 0)
+                .rotate((float) Math.toRadians(rotationYaw.value()), 0, 1, 0)
+                .rotate((float) Math.toRadians(rotationRoll.value()), 0, 0, 1)
+                .translate(-unrotatedLengthX >> 1, -unrotatedLengthY >> 1, -unrotatedLengthZ >> 1);
     }
 
     @MainThread
@@ -255,6 +332,10 @@ public abstract class ShapePlaceable implements Placeable {
     private final byte material;
     protected ShapeSetting[] settings;
 
+    final IntSetting rotationPitch = new StandAloneIntSetting(0, 360, 0);
+    final IntSetting rotationYaw = new StandAloneIntSetting(0, 360, 0);
+    final IntSetting rotationRoll = new StandAloneIntSetting(0, 360, 0);
+    final IntSetting blockSize = new StandAloneIntSetting(1, 32, 1);
     final ToggleSetting invert = new StandAloneToggleSetting(false);
     private final StandAloneOptionSetting rotation;
     private ShaderIdentifier shaderIdentifier;

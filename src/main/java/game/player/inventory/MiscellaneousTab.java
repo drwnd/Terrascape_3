@@ -1,8 +1,9 @@
 package game.player.inventory;
 
 import core.renderables.Renderable;
-
 import core.rendering_api.Window;
+import core.utils.MainThread;
+
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructureSelector;
@@ -12,6 +13,7 @@ import org.joml.Vector2i;
 
 public final class MiscellaneousTab extends Renderable implements InventoryTab {
 
+    @MainThread
     public MiscellaneousTab(Vector2f sizeToParent, Vector2f offsetToParent) {
         super(sizeToParent, offsetToParent);
         setVisible(false);
@@ -29,6 +31,7 @@ public final class MiscellaneousTab extends Renderable implements InventoryTab {
     }
 
     @Override
+    @MainThread
     public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
         if (chunkRebuildDisplay.containsPixelCoordinate(pixelCoordinate)) return new ChunkRebuildPlaceable();
         if (structureSelectDisplay.containsPixelCoordinate(pixelCoordinate)) return new StructureSelector();

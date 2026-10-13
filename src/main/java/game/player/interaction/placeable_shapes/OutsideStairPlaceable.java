@@ -9,6 +9,7 @@ import game.language.UiMessages;
 import game.player.interaction.Rotation24Way;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
+import game.settings.IntSettings;
 
 import static game.utils.Constants.CHUNK_SIZE;
 
@@ -55,6 +56,21 @@ public final class OutsideStairPlaceable extends ShapePlaceable{
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
                 new ShapeSetting(slope, UiMessages.SLOPE, "slope")
         };
+    }
+
+    @Override
+    public int unrotatedLengthZ() {
+        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    @Override
+    public int unrotatedLengthY() {
+        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
+    }
+
+    @Override
+    public int unrotatedLengthX() {
+        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);

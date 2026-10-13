@@ -15,7 +15,7 @@ public enum ComputeShaders implements ShaderIdentifier {
     INSIDE_STAIR,
     OUTSIDE_ARC,
     OUTSIDE_STAIR,
-    SLAB,
+    CUBOID,
     SPHERE,
     STAIR;
 

@@ -6,7 +6,8 @@
   },
   "stepSounds": {
     "folderPath": "sounds/step",
-    "fileNamePrefix": "dirt"
+    "fileNamePrefix": "dirt",
+    "gainMultiplier": 3
   },
   "jumpSounds": {
     "folderPath": "sounds/step",

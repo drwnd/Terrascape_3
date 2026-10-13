@@ -53,17 +53,17 @@ public final class InsideArcPlaceable extends ShapePlaceable {
     }
 
     @Override
-    public int getLengthX() {
+    public int unrotatedLengthX() {
         return radius.value();
     }
 
     @Override
-    public int getLengthY() {
+    public int unrotatedLengthY() {
         return radius.value();
     }
 
     @Override
-    public int getLengthZ() {
+    public int unrotatedLengthZ() {
         return radius.value();
     }
 

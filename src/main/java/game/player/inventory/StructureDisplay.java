@@ -1,7 +1,8 @@
 package game.player.inventory;
 
 import core.assets.AssetManager;
-import core.renderables.Renderable;
+import core.renderables.ButtonResult;
+import core.renderables.UiButton;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.Shader;
 import core.settings.CoreFloatSettings;
@@ -20,11 +21,11 @@ import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public final class StructureDisplay extends Renderable {
+public final class StructureDisplay extends UiButton {
 
     @MainThread
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
-        super(sizeToParent, offsetToParent);
+        super(sizeToParent, offsetToParent, (_, _, _) -> ButtonResult.IGNORE);
         sizeX = structure.sizeX();
         sizeY = structure.sizeY();
         sizeZ = structure.sizeZ();
@@ -48,7 +49,7 @@ public final class StructureDisplay extends Renderable {
         rotation.x -= rotationPitch;
         rotation.y += rotationYaw;
 
-        rotation.x = Math.clamp(rotation.x, -89.9F, 89.9F); // Looking directly up or down breaks the lookAt transform
+        rotation.x = Math.clamp(rotation.x, -89.9F, 89.9F); // Looking straight up or down breaks the lookAt transform
         rotation.y %= 360.0F;
     }
 

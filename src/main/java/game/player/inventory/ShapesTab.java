@@ -2,14 +2,15 @@ package game.player.inventory;
 
 import core.renderables.*;
 import core.rendering_api.Window;
+import core.utils.MainThread;
 
 import game.player.interaction.Placeable;
+import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
 
-import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -104,7 +105,6 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
-        super.renderSelf(position, size);
         if (!refreshShapePreview && !selectedDisplay.getPlaceable().isBitMapInvalid()) return;
 
         refreshShapePreview = false;
@@ -127,11 +127,20 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     }
 
     @MainThread
-    void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
-        for (CubeDisplay display : cubeDisplays) {
-            this.cubeDisplays.add(display);
-            addRenderable(display.display());
+    public void selectDisplayOfClass(ShapePlaceable placeable) {
+        Class<?> tClass = placeable.getClass();
+        for (ShapeDisplay shapeDisplay : shapeDisplays) {
+            if (!tClass.isInstance(shapeDisplay.getPlaceable())) continue;
+            shapeDisplay.setSettingsToPlaceableSettings(placeable);
+            setSelectedDisplay(shapeDisplay);
+            break;
         }
+    }
+
+    @MainThread
+    void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
+        this.cubeDisplays.addAll(cubeDisplays);
+        for (CubeDisplay display : cubeDisplays) addRenderable(display.display());
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
         addRenderable(removeRenderable(itemNameDisplay));
@@ -164,26 +173,30 @@ public final class ShapesTab extends Renderable implements InventoryTab {
         return selectedDisplay;
     }
 
+    @MainThread
     void setSelectedDisplay(ShapeDisplay selectedDisplay) {
         this.selectedDisplay = selectedDisplay;
+        for (UiBackgroundElement settingElement : shapePlaceableSettings) settingElement.setVisible(false);
+        for (UiBackgroundElement settingElement : selectedDisplay.getSettingElements()) settingElement.setVisible(true);
+        refreshShapePreview();
     }
 
-    ArrayList<UiBackgroundElement> getShapePlaceableSettingSliders() {
-        return shapePlaceableSettingSliders;
+    ArrayList<UiBackgroundElement> getShapePlaceableSettings() {
+        return shapePlaceableSettings;
     }
 
     @MainThread
     private void loadShapeDisplays() {
         for (Renderable shapeDisplay : shapeDisplays) removeRenderable(shapeDisplay).delete();
-        for (Renderable slider : shapePlaceableSettingSliders) removeRenderable(slider).delete();
+        for (Renderable slider : shapePlaceableSettings) removeRenderable(slider).delete();
         shapeDisplays.clear();
-        shapePlaceableSettingSliders.clear();
+        shapePlaceableSettings.clear();
 
         shapeDisplays.add(new ShapeDisplay(0, new CubePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(1, new SpherePlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(2, new CylinderPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(3, new ConePlaceable(STONE), this));
-        shapeDisplays.add(new ShapeDisplay(4, new SlabPlaceable(STONE), this));
+        shapeDisplays.add(new ShapeDisplay(4, new CuboidPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(5, new EllipsoidPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(6, new StairPlaceable(STONE), this));
         shapeDisplays.add(new ShapeDisplay(7, new InsideStairPlaceable(STONE), this));
@@ -206,7 +219,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
-    private final ArrayList<UiBackgroundElement> shapePlaceableSettingSliders = new ArrayList<>();
+    private final ArrayList<UiBackgroundElement> shapePlaceableSettings = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 
