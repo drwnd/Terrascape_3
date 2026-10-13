@@ -539,29 +539,16 @@ public final class MaterialsData {
         int targetStartZ = targetStart.z + (sourceStartZ - sourceStart.z >> lod);
 
         if (identifier == HOMOGENOUS) {
-            byte material = data[startIndex + 1];
-            if (material == AIR && !forceOverride) return;
-            for (int x = 0; x < lengthX; x++)
-                for (int z = 0; z < lengthZ; z++)
-                    for (int y = 0; y < lengthY; y++) {
-                        int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
-                        if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
-                                && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
-                        uncompressedMaterials[targetIndex] = material;
-                    }
+            MaterialStorer.storeCuboid(uncompressedMaterials, data[startIndex + 1], forceOverride,
+                    targetStartX, targetStartY, targetStartZ,
+                    targetStartX + lengthX, targetStartY + lengthY, targetStartZ + lengthZ);
             return;
         }
 //        if (identifier == DETAIL)
-        for (int x = 0; x < lengthX; x++)
-            for (int z = 0; z < lengthZ; z++)
-                for (int y = 0; y < lengthY; y++) {
-                    int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
-                    byte material = data[startIndex + getInDetailIndex(transform, x, y, z)];
-                    if (material == AIR && !forceOverride) continue;
-                    if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
-                            && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
-                    uncompressedMaterials[targetIndex] = material;
-                }
+        MaterialStorer.storeDetailSegment(uncompressedMaterials, forceOverride, transform,
+                targetStartX, targetStartY, targetStartZ,
+                lengthX, lengthY, lengthZ,
+                data, startIndex);
     }
 
     private int fillSouthLayerInto(ByteArrayList materials, int startIndex) {
@@ -1486,7 +1473,7 @@ public final class MaterialsData {
         return ((inChunkX & 1) << 2 | (inChunkZ & 1) << 1 | (inChunkY & 1)) + 1;
     }
 
-    private static int getInDetailIndex(byte transform, int inChunkX, int inChunkY, int inChunkZ) {
+    static int getInDetailIndex(byte transform, int inChunkX, int inChunkY, int inChunkZ) {
         if ((transform & Structure.MIRROR_X) != 0) inChunkX = ~inChunkX;
         if ((transform & Structure.MIRROR_Z) != 0) inChunkZ = ~inChunkZ;
         if ((transform & Structure.ROTATE_90) != 0) {

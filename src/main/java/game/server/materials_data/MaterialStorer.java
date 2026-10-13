@@ -4,11 +4,49 @@ import core.utils.MathUtils;
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.server.Game;
+import game.server.material.Properties;
 import game.settings.OptionSettings;
 
-import static game.utils.Constants.AIR;
+import static game.utils.Constants.*;
+import static game.server.materials_data.MaterialsData.*;
 
 final class MaterialStorer {
+
+    static void storeCuboid(byte[] uncompressedMaterials, byte material, boolean forceOverride,
+                            int startX, int startY, int startZ,
+                            int endX, int endY, int endZ) {
+        if (material == AIR && !forceOverride) return;
+        for (int x = startX; x < endX; x++)
+            for (int z = startZ; z < endZ; z++)
+                for (int y = startY; y < endY; y++) {
+                    int targetIndex = getUncompressedIndex(x, y, z);
+                    storeMaterial(uncompressedMaterials, targetIndex, material, forceOverride);
+                }
+    }
+
+    static void storeDetailSegment(byte[] uncompressedMaterials, boolean forceOverride, byte transform,
+                                   int startX, int startY, int startZ,
+                                   int lengthX, int lengthY, int lengthZ,
+                                   byte[] data, int startIndex) {
+        if (((startX | startY | startZ) & 1) == 0) {
+            int uncompressedIndex = getUncompressedIndex(startX, startY, startZ);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 0, data[startIndex + getInDetailIndex(transform, 0, 0, 0)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 1, data[startIndex + getInDetailIndex(transform, 0, 0, 1)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 2, data[startIndex + getInDetailIndex(transform, 0, 1, 0)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 3, data[startIndex + getInDetailIndex(transform, 0, 1, 1)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 4, data[startIndex + getInDetailIndex(transform, 1, 0, 0)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 5, data[startIndex + getInDetailIndex(transform, 1, 0, 1)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 6, data[startIndex + getInDetailIndex(transform, 1, 1, 0)], forceOverride);
+            storeMaterial(uncompressedMaterials, uncompressedIndex + 7, data[startIndex + getInDetailIndex(transform, 1, 1, 1)], forceOverride);
+            return;
+        }
+        for (int x = 0; x < lengthX; x++)
+            for (int z = 0; z < lengthZ; z++)
+                for (int y = 0; y < lengthY; y++) {
+                    int targetIndex = getUncompressedIndex(startX + x, startY + y, startZ + z);
+                    storeMaterial(uncompressedMaterials, targetIndex, data[startIndex + getInDetailIndex(transform, x, y, z)], forceOverride);
+                }
+    }
 
     static void storeMaterials(int inChunkX, int inChunkY, int inChunkZ, byte[] uncompressedMaterials, int totalSizeBits, int lod, ShapePlaceable placeable) {
         if (uncompressedMaterials.length != 1 << totalSizeBits * 3)
@@ -123,6 +161,12 @@ final class MaterialStorer {
                 || paint && uncompressedMaterials[materialIndex] == AIR
                 || replaceAir && uncompressedMaterials[materialIndex] != AIR
                 || breakHeldOnly && uncompressedMaterials[materialIndex] != heldMaterial) return;
+        uncompressedMaterials[materialIndex] = material;
+    }
+
+    private static void storeMaterial(byte[] uncompressedMaterials, int materialIndex, byte material, boolean forceOverride) {
+        if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[materialIndex], STRUCTURE_REPLACEABLE)
+                && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) return;
         uncompressedMaterials[materialIndex] = material;
     }
 }
