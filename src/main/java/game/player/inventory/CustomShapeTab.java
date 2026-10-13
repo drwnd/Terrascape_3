@@ -4,6 +4,7 @@ import core.renderables.*;
 import core.rendering_api.Debug;
 import core.rendering_api.Window;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import game.assets.Textures;
 import game.language.UiMessages;
@@ -11,9 +12,8 @@ import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
 import game.server.Game;
 import game.server.generation.Structure;
-
 import game.settings.FloatSettings;
-import core.utils.MainThread;
+
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -125,7 +125,6 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
-        super.renderSelf(position, size);
         if (!refreshShapePreview) return;
 
         refreshShapePreview = false;

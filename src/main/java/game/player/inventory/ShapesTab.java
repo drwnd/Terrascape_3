@@ -2,6 +2,7 @@ package game.player.inventory;
 
 import core.renderables.*;
 import core.rendering_api.Window;
+import core.utils.MainThread;
 
 import game.player.interaction.Placeable;
 import game.player.interaction.ShapePlaceable;
@@ -10,7 +11,6 @@ import game.server.Game;
 import game.server.generation.Structure;
 import game.settings.FloatSettings;
 
-import core.utils.MainThread;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -105,7 +105,6 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
-        super.renderSelf(position, size);
         if (!refreshShapePreview && !selectedDisplay.getPlaceable().isBitMapInvalid()) return;
 
         refreshShapePreview = false;

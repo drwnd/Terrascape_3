@@ -4,13 +4,14 @@ import core.assets.AssetManager;
 import core.renderables.*;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
+import core.utils.MainThread;
 
 import game.language.UiMessages;
 import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.server.Game;
 
-import core.utils.MainThread;
+import game.server.generation.Structure;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
@@ -42,18 +43,10 @@ public final class StructureTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
-        super.renderSelf(position, size);
         if (!reloadDisplay || toLoadStructureButton == null) return;
 
         reloadDisplay = false;
-        removeRenderable(selectedStructureDisplay).delete();
-
-        Vector2f sizeToParent = new Vector2f(0.6625F, 0.6625F * Window.getAspectRatio());
-        Vector2f offsetToParent = new Vector2f(0.3375F, 0.5F - sizeToParent.y * 0.5F);
-        selectedStructureDisplay = new StructureDisplay(sizeToParent, offsetToParent, AssetManager.get(toLoadStructureButton.getStructure()));
-        selectedStructureDisplay.setDoAutoFocusScaling(false);
-        selectedStructureDisplay.setScaleWithGuiSize(false);
-        addRenderable(selectedStructureDisplay);
+        selectStructure(AssetManager.get(toLoadStructureButton.getStructure()));
     }
 
     @Override
@@ -108,6 +101,18 @@ public final class StructureTab extends Renderable implements InventoryTab {
     public float getMaxScroll(Vector2i pixelCoordinate) {
         if (structureButtonsContainer.containsPixelCoordinate(pixelCoordinate)) return getMaxScroll(structureButtons);
         return Float.POSITIVE_INFINITY;
+    }
+
+    @MainThread
+    public void selectStructure(Structure structure) {
+        removeRenderable(selectedStructureDisplay).delete();
+
+        Vector2f sizeToParent = new Vector2f(0.6625F, 0.6625F * Window.getAspectRatio());
+        Vector2f offsetToParent = new Vector2f(0.3375F, 0.5F - sizeToParent.y * 0.5F);
+        selectedStructureDisplay = new StructureDisplay(sizeToParent, offsetToParent, structure);
+        selectedStructureDisplay.setDoAutoFocusScaling(false);
+        selectedStructureDisplay.setScaleWithGuiSize(false);
+        addRenderable(selectedStructureDisplay);
     }
 
     @MainThread

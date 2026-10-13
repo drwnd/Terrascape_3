@@ -88,10 +88,9 @@ public final class Inventory extends UiElement {
     @Override
     @MainThread
     public boolean clickOn(Vector2i pixelCoordinate, int button, int action) {
-        if (super.clickOn(pixelCoordinate, button, action)) return true;
         Hotbar hotbar = Game.getPlayer().getHotbar();
-        if (hotbar.containsPixelCoordinate(pixelCoordinate)) return hotbar.clickOn(pixelCoordinate, button, action);
-        return false;
+        if (hotbar.containsPixelCoordinate(pixelCoordinate) && hotbar.clickOn(pixelCoordinate, button, action)) return true;
+        return super.clickOn(pixelCoordinate, button, action);
     }
 
     public TabOpenerButton getOpenTabButton() {

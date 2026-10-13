@@ -1,12 +1,15 @@
 package game.player;
 
+import core.assets.CoreSounds;
 import core.renderables.UiElement;
 import core.rendering_api.Window;
+import core.settings.CoreFloatSettings;
 import core.sound.Sound;
 import core.utils.MainThread;
 
 import game.assets.Textures;
 import game.player.interaction.ShapePlaceable;
+import game.player.interaction.StructurePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
@@ -14,6 +17,7 @@ import game.player.inventory.InventoryTab;
 import game.player.inventory.ShapesTab;
 import game.player.inventory.StructureDisplay;
 import game.player.interaction.Target;
+import game.player.inventory.StructureTab;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.material.Material;
@@ -111,11 +115,28 @@ public final class Hotbar extends UiElement {
 
         float relativeX = (float) pixelCoordinate.x / Window.getWidth();
         int slot = Math.clamp((int) ((relativeX - getOffsetToParent().x) * LENGTH / getSizeToParent().x), 0, LENGTH - 1);
-        if (!(contents[slot] instanceof ShapePlaceable shapePlaceable)) return true;
+        if (contents[slot] == null) return true;
 
-        Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.SHAPES);
-        Sound.playUI(Material.getStepSounds(shapePlaceable.getMaterial()), FloatSettings.INVENTORY_AUDIO);
-        ((ShapesTab) InventoryTab.Types.SHAPES.getButton().getToOpenTab()).selectDisplayOfClass(shapePlaceable);
+        switch (contents[slot]) {
+            case CustomShape customShape -> {
+                Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.CUSTOM_SHAPES);
+                Sound.playUI(Material.getStepSounds(customShape.getMaterial()), FloatSettings.INVENTORY_AUDIO);
+            }
+            case ShapePlaceable shapePlaceable -> {
+                Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.SHAPES);
+                Sound.playUI(Material.getStepSounds(shapePlaceable.getMaterial()), FloatSettings.INVENTORY_AUDIO);
+                ((ShapesTab) InventoryTab.Types.SHAPES.getButton().getToOpenTab()).selectDisplayOfClass(shapePlaceable);
+            }
+            case StructurePlaceable structurePlaceable -> {
+                Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.STRUCTURES);
+                Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO);
+                ((StructureTab) InventoryTab.Types.STRUCTURES.getButton().getToOpenTab()).selectStructure(structurePlaceable.getStructure());
+            }
+            default -> {
+                Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.MISCELLANEOUS);
+                Sound.playUI(CoreSounds.BUTTON_SUCCESS, CoreFloatSettings.UI_AUDIO);
+            }
+        }
         return true;
     }
 
