@@ -140,10 +140,8 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
-        for (CubeDisplay display : cubeDisplays) {
-            this.cubeDisplays.add(display);
-            addRenderable(display.display());
-        }
+        this.cubeDisplays.addAll(cubeDisplays);
+        for (CubeDisplay display : cubeDisplays) addRenderable(display.display());
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
         addRenderable(removeRenderable(itemNameDisplay));

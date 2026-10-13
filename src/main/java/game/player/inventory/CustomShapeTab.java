@@ -140,7 +140,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             structure = shape.updateBitMap(true).getStructure();
         } catch (Exception exception) {
             Debug.err(exception);
-            shape.setShaderCode("bool isInside(int x, int y, int z) {return true;}");
+            shape.setShaderCode(DEFAULT_CUSTOM_SHAPE_SHADER_CODE);
             return;
         }
 
@@ -172,10 +172,8 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
     @MainThread
     void addContents(ArrayList<CubeDisplay> cubeDisplays, OptionToggle placeModeToggle, Toggle offsetToggle) {
-        for (CubeDisplay display : cubeDisplays) {
-            this.cubeDisplays.add(display);
-            addRenderable(display.display());
-        }
+        this.cubeDisplays.addAll(cubeDisplays);
+        for (CubeDisplay display : cubeDisplays) addRenderable(display.display());
         addRenderable(placeModeToggle);
         addRenderable(offsetToggle);
         addRenderable(removeRenderable(itemNameDisplay));
@@ -193,7 +191,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
             if (action != GLFW_PRESS) return ButtonResult.IGNORE;
             if (Window.isMaximized()) Window.toggleFullScreen();
 
-            JFileChooser fileChooser = new JFileChooser("assets/shaders/customShapeShaders");
+            JFileChooser fileChooser = new JFileChooser(Path.of("assets", "shaders", "customShapeShaders").toFile());
             fileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt", "comp", "glsl"));
 
             int option = fileChooser.showOpenDialog(null);
@@ -226,9 +224,11 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
     private final Vector2i lastCursorPos = new Vector2i();
 
-    private final CustomShape shape = new CustomShape(STONE, "bool isInside(float x, float y, float z) {return true;}");
+    private final CustomShape shape = new CustomShape(STONE, DEFAULT_CUSTOM_SHAPE_SHADER_CODE);
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();
     private Path selectedFilepath = null;
     private StructureDisplay shapePreview;
     private boolean refreshShapePreview = true;
+
+    private static final String DEFAULT_CUSTOM_SHAPE_SHADER_CODE = "bool isInside(float x, float y, float z) {return true;}";
 }

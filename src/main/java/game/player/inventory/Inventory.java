@@ -163,17 +163,25 @@ public final class Inventory extends UiElement {
         Vector2f sizeToParent = new Vector2f(), offsetToParent = new Vector2f();
 
         for (int material = 0; material < AMOUNT_OF_MATERIALS; material++) {
-            Structure structure = new Structure((byte) material);
-
-            StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
-            display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
-            display.setScaleWithGuiSize(false);
-            display.setPlayFocusSound(false);
-
+            StructureDisplay display = getDisplay((byte) material, sizeToParent, offsetToParent);
             cubeDisplays.add(new CubeDisplay(display, (byte) material));
         }
         Debug.log("Build cube displays. Took %sms%n", (System.nanoTime() - start) / 1_000_000);
         return cubeDisplays;
+    }
+
+    @MainThread
+    private static StructureDisplay getDisplay(byte material, Vector2f sizeToParent, Vector2f offsetToParent) {
+        Structure structure = new Structure(material);
+        StructureDisplay display = new StructureDisplay(sizeToParent, offsetToParent, structure);
+        display.setAction((_, _, action) -> {
+            if (action == GLFW_PRESS) Sound.playUI(Material.getStepSounds(material), FloatSettings.INVENTORY_AUDIO);
+            return ButtonResult.IGNORE;
+        });
+        display.setScalingFactor(FloatSettings.INVENTORY_ITEM_SCALING.value());
+        display.setScaleWithGuiSize(false);
+        display.setPlayFocusSound(false);
+        return display;
     }
 
 
