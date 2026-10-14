@@ -22,6 +22,73 @@ final class MaterialStorer {
                     int targetIndex = getUncompressedIndex(x, y, z);
                     storeMaterial(uncompressedMaterials, targetIndex, material, forceOverride);
                 }
+
+        /*
+                if (material == AIR && !forceOverride) return;
+        int alignLength = 1;
+        while (startX < endX && startY < endY && startZ < endZ) {
+            if ((startX & alignLength) != 0) {
+                storeXLayer(uncompressedMaterials, material, forceOverride, alignLength, startX, startY, startZ, endY, endZ);
+                startX += alignLength;
+                if (startX >= endX) return;
+            }
+            if ((endX & alignLength) != 0) {
+                endX -= alignLength;
+                storeXLayer(uncompressedMaterials, material, forceOverride, alignLength, endX, startY, startZ, endY, endZ);
+                if (startX >= endX) return;
+            }
+
+            if ((startY & alignLength) != 0) {
+                storeYLayer(uncompressedMaterials, material, forceOverride, alignLength, startY, startX, startZ, endX, endZ);
+                startY += alignLength;
+                if (startY >= endY) return;
+            }
+            if ((endY & alignLength) != 0) {
+                endY -= alignLength;
+                storeYLayer(uncompressedMaterials, material, forceOverride, alignLength, endY, startX, startZ, endX, endZ);
+                if (startY >= endY) return;
+            }
+
+            if ((startZ & alignLength) != 0) {
+                storeZLayer(uncompressedMaterials, material, forceOverride, alignLength, startZ, startX, startY, endX, endY);
+                startZ += alignLength;
+                if (startZ >= endZ) return;
+            }
+            if ((endZ & alignLength) != 0) {
+                endZ -= alignLength;
+                storeZLayer(uncompressedMaterials, material, forceOverride, alignLength, endZ, startX, startY, endX, endY);
+                if (startZ >= endZ) return;
+            }
+            alignLength <<= 1;
+        }
+         */
+    }
+
+    private static void storeXLayer(byte[] uncompressedMaterials, byte material, boolean forceOverride, int alignLength,
+                                    int x, int startY, int startZ, int endY, int endZ) {
+        for (int y = startY; y < endY; y += alignLength)
+            for (int z = startZ; z < endZ; z += alignLength)
+                storeAlignedCube(uncompressedMaterials, material, forceOverride, alignLength, x, y, z);
+    }
+
+    private static void storeYLayer(byte[] uncompressedMaterials, byte material, boolean forceOverride, int alignLength,
+                                    int y, int startX, int startZ, int endX, int endZ) {
+        for (int x = startX; x < endX; x += alignLength)
+            for (int z = startZ; z < endZ; z += alignLength)
+                storeAlignedCube(uncompressedMaterials, material, forceOverride, alignLength, x, y, z);
+    }
+
+    private static void storeZLayer(byte[] uncompressedMaterials, byte material, boolean forceOverride, int alignLength,
+                                    int z, int startX, int startY, int endX, int endY) {
+        for (int x = startX; x < endX; x += alignLength)
+            for (int y = startY; y < endY; y += alignLength)
+                storeAlignedCube(uncompressedMaterials, material, forceOverride, alignLength, x, y, z);
+    }
+
+    private static void storeAlignedCube(byte[] uncompressedMaterials, byte material, boolean forceOverride, int length, int startX, int startY, int startZ) {
+        for (int uncompressedIndex = getUncompressedIndex(startX, startY, startZ), endIndex = uncompressedIndex + length * length * length;
+             uncompressedIndex < endIndex; uncompressedIndex++)
+            storeMaterial(uncompressedMaterials, uncompressedIndex, material, forceOverride);
     }
 
     static void storeDetailSegment(byte[] uncompressedMaterials, boolean forceOverride, byte transform,
