@@ -39,7 +39,7 @@ public final class ObjectLoader {
         System.arraycopy(mesh.opaqueVertices(), 0, vertices, 0, mesh.opaqueVertices().length);
         System.arraycopy(mesh.transparentVertices(), 0, vertices, mesh.opaqueVertices().length, mesh.transparentVertices().length);
 
-        glNamedBufferData(vertexBuffer, vertices, GL_STATIC_DRAW);
+        glNamedBufferData(vertexBuffer, vertices, GL_STATIC_COPY);
         return new OpaqueModel(position, mesh.vertexCounts(), vertexBuffer, mesh.lod(), true);
     }
 

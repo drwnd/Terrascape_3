@@ -185,14 +185,11 @@ public final class Renderer extends Renderable {
     private void setUpShadowMappedRendering(Shader shader) {
         shader.setUniform("shadowMap", 2);
         shader.setUniform("shadowColor", 3);
-        shader.setUniform("shadowColorDepthMap", 4);
         shader.setUniform("sunMatrices", sunMatrices);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D_ARRAY, shadowTexture);
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D_ARRAY, shadowColorTexture);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, shadowColorDepthTexture);
     }
 
 
@@ -374,7 +371,9 @@ public final class Renderer extends Renderable {
 
         glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffers[currentShadowIndex]);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClearColor(1.0F, 1.0F, 1.0F, 0.0F);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         glColorMask(false, false, false, false);
         glDepthMask(true);
 
@@ -429,11 +428,7 @@ public final class Renderer extends Renderable {
         }
 
         glColorMask(true, true, true, true);
-        glDepthMask(true);
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowColorFramebuffers[currentShadowIndex]);
-        glClearColor(1.0F, 1.0F, 1.0F, 0.0F);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+        glDepthMask(false);
 
         if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.CHUNKS_CAST_SHADOWS.value()) {
             Shader shader = AssetManager.get(Shaders.GLASS);
@@ -449,7 +444,7 @@ public final class Renderer extends Renderable {
             glEnable(GL_CULL_FACE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            glDepthFunc(GL_ALWAYS);
+            glDepthFunc(GL_GREATER);
 
             renderingOptimizer.populateGlassShadowIndirectBuffer(shadowLod);
 
@@ -476,7 +471,7 @@ public final class Renderer extends Renderable {
             glEnable(GL_CULL_FACE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            glDepthFunc(GL_ALWAYS);
+            glDepthFunc(GL_GREATER);
 
             renderParticles(shader, currentTick, false);
         }
@@ -1055,11 +1050,6 @@ public final class Renderer extends Renderable {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
         glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
 
-        shadowColorDepthTexture = CoreObjectLoader.createTexture2DArray(GL_DEPTH_COMPONENT32F, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowCascades, GL_DEPTH_COMPONENT, GL_FLOAT, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, new float[]{0, 0, 0, 0});
         shadowColorTexture = CoreObjectLoader.createTexture2DArray(GL_RGB8, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, shadowCascades, GL_RGB, GL_UNSIGNED_BYTE, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
@@ -1068,7 +1058,6 @@ public final class Renderer extends Renderable {
     private void createShadowFrameBuffers() {
         int shadowCascades = IntSettings.SHADOW_CASCADES_COUNT.value();
         shadowFramebuffers = new int[shadowCascades];
-        shadowColorFramebuffers = new int[shadowCascades];
         sunMatrices = new Matrix4f[shadowCascades];
         shadowSnapshotPositions = new Position[shadowCascades];
 
@@ -1077,18 +1066,10 @@ public final class Renderer extends Renderable {
             shadowFramebuffers[index] = glCreateFramebuffers();
             glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffers[index]);
             glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowTexture, 0, index);
-            glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                throw new IllegalStateException("Shadow Frame buffer " + index + " not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-
-            shadowColorFramebuffers[index] = glCreateFramebuffers();
-            glBindFramebuffer(GL_FRAMEBUFFER, shadowColorFramebuffers[index]);
-            glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowColorDepthTexture, 0, index);
             glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, shadowColorTexture, 0, index);
             glDrawBuffers(new int[]{GL_COLOR_ATTACHMENT0});
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                throw new IllegalStateException("Shadow Color Frame buffer " + index + " not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
-
+                throw new IllegalStateException("Shadow Frame buffer " + index + " not complete. status " + Integer.toHexString(glCheckFramebufferStatus(GL_FRAMEBUFFER)));
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
@@ -1102,7 +1083,6 @@ public final class Renderer extends Renderable {
         glDeleteTextures(shadowColorTexture);
         glDeleteTextures(accumulationTexture);
         glDeleteTextures(revealTexture);
-        glDeleteTextures(shadowColorDepthTexture);
     }
 
     @MainThread
@@ -1110,16 +1090,13 @@ public final class Renderer extends Renderable {
         glDeleteFramebuffers(framebuffer);
         glDeleteFramebuffers(shadowFramebuffers);
         glDeleteFramebuffers(transparencyFramebuffer);
-        glDeleteFramebuffers(shadowColorFramebuffers);
     }
 
     @MainThread
     private void reloadShadowMaps() {
         glDeleteTextures(shadowTexture);
         glDeleteTextures(shadowColorTexture);
-        glDeleteTextures(shadowColorDepthTexture);
         glDeleteFramebuffers(shadowFramebuffers);
-        glDeleteFramebuffers(shadowColorFramebuffers);
         createShadowTextures();
         createShadowFrameBuffers();
     }
@@ -1179,8 +1156,8 @@ public final class Renderer extends Renderable {
     private int hologramSize, hologramHash;
 
     private int framebuffer, colorTexture, depthTexture, intPosTexture;
-    private int shadowTexture, shadowColorTexture, shadowColorDepthTexture, currentShadowIndex = 0;
-    private int[] shadowFramebuffers, shadowColorFramebuffers;
+    private int shadowTexture, shadowColorTexture, currentShadowIndex = 0;
+    private int[] shadowFramebuffers;
     private Matrix4f[] sunMatrices;
     private Position[] shadowSnapshotPositions;
     private int transparencyFramebuffer, accumulationTexture, revealTexture;

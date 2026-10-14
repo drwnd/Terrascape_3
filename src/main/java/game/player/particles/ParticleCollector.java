@@ -212,7 +212,7 @@ public final class ParticleCollector {
 
     private static ParticleEffect loadParticleEffect(ToBufferParticleEffect particleEffect) {
         int particlesBuffer = glCreateBuffers();
-        glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL_STATIC_DRAW);
+        glNamedBufferData(particlesBuffer, particleEffect.particlesData(), GL_STATIC_COPY);
 
         return new ParticleEffect(particlesBuffer, particleEffect.spawnTick(),
                 particleEffect.type().getLifeTimeTicks(), particleEffect.particlesData().length / SHADER_PARTICLE_INT_SIZE,

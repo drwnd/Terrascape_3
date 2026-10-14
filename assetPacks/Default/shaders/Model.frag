@@ -6,7 +6,6 @@ const int DO_GLASS_SHADOWS_BIT = 4;
 uniform sampler2D image;
 uniform sampler2DArrayShadow shadowMap;
 uniform sampler2DArray shadowColor;
-uniform sampler2DArray shadowColorDepthMap;
 uniform mat4[10] sunMatrices;
 
 uniform ivec2 shadowIndices;
@@ -57,11 +56,6 @@ float getSkyVisibility(vec4 samplePosition) {
 }
 
 vec3 getShadowColor(vec3 shadowCoord) {
-    float currentDepth = abs(shadowCoord.z);
-    float bias = max(0.0002 * (1 - dot(normal, sunDirection)), 0.002);
-    float closestDepth = texture(shadowColorDepthMap, vec3(shadowCoord.xy, shadowIndices.x)).x;
-
-    if (currentDepth + bias > closestDepth) return vec3(1);
     return texture(shadowColor, vec3(shadowCoord.xy, shadowIndices.x)).rgb;
 }
 
