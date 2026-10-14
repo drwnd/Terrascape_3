@@ -11,7 +11,6 @@ uniform bool invert;
 uniform int blockSize;
 uniform mat4 rotationMatrix;
 
-uniform int sizeReduction;
 uniform int thickness;
 
 uint zOrderCurveValue(uint value) {

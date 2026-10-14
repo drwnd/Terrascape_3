@@ -54,9 +54,9 @@ public final class CustomShape extends ShapePlaceable {
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[] {
-                new ShapeSetting(lengthX, UiMessages.LENGTH_X, "ignore"),
-                new ShapeSetting(lengthY, UiMessages.LENGTH_Y, "ignore"),
-                new ShapeSetting(lengthZ, UiMessages.LENGTH_Z, "ignore")
+                new ShapeSetting(lengthX, UiMessages.LENGTH_X, null),
+                new ShapeSetting(lengthY, UiMessages.LENGTH_Y, null),
+                new ShapeSetting(lengthZ, UiMessages.LENGTH_Z, null)
         };
     }
 

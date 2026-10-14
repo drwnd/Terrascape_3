@@ -50,7 +50,7 @@ public final class ArcPlaceable extends ShapePlaceable {
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
                 new ShapeSetting(radius, UiMessages.RADIUS, "radius"),
-                new ShapeSetting(height, UiMessages.HEIGHT, "height"),
+                new ShapeSetting(height, UiMessages.HEIGHT, null),
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness"),
                 new ShapeSetting(exponent, UiMessages.DISTANCE_EXPONENT, "exponent")
         };

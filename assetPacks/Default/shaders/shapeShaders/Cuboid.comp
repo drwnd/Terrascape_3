@@ -8,7 +8,6 @@ layout (std430, binding = 0) restrict writeonly buffer bitMapBuffer {
 
 uniform ivec3 size;
 uniform bool invert;
-uniform int rotation;
 uniform int blockSize;
 uniform mat4 rotationMatrix;
 

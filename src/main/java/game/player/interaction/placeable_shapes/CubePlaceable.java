@@ -57,7 +57,7 @@ public final class CubePlaceable extends ShapePlaceable {
     @Override
     protected ShapeSetting[] getSettings() {
         return new ShapeSetting[]{
-                new ShapeSetting(sizeReduction, UiMessages.SIZE_REDUCTION, "sizeReduction"),
+                new ShapeSetting(sizeReduction, UiMessages.SIZE_REDUCTION, null),
                 new ShapeSetting(thickness, UiMessages.WALL_THICKNESS, "thickness")
         };
     }

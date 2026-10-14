@@ -242,9 +242,9 @@ public abstract class ShapePlaceable implements Placeable {
 
         settings[0] = new ShapeSetting(invert, UiMessages.INVERT_PLACEABLE, "invert");
         settings[1] = new ShapeSetting(blockSize, UiMessages.BLOCK_SIZE_OPTION, "blockSize");
-        settings[2] = new ShapeSetting(rotationPitch, UiMessages.ROTATION_PITCH, "pitch");
-        settings[3] = new ShapeSetting(rotationYaw, UiMessages.ROTATION_YAW, "yaw");
-        settings[4] = new ShapeSetting(rotationRoll, UiMessages.ROTATION_ROLL, "roll");
+        settings[2] = new ShapeSetting(rotationPitch, UiMessages.ROTATION_PITCH, null);
+        settings[3] = new ShapeSetting(rotationYaw, UiMessages.ROTATION_YAW, null);
+        settings[4] = new ShapeSetting(rotationRoll, UiMessages.ROTATION_ROLL, null);
 
         if (rotation.value() != null)
             settings[defaultSettingsCount - 1] = new ShapeSetting(rotation, UiMessages.SHAPE_ROTATION, "rotation");
@@ -308,9 +308,9 @@ public abstract class ShapePlaceable implements Placeable {
     private Matrix4f getRotationMatrix(int unrotatedLengthX, int unrotatedLengthY, int unrotatedLengthZ) {
         return new Matrix4f()
                 .translate(unrotatedLengthX >> 1, unrotatedLengthY >> 1, unrotatedLengthZ >> 1)
-                .rotate((float) Math.toRadians(rotationPitch.value()), 1, 0, 0)
                 .rotate((float) Math.toRadians(rotationYaw.value()), 0, 1, 0)
                 .rotate((float) Math.toRadians(rotationRoll.value()), 0, 0, 1)
+                .rotate((float) Math.toRadians(rotationPitch.value()), 1, 0, 0)
                 .translate(-unrotatedLengthX >> 1, -unrotatedLengthY >> 1, -unrotatedLengthZ >> 1);
     }
 

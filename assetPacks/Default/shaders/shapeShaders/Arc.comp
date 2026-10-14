@@ -13,7 +13,6 @@ uniform int blockSize;
 uniform mat4 rotationMatrix;
 
 uniform int radius;
-uniform int height;
 uniform int thickness;
 uniform float exponent;
 

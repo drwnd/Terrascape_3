@@ -12,8 +12,6 @@ uniform int rotation;
 uniform int blockSize;
 uniform mat4 rotationMatrix;
 
-uniform int ignore;
-
 uint zOrderCurveValue(uint value) {
     uint zOrderValue = 0;
     for (uint index = 0; index < 10; index++) {
@@ -30,12 +28,14 @@ bool isValidCoord(vec3 coord) {
 
 bool isInside(float x, float y, float z);
 
+bool isInsideRotated(float x, float y, float z);
+
 bool check(int x, int y, int z) {
     x = x / blockSize * blockSize;
     y = y / blockSize * blockSize;
     z = z / blockSize * blockSize;
     vec3 rotated = (rotationMatrix * vec4(x + 0.5, y + 0.5, z + 0.5, 1)).xyz;
-    return isValidCoord(rotated) && isInside(rotated.x, rotated.y, rotated.z) != invert;
+    return isValidCoord(rotated) && isInsideRotated(rotated.x, rotated.y, rotated.z) != invert;
 }
 
 

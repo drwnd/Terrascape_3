@@ -40,6 +40,7 @@ public record ShapeSetting(Setting setting, StringGetter name, String uniformNam
 
     @MainThread
     public void setUniform(Shader shader) {
+        if (uniformName == null) return;
         switch (setting) {
             case IntSetting intSetting -> shader.setUniform(uniformName, intSetting.value());
             case FloatSetting floatSetting -> shader.setUniform(uniformName, floatSetting.value());
