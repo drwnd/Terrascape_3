@@ -104,7 +104,6 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addSlider(FloatSettings.HOTBAR_SIZE);
         section.addToggle(ToggleSettings.RENDER_HUD);
         section.addToggle(ToggleSettings.USE_SHADOW_MAPPING);
-        section.addToggle(ToggleSettings.CHUNKS_CAST_SHADOWS);
         section.addToggle(ToggleSettings.PARTICLES_CAST_SHADOWS);
         section.addToggle(ToggleSettings.GLASS_CASTS_SHADOWS);
         section.addToggle(ToggleSettings.PLAYER_CASTS_SHADOWS);
@@ -177,7 +176,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(CoreToggleSettings.ENABLE_OPENGL_DEBUG_CONTEXT);
         section.addToggle(ToggleSettings.RENDER_OCCLUDERS);
         section.addToggle(ToggleSettings.RENDER_OCCLUDEES);
-        section.addToggle(ToggleSettings.RENDER_OCCLUDER_DEPTH_MAP);
+        section.addToggle(ToggleSettings.RENDER_DEPTH_MAP);
         section.addToggle(ToggleSettings.RENDER_SHADOW_MAP);
         section.addToggle(ToggleSettings.RENDER_SHADOW_COLORS);
         section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE);
