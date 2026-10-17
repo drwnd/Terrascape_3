@@ -44,6 +44,7 @@ public class MenuInput<T extends Renderable> extends Input {
     @MainThread
     public void setInputMode() {
         setStandardInputMode();
+        menu.hoverOver(cursorPos.set(Input.getCursorPos()));
     }
 
     @Override
