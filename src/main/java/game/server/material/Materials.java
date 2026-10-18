@@ -151,7 +151,10 @@ public enum Materials implements Translatable {
     MAGENTA_CRYSTAL,
     CYAN_CRYSTAL,
     WHITE_CRYSTAL,
-    BLACK_CRYSTAL;
+    BLACK_CRYSTAL,
+    BONE,
+    FLESH,
+    ZOMBIE_SKIN;
 
     public byte id() {
         return (byte) ordinal();
