@@ -6,24 +6,24 @@ import core.assets.identifiers.AssetIdentifier;
 import core.utils.MainThread;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class RenderEntity {
 
     public double animationTimer = 0;
 
-    public RenderEntity(AssetIdentifier<Model> modelIdentifier, Animator animator) {
+    public RenderEntity(AssetIdentifier<Model> modelIdentifier) {
         this.modelIdentifier = modelIdentifier;
-        this.animator = animator;
     }
 
     @MainThread
-    public void updateFrame(float frameTime) {
+    public void updateFrame(float frameTime, Vector3f rotation) {
         model = AssetManager.get(modelIdentifier);
         if (transforms.length != model.parts().length) {
             transforms = new Matrix4f[model.parts().length];
             for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f();
         }
-        animator.applyAnimation(this, frameTime);
+        model.animator().applyAnimation(this, rotation, frameTime);
     }
 
     public Matrix4f[] transforms() {
@@ -39,7 +39,6 @@ public class RenderEntity {
     }
 
     private final AssetIdentifier<Model> modelIdentifier;
-    private final Animator animator;
     private Model model;
     private Matrix4f[] transforms = new Matrix4f[0];
 }

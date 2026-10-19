@@ -14,7 +14,8 @@ public enum Command {
     SETTING(SettingCommand::execute, SettingCommand.EXPLANATION, SettingCommand.SYNTAX),
     TIME(TimeCommand::execute, TimeCommand.EXPLANATION, TimeCommand.SYNTAX),
     STRUCTURE(StructureCommand::execute, StructureCommand.EXPLANATION, StructureCommand.SYNTAX),
-    HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX);
+    HELP(HelpCommand::execute, HelpCommand.EXPLANATION, HelpCommand.SYNTAX),
+    SUMMON(SummonCommand::execute, SummonCommand.EXPLANATION, SummonCommand.SYNTAX);
 
     @MainThread
     public static CommandResult execute(String commandString) {

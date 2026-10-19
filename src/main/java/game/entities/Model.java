@@ -7,11 +7,11 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-public record Model(GuiElement guiElement, ModelPart[] parts) implements Asset {
+public record Model(GuiElement guiElement, ModelPart[] parts, Animator animator) implements Asset {
 
     @MainThread
-    public Model(ModelData data) {
-        this(AssetLoader.loadGuiElement(data.toGuiElementData()), data.parts());
+    public Model(ModelData data, Animator animator) {
+        this(AssetLoader.loadGuiElement(data.toGuiElementData()), data.parts(), animator);
     }
 
     @Override

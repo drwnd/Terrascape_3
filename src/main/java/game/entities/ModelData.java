@@ -92,6 +92,12 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
                 pos5.x, pos5.y, pos5.z
         ));
 
+        if (side == NORTH || side == TOP || side == EAST) {
+            float temp = faceSize1;
+            faceSize1 = faceSize2;
+            faceSize2 = temp;
+        }
+
         textureCoordinates.addAll(List.of(
                 0.0F, 0.0F,
                 faceSize1, 0.0F,

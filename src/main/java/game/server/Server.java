@@ -9,6 +9,7 @@ import core.settings.optionSettings.ColorOption;
 import core.sound.Sound;
 import core.utils.Vector3l;
 
+import game.entities.Entity;
 import game.player.Player;
 import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
@@ -237,6 +238,7 @@ public final class Server implements CrashCallback {
                 if (shouldRemove) iterator.remove();
             }
         }
+        for (Entity entity : Entity.ENTITIES) entity.updateGameTick();
         Position newPlayerPosition = Game.getPlayer().getPosition();
         synchronized (generator) {
             if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSettings.CULLING_COMPUTATION.value()) {
