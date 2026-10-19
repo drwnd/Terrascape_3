@@ -1,21 +1,21 @@
 package game.player.movement;
 
-import com.google.gson.Gson;
 import core.assets.AssetManager;
 import core.rendering_api.Input;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
-import game.assets.Model;
+import game.entities.RenderEntity;
 import game.player.rendering.Camera;
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
+import com.google.gson.Gson;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -71,12 +71,10 @@ public abstract class MovementState {
      *
      * @param playerCharacter The model to animate.
      * @param camera          The camera of the player.
-     * @param animationTimer  A value to be used as input into trigonometric functions. In whatever unit is convenient.
      * @param frameTime       The time since the last frame in ms.
-     * @return The new value of {@code animationTimer}
      */
     @MainThread
-    public abstract double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime);
+    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime);
 
     @ServerThread
     byte getStandingMaterial(Position position) {

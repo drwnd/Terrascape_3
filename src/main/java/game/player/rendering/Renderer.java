@@ -19,6 +19,8 @@ import core.utils.MainThread;
 import core.utils.Vector3l;
 
 import game.assets.*;
+import game.entities.RenderEntity;
+import game.entities.PlayerAnimator;
 import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.*;
@@ -203,9 +205,8 @@ public final class Renderer extends Renderable {
         Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
         Position cameraPosition = player.getCamera().getPosition();
 
-        Model playerCharacter = AssetManager.get(Models.PLAYER);
         float frameTime = frameTimes.size() >= 2 ? (frameTimes.getLast() - frameTimes.get(frameTimes.size() - 2)) / 1_000_000F : 0;
-        animationTimer = player.getMovement().getState().applyAnimation(playerCharacter, player.getCamera(), animationTimer, frameTime);
+        playerCharacter.updateFrame(frameTime);
         player.applyAnimation(playerCharacter);
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -528,10 +529,9 @@ public final class Renderer extends Renderable {
         AssetManager.get(TextureArrays.PROPERTIES).bind();
 
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
-            Model playerCharacter = AssetManager.get(Models.PLAYER);
             MovementState state = player.getMovement().getState();
-            if (state.hideHeadInFirstPerson()) playerCharacter.transforms()[Models.HEAD].zero();
-            if (state.hideBodyInFirstPerson()) playerCharacter.transforms()[Models.BODY].zero();
+            if (state.hideHeadInFirstPerson()) playerCharacter.transforms()[PlayerAnimator.HEAD].zero();
+            if (state.hideBodyInFirstPerson()) playerCharacter.transforms()[PlayerAnimator.BODY].zero();
         }
 
         renderPlayerCharacter(shader, cameraPosition, playerPosition, projectionViewMatrix);
@@ -539,8 +539,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private static void renderPlayerCharacter(Shader shader, Position cameraPosition, Position playerPosition, Matrix4f matrix) {
-        Model playerCharacter = AssetManager.get(Models.PLAYER);
+    private void renderPlayerCharacter(Shader shader, Position cameraPosition, Position playerPosition, Matrix4f matrix) {
         Vector3l cameraChunkPosition = new Vector3l(
                 cameraPosition.longX & ~CHUNK_SIZE_MASK,
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
@@ -1140,7 +1139,7 @@ public final class Renderer extends Renderable {
     private final ArrayList<Renderable> hudElements = new ArrayList<>();
     private final UiElement crosshair;
     private final Player player;
-    private double animationTimer = 0;
+    private final RenderEntity playerCharacter = new RenderEntity(Models.PLAYER, new PlayerAnimator());
 
     private Position lastCameraPosition;
     private Matrix4f lastProjectionViewMatrix;

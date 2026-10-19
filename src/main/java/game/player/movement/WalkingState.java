@@ -3,22 +3,23 @@ package game.player.movement;
 import core.rendering_api.Input;
 import core.sound.Sound;
 import core.utils.MathUtils;
+import core.utils.MainThread;
 
-import game.assets.Model;
+import game.entities.RenderEntity;
+import game.entities.Model;
 import game.player.rendering.Camera;
 import game.server.Game;
 import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import static game.assets.Models.*;
+import static game.entities.PlayerAnimator.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class WalkingState extends MovementState {
@@ -72,7 +73,7 @@ public final class WalkingState extends MovementState {
 
     @Override
     @MainThread
-    public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
         Model.ModelPart[] parts = playerCharacter.parts();
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
@@ -81,9 +82,11 @@ public final class WalkingState extends MovementState {
 
         rotateBody(transforms, parts, cameraRotation, velocity);
 
+        double animationTimer = playerCharacter.animationTimer;
         float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
         float bodyMovement = (float) Math.cos(animationTimer) * Math.min(speed * 0.1F, 0.3F);
+
         transforms[HEAD].translate(0, bodyMovement, 0).rotate((float) -Math.toRadians(cameraRotation.x), 1, 0, 0);
         transforms[BODY].translate(0, bodyMovement, 0);
         transforms[LEFT_ARM].rotate((float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(-speed * 0.1F, 0, 0, 1);
@@ -91,7 +94,7 @@ public final class WalkingState extends MovementState {
         transforms[LEFT_LEG].rotate((float) -Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
         transforms[RIGHT_LEG].rotate((float) Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
 
-        return animationTimer + (Input.isKeyPressed(KeySettings.SPRINT) ? 1.5 : 1) * frameTime * 0.01;
+        playerCharacter.animationTimer += (Input.isKeyPressed(KeySettings.SPRINT) ? 1.5 : 1) * frameTime * 0.01;
     }
 
     @MainThread

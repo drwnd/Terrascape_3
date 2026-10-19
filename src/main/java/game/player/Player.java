@@ -4,9 +4,10 @@ import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.sound.Sound;
 import core.utils.Vector3l;
+import core.utils.MainThread;
 
-import game.assets.Model;
-import game.assets.Models;
+import game.entities.RenderEntity;
+import game.entities.PlayerAnimator;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
 import game.player.movement.Movement;
@@ -18,10 +19,9 @@ import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -151,14 +151,14 @@ public final class Player {
     }
 
     @MainThread
-    public void applyAnimation(Model playerCharacter) {
+    public void applyAnimation(RenderEntity playerCharacter) {
         final int animationLength = 8;
         long currentTick = Game.getServer().getCurrentGameTick();
         if (currentTick > lastInteractionTick + animationLength) return;
 
         float ticksPassed = Math.min(Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1) + (currentTick - lastInteractionTick), animationLength);
 
-        playerCharacter.transforms()[Models.RIGHT_ARM]
+        playerCharacter.transforms()[PlayerAnimator.RIGHT_ARM]
                 .rotate((float) Math.sin(ticksPassed * Math.PI / animationLength), 0, 0, 1)
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
     }
