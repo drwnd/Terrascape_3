@@ -5,6 +5,7 @@ import core.assets.Texture;
 import core.assets.identifiers.TextureIdentifier;
 import core.settings.optionSettings.Option;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -59,6 +60,7 @@ public final class Skin implements Option, TextureIdentifier {
     }
 
     @Override
+    @MainThread
     public Texture generateAsset() {
         Path filepath = Path.of("assets", "skins", fileName());
         return AssetLoader.loadTexture2D(filepath);

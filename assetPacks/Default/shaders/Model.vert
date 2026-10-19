@@ -8,6 +8,7 @@ layout (location = 0) in vec3 positionOffset;
 layout (location = 1) in vec2 textureCoordinate;
 layout (location = 2) in int intData;
 
+flat out int textureData;
 out vec2 fragTextureCoordinate;
 out vec3 offset;
 out vec3 normal;
@@ -25,4 +26,5 @@ void main() {
     offset = positionOffset;
     transfromationMatrix = transformations[transfromIndex];
     normal = NORMALS[side];
+    textureData = intData;
 }

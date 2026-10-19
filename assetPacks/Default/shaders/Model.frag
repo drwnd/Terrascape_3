@@ -1,4 +1,6 @@
 #version 460 core
+#define MAX_AMOUNT_OF_MATERIALS 256
+
 const int HEAD_UNDER_WATER_BIT = 1;
 const int DO_SHADOW_MAPPING_BIT = 2;
 const int DO_GLASS_SHADOWS_BIT = 4;
@@ -6,7 +8,12 @@ const int DO_GLASS_SHADOWS_BIT = 4;
 uniform sampler2D image;
 uniform sampler2DArrayShadow shadowMap;
 uniform sampler2DArray shadowColor;
+uniform sampler2DArray textures;
+uniform sampler2DArray propertiesTextures;
 uniform mat4[10] sunMatrices;
+
+uniform int[MAX_AMOUNT_OF_MATERIALS] textureSizes;
+uniform int maxTextureSize;
 
 uniform ivec2 shadowIndices;
 uniform int flags;
@@ -16,6 +23,7 @@ uniform vec3 sunDirection;
 uniform vec3 cameraPosition;
 uniform vec3 position;
 
+flat in int textureData;
 in vec2 fragTextureCoordinate;
 in vec3 offset;
 in vec3 normal;
@@ -72,7 +80,7 @@ vec3 getSkyLight(vec3 position, vec3 normal) {
     return max(min(blendedColor, color), vec3(0.5));
 }
 
-vec3 getColor(vec3 color, vec3 voxelPosition) {
+vec3 getColor(vec3 color, vec3 voxelPosition, float emissivness) {
     float absTime = abs(time);
     float timeLight = max(nightBrightness, easeInOutQuart(absTime));
     float nightLight = 0.6 * (1 - absTime) * (1 - absTime);
@@ -80,17 +88,17 @@ vec3 getColor(vec3 color, vec3 voxelPosition) {
     float waterFogMultiplier = min(1, isFlag(HEAD_UNDER_WATER_BIT) * max(0.5, distance * 0.000625));
     float fogMultiplier = 1 - exp(-distance * 0.000005);
 
-    vec3 transfromedNormal = (transfromationMatrix * vec4(normal, 0)).xyz;
     vec3 nightLightVec = vec3(nightLight, nightLight, nightLight);
     vec3 nightBrightnessVec = vec3(nightBrightness);
-    vec3 skyLight = getSkyLight(voxelPosition, transfromedNormal);
-    vec3 sunIllumination = dot(transfromedNormal, sunDirection) * 0.2 * absTime * skyLight;
+    vec3 skyLight = getSkyLight(voxelPosition, normal);
+    vec3 sunIllumination = dot(normal, sunDirection) * 0.2 * absTime * skyLight;
     vec3 light = max(nightBrightnessVec, skyLight) * timeLight + sunIllumination;
 
     light = max(nightBrightnessVec, light);
     light.b = max(nightBrightness, max(nightBrightness, skyLight.b + nightLight) * timeLight + sunIllumination.b);
 
-    vec3 baseColor = color * light * (1 - waterFogMultiplier) * (1 - fogMultiplier);
+    vec3 fragLight = max(vec3(emissivness), light);
+    vec3 baseColor = color * fragLight * (1 - waterFogMultiplier) * (1 - fogMultiplier);
     vec3 waterColor = vec3(0.0, 0.098, 0.643) * waterFogMultiplier * timeLight;
     vec3 fogColor = vec3(0.46, 0.63, 0.79) * fogMultiplier * timeLight;
 
@@ -98,9 +106,19 @@ vec3 getColor(vec3 color, vec3 voxelPosition) {
 }
 
 void main() {
+    int material = (textureData >> 21) & 0xFF;
     vec3 voxelPosition = (transfromationMatrix * vec4(floor(offset + normal * 0.5), 1)).xyz + position;
-    vec4 color = texture(image, fragTextureCoordinate);
+    vec4 color;
+    float emissivness = 0;
+    if (material == 0) color = texture(image, fragTextureCoordinate);
+    else {
+        float invTextureSize = 1.0 / textureSizes[material];
+        vec2 textureCoordinate = fract(fragTextureCoordinate * invTextureSize);
+        float normalizer = float(textureSizes[material]) / maxTextureSize;
+        color = texture(textures, vec3(textureCoordinate * normalizer, material));
+        emissivness = texture(propertiesTextures, vec3(textureCoordinate * normalizer, material)).r;
+    }
     if (color.a == 0.0) discard;
-    fragColor = vec4(getColor(color.rgb, voxelPosition), 1);
+    fragColor = vec4(getColor(color.rgb, voxelPosition, emissivness), 1);
     intPos = ivec4(floor(voxelPosition), 7);
 }

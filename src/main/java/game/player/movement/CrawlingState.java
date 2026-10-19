@@ -56,7 +56,7 @@ public final class CrawlingState extends MovementState {
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
         Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
 
-        SwimmingState.applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.boxes());
+        SwimmingState.applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.parts());
 
         float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
         float speed = velocity.length();

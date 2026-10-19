@@ -71,7 +71,7 @@ public final class SwimmingState extends MovementState {
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
         Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
 
-        applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.boxes());
+        applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.parts());
 
         float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
         float speed = velocity.length();
@@ -93,7 +93,7 @@ public final class SwimmingState extends MovementState {
     }
 
     @MainThread
-    static void applyBasicAnimation(Vector3f cameraRotation, Vector3f velocity, Matrix4f[] transforms, Model.ModelBox[] boxes) {
+    static void applyBasicAnimation(Vector3f cameraRotation, Vector3f velocity, Matrix4f[] transforms, Model.ModelPart[] parts) {
         Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
         float angle = (float) -Math.toRadians(cameraRotation.y);
         float sidewaysVelocity = -velocity.x * direction.z + velocity.z * direction.x;
@@ -103,15 +103,15 @@ public final class SwimmingState extends MovementState {
         for (int index = BODY; index < transforms.length; index++)
             transforms[index].identity()
                     .rotate(angle - sidewaysTilt, 0, 1, 0)
-                    .translate(boxes[index].position())
+                    .translate(parts[index].position())
                     .translate(0, 0, isFirstPerson ? 3 : 0);
         if (isFirstPerson)
             transforms[HEAD].identity()
                     .rotate(angle, 0, 1, 0)
-                    .translate(boxes[HEAD].position());
+                    .translate(parts[HEAD].position());
         else transforms[HEAD].identity()
                 .rotate(angle, 0, 1, 0)
-                .translate(boxes[HEAD].position())
+                .translate(parts[HEAD].position())
                 .rotate(-sidewaysTilt, 0, 1, 0)
                 .translate(0, 0, -6)
                 .rotate(sidewaysTilt, 0, 1, 0)

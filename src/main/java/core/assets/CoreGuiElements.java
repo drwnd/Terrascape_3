@@ -14,7 +14,7 @@ public enum CoreGuiElements implements GuiElementIdentifier {
 
     @Override
     public GuiElementData getData() {
-        return new GuiElementData(new float[][]{vertices, textureCoordinates}, new int[0][], new int[]{2, 2});
+        return new GuiElementData(new float[][]{vertices, textureCoordinates}, new int[0][], new int[]{2, 2}, vertices.length / 2);
     }
 
     private final float[] vertices, textureCoordinates;

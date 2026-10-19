@@ -1,11 +1,12 @@
 package game.assets;
 
-import core.assets.Asset;
-import core.assets.AssetLoader;
-import core.assets.GuiElement;
-import core.assets.GuiElementData;
-
+import core.assets.*;
 import core.utils.MainThread;
+
+import game.player.rendering.Mesh;
+import game.player.rendering.MeshGenerator;
+import game.server.generation.Structure;
+
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -14,48 +15,134 @@ import org.joml.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 
-public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transforms) implements Asset {
+import static game.utils.Constants.*;
+
+public record Model(GuiElement guiElement, ModelPart[] parts, Matrix4f[] transforms) implements Asset {
 
     @MainThread
     Model(ModelData data) {
-        this(AssetLoader.loadGuiElement(data.toGuiElementData()), data.boxes(), getTransforms(data.boxes()));
+        this(AssetLoader.loadGuiElement(data.toGuiElementData()), data.parts());
+    }
+
+    private Model(GuiElement guiElement, ModelPart[] parts) {
+        this(guiElement, parts, getTransforms(parts));
     }
 
     @Override
     public void delete() {
-
+        guiElement.delete();
     }
 
-    private static Matrix4f[] getTransforms(ModelBox[] boxes) {
-        Matrix4f[] transforms = new Matrix4f[boxes.length];
-        for (int index = 0; index < boxes.length; index++) transforms[index] = new Matrix4f();
+    private static Matrix4f[] getTransforms(ModelPart[] parts) {
+        Matrix4f[] transforms = new Matrix4f[parts.length];
+        for (int index = 0; index < parts.length; index++) transforms[index] = new Matrix4f();
         return transforms;
     }
 
-    public record ModelData(ModelBox[] boxes) {
+    public record ModelData(ModelBox[] boxes, ModelStructure[] structures) {
+
+        public ModelPart[] parts() {
+            int length = (boxes == null ? 0 : boxes.length) + (structures == null ? 0 : structures.length);
+            ModelPart[] parts = new ModelPart[length];
+            if (boxes != null)
+                System.arraycopy(boxes, 0, parts, 0, boxes.length);
+            if (structures != null)
+                System.arraycopy(structures, 0, parts, boxes == null ? 0 : boxes.length, structures.length);
+            return parts;
+        }
 
         public GuiElementData toGuiElementData() {
-            ArrayList<Float> vertices = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 3);
-            ArrayList<Float> textureCoordinates = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 2);
-            ArrayList<Integer> intData = new ArrayList<>(boxes.length * VERTICES_PER_BOX * 1);
+            int boxesLength = boxes == null ? 0 : boxes.length;
+            int structuresLength = structures == null ? 0 : structures.length;
 
-            for (int index = 0; index < boxes.length; index++) {
+            ArrayList<Float> vertices = new ArrayList<>(boxesLength * VERTICES_PER_BOX * 3);
+            ArrayList<Float> textureCoordinates = new ArrayList<>(boxesLength * VERTICES_PER_BOX * 2);
+            ArrayList<Integer> intData = new ArrayList<>(boxesLength * VERTICES_PER_BOX * 1);
+            MeshGenerator generator = new MeshGenerator();
+
+            for (int index = 0; index < boxesLength; index++) {
                 ModelBox box = boxes[index];
                 int amount = box.hasOuterLayer ? VERTICES_PER_BOX * 2 : VERTICES_PER_BOX * 1;
 
-                generateModelPart(vertices, textureCoordinates, box.size, box.center, false, box.textureCoordinate);
-                if (box.hasOuterLayer) generateModelPart(vertices, textureCoordinates, box.size, box.center, true, box.outerTextureCoordinate);
+                generateModelBox(vertices, textureCoordinates, box.size, box.center, false, box.textureCoordinate);
+                if (box.hasOuterLayer) generateModelBox(vertices, textureCoordinates, box.size, box.center, true, box.outerTextureCoordinate);
 
                 for (int count = 0; count < amount; count++) intData.add((count / 6 % 6) << 29 | index);
             }
+
+            for (int index = 0; index < structuresLength; index++) {
+                ModelStructure modelStructure = structures[index];
+                Structure structure = AssetManager.get(new StructureIdentifier(modelStructure.structureName));
+
+                Mesh mesh = generator.generateMesh(structure);
+                int[] opaqueVertices = mesh.opaqueVertices();
+                for (int vertexIndex = 0; vertexIndex < opaqueVertices.length; vertexIndex += MeshGenerator.INTS_PER_VERTEX) {
+                    int x = opaqueVertices[vertexIndex + 0];
+                    int y = opaqueVertices[vertexIndex + 1];
+                    int z = opaqueVertices[vertexIndex + 2];
+                    int textureData = opaqueVertices[vertexIndex + 3];
+                    generateModelFace(vertices, textureCoordinates, modelStructure.center, x, y, z, textureData);
+
+                    int side = textureData >> 8 & 7;
+                    int material = textureData & 0xFF;
+                    for (int count = 0; count < 6; count++) intData.add(side << 29 | material << 21 | index + boxesLength);
+                }
+            }
+
             return new GuiElementData(
                     new float[][]{toFloatArray(vertices), toFloatArray(textureCoordinates)},
                     new int[][]{toIntArray(intData)},
-                    new int[]{3, 2, 1});
+                    new int[]{3, 2, 1}, vertices.size() / 3);
         }
 
-        private static void generateModelPart(ArrayList<Float> vert, ArrayList<Float> text, Vector3i size, Vector3f center,
-                                              boolean padSize, Vector2f textureCoordinate) {
+        private static void generateModelFace(ArrayList<Float> vertices, ArrayList<Float> textureCoordinates, Vector3f center, int x, int y, int z, int textureData) {
+            int side = textureData >> 8 & 7;
+
+            float faceSize1 = (textureData >> 17 & 63) + 1;
+            float faceSize2 = (textureData >> 11 & 63) + 1;
+            Vector3f pos0 = getFacePosition(side, 0, faceSize1, faceSize2).sub(center).add(x, y, z);
+            Vector3f pos1 = getFacePosition(side, 1, faceSize1, faceSize2).sub(center).add(x, y, z);
+            Vector3f pos2 = getFacePosition(side, 2, faceSize1, faceSize2).sub(center).add(x, y, z);
+            Vector3f pos3 = getFacePosition(side, 3, faceSize1, faceSize2).sub(center).add(x, y, z);
+            Vector3f pos4 = getFacePosition(side, 4, faceSize1, faceSize2).sub(center).add(x, y, z);
+            Vector3f pos5 = getFacePosition(side, 5, faceSize1, faceSize2).sub(center).add(x, y, z);
+
+            vertices.addAll(List.of(
+                    pos0.x, pos0.y, pos0.z,
+                    pos1.x, pos1.y, pos1.z,
+                    pos2.x, pos2.y, pos2.z,
+                    pos3.x, pos3.y, pos3.z,
+                    pos4.x, pos4.y, pos4.z,
+                    pos5.x, pos5.y, pos5.z
+            ));
+
+            textureCoordinates.addAll(List.of(
+                    0.0F, 0.0F,
+                    faceSize1, 0.0F,
+                    0.0F, -faceSize2,
+
+                    faceSize1, -faceSize2,
+                    0.0F, -faceSize2,
+                    faceSize1, 0.0F
+            ));
+        }
+
+        @SuppressWarnings("SuspiciousNameCombination")
+        private static Vector3f getFacePosition(int side, int currentVertexId, float faceSize1, float faceSize2) {
+            Vector3f offset = FACE_POSITIONS[currentVertexId];
+            return switch (side) {
+                case NORTH -> new Vector3f(faceSize2, faceSize1, 1).mul(offset.y, offset.x, offset.z);
+                case TOP -> new Vector3f(faceSize1, 1, faceSize2).mul(offset.x, offset.z, offset.y);
+                case WEST -> new Vector3f(1, faceSize1, faceSize2).mul(offset.z, offset.y, offset.x);
+                case SOUTH -> new Vector3f(faceSize2, faceSize1, 0).mul(offset.x, offset.y, offset.z);
+                case BOTTOM -> new Vector3f(faceSize1, 0, faceSize2).mul(offset.y, offset.z, offset.x);
+                case EAST -> new Vector3f(0, faceSize1, faceSize2).mul(offset.z, offset.x, offset.y);
+                default -> new Vector3f(0);
+            };
+        }
+
+        private static void generateModelBox(ArrayList<Float> vertices, ArrayList<Float> textureCoordinates, Vector3i size, Vector3f center,
+                                             boolean padSize, Vector2f textureCoordinate) {
             float dx = size.x / 64F, dy = size.y / 64F, dz = size.z / 64F;
             float u = textureCoordinate.x, v = textureCoordinate.y;
             float padding = padSize ? 0.25F : 0;
@@ -63,7 +150,7 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
             float py = size.y + padding - center.y, ny = -center.y - padding;
             float pz = size.z + padding - center.z, nz = -center.z - padding;
 
-            vert.addAll(List.of(
+            vertices.addAll(List.of(
                     // north
                     nx, py, pz,
                     nx, ny, pz,
@@ -112,7 +199,7 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
                     nx, py, nz,
                     nx, ny, pz
             ));
-            text.addAll(List.of(
+            textureCoordinates.addAll(List.of(
                     // north
                     u + 2 * dz + 1 * dx, v + dz,
                     u + 2 * dz + 1 * dx, v + dy + dz,
@@ -176,9 +263,21 @@ public record Model(GuiElement guiElement, ModelBox[] boxes, Matrix4f[] transfor
         }
     }
 
-    public record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, boolean hasOuterLayer,
-                           Vector2f outerTextureCoordinate) {
+    public interface ModelPart {
+        Vector3f position();
+    }
+
+    private record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, boolean hasOuterLayer,
+                            Vector2f outerTextureCoordinate) implements ModelPart {
+    }
+
+    private record ModelStructure(Vector3f center, Vector3f position, String structureName) implements ModelPart {
+
     }
 
     private static final int VERTICES_PER_BOX = 36;
+    private static final Vector3f[] FACE_POSITIONS = new Vector3f[]{
+            new Vector3f(0, 0, 1), new Vector3f(0, 1, 1), new Vector3f(1, 0, 1),
+            new Vector3f(1, 1, 1), new Vector3f(1, 0, 1), new Vector3f(0, 1, 1)
+    };
 }

@@ -71,7 +71,7 @@ public final class AssetLoader {
     @MainThread
     public static GuiElement loadGuiElement(GuiElementData data) {
         verifyGuiElementData(data);
-        int vertexCount = data.getVertexCount(), vao = createVAO();
+        int vertexCount = data.vertexCount(), vao = createVAO();
         float[][] floatAttributes = data.floatAttributes();
         int[][] intAttributes = data.intAttributes();
         int[] attributeSizes = data.attributeSizes();
@@ -212,7 +212,7 @@ public final class AssetLoader {
         if (floatAttributes.length + intAttributes.length != attributeSizes.length)
             throw new IllegalArgumentException("Specify same number of attributes and attribute sizes");
 
-        int vertexCount = data.getVertexCount();
+        int vertexCount = data.vertexCount();
         for (int attributeSize : attributeSizes) if (attributeSize <= 0) throw new IllegalArgumentException("Sizes must be strictly positive integers");
 
         for (int index = 0; index < floatAttributes.length; index++) {

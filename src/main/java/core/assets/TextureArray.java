@@ -16,6 +16,11 @@ public record TextureArray(int id, int[] textureSizes, int maxTextureSize) imple
         glDeleteTextures(id);
     }
 
+    @MainThread
+    public void bind() {
+        glBindTexture(GL_TEXTURE_2D_ARRAY, id);
+    }
+
     private static int getMax(int[] textureSizes) {
         int maxTextureSize = 0;
         for (int textureSize : textureSizes) maxTextureSize = Math.max(maxTextureSize, textureSize);

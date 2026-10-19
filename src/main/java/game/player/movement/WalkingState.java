@@ -74,12 +74,12 @@ public final class WalkingState extends MovementState {
     @MainThread
     public double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        Model.ModelBox[] boxes = playerCharacter.boxes();
+        Model.ModelPart[] parts = playerCharacter.parts();
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
         Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
         Vector3f cameraRotation = camera.getRotation();
 
-        rotateBody(transforms, boxes, cameraRotation, velocity);
+        rotateBody(transforms, parts, cameraRotation, velocity);
 
         float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
@@ -95,7 +95,7 @@ public final class WalkingState extends MovementState {
     }
 
     @MainThread
-    static void rotateBody(Matrix4f[] transforms, Model.ModelBox[] boxes, Vector3f cameraRotation, Vector3f velocity) {
+    static void rotateBody(Matrix4f[] transforms, Model.ModelPart[] parts, Vector3f cameraRotation, Vector3f velocity) {
         Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
         float angle = (float) -Math.toRadians(cameraRotation.y);
         float sidewaysVelocity = -velocity.x * direction.z + velocity.z * direction.x;
@@ -105,11 +105,11 @@ public final class WalkingState extends MovementState {
         for (int index = 0; index < transforms.length; index++)
             transforms[index].identity()
                     .rotate(angle - sidewaysTilt, 0, 1, 0)
-                    .translate(boxes[index].position())
+                    .translate(parts[index].position())
                     .translate(0, 0, isFirstPerson ? 3 : 0);
         if (isFirstPerson) transforms[HEAD].identity()
                 .rotate(angle, 0, 1, 0)
-                .translate(boxes[HEAD].position())
+                .translate(parts[HEAD].position())
                 .rotate(-sidewaysTilt, 0, 1, 0)
                 .translate(0, 0, 3)
                 .rotate(sidewaysTilt, 0, 1, 0);
