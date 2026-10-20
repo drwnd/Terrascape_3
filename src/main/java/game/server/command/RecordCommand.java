@@ -2,8 +2,8 @@ package game.server.command;
 
 import core.utils.MainThread;
 import game.player.Player;
-import game.player.movement.FlyingState;
-import game.player.movement.MovementState;
+import game.entities.movement.FlyingState;
+import game.entities.movement.MovementState;
 import game.server.Function;
 import game.server.Game;
 import game.server.PlayerRecord;

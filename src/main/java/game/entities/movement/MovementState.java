@@ -1,4 +1,4 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.assets.AssetManager;
 import core.rendering_api.Input;
@@ -33,30 +33,30 @@ public abstract class MovementState {
     }
 
     /**
-     * Computes the acceleration the Player should have in the next GameTick.
-     * Only gets called when the Player is actively moving.
+     * Computes the acceleration the Entity should have in the next GameTick.
+     * Only gets called when the Entity is actively moving.
      *
-     * @param playerRotation The rotation of the player (not necessarily the camera)
-     * @param lastPosition   The position of the player in the last GameTick
-     * @return The acceleration of the Player.
+     * @param rotation The rotation of the Entity
+     * @param lastPosition   The position of the Entity in the last GameTick
+     * @return The acceleration of the Entity.
      */
     @ServerThread
-    abstract Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition);
+    protected abstract Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition);
 
     /**
-     * Changes the current Velocity the Player has.
-     * Gets called every GameTick regardless of the Player being able to move actively.
+     * Changes the current Velocity the Entity has.
+     * Gets called every GameTick regardless of the Entity being able to move actively.
      * Therefore, no inputs should be queried in this method.
      *
-     * @param velocity       The current Velocity of the Player. This is also the output variable.
-     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Player can't move actively.
-     * @param playerPosition The position of the Player.
-     * @param playerRotation The rotation of the Player.
+     * @param velocity       The current Velocity of the Entity. This is also the output variable.
+     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Entity can't move actively.
+     * @param position The position of the Entity.
+     * @param rotation The rotation of the Entity.
      */
     @ServerThread
-    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        int waterIntersection = intersectedVolume(playerPosition, this, WATER);
-        int lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position position, Vector3f rotation) {
+        int waterIntersection = intersectedVolume(position, this, WATER);
+        int lavaIntersection = intersectedVolume(position, this, LAVA);
 
         float drag = movement.isGrounded() ? WALKING_DRAG : AIR_DRAG;
         float liquidDrag = (float) (Math.pow(WATER_DRAG, waterIntersection)) * (float) (Math.pow(LAVA_DRAG, lavaIntersection));
@@ -99,7 +99,7 @@ public abstract class MovementState {
     }
 
     @MainThread
-    abstract void handleInput(int key, int action);
+    protected abstract void handleInput(int key, int action);
 
     public abstract byte getIdentifier();
 

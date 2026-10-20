@@ -1,4 +1,4 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.utils.MathUtils;
@@ -24,11 +24,11 @@ public final class SwimmingState extends MovementState {
 
     @Override
     @ServerThread
-    Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
+    protected Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.SPRINT) || !Input.isKeyPressed(KeySettings.MOVE_FORWARD)) next = MovementState.load(CrawlingState.class);
 
         Vector3f velocityChange = new Vector3f();
-        Vector3f playerDirection = MathUtils.getDirection(playerRotation);
+        Vector3f playerDirection = MathUtils.getDirection(rotation);
 
         float liquidVolume = intersectedVolume(lastPosition, this, WATER) + intersectedVolume(lastPosition, this, LAVA);
         float airVolume = Math.min(intersectedVolume(lastPosition, this, AIR), 50.0F);
@@ -40,17 +40,17 @@ public final class SwimmingState extends MovementState {
 
     @Override
     @ServerThread
-    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        if (!intersectsLiquid(playerPosition, this)) next = MovementState.load(CrawlingState.class);
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position position, Vector3f rotation) {
+        if (!intersectsLiquid(position, this)) next = MovementState.load(CrawlingState.class);
 
-        float waterIntersection = intersectedVolume(playerPosition, this, WATER);
-        float lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
+        float waterIntersection = intersectedVolume(position, this, WATER);
+        float lavaIntersection = intersectedVolume(position, this, LAVA);
 
         float liquidDrag = (float) (Math.pow(WATER_DRAG, waterIntersection)) * (float) (Math.pow(LAVA_DRAG, lavaIntersection));
         velocity.add(acceleration).mul(liquidDrag * AIR_DRAG);
 
         if (velocity.y > 0.0F) {
-            Position nextPosition = new Position(playerPosition);
+            Position nextPosition = new Position(position);
             nextPosition.addComponent(Y_COMPONENT, velocity.y);
             if (!intersectsLiquid(nextPosition, this)) velocity.y = 0.0F;
         }
@@ -58,7 +58,7 @@ public final class SwimmingState extends MovementState {
 
     @Override
     @MainThread
-    void handleInput(int key, int action) {
+    protected void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(FlyingState.class);
             lastJumpTime = System.nanoTime();

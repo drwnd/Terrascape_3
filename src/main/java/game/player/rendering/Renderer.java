@@ -26,7 +26,7 @@ import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.*;
 import game.player.interaction.placeable_shapes.CapsulePlaceable;
-import game.player.movement.MovementState;
+import game.entities.movement.MovementState;
 import game.player.particles.ParticleEffect;
 import game.server.*;
 import game.server.generation.Structure;
@@ -574,7 +574,7 @@ public final class Renderer extends Renderable {
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
-        for (Entity entity : Entity.ENTITIES) renderEntity(shader, cameraChunkPosition, entity.getPosition(), entity.getRenderEntity());
+        for (Entity entity : Entity.ENTITIES) renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
     }
 
     @MainThread
@@ -1172,7 +1172,7 @@ public final class Renderer extends Renderable {
     private final ArrayList<Renderable> hudElements = new ArrayList<>();
     private final UiElement crosshair;
     private final Player player;
-    private final RenderEntity playerCharacter = new RenderEntity(Models.PLAYER);
+    private final RenderEntity playerCharacter = new RenderEntity(Models.PLAYER, new PlayerAnimator());
 
     private Position lastCameraPosition;
     private Matrix4f lastProjectionViewMatrix;

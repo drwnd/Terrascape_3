@@ -1,0 +1,11 @@
+{
+  "maxAutoStepHeight": 5,
+  "hitboxSize": {
+    "x": 8,
+    "y": 28,
+    "z": 8
+  },
+  "walkingSpeed": 0.5,
+  "searchRadius": 100,
+  "timeBetweenActions": 200
+}

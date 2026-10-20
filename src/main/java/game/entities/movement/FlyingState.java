@@ -1,4 +1,4 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.utils.MathUtils;
@@ -23,10 +23,10 @@ public final class FlyingState extends MovementState {
 
     @Override
     @ServerThread
-    protected Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
+    protected Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition) {
 
         Vector3f velocityChange = new Vector3f();
-        Vector3f playerDirection = MathUtils.getHorizontalDirection(playerRotation);
+        Vector3f playerDirection = MathUtils.getHorizontalDirection(rotation);
 
         WalkingState.applyXZMovement(velocityChange, horizontalFlySpeed, sprintSpeedModifier);
 
@@ -44,7 +44,7 @@ public final class FlyingState extends MovementState {
 
     @Override
     @ServerThread
-    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position position, Vector3f rotation) {
         velocity.add(acceleration).mul(AIR_DRAG);
         if (movement.isGrounded() && !ToggleSettings.NO_CLIP.value()) next = MovementState.load(WalkingState.class);
     }

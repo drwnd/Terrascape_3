@@ -1,4 +1,4 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.utils.MathUtils;
@@ -21,13 +21,13 @@ public final class CrawlingState extends MovementState {
 
     @Override
     @ServerThread
-    Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition) {
+    protected Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition) {
         if (!Input.isKeyPressed(KeySettings.CRAWL)) next = MovementState.load(SneakingState.class);
         if (Input.isKeyPressed(KeySettings.SPRINT) && Input.isKeyPressed(KeySettings.MOVE_FORWARD) && intersectsLiquid(lastPosition, this))
             next = MovementState.load(SwimmingState.class);
 
         Vector3f velocityChange = new Vector3f();
-        Vector3f playerDirection = MathUtils.getHorizontalDirection(playerRotation);
+        Vector3f playerDirection = MathUtils.getHorizontalDirection(rotation);
         float speed = getMovementSpeed(lastPosition, crawlingSpeed, inAirSpeed, swimStrength);
 
         applyXZMovement(velocityChange, speed, 1.0F);
@@ -42,7 +42,7 @@ public final class CrawlingState extends MovementState {
 
     @Override
     @MainThread
-    void handleInput(int key, int action) {
+    protected void handleInput(int key, int action) {
         if (key == KeySettings.JUMP.keybind() && action == GLFW_PRESS) {
             if (System.nanoTime() - lastJumpTime < JUMP_FLYING_INTERVALL) next = MovementState.load(FlyingState.class);
             lastJumpTime = System.nanoTime();

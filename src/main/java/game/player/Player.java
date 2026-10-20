@@ -10,7 +10,7 @@ import game.entities.RenderEntity;
 import game.entities.PlayerAnimator;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
-import game.player.movement.Movement;
+import game.entities.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
 import game.player.particles.ParticleCollector;
@@ -74,7 +74,7 @@ public final class Player {
     @ServerThread
     public void updateGameTick() {
         synchronized (this) {
-            position = movement.computeNextGameTickPosition(position, camera.getRotation());
+            position = movement.computeNextGameTickPosition(position, camera.getRotation(), canDoActiveActions());
         }
         if (canDoActiveActions()) interactionHandler.updateGameTick();
         renderer.updateGameTick();

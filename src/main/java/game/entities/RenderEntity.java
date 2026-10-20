@@ -12,6 +12,11 @@ public class RenderEntity {
 
     public double animationTimer = 0;
 
+    public RenderEntity(AssetIdentifier<Model> modelIdentifier, Animator animator) {
+        this.modelIdentifier = modelIdentifier;
+        this.animator = animator;
+    }
+
     public RenderEntity(AssetIdentifier<Model> modelIdentifier) {
         this.modelIdentifier = modelIdentifier;
     }
@@ -23,7 +28,11 @@ public class RenderEntity {
             transforms = new Matrix4f[model.parts().length];
             for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f();
         }
-        model.animator().applyAnimation(this, rotation, frameTime);
+        animator.applyAnimation(this, rotation, frameTime);
+    }
+
+    public void setAnimator(Animator animator) {
+        this.animator = animator;
     }
 
     public Matrix4f[] transforms() {
@@ -39,6 +48,7 @@ public class RenderEntity {
     }
 
     private final AssetIdentifier<Model> modelIdentifier;
+    private Animator animator;
     private Model model;
     private Matrix4f[] transforms = new Matrix4f[0];
 }

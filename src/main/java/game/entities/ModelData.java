@@ -18,12 +18,13 @@ import static game.utils.Constants.*;
 public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structures) {
 
     public Model.ModelPart[] parts() {
-        int length = (boxes == null ? 0 : boxes.length) + (structures == null ? 0 : structures.length);
-        Model.ModelPart[] parts = new Model.ModelPart[length];
+        int boxesLength = boxes == null ? 0 : boxes.length;
+        int structuresLength = structures == null ? 0 : structures.length;
+        Model.ModelPart[] parts = new Model.ModelPart[boxesLength + structuresLength];
         if (boxes != null)
-            System.arraycopy(boxes, 0, parts, 0, boxes.length);
+            System.arraycopy(boxes, 0, parts, 0, boxesLength);
         if (structures != null)
-            System.arraycopy(structures, 0, parts, boxes == null ? 0 : boxes.length, structures.length);
+            System.arraycopy(structures, 0, parts, boxesLength, structuresLength);
         return parts;
     }
 

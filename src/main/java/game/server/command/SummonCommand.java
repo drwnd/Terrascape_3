@@ -1,9 +1,8 @@
 package game.server.command;
 
 import core.utils.MainThread;
+
 import game.assets.Models;
-import game.entities.Entity;
-import game.entities.RenderEntity;
 import game.server.Game;
 import game.utils.Position;
 
@@ -64,7 +63,7 @@ public final class SummonCommand {
         tokens.expectFinishedLessEqual();
         if (!xSet || !ySet || !zSet) return CommandResult.fail("Not all coordinates specified");
 
-        new Entity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ), new RenderEntity(model));
+        model.getEntity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ));
         return CommandResult.success();
     }
 }

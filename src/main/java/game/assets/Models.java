@@ -6,26 +6,32 @@ import core.assets.AssetManager;
 import core.assets.identifiers.AssetIdentifier;
 import core.utils.FileManager;
 import core.utils.MainThread;
+
 import game.entities.*;
+import game.utils.Position;
 
 import java.nio.file.Path;
 
 public enum Models implements AssetIdentifier<Model> {
-    PLAYER(new PlayerAnimator()),
-    ZOMBIE(new Zombie.ZombieAnimator());
+    PLAYER(Mannequin::new),
+    ZOMBIE(Zombie::new);
 
     @Override
     @MainThread
     public Model generateAsset() {
         Path filepath = AssetManager.getAssetFilepath(Path.of("models", name() + ".json"));
         ModelData modelData = new Gson().fromJson(FileManager.loadJson(filepath), ModelData.class);
-        return new Model(modelData, animator);
+        return new Model(modelData);
     }
 
 
-    Models(Animator animator) {
-        this.animator = animator;
+    Models(Entity.EntityBuilder entityBuilder) {
+        this.entityBuilder = entityBuilder;
     }
 
-    private final Animator animator;
+    public void getEntity(Position position) {
+        entityBuilder.getEntity(position);
+    }
+
+    private final Entity.EntityBuilder entityBuilder;
 }

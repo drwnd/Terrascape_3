@@ -1,4 +1,4 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.sound.Sound;
@@ -28,12 +28,18 @@ public final class Movement {
         state.movement = this;
     }
 
+    @MainThread
+    public Movement(MovementState state) {
+        this.state = state;
+        state.movement = this;
+    }
+
     @ServerThread
-    public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
+    public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation, boolean isActive) {
         Position position = new Position(lastPosition);
         grounded = velocity.y == 0.0F && checkGrounded(position);
 
-        Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
+        Vector3f acceleration = isActive ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
         state.changeVelocity(velocity, acceleration, position, rotation);
 
         velocity.set(move(position));
