@@ -2,7 +2,7 @@ package game.server.command;
 
 import core.utils.MainThread;
 
-import game.assets.Models;
+import game.assets.EntityType;
 import game.server.Game;
 import game.utils.Position;
 
@@ -19,7 +19,7 @@ public final class SummonCommand {
     static CommandResult execute(TokenList tokens) {
         Position position = Game.getPlayer().getPosition();
         String entityName = tokens.expectNextKeyWord().keyword();
-        Models model = Models.valueOf(entityName.toUpperCase());
+        EntityType entityType = EntityType.valueOf(entityName.toUpperCase());
 
         long longX = 0, longY = 0, longZ = 0;
         float fractionX = 0.0F, fractionY = 0.0F, fractionZ = 0.0F;
@@ -63,7 +63,7 @@ public final class SummonCommand {
         tokens.expectFinishedLessEqual();
         if (!xSet || !ySet || !zSet) return CommandResult.fail("Not all coordinates specified");
 
-        model.getEntity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ));
+        entityType.getEntity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ));
         return CommandResult.success();
     }
 }

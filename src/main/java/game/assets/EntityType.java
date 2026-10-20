@@ -12,7 +12,7 @@ import game.utils.Position;
 
 import java.nio.file.Path;
 
-public enum Models implements AssetIdentifier<Model> {
+public enum EntityType implements AssetIdentifier<Model> {
     PLAYER(Mannequin::new),
     ZOMBIE(Zombie::new);
 
@@ -25,7 +25,7 @@ public enum Models implements AssetIdentifier<Model> {
     }
 
 
-    Models(Entity.EntityBuilder entityBuilder) {
+    EntityType(Entity.EntityBuilder entityBuilder) {
         this.entityBuilder = entityBuilder;
     }
 

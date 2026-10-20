@@ -6,7 +6,7 @@ import core.sound.Sound;
 import core.utils.Vector3l;
 import core.utils.MainThread;
 
-import game.assets.Models;
+import game.assets.EntityType;
 import game.entities.Entity;
 import game.entities.RenderEntity;
 import game.entities.PlayerAnimator;
@@ -36,7 +36,7 @@ public final class Player extends Entity {
 
     @MainThread
     public Player(Position position) {
-        super(position, new RenderEntity(Models.PLAYER), MovementState.load(WalkingState.class));
+        super(position, new RenderEntity(EntityType.PLAYER), MovementState.load(WalkingState.class));
         super.getRenderEntity().setAnimator(new PlayerAnimator());
 
         meshCollector = new MeshCollector();

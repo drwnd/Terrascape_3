@@ -36,8 +36,8 @@ public abstract class MovementState {
      * Computes the acceleration the Entity should have in the next GameTick.
      * Only gets called when the Entity is actively moving.
      *
-     * @param rotation The rotation of the Entity
-     * @param lastPosition   The position of the Entity in the last GameTick
+     * @param rotation     The rotation of the Entity
+     * @param lastPosition The position of the Entity in the last GameTick
      * @return The acceleration of the Entity.
      */
     @ServerThread
@@ -48,10 +48,10 @@ public abstract class MovementState {
      * Gets called every GameTick regardless of the Entity being able to move actively.
      * Therefore, no inputs should be queried in this method.
      *
-     * @param velocity       The current Velocity of the Entity. This is also the output variable.
-     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Entity can't move actively.
-     * @param position The position of the Entity.
-     * @param rotation The rotation of the Entity.
+     * @param velocity     The current Velocity of the Entity. This is also the output variable.
+     * @param acceleration The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Entity can't move actively.
+     * @param position     The position of the Entity.
+     * @param rotation     The rotation of the Entity.
      */
     @ServerThread
     void changeVelocity(Vector3f velocity, Vector3f acceleration, Position position, Vector3f rotation) {
