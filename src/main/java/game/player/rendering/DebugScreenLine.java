@@ -15,6 +15,7 @@ import core.utils.MathUtils;
 import core.utils.StringGetter;
 import core.utils.Vector3l;
 
+import game.entities.Entity;
 import game.player.interaction.Target;
 import game.server.Chunk;
 import game.server.Game;
@@ -58,7 +59,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().name);
 
-        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> "Current Tick:%s, Current Time:%s".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()));
+        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> "Current Tick:%d, Current Time:%f".formatted(Game.getServer().getCurrentGameTick(), Renderer.getRenderTime()));
 
         add(lines, DebugScreenOptions.FPS, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();
@@ -68,7 +69,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                 minFrameTime = Math.min(minFrameTime, frameTimes.get(index + 1) - frameTimes.get(index));
             }
 
-            return "FPS: %s, lowest: %s, highest: %s, CPU Frame Time: %sµs"
+            return "FPS: %d, lowest: %d, highest: %d, CPU Frame Time: %dµs"
                     .formatted(frameTimes.size(), (int) (1_000_000_000D / maxFrameTime), (int) (1_000_000_000D / minFrameTime), frameTime / 1_000L);
         });
 
@@ -77,7 +78,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             long free = Runtime.getRuntime().freeMemory();
             long used = total - free;
 
-            return "Total Memory: %sMB, used: %sMB, free: %sMB".formatted(total / 1_000_000L, used / 1_000_000L, free / 1_000_000L);
+            return "Total Memory: %dMB, used: %dMB, free: %dMB".formatted(total / 1_000_000L, used / 1_000_000L, free / 1_000_000L);
         });
 
         add(lines, DebugScreenOptions.CHUNK_MEMORY, () -> {
@@ -90,7 +91,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                     chunks++;
                 }
             if (chunks == 0) return "No generated Chunks";
-            return "Chunk Memory: %sMB, average: %sB".formatted(memory / 1_000_000L, memory / chunks);
+            return "Chunk Memory: %dMB, average: %dB".formatted(memory / 1_000_000L, memory / chunks);
         });
 
         add(lines, DebugScreenOptions.BUFFER_STORAGE, () -> {
@@ -100,12 +101,13 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             int capacity = allocator.getCapacity() / 1000;
             int highestAllocated = allocator.getHighestAllocated() / 1000;
 
-            return "Capacity:%sKB, Highest Allocated:%sKB, Used: %sKB, Free: %sKB".formatted(capacity, highestAllocated, used, free);
+            return "Capacity:%dKB, Highest Allocated:%dKB, Used: %dKB, Free: %dKB".formatted(capacity, highestAllocated, used, free);
         });
 
         add(lines, DebugScreenOptions.RENDERED_MODELS, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
-            return "Rendered Opaque Models:%s, Water Models:%s, Glass Models:%s".formatted(renderer.renderedOpaqueModels, renderer.renderedTransparentModels, renderer.renderedGlassModels);
+            return "Rendered Opaque Models:%d, Water Models:%d, Glass Models:%d, Entities:%d".formatted(
+                    renderer.renderedOpaqueModels, renderer.renderedTransparentModels, renderer.renderedGlassModels, Entity.ENTITIES.size());
         });
 
         add(lines, DebugScreenOptions.POSITION, () -> {
@@ -115,7 +117,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.VELOCITY, () -> {
             Vector3f velocity = Game.getPlayer().getMovement().getVelocity();
-            return "Velocity %sm/s : [X:%s, Y:%s, Z:%s]".formatted(MathUtils.round(velocity.length() * 20 / 16, 3), MathUtils.round(velocity.x, 3), MathUtils.round(velocity.y, 3), MathUtils.round(velocity.z, 3));
+            return "Velocity %fm/s : [X:%f, Y:%f, Z:%f]".formatted(MathUtils.round(velocity.length() * 20 / 16, 3), MathUtils.round(velocity.x, 3), MathUtils.round(velocity.y, 3), MathUtils.round(velocity.z, 3));
         });
 
         add(lines, DebugScreenOptions.CHUNK_POSITION, () -> {
@@ -125,17 +127,17 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
                     playerPosition.longY >>> CHUNK_SIZE_BITS,
                     playerPosition.longZ >>> CHUNK_SIZE_BITS, 0);
             if (chunk == null) return "Chunk is null";
-            return "Chunk Position [X:%s, Y:%s, Z:%s], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
+            return "Chunk Position [X:%d, Y:%d, Z:%d], In Chunk Position %s".formatted(chunk.X, chunk.Y, chunk.Z, playerPosition.inChunkPositionToString());
         });
 
         add(lines, DebugScreenOptions.DIRECTION, () -> {
             Vector3f direction = Game.getPlayer().getCamera().getDirection();
-            return "Direction X:%s, Y:%s, Z:%s".formatted(direction.x, direction.y, direction.z);
+            return "Direction X:%f, Y:%f, Z:%f".formatted(direction.x, direction.y, direction.z);
         });
 
         add(lines, DebugScreenOptions.ROTATION, () -> {
             Vector3f rotation = Game.getPlayer().getCamera().getRotation();
-            return "Rotation Pitch:%s, Yaw:%s, Roll:%s".formatted(rotation.x, rotation.y, rotation.z);
+            return "Rotation Pitch:%f, Yaw:%f, Roll:%f".formatted(rotation.x, rotation.y, rotation.z);
         });
 
         add(lines, DebugScreenOptions.TARGET, () -> {
@@ -145,14 +147,14 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             return target.string();
         });
 
-        add(lines, DebugScreenOptions.SEED, () -> "Seed: %s".formatted(WorldGeneration.SEED));
+        add(lines, DebugScreenOptions.SEED, () -> "Seed: %d".formatted(WorldGeneration.SEED));
 
         add(lines, DebugScreenOptions.CHUNK_STATUS, () -> {
             Vector3l chunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
-            return "Current Chunk generation status:%s, meshed:%s".formatted(chunk.getGenerationStatus().name(), Game.getPlayer().getMeshCollector().isMeshed(chunk.INDEX, 0));
+            return "Current Chunk generation status:%s, meshed:%b".formatted(chunk.getGenerationStatus().name(), Game.getPlayer().getMeshCollector().isMeshed(chunk.INDEX, 0));
         });
 
         add(lines, DebugScreenOptions.CHUNK_IDENTIFIERS, () -> {
@@ -160,7 +162,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
             Chunk chunk = Game.getWorld().getChunk(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z, 0);
 
             if (chunk == null) return "Chunk is null";
-            return "Chunk Index:%s, Chunk ID:%s".formatted(chunk.INDEX, chunk.ID);
+            return "Chunk Index:%d, Chunk ID:%s".formatted(chunk.INDEX, chunk.ID);
         });
 
         add(lines, DebugScreenOptions.CONCURRENTLY_PLAYED_SOUNDS, () -> "Concurrently played sounds: %d / 128".formatted(Sound.getConcurrentlyPlayedSounds()));
@@ -175,42 +177,42 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         add(lines, DebugScreenOptions.RESULTING_HEIGHT, () -> {
             Position position = Game.getPlayer().getPosition();
             int resultingHeight = MathUtils.floor(WorldGeneration.getResultingHeight(position.longX, position.longZ));
-            return "Resulting Height: %s".formatted(resultingHeight);
+            return "Resulting Height: %d".formatted(resultingHeight);
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Temperature:%s".formatted(MapSample.temperatureMapValue(position.longX, position.longZ));
+            return "Temperature:%f".formatted(MapSample.temperatureMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Humidity:   %s".formatted(MapSample.humidityMapValue(position.longX, position.longZ));
+            return "Humidity:   %f".formatted(MapSample.humidityMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Height:     %s".formatted(MapSample.heightMapValue(position.longX, position.longZ));
+            return "Height:     %f".formatted(MapSample.heightMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Erosion:    %s".formatted(MapSample.erosionMapValue(position.longX, position.longZ));
+            return "Erosion:    %f".formatted(MapSample.erosionMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Continental:%s".formatted(MapSample.continentalMapValue(position.longX, position.longZ));
+            return "Continental:%f".formatted(MapSample.continentalMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "River:      %s".formatted(MapSample.riverMapValue(position.longX, position.longZ));
+            return "River:      %f".formatted(MapSample.riverMapValue(position.longX, position.longZ));
         });
 
         add(lines, DebugScreenOptions.GENERATION_DATA, () -> {
             Position position = Game.getPlayer().getPosition();
-            return "Ridge:      %s".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
+            return "Ridge:      %f".formatted(MapSample.ridgeMapValue(position.longX, position.longZ));
         });
 
         return lines;
