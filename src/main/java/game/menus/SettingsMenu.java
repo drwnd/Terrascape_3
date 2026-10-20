@@ -182,6 +182,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.RENDER_ACCUMULATION_TEXTURE);
         section.addToggle(ToggleSettings.RENDER_REVEAL_TEXTURE);
         section.addOption(CoreOptionSettings.LOG_MESSAGES);
+        section.addToggle(ToggleSettings.RENDER_ENTITY_HITBOXES);
 
         section.addSlider(IntSettings.REACH);
         section.addSlider(IntSettings.BREAK_PLACE_INTERVALL);

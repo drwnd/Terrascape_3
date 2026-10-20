@@ -15,7 +15,6 @@ import org.joml.Vector3f;
 
 public class Zombie extends Entity {
 
-    @MainThread
     public Zombie(Position position) {
         super(position, new RenderEntity(Models.ZOMBIE), MovementState.load(ZombieMovementState.class));
         getRenderEntity().setAnimator(new ZombieAnimator(this));

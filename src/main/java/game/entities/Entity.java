@@ -8,22 +8,15 @@ import game.utils.Position;
 import game.utils.ServerThread;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-
 public abstract class Entity {
 
-    public static final ArrayList<Entity> ENTITIES = new ArrayList<>();
-
-    @MainThread
     public Entity(Position position, RenderEntity renderEntity, MovementState movementState) {
         this.position = position;
         this.renderEntity = renderEntity;
         this.movement = new Movement(movementState);
-        ENTITIES.add(this);
-    }
-
-    public void kill() {
-        ENTITIES.remove(this);
+        synchronized (Game.getWorld().entities) {
+            Game.getWorld().entities.add(this);
+        }
     }
 
     @ServerThread
@@ -46,8 +39,8 @@ public abstract class Entity {
 
     public Position getToRenderPosition() {
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
-        Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
         synchronized (this) {
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
             return new Position(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
         }
     }
@@ -60,9 +53,9 @@ public abstract class Entity {
         return movement;
     }
 
+    protected final Movement movement;
+    protected Position position;
     private final RenderEntity renderEntity;
-    private final Movement movement;
-    private Position position;
     private final Vector3f rotation = new Vector3f();
 
     public interface EntityBuilder {

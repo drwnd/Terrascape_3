@@ -30,7 +30,8 @@ public enum ToggleSettings implements ToggleSetting {
     RENDER_SHADOW_MAP(false),
     RENDER_SHADOW_COLORS(false),
     RENDER_ACCUMULATION_TEXTURE(false),
-    RENDER_REVEAL_TEXTURE(false);
+    RENDER_REVEAL_TEXTURE(false),
+    RENDER_ENTITY_HITBOXES(false);
 
     ToggleSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;

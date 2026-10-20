@@ -22,13 +22,6 @@ import static game.utils.Constants.*;
 
 public final class Movement {
 
-    @MainThread
-    public Movement() {
-        state = MovementState.load(WalkingState.class);
-        state.movement = this;
-    }
-
-    @MainThread
     public Movement(MovementState state) {
         this.state = state;
         state.movement = this;
@@ -238,11 +231,11 @@ public final class Movement {
     private void playFootstepSound(Position position) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         int ticksBetweenFootsteps = state.ticksBetweenFootsteps();
-        if (ticksBetweenFootsteps < 0 || currentGameTick < lastFootstepTick + ticksBetweenFootsteps || velocity.lengthSquared() < 1) return;
+        if (ticksBetweenFootsteps <= 0 || currentGameTick < lastFootstepTick + ticksBetweenFootsteps || velocity.lengthSquared() < .5) return;
         lastFootstepTick = currentGameTick;
 
         byte standingMaterial = state.getStandingMaterial(position);
-        Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, null);
+        Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, velocity);
     }
 
     private long getStartX(Position position, Vector3i hitboxSize, int component) {

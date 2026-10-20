@@ -6,8 +6,12 @@ import core.sound.Sound;
 import core.utils.Vector3l;
 import core.utils.MainThread;
 
+import game.assets.Models;
+import game.entities.Entity;
 import game.entities.RenderEntity;
 import game.entities.PlayerAnimator;
+import game.entities.movement.MovementState;
+import game.entities.movement.WalkingState;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
 import game.entities.movement.Movement;
@@ -28,15 +32,17 @@ import org.joml.Vector3i;
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
 
-public final class Player {
+public final class Player extends Entity {
 
     @MainThread
     public Player(Position position) {
+        super(position, new RenderEntity(Models.PLAYER), MovementState.load(WalkingState.class));
+        super.getRenderEntity().setAnimator(new PlayerAnimator());
+
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
         camera = new Camera();
         input = new PlayerInput(this);
-        movement = new Movement();
         renderer = new Renderer(this, meshCollector);
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
@@ -46,12 +52,13 @@ public final class Player {
         renderer.addRenderable(inventory);
         renderer.addHUDRenderable(hotbar);
         renderer.addRenderable(chat);
-        this.position = position;
         Window.pushRenderable(renderer);
     }
 
+    @Override
     @MainThread
-    public Position updateFrame() {
+    public void updateFrame(float frameTime) {
+        getRenderEntity().updateFrame(frameTime, camera.getRotation());
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
@@ -59,18 +66,17 @@ public final class Player {
         meshCollector.uploadAllMeshes();
         meshCollector.deleteOldMeshes();
 
-        Position toRenderPosition;
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
         synchronized (this) {
             camera.rotate(input.getCursorMovement());
             Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
-            toRenderPosition = new Position(position)
-                    .add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
+            toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
             camera.setPosition(camera.applyPerspectiveOffset(new Position(toRenderPosition).addComponent(Y_COMPONENT, movement.getState().getCameraElevation())));
         }
-        return toRenderPosition;
+        applyAnimation();
     }
 
+    @Override
     @ServerThread
     public void updateGameTick() {
         synchronized (this) {
@@ -84,6 +90,11 @@ public final class Player {
         if (canDoActiveActions() && currentGameTick >= lastInteractionTick + IntSettings.BREAK_PLACE_INTERVALL.value()
                 && (Input.isKeyPressed(KeySettings.DESTROY) || Input.isKeyPressed(KeySettings.USE)))
             lastInteractionTick = currentGameTick;
+    }
+
+    @Override
+    public Position getToRenderPosition() {
+        return toRenderPosition;
     }
 
     @MainThread
@@ -151,14 +162,14 @@ public final class Player {
     }
 
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter) {
+    public void applyAnimation() {
         final int animationLength = 8;
         long currentTick = Game.getServer().getCurrentGameTick();
         if (currentTick > lastInteractionTick + animationLength) return;
 
         float ticksPassed = Math.min(Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1) + (currentTick - lastInteractionTick), animationLength);
 
-        playerCharacter.transforms()[PlayerAnimator.RIGHT_ARM]
+        getRenderEntity().transforms()[PlayerAnimator.RIGHT_ARM]
                 .rotate((float) Math.sin(ticksPassed * Math.PI / animationLength), 0, 0, 1)
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
     }
@@ -194,10 +205,7 @@ public final class Player {
         return renderer;
     }
 
-    public Movement getMovement() {
-        return movement;
-    }
-
+    @Override
     public Position getPosition() {
         synchronized (this) {
             return new Position(position);
@@ -270,13 +278,12 @@ public final class Player {
     private final ParticleCollector particleCollector;
     private final Camera camera;
     private final PlayerInput input;
-    private final Movement movement;
     private final Renderer renderer;
     private final InteractionHandler interactionHandler;
     private final Hotbar hotbar;
     private final Inventory inventory;
     private final ChatTextField chat;
+    private final Position toRenderPosition = new Position();
 
-    private Position position; // Center of the players' feet
     private long lastInteractionTick = 0;
 }

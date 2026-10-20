@@ -44,6 +44,7 @@ public final class Server implements CrashCallback {
         this.messages = messages;
     }
 
+    @SuppressWarnings("CopyConstructorMissesField") // executor is shutdown and cannot be used, and generatorRestartScheduled is true by default
     @MainThread
     public Server(Server oldServer) {
         oldServer.cleanUp();
@@ -231,15 +232,18 @@ public final class Server implements CrashCallback {
     @ServerThread
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
-        Game.getPlayer().updateGameTick();
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities) entity.updateGameTick();
+        }
+        Position newPlayerPosition = Game.getPlayer().getPosition();
+
         synchronized (functions) {
             for (Iterator<Function> iterator = functions.values().iterator(); iterator.hasNext(); ) {
                 boolean shouldRemove = !iterator.next().run();
                 if (shouldRemove) iterator.remove();
             }
         }
-        for (Entity entity : Entity.ENTITIES) entity.updateGameTick();
-        Position newPlayerPosition = Game.getPlayer().getPosition();
+
         synchronized (generator) {
             if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSettings.CULLING_COMPUTATION.value()) {
                 generator.restart();

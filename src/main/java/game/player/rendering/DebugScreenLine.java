@@ -15,7 +15,6 @@ import core.utils.MathUtils;
 import core.utils.StringGetter;
 import core.utils.Vector3l;
 
-import game.entities.Entity;
 import game.player.interaction.Target;
 import game.server.Chunk;
 import game.server.Game;
@@ -107,7 +106,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         add(lines, DebugScreenOptions.RENDERED_MODELS, () -> {
             Renderer renderer = Game.getPlayer().getRenderer();
             return "Rendered Opaque Models:%d, Water Models:%d, Glass Models:%d, Entities:%d".formatted(
-                    renderer.renderedOpaqueModels, renderer.renderedTransparentModels, renderer.renderedGlassModels, Entity.ENTITIES.size());
+                    renderer.renderedOpaqueModels, renderer.renderedTransparentModels, renderer.renderedGlassModels, Game.getWorld().entities.size());
         });
 
         add(lines, DebugScreenOptions.POSITION, () -> {

@@ -4,6 +4,7 @@ import core.sound.Sound;
 import core.utils.FileManager;
 import core.utils.MathUtils;
 
+import game.entities.Entity;
 import game.server.generation.WorldGeneration;
 import game.server.generation.WorldGenerationSettings;
 import game.server.saving.ChunkSaver;
@@ -14,6 +15,7 @@ import game.utils.Status;
 import game.utils.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
@@ -28,14 +30,15 @@ public final class World {
     public final long lastPlayedAsMs;
     public final String name, fileName, created, lastPlayed;
     public final WorldGenerationSettings worldGenerationSettings;
+    public final ArrayList<Entity> entities;
 
     @MainThread
     public World(World world) {
-        this(world.worldGenerationSettings, world.name, world.created, world.lastPlayed, world.lastPlayedAsMs, true);
+        this(world.worldGenerationSettings, world.name, world.created, world.lastPlayed, world.lastPlayedAsMs, world.entities, true);
     }
 
     @MainThread
-    public World(WorldGenerationSettings worldGenerationSettings, String name, String created, String lastPlayed, long lastPlayedAsMs, boolean createChunksArray) {
+    public World(WorldGenerationSettings worldGenerationSettings, String name, String created, String lastPlayed, long lastPlayedAsMs, ArrayList<Entity> entities, boolean createChunksArray) {
         int renderDistance = IntSettings.RENDER_DISTANCE.value();
 
         LOD_COUNT = IntSettings.LOD_COUNT.value();
@@ -52,6 +55,7 @@ public final class World {
         this.worldGenerationSettings = worldGenerationSettings;
         this.lastPlayedAsMs = lastPlayedAsMs;
         this.fileName = Utils.sanitizeFileName(name);
+        this.entities = entities;
     }
 
     @MainThread
@@ -102,6 +106,7 @@ public final class World {
         lastPlayed = oldWorld.lastPlayed;
         worldGenerationSettings = oldWorld.worldGenerationSettings;
         lastPlayedAsMs = oldWorld.lastPlayedAsMs;
+        entities = oldWorld.entities;
         this.fileName = Utils.sanitizeFileName(name);
     }
 

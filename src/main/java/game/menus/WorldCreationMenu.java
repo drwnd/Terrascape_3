@@ -22,6 +22,7 @@ import org.joml.Vector2i;
 
 import java.io.*;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -80,7 +81,7 @@ public final class WorldCreationMenu extends UiBackgroundElement {
             Date defaultData = new Date(0);
             new WorldSaver().save(new World(
                     new WorldGenerationSettings(seed, (BiomeSamplers) biomeSetting.value(), (1 << blockSizeSetting.value().ordinal())),
-                    worldName, defaultData.toString(), defaultData.toString(), defaultData.getTime(), false),
+                    worldName, defaultData.toString(), defaultData.toString(), defaultData.getTime(), new ArrayList<>(), false),
                     WorldSaver.getSaveFileLocation(fileName));
 
             Window.popRenderable();

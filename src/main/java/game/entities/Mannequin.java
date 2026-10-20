@@ -1,7 +1,5 @@
 package game.entities;
 
-import core.utils.MainThread;
-
 import game.assets.Models;
 import game.entities.movement.EntityMovementState;
 import game.entities.movement.MovementState;
@@ -11,7 +9,6 @@ import org.joml.Vector3f;
 
 public class Mannequin extends Entity{
 
-    @MainThread
     public Mannequin(Position position) {
         super(position, new RenderEntity(Models.PLAYER, new PlayerAnimator()), MovementState.load(MannequinMovementState.class));
     }
