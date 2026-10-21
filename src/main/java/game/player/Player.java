@@ -3,7 +3,6 @@ package game.player;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.sound.Sound;
-import core.utils.Vector3l;
 import core.utils.MainThread;
 
 import game.assets.EntityType;
@@ -14,7 +13,6 @@ import game.entities.movement.MovementState;
 import game.entities.movement.WalkingState;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
-import game.entities.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
 import game.player.particles.ParticleCollector;
@@ -27,7 +25,6 @@ import game.utils.Position;
 import game.utils.ServerThread;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -38,6 +35,7 @@ public final class Player extends Entity {
     public Player(Position position) {
         super(position, new RenderEntity(EntityType.PLAYER), MovementState.load(WalkingState.class));
         super.getRenderEntity().setAnimator(new PlayerAnimator());
+        Game.getServer().spawnEntity(this);
 
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
@@ -93,6 +91,7 @@ public final class Player extends Entity {
     }
 
     @Override
+    @MainThread
     public Position getToRenderPosition() {
         return toRenderPosition;
     }
@@ -153,7 +152,7 @@ public final class Player extends Entity {
             camera.changeZoom(yScroll > 0 ? zoomFactorChange : 1 / zoomFactorChange);
             return;
         }
-        if (interactionHandler.getState(Target.getPlayerTarget()).isLocked()) {
+        if (interactionHandler.getState(VoxelTarget.getPlayerTarget()).isLocked()) {
             interactionHandler.handleScroll(yScroll);
             return;
         }
@@ -172,17 +171,6 @@ public final class Player extends Entity {
         getRenderEntity().transforms()[PlayerAnimator.RIGHT_ARM]
                 .rotate((float) Math.sin(ticksPassed * Math.PI / animationLength), 0, 0, 1)
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
-    }
-
-
-    public Vector3l getMinCoordinate() {
-        Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Vector3l(Movement.minX(position, hitboxSize), Movement.minY(position, hitboxSize), Movement.minZ(position, hitboxSize));
-    }
-
-    public Vector3l getMaxCoordinate() {
-        Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Vector3l(Movement.maxX(position, hitboxSize), Movement.maxY(position, hitboxSize), Movement.maxZ(position, hitboxSize));
     }
 
     public Placeable getHeldPlaceable() {

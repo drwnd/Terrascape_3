@@ -120,6 +120,18 @@ public final class Server implements CrashCallback {
         this.dayTime = dayTime;
     }
 
+    public void spawnEntity(Entity entity) {
+        synchronized (toSpawnEntities) {
+            toSpawnEntities.add(entity);
+        }
+    }
+
+    public void killEntity(Entity entity) {
+        synchronized (toKillEntities) {
+            toKillEntities.add(entity);
+        }
+    }
+
     @ServerThread
     public boolean requestBreakPlaceInteraction(Vector3l position, Placeable placeable, int side) {
         placeable.offsetPosition(position, side);
@@ -250,6 +262,19 @@ public final class Server implements CrashCallback {
                 generatorRestartScheduled = false;
             }
         }
+
+        synchronized (Game.getWorld().entities) {
+            synchronized (toSpawnEntities) {
+                Game.getWorld().entities.addAll(toSpawnEntities);
+                toSpawnEntities.clear();
+            }
+            synchronized (toKillEntities) {
+                for (Entity entity : toKillEntities) entity.kill();
+                Game.getWorld().entities.removeAll(toKillEntities);
+                toKillEntities.clear();
+            }
+        }
+
         removeOldChatMessages(IntSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
@@ -265,6 +290,7 @@ public final class Server implements CrashCallback {
     private final ArrayList<ChatMessage> messages;
     private final ChunkGenerator generator = new ChunkGenerator();
     private final HashMap<Object, Function> functions = new HashMap<>();
+    private final ArrayList<Entity> toSpawnEntities = new ArrayList<>(), toKillEntities = new ArrayList<>();
 
     private long gameTickStartTime;
     private boolean generatorRestartScheduled = true;

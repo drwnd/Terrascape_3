@@ -15,7 +15,7 @@ import core.utils.MathUtils;
 import core.utils.StringGetter;
 import core.utils.Vector3l;
 
-import game.player.interaction.Target;
+import game.player.interaction.VoxelTarget;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.generation.MapSample;
@@ -140,7 +140,7 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
         });
 
         add(lines, DebugScreenOptions.TARGET, () -> {
-            Target target = Target.getPlayerTarget();
+            VoxelTarget target = VoxelTarget.getPlayerTarget();
 
             if (target == null) return "Nothing targeted.";
             return target.string();

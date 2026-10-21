@@ -11,7 +11,7 @@ import game.player.Player;
 import game.player.interaction.PlacingState;
 import game.player.interaction.RepeatPlaceable;
 import game.player.interaction.StructureSelector;
-import game.player.interaction.Target;
+import game.player.interaction.VoxelTarget;
 import game.server.Game;
 import game.server.World;
 import game.server.generation.Structure;
@@ -126,10 +126,10 @@ public final class StructureCommand {
     @MainThread
     private static CommandResult getMinMaxPosition(Vector3l minPosition, Vector3l maxPosition) {
         Player player = Game.getPlayer();
-        Target lockedTarget = player.getInteractionHandler().getLockedTarget();
-        Target startTarget = player.getInteractionHandler().getStartTarget();
+        VoxelTarget lockedTarget = player.getInteractionHandler().getLockedTarget();
+        VoxelTarget startTarget = player.getInteractionHandler().getStartTarget();
         if (startTarget == null) startTarget = lockedTarget;
-        PlacingState state = player.getInteractionHandler().getState(Target.getPlayerTarget());
+        PlacingState state = player.getInteractionHandler().getState(VoxelTarget.getPlayerTarget());
 
         if (!(player.getHeldPlaceable() instanceof StructureSelector))
             return CommandResult.fail("Must use a Structure Selector");

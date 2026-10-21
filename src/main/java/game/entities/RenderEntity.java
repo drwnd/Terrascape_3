@@ -8,7 +8,7 @@ import core.utils.MainThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class RenderEntity {
+public final class RenderEntity {
 
     public double animationTimer = 0;
 
@@ -23,12 +23,16 @@ public class RenderEntity {
 
     @MainThread
     public void updateFrame(float frameTime, Vector3f rotation) {
+        synchronizeTransforms();
+        animator.applyAnimation(this, rotation, frameTime);
+    }
+
+    public void synchronizeTransforms() {
         model = AssetManager.get(modelIdentifier);
         if (transforms.length != model.parts().length) {
             transforms = new Matrix4f[model.parts().length];
-            for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f();
+            for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f().zero();
         }
-        animator.applyAnimation(this, rotation, frameTime);
     }
 
     public void setAnimator(Animator animator) {

@@ -1,12 +1,14 @@
 package game.entities;
 
 import core.utils.MainThread;
+import core.utils.Vector3l;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.server.Game;
 import game.utils.Position;
 import game.utils.ServerThread;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 public abstract class Entity {
 
@@ -14,9 +16,11 @@ public abstract class Entity {
         this.position = position;
         this.renderEntity = renderEntity;
         this.movement = new Movement(movementState);
-        synchronized (Game.getWorld().entities) {
-            Game.getWorld().entities.add(this);
-        }
+        renderEntity.synchronizeTransforms();
+    }
+
+    public void kill() {
+
     }
 
     @ServerThread
@@ -37,6 +41,7 @@ public abstract class Entity {
         return position;
     }
 
+    @MainThread
     public Position getToRenderPosition() {
         float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
         synchronized (this) {
@@ -53,12 +58,22 @@ public abstract class Entity {
         return movement;
     }
 
+    public Vector3l getMinCoordinate() {
+        synchronized (this) {
+            Vector3i hitboxSize = movement.getState().getHitboxSize();
+            return new Vector3l(Movement.minX(position, hitboxSize), Movement.minY(position, hitboxSize), Movement.minZ(position, hitboxSize));
+        }
+    }
+
+    public Vector3l getMaxCoordinate() {
+        synchronized (this) {
+            Vector3i hitboxSize = movement.getState().getHitboxSize();
+            return new Vector3l(Movement.maxX(position, hitboxSize), Movement.maxY(position, hitboxSize), Movement.maxZ(position, hitboxSize));
+        }
+    }
+
     protected final Movement movement;
     protected Position position;
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();
-
-    public interface EntityBuilder {
-        void getEntity(Position position);
-    }
 }

@@ -708,9 +708,9 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderPlaceableHologram(Position cameraPosition, Matrix4f projectionViewMatrix) {
-        Target currentTarget = Target.getPlayerTarget();
-        Target lockedTarget = player.getInteractionHandler().getLockedTarget();
-        Target startTarget = player.getInteractionHandler().getStartTarget();
+        VoxelTarget currentTarget = VoxelTarget.getPlayerTarget();
+        VoxelTarget lockedTarget = player.getInteractionHandler().getLockedTarget();
+        VoxelTarget startTarget = player.getInteractionHandler().getStartTarget();
         PlacingState state = player.getInteractionHandler().getState(currentTarget);
 
         if (!state.shouldRender()) return;
@@ -732,7 +732,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target endTarget) {
+    private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget endTarget) {
         if (startTarget == null || endTarget == null) return;
 
         CapsulePlaceable placeable = (CapsulePlaceable) player.getHeldPlaceable();
@@ -754,7 +754,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target) {
+    private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget target) {
         StructurePlaceable placeable = (StructurePlaceable) player.getHeldPlaceable();
         Vector3l position = target.offsetPosition();
         placeable.offsetPosition(position, target.side());
@@ -768,7 +768,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget, Placeable placeable) {
+    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget currentTarget, Placeable placeable) {
         if (startTarget == null || currentTarget == null) return;
         byte material = placeable instanceof ShapePlaceable shapePlaceable
                 && !Input.isKeyPressed(KeySettings.SPRINT)
@@ -976,17 +976,16 @@ public final class Renderer extends Renderable {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glDepthMask(true);
+        boolean isFirstPerson = OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON;
 
         synchronized (Game.getWorld().entities) {
             for (Entity entity : Game.getWorld().entities) {
-                Vector3i hitbox = entity.getMovement().getState().getHitboxSize();
-                Position position = entity.getPosition();
-                long minX = position.longX - (hitbox.x >> 1);
-                long minY = position.longY;
-                long minZ = position.longZ - (hitbox.z >> 1);
+                if (isFirstPerson && entity instanceof Player) continue;
+                Vector3l maxPosition = entity.getMaxCoordinate();
+                Vector3l minPosition = entity.getMinCoordinate();
 
-                shader.setUniform("minPosition", minX, minY, minZ);
-                shader.setUniform("maxPosition", minX + hitbox.x, minY + hitbox.y, minZ + hitbox.z);
+                shader.setUniform("minPosition", maxPosition);
+                shader.setUniform("maxPosition", minPosition);
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }

@@ -50,6 +50,10 @@ public final class Movement {
         state.handleInput(button, action);
     }
 
+    public void applyForce(float x, float y, float z) {
+        velocity.add(x, y, z);
+    }
+
     public Vector3f getVelocity() {
         return new Vector3f(velocity);
     }

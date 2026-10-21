@@ -3,6 +3,7 @@ package game.server.command;
 import core.utils.MainThread;
 
 import game.assets.EntityType;
+import game.entities.Entity;
 import game.server.Game;
 import game.utils.Position;
 
@@ -63,7 +64,8 @@ public final class SummonCommand {
         tokens.expectFinishedLessEqual();
         if (!xSet || !ySet || !zSet) return CommandResult.fail("Not all coordinates specified");
 
-        entityType.getEntity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ));
+        Entity entity = entityType.getEntity(new Position(longX, longY, longZ, fractionX, fractionY, fractionZ));
+        Game.getServer().spawnEntity(entity);
         return CommandResult.success();
     }
 }

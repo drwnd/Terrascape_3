@@ -25,13 +25,17 @@ public enum EntityType implements AssetIdentifier<Model> {
     }
 
 
-    EntityType(Entity.EntityBuilder entityBuilder) {
+    EntityType(EntityBuilder entityBuilder) {
         this.entityBuilder = entityBuilder;
     }
 
-    public void getEntity(Position position) {
-        entityBuilder.getEntity(position);
+    public Entity getEntity(Position position) {
+        return entityBuilder.getEntity(position);
     }
 
-    private final Entity.EntityBuilder entityBuilder;
+    private final EntityBuilder entityBuilder;
+
+    private interface EntityBuilder {
+        Entity getEntity(Position position);
+    }
 }
