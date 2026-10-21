@@ -123,7 +123,7 @@ void main() {
     }
 
     vec3 facePosition = getFacePositions(side, currentVertexId);
-    voxelPosition += rotate(facePosition * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime);
+    voxelPosition += 2 * rotate(facePosition * 0.5 * timeScaler - vec3(timeScaler * 0.5), currentParticle, aliveTime);
 
     gl_Position = projectionViewMatrix * vec4(voxelPosition, 1.0);
 

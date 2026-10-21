@@ -17,7 +17,9 @@ import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.utils.Utils;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3i;
+import org.joml.Vector4f;
 
 import java.util.Arrays;
 
@@ -185,7 +187,9 @@ public final class MaterialsData {
     }
 
     public void addPlaceParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent, Vector3i lengths, byte transform) {
-        addPlaceParticles(collector, getBitMap(), transform, lengths, opaque, transparent, totalSizeBits, 0, 0, 0, 0);
+        synchronized (this) {
+            addPlaceParticles(collector, getBitMap(), transform, lengths, opaque, transparent, totalSizeBits, 0, 0, 0, 0);
+        }
     }
 
     public void addBreakParticles(ParticleCollector collector, IntArrayList opaque, IntArrayList transparent, ShapePlaceable placeable,
@@ -193,7 +197,15 @@ public final class MaterialsData {
         Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
         Vector3i start = new Vector3i(startX, startY, startZ);
         Vector3i offset = new Vector3i(offsetX, offsetY, offsetZ);
-        addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
+        synchronized (this) {
+            addBreakParticles(collector, opaque, transparent, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
+        }
+    }
+
+    public void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform) {
+        synchronized (this) {
+            addDeathParticles(collector, particles, transform, totalSizeBits, 0, 0, 0, 0);
+        }
     }
 
     public void addPlaceParticles(ParticleCollector collector, IntArrayList particles, ShapePlaceable placeable,
@@ -201,13 +213,17 @@ public final class MaterialsData {
         Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
         Vector3i start = new Vector3i(startX, startY, startZ);
         Vector3i offset = new Vector3i(offsetX, offsetY, offsetZ);
-        addPlaceParticles(collector, particles, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
+        synchronized (this) {
+            addPlaceParticles(collector, particles, placeable, lengths, start, offset, totalSizeBits, 0, 0, 0, 0);
+        }
     }
 
     public void findIntersectingMaterials(boolean[] involvedMaterials, ShapePlaceable placeable, int startX, int startY, int startZ) {
         Vector3i lengths = new Vector3i(placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ());
         Vector3i start = new Vector3i(startX, startY, startZ);
-        findIntersectingMaterials(involvedMaterials, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+        synchronized (this) {
+            findIntersectingMaterials(involvedMaterials, placeable, lengths, start, totalSizeBits, 0, 0, 0, 0);
+        }
     }
 
     public long[] getBitMap() {
@@ -378,7 +394,7 @@ public final class MaterialsData {
         int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY - start.y + length, lengths.y);
         int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ - start.z + length, lengths.z);
 
-        int identifier = getIdentifier(startIndex);
+        byte identifier = getIdentifier(startIndex);
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
             if (material == AIR || material == OUT_OF_WORLD
@@ -734,7 +750,7 @@ public final class MaterialsData {
 
     private void addPlaceParticles(ParticleCollector collector, long[] bitMap, byte transform, Vector3i lengths, IntArrayList opaque, IntArrayList transparent,
                                    int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
-        int identifier = getIdentifier(startIndex);
+        byte identifier = getIdentifier(startIndex);
 
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
@@ -799,7 +815,7 @@ public final class MaterialsData {
         int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY + length - start.y, lengths.y);
         int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ + length - start.z, lengths.z);
 
-        int identifier = getIdentifier(startIndex);
+        byte identifier = getIdentifier(startIndex);
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
             if (material == AIR || material == OUT_OF_WORLD
@@ -865,7 +881,7 @@ public final class MaterialsData {
         int minY = Math.max(inChunkY - start.y, 0), maxY = Math.min(inChunkY + length - start.y, lengths.y);
         int minZ = Math.max(inChunkZ - start.z, 0), maxZ = Math.min(inChunkZ + length - start.z, lengths.z);
 
-        int identifier = getIdentifier(startIndex);
+        byte identifier = getIdentifier(startIndex);
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
             if (material == placeable.getMaterial() || paint && material == AIR || replaceAir && material != AIR) return;
@@ -905,6 +921,49 @@ public final class MaterialsData {
         addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
         addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
         addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+    }
+
+    private void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform,
+                                   int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
+        byte identifier = getIdentifier(startIndex);
+        int stepLength = IntSettings.DEATH_PARTICLE_STEP_LENGTH.value();
+
+        if (identifier == HOMOGENOUS) {
+            byte material = data[startIndex + 1];
+            if (material == AIR) return;
+
+            int length = 1 << sizeBits;
+            Vector4f position = new Vector4f();
+            for (int x = inChunkX, endX = inChunkX + length; x < endX; x += stepLength)
+                for (int y = inChunkY, endY = inChunkY + length; y < endY; y += stepLength)
+                    for (int z = inChunkZ, endZ = inChunkZ + length; z < endZ; z += stepLength) {
+                        position.set(x, y, z, 1).mul(transform);
+                        collector.addBreakParticle(particles, (int) position.x, (int) position.y, (int) position.z, material);
+                    }
+            return;
+        }
+        if (identifier == DETAIL) {
+            Vector4f position = new Vector4f();
+            for (int x = inChunkX, endX = inChunkX + 2; x < endX; x += stepLength)
+                for (int y = inChunkY, endY = inChunkY + 2; y < endY; y += stepLength)
+                    for (int z = inChunkZ, endZ = inChunkZ + 2; z < endZ; z += stepLength) {
+                        byte material = data[startIndex + getInDetailIndex(x, y, z)];
+                        if (material == AIR) continue;
+                        position.set(x, y, z, 1).mul(transform);
+                        collector.addBreakParticle(particles, (int) position.x, (int) position.y, (int) position.z, material);
+                    }
+            return;
+        }
+//        if (identifier == SPLITTER)
+        int nextSize = 1 << --sizeBits;
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
@@ -1492,6 +1551,7 @@ public final class MaterialsData {
         if ((transform & Structure.ROTATE_90) != 0) {
             int inChunkXCopy = inChunkX;
             inChunkX = ~inChunkZ;
+            //noinspection SuspiciousNameCombination
             inChunkZ = inChunkXCopy;
         }
         return ((inChunkX & 1) << 2 | (inChunkZ & 1) << 1 | (inChunkY & 1)) + 1;

@@ -9,7 +9,7 @@ uniform ivec3 minPosition;
 uniform ivec3 maxPosition;
 
 const vec3[6] NORMALS = vec3[6](vec3(0, 0, 1), vec3(0, 1, 0), vec3(1, 0, 0), vec3(0, 0, -1), vec3(0, -1, 0), vec3(-1, 0, 0));
-const ivec2[6] FACE_POSITIONS = ivec2[6](ivec2(0, 0), ivec2(1, 0), ivec2(0, 1), ivec2(1, 1), ivec2(0, 1), ivec2(1, 0));
+const ivec2[6] FACE_POSITIONS = ivec2[6](ivec2(0, 0), ivec2(0, 1), ivec2(1, 0), ivec2(1, 1), ivec2(1, 0), ivec2(0, 1));
 const int NORTH = 0;
 const int TOP = 1;
 const int WEST = 2;

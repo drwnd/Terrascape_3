@@ -37,6 +37,7 @@ public record EntityTarget(Vector3l position, Entity entity) implements Target {
                 if (Math.abs(direction.x) > DIRECTION_THRESHOLD) {
                     float t1 = (minPosition.x - origin.longX - origin.fractionX) * invDirection.x;
                     float t2 = (maxPosition.x - origin.longX - origin.fractionX) * invDirection.x;
+                    if (Math.max(t1, t2) < 0) continue;
 
                     tMin = Math.max(tMin, Math.min(t1, t2));
                     tMax = Math.min(tMax, Math.max(t1, t2));
@@ -44,6 +45,7 @@ public record EntityTarget(Vector3l position, Entity entity) implements Target {
                 if (Math.abs(direction.y) > DIRECTION_THRESHOLD) {
                     float t1 = (minPosition.y - origin.longY - origin.fractionY) * invDirection.y;
                     float t2 = (maxPosition.y - origin.longY - origin.fractionY) * invDirection.y;
+                    if (Math.max(t1, t2) < 0) continue;
 
                     tMin = Math.max(tMin, Math.min(t1, t2));
                     tMax = Math.min(tMax, Math.max(t1, t2));
@@ -51,6 +53,7 @@ public record EntityTarget(Vector3l position, Entity entity) implements Target {
                 if (Math.abs(direction.z) > DIRECTION_THRESHOLD) {
                     float t1 = (minPosition.z - origin.longZ - origin.fractionZ) * invDirection.z;
                     float t2 = (maxPosition.z - origin.longZ - origin.fractionZ) * invDirection.z;
+                    if (Math.max(t1, t2) < 0) continue;
 
                     tMin = Math.max(tMin, Math.min(t1, t2));
                     tMax = Math.min(tMax, Math.max(t1, t2));

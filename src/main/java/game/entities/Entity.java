@@ -1,12 +1,15 @@
 package game.entities;
 
+import core.utils.IntArrayList;
 import core.utils.MainThread;
 import core.utils.Vector3l;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
+import game.player.particles.ParticleType;
 import game.server.Game;
 import game.utils.Position;
 import game.utils.ServerThread;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -20,7 +23,15 @@ public abstract class Entity {
     }
 
     public void kill() {
+        synchronized (this) {
+            Matrix4f[] transforms = renderEntity.transforms();
+            Model.ModelPart[] parts = renderEntity.parts();
+            if (transforms.length != parts.length) return;
 
+            IntArrayList particles = new IntArrayList(parts.length * 64);
+            for (int index = 0; index < parts.length; index++) parts[index].spawnParticles(particles, transforms[index]);
+            Game.getPlayer().getParticleCollector().addParticles(position.longX, position.longY, position.longZ, particles, ParticleType.OPAQUE_BREAK);
+        }
     }
 
     @ServerThread

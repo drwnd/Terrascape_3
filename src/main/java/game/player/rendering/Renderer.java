@@ -973,7 +973,6 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
         shader.bind();
         setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
-        glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glDepthMask(true);
         boolean isFirstPerson = OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON;

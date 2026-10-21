@@ -117,6 +117,7 @@ public final class SettingsMenu extends UiBackgroundElement {
         section.addToggle(ToggleSettings.SHOW_SPLASH_PARTICLES);
         section.addSlider(IntSettings.BREAK_PARTICLE_STEP_LENGTH);
         section.addSlider(IntSettings.PLACE_PARTICLE_STEP_LENGTH);
+        section.addSlider(IntSettings.DEATH_PARTICLE_STEP_LENGTH);
         section.addToggle(ToggleSettings.HIDE_BODY_IN_FIRST_PERSON);
         section.addOption(OptionSettings.OCCLUSION_CULLING);
 

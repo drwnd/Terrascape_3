@@ -12,6 +12,7 @@ public enum IntSettings implements IntSetting {
     AMBIENT_OCCLUSION_SAMPLES(0, 51, 51),
     BREAK_PARTICLE_STEP_LENGTH(1, 16, 2),
     PLACE_PARTICLE_STEP_LENGTH(1, 16, 1),
+    DEATH_PARTICLE_STEP_LENGTH(1, 16, 1),
     RENDER_DISTANCE(2, 16, 6, Game::updateRenderDistance),
     LOD_COUNT(1, 20, 10, Game::updateLodCount),
     SHADOW_CASCADES_COUNT(1, 10, 1, Renderer::reloadShadowMaps),
