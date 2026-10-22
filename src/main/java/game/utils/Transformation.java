@@ -28,11 +28,10 @@ public final class Transformation {
         return matrix;
     }
 
-    public static Matrix4f getProjectionViewMatrix(Camera camera) {
-        Vector3f position = camera.getPosition().getInChunkPosition();
+    public static Matrix4f getProjectionViewMatrix(Camera camera, Position cameraPosition) {
+        Vector3f position = cameraPosition.getInChunkPosition();
         Matrix4f matrix = createProjectionRotationMatrix(camera);
         matrix.translate(-position.x, -position.y, -position.z);
-
         return matrix;
     }
 
@@ -48,11 +47,9 @@ public final class Transformation {
         return matrix;
     }
 
-    public static Matrix4f getFrustumCullingMatrix(Camera camera) {
-        Position cameraPosition = camera.getPosition();
+    public static Matrix4f getFrustumCullingMatrix(Camera camera, Position cameraPosition) {
         Matrix4f matrix = createProjectionRotationMatrix(camera);
         matrix.translate(-cameraPosition.fractionX, -cameraPosition.fractionY, -cameraPosition.fractionZ);
-
         return matrix;
     }
 

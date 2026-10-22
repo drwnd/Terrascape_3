@@ -5,16 +5,16 @@ import core.rendering_api.Window;
 import core.settings.optionSettings.Option;
 import core.utils.MathUtils;
 import core.utils.Vector3l;
+import core.utils.MainThread;
 
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.OptionSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.*;
 
 import java.lang.Math;
@@ -33,9 +33,11 @@ public final class Camera {
 
     @ServerThread
     public void updateGameTick() {
-        oldRotationSpeed.set(rotationSpeed);
-        rotationSpeed.set(oldRotation.sub(rotation));
-        oldRotation.set(rotation);
+        synchronized (this) {
+            oldRotationSpeed.set(rotationSpeed);
+            rotationSpeed.set(oldRotation.sub(rotation));
+            oldRotation.set(rotation);
+        }
     }
 
     @MainThread

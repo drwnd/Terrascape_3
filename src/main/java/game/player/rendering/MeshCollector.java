@@ -1,10 +1,10 @@
 package game.player.rendering;
 
 import core.utils.Vector3l;
+import core.utils.MainThread;
 
 import game.server.Game;
 import game.settings.IntSettings;
-import core.utils.MainThread;
 import game.utils.Position;
 import game.utils.ServerThread;
 import game.utils.Utils;
