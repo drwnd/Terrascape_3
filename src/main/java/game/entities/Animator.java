@@ -7,6 +7,21 @@ import org.joml.Vector3f;
 
 public interface Animator {
 
+    Animator DEFAULT_ANIMATOR = new Animator() {
+        @Override
+        @MainThread
+        public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {
+            Animator.super.applyAnimation(entity, rotation, frameTime);
+        }
+    };
+
+    int HEAD = 0;
+    int BODY = 1;
+    int RIGHT_ARM = 2;
+    int LEFT_ARM = 3;
+    int RIGHT_LEG = 4;
+    int LEFT_LEG = 5;
+
     /**
      * Animates the given Entity.
      * This method should only be called by {@code Entity::updateFrame}

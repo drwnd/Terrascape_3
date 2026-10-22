@@ -19,6 +19,7 @@ public final class RenderEntity {
 
     public RenderEntity(AssetIdentifier<Model> modelIdentifier) {
         this.modelIdentifier = modelIdentifier;
+        animator = Animator.DEFAULT_ANIMATOR;
     }
 
     @MainThread

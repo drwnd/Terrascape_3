@@ -8,13 +8,6 @@ import org.joml.Vector3f;
 
 public final class PlayerAnimator implements Animator {
 
-    public static final int HEAD = 0;
-    public static final int BODY = 1;
-    public static final int RIGHT_ARM = 2;
-    public static final int LEFT_ARM = 3;
-    public static final int RIGHT_LEG = 4;
-    public static final int LEFT_LEG = 5;
-
     @Override
     @MainThread
     public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {

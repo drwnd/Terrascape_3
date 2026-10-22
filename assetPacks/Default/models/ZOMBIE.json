@@ -21,12 +21,12 @@
       "structureName": "Zombie Arm Left"
     },
     {
-      "center": {"x": 2, "y": 12, "z": 2},
+      "center": {"x": 2, "y": 12, "z": 4},
       "position": {"x": 2, "y": 12, "z": 0},
       "structureName": "Zombie Leg Right"
     },
     {
-      "center": {"x": 2, "y": 12, "z": 2},
+      "center": {"x": 2, "y": 12, "z": 4},
       "position": {"x": -2, "y": 12, "z": 0},
       "structureName": "Zombie Leg Left"
     }

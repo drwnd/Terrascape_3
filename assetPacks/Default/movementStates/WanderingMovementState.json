@@ -6,7 +6,7 @@
     "z": 8
   },
   "walkingSpeed": 0.5,
-  "searchRadius": 100,
+  "searchRadius": 200,
   "timeBetweenActions": 200,
   "ticksBetweenFootsteps": 12
 }

@@ -3,7 +3,6 @@ package game.entities;
 import core.utils.MainThread;
 
 import game.assets.EntityType;
-import game.entities.movement.EntityMovementState;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.entities.movement.WalkingState;
@@ -16,22 +15,11 @@ import org.joml.Vector3f;
 public class Zombie extends Entity {
 
     public Zombie(Position position) {
-        super(position, new RenderEntity(EntityType.ZOMBIE), MovementState.load(ZombieMovementState.class));
+        super(position, new RenderEntity(EntityType.ZOMBIE), MovementState.load(WanderingMovementState.class));
         getRenderEntity().setAnimator(new ZombieAnimator(this));
     }
 
-    public static class ZombieAnimator implements Animator {
-
-        public static final int HEAD = 0;
-        public static final int BODY = 1;
-        public static final int RIGHT_ARM = 2;
-        public static final int LEFT_ARM = 3;
-        public static final int RIGHT_LEG = 4;
-        public static final int LEFT_LEG = 5;
-
-        public ZombieAnimator(Zombie zombie) {
-            this.zombie = zombie;
-        }
+    private record ZombieAnimator(Zombie zombie) implements Animator {
 
         @Override
         @MainThread
@@ -67,32 +55,5 @@ public class Zombie extends Entity {
 
             entity.animationTimer += frameTime * 0.005;
         }
-
-        private final Zombie zombie;
-    }
-
-    public static class ZombieMovementState extends EntityMovementState {
-
-        @Override
-        protected Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition) {
-            long currentTick = Game.getServer().getCurrentGameTick();
-
-            if (currentTick - lastActionTick > timeBetweenActions) {
-                lastActionTick = currentTick;
-                rotation.y = (float) Math.random() * 360;
-                float distance = (float) Math.sqrt(Math.random()) * searchRadius;
-                targetX = lastPosition.longX + (long) (Math.sin(Math.toRadians(rotation.y)) * distance);
-                targetZ = lastPosition.longZ - (long) (Math.cos(Math.toRadians(rotation.y)) * distance);
-            }
-
-            Vector3f distance = new Vector3f(targetX - lastPosition.longX, 0, targetZ - lastPosition.longZ);
-            if (distance.lengthSquared() < 100) return new Vector3f();
-            return distance.normalize(walkingSpeed);
-        }
-
-        private long targetX, targetZ;
-
-        @SuppressWarnings("unused")
-        private int searchRadius, timeBetweenActions;
     }
 }

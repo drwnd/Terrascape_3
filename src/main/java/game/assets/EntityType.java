@@ -14,7 +14,8 @@ import java.nio.file.Path;
 
 public enum EntityType implements AssetIdentifier<Model> {
     PLAYER(Mannequin::new),
-    ZOMBIE(Zombie::new);
+    ZOMBIE(Zombie::new),
+    SKELETON(Skeleton::new);
 
     @Override
     @MainThread
