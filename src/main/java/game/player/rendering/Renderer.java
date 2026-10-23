@@ -79,9 +79,8 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    public float getRenderTime() {
-        Server server = Game.getServer();
-        float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * gameTickFraction;
+    public float getRenderTime(float dayTime) {
+        float renderTime = dayTime + FloatSettings.TIME_SPEED.value() * gameTickFraction;
         if (renderTime > 1.0F) renderTime -= 2.0F;
         return renderTime;
     }
@@ -191,7 +190,7 @@ public final class Renderer extends Renderable {
         int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
         shader.bind();
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("image", 4);
@@ -211,8 +210,13 @@ public final class Renderer extends Renderable {
         glDepthFunc(GL_GREATER);
 
         float frameTime = frameTimes.size() >= 2 ? (frameTimes.getLast() - frameTimes.get(frameTimes.size() - 2)) / 1_000_000F : 0;
+        Server server = Game.getServer();
+        synchronized (server) {
+            renderTime = getRenderTime(server.getDayTime());
+            currentGameTick = server.getCurrentGameTick();
+            gameTickFraction = Math.clamp(server.getCurrentGameTickFraction(), 0, 1);
+        }
         synchronized (Game.getWorld().entities) {
-            gameTickFraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
             for (Entity entity : Game.getWorld().entities) entity.updateFrame(frameTime, gameTickFraction);
         }
         Camera camera = player.getCamera();
@@ -346,7 +350,7 @@ public final class Renderer extends Renderable {
         shader.bind();
         shader.setUniform("dayTexture", 0);
         shader.setUniform("nightTexture", 1);
-        shader.setUniform("time", getRenderTime());
+        shader.setUniform("time", renderTime);
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
 
         glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).id());
@@ -371,8 +375,6 @@ public final class Renderer extends Renderable {
     @MainThread
     private void computeShadowMap(Position cameraPosition) {
         currentShadowIndex = (currentShadowIndex + 1) % shadowFramebuffers.length;
-        float renderTime = getRenderTime();
-
         shadowSnapshotPositions[currentShadowIndex] = cameraPosition;
         for (int cascade = 0; cascade < sunMatrices.length; cascade++)
             Transformation.updateSunMatrix(sunMatrices[cascade], shadowSnapshotPositions[cascade], cameraPosition, renderTime, cascade);
@@ -416,7 +418,6 @@ public final class Renderer extends Renderable {
         } // Opaque chunk Shadows
 
         if (ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
-            long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.PARTICLE_SHADOW);
             shader.bind();
             shader.setUniform("projectionViewMatrix", sunMatrices[currentShadowIndex]);
@@ -424,9 +425,8 @@ public final class Renderer extends Renderable {
                     cameraPosition.longX & ~CHUNK_SIZE_MASK,
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
-            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
-            renderParticles(shader, currentTick, true);
+            renderParticles(shader, true);
         }
 
         if (ToggleSettings.PLAYER_CASTS_SHADOWS.value() && currentShadowIndex == 0) {
@@ -452,12 +452,10 @@ public final class Renderer extends Renderable {
         }
 
         if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
-            long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             setUpGlassRendering(shader, sunMatrices[currentShadowIndex], cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
-            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
-            renderParticles(shader, currentTick, false);
+            renderParticles(shader, false);
         }
 
         glDepthMask(true);
@@ -469,7 +467,7 @@ public final class Renderer extends Renderable {
         renderedOpaqueModels = 0;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
@@ -496,19 +494,17 @@ public final class Renderer extends Renderable {
     @MainThread
     private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         glDisable(GL_STENCIL_TEST);
 
-        long currentTick = Game.getServer().getCurrentGameTick();
         int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
-        shader.setUniform("gameTickFraction", gameTickFraction);
         shader.setUniform("flags", getFlags(cameraPosition));
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("shadowIndices", 0, maxShadowCascade);
 
-        renderParticles(shader, currentTick, true);
+        renderParticles(shader, true);
     }
 
     @MainThread
@@ -536,7 +532,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionViewMatrix", matrix);
         synchronized (Game.getWorld().entities) {
             for (Entity entity : Game.getWorld().entities)
-                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(gameTickFraction), entity.getRenderEntity());
+                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
         }
     }
 
@@ -598,7 +594,7 @@ public final class Renderer extends Renderable {
         renderedTransparentModels = 0;
 
         Shader shader = AssetManager.get(Shaders.TRANSPARENT);
-        setUpTransparentRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setUpTransparentRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
@@ -670,19 +666,17 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
         glDisable(GL_STENCIL_TEST);
-        long currentTick = Game.getServer().getCurrentGameTick();
-        shader.setUniform("gameTickFraction", gameTickFraction);
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
-
-        renderParticles(shader, currentTick, false);
+        renderParticles(shader, false);
     }
 
     @MainThread
-    private void renderParticles(Shader shader, long currentTick, boolean opaque) {
+    private void renderParticles(Shader shader, boolean opaque) {
         for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
             if (particleEffect.isOpaque() != opaque) continue;
             shader.setUniform("lifeTimeTicks", particleEffect.lifeTimeTicks());
-            shader.setUniform("aliveTicks", (int) (currentTick - particleEffect.spawnTick()));
+            shader.setUniform("aliveTicks", (int) (currentGameTick - particleEffect.spawnTick()));
+            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
             glDrawArraysInstanced(GL_TRIANGLES, 0, 9, particleEffect.count());
@@ -1150,7 +1144,8 @@ public final class Renderer extends Renderable {
         );
     }
 
-    private float gameTickFraction;
+    private long currentGameTick;
+    private float gameTickFraction, renderTime;
     private boolean vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private RenderingOptimizer renderingOptimizer;

@@ -91,7 +91,7 @@ public final class Player extends Entity {
 
     @Override
     @MainThread
-    public Position getToRenderPosition(float gameTickFraction) {
+    public Position getToRenderPosition() {
         return toRenderPosition;
     }
 

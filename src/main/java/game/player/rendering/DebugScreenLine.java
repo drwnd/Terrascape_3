@@ -18,6 +18,7 @@ import core.utils.Vector3l;
 import game.player.interaction.VoxelTarget;
 import game.server.Chunk;
 import game.server.Game;
+import game.server.Server;
 import game.server.generation.MapSample;
 import game.server.generation.WorldGeneration;
 import game.settings.DebugScreenOptions;
@@ -58,7 +59,10 @@ public record DebugScreenLine(OptionSetting visibility, OptionSetting color, Str
 
         add(lines, DebugScreenOptions.WORLD_NAME, () -> Game.getWorld().name);
 
-        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> "Current Tick:%d, Current Time:%f".formatted(Game.getServer().getCurrentGameTick(), Game.getPlayer().getRenderer().getRenderTime()));
+        add(lines, DebugScreenOptions.WORLD_TICK_AND_TIME, () -> {
+            Server server = Game.getServer();
+            return "Current Tick:%d, Current Time:%f".formatted(server.getCurrentGameTick(), Game.getPlayer().getRenderer().getRenderTime(server.getDayTime()));
+        });
 
         add(lines, DebugScreenOptions.FPS, () -> {
             ArrayList<Long> frameTimes = Game.getPlayer().getRenderer().getFrameTimes();

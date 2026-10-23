@@ -232,10 +232,12 @@ public final class Server implements CrashCallback {
     @ServerThread
     private void executeGameTickCatchException() {
         try {
-            gameTickStartTime = System.nanoTime();
+            synchronized (this) {
+                gameTickStartTime = System.nanoTime();
+                currentGameTick++;
+                incrementTime();
+            }
             executeGameTick();
-            currentGameTick++;
-            incrementTime();
         } catch (Exception exception) {
             Debug.err(exception);
         }

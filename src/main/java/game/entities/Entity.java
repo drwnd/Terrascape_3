@@ -45,6 +45,8 @@ public abstract class Entity {
     public void updateFrame(float frameTime, float gameTickFraction) {
         synchronized (this) {
             renderEntity.updateFrame(frameTime, gameTickFraction, rotation);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
+            toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
         }
     }
 
@@ -53,11 +55,8 @@ public abstract class Entity {
     }
 
     @MainThread
-    public Position getToRenderPosition(float gameTickFraction) {
-        synchronized (this) {
-            Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
-            return new Position(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
-        }
+    public Position getToRenderPosition() {
+        return toRenderPosition;
     }
 
     public RenderEntity getRenderEntity() {
@@ -83,7 +82,7 @@ public abstract class Entity {
     }
 
     protected final Movement movement;
-    protected Position position;
+    protected Position position, toRenderPosition = new Position();
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();
 }

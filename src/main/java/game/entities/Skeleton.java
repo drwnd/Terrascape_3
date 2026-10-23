@@ -42,8 +42,9 @@ public class Skeleton extends Entity {
             transforms[LEFT_LEG].rotate((float) -Math.sin(animationTimer) * speed * 3, 1, 0, 0);
             transforms[RIGHT_LEG].rotate((float) Math.sin(animationTimer) * speed * 3, 1, 0, 0);
 
-            float wobbleStrength = speed * 3;
-            double wobbleTime = animationTimer * WOBBLE_SPEED;
+            boolean isIdle = speed < 0.05F;
+            float wobbleStrength = isIdle ? 0.2F : speed * 3;
+            double wobbleTime = animationTimer * WOBBLE_SPEED * (isIdle ? 0.25 : 1);
             for (int index = 0; index < 6; index++) {
                 transforms[index].translate(
                                 (float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_X] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_X]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_X] * wobbleStrength,
