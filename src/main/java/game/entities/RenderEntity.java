@@ -23,9 +23,9 @@ public final class RenderEntity {
     }
 
     @MainThread
-    public void updateFrame(float frameTime, Vector3f rotation) {
+    public void updateFrame(float frameTime, float gameTickFraction, Vector3f rotation) {
         synchronizeTransforms();
-        animator.applyAnimation(this, rotation, frameTime);
+        animator.applyAnimation(this, rotation, frameTime, gameTickFraction);
     }
 
     public void synchronizeTransforms() {

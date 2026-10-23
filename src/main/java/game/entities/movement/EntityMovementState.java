@@ -8,7 +8,7 @@ public abstract class EntityMovementState extends MovementState {
     protected long lastActionTick = 0;
 
     @Override
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
         throw new UnsupportedOperationException("Only for Player movement");
     }
 

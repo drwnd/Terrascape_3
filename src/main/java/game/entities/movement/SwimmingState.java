@@ -7,7 +7,6 @@ import core.utils.MainThread;
 import game.entities.RenderEntity;
 import game.entities.Model;
 import game.player.rendering.Camera;
-import game.server.Game;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
 import game.utils.Position;
@@ -67,14 +66,13 @@ public final class SwimmingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
-        Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
+        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
 
         applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.parts());
 
-        float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
+        float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = velocity.length();
         float amplitude = (float) Math.clamp(speed + rotationSpeed, -Math.PI * 0.35, Math.PI * 0.35);
 

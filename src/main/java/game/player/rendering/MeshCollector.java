@@ -11,6 +11,7 @@ import game.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 import static game.utils.Constants.*;
@@ -80,7 +81,7 @@ public final class MeshCollector {
     @MainThread
     public MeshCollector(MeshCollector oldMeshCollector) {
         oldMeshCollector.deleteOldMeshes();
-        oldMeshCollector.uploadAllMeshes();
+        oldMeshCollector.uploadMeshes(Integer.MAX_VALUE);
         allocator = oldMeshCollector.allocator;
         int lodCount = Math.min(oldMeshCollector.isMeshed.length, isMeshed.length);
 
@@ -97,10 +98,12 @@ public final class MeshCollector {
     }
 
     @MainThread
-    public void uploadAllMeshes() {
+    public void uploadMeshes(int maxAmount) {
         Vector3l playerChunkCoordinate = Game.getPlayer().getPosition().getChunkCoordinate();
+        int count = 0;
         synchronized (meshQueue) {
-            for (Mesh mesh : meshQueue) {
+            for (Iterator<Mesh> iterator = meshQueue.iterator(); iterator.hasNext(); ) {
+                Mesh mesh = iterator.next();
                 long playerChunkX = playerChunkCoordinate.x >> mesh.lod();
                 long playerChunkY = playerChunkCoordinate.y >> mesh.lod();
                 long playerChunkZ = playerChunkCoordinate.z >> mesh.lod();
@@ -108,8 +111,9 @@ public final class MeshCollector {
                     continue;
 
                 upload(mesh);
+                iterator.remove();
+                if (++count > maxAmount) break;
             }
-            meshQueue.clear();
         }
     }
 

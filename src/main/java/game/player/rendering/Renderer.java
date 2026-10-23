@@ -79,9 +79,9 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    public static float getRenderTime() {
+    public float getRenderTime() {
         Server server = Game.getServer();
-        float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
+        float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * gameTickFraction;
         if (renderTime > 1.0F) renderTime -= 2.0F;
         return renderTime;
     }
@@ -212,7 +212,8 @@ public final class Renderer extends Renderable {
 
         float frameTime = frameTimes.size() >= 2 ? (frameTimes.getLast() - frameTimes.get(frameTimes.size() - 2)) / 1_000_000F : 0;
         synchronized (Game.getWorld().entities) {
-            for (Entity entity : Game.getWorld().entities) entity.updateFrame(frameTime);
+            gameTickFraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
+            for (Entity entity : Game.getWorld().entities) entity.updateFrame(frameTime, gameTickFraction);
         }
         Camera camera = player.getCamera();
         Position cameraPosition = player.getCamera().getPosition();
@@ -339,7 +340,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private static void renderSkybox(Camera camera) {
+    private void renderSkybox(Camera camera) {
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
@@ -423,7 +424,7 @@ public final class Renderer extends Renderable {
                     cameraPosition.longX & ~CHUNK_SIZE_MASK,
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
-            shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
             renderParticles(shader, currentTick, true);
         }
@@ -454,7 +455,7 @@ public final class Renderer extends Renderable {
             long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             setUpGlassRendering(shader, sunMatrices[currentShadowIndex], cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
-            shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
             renderParticles(shader, currentTick, false);
         }
@@ -502,7 +503,7 @@ public final class Renderer extends Renderable {
         long currentTick = Game.getServer().getCurrentGameTick();
         int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
-        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+        shader.setUniform("gameTickFraction", gameTickFraction);
         shader.setUniform("flags", getFlags(cameraPosition));
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("shadowIndices", 0, maxShadowCascade);
@@ -516,10 +517,11 @@ public final class Renderer extends Renderable {
         setupEntityRendering(shader, cameraPosition, projectionViewMatrix);
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
             MovementState state = player.getMovement().getState();
-            if (state.hideHeadInFirstPerson()) player.getRenderEntity().transforms()[PlayerAnimator.HEAD].zero();
-            if (state.hideBodyInFirstPerson()) player.getRenderEntity().transforms()[PlayerAnimator.BODY].zero();
+            Matrix4f[] transforms = player.getRenderEntity().transforms();
+            if (state.hideHeadInFirstPerson()) transforms[PlayerAnimator.HEAD].zero();
+            if (state.hideBodyInFirstPerson()) transforms[PlayerAnimator.BODY].zero();
             if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value())
-                for (Matrix4f transform : player.getRenderEntity().transforms()) transform.zero();
+                for (Matrix4f transform : transforms) transform.zero();
         }
         renderEntities(shader, cameraPosition, projectionViewMatrix);
     }
@@ -533,7 +535,8 @@ public final class Renderer extends Renderable {
 
         shader.setUniform("projectionViewMatrix", matrix);
         synchronized (Game.getWorld().entities) {
-            for (Entity entity : Game.getWorld().entities) renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+            for (Entity entity : Game.getWorld().entities)
+                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(gameTickFraction), entity.getRenderEntity());
         }
     }
 
@@ -668,7 +671,7 @@ public final class Renderer extends Renderable {
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
         glDisable(GL_STENCIL_TEST);
         long currentTick = Game.getServer().getCurrentGameTick();
-        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
+        shader.setUniform("gameTickFraction", gameTickFraction);
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
 
         renderParticles(shader, currentTick, false);
@@ -1147,6 +1150,7 @@ public final class Renderer extends Renderable {
         );
     }
 
+    private float gameTickFraction;
     private boolean vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private RenderingOptimizer renderingOptimizer;

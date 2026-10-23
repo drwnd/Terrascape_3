@@ -42,9 +42,9 @@ public abstract class Entity {
     }
 
     @MainThread
-    public void updateFrame(float frameTime) {
+    public void updateFrame(float frameTime, float gameTickFraction) {
         synchronized (this) {
-            renderEntity.updateFrame(frameTime, rotation);
+            renderEntity.updateFrame(frameTime, gameTickFraction, rotation);
         }
     }
 
@@ -53,10 +53,9 @@ public abstract class Entity {
     }
 
     @MainThread
-    public Position getToRenderPosition() {
-        float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
+    public Position getToRenderPosition(float gameTickFraction) {
         synchronized (this) {
-            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
             return new Position(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
         }
     }

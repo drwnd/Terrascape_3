@@ -10,8 +10,8 @@ public interface Animator {
     Animator DEFAULT_ANIMATOR = new Animator() {
         @Override
         @MainThread
-        public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {
-            Animator.super.applyAnimation(entity, rotation, frameTime);
+        public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
+            Animator.super.applyAnimation(entity, rotation, frameTime, gameTickFraction);
         }
     };
 
@@ -26,11 +26,12 @@ public interface Animator {
      * Animates the given Entity.
      * This method should only be called by {@code Entity::updateFrame}
      *
-     * @param entity          The Entity to animate.
-     * @param frameTime       The time since the last frame in ms.
+     * @param entity           The Entity to animate.
+     * @param frameTime        The time since the last frame in ms.
+     * @param gameTickFraction The time within the current Game-Tick. In the range [0, 1].
      */
     @MainThread
-    default void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {
+    default void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
         Matrix4f[] transforms = entity.transforms();
         Model.ModelPart[] parts = entity.parts();
 

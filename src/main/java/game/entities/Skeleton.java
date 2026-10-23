@@ -6,7 +6,6 @@ import game.assets.EntityType;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.entities.movement.WalkingState;
-import game.server.Game;
 import game.utils.Position;
 
 import org.joml.Matrix4f;
@@ -26,12 +25,11 @@ public class Skeleton extends Entity {
 
         @Override
         @MainThread
-        public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {
+        public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
             Matrix4f[] transforms = entity.transforms();
             Model.ModelPart[] parts = entity.parts();
-            float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
             Movement movement = skeleton.getMovement();
-            Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
+            Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
 
             WalkingState.rotateBody(transforms, parts, rotation, velocity);
 

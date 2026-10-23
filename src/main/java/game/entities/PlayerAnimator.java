@@ -10,8 +10,8 @@ public final class PlayerAnimator implements Animator {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime) {
+    public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
         Player player = Game.getPlayer();
-        player.getMovement().getState().applyAnimation(entity, player.getCamera(), frameTime);
+        player.getMovement().getState().applyAnimation(entity, player.getCamera(), frameTime, gameTickFraction);
     }
 }

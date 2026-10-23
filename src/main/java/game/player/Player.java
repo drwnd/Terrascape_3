@@ -55,23 +55,22 @@ public final class Player extends Entity {
 
     @Override
     @MainThread
-    public void updateFrame(float frameTime) {
-        getRenderEntity().updateFrame(frameTime, camera.getRotation());
+    public void updateFrame(float frameTime, float gameTickFraction) {
+        getRenderEntity().updateFrame(frameTime, gameTickFraction, camera.getRotation());
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
         particleCollector.clearToBufferParticleEffects();
-        meshCollector.uploadAllMeshes();
+        meshCollector.uploadMeshes(100);
         meshCollector.deleteOldMeshes();
 
-        float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
         synchronized (this) {
             camera.rotate(input.getCursorMovement());
-            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
             toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
             camera.setPosition(camera.applyPerspectiveOffset(new Position(toRenderPosition).addComponent(Y_COMPONENT, movement.getState().getCameraElevation())));
         }
-        applyAnimation();
+        applyAnimation(gameTickFraction);
     }
 
     @Override
@@ -92,7 +91,7 @@ public final class Player extends Entity {
 
     @Override
     @MainThread
-    public Position getToRenderPosition() {
+    public Position getToRenderPosition(float gameTickFraction) {
         return toRenderPosition;
     }
 
@@ -161,12 +160,12 @@ public final class Player extends Entity {
     }
 
     @MainThread
-    public void applyAnimation() {
+    public void applyAnimation(float gameTickFraction) {
         final int animationLength = 8;
         long currentTick = Game.getServer().getCurrentGameTick();
         if (currentTick > lastInteractionTick + animationLength) return;
 
-        float ticksPassed = Math.min(Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1) + (currentTick - lastInteractionTick), animationLength);
+        float ticksPassed = Math.min(gameTickFraction + (currentTick - lastInteractionTick), animationLength);
 
         getRenderEntity().transforms()[PlayerAnimator.RIGHT_ARM]
                 .rotate((float) Math.sin(ticksPassed * Math.PI / animationLength), 0, 0, 1)

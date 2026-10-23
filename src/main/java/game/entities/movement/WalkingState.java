@@ -8,7 +8,6 @@ import core.utils.MainThread;
 import game.entities.RenderEntity;
 import game.entities.Model;
 import game.player.rendering.Camera;
-import game.server.Game;
 import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
@@ -73,17 +72,16 @@ public final class WalkingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
         Matrix4f[] transforms = playerCharacter.transforms();
         Model.ModelPart[] parts = playerCharacter.parts();
-        float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1);
-        Vector3f velocity = movement.getRenderVelocity().mul(fraction).add(movement.getOldRenderVelocity().mul(1 - fraction));
+        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
         Vector3f cameraRotation = camera.getRotation();
 
         rotateBody(transforms, parts, cameraRotation, velocity);
 
         double animationTimer = playerCharacter.animationTimer;
-        float rotationSpeed = camera.getCurrentRotationSpeed(fraction).length() * 0.05F;
+        float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
         float bodyMovement = (float) Math.cos(animationTimer) * Math.min(speed * 0.1F, 0.3F);
 

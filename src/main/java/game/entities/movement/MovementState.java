@@ -69,12 +69,13 @@ public abstract class MovementState {
     /**
      * Animates the given Model (assumed to be a player model).
      *
-     * @param playerCharacter The model to animate.
-     * @param camera          The camera of the player.
-     * @param frameTime       The time since the last frame in ms.
+     * @param playerCharacter  The model to animate.
+     * @param camera           The camera of the player.
+     * @param frameTime        The time since the last frame in ms.
+     * @param gameTickFraction The time within the current Game-Tick. In the range [0, 1].
      */
     @MainThread
-    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime);
+    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction);
 
     @ServerThread
     byte getStandingMaterial(Position position) {
