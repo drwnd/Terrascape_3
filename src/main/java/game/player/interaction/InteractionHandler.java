@@ -103,25 +103,16 @@ public final class InteractionHandler {
     @ServerThread
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowPlace() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) {
-            useInfo.lastAction = Game.getServer().getCurrentGameTick();
-            useInfo.forceAction = false;
-            return;
-        }
         handleUseDestroy(useInfo, placeable, placeable != null && placeable.offsetOnPlace(), false);
     }
 
     @ServerThread
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowBreak() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY && !(placeable instanceof ShapePlaceable)) {
-            destroyInfo.lastAction = Game.getServer().getCurrentGameTick();
-            destroyInfo.forceAction = false;
-            return;
-        }
-        if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
+        if (placeable != null && !placeable.allowBreak()) placeable = null;
+        else if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
         else placeable = shapePlaceable.copyWithMaterial(AIR);
-        handleUseDestroy(destroyInfo, placeable, placeable.offsetOnBreak(), true);
+        handleUseDestroy(destroyInfo, placeable, placeable != null && placeable.offsetOnBreak(), true);
     }
 
     @ServerThread
@@ -143,7 +134,7 @@ public final class InteractionHandler {
             info.forceAction = false;
             return;
         }
-        if (placeable == null) return;
+        if (!placeableCanModifyVoxels(placeable, isDestroy)) return;
 
         PlacingState state = getState(voxelTarget);
         VoxelTarget target = state.isLocked() ? lockedTarget : voxelTarget;
@@ -173,6 +164,14 @@ public final class InteractionHandler {
         if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) return;
         info.lastAction = currentGameTick;
         startTarget = lockedTarget = null;
+    }
+
+    private boolean placeableCanModifyVoxels(Placeable placeable, boolean isDestroy) {
+        if (placeable == null) return false;
+        if (isDestroy)
+            return placeable.allowBreak() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || placeable instanceof ShapePlaceable);
+        else
+            return placeable.allowPlace() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || !(placeable instanceof ShapePlaceable));
     }
 
     @MainThread

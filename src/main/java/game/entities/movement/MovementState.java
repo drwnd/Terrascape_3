@@ -104,6 +104,10 @@ public abstract class MovementState {
 
     public abstract byte getIdentifier();
 
+    boolean isNoClip() {
+        return ToggleSettings.NO_CLIP.value();
+    }
+
     int ticksBetweenFootsteps() {
         return ticksBetweenFootsteps;
     }
@@ -116,11 +120,11 @@ public abstract class MovementState {
         return preventsFallingFromEdge;
     }
 
-    public boolean hideBodyInFirstPerson() {
+    public final boolean hideBodyInFirstPerson() {
         return hideBodyInFirstPerson;
     }
 
-    public boolean hideHeadInFirstPerson() {
+    public final boolean hideHeadInFirstPerson() {
         return hideHeadInFirstPerson;
     }
 

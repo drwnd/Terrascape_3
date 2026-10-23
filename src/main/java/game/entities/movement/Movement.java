@@ -2,6 +2,7 @@ package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.sound.Sound;
+import core.utils.MainThread;
 
 import game.server.Game;
 import game.server.World;
@@ -9,11 +10,9 @@ import game.server.material.Material;
 import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
-import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -40,7 +39,7 @@ public final class Movement {
         renderVelocity = position.vectorFrom(lastPosition);
         playFootstepSound(position);
 
-        if (ToggleSettings.NO_CLIP.value() || noCollision(position, state.next)) state = state.next;
+        if (state.isNoClip() || noCollision(position, state.next)) state = state.next;
         state.movement = this;
         return position;
     }
@@ -117,7 +116,7 @@ public final class Movement {
 
 
     private Vector3f move(Position position) {
-        if (ToggleSettings.NO_CLIP.value()) {
+        if (state.isNoClip()) {
             position.add(velocity.x, velocity.y, velocity.z);
             return velocity;
         }
