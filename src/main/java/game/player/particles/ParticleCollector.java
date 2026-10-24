@@ -17,6 +17,7 @@ import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
 import game.utils.Utils;
 
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.Random;
@@ -269,6 +270,15 @@ public final class ParticleCollector {
 
     public void addBreakParticle(IntArrayList particles, int xOffset, int yOffset, int zOffset, byte material) {
         float velocityX = getRandom(-12F, 12F), velocityY = getRandom(-2F, 25F), velocityZ = getRandom(-12F, 12F);
+        float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
+
+        particles.add(packOffset(xOffset, yOffset, zOffset, false, false));
+        particles.add(packVelocityGravity(velocityX, velocityY, velocityZ, BREAK_PARTICLE_GRAVITY));
+        particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
+    }
+
+    public void addDeathParticle(IntArrayList particles, Vector3f velocity, int xOffset, int yOffset, int zOffset, byte material) {
+        float velocityX = getRandom(-12F, 12F) + velocity.x, velocityY = getRandom(-2F, 25F) + velocity.y, velocityZ = getRandom(-12F, 12F) + velocity.z;
         float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
 
         particles.add(packOffset(xOffset, yOffset, zOffset, false, false));

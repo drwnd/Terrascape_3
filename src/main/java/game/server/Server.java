@@ -247,6 +247,15 @@ public final class Server implements CrashCallback {
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
         synchronized (Game.getWorld().entities) {
+            synchronized (toSpawnEntities) {
+                Game.getWorld().entities.addAll(toSpawnEntities);
+                toSpawnEntities.clear();
+            }
+            synchronized (toKillEntities) {
+                for (Entity entity : toKillEntities) entity.kill();
+                Game.getWorld().entities.removeAll(toKillEntities);
+                toKillEntities.clear();
+            }
             for (Entity entity : Game.getWorld().entities) entity.updateGameTick();
         }
         Position newPlayerPosition = Game.getPlayer().getPosition();
@@ -262,18 +271,6 @@ public final class Server implements CrashCallback {
             if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSettings.CULLING_COMPUTATION.value()) {
                 generator.restart();
                 generatorRestartScheduled = false;
-            }
-        }
-
-        synchronized (Game.getWorld().entities) {
-            synchronized (toSpawnEntities) {
-                Game.getWorld().entities.addAll(toSpawnEntities);
-                toSpawnEntities.clear();
-            }
-            synchronized (toKillEntities) {
-                for (Entity entity : toKillEntities) entity.kill();
-                Game.getWorld().entities.removeAll(toKillEntities);
-                toKillEntities.clear();
             }
         }
 

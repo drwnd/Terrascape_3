@@ -125,11 +125,8 @@ public final class InteractionHandler {
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
 
         if (entityTarget != null && (voxelTarget == null || entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer())) {
-            if (isDestroy) Game.getServer().killEntity(entityTarget.entity());
-            else {
-                Vector3f direction = Game.getPlayer().getCamera().getDirection();
-                entityTarget.entity().getMovement().applyForce(direction.x * 10, Math.max(0, direction.y) * 10 + 3, direction.z * 10);
-            }
+            Vector3f direction = Game.getPlayer().getCamera().getDirection();
+            entityTarget.entity().hit(direction, isDestroy ? 1 : 0);
             info.lastAction = currentGameTick;
             info.forceAction = false;
             return;

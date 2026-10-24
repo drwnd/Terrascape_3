@@ -9,8 +9,8 @@ import game.utils.Position;
 
 public final class SummonCommand {
 
-    static final String SYNTAX = "MODEL [~]X-Coordinate [~]Y-Coordinate [~]Z-Coordinate [abs] // Adding ~ before a Coordinate adds that Coordinate to the Players Position.";
-    static final String EXPLANATION = "Summons an Entity with the model specified by MODEL at the specified Position.";
+    static final String SYNTAX = "(ENTITY_TYPE | random) [~]X-Coordinate [~]Y-Coordinate [~]Z-Coordinate [abs] // Adding ~ before a Coordinate adds that Coordinate to the Players Position.";
+    static final String EXPLANATION = "Summons an Entity of the EntityType specified by ENTITY_TYPE at the specified Position. random spawns a random Entity";
 
     private SummonCommand() {
 
@@ -20,7 +20,12 @@ public final class SummonCommand {
     static CommandResult execute(TokenList tokens) {
         Position position = Game.getPlayer().getPosition();
         String entityName = tokens.expectNextKeyWord().keyword();
-        EntityType entityType = EntityType.valueOf(entityName.toUpperCase());
+        EntityType entityType;
+        if ("random".equalsIgnoreCase(entityName)) {
+            EntityType[] types = EntityType.values();
+            entityType = types[(int) (Math.random() * types.length)];
+        } else
+            entityType = EntityType.valueOf(entityName.toUpperCase());
 
         long longX = 0, longY = 0, longZ = 0;
         float fractionX = 0.0F, fractionY = 0.0F, fractionZ = 0.0F;

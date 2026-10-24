@@ -1,15 +1,12 @@
 package core.renderables;
 
-import core.assets.AssetManager;
-import core.assets.Texture;
-import core.assets.CoreShaders;
-import core.assets.CoreTextures;
+import core.assets.*;
 import core.assets.identifiers.AssetIdentifier;
 import core.rendering_api.Window;
 import core.rendering_api.shaders.GuiShader;
 import core.settings.CoreFloatSettings;
-
 import core.utils.MainThread;
+
 import org.joml.Vector2f;
 
 import java.awt.*;
@@ -47,11 +44,11 @@ public class UiBackgroundElement extends Renderable {
         if (colorMultiplier != null) this.colorMultiplier = colorMultiplier;
     }
 
-    public void setTextureIdentifier(AssetIdentifier<Texture> textureIdentifier) {
+    public void setTextureIdentifier(AssetIdentifier<Texture2D> textureIdentifier) {
         if (textureIdentifier != null) this.textureIdentifier = textureIdentifier;
     }
 
     private float rimThicknessMultiplier = 1.0F;
     private Color colorMultiplier = Color.WHITE;
-    private AssetIdentifier<Texture> textureIdentifier = CoreTextures.GUI_ELEMENT_BACKGROUND;
+    private AssetIdentifier<Texture2D> textureIdentifier = CoreTextures.GUI_ELEMENT_BACKGROUND;
 }

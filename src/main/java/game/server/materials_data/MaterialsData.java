@@ -18,6 +18,7 @@ import game.settings.OptionSettings;
 import game.utils.Utils;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
 
@@ -202,9 +203,9 @@ public final class MaterialsData {
         }
     }
 
-    public void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform) {
+    public void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform, Vector3f velocity) {
         synchronized (this) {
-            addDeathParticles(collector, particles, transform, totalSizeBits, 0, 0, 0, 0);
+            addDeathParticles(collector, particles, transform, velocity, totalSizeBits, 0, 0, 0, 0);
         }
     }
 
@@ -923,7 +924,7 @@ public final class MaterialsData {
         addPlaceParticles(collector, particles, placeable, lengths, start, offset, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
-    private void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform,
+    private void addDeathParticles(ParticleCollector collector, IntArrayList particles, Matrix4f transform, Vector3f velocity,
                                    int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {
         byte identifier = getIdentifier(startIndex);
         int stepLength = IntSettings.DEATH_PARTICLE_STEP_LENGTH.value();
@@ -938,7 +939,7 @@ public final class MaterialsData {
                 for (int y = inChunkY, endY = inChunkY + length; y < endY; y += stepLength)
                     for (int z = inChunkZ, endZ = inChunkZ + length; z < endZ; z += stepLength) {
                         position.set(x, y, z, 1).mul(transform);
-                        collector.addBreakParticle(particles, (int) position.x, (int) position.y, (int) position.z, material);
+                        collector.addDeathParticle(particles, velocity, (int) position.x, (int) position.y, (int) position.z, material);
                     }
             return;
         }
@@ -950,20 +951,20 @@ public final class MaterialsData {
                         byte material = data[startIndex + getInDetailIndex(x, y, z)];
                         if (material == AIR) continue;
                         position.set(x, y, z, 1).mul(transform);
-                        collector.addBreakParticle(particles, (int) position.x, (int) position.y, (int) position.z, material);
+                        collector.addDeathParticle(particles, velocity, (int) position.x, (int) position.y, (int) position.z, material);
                     }
             return;
         }
 //        if (identifier == SPLITTER)
         int nextSize = 1 << --sizeBits;
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
-        addDeathParticles(collector, particles, transform, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + SPLITTER_BYTE_SIZE, inChunkX, inChunkY, inChunkZ);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 1), inChunkX, inChunkY, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 4), inChunkX, inChunkY + nextSize, inChunkZ);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 7), inChunkX, inChunkY + nextSize, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 10), inChunkX + nextSize, inChunkY, inChunkZ);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 13), inChunkX + nextSize, inChunkY, inChunkZ + nextSize);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 16), inChunkX + nextSize, inChunkY + nextSize, inChunkZ);
+        addDeathParticles(collector, particles, transform, velocity, sizeBits, startIndex + getOffset(startIndex + 19), inChunkX + nextSize, inChunkY + nextSize, inChunkZ + nextSize);
     }
 
     private void fillBitMap(long[] bitMap, int sizeBits, int startIndex, int inChunkX, int inChunkY, int inChunkZ) {

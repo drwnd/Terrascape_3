@@ -5,9 +5,8 @@ import core.rendering_api.Window;
 import core.sound.Sound;
 import core.utils.MainThread;
 
-import game.assets.EntityType;
 import game.entities.Entity;
-import game.entities.RenderEntity;
+import game.entities.PlayerCharacter;
 import game.entities.PlayerAnimator;
 import game.entities.movement.MovementState;
 import game.entities.movement.WalkingState;
@@ -33,7 +32,7 @@ public final class Player extends Entity {
 
     @MainThread
     public Player(Position position) {
-        super(position, new RenderEntity(EntityType.PLAYER), MovementState.load(WalkingState.class));
+        super(position, new PlayerCharacter(), MovementState.load(WalkingState.class));
         super.getRenderEntity().setAnimator(new PlayerAnimator());
         Game.getServer().spawnEntity(this);
 

@@ -27,13 +27,13 @@ public record Model(GuiElement guiElement, ModelPart[] parts) implements Asset {
     public interface ModelPart {
         Vector3f position();
 
-        void spawnParticles(IntArrayList particles, Matrix4f transform);
+        void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity);
     }
 
     record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, boolean hasOuterLayer, byte particleMaterial,
                     Vector2f outerTextureCoordinate) implements ModelPart {
         @Override
-        public void spawnParticles(IntArrayList particles, Matrix4f transform) {
+        public void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
             transform.translate(-center.x, -center.y, -center.z);
             ParticleCollector collector = Game.getPlayer().getParticleCollector();
             Vector4f position = new Vector4f();
@@ -42,17 +42,17 @@ public record Model(GuiElement guiElement, ModelPart[] parts) implements Asset {
                 for (int y = 0; y < size.y; y += stepLength)
                     for (int z = 0; z < size.z; z += stepLength) {
                         position.set(x, y, z, 1).mul(transform);
-                        collector.addBreakParticle(particles, (int) position.x, (int) position.y, (int) position.z, particleMaterial);
+                        collector.addDeathParticle(particles, velocity, (int) position.x, (int) position.y, (int) position.z, particleMaterial);
                     }
         }
     }
 
     record ModelStructure(Vector3f center, Vector3f position, String structureName) implements ModelPart {
         @Override
-        public void spawnParticles(IntArrayList particles, Matrix4f transform) {
+        public void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
             transform.translate(-center.x, -center.y, -center.z);
             Structure structure = AssetManager.get(new StructureIdentifier(structureName));
-            structure.materials().addDeathParticles(Game.getPlayer().getParticleCollector(), particles, transform);
+            structure.materials().addDeathParticles(Game.getPlayer().getParticleCollector(), particles, transform, velocity);
         }
     }
 }

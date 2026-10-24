@@ -1,7 +1,6 @@
 package game.player.rendering;
 
 import core.assets.*;
-import core.assets.identifiers.TextureIdentifier;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.CoreObjectLoader;
@@ -199,8 +198,6 @@ public final class Renderer extends Renderable {
 
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
-        glActiveTexture(GL_TEXTURE4);
-        AssetManager.get((TextureIdentifier) OptionSettings.SKIN.value()).bind();
     }
 
 
@@ -432,7 +429,7 @@ public final class Renderer extends Renderable {
         if (ToggleSettings.PLAYER_CASTS_SHADOWS.value() && currentShadowIndex == 0) {
             Shader shader = AssetManager.get(Shaders.MODEL_SHADOW);
             shader.bind();
-            renderEntities(shader, cameraPosition, sunMatrices[currentShadowIndex]);
+            renderEntitiesWithoutTextures(shader, cameraPosition, sunMatrices[currentShadowIndex]);
         }
 
         glColorMask(true, true, true, true);
@@ -523,7 +520,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderEntities(Shader shader, Position cameraPosition, Matrix4f matrix) {
+    private void renderEntitiesWithoutTextures(Shader shader, Position cameraPosition, Matrix4f matrix) {
         Vector3l cameraChunkPosition = new Vector3l(
                 cameraPosition.longX & ~CHUNK_SIZE_MASK,
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
@@ -533,6 +530,23 @@ public final class Renderer extends Renderable {
         synchronized (Game.getWorld().entities) {
             for (Entity entity : Game.getWorld().entities)
                 renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+        }
+    }
+
+    @MainThread
+    private void renderEntities(Shader shader, Position cameraPosition, Matrix4f matrix) {
+        Vector3l cameraChunkPosition = new Vector3l(
+                cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                cameraPosition.longZ & ~CHUNK_SIZE_MASK);
+
+        shader.setUniform("projectionViewMatrix", matrix);
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities) {
+                glActiveTexture(GL_TEXTURE4);
+                AssetManager.get(entity.getRenderEntity().getTextureIdentifier()).bind();
+                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+            }
         }
     }
 

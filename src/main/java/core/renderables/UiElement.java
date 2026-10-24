@@ -3,7 +3,8 @@ package core.renderables;
 import core.assets.AssetManager;
 import core.assets.CoreShaders;
 import core.assets.Texture;
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.Texture2D;
+import core.assets.identifiers.AssetIdentifier;
 import core.rendering_api.shaders.GuiShader;
 
 import core.utils.MainThread;
@@ -12,7 +13,7 @@ import org.joml.Vector2f;
 public class UiElement extends Renderable {
 
     @MainThread
-    public UiElement(Vector2f sizeToParent, Vector2f offsetToParent, TextureIdentifier texture) {
+    public UiElement(Vector2f sizeToParent, Vector2f offsetToParent, AssetIdentifier<Texture2D> texture) {
         super(sizeToParent, offsetToParent);
         this.texture = texture;
     }
@@ -27,5 +28,5 @@ public class UiElement extends Renderable {
         else shader.drawQuadNoGuiScale(position, size, background);
     }
 
-    private final TextureIdentifier texture;
+    private final AssetIdentifier<Texture2D> texture;
 }

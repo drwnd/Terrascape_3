@@ -3,12 +3,14 @@ package game.entities;
 import core.utils.IntArrayList;
 import core.utils.MainThread;
 import core.utils.Vector3l;
+
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.player.particles.ParticleType;
 import game.server.Game;
 import game.utils.Position;
 import game.utils.ServerThread;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -29,9 +31,16 @@ public abstract class Entity {
             if (transforms.length != parts.length) return;
 
             IntArrayList particles = new IntArrayList(parts.length * 64);
-            for (int index = 0; index < parts.length; index++) parts[index].spawnParticles(particles, transforms[index]);
+            Vector3f velocity = movement.getVelocity().mul(3);
+            for (int index = 0; index < parts.length; index++) parts[index].spawnParticles(particles, transforms[index], velocity);
             Game.getPlayer().getParticleCollector().addParticles(position.longX, position.longY, position.longZ, particles, ParticleType.OPAQUE_BREAK);
         }
+    }
+
+    public void hit(Vector3f direction, int damage) {
+        movement.applyForce(direction.x * 10, Math.max(0, direction.y) * 10 + 3, direction.z * 10);
+        health -= damage;
+        if (health <= 0) Game.getServer().killEntity(this);
     }
 
     @ServerThread
@@ -43,6 +52,7 @@ public abstract class Entity {
 
     @MainThread
     public void updateFrame(float frameTime, float gameTickFraction) {
+        if (health <= 0) return;
         synchronized (this) {
             renderEntity.updateFrame(frameTime, gameTickFraction, rotation);
             Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
@@ -85,4 +95,5 @@ public abstract class Entity {
     protected Position position, toRenderPosition = new Position();
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();
+    private int health = 1;
 }
