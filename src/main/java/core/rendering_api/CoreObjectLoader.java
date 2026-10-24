@@ -22,7 +22,6 @@ public final class CoreObjectLoader {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
         for (int index = 0; index < textures.length; index++) {
             Texture2D texture = textures[index];
@@ -30,6 +29,11 @@ public final class CoreObjectLoader {
                     textureArray, GL_TEXTURE_2D_ARRAY, 0, 0, 0, index,
                     texture.width(), texture.width(), 1);
         }
+        glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray);
+        glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
         int[] textureSizes = new int[textures.length];
         for (int index = 0; index < textures.length; index++)
