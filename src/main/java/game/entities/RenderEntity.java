@@ -41,7 +41,9 @@ public class RenderEntity {
         model = AssetManager.get(modelIdentifier);
         if (transforms.length != model.parts().length) {
             transforms = new Matrix4f[model.parts().length];
+            parentedTransforms = new Matrix4f[model.parts().length];
             for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f().zero();
+            System.arraycopy(transforms, 0, parentedTransforms, 0, model.parts().length);
         }
     }
 
@@ -51,6 +53,10 @@ public class RenderEntity {
 
     public Matrix4f[] transforms() {
         return transforms;
+    }
+
+    public Matrix4f[] parentedTransforms() {
+        return parentedTransforms;
     }
 
     public Model.ModelPart[] parts() {
@@ -69,7 +75,7 @@ public class RenderEntity {
     private final AssetIdentifier<Texture2D> textureIdentifier;
     private Animator animator;
     private Model model;
-    private Matrix4f[] transforms = new Matrix4f[0];
+    private Matrix4f[] transforms = new Matrix4f[0], parentedTransforms = new Matrix4f[0];
 
     private static final AssetIdentifier<Texture2D> NULL_TEXTURE_IDENTIFIER = () -> new Texture2D(0);
 }

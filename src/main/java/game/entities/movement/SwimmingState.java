@@ -5,10 +5,8 @@ import core.utils.MathUtils;
 import core.utils.MainThread;
 
 import game.entities.RenderEntity;
-import game.entities.Model;
 import game.player.rendering.Camera;
 import game.settings.KeySettings;
-import game.settings.OptionSettings;
 import game.utils.Position;
 import game.utils.ServerThread;
 
@@ -66,11 +64,8 @@ public final class SwimmingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
-
-        applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.parts());
 
         float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = velocity.length();
@@ -80,12 +75,12 @@ public final class SwimmingState extends MovementState {
         double swimAngle = Math.abs(Math.sin(animationTimer) * Math.PI);
         double liftAngle = Math.max(0, Math.sin(animationTimer * 2) * Math.PI * 0.35);
 
-        transforms[HEAD].translate(0, -22, -6).rotate((float) -Math.PI * 0.25F, 1, 0, 0);
+        transforms[HEAD].rotate((float) Math.PI * 0.25F, 1, 0, 0);
         transforms[BODY].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0);
-        transforms[LEFT_ARM].translate(0, -20, -4).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
+        transforms[LEFT_ARM]
                 .rotate((float) -swimAngle, 0, 0, 1)
                 .rotate((float) liftAngle, 1, 0, 0);
-        transforms[RIGHT_ARM].translate(0, -20, -4).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
+        transforms[RIGHT_ARM]
                 .rotate((float) swimAngle, 0, 0, 1)
                 .rotate((float) liftAngle, 1, 0, 0);
         applyLegAnimation(animationTimer, transforms, amplitude);
@@ -94,37 +89,9 @@ public final class SwimmingState extends MovementState {
     }
 
     @MainThread
-    static void applyBasicAnimation(Vector3f cameraRotation, Vector3f velocity, Matrix4f[] transforms, Model.ModelPart[] parts) {
-        Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
-        float angle = (float) -Math.toRadians(cameraRotation.y);
-        float sidewaysVelocity = -velocity.x * direction.z + velocity.z * direction.x;
-        float sidewaysTilt = (float) Math.clamp(sidewaysVelocity * 0.2F, -Math.PI * 0.25, Math.PI * 0.25);
-        boolean isFirstPerson = OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON;
-
-        for (int index = BODY; index < transforms.length; index++)
-            transforms[index].identity()
-                    .rotate(angle - sidewaysTilt, 0, 1, 0)
-                    .translate(parts[index].position())
-                    .translate(0, 0, isFirstPerson ? 3 : 0);
-        if (isFirstPerson)
-            transforms[HEAD].identity()
-                    .rotate(angle, 0, 1, 0)
-                    .translate(parts[HEAD].position());
-        else transforms[HEAD].identity()
-                .rotate(angle, 0, 1, 0)
-                .translate(parts[HEAD].position())
-                .rotate(-sidewaysTilt, 0, 1, 0)
-                .translate(0, 0, -6)
-                .rotate(sidewaysTilt, 0, 1, 0)
-                .translate(0, 0, 6);
-    }
-
-    @MainThread
     static void applyLegAnimation(double animationTimer, Matrix4f[] transforms, float amplitude) {
-        transforms[LEFT_LEG].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
-                .rotate((float) -Math.sin(animationTimer * 2) * amplitude * 0.35F, 1, 0, 0);
-        transforms[RIGHT_LEG].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
-                .rotate((float) Math.sin(animationTimer * 2) * amplitude * 0.35F, 1, 0, 0);
+        transforms[LEFT_LEG].rotate((float) -Math.sin(animationTimer * 2) * amplitude * 0.35F, 1, 0, 0);
+        transforms[RIGHT_LEG].rotate((float) Math.sin(animationTimer * 2) * amplitude * 0.35F, 1, 0, 0);
     }
 
     @Override

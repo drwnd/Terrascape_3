@@ -5,7 +5,6 @@ import core.utils.MathUtils;
 import core.utils.MainThread;
 
 import game.entities.RenderEntity;
-import game.entities.Model;
 import game.player.rendering.Camera;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
@@ -59,13 +58,9 @@ public final class FlyingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        Model.ModelPart[] parts = playerCharacter.parts();
-        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
         Vector3f cameraRotation = camera.getRotation();
-
-        WalkingState.rotateBody(transforms, parts, cameraRotation, velocity);
 
         float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);

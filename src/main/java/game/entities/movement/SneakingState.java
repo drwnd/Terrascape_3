@@ -5,7 +5,6 @@ import core.utils.MathUtils;
 import core.utils.MainThread;
 
 import game.entities.RenderEntity;
-import game.entities.Model;
 import game.player.rendering.Camera;
 import game.settings.KeySettings;
 import game.utils.Position;
@@ -52,24 +51,20 @@ public final class SneakingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        Model.ModelPart[] parts = playerCharacter.parts();
-        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
         Vector3f cameraRotation = camera.getRotation();
-
-        WalkingState.rotateBody(transforms, parts, cameraRotation, velocity);
 
         float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
         double animationTimer = playerCharacter.animationTimer;
 
-        transforms[HEAD].translate(0, -4, 0).rotate((float) -Math.toRadians(cameraRotation.x), 1, 0, 0);
+        transforms[HEAD].rotate(0.5F + (float) -Math.toRadians(cameraRotation.x), 1, 0, 0);
         transforms[BODY].translate(0, -2, 6).rotate(-0.5F, 1, 0, 0);
-        transforms[LEFT_ARM].translate(0, -4, 0).rotate((float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(-speed * 0.2F, 0, 0, 1);
-        transforms[RIGHT_ARM].translate(0, -4, 0).rotate((float) -Math.sin(animationTimer) * speed, 1, 0, 0).rotate(speed * 0.2F, 0, 0, 1);
-        transforms[LEFT_LEG].translate(0, 0, 5.5F).rotate((float) -Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
-        transforms[RIGHT_LEG].translate(0, 0, 5.5F).rotate((float) Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
+        transforms[LEFT_ARM].rotate(0.5F + (float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(-speed * 0.2F, 0, 0, 1);
+        transforms[RIGHT_ARM].rotate(0.5F + (float) -Math.sin(animationTimer) * speed, 1, 0, 0).rotate(speed * 0.2F, 0, 0, 1);
+        transforms[LEFT_LEG].translate(0, 1, 0).rotate(0.5F + (float) -Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
+        transforms[RIGHT_LEG].translate(0, 1, 0).rotate(0.5F + (float) Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
 
         playerCharacter.animationTimer += frameTime * 0.005;
     }

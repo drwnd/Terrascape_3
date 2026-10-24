@@ -510,7 +510,7 @@ public final class Renderer extends Renderable {
         setupEntityRendering(shader, cameraPosition, projectionViewMatrix);
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
             MovementState state = player.getMovement().getState();
-            Matrix4f[] transforms = player.getRenderEntity().transforms();
+            Matrix4f[] transforms = player.getRenderEntity().parentedTransforms();
             if (state.hideHeadInFirstPerson()) transforms[PlayerAnimator.HEAD].zero();
             if (state.hideBodyInFirstPerson()) transforms[PlayerAnimator.BODY].zero();
             if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value())
@@ -557,7 +557,7 @@ public final class Renderer extends Renderable {
                 (position.longY - cameraChunkPosition.y) + position.fractionY,
                 (position.longZ - cameraChunkPosition.z) + position.fractionZ
         );
-        shader.setUniform("transformations", renderEntity.transforms());
+        shader.setUniform("transformations", renderEntity.parentedTransforms());
 
         glBindVertexArray(renderEntity.guiElement().vao());
         glEnableVertexAttribArray(0);

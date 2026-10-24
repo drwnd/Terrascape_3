@@ -5,7 +5,6 @@ import core.utils.MainThread;
 import game.assets.EntityType;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
-import game.entities.movement.WalkingState;
 import game.utils.Position;
 
 import org.joml.Matrix4f;
@@ -31,7 +30,7 @@ public class Skeleton extends Entity {
             Movement movement = skeleton.getMovement();
             Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
 
-            WalkingState.rotateBody(transforms, parts, rotation, velocity);
+            Animator.rotateBody(transforms, parts, rotation);
 
             float speed = (float) Math.clamp(velocity.length() * 0.2, -Math.PI * 0.5, Math.PI * 0.5);
             double animationTimer = entity.animationTimer;
@@ -46,7 +45,8 @@ public class Skeleton extends Entity {
             float wobbleStrength = isIdle ? 0.2F : speed * 3;
             double wobbleTime = animationTimer * WOBBLE_SPEED * (isIdle ? 0.25 : 1);
             for (int index = 0; index < 6; index++) {
-                transforms[index].translate(
+                transforms[index]
+                        .translate(
                                 (float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_X] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_X]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_X] * wobbleStrength,
                                 (float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_Y] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_Y]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_Y] * wobbleStrength,
                                 (float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_Z] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_Z]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_Z] * wobbleStrength)
@@ -55,6 +55,7 @@ public class Skeleton extends Entity {
                         .rotate((float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_PITCH] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_PITCH]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_PITCH] * wobbleStrength, 0, 1, 0);
             }
 
+            Animator.applyApplyParenting(entity);
             entity.animationTimer += frameTime * 0.005;
         }
 

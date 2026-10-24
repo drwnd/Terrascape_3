@@ -73,9 +73,10 @@ public abstract class MovementState {
      * @param camera           The camera of the player.
      * @param frameTime        The time since the last frame in ms.
      * @param gameTickFraction The time within the current Game-Tick. In the range [0, 1].
+     * @param velocity         The interpolated renderVelocity of the player.
      */
     @MainThread
-    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction);
+    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity);
 
     @ServerThread
     byte getStandingMaterial(Position position) {

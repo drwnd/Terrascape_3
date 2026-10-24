@@ -50,23 +50,20 @@ public final class CrawlingState extends MovementState {
 
     @Override
     @MainThread
-    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction) {
+    public void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity) {
         Matrix4f[] transforms = playerCharacter.transforms();
-        Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
-
-        SwimmingState.applyBasicAnimation(camera.getRotation(), velocity, transforms, playerCharacter.parts());
 
         float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = velocity.length();
         float amplitude = (float) Math.clamp(speed + rotationSpeed, -Math.PI * 0.35, Math.PI * 0.35);
         double animationTimer = playerCharacter.animationTimer;
 
-        transforms[HEAD].translate(0, -22, -6).rotate((float) -Math.PI * 0.25F, 1, 0, 0);
+        transforms[HEAD].rotate((float) Math.PI * 0.25F, 1, 0, 0);
         transforms[BODY].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0);
-        transforms[LEFT_ARM].translate(0, -20, -4).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
+        transforms[LEFT_ARM]
                 .rotate((float) -Math.abs(Math.sin(animationTimer) * Math.PI), 0, 0, 1)
                 .rotate((float) Math.min(0, -Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0);
-        transforms[RIGHT_ARM].translate(0, -20, -4).rotate((float) -Math.PI * 0.5F, 1, 0, 0)
+        transforms[RIGHT_ARM]
                 .rotate((float) Math.abs(Math.cos(animationTimer) * Math.PI), 0, 0, 1)
                 .rotate((float) Math.min(0, Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0);
         SwimmingState.applyLegAnimation(animationTimer, transforms, amplitude);
