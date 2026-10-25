@@ -83,7 +83,7 @@ public final class GuiShader extends RenderShader {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
 
-        glDrawArrays(GL_TRIANGLES, 0, quad.vertexCount());
+        glDrawElements(GL_TRIANGLES, quad.vertexCount(), GL_UNSIGNED_INT, 0);
         flipNextDrawVertically = false;
     }
 

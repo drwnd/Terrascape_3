@@ -1,5 +1,6 @@
 package game.entities;
 
+import core.assets.AssetLoader;
 import core.assets.AssetManager;
 import core.assets.GuiElementData;
 import game.assets.StructureIdentifier;
@@ -44,7 +45,7 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
             generateModelBox(vertices, textureCoordinates, box.size(), box.center(), false, box.textureCoordinate());
             if (box.hasOuterLayer()) generateModelBox(vertices, textureCoordinates, box.size(), box.center(), true, box.outerTextureCoordinate());
 
-            for (int count = 0; count < amount; count++) intData.add((count / 6 % 6) << 29 | index);
+            for (int count = 0; count < amount; count++) intData.add((count / VERTICES_PER_FACE % 6) << 29 | index);
         }
 
         for (int index = 0; index < structuresLength; index++) {
@@ -62,14 +63,14 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
 
                 int side = textureData >> 8 & 7;
                 int material = textureData & 0xFF;
-                for (int count = 0; count < 6; count++) intData.add(side << 29 | material << 21 | index + boxesLength);
+                for (int count = 0; count < VERTICES_PER_FACE; count++) intData.add(side << 29 | material << 21 | index + boxesLength);
             }
         }
 
         return new GuiElementData(
                 new float[][]{toFloatArray(vertices), toFloatArray(textureCoordinates)},
                 new int[][]{toIntArray(intData)},
-                new int[]{3, 2, 1}, vertices.size() / 3);
+                new int[]{3, 2, 1}, AssetLoader.getQuadIndices(vertices.size() / 3 / AssetLoader.VERTICES_PER_QUAD));
     }
 
     private static void generateModelFace(ArrayList<Float> vertices, ArrayList<Float> textureCoordinates, Vector3f center, int x, int y, int z, int textureData) {
@@ -81,16 +82,12 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
         Vector3f pos1 = getFacePosition(side, 1, faceSize1, faceSize2).sub(center).add(x, y, z);
         Vector3f pos2 = getFacePosition(side, 2, faceSize1, faceSize2).sub(center).add(x, y, z);
         Vector3f pos3 = getFacePosition(side, 3, faceSize1, faceSize2).sub(center).add(x, y, z);
-        Vector3f pos4 = getFacePosition(side, 4, faceSize1, faceSize2).sub(center).add(x, y, z);
-        Vector3f pos5 = getFacePosition(side, 5, faceSize1, faceSize2).sub(center).add(x, y, z);
 
         vertices.addAll(List.of(
                 pos0.x, pos0.y, pos0.z,
                 pos1.x, pos1.y, pos1.z,
                 pos2.x, pos2.y, pos2.z,
-                pos3.x, pos3.y, pos3.z,
-                pos4.x, pos4.y, pos4.z,
-                pos5.x, pos5.y, pos5.z
+                pos3.x, pos3.y, pos3.z
         ));
 
         if (side == NORTH || side == TOP || side == EAST) {
@@ -103,10 +100,7 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
                 0.0F, 0.0F,
                 faceSize1, 0.0F,
                 0.0F, -faceSize2,
-
-                faceSize1, -faceSize2,
-                0.0F, -faceSize2,
-                faceSize1, 0.0F
+                faceSize1, -faceSize2
         ));
     }
 
@@ -137,98 +131,74 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
                 // north
                 nx, py, pz,
                 nx, ny, pz,
-                px, ny, pz,
                 px, py, pz,
-                nx, py, pz,
                 px, ny, pz,
 
                 // top
                 nx, py, nz,
                 nx, py, pz,
-                px, py, pz,
                 px, py, nz,
-                nx, py, nz,
                 px, py, pz,
 
                 // west
                 px, ny, nz,
                 px, py, nz,
                 px, ny, pz,
-                px, py, nz,
                 px, py, pz,
-                px, ny, pz,
 
                 // south
                 nx, ny, nz,
                 nx, py, nz,
                 px, ny, nz,
-                nx, py, nz,
                 px, py, nz,
-                px, ny, nz,
 
                 // bottom
                 px, ny, pz,
                 nx, ny, pz,
-                nx, ny, nz,
                 px, ny, nz,
-                px, ny, pz,
                 nx, ny, nz,
 
                 // east
                 nx, py, nz,
                 nx, ny, nz,
-                nx, ny, pz,
                 nx, py, pz,
-                nx, py, nz,
                 nx, ny, pz
         ));
         textureCoordinates.addAll(List.of(
                 // north
                 u + 2 * dz + 1 * dx, v + dz,
                 u + 2 * dz + 1 * dx, v + dy + dz,
-                u + 2 * dz + 2 * dx, v + dy + dz,
                 u + 2 * dz + 2 * dx, v + dz,
-                u + 2 * dz + 1 * dx, v + dz,
                 u + 2 * dz + 2 * dx, v + dy + dz,
 
                 // top
                 u + dx + dz, v + dz,
                 u + dx + dz, v,
-                u + dz, v,
                 u + dz, v + dz,
-                u + dx + dz, v + dz,
                 u + dz, v,
 
                 // west
                 u + dz, v + dy + dz,
                 u + dz, v + dz,
                 u, v + dy + dz,
-                u + dz, v + dz,
                 u, v + dz,
-                u, v + dy + dz,
 
                 // south
                 u + dx + dz, v + dz + dy,
                 u + dx + dz, v + dz,
                 u + dz, v + dz + dy,
-                u + dx + dz, v + dz,
                 u + dz, v + dz,
-                u + dz, v + dz + dy,
 
                 // bottom
                 u + dz + 2 * dx, v + dz,
                 u + dz + dx, v + dz,
-                u + dz + dx, v,
                 u + dz + 2 * dx, v,
-                u + dz + 2 * dx, v + dz,
                 u + dz + dx, v,
 
                 // east
                 u + dx + 1 * dz, v + dz,
                 u + dx + 1 * dz, v + dy + dz,
-                u + dx + 2 * dz, v + dy + dz,
                 u + dx + 2 * dz, v + dz,
-                u + dx + 1 * dz, v + dz,
                 u + dx + 2 * dz, v + dy + dz
         ));
     }
@@ -245,9 +215,9 @@ public record ModelData(Model.ModelBox[] boxes, Model.ModelStructure[] structure
         return array;
     }
 
-    private static final int VERTICES_PER_BOX = 36;
+    private static final int VERTICES_PER_FACE = 4;
+    private static final int VERTICES_PER_BOX = VERTICES_PER_FACE * 6;
     private static final Vector3f[] FACE_POSITIONS = new Vector3f[]{
-            new Vector3f(0, 0, 1), new Vector3f(0, 1, 1), new Vector3f(1, 0, 1),
-            new Vector3f(1, 1, 1), new Vector3f(1, 0, 1), new Vector3f(0, 1, 1)
+            new Vector3f(0, 0, 1), new Vector3f(0, 1, 1), new Vector3f(1, 0, 1), new Vector3f(1, 1, 1)
     };
 }

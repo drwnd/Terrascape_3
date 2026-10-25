@@ -564,7 +564,7 @@ public final class Renderer extends Renderable {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
 
-        glDrawArrays(GL_TRIANGLES, 0, renderEntity.guiElement().vertexCount());
+        glDrawElements(GL_TRIANGLES, renderEntity.guiElement().vertexCount(), GL_UNSIGNED_INT, 0);
     }
 
     @MainThread
