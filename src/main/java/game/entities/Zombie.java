@@ -33,25 +33,25 @@ public class Zombie extends Entity {
             double animationTimer = entity.animationTimer;
 
             transforms[HEAD]
-                    .rotate(0.5F + (float) -Math.toRadians(rotation.x), 1, 0, 0)
+                    .rotate(0.5F - (float) Math.toRadians(rotation.x), 1, 0, 0)
                     .rotate((float) Math.sin(animationTimer * 0.5) * 0.1F, 0, 0, 1);
-            transforms[BODY].translate(0, -2, 2.5F)
+            transforms[BODY].translate(0, -2, 3.5F)
                     .rotate(-0.5F, 1, 0, 0);
             transforms[LEFT_ARM]
                     .rotate(0.5F + (float) Math.sin(animationTimer) * (speed + 0.1F) + (float) Math.toRadians(90), 1, 0, 0)
                     .rotate(-speed * 0.2F, 0, 0, 1);
             transforms[RIGHT_ARM]
-                    .rotate(0.5F + (float) -Math.sin(animationTimer) * (speed + 0.1F) + (float) Math.toRadians(90), 1, 0, 0)
+                    .rotate(0.5F - (float) Math.sin(animationTimer) * (speed + 0.1F) + (float) Math.toRadians(90), 1, 0, 0)
                     .rotate(speed * 0.2F, 0, 0, 1);
             transforms[LEFT_LEG].translate(0, 1, 0)
-                    .rotate(0.5F + (float) -Math.sin(animationTimer) * speed, 1, 0, 0)
+                    .rotate(0.5F - (float) Math.sin(animationTimer) * speed, 1, 0, 0)
                     .rotate(-0.1F, 0, 0, 1);
             transforms[RIGHT_LEG].translate(0, 1, 0)
                     .rotate(0.5F + (float) Math.sin(animationTimer) * speed, 1, 0, 0)
                     .rotate(0.1F, 0, 0, 1);
 
             entity.animationTimer += frameTime * 0.005;
-            Animator.applyApplyParenting(entity);
+            Animator.applyParenting(entity);
         }
     }
 }

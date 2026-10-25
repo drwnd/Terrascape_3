@@ -7,7 +7,8 @@
       "textureCoordinate": {"x": 0, "y": 0},
       "outerTextureCoordinate": {"x": 0.5, "y": 0},
       "particleMaterial": 149,
-      "parentIndex": 1
+      "parentIndex": 1,
+      "ignoreParentRotation": true
     },
     {
       "size": {"x": 8, "y": 12, "z": 4},

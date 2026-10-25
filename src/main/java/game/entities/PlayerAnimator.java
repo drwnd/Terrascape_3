@@ -22,7 +22,7 @@ public final class PlayerAnimator implements Animator {
 
         rotateBody(entity.transforms(), entity.parts(), player.getCamera().getRotation(), velocity);
         player.getMovement().getState().applyAnimation(entity, player.getCamera(), frameTime, gameTickFraction, velocity);
-        Animator.applyApplyParenting(entity);
+        Animator.applyParenting(entity);
     }
 
     @MainThread
@@ -35,7 +35,7 @@ public final class PlayerAnimator implements Animator {
 
         for (int index = 0; index < transforms.length; index++) {
             transforms[index].identity();
-            if (parts[index].parentIndex() == null) transforms[index].rotate(angle - sidewaysTilt, 0, 1, 0);
+            if (parts[index].parentIndex() == null || parts[index].ignoreParentRotation()) transforms[index].rotate(angle - sidewaysTilt, 0, 1, 0);
             transforms[index]
                     .translate(parts[index].position())
                     .translate(0, 0, isFirstPerson && parts[index].parentIndex() == null ? 3 : 0);

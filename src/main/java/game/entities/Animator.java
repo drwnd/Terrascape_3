@@ -2,6 +2,7 @@ package game.entities;
 
 import core.utils.MainThread;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -50,13 +51,13 @@ public interface Animator {
 
         for (int index = 0; index < transforms.length; index++) {
             transforms[index].identity();
-            if (parts[index].parentIndex() == null) transforms[index].rotate(angle, 0, 1, 0);
+            if (parts[index].parentIndex() == null || parts[index].ignoreParentRotation()) transforms[index].rotate(angle, 0, 1, 0);
             transforms[index].translate(parts[index].position());
         }
     }
 
 
-    static void applyApplyParenting(RenderEntity entity) {
+    static void applyParenting(RenderEntity entity) {
         Matrix4f[] transforms = entity.transforms();
         Matrix4f[] parentedTransforms = entity.parentedTransforms();
         Model.ModelPart[] parts = entity.parts();
@@ -70,7 +71,9 @@ public interface Animator {
         if (parentedTransforms[index] != null) return parentedTransforms[index];
         if (parts[index].parentIndex() != null) {
             Matrix4f parentTransform = fillParentTransforms(transforms, parentedTransforms, parts, parts[index].parentIndex());
+            Matrix3f rotation = parts[index].ignoreParentRotation() ? transforms[index].get3x3(new Matrix3f()) : null;
             parentTransform.mul(transforms[index], transforms[index]);
+            if (parts[index].ignoreParentRotation()) transforms[index].set3x3(rotation);
         }
         parentedTransforms[index] = transforms[index];
         return parentedTransforms[index];

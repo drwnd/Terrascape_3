@@ -58,11 +58,13 @@ public record Model(GuiElement guiElement, ModelPart[] parts) implements Asset {
 
         Integer parentIndex();
 
+        boolean ignoreParentRotation();
+
         void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity);
     }
 
     record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, byte particleMaterial,
-                    Vector2f outerTextureCoordinate, Integer parentIndex) implements ModelPart {
+                    Vector2f outerTextureCoordinate, Integer parentIndex, boolean ignoreParentRotation) implements ModelPart {
         @Override
         public void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
             transform.translate(-center.x, -center.y, -center.z);
@@ -82,7 +84,7 @@ public record Model(GuiElement guiElement, ModelPart[] parts) implements Asset {
         }
     }
 
-    record ModelStructure(Vector3f center, Vector3f position, String structureName, Integer parentIndex) implements ModelPart {
+    record ModelStructure(Vector3f center, Vector3f position, String structureName, Integer parentIndex, boolean ignoreParentRotation) implements ModelPart {
         @Override
         public void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
             transform.translate(-center.x, -center.y, -center.z);

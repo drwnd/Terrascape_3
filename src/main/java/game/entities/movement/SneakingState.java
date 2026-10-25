@@ -59,10 +59,10 @@ public final class SneakingState extends MovementState {
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
         double animationTimer = playerCharacter.animationTimer;
 
-        transforms[HEAD].rotate(0.5F + (float) -Math.toRadians(cameraRotation.x), 1, 0, 0);
+        transforms[HEAD].rotate(-(float) Math.toRadians(cameraRotation.x), 1, 0, 0);
         transforms[BODY].translate(0, -2, 6).rotate(-0.5F, 1, 0, 0);
         transforms[LEFT_ARM].rotate(0.5F + (float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(-speed * 0.2F, 0, 0, 1);
-        transforms[RIGHT_ARM].rotate(0.5F + (float) -Math.sin(animationTimer) * speed, 1, 0, 0).rotate(speed * 0.2F, 0, 0, 1);
+        transforms[RIGHT_ARM].rotate(0.5F - (float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(speed * 0.2F, 0, 0, 1);
         transforms[LEFT_LEG].translate(0, 1, 0).rotate(0.5F + (float) -Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
         transforms[RIGHT_LEG].translate(0, 1, 0).rotate(0.5F + (float) Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
 

@@ -55,7 +55,7 @@ public class Skeleton extends Entity {
                         .rotate((float) Math.sin(wobbleTime * wobbleSpeeds[index * WOBBLE_COUNT + WOBBLE_PITCH] + wobbleOffsets[index * WOBBLE_COUNT + WOBBLE_PITCH]) * wobbleStrengths[index * WOBBLE_COUNT + WOBBLE_PITCH] * wobbleStrength, 0, 1, 0);
             }
 
-            Animator.applyApplyParenting(entity);
+            Animator.applyParenting(entity);
             entity.animationTimer += frameTime * 0.005;
         }
 

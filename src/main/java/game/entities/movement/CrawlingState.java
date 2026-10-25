@@ -58,7 +58,7 @@ public final class CrawlingState extends MovementState {
         float amplitude = (float) Math.clamp(speed + rotationSpeed, -Math.PI * 0.35, Math.PI * 0.35);
         double animationTimer = playerCharacter.animationTimer;
 
-        transforms[HEAD].rotate((float) Math.PI * 0.25F, 1, 0, 0);
+        transforms[HEAD].rotate((float) -Math.PI * 0.25F, 1, 0, 0);
         transforms[BODY].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0);
         transforms[LEFT_ARM]
                 .rotate((float) -Math.abs(Math.sin(animationTimer) * Math.PI), 0, 0, 1)

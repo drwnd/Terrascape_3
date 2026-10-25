@@ -75,7 +75,7 @@ public final class SwimmingState extends MovementState {
         double swimAngle = Math.abs(Math.sin(animationTimer) * Math.PI);
         double liftAngle = Math.max(0, Math.sin(animationTimer * 2) * Math.PI * 0.35);
 
-        transforms[HEAD].rotate((float) Math.PI * 0.25F, 1, 0, 0);
+        transforms[HEAD].rotate((float) -Math.PI * 0.25F, 1, 0, 0);
         transforms[BODY].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0);
         transforms[LEFT_ARM]
                 .rotate((float) -swimAngle, 0, 0, 1)
