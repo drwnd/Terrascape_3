@@ -3,7 +3,6 @@ package game.settings;
 import core.settings.ToggleSetting;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_F3;
 
 public enum ToggleSettings implements ToggleSetting {
     SCROLL_HOTBAR(true),

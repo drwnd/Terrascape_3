@@ -41,12 +41,6 @@ public final class AABB {
                 && this.minZ < maxZ && minZ < this.maxZ;
     }
 
-    public boolean includes(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        return this.minX <= minX && maxX <= this.maxX
-                && this.minY <= minY && maxY <= this.maxY
-                && this.minZ <= minZ && maxZ <= this.maxZ;
-    }
-
     public boolean isEmpty() {
         return maxX <= minX || maxY <= minY || maxZ <= minZ;
     }

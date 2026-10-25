@@ -236,7 +236,7 @@ public class CoreSettingsRenderable extends UiBackgroundElement {
 
     protected int settingsCount = 0;
     protected final SettingsRenderableInput input = new SettingsRenderableInput(this);
-    protected SideScroller scroller;
+    protected final SideScroller scroller;
 
     protected final ArrayList<Slider<? extends Number>> sliders = new ArrayList<>();
     protected final ArrayList<KeySelector> keySelectors = new ArrayList<>();

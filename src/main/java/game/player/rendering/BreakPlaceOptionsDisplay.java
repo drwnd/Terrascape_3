@@ -7,6 +7,7 @@ import core.settings.CoreFloatSettings;
 import core.settings.CoreOptionSettings;
 import core.settings.optionSettings.FontOption;
 
+import core.utils.MainThread;
 import game.language.UiMessages;
 import game.player.Hotbar;
 import game.settings.FloatSettings;
@@ -16,6 +17,7 @@ import org.joml.Vector2f;
 
 public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
 
+    @MainThread
     public BreakPlaceOptionsDisplay() {
         super(new Vector2f(), new Vector2f());
         setRimThicknessMultiplier(0.2F);
@@ -28,6 +30,7 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
     }
 
     @Override
+    @MainThread
     public void renderSelf(Vector2f position, Vector2f size) {
         breakPlaceSize.setText(UiMessages.BREAK_PLACE_SIZE_FORMAT.get().formatted(1 << IntSettings.BREAK_PLACE_SIZE.value()));
         breakPlaceAlign.setText(UiMessages.BREAK_PLACE_ALIGN_FORMAT.get().formatted(1 << IntSettings.BREAK_PLACE_ALIGN.value()));
@@ -44,6 +47,6 @@ public final class BreakPlaceOptionsDisplay extends UiBackgroundElement {
         super.renderSelf(getPosition(), getSize());
     }
 
-    TextElement breakPlaceSize = new TextElement(new Vector2f(0.05F, 2.0F / 3.0F));
-    TextElement breakPlaceAlign = new TextElement(new Vector2f(0.05F, 1.0F / 3.0F));
+    final TextElement breakPlaceSize = new TextElement(new Vector2f(0.05F, 2.0F / 3.0F));
+    final TextElement breakPlaceAlign = new TextElement(new Vector2f(0.05F, 1.0F / 3.0F));
 }

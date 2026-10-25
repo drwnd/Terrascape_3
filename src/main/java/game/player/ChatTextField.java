@@ -1,6 +1,7 @@
 package game.player;
 
 import core.renderables.TextField;
+import core.utils.MainThread;
 
 import game.language.UiMessages;
 
@@ -8,6 +9,7 @@ import org.joml.Vector2f;
 
 public final class ChatTextField extends TextField {
 
+    @MainThread
     public ChatTextField() {
         super(new Vector2f(1.0F, 0.05F), new Vector2f(0.0F, 0.0F), UiMessages.CHAT_MESSAGE_PROMPT);
         setVisible(false);
@@ -21,5 +23,5 @@ public final class ChatTextField extends TextField {
         return input;
     }
 
-    ChatInput input = new ChatInput(this);
+    final ChatInput input = new ChatInput(this);
 }

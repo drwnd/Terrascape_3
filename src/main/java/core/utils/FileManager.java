@@ -1,5 +1,7 @@
 package core.utils;
 
+import core.rendering_api.Debug;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -23,7 +25,7 @@ public final class FileManager {
                 lines.add(line);
             }
         } catch (IOException exception) {
-            exception.printStackTrace();
+            Debug.err(exception);
             return new String[0];
         }
 
@@ -51,7 +53,7 @@ public final class FileManager {
 
     public static File loadAndCreateDirectory(Path filepath) {
         File file = filepath.toFile();
-        file.mkdirs();
+        boolean _ = file.mkdirs();
         return file;
     }
 
@@ -60,8 +62,8 @@ public final class FileManager {
         try {
             if (!file.exists()) {
                 File parent = file.toPath().toAbsolutePath().getParent().toFile();
-                parent.mkdirs();
-                file.createNewFile();
+                boolean _ = parent.mkdirs();
+                boolean _ = file.createNewFile();
             }
         } catch (IOException exception) {
             throw new RuntimeException(exception);
@@ -75,7 +77,7 @@ public final class FileManager {
             File[] children = file.listFiles();
             if (children != null) for (File child : children) delete(child);
         }
-        file.delete();
+        boolean _ = file.delete();
     }
 
     public static String loadFileContents(Path filepath) {

@@ -2,6 +2,7 @@ package core.assets;
 
 import core.assets.identifiers.SoundIdentifier;
 import core.sound.Sound;
+import core.utils.MainThread;
 
 import java.nio.file.Path;
 
@@ -16,6 +17,7 @@ public enum CoreSounds implements SoundIdentifier {
     }
 
     @Override
+    @MainThread
     public Sound generateAsset() {
         return new Sound(AssetLoader.loadSound(AssetManager.getAssetFilepath(filepath)), gainMultiplier, pitchMultiplier);
     }

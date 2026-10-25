@@ -27,16 +27,6 @@ public final class Position implements Distanceable {
         return new Position(saver.loadLong(), saver.loadLong(), saver.loadLong(), saver.loadFloat(), saver.loadFloat(), saver.loadFloat());
     }
 
-
-    public Position() {
-        this.longX = 0L;
-        this.longY = 0L;
-        this.longZ = 0L;
-        this.fractionX = 0.0F;
-        this.fractionY = 0.0F;
-        this.fractionZ = 0.0F;
-    }
-
     public Position(long longX, long longY, long longZ, float fractionX, float fractionY, float fractionZ) {
         this.longX = longX + MathUtils.floor(fractionX);
         this.longY = longY + MathUtils.floor(fractionY);
@@ -140,10 +130,6 @@ public final class Position implements Distanceable {
 
     public Vector3l longPosition() {
         return new Vector3l(longX, longY, longZ);
-    }
-
-    public Vector3f fractionPosition() {
-        return new Vector3f(fractionX, fractionY, fractionZ);
     }
 
     public boolean sharesChunkWith(Position position) {

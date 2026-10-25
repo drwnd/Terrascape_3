@@ -7,6 +7,7 @@ import core.assets.identifiers.AssetIdentifier;
 import core.rendering_api.Window;
 import core.settings.CoreOptionSettings;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import org.joml.Vector2f;
 
@@ -96,6 +97,7 @@ public final class FontOption implements Option, AssetIdentifier<Texture> {
     }
 
     @Override
+    @MainThread
     public Texture generateAsset() {
         return AssetLoader.loadTexture2D(filepath());
     }

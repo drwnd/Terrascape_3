@@ -5,7 +5,7 @@ import game.server.material.Properties;
 
 public final class Constants {
 
-    public static final float Z_NEAR = 0.8208F; // Just barely can't xRay
+    public static final float Z_NEAR = 0.8208F; // Just barely can't x-Ray
     public static final float Z_FAR = Float.POSITIVE_INFINITY;
     public static final int PERSPECTIVE_OFFSET_LENGTH = 64;
 

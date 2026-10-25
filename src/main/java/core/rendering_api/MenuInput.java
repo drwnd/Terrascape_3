@@ -9,7 +9,7 @@ public class MenuInput<T extends Renderable> extends Input {
 
     public final ScrollCallback scrollCallback;
     public final MaxScrollGetter maxScrollGetter;
-    protected T menu;
+    protected final T menu;
 
     @MainThread
     public MenuInput(T menu) {

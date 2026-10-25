@@ -44,11 +44,5 @@ public final class InventoryInput extends MenuInput<Inventory> {
         super.setScroll(scroll);
     }
 
-    @Override
-    @MainThread
-    public float getScroll() {
-        return super.getScroll();
-    }
-
     float structureScroll = 0, materialScroll = 0;
 }

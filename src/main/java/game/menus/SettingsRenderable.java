@@ -4,6 +4,7 @@ import core.renderables.ButtonResult;
 import core.renderables.CoreSettingsRenderable;
 import core.renderables.OptionToggle;
 import core.renderables.TextElement;
+import core.utils.MainThread;
 import core.utils.Message;
 
 import game.settings.DebugScreenOptions;
@@ -15,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class SettingsRenderable extends CoreSettingsRenderable {
 
+    @MainThread
     public void addDebugLineSetting(DebugScreenOptions debugLine) {
         settingsCount++;
 
