@@ -3,6 +3,7 @@ package game.entities.model;
 import core.utils.FloatArrayList;
 import core.utils.IntArrayList;
 
+import game.player.particles.ParticleCollector;
 import game.player.rendering.Mesh;
 import game.player.rendering.MeshGenerator;
 import game.server.Game;
@@ -10,7 +11,10 @@ import game.server.generation.Structure;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
+import org.joml.Vector4f;
 
+import static game.entities.RenderEntity.*;
 import static game.entities.model.ModelData.*;
 import static game.utils.Constants.*;
 
@@ -23,10 +27,35 @@ public interface StructurePart extends ModelPart {
     Vector3f position();
 
     @Override
+    default Vector3i size() {
+        Structure structure = structure();
+        return new Vector3i(structure.sizeX(), structure.sizeY(), structure.sizeZ());
+    }
+
+    @Override
     default void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
         Vector3f center = center();
         transform.translate(-center.x, -center.y, -center.z);
         structure().materials().addDeathParticles(Game.getPlayer().getParticleCollector(), particles, transform, velocity);
+    }
+
+    @Override
+    default void spawnParticles(IntArrayList particles, Matrix4f transform, ParticleCollector collector, int inPartX, int inPartY, int inPartZ, int lengthX, int lengthY, int lengthZ) {
+        Vector3f center = center(), velocity = new Vector3f();
+        transform = new Matrix4f(transform).translate(-center.x, -center.y, -center.z);
+        Vector4f current = new Vector4f();
+        Structure structure = structure();
+
+        int startX = Math.max(0, inPartX), startY = Math.max(0, inPartY), startZ = Math.max(0, inPartZ);
+        for (int x = startX; x < startX + lengthX; x++)
+            for (int y = startY; y < startY + lengthY; y++)
+                for (int z = startZ; z < startZ + lengthZ; z++) {
+
+                    byte material = structure.getMaterial(x, y, z);
+                    if (material == AIR || WOUND_STRUCTURE.getMaterial(x - inPartX, y - inPartY, z - inPartZ) == AIR) continue;
+                    current.set(x, y, z, 1).mul(transform);
+                    collector.addDeathParticle(particles, velocity, (int) current.x, (int) current.y, (int) current.z, material);
+                }
     }
 
     @Override

@@ -8,12 +8,17 @@ import game.server.Game;
 import game.settings.IntSettings;
 import org.joml.*;
 
+import java.lang.Math;
+
+import static game.entities.RenderEntity.WOUND_STRUCTURE;
 import static game.entities.model.ModelData.*;
+import static game.utils.Constants.AIR;
 
 public record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector2f textureCoordinate, byte particleMaterial,
                 Vector2f outerTextureCoordinate, Integer parentIndex, boolean ignoreParentRotation) implements ModelPart {
     @Override
     public void spawnParticles(IntArrayList particles, Matrix4f transform, Vector3f velocity) {
+        if (particleMaterial == AIR) return;
         transform.translate(-center.x, -center.y, -center.z);
         ParticleCollector collector = Game.getPlayer().getParticleCollector();
         Vector4f position = new Vector4f();
@@ -23,6 +28,24 @@ public record ModelBox(Vector3i size, Vector3f center, Vector3f position, Vector
                 for (int z = 0; z < size.z; z += stepLength) {
                     position.set(x, y, z, 1).mul(transform);
                     collector.addDeathParticle(particles, velocity, (int) position.x, (int) position.y, (int) position.z, particleMaterial);
+                }
+    }
+
+    @Override
+    public void spawnParticles(IntArrayList particles, Matrix4f transform, ParticleCollector collector, int inPartX, int inPartY, int inPartZ, int lengthX, int lengthY, int lengthZ) {
+        if (particleMaterial == AIR) return;
+        Vector3f velocity = new Vector3f();
+        Vector4f current = new Vector4f();
+        transform = new Matrix4f(transform).translate(-center.x, -center.y, -center.z);
+
+        int startX = Math.max(0, inPartX), startY = Math.max(0, inPartY), startZ = Math.max(0, inPartZ);
+        for (int x = startX; x < startX + lengthX; x++)
+            for (int y = startY; y < startY + lengthY; y++)
+                for (int z = startZ; z < startZ + lengthZ; z++) {
+
+                    if (WOUND_STRUCTURE.getMaterial(x - inPartX, y - inPartY, z - inPartZ) == AIR) continue;
+                    current.set(x, y, z, 1).mul(transform);
+                    collector.addDeathParticle(particles, velocity, (int) current.x, (int) current.y, (int) current.z, particleMaterial);
                 }
     }
 
