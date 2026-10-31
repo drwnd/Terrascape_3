@@ -3,8 +3,10 @@ package game.entities;
 import core.assets.AssetManager;
 import core.utils.IntArrayList;
 import core.utils.MainThread;
+import core.utils.Saver;
 import core.utils.Vector3l;
 
+import game.assets.EntityType;
 import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
@@ -19,13 +21,42 @@ import org.joml.Vector3i;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class Entity {
+public abstract class Entity implements Saver.Savable {
 
-    public Entity(Position position, RenderEntity renderEntity, MovementState movementState) {
+    public Entity(Position position, RenderEntity renderEntity, Class<? extends MovementState> movementState, EntityType entityType) {
         this.position = position;
         this.renderEntity = renderEntity;
-        this.movement = new Movement(movementState);
+        this.movement = new Movement(MovementState.load(movementState));
+        this.entityType = entityType;
         renderEntity.synchronizeTransforms();
+    }
+
+    public Entity(Position position, EntityType entityType, Class<? extends MovementState> movementState) {
+        this.position = position;
+        this.renderEntity = new RenderEntity(entityType);
+        this.movement = new Movement(MovementState.load(movementState));
+        this.entityType = entityType;
+        renderEntity.synchronizeTransforms();
+    }
+
+    public final void save(Saver<?> saver) {
+        if (entityType == EntityType.PLAYER) return;
+        saver.saveEnum(entityType);
+        saver.saveGeneric(position);
+        saver.saveVector3f(rotation);
+        saver.saveInt(health);
+    }
+
+    public static Entity load(Saver<?> saver) {
+        EntityType entityType = saver.loadEnum(EntityType.class);
+        Position position = saver.loadGeneric(Position::load);
+        Vector3f rotation = saver.loadVector3f();
+        int health = saver.loadInt();
+
+        Entity entity = entityType.getEntity(position);
+        entity.rotation.set(rotation);
+        entity.health = health;
+        return entity;
     }
 
     @ServerThread
@@ -109,5 +140,6 @@ public abstract class Entity {
     private final AtomicBoolean isHit = new AtomicBoolean(false);
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();
+    private final EntityType entityType;
     private int health = 20;
 }

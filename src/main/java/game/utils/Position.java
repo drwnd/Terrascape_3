@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 
 import static game.utils.Constants.*;
 
-public final class Position implements Distanceable {
+public final class Position implements Distanceable, Saver.Savable {
 
     public long longX, longY, longZ;
     public float fractionX, fractionY, fractionZ;

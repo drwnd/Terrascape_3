@@ -2,6 +2,7 @@ package game.server.saving;
 
 import core.utils.MainThread;
 import core.utils.Saver;
+import game.entities.Entity;
 import game.server.World;
 import game.server.generation.BiomeSamplers;
 import game.server.generation.WorldGenerationSettings;
@@ -30,6 +31,7 @@ public final class WorldSaver extends Saver<World> {
         saveString(world.created);
         saveString(new Date().toString());
         saveLong(new Date().getTime());
+        saveGenericArray(world.entities);
     }
 
     @Override
@@ -42,9 +44,10 @@ public final class WorldSaver extends Saver<World> {
         String created = loadString();
         String lastPlayed = loadString();
         long lastPlayedAsMs = loadLong();
+        ArrayList<Entity> entities = loadGenericArray(Entity::load);
         return new World(
                 new WorldGenerationSettings(seed, biomeSampler, blockSize),
-                name, created, lastPlayed, lastPlayedAsMs, new ArrayList<>(), false);
+                name, created, lastPlayed, lastPlayedAsMs, entities, false);
     }
 
     @Override
@@ -60,6 +63,18 @@ public final class WorldSaver extends Saver<World> {
                     new WorldGenerationSettings(seed, biomeSampler, blockSize),
                     "", created.toString(), lastPlayed.toString(), 0, new ArrayList<>(), false);
         }
+        if (versionNumber == 4) {
+            long seed = loadLong();
+            BiomeSamplers biomeSampler = BiomeSamplers.getSaved(loadInt());
+            int blockSize = loadInt();
+            String name = loadString();
+            String created = loadString();
+            String lastPlayed = loadString();
+            long lastPlayedAsMs = loadLong();
+            return new World(
+                    new WorldGenerationSettings(seed, biomeSampler, blockSize),
+                    name, created, lastPlayed, lastPlayedAsMs, new ArrayList<>(), false);
+        }
         return getDefault();
     }
 
@@ -73,6 +88,6 @@ public final class WorldSaver extends Saver<World> {
 
     @Override
     protected int getVersionNumber() {
-        return 4;
+        return 5;
     }
 }

@@ -52,6 +52,6 @@
     </inspection_tool>
     <inspection_tool class="SystemGetenv" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UseOfAWTPeerClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="b3cce1b5-f442-3d9c-a515-7e0a8d5d5147" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+    <inspection_tool class="b3cce1b5-f442-3d9c-a515-7e0a8d5d5147" enabled="false" level="ERROR" enabled_by_default="false" editorAttributes="ERRORS_ATTRIBUTES" />
   </profile>
 </component>

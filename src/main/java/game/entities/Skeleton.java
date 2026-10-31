@@ -5,7 +5,6 @@ import core.utils.MainThread;
 import game.assets.EntityType;
 import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
-import game.entities.movement.MovementState;
 import game.utils.Position;
 
 import org.joml.Matrix4f;
@@ -13,7 +12,7 @@ import org.joml.Vector3f;
 
 public class Skeleton extends Entity {
     public Skeleton(Position position) {
-        super(position, new RenderEntity(EntityType.SKELETON), MovementState.load(WanderingMovementState.class));
+        super(position, EntityType.SKELETON, WanderingMovementState.class);
         getRenderEntity().setAnimator(new SkeletonAnimator(this));
     }
 

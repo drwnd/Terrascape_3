@@ -26,7 +26,7 @@ public final class PlayerSaver extends Saver<Player> {
     @Override
     @MainThread
     protected void save(Player player) {
-        saveGeneric(player.getPosition()::save);
+        saveGeneric(player.getPosition());
         saveVector3f(player.getCamera().getRotation());
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());

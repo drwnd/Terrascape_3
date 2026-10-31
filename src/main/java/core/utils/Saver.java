@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public abstract class Saver<T> {
 
@@ -236,12 +237,32 @@ public abstract class Saver<T> {
         return builder.toString();
     }
 
-    public final void saveGeneric(GenericSaver savable) {
+    public final void saveGeneric(Savable savable) {
         savable.save(this);
     }
 
-    public final <V> V loadGeneric(GenericLoader<V> loadable) {
-        return loadable.load(this);
+    public final <V> V loadGeneric(GenericLoader<V> loader) {
+        return loader.load(this);
+    }
+
+    public final void saveEnum(Enum<?> value) {
+        saveInt(value.ordinal());
+    }
+
+    public final <V extends Enum<V>> V loadEnum(Class<V> tClass) {
+        return tClass.getEnumConstants()[loadInt()];
+    }
+
+    public final <V extends Savable> void saveGenericArray(ArrayList<V> array) {
+        saveInt(array.size());
+        for (V value : array) value.save(this);
+    }
+
+    public final <V> ArrayList<V> loadGenericArray(GenericLoader<V> loader) {
+        int length = loadInt();
+        ArrayList<V> array = new ArrayList<>(length);
+        for (int index = 0; index < length; index++) array.add(loader.load(this));
+        return array;
     }
 
     private int currentIndex;
@@ -251,7 +272,7 @@ public abstract class Saver<T> {
         T load(Saver<?> saver);
     }
 
-    public interface GenericSaver {
+    public interface Savable {
         void save(Saver<?> saver);
     }
 }

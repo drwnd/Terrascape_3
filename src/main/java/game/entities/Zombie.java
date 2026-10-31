@@ -5,7 +5,6 @@ import core.utils.MainThread;
 import game.assets.EntityType;
 import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
-import game.entities.movement.MovementState;
 import game.utils.Position;
 
 import org.joml.Matrix4f;
@@ -14,7 +13,7 @@ import org.joml.Vector3f;
 public class Zombie extends Entity {
 
     public Zombie(Position position) {
-        super(position, new RenderEntity(EntityType.ZOMBIE), MovementState.load(WanderingMovementState.class));
+        super(position, EntityType.ZOMBIE, WanderingMovementState.class);
         getRenderEntity().setAnimator(new ZombieAnimator(this));
     }
 
