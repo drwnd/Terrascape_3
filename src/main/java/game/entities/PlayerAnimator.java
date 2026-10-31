@@ -3,6 +3,7 @@ package game.entities;
 import core.utils.MainThread;
 
 import core.utils.MathUtils;
+import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
 import game.player.Player;
 import game.player.rendering.Camera;
@@ -26,7 +27,7 @@ public final class PlayerAnimator implements Animator {
     }
 
     @MainThread
-    private static void rotateBody(Matrix4f[] transforms, Model.ModelPart[] parts, Vector3f cameraRotation, Vector3f velocity) {
+    private static void rotateBody(Matrix4f[] transforms, ModelPart[] parts, Vector3f cameraRotation, Vector3f velocity) {
         Vector3f direction = MathUtils.getHorizontalDirection(cameraRotation);
         float angle = (float) -Math.toRadians(cameraRotation.y);
         float sidewaysVelocity = -velocity.x * direction.z + velocity.z * direction.x;

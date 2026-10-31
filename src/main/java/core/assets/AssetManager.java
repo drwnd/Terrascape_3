@@ -3,6 +3,7 @@ package core.assets;
 import core.assets.identifiers.*;
 import core.rendering_api.Debug;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ public final class AssetManager {
         assetPackNames.clear();
     }
 
+    @MainThread
     public static void deleteAll() {
         Debug.log("---Deleting old Assets---");
         synchronized (assets) {
@@ -34,12 +36,23 @@ public final class AssetManager {
         for (Runnable callback : deleteAllCallbacks) callback.run();
     }
 
+    @MainThread
+    public static void deletePending() {
+        synchronized (assets) {
+            for (AssetIdentifier<?> identifier : toDeleteAssets) deleteSychronized(identifier);
+            toDeleteAssets.clear();
+        }
+    }
+
     public static void delete(AssetIdentifier<?> identifier) {
         synchronized (assets) {
-            if (!assets.containsKey(identifier)) return;
-            Asset asset = assets.get(identifier);
-            asset.delete();
-            assets.remove(identifier, asset);
+            deleteSychronized(identifier);
+        }
+    }
+
+    public static void deleteOnFrameUpdate(AssetIdentifier<?> identifier) {
+        synchronized (assets) {
+            toDeleteAssets.add(identifier);
         }
     }
 
@@ -87,6 +100,7 @@ public final class AssetManager {
         return new ArrayList<>(assetPackNames);
     }
 
+    @MainThread
     public static void setActiveAssetPackNames(ArrayList<String> assetPackNames) {
         if (AssetManager.assetPackNames.equals(assetPackNames)) return;
         AssetManager.assetPackNames.clear();
@@ -94,11 +108,19 @@ public final class AssetManager {
         deleteAll();
     }
 
+    private static void deleteSychronized(AssetIdentifier<?> identifier) {
+        if (!assets.containsKey(identifier)) return;
+        Asset asset = assets.get(identifier);
+        asset.delete();
+        assets.remove(identifier, asset);
+    }
+
     private static void addAssetFilePathsInFolder(ArrayList<Path> filePaths, Path folderPath) {
         File[] files = FileManager.getChildren(folderPath);
         for (File file : files) filePaths.add(file.toPath());
     }
 
+    private static final ArrayList<AssetIdentifier<?>> toDeleteAssets = new ArrayList<>();
     private static final ArrayList<Runnable> deleteAllCallbacks = new ArrayList<>();
     private static final HashMap<AssetIdentifier<?>, Asset> assets = new HashMap<>();
     private static final ArrayList<String> assetPackNames = new ArrayList<>();

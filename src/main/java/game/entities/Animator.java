@@ -2,6 +2,7 @@ package game.entities;
 
 import core.utils.MainThread;
 
+import game.entities.model.ModelPart;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -36,7 +37,7 @@ public interface Animator {
     @MainThread
     default void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
         Matrix4f[] transforms = entity.transforms();
-        Model.ModelPart[] parts = entity.parts();
+        ModelPart[] parts = entity.parts();
 
         float angle = (float) -Math.toRadians(rotation.y);
 
@@ -46,7 +47,7 @@ public interface Animator {
                     .translate(parts[index].position());
     }
 
-    static void rotateBody(Matrix4f[] transforms, Model.ModelPart[] parts, Vector3f rotation) {
+    static void rotateBody(Matrix4f[] transforms, ModelPart[] parts, Vector3f rotation) {
         float angle = (float) -Math.toRadians(rotation.y);
 
         for (int index = 0; index < transforms.length; index++) {
@@ -60,14 +61,14 @@ public interface Animator {
     static void applyParenting(RenderEntity entity) {
         Matrix4f[] transforms = entity.transforms();
         Matrix4f[] parentedTransforms = entity.parentedTransforms();
-        Model.ModelPart[] parts = entity.parts();
+        ModelPart[] parts = entity.parts();
 
         Arrays.fill(parentedTransforms, null);
         for (int index = 0; index < transforms.length; index++)
             fillParentTransforms(transforms, parentedTransforms, parts, index);
     }
 
-    private static Matrix4f fillParentTransforms(Matrix4f[] transforms, Matrix4f[] parentedTransforms, Model.ModelPart[] parts, int index) {
+    private static Matrix4f fillParentTransforms(Matrix4f[] transforms, Matrix4f[] parentedTransforms, ModelPart[] parts, int index) {
         if (parentedTransforms[index] != null) return parentedTransforms[index];
         if (parts[index].parentIndex() != null) {
             Matrix4f parentTransform = fillParentTransforms(transforms, parentedTransforms, parts, parts[index].parentIndex());

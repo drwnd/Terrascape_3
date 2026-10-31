@@ -1,9 +1,11 @@
 package game.entities;
 
+import core.assets.AssetManager;
 import core.utils.IntArrayList;
 import core.utils.MainThread;
 import core.utils.Vector3l;
 
+import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.player.particles.ParticleType;
@@ -15,6 +17,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class Entity {
 
     public Entity(Position position, RenderEntity renderEntity, MovementState movementState) {
@@ -24,10 +28,16 @@ public abstract class Entity {
         renderEntity.synchronizeTransforms();
     }
 
-    public void kill() {
+    @ServerThread
+    public final void kill() {
+        playDeathAnimation();
+        if (renderEntity.isCustomModel()) AssetManager.deleteOnFrameUpdate(renderEntity.getModelIdentifier());
+    }
+
+    private void playDeathAnimation() {
         synchronized (this) {
             Matrix4f[] transforms = renderEntity.transforms();
-            Model.ModelPart[] parts = renderEntity.parts();
+            ModelPart[] parts = renderEntity.parts();
             if (transforms.length != parts.length) return;
 
             IntArrayList particles = new IntArrayList(parts.length * 64);
@@ -37,10 +47,12 @@ public abstract class Entity {
         }
     }
 
+    @ServerThread
     public void hit(Vector3f direction, int damage) {
         movement.applyForce(direction.x * 10, Math.max(0, direction.y) * 10 + 3, direction.z * 10);
         health -= damage;
         if (health <= 0) Game.getServer().killEntity(this);
+        else if (damage > 0) isHit.set(true);
     }
 
     @ServerThread
@@ -58,6 +70,7 @@ public abstract class Entity {
             Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
             toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
         }
+        if (isHit.getAndSet(false)) renderEntity.hit(getPosition());
     }
 
     public Position getPosition() {
@@ -93,7 +106,8 @@ public abstract class Entity {
 
     protected final Movement movement;
     protected Position position, toRenderPosition = new Position();
+    private final AtomicBoolean isHit = new AtomicBoolean(false);
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();
-    private int health = 1;
+    private int health = 20;
 }

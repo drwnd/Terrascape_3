@@ -38,6 +38,11 @@ public final class MaterialsData {
         this.totalSizeBits = totalSizeBits;
     }
 
+    public MaterialsData(MaterialsData materialsData) {
+        this.data = materialsData.data.clone();
+        this.totalSizeBits = materialsData.totalSizeBits;
+    }
+
     // Static API
     public static int getUncompressedIndex(int inChunkX, int inChunkY, int inChunkZ) {
         return Z_ORDER_3D_TABLE_X[inChunkX] | Z_ORDER_3D_TABLE_Y[inChunkY] | Z_ORDER_3D_TABLE_Z[inChunkZ];

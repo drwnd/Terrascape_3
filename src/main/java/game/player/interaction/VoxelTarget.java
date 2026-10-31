@@ -23,7 +23,7 @@ public record VoxelTarget(Vector3l position, int side, byte material) implements
 
     public static VoxelTarget getPlayerTarget() {
         Player player = Game.getPlayer();
-        Position origin = player.getPosition().addComponent(Y_COMPONENT, player.getMovement().getState().getCameraElevation());
+        Position origin = player.getEyePosition();
         Vector3f direction = player.getCamera().getDirection();
         return VoxelTarget.getTarget(origin, direction, IntSettings.REACH.value());
     }

@@ -198,6 +198,10 @@ public final class Player extends Entity {
         }
     }
 
+    public Position getEyePosition() {
+        return getPosition().addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
+    }
+
     public Hotbar getHotbar() {
         return hotbar;
     }

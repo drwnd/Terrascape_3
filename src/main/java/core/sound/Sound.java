@@ -93,7 +93,7 @@ public record Sound(int buffer, float gainMultiplier, float pitchMultiplier) imp
     }
 
     public static void play3D(SoundIdentifier identifier, FloatSetting gain, Distanceable distanceable, Vector3f velocity) {
-        if (identifier == null || distanceable == null) return;
+        if (identifier == null || distanceable == null || Sound.distanceable == null || Sound.velocity == null) return;
         AudioSource source = getNextFreeAudioSource();
         if (source == null) return;
 

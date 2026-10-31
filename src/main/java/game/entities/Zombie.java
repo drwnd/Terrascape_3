@@ -3,6 +3,7 @@ package game.entities;
 import core.utils.MainThread;
 
 import game.assets.EntityType;
+import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
 import game.utils.Position;
@@ -23,7 +24,7 @@ public class Zombie extends Entity {
         @MainThread
         public void applyAnimation(RenderEntity entity, Vector3f rotation, float frameTime, float gameTickFraction) {
             Matrix4f[] transforms = entity.transforms();
-            Model.ModelPart[] parts = entity.parts();
+            ModelPart[] parts = entity.parts();
             Movement movement = zombie.getMovement();
             Vector3f velocity = movement.getRenderVelocity().mul(gameTickFraction).add(movement.getOldRenderVelocity().mul(1 - gameTickFraction));
 

@@ -8,6 +8,8 @@ import core.utils.FileManager;
 import core.utils.MainThread;
 
 import game.entities.*;
+import game.entities.model.Model;
+import game.entities.model.ModelData;
 import game.utils.Position;
 
 import java.nio.file.Path;
