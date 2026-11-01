@@ -101,7 +101,7 @@ public final class StructurePlaceable implements Placeable {
             for (int structureY = (int) min.y; structureY < max.y; structureY++)
                 for (int structureZ = (int) min.z; structureZ < max.z; structureZ++) {
                     byte material = structure.getMaterial(structureX, structureY, structureZ, transform);
-                    if (Properties.doesntHaveProperties(material, NO_COLLISION)) return true;
+                    if (Properties.doesNotHaveProperties(material, NO_COLLISION)) return true;
                 }
         return false;
     }

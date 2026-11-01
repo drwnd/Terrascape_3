@@ -53,7 +53,7 @@ public enum Properties {
         return (Material.getProperties(material) & properties) == properties;
     }
 
-    public static boolean doesntHaveProperties(byte material, int properties) {
+    public static boolean doesNotHaveProperties(byte material, int properties) {
         return (Material.getProperties(material) & properties) == 0;
     }
 

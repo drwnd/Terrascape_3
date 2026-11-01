@@ -152,7 +152,7 @@ public final class Camera {
             for (long y = startY; y <= endY; y++)
                 for (long z = startZ; z <= endZ; z++) {
                     byte material = world.getMaterial(x, y, z);
-                    if (Properties.doesntHaveProperties(material, TRANSPARENT)) return true;
+                    if (Properties.doesNotHaveProperties(material, TRANSPARENT)) return true;
                 }
         return false;
     }

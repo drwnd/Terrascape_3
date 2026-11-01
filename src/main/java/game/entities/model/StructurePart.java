@@ -24,8 +24,6 @@ public interface StructurePart extends ModelPart {
 
     Vector3f center();
 
-    Vector3f position();
-
     @Override
     default Vector3i size() {
         Structure structure = structure();

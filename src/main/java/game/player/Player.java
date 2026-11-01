@@ -76,7 +76,7 @@ public final class Player extends Entity {
     @ServerThread
     public void updateGameTick() {
         synchronized (this) {
-            position = movement.computeNextGameTickPosition(position, camera.getRotation(), canDoActiveActions());
+            position.set(movement.computeNextGameTickPosition(position, camera.getRotation(), canDoActiveActions()));
         }
         if (canDoActiveActions()) interactionHandler.updateGameTick();
         renderer.updateGameTick();
@@ -223,7 +223,7 @@ public final class Player extends Entity {
 
     public void setPosition(Position position) {
         synchronized (this) {
-            this.position = new Position(position);
+            this.position.set(position);
         }
     }
 

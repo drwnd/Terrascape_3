@@ -89,7 +89,7 @@ public abstract class Entity implements Saver.Savable {
     @ServerThread
     public void updateGameTick() {
         synchronized (this) {
-            position = movement.computeNextGameTickPosition(position, rotation, movement.isGrounded());
+            position.set(movement.computeNextGameTickPosition(position, rotation, movement.isGrounded()));
         }
     }
 
@@ -136,7 +136,7 @@ public abstract class Entity implements Saver.Savable {
     }
 
     protected final Movement movement;
-    protected Position position, toRenderPosition = new Position();
+    protected final Position position, toRenderPosition = new Position();
     private final AtomicBoolean isHit = new AtomicBoolean(false);
     private final RenderEntity renderEntity;
     private final Vector3f rotation = new Vector3f();

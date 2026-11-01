@@ -567,7 +567,7 @@ public final class MaterialsData {
                 for (int z = 0; z < lengthZ; z++)
                     for (int y = 0; y < lengthY; y++) {
                         int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
-                        if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
+                        if (!forceOverride && Properties.doesNotHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
                                 && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
                         uncompressedMaterials[targetIndex] = material;
                     }
@@ -580,7 +580,7 @@ public final class MaterialsData {
                     int targetIndex = getUncompressedIndex(targetStartX + x, targetStartY + y, targetStartZ + z);
                     byte material = data[startIndex + getInDetailIndex(transform, x, y, z)];
                     if (material == AIR && !forceOverride) continue;
-                    if (!forceOverride && Properties.doesntHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
+                    if (!forceOverride && Properties.doesNotHaveProperties(uncompressedMaterials[targetIndex], STRUCTURE_REPLACEABLE)
                             && Properties.hasProperties(material, STRUCTURE_REPLACEABLE)) continue;
                     uncompressedMaterials[targetIndex] = material;
                 }
@@ -1422,7 +1422,7 @@ public final class MaterialsData {
         }
         if (identifier == HOMOGENOUS) {
             byte material = data[startIndex + 1];
-            if (Properties.doesntHaveProperties(material, TRANSPARENT)) return;
+            if (Properties.doesNotHaveProperties(material, TRANSPARENT)) return;
             aabb.excludeMaximizeSurfaceArea(inChunkX, inChunkY, inChunkZ, size);
         }
     }

@@ -20,7 +20,7 @@ import static org.lwjgl.openal.AL10.*;
 
 public final class AssetLoader {
 
-    public static int VERTICES_PER_QUAD = 4;
+    public static final int VERTICES_PER_QUAD = 4;
 
     private AssetLoader() {
 

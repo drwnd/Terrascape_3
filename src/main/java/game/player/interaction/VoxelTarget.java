@@ -60,7 +60,7 @@ public record VoxelTarget(Vector3l position, int side, byte material) implements
             byte material = Game.getWorld().getMaterial(x, y, z);
             if (material == OUT_OF_WORLD) return null;
 
-            if (Properties.doesntHaveProperties(material, NO_COLLISION))
+            if (Properties.doesNotHaveProperties(material, NO_COLLISION))
                 return new VoxelTarget(new Vector3l(x, y, z), intersectedSide, material);
 
             if (lengthX < lengthZ && lengthX < lengthY) {

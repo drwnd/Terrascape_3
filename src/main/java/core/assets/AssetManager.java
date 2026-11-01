@@ -39,14 +39,14 @@ public final class AssetManager {
     @MainThread
     public static void deletePending() {
         synchronized (assets) {
-            for (AssetIdentifier<?> identifier : toDeleteAssets) deleteSychronized(identifier);
+            for (AssetIdentifier<?> identifier : toDeleteAssets) deleteSynchronized(identifier);
             toDeleteAssets.clear();
         }
     }
 
     public static void delete(AssetIdentifier<?> identifier) {
         synchronized (assets) {
-            deleteSychronized(identifier);
+            deleteSynchronized(identifier);
         }
     }
 
@@ -108,7 +108,7 @@ public final class AssetManager {
         deleteAll();
     }
 
-    private static void deleteSychronized(AssetIdentifier<?> identifier) {
+    private static void deleteSynchronized(AssetIdentifier<?> identifier) {
         if (!assets.containsKey(identifier)) return;
         Asset asset = assets.get(identifier);
         asset.delete();
