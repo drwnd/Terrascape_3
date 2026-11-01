@@ -1,7 +1,8 @@
-package game.player.movement;
+package game.entities.movement;
 
 import core.rendering_api.Input;
 import core.sound.Sound;
+import core.utils.MainThread;
 
 import game.server.Game;
 import game.server.World;
@@ -9,11 +10,9 @@ import game.server.material.Material;
 import game.server.material.Properties;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
-import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -22,18 +21,17 @@ import static game.utils.Constants.*;
 
 public final class Movement {
 
-    @MainThread
-    public Movement() {
-        state = MovementState.load(WalkingState.class);
+    public Movement(MovementState state) {
+        this.state = state;
         state.movement = this;
     }
 
     @ServerThread
-    public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation) {
+    public Position computeNextGameTickPosition(Position lastPosition, Vector3f rotation, boolean isActive) {
         Position position = new Position(lastPosition);
         grounded = velocity.y == 0.0F && checkGrounded(position);
 
-        Vector3f acceleration = Game.getPlayer().canDoActiveActions() ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
+        Vector3f acceleration = isActive ? state.computeNextGameTickAcceleration(rotation, position) : new Vector3f(0.0F);
         state.changeVelocity(velocity, acceleration, position, rotation);
 
         velocity.set(move(position));
@@ -41,7 +39,7 @@ public final class Movement {
         renderVelocity = position.vectorFrom(lastPosition);
         playFootstepSound(position);
 
-        if (ToggleSettings.NO_CLIP.value() || noCollision(position, state.next)) state = state.next;
+        if (state.isNoClip() || noCollision(position, state.next)) state = state.next;
         state.movement = this;
         return position;
     }
@@ -49,6 +47,10 @@ public final class Movement {
     @MainThread
     public void handleInput(int button, int action) {
         state.handleInput(button, action);
+    }
+
+    public void applyForce(float x, float y, float z) {
+        velocity.add(x, y, z);
     }
 
     public Vector3f getVelocity() {
@@ -114,7 +116,7 @@ public final class Movement {
 
 
     private Vector3f move(Position position) {
-        if (ToggleSettings.NO_CLIP.value()) {
+        if (state.isNoClip()) {
             position.add(velocity.x, velocity.y, velocity.z);
             return velocity;
         }
@@ -232,11 +234,11 @@ public final class Movement {
     private void playFootstepSound(Position position) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         int ticksBetweenFootsteps = state.ticksBetweenFootsteps();
-        if (ticksBetweenFootsteps < 0 || currentGameTick < lastFootstepTick + ticksBetweenFootsteps || velocity.lengthSquared() < 1) return;
+        if (ticksBetweenFootsteps <= 0 || currentGameTick < lastFootstepTick + ticksBetweenFootsteps || velocity.lengthSquared() < .5) return;
         lastFootstepTick = currentGameTick;
 
         byte standingMaterial = state.getStandingMaterial(position);
-        Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, null);
+        Sound.play3D(Material.getStepSounds(standingMaterial), FloatSettings.FOOTSTEPS_AUDIO, position, velocity);
     }
 
     private long getStartX(Position position, Vector3i hitboxSize, int component) {

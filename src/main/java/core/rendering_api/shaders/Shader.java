@@ -2,6 +2,7 @@ package core.rendering_api.shaders;
 
 import core.assets.Asset;
 
+import core.assets.Texture;
 import core.rendering_api.Debug;
 import core.utils.MainThread;
 import core.utils.Vector3l;
@@ -24,8 +25,36 @@ public abstract class Shader implements Asset {
 
 
     @MainThread
+    public Shader() {
+        try {
+            programID = createProgram();
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    @MainThread
     public void bind() {
         glUseProgram(programID);
+        textureIndex = GL_TEXTURE0;
+    }
+
+    @MainThread
+    public void setTextureUniform(String uniformName, int textureTarget, int texture) {
+        if (textureIndex > GL_TEXTURE31) throw new IllegalStateException("Can't bind more than 32 textures");
+        setUniform(uniformName, textureIndex - GL_TEXTURE0);
+        glActiveTexture(textureIndex);
+        glBindTexture(textureTarget, texture);
+        textureIndex++;
+    }
+
+    @MainThread
+    public void setTextureUniform(String uniformName, Texture texture) {
+        if (textureIndex > GL_TEXTURE31) throw new IllegalStateException("Can't bind more than 32 textures");
+        setUniform(uniformName, textureIndex - GL_TEXTURE0);
+        glActiveTexture(textureIndex);
+        texture.bind();
+        textureIndex++;
     }
 
     @MainThread
@@ -167,6 +196,10 @@ public abstract class Shader implements Asset {
         if (programID != 0) glDeleteProgram(programID);
     }
 
+    public int getNextAvailableTextureIndex() {
+        return textureIndex;
+    }
+
 
     @MainThread
     static int createProgram() throws Exception {
@@ -234,6 +267,7 @@ public abstract class Shader implements Asset {
     private static final Pattern REMOVE_ARRAY_DECLARATION = Pattern.compile("\\[.*]");
     private static final Pattern REMOVE_UNNECESSARY_WHITESPACE = Pattern.compile(" +");
 
-    protected int programID;
+    protected final int programID;
     private final HashMap<String, Integer> uniforms = new HashMap<>();
+    private int textureIndex;
 }

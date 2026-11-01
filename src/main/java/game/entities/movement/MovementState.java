@@ -1,21 +1,21 @@
-package game.player.movement;
+package game.entities.movement;
 
-import com.google.gson.Gson;
 import core.assets.AssetManager;
 import core.rendering_api.Input;
 import core.utils.FileManager;
+import core.utils.MainThread;
 
-import game.assets.Model;
+import game.entities.RenderEntity;
 import game.player.rendering.Camera;
 import game.server.Game;
 import game.server.World;
 import game.server.material.Properties;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
+import com.google.gson.Gson;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -33,30 +33,30 @@ public abstract class MovementState {
     }
 
     /**
-     * Computes the acceleration the Player should have in the next GameTick.
-     * Only gets called when the Player is actively moving.
+     * Computes the acceleration the Entity should have in the next GameTick.
+     * Only gets called when the Entity is actively moving.
      *
-     * @param playerRotation The rotation of the player (not necessarily the camera)
-     * @param lastPosition   The position of the player in the last GameTick
-     * @return The acceleration of the Player.
+     * @param rotation     The rotation of the Entity
+     * @param lastPosition The position of the Entity in the last GameTick
+     * @return The acceleration of the Entity.
      */
     @ServerThread
-    abstract Vector3f computeNextGameTickAcceleration(Vector3f playerRotation, Position lastPosition);
+    protected abstract Vector3f computeNextGameTickAcceleration(Vector3f rotation, Position lastPosition);
 
     /**
-     * Changes the current Velocity the Player has.
-     * Gets called every GameTick regardless of the Player being able to move actively.
+     * Changes the current Velocity the Entity has.
+     * Gets called every GameTick regardless of the Entity being able to move actively.
      * Therefore, no inputs should be queried in this method.
      *
-     * @param velocity       The current Velocity of the Player. This is also the output variable.
-     * @param acceleration   The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Player can't move actively.
-     * @param playerPosition The position of the Player.
-     * @param playerRotation The rotation of the Player.
+     * @param velocity     The current Velocity of the Entity. This is also the output variable.
+     * @param acceleration The acceleration computed in computeNextGameTickAcceleration(...) or 0 if the Entity can't move actively.
+     * @param position     The position of the Entity.
+     * @param rotation     The rotation of the Entity.
      */
     @ServerThread
-    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position playerPosition, Vector3f playerRotation) {
-        int waterIntersection = intersectedVolume(playerPosition, this, WATER);
-        int lavaIntersection = intersectedVolume(playerPosition, this, LAVA);
+    void changeVelocity(Vector3f velocity, Vector3f acceleration, Position position, Vector3f rotation) {
+        int waterIntersection = intersectedVolume(position, this, WATER);
+        int lavaIntersection = intersectedVolume(position, this, LAVA);
 
         float drag = movement.isGrounded() ? WALKING_DRAG : AIR_DRAG;
         float liquidDrag = (float) (Math.pow(WATER_DRAG, waterIntersection)) * (float) (Math.pow(LAVA_DRAG, lavaIntersection));
@@ -69,14 +69,14 @@ public abstract class MovementState {
     /**
      * Animates the given Model (assumed to be a player model).
      *
-     * @param playerCharacter The model to animate.
-     * @param camera          The camera of the player.
-     * @param animationTimer  A value to be used as input into trigonometric functions. In whatever unit is convenient.
-     * @param frameTime       The time since the last frame in ms.
-     * @return The new value of {@code animationTimer}
+     * @param playerCharacter  The model to animate.
+     * @param camera           The camera of the player.
+     * @param frameTime        The time since the last frame in ms.
+     * @param gameTickFraction The time within the current Game-Tick. In the range [0, 1].
+     * @param velocity         The interpolated renderVelocity of the player.
      */
     @MainThread
-    public abstract double applyAnimation(Model playerCharacter, Camera camera, double animationTimer, float frameTime);
+    public abstract void applyAnimation(RenderEntity playerCharacter, Camera camera, float frameTime, float gameTickFraction, Vector3f velocity);
 
     @ServerThread
     byte getStandingMaterial(Position position) {
@@ -101,9 +101,13 @@ public abstract class MovementState {
     }
 
     @MainThread
-    abstract void handleInput(int key, int action);
+    protected abstract void handleInput(int key, int action);
 
     public abstract byte getIdentifier();
+
+    boolean isNoClip() {
+        return ToggleSettings.NO_CLIP.value();
+    }
 
     int ticksBetweenFootsteps() {
         return ticksBetweenFootsteps;
@@ -117,11 +121,11 @@ public abstract class MovementState {
         return preventsFallingFromEdge;
     }
 
-    public boolean hideBodyInFirstPerson() {
+    public final boolean hideBodyInFirstPerson() {
         return hideBodyInFirstPerson;
     }
 
-    public boolean hideHeadInFirstPerson() {
+    public final boolean hideHeadInFirstPerson() {
         return hideHeadInFirstPerson;
     }
 

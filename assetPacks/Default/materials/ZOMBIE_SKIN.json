@@ -1,0 +1,16 @@
+{
+  "properties": [],
+  "digSounds": {
+    "folderPath": "sounds/dig",
+    "fileNamePrefix": "vines"
+  },
+  "stepSounds": {
+    "folderPath": "sounds/block/vine",
+    "fileNamePrefix": "climb"
+  },
+  "jumpSounds": {
+    "folderPath": "sounds/step",
+    "fileNamePrefix": "grass",
+    "gainMultiplier": 2
+  }
+}

@@ -2,7 +2,8 @@
   "properties": [],
   "digSounds": {
     "folderPath": "sounds/dig",
-    "fileNamePrefix": "stone"
+    "fileNamePrefix": "metal",
+    "gainMultiplier": 1.5
   },
   "stepSounds": {
     "folderPath": "sounds/step",

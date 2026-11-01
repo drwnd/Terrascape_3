@@ -5,14 +5,13 @@ import core.language.Translatable;
 import core.rendering_api.shaders.Shader;
 import core.settings.optionSettings.Option;
 import core.utils.IntArrayList;
-import core.utils.Vector3l;
+import core.utils.MainThread;
 
 import game.assets.Shaders;
 import game.player.Player;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.OptionSettings;
-import core.utils.MainThread;
 import game.utils.Position;
 import game.utils.Transformation;
 import game.utils.Utils;
@@ -66,15 +65,14 @@ public final class RenderingOptimizer {
     @MainThread
     public void computeVisibility(Player player, Position cameraPosition, Matrix4f projectionViewMatrix) {
         if (cameraPosition == null || projectionViewMatrix == null) return;
-        FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera()));
-        Vector3l position = cameraPosition.longPosition();
+        FrustumIntersection frustumIntersection = new FrustumIntersection(Transformation.getFrustumCullingMatrix(player.getCamera(), cameraPosition));
 
-        cameraChunkX = position.x >>> CHUNK_SIZE_BITS;
-        cameraChunkY = position.y >>> CHUNK_SIZE_BITS;
-        cameraChunkZ = position.z >>> CHUNK_SIZE_BITS;
-        cameraX = position.x;
-        cameraY = position.y;
-        cameraZ = position.z;
+        cameraChunkX = cameraPosition.longX >>> CHUNK_SIZE_BITS;
+        cameraChunkY = cameraPosition.longY >>> CHUNK_SIZE_BITS;
+        cameraChunkZ = cameraPosition.longZ >>> CHUNK_SIZE_BITS;
+        cameraX = cameraPosition.longX;
+        cameraY = cameraPosition.longY;
+        cameraZ = cameraPosition.longZ;
 
         int lodCount = Game.getWorld().LOD_COUNT;
         for (int lod = 0; lod < lodCount; lod++) computeLodVisibility(lod, frustumIntersection);

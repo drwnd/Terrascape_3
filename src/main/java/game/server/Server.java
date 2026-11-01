@@ -9,6 +9,7 @@ import core.settings.optionSettings.ColorOption;
 import core.sound.Sound;
 import core.utils.Vector3l;
 
+import game.entities.Entity;
 import game.player.Player;
 import game.player.interaction.Placeable;
 import game.player.rendering.MeshCollector;
@@ -43,6 +44,7 @@ public final class Server implements CrashCallback {
         this.messages = messages;
     }
 
+    @SuppressWarnings("CopyConstructorMissesField") // executor is shutdown and cannot be used, and generatorRestartScheduled is true by default
     @MainThread
     public Server(Server oldServer) {
         oldServer.cleanUp();
@@ -116,6 +118,18 @@ public final class Server implements CrashCallback {
 
     public void setDayTime(float dayTime) {
         this.dayTime = dayTime;
+    }
+
+    public void spawnEntity(Entity entity) {
+        synchronized (toSpawnEntities) {
+            toSpawnEntities.add(entity);
+        }
+    }
+
+    public void killEntity(Entity entity) {
+        synchronized (toKillEntities) {
+            toKillEntities.add(entity);
+        }
     }
 
     @ServerThread
@@ -218,10 +232,12 @@ public final class Server implements CrashCallback {
     @ServerThread
     private void executeGameTickCatchException() {
         try {
-            gameTickStartTime = System.nanoTime();
+            synchronized (this) {
+                gameTickStartTime = System.nanoTime();
+                currentGameTick++;
+                incrementTime();
+            }
             executeGameTick();
-            currentGameTick++;
-            incrementTime();
         } catch (Exception exception) {
             Debug.err(exception);
         }
@@ -230,20 +246,34 @@ public final class Server implements CrashCallback {
     @ServerThread
     private void executeGameTick() {
         Position oldPlayerPosition = Game.getPlayer().getPosition();
-        Game.getPlayer().updateGameTick();
+        synchronized (Game.getWorld().entities) {
+            synchronized (toSpawnEntities) {
+                Game.getWorld().entities.addAll(toSpawnEntities);
+                toSpawnEntities.clear();
+            }
+            synchronized (toKillEntities) {
+                for (Entity entity : toKillEntities) entity.kill();
+                Game.getWorld().entities.removeAll(toKillEntities);
+                toKillEntities.clear();
+            }
+            for (Entity entity : Game.getWorld().entities) entity.updateGameTick();
+        }
+        Position newPlayerPosition = Game.getPlayer().getPosition();
+
         synchronized (functions) {
             for (Iterator<Function> iterator = functions.values().iterator(); iterator.hasNext(); ) {
                 boolean shouldRemove = !iterator.next().run();
                 if (shouldRemove) iterator.remove();
             }
         }
-        Position newPlayerPosition = Game.getPlayer().getPosition();
+
         synchronized (generator) {
             if ((!oldPlayerPosition.sharesChunkWith(newPlayerPosition) || generatorRestartScheduled) && ToggleSettings.CULLING_COMPUTATION.value()) {
                 generator.restart();
                 generatorRestartScheduled = false;
             }
         }
+
         removeOldChatMessages(IntSettings.MAX_CHAT_MESSAGE_COUNT.value());
     }
 
@@ -259,6 +289,7 @@ public final class Server implements CrashCallback {
     private final ArrayList<ChatMessage> messages;
     private final ChunkGenerator generator = new ChunkGenerator();
     private final HashMap<Object, Function> functions = new HashMap<>();
+    private final ArrayList<Entity> toSpawnEntities = new ArrayList<>(), toKillEntities = new ArrayList<>();
 
     private long gameTickStartTime;
     private boolean generatorRestartScheduled = true;

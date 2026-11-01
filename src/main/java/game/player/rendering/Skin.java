@@ -1,8 +1,8 @@
 package game.player.rendering;
 
 import core.assets.AssetLoader;
-import core.assets.Texture;
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.Texture2D;
+import core.assets.identifiers.AssetIdentifier;
 import core.settings.optionSettings.Option;
 import core.utils.FileManager;
 import core.utils.MainThread;
@@ -10,7 +10,13 @@ import core.utils.MainThread;
 import java.io.File;
 import java.nio.file.Path;
 
-public final class Skin implements Option, TextureIdentifier {
+public final class Skin implements Option, AssetIdentifier<Texture2D> {
+
+    public static Skin getRandomSkin() {
+        File[] skinFiles = FileManager.getChildren(Path.of("assets", "skins"));
+        File skinFile = skinFiles[(int) (Math.random() * skinFiles.length)];
+        return new Skin(skinFile);
+    }
 
     public Skin(String skinName) {
         this(Path.of("assets", "skins", skinName).toFile());
@@ -55,14 +61,9 @@ public final class Skin implements Option, TextureIdentifier {
     }
 
     @Override
-    public String fileName() {
-        return skinFile.getName();
-    }
-
-    @Override
     @MainThread
-    public Texture generateAsset() {
-        Path filepath = Path.of("assets", "skins", fileName());
+    public Texture2D generateAsset() {
+        Path filepath = Path.of("assets", "skins", skinFile.getName());
         return AssetLoader.loadTexture2D(filepath);
     }
 

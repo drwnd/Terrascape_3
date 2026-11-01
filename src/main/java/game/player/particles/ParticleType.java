@@ -1,6 +1,6 @@
 package game.player.particles;
 
-enum ParticleType {
+public enum ParticleType {
 
     OPAQUE_BREAK(40, true),
     OPAQUE_PLACE(10, true),

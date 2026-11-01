@@ -3,13 +3,15 @@ package game.player;
 import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.sound.Sound;
-import core.utils.Vector3l;
+import core.utils.MainThread;
 
-import game.assets.Model;
-import game.assets.Models;
+import game.assets.EntityType;
+import game.entities.Entity;
+import game.entities.PlayerCharacter;
+import game.entities.PlayerAnimator;
+import game.entities.movement.WalkingState;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
-import game.player.movement.Movement;
 import game.player.rendering.Camera;
 import game.player.rendering.MeshCollector;
 import game.player.particles.ParticleCollector;
@@ -18,25 +20,26 @@ import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.ToggleSettings;
-import core.utils.MainThread;
 import game.utils.Position;
-
 import game.utils.ServerThread;
+
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
 import static org.lwjgl.glfw.GLFW.*;
 
-public final class Player {
+public final class Player extends Entity {
 
     @MainThread
     public Player(Position position) {
+        super(position, new PlayerCharacter(), WalkingState.class, EntityType.PLAYER);
+        super.getRenderEntity().setAnimator(new PlayerAnimator());
+        Game.getServer().spawnEntity(this);
+
         meshCollector = new MeshCollector();
         particleCollector = new ParticleCollector();
         camera = new Camera();
         input = new PlayerInput(this);
-        movement = new Movement();
         renderer = new Renderer(this, meshCollector);
         interactionHandler = new InteractionHandler();
         hotbar = new Hotbar();
@@ -46,35 +49,34 @@ public final class Player {
         renderer.addRenderable(inventory);
         renderer.addHUDRenderable(hotbar);
         renderer.addRenderable(chat);
-        this.position = position;
         Window.pushRenderable(renderer);
     }
 
+    @Override
     @MainThread
-    public Position updateFrame() {
+    public void updateFrame(float frameTime, float gameTickFraction) {
+        getRenderEntity().updateFrame(frameTime, gameTickFraction, camera.getRotation());
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
         particleCollector.clearToBufferParticleEffects();
-        meshCollector.uploadAllMeshes();
+        meshCollector.uploadMeshes(100);
         meshCollector.deleteOldMeshes();
 
-        Position toRenderPosition;
-        float fraction = Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0.0F, 1.0F);
         synchronized (this) {
             camera.rotate(input.getCursorMovement());
-            Vector3f movementThisTick = movement.getRenderVelocity().mul(fraction - 1.0F);
-            toRenderPosition = new Position(position)
-                    .add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
+            Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
+            toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
             camera.setPosition(camera.applyPerspectiveOffset(new Position(toRenderPosition).addComponent(Y_COMPONENT, movement.getState().getCameraElevation())));
         }
-        return toRenderPosition;
+        applyAnimation(gameTickFraction);
     }
 
+    @Override
     @ServerThread
     public void updateGameTick() {
         synchronized (this) {
-            position = movement.computeNextGameTickPosition(position, camera.getRotation());
+            position = movement.computeNextGameTickPosition(position, camera.getRotation(), canDoActiveActions());
         }
         if (canDoActiveActions()) interactionHandler.updateGameTick();
         renderer.updateGameTick();
@@ -84,6 +86,12 @@ public final class Player {
         if (canDoActiveActions() && currentGameTick >= lastInteractionTick + IntSettings.BREAK_PLACE_INTERVALL.value()
                 && (Input.isKeyPressed(KeySettings.DESTROY) || Input.isKeyPressed(KeySettings.USE)))
             lastInteractionTick = currentGameTick;
+    }
+
+    @Override
+    @MainThread
+    public Position getToRenderPosition() {
+        return toRenderPosition;
     }
 
     @MainThread
@@ -142,7 +150,7 @@ public final class Player {
             camera.changeZoom(yScroll > 0 ? zoomFactorChange : 1 / zoomFactorChange);
             return;
         }
-        if (interactionHandler.getState(Target.getPlayerTarget()).isLocked()) {
+        if (interactionHandler.getState(VoxelTarget.getPlayerTarget()).isLocked()) {
             interactionHandler.handleScroll(yScroll);
             return;
         }
@@ -151,27 +159,16 @@ public final class Player {
     }
 
     @MainThread
-    public void applyAnimation(Model playerCharacter) {
+    public void applyAnimation(float gameTickFraction) {
         final int animationLength = 8;
         long currentTick = Game.getServer().getCurrentGameTick();
         if (currentTick > lastInteractionTick + animationLength) return;
 
-        float ticksPassed = Math.min(Math.clamp(Game.getServer().getCurrentGameTickFraction(), 0, 1) + (currentTick - lastInteractionTick), animationLength);
+        float ticksPassed = Math.min(gameTickFraction + (currentTick - lastInteractionTick), animationLength);
 
-        playerCharacter.transforms()[Models.RIGHT_ARM]
+        getRenderEntity().transforms()[PlayerAnimator.RIGHT_ARM]
                 .rotate((float) Math.sin(ticksPassed * Math.PI / animationLength), 0, 0, 1)
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
-    }
-
-
-    public Vector3l getMinCoordinate() {
-        Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Vector3l(Movement.minX(position, hitboxSize), Movement.minY(position, hitboxSize), Movement.minZ(position, hitboxSize));
-    }
-
-    public Vector3l getMaxCoordinate() {
-        Vector3i hitboxSize = movement.getState().getHitboxSize();
-        return new Vector3l(Movement.maxX(position, hitboxSize), Movement.maxY(position, hitboxSize), Movement.maxZ(position, hitboxSize));
     }
 
     public Placeable getHeldPlaceable() {
@@ -194,14 +191,15 @@ public final class Player {
         return renderer;
     }
 
-    public Movement getMovement() {
-        return movement;
-    }
-
+    @Override
     public Position getPosition() {
         synchronized (this) {
             return new Position(position);
         }
+    }
+
+    public Position getEyePosition() {
+        return getPosition().addComponent(Y_COMPONENT, movement.getState().getCameraElevation());
     }
 
     public Hotbar getHotbar() {
@@ -270,13 +268,12 @@ public final class Player {
     private final ParticleCollector particleCollector;
     private final Camera camera;
     private final PlayerInput input;
-    private final Movement movement;
     private final Renderer renderer;
     private final InteractionHandler interactionHandler;
     private final Hotbar hotbar;
     private final Inventory inventory;
     private final ChatTextField chat;
+    private final Position toRenderPosition = new Position();
 
-    private Position position; // Center of the players' feet
     private long lastInteractionTick = 0;
 }

@@ -27,7 +27,7 @@ public final class ShaderLoader {
             case Shaders.VOLUME_INDICATOR -> new RenderShader("StructureHologram.vert", "StructureHologram.frag", identifier);
             case Shaders.TRANSPARENCY_APPLIER -> new GuiShader("Gui.vert", "TransparencyApplier.frag", identifier);
             case Shaders.MODEL -> new RenderShader("Model.vert", "Model.frag", identifier);
-            case Shaders.MODEL_SHADOW -> new RenderShader("Model.vert", "Shadow.frag", identifier);
+            case Shaders.MODEL_SHADOW -> new RenderShader("Model.vert", "Null.frag", identifier);
             case Shaders.TEXTURE_LAYER -> new GuiShader("Gui.vert", "TextureLayer.frag", identifier);
 
             case ComputeShaders.ARC -> new ComputeShader("shapeShaders/Arc.comp", identifier);

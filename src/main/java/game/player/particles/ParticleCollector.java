@@ -1,8 +1,9 @@
 package game.player.particles;
 
 import core.utils.IntArrayList;
-
+import core.utils.MainThread;
 import core.utils.Vector3l;
+
 import game.player.interaction.PlaceMode;
 import game.player.interaction.ShapePlaceable;
 import game.player.rendering.MeshGenerator;
@@ -14,12 +15,12 @@ import game.server.material.Material;
 import game.settings.IntSettings;
 import game.settings.OptionSettings;
 import game.settings.ToggleSettings;
-
-import core.utils.MainThread;
 import game.utils.Utils;
-import org.joml.Random;
+
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import java.util.Random;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -135,14 +136,14 @@ public final class ParticleCollector {
         addParticles(x, y, z, particles, ParticleType.SPLASH);
     }
 
-
-    private void addParticles(long startX, long startY, long startZ, IntArrayList particles, ParticleType type) {
-        long currentTick = Game.getServer().getCurrentGameTick();
+    public void addParticles(long startX, long startY, long startZ, IntArrayList particles, ParticleType type) {
         if (particles.isEmpty()) return;
+        long currentTick = Game.getServer().getCurrentGameTick();
         int[] particlesData = packParticlesIntoBuffer(particles);
         ToBufferParticleEffect effect = new ToBufferParticleEffect(particlesData, currentTick, type, startX, startY, startZ);
         addToBufferParticleEffect(effect);
     }
+
 
     private void addToBufferParticleEffect(ToBufferParticleEffect particleEffect) {
         synchronized (toBufferParticleEffects) {
@@ -206,7 +207,6 @@ public final class ParticleCollector {
     private static int[] packParticlesIntoBuffer(IntArrayList particles) {
         int[] particlesData = new int[particles.size()];
         particles.copyInto(particlesData, 0);
-
         return particlesData;
     }
 
@@ -241,7 +241,9 @@ public final class ParticleCollector {
             int offsetCopy = zOffset;
             float velocityCopy = velocityZ;
 
+            //noinspection SuspiciousNameCombination
             zOffset = xOffset;
+            //noinspection SuspiciousNameCombination
             velocityZ = velocityX;
 
             xOffset = lengthZ - offsetCopy - 1;
@@ -268,6 +270,15 @@ public final class ParticleCollector {
 
     public void addBreakParticle(IntArrayList particles, int xOffset, int yOffset, int zOffset, byte material) {
         float velocityX = getRandom(-12F, 12F), velocityY = getRandom(-2F, 25F), velocityZ = getRandom(-12F, 12F);
+        float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
+
+        particles.add(packOffset(xOffset, yOffset, zOffset, false, false));
+        particles.add(packVelocityGravity(velocityX, velocityY, velocityZ, BREAK_PARTICLE_GRAVITY));
+        particles.add(packRotationMaterial(rotationSpeedX, rotationSpeedY, material));
+    }
+
+    public void addDeathParticle(IntArrayList particles, Vector3f velocity, int xOffset, int yOffset, int zOffset, byte material) {
+        float velocityX = getRandom(-12F, 12F) + velocity.x, velocityY = getRandom(-2F, 25F) + velocity.y, velocityZ = getRandom(-12F, 12F) + velocity.z;
         float rotationSpeedX = getRandom(0.0F, 5F), rotationSpeedY = getRandom(0.0F, 5F);
 
         particles.add(packOffset(xOffset, yOffset, zOffset, false, false));
@@ -346,4 +357,7 @@ public final class ParticleCollector {
 
     private static final int SPLASH_PARTICLE_COUNT = 200;
     private static final float SPLASH_PARTICLE_GRAVITY = 80;
+
+    private record ToBufferParticleEffect(int[] particlesData, long spawnTick, ParticleType type, long x, long y, long z) {
+    }
 }

@@ -16,7 +16,7 @@ import game.player.interaction.placeable_shapes.CustomShape;
 import game.player.inventory.InventoryTab;
 import game.player.inventory.ShapesTab;
 import game.player.inventory.StructureDisplay;
-import game.player.interaction.Target;
+import game.player.interaction.VoxelTarget;
 import game.player.inventory.StructureTab;
 import game.server.Game;
 import game.server.generation.Structure;
@@ -157,7 +157,7 @@ public final class Hotbar extends UiElement {
 
     @MainThread
     private void handlePickBlock() {
-        Target target = Target.getPlayerTarget();
+        VoxelTarget target = VoxelTarget.getPlayerTarget();
         if (target == null) return;
 
         int slot = indexOf(target.material());

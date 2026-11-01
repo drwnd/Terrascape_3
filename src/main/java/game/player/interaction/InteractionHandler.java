@@ -2,6 +2,7 @@ package game.player.interaction;
 
 import core.rendering_api.Input;
 import core.utils.Vector3l;
+import core.utils.MainThread;
 
 import game.player.interaction.placeable_shapes.CapsulePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
@@ -9,8 +10,9 @@ import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
 import game.settings.OptionSettings;
-import core.utils.MainThread;
 import game.utils.ServerThread;
+
+import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import static game.utils.Constants.*;
@@ -46,7 +48,7 @@ public final class InteractionHandler {
         ).mul(1 << IntSettings.BREAK_PLACE_ALIGN.value()).mul(yScroll > 0 ? 1 : -1);
 
         if (startTarget != null && Input.isKeyPressed(KeySettings.SNEAK)) startTarget.shiftPosition(movement);
-        else if (lockedTarget != null && startTarget == null && !Input.isKeyPressed(KeySettings.SNEAK)) startTarget = new Target(lockedTarget);
+        else if (lockedTarget != null && startTarget == null && !Input.isKeyPressed(KeySettings.SNEAK)) startTarget = new VoxelTarget(lockedTarget);
         if (lockedTarget != null) lockedTarget.shiftPosition(movement);
     }
 
@@ -59,15 +61,15 @@ public final class InteractionHandler {
         handleUse();
     }
 
-    public Target getStartTarget() {
+    public VoxelTarget getStartTarget() {
         return startTarget;
     }
 
-    public Target getLockedTarget() {
+    public VoxelTarget getLockedTarget() {
         return lockedTarget;
     }
 
-    public PlacingState getState(Target currentTarget) {
+    public PlacingState getState(VoxelTarget currentTarget) {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
         boolean isLocked = lockedTarget != null;
@@ -101,36 +103,38 @@ public final class InteractionHandler {
     @ServerThread
     private void handleUse() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable == null || !placeable.allowPlace() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY) {
-            useInfo.lastAction = Game.getServer().getCurrentGameTick();
-            useInfo.forceAction = false;
-            return;
-        }
-        handleUseDestroy(useInfo, placeable, placeable.offsetOnPlace());
+        handleUseDestroy(useInfo, placeable, placeable != null && placeable.offsetOnPlace(), false);
     }
 
     @ServerThread
     private void handleDestroy() {
         Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowBreak() || OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY && !(placeable instanceof ShapePlaceable)) {
-            destroyInfo.lastAction = Game.getServer().getCurrentGameTick();
-            destroyInfo.forceAction = false;
-            return;
-        }
-        if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
+        if (placeable != null && !placeable.allowBreak()) placeable = null;
+        else if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
         else placeable = shapePlaceable.copyWithMaterial(AIR);
-        handleUseDestroy(destroyInfo, placeable, placeable.offsetOnBreak());
+        handleUseDestroy(destroyInfo, placeable, placeable != null && placeable.offsetOnBreak(), true);
     }
 
     @ServerThread
-    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition) {
+    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition, boolean isDestroy) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
 
-        Target currentTarget = Target.getPlayerTarget();
-        PlacingState state = getState(currentTarget);
-        Target target = state.isLocked() ? lockedTarget : currentTarget;
+        VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
+        EntityTarget entityTarget = EntityTarget.getPlayerTarget();
+
+        if (entityTarget != null && (voxelTarget == null || entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer())) {
+            Vector3f direction = Game.getPlayer().getCamera().getDirection();
+            entityTarget.entity().hit(direction, isDestroy ? 1 : 0);
+            info.lastAction = currentGameTick;
+            info.forceAction = false;
+            return;
+        }
+        if (!placeableCanModifyVoxels(placeable, isDestroy)) return;
+
+        PlacingState state = getState(voxelTarget);
+        VoxelTarget target = state.isLocked() ? lockedTarget : voxelTarget;
 
         if (target == null) {
             info.lastAction = currentGameTick;
@@ -159,20 +163,28 @@ public final class InteractionHandler {
         startTarget = lockedTarget = null;
     }
 
+    private boolean placeableCanModifyVoxels(Placeable placeable, boolean isDestroy) {
+        if (placeable == null) return false;
+        if (isDestroy)
+            return placeable.allowBreak() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || placeable instanceof ShapePlaceable);
+        else
+            return placeable.allowPlace() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || !(placeable instanceof ShapePlaceable));
+    }
+
     @MainThread
     private void handleLockPlacePosition() {
-        Target currentTarget = Target.getPlayerTarget();
+        VoxelTarget currentTarget = VoxelTarget.getPlayerTarget();
         PlacingState state = getState(currentTarget);
         if (state.isLocked()) lockedTarget = startTarget = null;
         else if (currentTarget != null) {
             lockedTarget = currentTarget;
-            if (startTarget == null) startTarget = new Target(currentTarget);
+            if (startTarget == null) startTarget = new VoxelTarget(currentTarget);
         }
     }
 
     @MainThread
     private void handleSetPlaceStartPosition() {
-        Target currentTarget = Target.getPlayerTarget();
+        VoxelTarget currentTarget = VoxelTarget.getPlayerTarget();
         PlacingState state = getState(currentTarget);
         if (state == PlacingState.NONE || state.isLocked()) return;
         startTarget = currentTarget;
@@ -180,7 +192,7 @@ public final class InteractionHandler {
 
     @MainThread
     private void handleReleasePlaceStartPosition() {
-        if (getState(Target.getPlayerTarget()).isLocked()) return;
+        if (getState(VoxelTarget.getPlayerTarget()).isLocked()) return;
         startTarget = null;
     }
 
@@ -206,7 +218,7 @@ public final class InteractionHandler {
 
     private final PlaceDestroyInfo useInfo = new PlaceDestroyInfo();
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
-    private Target startTarget = null, lockedTarget = null;
+    private VoxelTarget startTarget = null, lockedTarget = null;
 
     private static class PlaceDestroyInfo {
         public long lastAction = 0;

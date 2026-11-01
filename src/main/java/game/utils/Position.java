@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 
 import static game.utils.Constants.*;
 
-public final class Position implements Distanceable {
+public final class Position implements Distanceable, Saver.Savable {
 
     public long longX, longY, longZ;
     public float fractionX, fractionY, fractionZ;
@@ -25,6 +25,11 @@ public final class Position implements Distanceable {
 
     public static Position load(Saver<?> saver) {
         return new Position(saver.loadLong(), saver.loadLong(), saver.loadLong(), saver.loadFloat(), saver.loadFloat(), saver.loadFloat());
+    }
+
+    public Position() {
+        longX = longY = longZ = 0L;
+        fractionX = fractionY = fractionZ = 0.0F;
     }
 
     public Position(long longX, long longY, long longZ, float fractionX, float fractionY, float fractionZ) {

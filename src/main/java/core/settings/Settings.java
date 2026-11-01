@@ -111,6 +111,7 @@ public final class Settings {
         }
 
         @Override
+        @MainThread
         public boolean setIfPresent(String name, String value) {
             if (!name().equalsIgnoreCase(name)) return false;
             String[] packsArray = value.split("#");

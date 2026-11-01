@@ -19,6 +19,12 @@ public final class IntArrayList {
         size++;
     }
 
+    public void addAll(int[] values) {
+        if (size + values.length >= data.length) growAtLeast(size + values.length);
+        System.arraycopy(values, 0, data, size, values.length);
+        size += values.length;
+    }
+
     public void clear() {
         size = 0;
     }
@@ -39,10 +45,22 @@ public final class IntArrayList {
         return data;
     }
 
+    public int[] trimmed() {
+        int[] trimmedData = new int[size];
+        System.arraycopy(data, 0, trimmedData, 0, size);
+        return trimmedData;
+    }
+
 
     private void grow() {
         int[] newData = new int[Math.max(data.length << 1, size)];
         System.arraycopy(data, 0, newData, 0, data.length);
+        data = newData;
+    }
+
+    private void growAtLeast(int requiredSize) {
+        int[] newData = new int[MathUtils.max(data.length << 1, size, requiredSize)];
+        System.arraycopy(data, 0, newData,0, size);
         data = newData;
     }
 

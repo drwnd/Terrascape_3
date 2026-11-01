@@ -132,7 +132,7 @@ public final class Window {
 
                 glfwSwapBuffers(window);
                 glfwPollEvents();
-
+                AssetManager.deletePending();
             } catch (Exception exception) {
                 handleException(exception);
             }

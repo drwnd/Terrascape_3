@@ -1,8 +1,14 @@
 package game.assets;
 
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.AssetLoader;
+import core.assets.AssetManager;
+import core.assets.Texture2D;
+import core.assets.identifiers.AssetIdentifier;
+import core.utils.MainThread;
 
-public enum Textures implements TextureIdentifier {
+import java.nio.file.Path;
+
+public enum Textures implements AssetIdentifier<Texture2D> {
 
     DAY_SKY("DaySky.png"),
     NIGHT_SKY("NightSky.png"),
@@ -12,13 +18,15 @@ public enum Textures implements TextureIdentifier {
     RELOAD_ICON("Reload.png");
 
     Textures(String fileName) {
-        this.filepath = fileName;
+        this.fileName = fileName;
     }
 
     @Override
-    public String fileName() {
-        return filepath;
+    @MainThread
+    public Texture2D generateAsset() {
+        Path filepath = AssetManager.getAssetFilepath(Path.of("textures", fileName));
+        return AssetLoader.loadTexture2D(filepath);
     }
 
-    private final String filepath;
+    private final String fileName;
 }

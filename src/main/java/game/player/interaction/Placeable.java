@@ -13,7 +13,7 @@ import game.utils.ServerThread;
 
 import java.util.ArrayList;
 
-public interface Placeable {
+public interface Placeable extends Saver.Savable {
 
     @MainThread
     static void savePlaceable(Placeable placeable, Saver<?> saver) {
@@ -21,7 +21,7 @@ public interface Placeable {
             saver.saveByte((byte) 0);
             return;
         }
-        saver.saveGeneric(placeable::save);
+        saver.saveGeneric(placeable);
         if (placeable instanceof ShapePlaceable shapePlaceable) {
             saver.saveBoolean(shapePlaceable.invert.value());
             saver.saveInt(shapePlaceable.blockSize.value());

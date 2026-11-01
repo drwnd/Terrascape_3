@@ -1,8 +1,11 @@
 package core.assets;
 
-import core.assets.identifiers.TextureIdentifier;
+import core.assets.identifiers.AssetIdentifier;
+import core.utils.MainThread;
 
-public enum CoreTextures implements TextureIdentifier {
+import java.nio.file.Path;
+
+public enum CoreTextures implements AssetIdentifier<Texture2D> {
 
     GUI_ELEMENT_BACKGROUND("GuiElementBackground.png"),
     TOGGLE_ACTIVATED("ToggleActivated.png"),
@@ -19,8 +22,10 @@ public enum CoreTextures implements TextureIdentifier {
     }
 
     @Override
-    public String fileName() {
-        return fileName;
+    @MainThread
+    public Texture2D generateAsset() {
+        Path filepath = AssetManager.getAssetFilepath(Path.of("textures", fileName));
+        return AssetLoader.loadTexture2D(filepath);
     }
 
     private final String fileName;

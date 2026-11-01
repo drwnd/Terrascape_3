@@ -1,7 +1,6 @@
 package game.player.rendering;
 
 import core.assets.*;
-import core.assets.identifiers.TextureIdentifier;
 import core.renderables.Renderable;
 import core.renderables.UiElement;
 import core.rendering_api.CoreObjectLoader;
@@ -19,11 +18,14 @@ import core.utils.MainThread;
 import core.utils.Vector3l;
 
 import game.assets.*;
+import game.entities.Entity;
+import game.entities.RenderEntity;
+import game.entities.PlayerAnimator;
 import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.*;
 import game.player.interaction.placeable_shapes.CapsulePlaceable;
-import game.player.movement.MovementState;
+import game.entities.movement.MovementState;
 import game.player.particles.ParticleEffect;
 import game.server.*;
 import game.server.generation.Structure;
@@ -76,9 +78,8 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    public static float getRenderTime() {
-        Server server = Game.getServer();
-        float renderTime = server.getDayTime() + FloatSettings.TIME_SPEED.value() * server.getCurrentGameTickFraction();
+    public float getRenderTime(float dayTime) {
+        float renderTime = dayTime + FloatSettings.TIME_SPEED.value() * gameTickFraction;
         if (renderTime > 1.0F) renderTime -= 2.0F;
         return renderTime;
     }
@@ -114,50 +115,37 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
+    private static void setUpVoxelRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
         TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         shader.bind();
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
-        shader.setUniform("textures", 0);
-        shader.setUniform("propertiesTextures", 1);
+        shader.setUniform("textureSizes", materialsTexture.textureSizes());
+        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
         shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
         shader.setUniform("time", time);
         shader.setUniform("sunDirection", getSunDirection(time));
-        shader.setUniform("textureSizes", materialsTexture.textureSizes());
-        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
+        shader.setTextureUniform("textures", materialsTexture);
+        shader.setTextureUniform("properties", AssetManager.get(TextureArrays.PROPERTIES));
 
         glEnable(GL_DEPTH_TEST);
+    }
+
+    @MainThread
+    public static void setupOpaqueRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
+        setUpVoxelRendering(shader, matrix, x, y, z, time);
         glEnable(GL_CULL_FACE);
         glEnable(GL_STENCIL_TEST);
         glDisable(GL_BLEND);
         glDepthMask(true);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.PROPERTIES).id());
     }
 
     @MainThread
     public static void setUpTransparentRendering(Shader shader, Matrix4f matrix, long x, long y, long z, float time) {
-        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
-        shader.bind();
-        shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
-
-        shader.setUniform("textures", 0);
-        shader.setUniform("nightBrightness", FloatSettings.NIGHT_BRIGHTNESS.value());
-        shader.setUniform("time", time);
-        shader.setUniform("sunDirection", getSunDirection(time));
-        shader.setUniform("textureSizes", materialsTexture.textureSizes());
-        shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
-
-        glEnable(GL_DEPTH_TEST);
+        setUpVoxelRendering(shader, matrix, x, y, z, time);
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_CULL_FACE);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
     @MainThread
@@ -167,9 +155,9 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionViewMatrix", matrix);
         shader.setUniform("iCameraPosition", x & ~CHUNK_SIZE_MASK, y & ~CHUNK_SIZE_MASK, z & ~CHUNK_SIZE_MASK);
 
-        shader.setUniform("textures", 0);
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
         shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
+        shader.setTextureUniform("textures", materialsTexture);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -177,19 +165,29 @@ public final class Renderer extends Renderable {
         glEnable(GL_CULL_FACE);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
         glDepthMask(false);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
     @MainThread
     private void setUpShadowMappedRendering(Shader shader) {
-        shader.setUniform("shadowMap", 2);
-        shader.setUniform("shadowColor", 3);
         shader.setUniform("sunMatrices", sunMatrices);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, shadowTexture);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, shadowColorTexture);
+        shader.setTextureUniform("shadowMap", GL_TEXTURE_2D_ARRAY, shadowTexture);
+        shader.setTextureUniform("shadowColor", GL_TEXTURE_2D_ARRAY, shadowColorTexture);
+    }
+
+    @MainThread
+    private void setupEntityRendering(Shader shader, Position cameraPosition, Matrix4f projectionViewMatrix) {
+        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
+
+        shader.bind();
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
+        setUpShadowMappedRendering(shader);
+        shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
+        shader.setUniform("image", 4);
+        shader.setUniform("flags", getFlags(cameraPosition));
+        shader.setUniform("shadowIndices", 0, maxShadowCascade);
+
+        glDisable(GL_STENCIL_TEST);
+        glDisable(GL_CULL_FACE);
     }
 
 
@@ -198,15 +196,19 @@ public final class Renderer extends Renderable {
     protected void renderSelf(Vector2f position, Vector2f size) {
         glDepthFunc(GL_GREATER);
 
-        Camera camera = player.getCamera();
-        Position toRenderPlayerPosition = player.updateFrame();
-        Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera);
-        Position cameraPosition = player.getCamera().getPosition();
-
-        Model playerCharacter = AssetManager.get(Models.PLAYER_MODEL);
         float frameTime = frameTimes.size() >= 2 ? (frameTimes.getLast() - frameTimes.get(frameTimes.size() - 2)) / 1_000_000F : 0;
-        animationTimer = player.getMovement().getState().applyAnimation(playerCharacter, player.getCamera(), animationTimer, frameTime);
-        player.applyAnimation(playerCharacter);
+        Server server = Game.getServer();
+        synchronized (server) {
+            renderTime = getRenderTime(server.getDayTime());
+            currentGameTick = server.getCurrentGameTick();
+            gameTickFraction = Math.clamp(server.getCurrentGameTickFraction(), 0, 1);
+        }
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities) entity.updateFrame(frameTime, gameTickFraction);
+        }
+        Camera camera = player.getCamera();
+        Position cameraPosition = player.getCamera().getPosition();
+        Matrix4f projectionViewMatrix = Transformation.getProjectionViewMatrix(camera, cameraPosition);
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         if (ToggleSettings.CULLING_COMPUTATION.value()) {
@@ -214,7 +216,7 @@ public final class Renderer extends Renderable {
                 renderingOptimizer.computeVisibility(player, lastCameraPosition, lastProjectionViewMatrix);
             else renderingOptimizer.computeVisibility(player, cameraPosition, projectionViewMatrix);
         }
-        if (ToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition, toRenderPlayerPosition);
+        if (ToggleSettings.USE_SHADOW_MAPPING.value()) computeShadowMap(cameraPosition);
 
         lastProjectionViewMatrix = projectionViewMatrix;
         lastCameraPosition = cameraPosition;
@@ -227,7 +229,7 @@ public final class Renderer extends Renderable {
         renderSkybox(camera);
         renderOpaqueGeometry(cameraPosition, projectionViewMatrix);
         renderOpaqueParticles(cameraPosition, projectionViewMatrix);
-        renderPlayerCharacter(cameraPosition, projectionViewMatrix, toRenderPlayerPosition);
+        renderEntities(cameraPosition, projectionViewMatrix);
 
         glDrawBuffers(GL_COLOR_ATTACHMENT0);
         if (ToggleSettings.USE_AMBIENT_OCCLUSION.value() && IntSettings.AMBIENT_OCCLUSION_SAMPLES.value() > 0)
@@ -253,6 +255,7 @@ public final class Renderer extends Renderable {
 
         if (ToggleSettings.RENDER_OCCLUDERS.value()) renderOccluders(cameraPosition, projectionViewMatrix);
         if (ToggleSettings.RENDER_OCCLUDEES.value()) renderOccludees(cameraPosition, projectionViewMatrix);
+        if (ToggleSettings.RENDER_ENTITY_HITBOXES.value()) renderEntityHitboxes(cameraPosition, projectionViewMatrix);
         if (ToggleSettings.RENDER_DEPTH_MAP.value()) renderDebugTexture2D(depthTexture);
         if (ToggleSettings.RENDER_SHADOW_MAP.value()) renderDebugTexture3D(shadowTexture, IntSettings.DEBUG_VISUALIZATION_LOD.value(), true);
         if (ToggleSettings.RENDER_SHADOW_COLORS.value()) renderDebugTexture3D(shadowColorTexture, IntSettings.DEBUG_VISUALIZATION_LOD.value(), false);
@@ -328,23 +331,18 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private static void renderSkybox(Camera camera) {
+    private void renderSkybox(Camera camera) {
         Shader shader = AssetManager.get(Shaders.SKYBOX);
 
         shader.bind();
-        shader.setUniform("dayTexture", 0);
-        shader.setUniform("nightTexture", 1);
-        shader.setUniform("time", getRenderTime());
+        shader.setUniform("time", renderTime);
         shader.setUniform("projectionViewMatrix", Transformation.createProjectionRotationMatrix(camera));
+        shader.setTextureUniform("dayTexture", AssetManager.get(Textures.DAY_SKY));
+        shader.setTextureUniform("nightTexture", AssetManager.get(Textures.NIGHT_SKY));
 
         glBindVertexArray(AssetManager.get(VertexArrays.SKYBOX).id());
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
-
-        glActiveTexture(GL_TEXTURE0);
-        AssetManager.get(Textures.DAY_SKY).bind();
-        glActiveTexture(GL_TEXTURE1);
-        AssetManager.get(Textures.NIGHT_SKY).bind();
 
         glDepthMask(false);
         glDisable(GL_DEPTH_TEST);
@@ -357,10 +355,8 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void computeShadowMap(Position cameraPosition, Position playerPosition) {
+    private void computeShadowMap(Position cameraPosition) {
         currentShadowIndex = (currentShadowIndex + 1) % shadowFramebuffers.length;
-        float renderTime = getRenderTime();
-
         shadowSnapshotPositions[currentShadowIndex] = cameraPosition;
         for (int cascade = 0; cascade < sunMatrices.length; cascade++)
             Transformation.updateSunMatrix(sunMatrices[cascade], shadowSnapshotPositions[cascade], cameraPosition, renderTime, cascade);
@@ -404,7 +400,6 @@ public final class Renderer extends Renderable {
         } // Opaque chunk Shadows
 
         if (ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
-            long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.PARTICLE_SHADOW);
             shader.bind();
             shader.setUniform("projectionViewMatrix", sunMatrices[currentShadowIndex]);
@@ -412,15 +407,14 @@ public final class Renderer extends Renderable {
                     cameraPosition.longX & ~CHUNK_SIZE_MASK,
                     cameraPosition.longY & ~CHUNK_SIZE_MASK,
                     cameraPosition.longZ & ~CHUNK_SIZE_MASK);
-            shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
-            renderParticles(shader, currentTick, true);
+            renderParticles(shader, true);
         }
 
         if (ToggleSettings.PLAYER_CASTS_SHADOWS.value() && currentShadowIndex == 0) {
             Shader shader = AssetManager.get(Shaders.MODEL_SHADOW);
             shader.bind();
-            renderPlayerCharacter(shader, cameraPosition, playerPosition, sunMatrices[currentShadowIndex]);
+            renderEntitiesWithoutTextures(shader, cameraPosition, sunMatrices[currentShadowIndex]);
         }
 
         glColorMask(true, true, true, true);
@@ -440,12 +434,10 @@ public final class Renderer extends Renderable {
         }
 
         if (ToggleSettings.GLASS_CASTS_SHADOWS.value() && ToggleSettings.PARTICLES_CAST_SHADOWS.value() && currentShadowIndex == 0) {
-            long currentTick = Game.getServer().getCurrentGameTick();
             Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
             setUpGlassRendering(shader, sunMatrices[currentShadowIndex], cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
-            shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
             shader.setUniform("viewPosition", sunDirection.x, sunDirection.y, sunDirection.z);
-            renderParticles(shader, currentTick, false);
+            renderParticles(shader, false);
         }
 
         glDepthMask(true);
@@ -457,7 +449,7 @@ public final class Renderer extends Renderable {
         renderedOpaqueModels = 0;
 
         Shader shader = AssetManager.get(Shaders.OPAQUE_GEOMETRY);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
@@ -484,90 +476,93 @@ public final class Renderer extends Renderable {
     @MainThread
     private void renderOpaqueParticles(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.OPAQUE_PARTICLE);
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         glDisable(GL_STENCIL_TEST);
 
-        long currentTick = Game.getServer().getCurrentGameTick();
         int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
 
-        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
         shader.setUniform("flags", getFlags(cameraPosition));
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
         shader.setUniform("shadowIndices", 0, maxShadowCascade);
 
-        renderParticles(shader, currentTick, true);
+        renderParticles(shader, true);
     }
 
     @MainThread
-    private void renderPlayerCharacter(Position cameraPosition, Matrix4f projectionViewMatrix, Position playerPosition) {
-        if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value() && OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) return;
-        int maxShadowCascade = Math.min(IntSettings.SHADOW_CASCADES_COUNT.value(), Game.getWorld().LOD_COUNT - SHADOW_LOD);
+    private void renderEntities(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.MODEL);
-        shader.bind();
-        setupOpaqueRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
-        setUpShadowMappedRendering(shader);
-        shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
-        shader.setUniform("image", 0);
-        shader.setUniform("flags", getFlags(cameraPosition));
-        shader.setUniform("shadowIndices", 0, maxShadowCascade);
-
-        glDisable(GL_STENCIL_TEST);
-        glDisable(GL_CULL_FACE);
-        glActiveTexture(GL_TEXTURE0);
-        AssetManager.get((TextureIdentifier) OptionSettings.SKIN.value()).bind();
-
+        setupEntityRendering(shader, cameraPosition, projectionViewMatrix);
         if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
-            Model playerCharacter = AssetManager.get(Models.PLAYER_MODEL);
             MovementState state = player.getMovement().getState();
-            if (state.hideHeadInFirstPerson()) playerCharacter.transforms()[Models.HEAD].zero();
-            if (state.hideBodyInFirstPerson()) playerCharacter.transforms()[Models.BODY].zero();
+            Matrix4f[] transforms = player.getRenderEntity().parentedTransforms();
+            if (state.hideHeadInFirstPerson()) transforms[PlayerAnimator.HEAD].zero();
+            if (state.hideBodyInFirstPerson()) transforms[PlayerAnimator.BODY].zero();
+            if (ToggleSettings.HIDE_BODY_IN_FIRST_PERSON.value())
+                for (Matrix4f transform : transforms) transform.zero();
         }
-
-        renderPlayerCharacter(shader, cameraPosition, playerPosition, projectionViewMatrix);
-        glEnable(GL_CULL_FACE);
+        renderEntities(shader, cameraPosition, projectionViewMatrix);
     }
 
     @MainThread
-    private static void renderPlayerCharacter(Shader shader, Position cameraPosition, Position playerPosition, Matrix4f matrix) {
-        Model playerCharacter = AssetManager.get(Models.PLAYER_MODEL);
+    private void renderEntitiesWithoutTextures(Shader shader, Position cameraPosition, Matrix4f matrix) {
         Vector3l cameraChunkPosition = new Vector3l(
                 cameraPosition.longX & ~CHUNK_SIZE_MASK,
                 cameraPosition.longY & ~CHUNK_SIZE_MASK,
                 cameraPosition.longZ & ~CHUNK_SIZE_MASK);
 
         shader.setUniform("projectionViewMatrix", matrix);
-        shader.setUniform("position",
-                (playerPosition.longX - cameraChunkPosition.x) + playerPosition.fractionX,
-                (playerPosition.longY - cameraChunkPosition.y) + playerPosition.fractionY,
-                (playerPosition.longZ - cameraChunkPosition.z) + playerPosition.fractionZ
-        );
-        shader.setUniform("transformations", playerCharacter.transforms());
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities)
+                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+        }
+    }
 
-        glBindVertexArray(playerCharacter.guiElement().vao());
+    @MainThread
+    private void renderEntities(Shader shader, Position cameraPosition, Matrix4f matrix) {
+        Vector3l cameraChunkPosition = new Vector3l(
+                cameraPosition.longX & ~CHUNK_SIZE_MASK,
+                cameraPosition.longY & ~CHUNK_SIZE_MASK,
+                cameraPosition.longZ & ~CHUNK_SIZE_MASK);
+
+        shader.setUniform("projectionViewMatrix", matrix);
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities) {
+                glActiveTexture(shader.getNextAvailableTextureIndex());
+                AssetManager.get(entity.getRenderEntity().getTextureIdentifier()).bind();
+                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+            }
+        }
+    }
+
+    @MainThread
+    private void renderEntity(Shader shader, Vector3l cameraChunkPosition, Position position, RenderEntity renderEntity) {
+        shader.setUniform("position",
+                (position.longX - cameraChunkPosition.x) + position.fractionX,
+                (position.longY - cameraChunkPosition.y) + position.fractionY,
+                (position.longZ - cameraChunkPosition.z) + position.fractionZ
+        );
+        shader.setUniform("transformations", renderEntity.parentedTransforms());
+
+        glBindVertexArray(renderEntity.guiElement().vao());
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
 
-        glDrawArrays(GL_TRIANGLES, 0, playerCharacter.guiElement().vertexCount());
+        glDrawElements(GL_TRIANGLES, renderEntity.guiElement().vertexCount(), GL_UNSIGNED_INT, 0);
     }
 
     @MainThread
     private void applyAmbientOcclusion(Position cameraPosition, Matrix4f projectionViewMatrix) {
         GuiShader shader = (GuiShader) AssetManager.get(Shaders.SSAO);
         shader.bind();
-        shader.setUniform("colorTexture", 0);
-        shader.setUniform("intPosTexture", 1);
         shader.setUniform("screenSize", Window.getWidth(), Window.getHeight());
-
         shader.setUniform("projectionViewMatrix", projectionViewMatrix);
         shader.setUniform("inChunkPosition", (float) (cameraPosition.longX & CHUNK_SIZE_MASK), cameraPosition.longY & CHUNK_SIZE_MASK, cameraPosition.longZ & CHUNK_SIZE_MASK);
         shader.setUniform("samples", IntSettings.AMBIENT_OCCLUSION_SAMPLES.value());
+        shader.setTextureUniform("colorTexture", GL_TEXTURE_2D, colorTexture);
+        shader.setTextureUniform("intPosTexture", GL_TEXTURE_2D, intPosTexture);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, colorTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, intPosTexture);
         glDisable(GL_BLEND);
         glDisable(GL_STENCIL_TEST);
 
@@ -593,7 +588,7 @@ public final class Renderer extends Renderable {
         renderedTransparentModels = 0;
 
         Shader shader = AssetManager.get(Shaders.TRANSPARENT);
-        setUpTransparentRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, getRenderTime());
+        setUpTransparentRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ, renderTime);
         setUpShadowMappedRendering(shader);
         shader.setUniform("cameraPosition", cameraPosition.getInChunkPosition());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, player.getMeshCollector().getBuffer());
@@ -627,13 +622,8 @@ public final class Renderer extends Renderable {
 
         GuiShader shader = (GuiShader) AssetManager.get(Shaders.TRANSPARENCY_APPLIER);
         shader.bind();
-        shader.setUniform("accumulationTexture", 0);
-        shader.setUniform("revealTexture", 1);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, accumulationTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, revealTexture);
+        shader.setTextureUniform("accumulationTexture", GL_TEXTURE_2D, accumulationTexture);
+        shader.setTextureUniform("revealTexture", GL_TEXTURE_2D, revealTexture);
 
         shader.flipNextDrawVertically();
         shader.drawFullScreenQuad();
@@ -665,19 +655,17 @@ public final class Renderer extends Renderable {
         Shader shader = AssetManager.get(Shaders.GLASS_PARTICLE);
         setUpGlassRendering(shader, projectionViewMatrix, cameraPosition.longX, cameraPosition.longY, cameraPosition.longZ);
         glDisable(GL_STENCIL_TEST);
-        long currentTick = Game.getServer().getCurrentGameTick();
-        shader.setUniform("gameTickFraction", Game.getServer().getCurrentGameTickFraction());
         shader.setUniform("viewPosition", cameraPosition.getInChunkPosition());
-
-        renderParticles(shader, currentTick, false);
+        renderParticles(shader, false);
     }
 
     @MainThread
-    private void renderParticles(Shader shader, long currentTick, boolean opaque) {
+    private void renderParticles(Shader shader, boolean opaque) {
         for (ParticleEffect particleEffect : player.getParticleCollector().getParticleEffects()) {
             if (particleEffect.isOpaque() != opaque) continue;
             shader.setUniform("lifeTimeTicks", particleEffect.lifeTimeTicks());
-            shader.setUniform("aliveTicks", (int) (currentTick - particleEffect.spawnTick()));
+            shader.setUniform("aliveTicks", (int) (currentGameTick - particleEffect.spawnTick()));
+            shader.setUniform("gameTickFraction", gameTickFraction);
             shader.setUniform("startPosition", particleEffect.x(), particleEffect.y(), particleEffect.z());
             glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleEffect.buffer());
             glDrawArraysInstanced(GL_TRIANGLES, 0, 9, particleEffect.count());
@@ -686,9 +674,9 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderPlaceableHologram(Position cameraPosition, Matrix4f projectionViewMatrix) {
-        Target currentTarget = Target.getPlayerTarget();
-        Target lockedTarget = player.getInteractionHandler().getLockedTarget();
-        Target startTarget = player.getInteractionHandler().getStartTarget();
+        VoxelTarget currentTarget = VoxelTarget.getPlayerTarget();
+        VoxelTarget lockedTarget = player.getInteractionHandler().getLockedTarget();
+        VoxelTarget startTarget = player.getInteractionHandler().getStartTarget();
         PlacingState state = player.getInteractionHandler().getState(currentTarget);
 
         if (!state.shouldRender()) return;
@@ -710,7 +698,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target endTarget) {
+    private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget endTarget) {
         if (startTarget == null || endTarget == null) return;
 
         CapsulePlaceable placeable = (CapsulePlaceable) player.getHeldPlaceable();
@@ -732,7 +720,7 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target target) {
+    private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget target) {
         StructurePlaceable placeable = (StructurePlaceable) player.getHeldPlaceable();
         Vector3l position = target.offsetPosition();
         placeable.offsetPosition(position, target.side());
@@ -746,7 +734,8 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, Target startTarget, Target currentTarget, Placeable placeable) {
+    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget currentTarget, Placeable placeable) {
+        if (startTarget == null || currentTarget == null) return;
         byte material = placeable instanceof ShapePlaceable shapePlaceable
                 && !Input.isKeyPressed(KeySettings.SPRINT)
                 && OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY ? shapePlaceable.getMaterial() : AIR;
@@ -787,15 +776,12 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private static void setupHologramRendering() {
-        TextureArray materialsTexture = AssetManager.get(TextureArrays.MATERIALS);
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         glEnable(GL_CULL_FACE);
         glDisable(GL_STENCIL_TEST);
         glDepthMask(true);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, materialsTexture.id());
     }
 
     @MainThread
@@ -817,10 +803,10 @@ public final class Renderer extends Renderable {
         shader.setUniform("instanceSize", lengthX, lengthY, lengthZ);
         shader.setUniform("startPosition", startPosition);
 
-        shader.setUniform("textures", 0);
         shader.setUniform("textureSizes", materialsTexture.textureSizes());
         shader.setUniform("maxTextureSize", materialsTexture.maxTextureSize());
         shader.setUniform("material", material);
+        shader.setTextureUniform("textures", materialsTexture);
 
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
         glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
@@ -946,6 +932,29 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
+    private static void renderEntityHitboxes(Position cameraPositon, Matrix4f projectionViewMatrix) {
+        Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
+        shader.bind();
+        setUpVolumeRendering(cameraPositon, projectionViewMatrix, shader);
+        glEnable(GL_CULL_FACE);
+        glDepthMask(true);
+        boolean isFirstPerson = OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON;
+
+        synchronized (Game.getWorld().entities) {
+            for (Entity entity : Game.getWorld().entities) {
+                if (isFirstPerson && entity instanceof Player) continue;
+                Vector3l maxPosition = entity.getMaxCoordinate();
+                Vector3l minPosition = entity.getMinCoordinate();
+
+                shader.setUniform("minPosition", maxPosition);
+                shader.setUniform("maxPosition", minPosition);
+
+                glDrawArrays(GL_TRIANGLES, 0, 36);
+            }
+        }
+    }
+
+    @MainThread
     private static void renderVolume(Shader shader, Chunk chunk, AABB aabb, int lod) {
         if (aabb.maxX < aabb.minX || aabb.maxY < aabb.minY || aabb.maxZ < aabb.minZ) return;
 
@@ -967,8 +976,6 @@ public final class Renderer extends Renderable {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         glDepthMask(false);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, AssetManager.get(TextureArrays.MATERIALS).id());
 
         shader.setUniform("iCameraPosition",
                 cameraPositon.longX & ~CHUNK_SIZE_MASK,
@@ -1121,6 +1128,8 @@ public final class Renderer extends Renderable {
         );
     }
 
+    private long currentGameTick;
+    private float gameTickFraction, renderTime;
     private boolean vSync = true;
     private ArrayList<ChatMessage> messages = new ArrayList<>();
     private RenderingOptimizer renderingOptimizer;
@@ -1129,7 +1138,6 @@ public final class Renderer extends Renderable {
     private final ArrayList<Renderable> hudElements = new ArrayList<>();
     private final UiElement crosshair;
     private final Player player;
-    private double animationTimer = 0;
 
     private Position lastCameraPosition;
     private Matrix4f lastProjectionViewMatrix;

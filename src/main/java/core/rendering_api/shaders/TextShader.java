@@ -25,11 +25,12 @@ public final class TextShader extends RenderShader {
     @Override
     @MainThread
     public void bind() {
-        glUseProgram(programID);
+        super.bind();
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        setTextureUniform("textAtlas", AssetManager.get((FontOption) CoreOptionSettings.FONT.value()));
     }
 
     @MainThread
@@ -48,11 +49,8 @@ public final class TextShader extends RenderShader {
         setUniform("offsets", offsets);
         setUniform("position", (position.x - 0.5F) * guiSize, (position.y - 0.5F) * guiSize);
         setUniform("color", color);
-        setUniform("textAtlas", 0);
         setUniform("addTransparentBackground", addTransparentBackground);
 
-        glActiveTexture(GL_TEXTURE0);
-        AssetManager.get(font).bind();
         glBindVertexArray(AssetManager.get(CoreVertexArrays.TEXT_ROW).id());
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, AssetManager.get(CoreBuffers.TEXT_ELEMENT_ARRAY_BUFFER).id());
