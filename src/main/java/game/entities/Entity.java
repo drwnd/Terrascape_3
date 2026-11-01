@@ -40,7 +40,7 @@ public abstract class Entity implements Saver.Savable {
     }
 
     public final void save(Saver<?> saver) {
-        if (entityType == EntityType.PLAYER) return;
+        if (entityType == EntityType.PLAYER) throw new UnsupportedOperationException("Player Entity should not be saved as any other Entity");
         saver.saveEnum(entityType);
         saver.saveGeneric(position);
         saver.saveVector3f(rotation);

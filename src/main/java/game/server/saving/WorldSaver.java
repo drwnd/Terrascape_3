@@ -3,6 +3,7 @@ package game.server.saving;
 import core.utils.MainThread;
 import core.utils.Saver;
 import game.entities.Entity;
+import game.server.Game;
 import game.server.World;
 import game.server.generation.BiomeSamplers;
 import game.server.generation.WorldGenerationSettings;
@@ -31,6 +32,7 @@ public final class WorldSaver extends Saver<World> {
         saveString(world.created);
         saveString(new Date().toString());
         saveLong(new Date().getTime());
+        world.entities.remove(Game.getPlayer());
         saveGenericArray(world.entities);
     }
 

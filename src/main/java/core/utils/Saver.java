@@ -128,10 +128,7 @@ public abstract class Saver<T> {
     }
 
     public final byte loadByte() {
-        if (currentIndex >= data.size()) {
-            currentIndex++;
-            return (byte) 0;
-        }
+        if (currentIndex >= data.size()) throw new ArrayIndexOutOfBoundsException("Index %d out of bounds for length %d.".formatted(currentIndex, data.size()));
         return data.get(currentIndex++);
     }
 
