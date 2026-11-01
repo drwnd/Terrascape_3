@@ -18,7 +18,6 @@ public class ComputeShader extends Shader {
     @MainThread
     public ComputeShader(String computeShaderCode, String shaderName) {
         try {
-            programID = createProgram();
             int computeShaderID = createComputeShader(computeShaderCode, programID);
             link(programID, computeShaderID);
 

@@ -16,7 +16,6 @@ public class RenderShader extends Shader {
         String vertexShaderCode = FileManager.loadFileContents(AssetManager.getAssetFilepath(SHADER_FOLDER_PATH.resolve(vertexShaderFilePath)));
         String fragmentShaderCode = FileManager.loadFileContents(AssetManager.getAssetFilepath(SHADER_FOLDER_PATH.resolve(fragmentShaderFilePath)));
         try {
-            programID = createProgram();
             int vertexShaderID = createVertexShader(vertexShaderCode, programID);
             int fragmentShaderID = createFragmentShader(fragmentShaderCode, programID);
             link(programID, vertexShaderID, fragmentShaderID);

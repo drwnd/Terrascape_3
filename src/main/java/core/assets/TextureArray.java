@@ -4,10 +4,15 @@ import core.utils.MainThread;
 
 import static org.lwjgl.opengl.GL46.*;
 
-public record TextureArray(int id, int[] textureSizes, int maxTextureSize) implements Asset {
+public record TextureArray(int id, int[] textureSizes, int maxTextureSize) implements Asset, Texture {
 
     public TextureArray(int id, int[] textureSizes) {
         this(id, textureSizes, getMax(textureSizes));
+    }
+
+    @Override
+    public int target() {
+        return GL_TEXTURE_2D_ARRAY;
     }
 
     @Override

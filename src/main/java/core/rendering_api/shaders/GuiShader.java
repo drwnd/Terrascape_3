@@ -22,7 +22,7 @@ public final class GuiShader extends RenderShader {
     @Override
     @MainThread
     public void bind() {
-        glUseProgram(programID);
+        super.bind();
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
@@ -46,10 +46,7 @@ public final class GuiShader extends RenderShader {
 
     @MainThread
     public void drawQuadCustomScale(Vector2f position, Vector2f size, Texture texture, float scale) {
-        glActiveTexture(GL_TEXTURE0);
-        texture.bind();
-
-        setUniform("image", 0);
+        setTextureUniform("image", texture);
         if (flipNextDrawVertically) {
             setUniform("position", (position.x - 0.5F) * scale, (position.y + size.y - 0.5F) * scale);
             setUniform("size", size.x * scale, -size.y * scale);
