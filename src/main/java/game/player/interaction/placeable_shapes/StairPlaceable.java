@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation24Way;
 import game.player.interaction.ShapePlaceable;
@@ -16,12 +17,12 @@ import static game.utils.Constants.CHUNK_SIZE;
 public final class StairPlaceable extends ShapePlaceable {
 
     public StairPlaceable(byte material) {
-        super(ComputeShaders.STAIR, material, Rotation24Way.ROTATION_01);
+        super(ItemType.STAIR_PLACEABLE, ComputeShaders.STAIR, material, Rotation24Way.ROTATION_01);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 6);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(stepHeight.value());
         saver.saveInt(heightOffset.value());

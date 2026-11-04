@@ -4,7 +4,7 @@ import core.renderables.*;
 import core.rendering_api.Window;
 import core.utils.MainThread;
 
-import game.player.interaction.Placeable;
+import game.items.Item;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.placeable_shapes.*;
 import game.server.Game;
@@ -51,7 +51,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
 
     @Override
     @MainThread
-    public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
+    public Item getSelectedItem(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
             if (display.display().containsPixelCoordinate(pixelCoordinate)) {
                 if (selectedDisplay == null) return new CubePlaceable(display.material());

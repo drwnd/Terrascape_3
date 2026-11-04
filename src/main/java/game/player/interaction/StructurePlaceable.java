@@ -6,6 +6,7 @@ import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
+import game.items.ItemType;
 import game.player.sound.PlaceBreakSound;
 import game.server.Chunk;
 import game.server.Game;
@@ -24,15 +25,27 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public final class StructurePlaceable implements Placeable {
+public final class StructurePlaceable extends Placeable {
 
     public StructurePlaceable(StructureIdentifier identifier) {
+        super(ItemType.STRUCTURE_PLACEABLE);
         this.identifier = identifier;
         this.structure = AssetManager.get(identifier);
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 2);
+    @Override
+    public void attack(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
+        interactionHandler.attemptEntityInteraction(info, this, true);
+    }
+
+    @Override
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        if (currentTarget == null && !isLocked) return PlacingState.NONE;
+        return isLocked ? PlacingState.STRUCTURE_PLACE_LOCKED : PlacingState.STRUCTURE_PLACE;
+    }
+
+    @Override
+    public void saveSelf(Saver<?> saver) {
         saver.saveString(identifier.structureName());
     }
 

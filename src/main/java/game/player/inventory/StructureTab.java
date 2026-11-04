@@ -6,8 +6,8 @@ import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.utils.MainThread;
 
+import game.items.Item;
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.StructurePlaceable;
 import game.server.Game;
 
@@ -77,7 +77,7 @@ public final class StructureTab extends Renderable implements InventoryTab {
 
     @Override
     @MainThread
-    public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
+    public Item getSelectedItem(Vector2i pixelCoordinate) {
         for (StructureSelectionButton button : structureButtons)
             if (button.containsPixelCoordinate(pixelCoordinate)) return new StructurePlaceable(button.getStructure());
         return null;

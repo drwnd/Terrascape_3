@@ -4,8 +4,8 @@ import core.rendering_api.Input;
 import core.utils.Vector3l;
 import core.utils.MainThread;
 
+import game.items.Item;
 import game.player.interaction.placeable_shapes.CapsulePlaceable;
-import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Game;
 import game.settings.IntSettings;
 import game.settings.KeySettings;
@@ -26,8 +26,8 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleSetPlaceStartPosition();
         if (action == GLFW_RELEASE && button == KeySettings.SET_PLACE_START_POSITION.keybind()) handleReleasePlaceStartPosition();
 
-        if (button == KeySettings.DESTROY.keybind()) updateInfo(action, destroyInfo);
-        if (button == KeySettings.USE.keybind()) updateInfo(action, useInfo);
+        if (button == KeySettings.DESTROY.keybind()) destroyInfo.update(action);
+        if (button == KeySettings.USE.keybind()) useInfo.update(action);
     }
 
     @MainThread
@@ -54,11 +54,11 @@ public final class InteractionHandler {
 
     @ServerThread
     public void updateGameTick() {
-        if (!Input.isKeyPressed(KeySettings.DESTROY)) updateInfo(GLFW_RELEASE, destroyInfo);
-        if (!Input.isKeyPressed(KeySettings.USE)) updateInfo(GLFW_RELEASE, useInfo);
+        if (!Input.isKeyPressed(KeySettings.DESTROY)) destroyInfo.update(GLFW_RELEASE);
+        if (!Input.isKeyPressed(KeySettings.USE)) useInfo.update(GLFW_RELEASE);
 
-        handleDestroy();
-        handleUse();
+        Game.getPlayer().getHeldItem().use(this, useInfo);
+        Game.getPlayer().getHeldItem().attack(this, destroyInfo);
     }
 
     public VoxelTarget getStartTarget() {
@@ -70,88 +70,80 @@ public final class InteractionHandler {
     }
 
     public PlacingState getState(VoxelTarget currentTarget) {
-        Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
+        Item item = Game.getPlayer().getHeldItem();
         boolean isLocked = lockedTarget != null;
         boolean isRepeat = startTarget != null;
-
-        if (breakHeldOnly && !(placeable instanceof ShapePlaceable)) return PlacingState.NONE;
-        if (placeable instanceof ChunkRebuildPlaceable) return PlacingState.NONE;
-        if (placeable instanceof StructureSelector) return isLocked ? PlacingState.STRUCTURE_SELECT_LOCKED : PlacingState.STRUCTURE_SELECT;
-
-        if (placeable instanceof CapsulePlaceable) {
-            if (isLocked) return PlacingState.CAPSULE_LOCKED;
-            if (currentTarget == null) return PlacingState.NONE;
-            return PlacingState.CAPSULE;
-        }
-
-        if (placeable instanceof StructurePlaceable) {
-            if (currentTarget == null && !isLocked) return PlacingState.NONE;
-            return isLocked ? PlacingState.STRUCTURE_PLACE_LOCKED : PlacingState.STRUCTURE_PLACE;
-        }
-
-        if (isRepeat) {
-            if (isLocked) return PlacingState.REPEAT_LOCKED;
-            if (currentTarget == null) return PlacingState.NONE;
-            return PlacingState.REPEAT;
-        }
-        if (isLocked) return PlacingState.SHAPE_LOCKED;
-        if (currentTarget == null) return PlacingState.NONE;
-        return PlacingState.SHAPE;
+        return item.getPlacingState(currentTarget, isLocked, isRepeat);
     }
 
     @ServerThread
-    private void handleUse() {
-        Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        handleUseDestroy(useInfo, placeable, placeable != null && placeable.offsetOnPlace(), false);
-    }
-
-    @ServerThread
-    private void handleDestroy() {
-        Placeable placeable = Game.getPlayer().getHeldPlaceable();
-        if (placeable != null && !placeable.allowBreak()) placeable = null;
-        else if (!(placeable instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
-        else placeable = shapePlaceable.copyWithMaterial(AIR);
-        handleUseDestroy(destroyInfo, placeable, placeable != null && placeable.offsetOnBreak(), true);
-    }
-
-    @ServerThread
-    private void handleUseDestroy(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition, boolean isDestroy) {
+    public void attemptEntityInteraction(PlaceDestroyInfo info, Item item, boolean isDestroy) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
         if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
         info.forceAction = false;
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
+        if (voxelTargetIsCloser(entityTarget, voxelTarget)) return;
+        interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
+    }
 
-        if (entityTarget != null && (voxelTarget == null || entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer())) {
-            Vector3f direction = Game.getPlayer().getCamera().getDirection();
-            entityTarget.entity().hit(direction, isDestroy ? 1 : 0);
-            info.lastAction = currentGameTick;
-            info.forceAction = false;
-            return;
-        }
-        if (!placeableCanModifyVoxels(placeable, isDestroy)) return;
+    @ServerThread
+    public void attemptVoxelInteraction(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition, boolean isDestroy) {
+        long currentGameTick = Game.getServer().getCurrentGameTick();
+        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
+        info.forceAction = false;
 
+        VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
+        EntityTarget entityTarget = EntityTarget.getPlayerTarget();
+        if (entityTargetIsCloser(voxelTarget, entityTarget)) return;
+        interactWithVoxel(info, placeable, voxelTarget, currentGameTick, offsetPosition, isDestroy);
+    }
+
+    @ServerThread
+    public void attemptVoxelAndEntityInteraction(PlaceDestroyInfo info, Item item, boolean offsetPosition, boolean isDestroy) {
+        long currentGameTick = Game.getServer().getCurrentGameTick();
+        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
+        info.forceAction = false;
+
+        VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
+        EntityTarget entityTarget = EntityTarget.getPlayerTarget();
+        if (entityTargetIsCloser(voxelTarget, entityTarget))
+            interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
+        if (voxelTargetIsCloser(entityTarget, voxelTarget))
+            interactWithVoxel(info, item, voxelTarget, currentGameTick, offsetPosition, isDestroy);
+    }
+
+    private static boolean voxelTargetIsCloser(EntityTarget entityTarget, VoxelTarget voxelTarget) {
+        return entityTarget == null || voxelTarget != null && voxelTarget.distanceSquaredToPlayer() < entityTarget.distanceSquaredToPlayer();
+    }
+
+    private static boolean entityTargetIsCloser(VoxelTarget voxelTarget, EntityTarget entityTarget) {
+        return voxelTarget == null || entityTarget != null && entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer();
+    }
+
+    @ServerThread
+    private void interactWithVoxel(PlaceDestroyInfo info, Item item, VoxelTarget voxelTarget, long currentGameTick, boolean offsetPosition, boolean isDestroy) {
+        if (!itemCanModifyVoxels(item, isDestroy)) return;
         PlacingState state = getState(voxelTarget);
         VoxelTarget target = state.isLocked() ? lockedTarget : voxelTarget;
 
         if (target == null) {
-            info.lastAction = currentGameTick;
-            info.forceAction = false;
+            info.setUsed(currentGameTick);
             return;
         }
 
         int targetedSide = target.side();
         Vector3l position = offsetPosition ? target.offsetPosition() : target.position();
+        Placeable placeable = (Placeable) item;
 
-        if (placeable instanceof CapsulePlaceable capsulePlaceable) {
+        if (item instanceof CapsulePlaceable capsulePlaceable) {
             if (startTarget != null) target = startTarget;
             Vector3l startPosition = offsetPosition ? target.offsetPosition() : target.position();
             capsulePlaceable.setStartEndPositions(startPosition, position);
             targetedSide = target.side();
 
-        } else if (placeable instanceof ShapePlaceable shapePlaceable) {
+        } else if (item instanceof ShapePlaceable shapePlaceable) {
             if (startTarget != null) target = startTarget;
             Vector3l startPosition = offsetPosition ? target.offsetPosition() : target.position();
             placeable = new RepeatPlaceable(shapePlaceable, startPosition, position);
@@ -159,12 +151,19 @@ public final class InteractionHandler {
         }
 
         if (!Game.getServer().requestBreakPlaceInteraction(position, placeable, targetedSide)) return;
-        info.lastAction = currentGameTick;
+        info.setUsed(currentGameTick);
         startTarget = lockedTarget = null;
     }
 
-    private boolean placeableCanModifyVoxels(Placeable placeable, boolean isDestroy) {
-        if (placeable == null) return false;
+    @ServerThread
+    private static void interactWithEntity(PlaceDestroyInfo info, EntityTarget entityTarget, Item item, long currentGameTick, boolean isDestroy) {
+        Vector3f direction = Game.getPlayer().getCamera().getDirection();
+        entityTarget.entity().hit(direction, isDestroy ? 1 : 0);
+        info.setUsed(currentGameTick);
+    }
+
+    private boolean itemCanModifyVoxels(Item item, boolean isDestroy) {
+        if (!(item instanceof Placeable placeable)) return false;
         if (isDestroy)
             return placeable.allowBreak() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || placeable instanceof ShapePlaceable);
         else
@@ -200,19 +199,14 @@ public final class InteractionHandler {
     private static void changeBreakPlaceSize(int addend) {
         IntSettings.BREAK_PLACE_SIZE.setValue(Math.clamp(IntSettings.BREAK_PLACE_SIZE.value() + addend, 0, CHUNK_SIZE_BITS + 2));
         IntSettings.BREAK_PLACE_ALIGN.setValue(Math.min(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));
-        if (Game.getPlayer().getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
+        if (Game.getPlayer().getHeldItem() instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
     }
 
     @MainThread
     private static void changeBreakPlaceAlign(int addend) {
         IntSettings.BREAK_PLACE_ALIGN.setValue(Math.clamp(IntSettings.BREAK_PLACE_ALIGN.value() + addend, 0, CHUNK_SIZE_BITS + 2));
         IntSettings.BREAK_PLACE_SIZE.setValue(Math.max(IntSettings.BREAK_PLACE_SIZE.value(), IntSettings.BREAK_PLACE_ALIGN.value()));
-        if (Game.getPlayer().getHeldPlaceable() instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
-    }
-
-    private static void updateInfo(int action, PlaceDestroyInfo info) {
-        info.buttonIsHeld = action == GLFW_PRESS;
-        if (info.buttonIsHeld) info.forceAction = true;
+        if (Game.getPlayer().getHeldItem() instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
     }
 
 
@@ -220,9 +214,4 @@ public final class InteractionHandler {
     private final PlaceDestroyInfo destroyInfo = new PlaceDestroyInfo();
     private VoxelTarget startTarget = null, lockedTarget = null;
 
-    private static class PlaceDestroyInfo {
-        public long lastAction = 0;
-        public boolean forceAction = false;
-        public boolean buttonIsHeld = false;
-    }
 }

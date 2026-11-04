@@ -11,8 +11,10 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.settings.stand_alones.StandAloneOptionSetting;
 import core.settings.stand_alones.StandAloneToggleSetting;
 import core.utils.MathUtils;
+import core.utils.Saver;
 import core.utils.Vector3l;
 
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.server.Chunk;
 import game.server.materials_data.MaterialsData;
@@ -30,15 +32,17 @@ import java.util.Objects;
 import static game.utils.Constants.*;
 import static org.lwjgl.opengl.GL46.*;
 
-public abstract class ShapePlaceable implements Placeable {
+public abstract class ShapePlaceable extends Placeable {
 
-    protected ShapePlaceable(ShaderIdentifier identifier, byte material) {
+    protected ShapePlaceable(ItemType itemType, ShaderIdentifier identifier, byte material) {
+        super(itemType);
         this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(null);
     }
 
-    protected ShapePlaceable(ShaderIdentifier identifier, byte material, Option defaultRotation) {
+    protected ShapePlaceable(ItemType itemType, ShaderIdentifier identifier, byte material, Option defaultRotation) {
+        super(itemType);
         this.shaderIdentifier = identifier;
         this.material = material;
         this.rotation = new StandAloneOptionSetting(defaultRotation);
@@ -54,6 +58,25 @@ public abstract class ShapePlaceable implements Placeable {
         placeable.rotationRoll.setValue(rotationRoll.value());
         placeable.setBitMap(bitMap);
         return placeable;
+    }
+
+    public static ShapePlaceable load(Saver<?> saver, ShapePlaceable placeable) {
+        placeable.invert.setValue(saver.loadBoolean());
+        placeable.blockSize.setValue(saver.loadInt());
+        placeable.rotationPitch.setValue(saver.loadInt());
+        placeable.rotationYaw.setValue(saver.loadInt());
+        placeable.rotationRoll.setValue(saver.loadInt());
+        return placeable;
+    }
+
+    @Override
+    public final void saveSelf(Saver<?> saver) {
+        saveUnique(saver);
+        saver.saveBoolean(invert.value());
+        saver.saveInt(blockSize.value());
+        saver.saveInt(rotationPitch.value());
+        saver.saveInt(rotationYaw.value());
+        saver.saveInt(rotationRoll.value());
     }
 
     @MainThread
@@ -130,6 +153,11 @@ public abstract class ShapePlaceable implements Placeable {
         return isBitMapInValid(settingsHash(), getPreferredSize());
     }
 
+
+    @Override
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        return getDefaultPlacingState(currentTarget, isLocked, isRepeat);
+    }
 
     @Override
     public Structure getStructure() {
@@ -219,6 +247,8 @@ public abstract class ShapePlaceable implements Placeable {
     protected Option rotation() {
         return rotation.value();
     }
+
+    protected abstract void saveUnique(Saver<?> saver);
 
     protected abstract ShapePlaceable copyWithMaterialUnique(byte material);
 

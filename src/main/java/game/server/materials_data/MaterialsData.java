@@ -393,7 +393,7 @@ public final class MaterialsData {
                 || inChunkZ >= start.z + lengths.z) return;
 
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
         long[] bitMap = placeable.getBitMap();
 
         int minX = Math.max(inChunkX - start.x, 0), maxX = Math.min(inChunkX - start.x + length, lengths.x);
@@ -813,7 +813,7 @@ public final class MaterialsData {
                 || inChunkZ >= start.z + lengths.z) return;
 
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
         int stepLength = IntSettings.BREAK_PARTICLE_STEP_LENGTH.value();
         long[] bitMap = placeable.getBitMap();
 

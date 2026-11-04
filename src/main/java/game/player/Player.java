@@ -10,6 +10,7 @@ import game.entities.Entity;
 import game.entities.PlayerCharacter;
 import game.entities.PlayerAnimator;
 import game.entities.movement.WalkingState;
+import game.items.Item;
 import game.player.interaction.*;
 import game.player.inventory.Inventory;
 import game.player.rendering.Camera;
@@ -115,13 +116,13 @@ public final class Player extends Entity {
         movement.handleInput(button, action);
         interactionHandler.handleActiveInput(button, action);
         hotbar.handleInput(button, action);
-        if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() != null) {
+        if (button == KeySettings.ROTATE_SHAPE_FORWARD.keybind() && action == GLFW_PRESS && getHeldItem() instanceof Placeable placeable) {
             renderer.invalidateHologram();
-            getHeldPlaceable().rotateForwards();
+            placeable.rotateForwards();
         }
-        if (button == KeySettings.ROTATE_SHAPE_BACKWARD.keybind() && action == GLFW_PRESS && getHeldPlaceable() != null) {
+        if (button == KeySettings.ROTATE_SHAPE_BACKWARD.keybind() && action == GLFW_PRESS && getHeldItem() instanceof Placeable placeable) {
             renderer.invalidateHologram();
-            getHeldPlaceable().rotateBackwards();
+            placeable.rotateBackwards();
         }
 
         if (action == GLFW_PRESS && (button == KeySettings.DESTROY.keybind() || button == KeySettings.USE.keybind()))
@@ -171,8 +172,8 @@ public final class Player extends Entity {
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
     }
 
-    public Placeable getHeldPlaceable() {
-        return hotbar.getSelectedMaterial();
+    public Item getHeldItem() {
+        return hotbar.getSelectedItem();
     }
 
     public MeshCollector getMeshCollector() {

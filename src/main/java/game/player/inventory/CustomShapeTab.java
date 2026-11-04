@@ -7,8 +7,8 @@ import core.utils.FileManager;
 import core.utils.MainThread;
 
 import game.assets.Textures;
+import game.items.Item;
 import game.language.UiMessages;
-import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
 import game.server.Game;
 import game.server.generation.Structure;
@@ -75,7 +75,7 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
     @Override
     @MainThread
-    public Placeable getSelectedPlaceable(Vector2i pixelCoordinate) {
+    public Item getSelectedItem(Vector2i pixelCoordinate) {
         for (CubeDisplay display : cubeDisplays)
             if (display.display().containsPixelCoordinate(pixelCoordinate)) return shape.copyWithMaterial(display.material());
         return null;

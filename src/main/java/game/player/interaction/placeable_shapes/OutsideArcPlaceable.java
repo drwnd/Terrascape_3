@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation8Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,12 +15,12 @@ import game.server.generation.Structure;
 public final class OutsideArcPlaceable extends ShapePlaceable {
 
     public OutsideArcPlaceable(byte material) {
-        super(ComputeShaders.OUTSIDE_ARC, material, Rotation8Way.ROTATION_1);
+        super(ItemType.OUTSIDE_ARC_PLACEABLE, ComputeShaders.OUTSIDE_ARC, material, Rotation8Way.ROTATION_1);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 17);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(radius.value());
         saver.saveInt(thickness.value());

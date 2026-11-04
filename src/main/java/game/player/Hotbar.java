@@ -8,10 +8,11 @@ import core.sound.Sound;
 import core.utils.MainThread;
 
 import game.assets.Textures;
+import game.items.EmptySlot;
+import game.items.Item;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.StructurePlaceable;
 import game.player.interaction.placeable_shapes.CubePlaceable;
-import game.player.interaction.Placeable;
 import game.player.interaction.placeable_shapes.CustomShape;
 import game.player.inventory.InventoryTab;
 import game.player.inventory.ShapesTab;
@@ -27,6 +28,8 @@ import game.settings.KeySettings;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 
+import java.util.Arrays;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public final class Hotbar extends UiElement {
@@ -36,6 +39,7 @@ public final class Hotbar extends UiElement {
     @MainThread
     public Hotbar() {
         super(new Vector2f(), new Vector2f(), Textures.HOTBAR);
+        Arrays.fill(content, EmptySlot.EMPTY_SLOT);
         setScaleWithGuiSize(false);
         setDoAutoFocusScaling(false);
 
@@ -63,8 +67,8 @@ public final class Hotbar extends UiElement {
         if (button == KeySettings.PICK_BLOCK.keybind()) handlePickBlock();
     }
 
-    public Placeable getSelectedMaterial() {
-        return contents[selectedSlot];
+    public Item getSelectedItem() {
+        return content[selectedSlot];
     }
 
     @MainThread
@@ -73,19 +77,19 @@ public final class Hotbar extends UiElement {
     }
 
     @MainThread
-    public void setContent(int slotIndex, Placeable placeable) {
+    public void setContent(int slotIndex, Item item) {
         slotIndex = clampSlot(slotIndex);
+        if (item == null) item = EmptySlot.EMPTY_SLOT;
 
-        playSound(placeable);
-        playSound(contents[slotIndex]);
+        playSound(item);
+        playSound(content[slotIndex]);
 
-        if (contents[slotIndex] instanceof CustomShape customShape) customShape.delete();
+        if (content[slotIndex] instanceof CustomShape customShape) customShape.delete();
         removeRenderable(displays[slotIndex]).delete();
         displays[slotIndex] = null;
-        contents[slotIndex] = placeable;
+        content[slotIndex] = item;
 
-        if (placeable == null) return;
-        Structure structure = placeable instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap(false).getSmallStructure() : placeable.getStructure();
+        Structure structure = item instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap(false).getSmallStructure() : item.getStructure();
         if (structure == null) return;
 
         displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);
@@ -115,9 +119,9 @@ public final class Hotbar extends UiElement {
 
         float relativeX = (float) pixelCoordinate.x / Window.getWidth();
         int slot = Math.clamp((int) ((relativeX - getOffsetToParent().x) * LENGTH / getSizeToParent().x), 0, LENGTH - 1);
-        if (contents[slot] == null) return true;
+        if (content[slot] == EmptySlot.EMPTY_SLOT) return true;
 
-        switch (contents[slot]) {
+        switch (content[slot]) {
             case CustomShape customShape -> {
                 Game.getPlayer().getInventory().setOpenTab(InventoryTab.Types.CUSTOM_SHAPES);
                 Sound.playUI(Material.getStepSounds(customShape.getMaterial()), FloatSettings.INVENTORY_AUDIO);
@@ -143,13 +147,13 @@ public final class Hotbar extends UiElement {
 
     private int nextFreeSlot() {
         for (int slot = selectedSlot; slot < selectedSlot + LENGTH; slot++)
-            if (contents[slot % LENGTH] == null) return slot % LENGTH;
+            if (content[slot % LENGTH] == EmptySlot.EMPTY_SLOT) return slot % LENGTH;
         return selectedSlot;
     }
 
     private int indexOf(byte material) {
         for (int slot = 0; slot < LENGTH; slot++) {
-            Placeable placeable = contents[slot];
+            Item placeable = content[slot];
             if (placeable instanceof CubePlaceable && ((CubePlaceable) placeable).getMaterial() == material) return slot;
         }
         return -1;
@@ -178,18 +182,18 @@ public final class Hotbar extends UiElement {
     @MainThread
     public void setSelectedSlot(int selectedSlot) {
         this.selectedSlot = clampSlot(selectedSlot);
-        if (contents[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
-        playSound(contents[this.selectedSlot]);
+        if (content[selectedSlot] instanceof ShapePlaceable shapePlaceable) shapePlaceable.updateBitMap(false);
+        playSound(content[this.selectedSlot]);
     }
 
-    public Placeable[] getContents() {
-        return contents;
+    public Item[] getContent() {
+        return content;
     }
 
     @MainThread
-    public void setContents(Placeable[] contents) {
-        if (contents.length != LENGTH) return;
-        for (int slot = 0; slot < LENGTH; slot++) setContent(slot, contents[slot]);
+    public void setContent(Item[] content) {
+        if (content.length != LENGTH) return;
+        for (int slot = 0; slot < LENGTH; slot++) setContent(slot, content[slot]);
     }
 
 
@@ -199,14 +203,14 @@ public final class Hotbar extends UiElement {
         return slot;
     }
 
-    private static void playSound(Placeable placeable) {
+    private static void playSound(Item placeable) {
         if (placeable instanceof ShapePlaceable shapePlaceable)
             Sound.playUI(Material.getStepSounds(shapePlaceable.getMaterial()), FloatSettings.INVENTORY_AUDIO);
     }
 
 
     private int selectedSlot = 0;
-    private final Placeable[] contents = new Placeable[LENGTH];
+    private final Item[] content = new Item[LENGTH];
     private final UiElement hotBarSelectionIndicator;
     private final StructureDisplay[] displays = new StructureDisplay[LENGTH];
 }

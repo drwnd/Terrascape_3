@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation24Way;
 import game.player.interaction.ShapePlaceable;
@@ -16,12 +17,12 @@ import static game.utils.Constants.CHUNK_SIZE;
 public final class InsideStairPlaceable extends ShapePlaceable {
 
     public InsideStairPlaceable(byte material) {
-        super(ComputeShaders.INSIDE_STAIR, material, Rotation24Way.ROTATION_17);
+        super(ItemType.INSIDE_STAIR_PLACEABLE, ComputeShaders.INSIDE_STAIR, material, Rotation24Way.ROTATION_17);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 9);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(stepHeight.value());
         saver.saveInt(heightOffset.value());
@@ -60,17 +61,17 @@ public final class InsideStairPlaceable extends ShapePlaceable {
 
     @Override
     public int unrotatedLengthZ() {
-        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override
     public int unrotatedLengthY() {
-        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     @Override
     public int unrotatedLengthX() {
-        return  1 << IntSettings.BREAK_PLACE_SIZE.value();
+        return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
     private final StandAloneIntSetting stepHeight = new StandAloneIntSetting(1, CHUNK_SIZE / 2, 4);

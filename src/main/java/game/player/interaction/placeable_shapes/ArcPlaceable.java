@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation12Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,12 +15,12 @@ import game.server.generation.Structure;
 public final class ArcPlaceable extends ShapePlaceable {
 
     public ArcPlaceable(byte material) {
-        super(ComputeShaders.ARC, material, Rotation12Way.ROTATION_01);
+        super(ItemType.ARC_PLACEABLE, ComputeShaders.ARC, material, Rotation12Way.ROTATION_01);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 15);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(radius.value());
         saver.saveInt(height.value());

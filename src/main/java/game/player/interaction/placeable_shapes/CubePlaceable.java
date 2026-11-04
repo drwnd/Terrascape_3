@@ -4,6 +4,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.ShapeSetting;
@@ -13,12 +14,12 @@ import game.settings.IntSettings;
 public final class CubePlaceable extends ShapePlaceable {
 
     public CubePlaceable(byte material) {
-        super(ComputeShaders.CUBE, material);
+        super(ItemType.CUBE_PLACEABLE, ComputeShaders.CUBE, material);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 1);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(sizeReduction.value());
         saver.saveInt(thickness.value());

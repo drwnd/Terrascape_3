@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation3Way;
 import game.player.interaction.ShapePlaceable;
@@ -14,12 +15,12 @@ import game.server.generation.Structure;
 public final class CylinderPlaceable extends ShapePlaceable {
 
     public CylinderPlaceable(byte material) {
-        super(ComputeShaders.CYLINDER, material, Rotation3Way.ROTATION_2);
+        super(ItemType.CYLINDER_PLACEABLE, ComputeShaders.CYLINDER, material, Rotation3Way.ROTATION_2);
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 5);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(radius.value());
         saver.saveInt(thickness.value());

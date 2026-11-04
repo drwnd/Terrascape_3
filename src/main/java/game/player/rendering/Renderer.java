@@ -21,6 +21,7 @@ import game.assets.*;
 import game.entities.Entity;
 import game.entities.RenderEntity;
 import game.entities.PlayerAnimator;
+import game.items.Item;
 import game.player.ChatTextField;
 import game.player.Player;
 import game.player.interaction.*;
@@ -678,16 +679,17 @@ public final class Renderer extends Renderable {
         VoxelTarget lockedTarget = player.getInteractionHandler().getLockedTarget();
         VoxelTarget startTarget = player.getInteractionHandler().getStartTarget();
         PlacingState state = player.getInteractionHandler().getState(currentTarget);
+        Item heldItem = player.getHeldItem();
 
         if (!state.shouldRender()) return;
         switch (state) {
-            case REPEAT -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget, player.getHeldPlaceable());
-            case REPEAT_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget, player.getHeldPlaceable());
+            case REPEAT -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, currentTarget, heldItem);
+            case REPEAT_LOCKED -> renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget, lockedTarget, heldItem);
 
             case STRUCTURE_SELECT, SHAPE ->
-                    renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? currentTarget : startTarget, currentTarget, player.getHeldPlaceable());
+                    renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? currentTarget : startTarget, currentTarget, heldItem);
             case STRUCTURE_SELECT_LOCKED ->
-                    renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? lockedTarget : startTarget, lockedTarget, player.getHeldPlaceable());
+                    renderRepeatVolumeIndicator(cameraPosition, projectionViewMatrix, startTarget == null ? lockedTarget : startTarget, lockedTarget, heldItem);
 
             case STRUCTURE_PLACE -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, currentTarget);
             case STRUCTURE_PLACE_LOCKED -> renderStructureVolumeIndicator(cameraPosition, projectionViewMatrix, lockedTarget);
@@ -701,7 +703,7 @@ public final class Renderer extends Renderable {
     private void renderCapsuleVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget endTarget) {
         if (startTarget == null || endTarget == null) return;
 
-        CapsulePlaceable placeable = (CapsulePlaceable) player.getHeldPlaceable();
+        CapsulePlaceable placeable = (CapsulePlaceable) player.getHeldItem();
         byte material = !Input.isKeyPressed(KeySettings.SPRINT)
                 && OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY ? placeable.getMaterial() : AIR;
 
@@ -721,7 +723,7 @@ public final class Renderer extends Renderable {
 
     @MainThread
     private void renderStructureVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget target) {
-        StructurePlaceable placeable = (StructurePlaceable) player.getHeldPlaceable();
+        StructurePlaceable placeable = (StructurePlaceable) player.getHeldItem();
         Vector3l position = target.offsetPosition();
         placeable.offsetPosition(position, target.side());
         synchronizeHologramModel(placeable);
@@ -734,15 +736,16 @@ public final class Renderer extends Renderable {
     }
 
     @MainThread
-    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget currentTarget, Placeable placeable) {
+    private void renderRepeatVolumeIndicator(Position cameraPosition, Matrix4f projectionViewMatrix, VoxelTarget startTarget, VoxelTarget currentTarget, Item item) {
         if (startTarget == null || currentTarget == null) return;
-        byte material = placeable instanceof ShapePlaceable shapePlaceable
+        byte material = item instanceof ShapePlaceable shapePlaceable
                 && !Input.isKeyPressed(KeySettings.SPRINT)
                 && OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY ? shapePlaceable.getMaterial() : AIR;
 
         Vector3l startPosition = material == AIR ? startTarget.position() : startTarget.offsetPosition();
         Vector3l endPosition = material == AIR ? currentTarget.position() : currentTarget.offsetPosition();
 
+        Placeable placeable = item instanceof Placeable ? (Placeable) item : null;
         RepeatPlaceable.offsetPositions(startPosition, endPosition, startTarget.side(), placeable);
         Vector3l minPosition = Utils.min(startPosition, endPosition);
         Vector3l maxPosition = Utils.max(startPosition, endPosition);
@@ -750,15 +753,15 @@ public final class Renderer extends Renderable {
 
         setupHologramRendering();
 
-        if (placeable instanceof ShapePlaceable shapePlaceable) {
+        if (item instanceof ShapePlaceable shapePlaceable) {
             synchronizeHologramModel(shapePlaceable.updateBitMap(false));
 
-            int countX = (int) (maxPosition.x - minPosition.x) / placeable.getLengthX();
-            int countY = (int) (maxPosition.y - minPosition.y) / placeable.getLengthY();
-            int countZ = (int) (maxPosition.z - minPosition.z) / placeable.getLengthZ();
+            int countX = (int) (maxPosition.x - minPosition.x) / shapePlaceable.getLengthX();
+            int countY = (int) (maxPosition.y - minPosition.y) / shapePlaceable.getLengthY();
+            int countZ = (int) (maxPosition.z - minPosition.z) / shapePlaceable.getLengthZ();
 
             renderHologram(cameraPosition, projectionViewMatrix, minPosition, new Matrix4f(), new int[]{NORTH, TOP, WEST, SOUTH, BOTTOM, EAST}, material,
-                    placeable.getLengthX(), placeable.getLengthY(), placeable.getLengthZ(), countX, countY, countZ);
+                    shapePlaceable.getLengthX(), shapePlaceable.getLengthY(), shapePlaceable.getLengthZ(), countX, countY, countZ);
         } else {
             Shader shader = AssetManager.get(Shaders.AABB_INDICATOR);
             shader.bind();

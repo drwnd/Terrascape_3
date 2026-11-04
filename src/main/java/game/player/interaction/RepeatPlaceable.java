@@ -20,9 +20,10 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public final class RepeatPlaceable implements Placeable {
+public final class RepeatPlaceable extends Placeable {
 
     public RepeatPlaceable(ShapePlaceable placeable, Vector3l startPosition, Vector3l endPosition) {
+        super(null);
         this.placeable = placeable;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
@@ -142,10 +143,14 @@ public final class RepeatPlaceable implements Placeable {
     }
 
     @Override
-    public void save(Saver<?> saver) {
+    public void saveSelf(Saver<?> saver) {
         throw new UnsupportedOperationException("This placeable should not be saved");
     }
 
+    @Override
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        throw new UnsupportedOperationException("This placeable should never be held, so this method should not be called");
+    }
 
     private void placeInChunk(Chunk chunk, int countX, int countY, int countZ) {
         long chunkStartX = chunk.X << CHUNK_SIZE_BITS + chunk.LOD;

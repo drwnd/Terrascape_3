@@ -5,6 +5,7 @@ import core.utils.Saver;
 import core.utils.Vector3l;
 
 import game.assets.StructureIdentifier;
+import game.items.ItemType;
 import game.server.Chunk;
 import game.server.Game;
 import game.server.World;
@@ -16,14 +17,20 @@ import java.util.ArrayList;
 
 import static game.utils.Constants.*;
 
-public final class ChunkRebuildPlaceable implements Placeable {
+public final class ChunkRebuildPlaceable extends Placeable {
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 3);
+    public ChunkRebuildPlaceable() {
+        super(ItemType.CHUNK_REBUILD_PLACEABLE);
     }
 
-    public static ChunkRebuildPlaceable load() {
-        return new ChunkRebuildPlaceable();
+    @Override
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        return PlacingState.NONE;
+    }
+
+    @Override
+    public void saveSelf(Saver<?> saver) {
+
     }
 
     @Override

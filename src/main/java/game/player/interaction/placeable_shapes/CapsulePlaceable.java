@@ -6,10 +6,9 @@ import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
+import game.items.ItemType;
 import game.language.UiMessages;
-import game.player.interaction.PlaceMode;
-import game.player.interaction.ShapePlaceable;
-import game.player.interaction.ShapeSetting;
+import game.player.interaction.*;
 import game.player.sound.PlaceBreakSound;
 import game.server.Chunk;
 import game.server.Game;
@@ -32,7 +31,7 @@ import static game.utils.Constants.*;
 public final class CapsulePlaceable extends ShapePlaceable {
 
     public CapsulePlaceable(byte material) {
-        super(null, material);
+        super(ItemType.CAPSULE_PLACEABLE, null, material);
         this.material = material;
         loadSettings();
     }
@@ -63,8 +62,14 @@ public final class CapsulePlaceable extends ShapePlaceable {
 
 
     @Override
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 20);
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        if (isLocked) return PlacingState.CAPSULE_LOCKED;
+        if (currentTarget == null) return PlacingState.NONE;
+        return PlacingState.CAPSULE;
+    }
+
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(material);
         saver.saveInt(radius.value());
     }
@@ -262,7 +267,7 @@ public final class CapsulePlaceable extends ShapePlaceable {
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
 
         int startX = (int) totalX >> lod & CHUNK_SIZE_MASK;
         int startY = (int) totalY >> lod & CHUNK_SIZE_MASK;

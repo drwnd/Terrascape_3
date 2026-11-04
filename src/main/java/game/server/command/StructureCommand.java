@@ -131,7 +131,7 @@ public final class StructureCommand {
         if (startTarget == null) startTarget = lockedTarget;
         PlacingState state = player.getInteractionHandler().getState(VoxelTarget.getPlayerTarget());
 
-        if (!(player.getHeldPlaceable() instanceof StructureSelector))
+        if (!(player.getHeldItem() instanceof StructureSelector))
             return CommandResult.fail("Must use a Structure Selector");
         if (state != PlacingState.STRUCTURE_SELECT_LOCKED)
             return CommandResult.fail("Must have locked a region to save as a structure");

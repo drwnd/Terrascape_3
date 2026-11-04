@@ -2,24 +2,21 @@ package game.player.interaction;
 
 import core.assets.AssetManager;
 import core.utils.Saver;
-import core.utils.Vector3l;
+
 import game.assets.StructureIdentifier;
-import game.server.Chunk;
+import game.items.Item;
+import game.items.ItemType;
 import game.server.generation.Structure;
-import game.settings.IntSettings;
 
-import java.util.ArrayList;
+public final class StructureSelector extends Item {
 
-public final class StructureSelector implements Placeable {
-
-    @Override
-    public void place(Vector3l position, int lod) {
-
+    public StructureSelector() {
+        super(ItemType.STRUCTURE_SELECTOR);
     }
 
     @Override
-    public ArrayList<Chunk> getAffectedChunks() {
-        return new ArrayList<>();
+    public PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        return isLocked ? PlacingState.STRUCTURE_SELECT_LOCKED : PlacingState.STRUCTURE_SELECT;
     }
 
     @Override
@@ -28,42 +25,7 @@ public final class StructureSelector implements Placeable {
     }
 
     @Override
-    public boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max) {
-        return true;
-    }
+    public void saveSelf(Saver<?> saver) {
 
-    @Override
-    public boolean allowBreak() {
-        return false;
-    }
-
-    @Override
-    public void offsetPosition(Vector3l position, int targetedSide) {
-        int breakPlaceAlign = 1 << IntSettings.BREAK_PLACE_ALIGN.value();
-        int mask = -breakPlaceAlign;
-
-        RepeatPlaceable.offsetPositionFromGround(position, targetedSide, getLengthX(), getLengthY(), getLengthZ());
-        position.x &= mask;
-        position.y &= mask;
-        position.z &= mask;
-    }
-
-    @Override
-    public void spawnParticles(Vector3l position) {
-
-    }
-
-    @Override
-    public void playSounds(Vector3l position) {
-
-    }
-
-    @Override
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 19);
-    }
-
-    public static StructureSelector load() {
-        return new StructureSelector();
     }
 }

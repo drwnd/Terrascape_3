@@ -6,6 +6,7 @@ import core.utils.FileManager;
 import core.utils.MainThread;
 import core.utils.Saver;
 
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation24Way;
 import game.player.interaction.ShapePlaceable;
@@ -17,13 +18,13 @@ public final class CustomShape extends ShapePlaceable {
 
     @MainThread
     public CustomShape(byte material, String shaderCode) {
-        super(() -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
+        super(ItemType.CUSTOM_SHAPE, () -> new ComputeShader(CODE_TEMPLATE + shaderCode, "CUSTOM"), material, Rotation24Way.ROTATION_01);
         this.shaderCode = shaderCode;
         loadSettings();
     }
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 18);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveString(shaderCode);
         saver.saveInt(lengthX.value());
@@ -53,7 +54,7 @@ public final class CustomShape extends ShapePlaceable {
 
     @Override
     protected ShapeSetting[] getSettings() {
-        return new ShapeSetting[] {
+        return new ShapeSetting[]{
                 new ShapeSetting(lengthX, UiMessages.LENGTH_X, null),
                 new ShapeSetting(lengthY, UiMessages.LENGTH_Y, null),
                 new ShapeSetting(lengthZ, UiMessages.LENGTH_Z, null)

@@ -4,9 +4,9 @@ import core.utils.MainThread;
 import core.utils.Saver;
 import core.utils.Vector3l;
 
+import game.items.Item;
 import game.player.Hotbar;
 import game.player.Player;
-import game.player.interaction.Placeable;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -20,7 +20,7 @@ public final class PlayerSaver extends Saver<Player> {
     }
 
     public PlayerSaver() {
-        super(64);
+        super(256);
     }
 
     @Override
@@ -31,7 +31,7 @@ public final class PlayerSaver extends Saver<Player> {
         saveVector3f(player.getMovement().getVelocity());
         saveInt(player.getHotbar().getSelectedSlot());
         saveByte(player.getMovement().getState().getIdentifier());
-        for (Placeable placeable : player.getHotbar().getContents()) Placeable.savePlaceable(placeable, this);
+        for (Item item : player.getHotbar().getContent()) saveGeneric(item);
     }
 
     @Override
@@ -42,15 +42,15 @@ public final class PlayerSaver extends Saver<Player> {
         Vector3f velocity = loadVector3f();
         int selectedSlot = loadInt();
         byte movementStateIdentifier = loadByte();
-        Placeable[] hotbar = new Placeable[Hotbar.LENGTH];
-        for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadGeneric(Placeable::loadPlaceable);
+        Item[] hotbar = new Item[Hotbar.LENGTH];
+        for (int slot = 0; slot < Hotbar.LENGTH; slot++) hotbar[slot] = loadGeneric(Item::loadGeneric);
 
         Player player = new Player(position);
         player.getCamera().setRotation(rotation);
         player.getMovement().setVelocity(velocity);
         player.getHotbar().setSelectedSlot(selectedSlot);
         player.getMovement().setState(movementStateIdentifier);
-        player.getHotbar().setContents(hotbar);
+        player.getHotbar().setContent(hotbar);
 
         return player;
     }
@@ -64,6 +64,6 @@ public final class PlayerSaver extends Saver<Player> {
 
     @Override
     protected int getVersionNumber() {
-        return 13;
+        return 14;
     }
 }

@@ -1,132 +1,107 @@
 package game.player.interaction;
 
 import core.utils.MathUtils;
-import core.utils.Saver;
 import core.utils.Vector3l;
 
-import game.player.interaction.placeable_shapes.*;
+import game.items.Item;
+import game.items.ItemType;
+import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.Chunk;
-import game.server.generation.Structure;
 import game.settings.IntSettings;
-import core.utils.MainThread;
 import game.utils.ServerThread;
 
 import java.util.ArrayList;
 
-public interface Placeable extends Saver.Savable {
+import static game.utils.Constants.*;
 
-    @MainThread
-    static void savePlaceable(Placeable placeable, Saver<?> saver) {
-        if (placeable == null) {
-            saver.saveByte((byte) 0);
-            return;
+public abstract class Placeable extends Item {
+
+    public Placeable(ItemType itemType) {
+        super(itemType);
+    }
+
+    public static PlacingState getDefaultPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat) {
+        if (isRepeat) {
+            if (isLocked) return PlacingState.REPEAT_LOCKED;
+            if (currentTarget == null) return PlacingState.NONE;
+            return PlacingState.REPEAT;
         }
-        saver.saveGeneric(placeable);
-        if (placeable instanceof ShapePlaceable shapePlaceable) {
-            saver.saveBoolean(shapePlaceable.invert.value());
-            saver.saveInt(shapePlaceable.blockSize.value());
-            saver.saveInt(shapePlaceable.rotationPitch.value());
-            saver.saveInt(shapePlaceable.rotationYaw.value());
-            saver.saveInt(shapePlaceable.rotationRoll.value());
-            shapePlaceable.delete();
-        }
+        if (isLocked) return PlacingState.SHAPE_LOCKED;
+        if (currentTarget == null) return PlacingState.NONE;
+        return PlacingState.SHAPE;
     }
 
-    @MainThread
-    static Placeable loadPlaceable(Saver<?> saver) {
-        Placeable placeable = switch (saver.loadByte()) {
-            case 1 -> CubePlaceable.load(saver);
-            case 2 -> StructurePlaceable.load(saver);
-            case 3 -> ChunkRebuildPlaceable.load();
-            case 4 -> SpherePlaceable.load(saver);
-            case 5 -> CylinderPlaceable.load(saver);
-            case 6 -> StairPlaceable.load(saver);
-            case 8 -> ConePlaceable.load(saver);
-            case 9 -> InsideStairPlaceable.load(saver);
-            case 10 -> OutsideStairPlaceable.load(saver);
-            case 13 -> CuboidPlaceable.load(saver);
-            case 14 -> EllipsoidPlaceable.load(saver);
-            case 15 -> ArcPlaceable.load(saver);
-            case 16 -> InsideArcPlaceable.load(saver);
-            case 17 -> OutsideArcPlaceable.load(saver);
-            case 18 -> CustomShape.load(saver);
-            case 19 -> StructureSelector.load();
-            case 20 -> CapsulePlaceable.load(saver);
-            default -> null;
-        };
-        if (placeable instanceof ShapePlaceable shapePlaceable) {
-            shapePlaceable.invert.setValue(saver.loadBoolean());
-            shapePlaceable.blockSize.setValue(saver.loadInt());
-            shapePlaceable.rotationPitch.setValue(saver.loadInt());
-            shapePlaceable.rotationYaw.setValue(saver.loadInt());
-            shapePlaceable.rotationRoll.setValue(saver.loadInt());
-        }
-        return placeable;
+    @Override
+    public void use(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
+        interactionHandler.attemptVoxelAndEntityInteraction(info, this, offsetOnPlace(), false);
+    }
+
+    @Override
+    public void attack(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
+        Placeable placeable;
+        if (!allowBreak()) placeable = null;
+        else if (!(this instanceof ShapePlaceable shapePlaceable)) placeable = new CubePlaceable(AIR).setBitMapToFull();
+        else placeable = shapePlaceable.copyWithMaterial(AIR);
+        interactionHandler.attemptVoxelAndEntityInteraction(info, placeable, offsetOnBreak(), true);
     }
 
     @ServerThread
-    void place(Vector3l position, int lod);
+    public abstract void place(Vector3l position, int lod);
 
     @ServerThread
-    ArrayList<Chunk> getAffectedChunks();
-
-    @MainThread
-    Structure getStructure();
+    public abstract ArrayList<Chunk> getAffectedChunks();
 
     @ServerThread
-    boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
+    public abstract boolean intersectsAABB(Vector3l position, Vector3l min, Vector3l max);
 
     @ServerThread
-    void offsetPosition(Vector3l position, int targetedSide);
+    public abstract void offsetPosition(Vector3l position, int targetedSide);
 
     @ServerThread
-    void spawnParticles(Vector3l position);
+    public abstract void spawnParticles(Vector3l position);
 
     @ServerThread
-    void playSounds(Vector3l position);
+    public abstract void playSounds(Vector3l position);
 
-    @MainThread
-    void save(Saver<?> saver);
-
-    default void rotateForwards() {
+    public void rotateForwards() {
     }
 
-    default void rotateBackwards() {
+    public void rotateBackwards() {
     }
 
-    default boolean allowBreak() {
+    public boolean allowBreak() {
         return true;
     }
 
-    default boolean allowPlace() {
+    public boolean allowPlace() {
         return true;
     }
 
-    default boolean offsetOnPlace() {
+    public boolean offsetOnPlace() {
         return true;
     }
 
-    default boolean offsetOnBreak() {
+    public boolean offsetOnBreak() {
         return false;
     }
 
-    default int getLengthX() {
+    public int getLengthX() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
-    default int getLengthY() {
+    public int getLengthY() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
-    default int getLengthZ() {
+    public int getLengthZ() {
         return 1 << IntSettings.BREAK_PLACE_SIZE.value();
     }
 
-    default int getPreferredSizePowOf2() {
+    public int getPreferredSizePowOf2() {
         return MathUtils.nextLargestPowOf2(getPreferredSize());
     }
 
-    default int getPreferredSize() {
+    public int getPreferredSize() {
         return Math.max(getLengthX(), Math.max(getLengthY(), getLengthZ()));
     }
 }

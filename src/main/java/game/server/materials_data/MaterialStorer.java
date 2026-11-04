@@ -34,7 +34,7 @@ final class MaterialStorer {
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
 
         for (int x = startX; x < endX; x++)
             for (int y = startY; y < endY; y++)
@@ -57,7 +57,7 @@ final class MaterialStorer {
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
 
         for (int x = startX; x < endX; x += 2)
             for (int y = startY; y < endY; y += 2)
@@ -88,7 +88,7 @@ final class MaterialStorer {
         boolean paint = OptionSettings.PLACE_MODE.value() == PlaceMode.PAINT;
         boolean replaceAir = OptionSettings.PLACE_MODE.value() == PlaceMode.REPLACE_AIR;
         boolean breakHeldOnly = OptionSettings.PLACE_MODE.value() == PlaceMode.BREAK_HELD_ONLY;
-        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldPlaceable()).getMaterial() : AIR;
+        byte heldMaterial = breakHeldOnly ? ((ShapePlaceable) Game.getPlayer().getHeldItem()).getMaterial() : AIR;
 
         for (int x = startX; x < endX; x += alignLength)
             for (int y = startY; y < endY; y += alignLength)

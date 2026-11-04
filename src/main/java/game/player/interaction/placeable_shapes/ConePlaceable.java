@@ -5,6 +5,7 @@ import core.settings.stand_alones.StandAloneIntSetting;
 import core.utils.Saver;
 
 import game.assets.ComputeShaders;
+import game.items.ItemType;
 import game.language.UiMessages;
 import game.player.interaction.Rotation6Way;
 import game.player.interaction.ShapePlaceable;
@@ -13,8 +14,8 @@ import game.server.generation.Structure;
 
 public final class ConePlaceable extends ShapePlaceable {
 
-    public void save(Saver<?> saver) {
-        saver.saveByte((byte) 8);
+    @Override
+    public void saveUnique(Saver<?> saver) {
         saver.saveByte(getMaterial());
         saver.saveInt(baseRadius.value());
         saver.saveInt(topRadius.value());
@@ -34,7 +35,7 @@ public final class ConePlaceable extends ShapePlaceable {
     }
 
     public ConePlaceable(byte material) {
-        super(ComputeShaders.CONE, material, Rotation6Way.ROTATION_5);
+        super(ItemType.CONE_PLACEABLE, ComputeShaders.CONE, material, Rotation6Way.ROTATION_5);
         loadSettings();
     }
 
