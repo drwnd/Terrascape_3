@@ -33,7 +33,7 @@ public final class SpawnEgg extends Item {
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
 
-        if (!InteractionHandler.voxelTargetIsCloser(entityTarget, voxelTarget)) return;
+        if (!interactionHandler.isTargetingVoxel(voxelTarget, entityTarget)) return;
         Game.getServer().spawnEntity(entityType.getEntity(new Position(voxelTarget.offsetPosition(), new Vector3f())));
         info.setUsed(Game.getServer().getCurrentGameTick());
     }

@@ -38,12 +38,12 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
     }
 
-    public static boolean voxelTargetIsCloser(EntityTarget entityTarget, VoxelTarget voxelTarget) {
-        return entityTarget == null || voxelTarget != null && voxelTarget.distanceSquaredToPlayer() < entityTarget.distanceSquaredToPlayer();
+    public boolean isTargetingVoxel(VoxelTarget voxelTarget, EntityTarget entityTarget) {
+        return lockedTarget != null || voxelTarget != null && (entityTarget == null || voxelTarget.distanceSquaredToPlayer() < entityTarget.distanceSquaredToPlayer());
     }
 
-    public static boolean entityTargetIsCloser(VoxelTarget voxelTarget, EntityTarget entityTarget) {
-        return voxelTarget == null || entityTarget != null && entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer();
+    public boolean isTargetingEntity(VoxelTarget voxelTarget, EntityTarget entityTarget) {
+        return entityTarget != null && (voxelTarget == null || entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer());
     }
 
     @MainThread
@@ -90,8 +90,8 @@ public final class InteractionHandler {
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
-        if (voxelTargetIsCloser(entityTarget, voxelTarget)) return;
-        interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
+        if (isTargetingEntity(voxelTarget, entityTarget))
+            interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
     }
 
     @ServerThread
@@ -100,8 +100,8 @@ public final class InteractionHandler {
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
-        if (entityTargetIsCloser(voxelTarget, entityTarget)) return;
-        interactWithVoxel(info, placeable, voxelTarget, currentGameTick, offsetPosition, isDestroy);
+        if (isTargetingVoxel(voxelTarget, entityTarget))
+            interactWithVoxel(info, placeable, voxelTarget, currentGameTick, offsetPosition, isDestroy);
     }
 
     @ServerThread
@@ -110,9 +110,9 @@ public final class InteractionHandler {
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
-        if (entityTargetIsCloser(voxelTarget, entityTarget))
+        if (isTargetingEntity(voxelTarget, entityTarget))
             interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
-        if (voxelTargetIsCloser(entityTarget, voxelTarget))
+        else if (isTargetingVoxel(voxelTarget, entityTarget))
             interactWithVoxel(info, item, voxelTarget, currentGameTick, offsetPosition, isDestroy);
     }
 
