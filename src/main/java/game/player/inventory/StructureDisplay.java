@@ -19,17 +19,24 @@ import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46.*;
 
 public final class StructureDisplay extends UiButton {
 
     @MainThread
     public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure) {
-        super(sizeToParent, offsetToParent, (_, _, _) -> ButtonResult.IGNORE);
+        this(sizeToParent, offsetToParent, structure, false);
+    }
+
+    @MainThread
+    public StructureDisplay(Vector2f sizeToParent, Vector2f offsetToParent, Structure structure, boolean rotate180) {
+        super(sizeToParent, offsetToParent);
+        setAction(this::startDragging);
         sizeX = structure.sizeX();
         sizeY = structure.sizeY();
         sizeZ = structure.sizeZ();
-        rotation = new Vector3f(35.26439F, -45.0F, 0.0F); // Direction : x == y == z
+        rotation = new Vector3f(35.26439F, (rotate180 ? 180.0F : 0.0F) - 45.0F, 0.0F);
 
         Mesh mesh = new MeshGenerator().generateMesh(structure);
         opaqueModel = ObjectLoader.loadOpaqueModel(mesh);
@@ -104,6 +111,16 @@ public final class StructureDisplay extends UiButton {
         if (transparentModel != null) transparentModel.delete();
     }
 
+    @Override
+    @MainThread
+    public void dragOver(Vector2i pixelCoordinate) {
+        DraggableInfo info = getOwnDraggableInfo(GLFW_HOVERED);
+        if (info == null) return;
+
+        rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
+        lastCursorPos.set(pixelCoordinate);
+    }
+
     @MainThread
     private static void renderOpaqueModel(OpaqueModel model, Shader shader) {
         if (model.isEmpty()) return;
@@ -132,6 +149,14 @@ public final class StructureDisplay extends UiButton {
         glDrawArrays(GL_TRIANGLES, model.transparentVertexCount(), model.glassVertexCount());
     }
 
+    @MainThread
+    private ButtonResult startDragging(Vector2i pixelCoordinate, int button, int action) {
+        if (action == GLFW_PRESS) lastCursorPos.set(pixelCoordinate);
+        DraggableInfo info = getOwnDraggableInfo(action);
+        return info == null ? ButtonResult.IGNORE : ButtonResult.SUCCESS;
+    }
+
+    private final Vector2i lastCursorPos = new Vector2i();
     private final OpaqueModel opaqueModel;
     private final TransparentModel transparentModel;
     private final int sizeX, sizeY, sizeZ;

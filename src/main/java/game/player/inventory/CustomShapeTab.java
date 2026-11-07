@@ -66,8 +66,8 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
                     return ButtonResult.SUCCESS;
                 });
             }
-            settingElement.setSizeToParent(0.3F, 0.075F);
-            settingElement.setOffsetToParent(0.35F, 1.0F - 0.05F * Window.getAspectRatio() - index++ * 0.08F);
+            settingElement.setSizeToParent(0.3F, 0.065F);
+            settingElement.setOffsetToParent(0.35F, 1.0F - 0.05F * Window.getAspectRatio() - index++ * 0.07F);
             settingElement.setRimThicknessMultiplier(0.5F);
             addRenderable(settingElement);
         }
@@ -155,17 +155,14 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
-        Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
+        Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, this);
     }
 
     @Override
     @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
-        if (shapePreview == null || pixelCoordinate.x > Window.getWidth() * (shapePreview.getPosition().x + shapePreview.getSize().x)) return;
-
-        shapePreview.rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
-        lastCursorPos.set(pixelCoordinate);
+        shapePreview.dragOver(pixelCoordinate);
     }
 
 
@@ -221,7 +218,6 @@ public final class CustomShapeTab extends Renderable implements InventoryTab {
 
     private final UiElement reloadIcon;
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
-    private final Vector2i lastCursorPos = new Vector2i();
 
     private final CustomShape shape = new CustomShape(STONE, DEFAULT_CUSTOM_SHAPE_SHADER_CODE);
     private final ArrayList<CubeDisplay> cubeDisplays = new ArrayList<>();

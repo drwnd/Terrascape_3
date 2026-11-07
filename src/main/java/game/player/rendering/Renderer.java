@@ -514,8 +514,10 @@ public final class Renderer extends Renderable {
 
         shader.setUniform("projectionViewMatrix", matrix);
         synchronized (Game.getWorld().entities) {
-            for (Entity entity : Game.getWorld().entities)
+            for (Entity entity : Game.getWorld().entities) {
+                if (!entity.canRender()) continue;
                 renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+            }
         }
     }
 
@@ -529,6 +531,7 @@ public final class Renderer extends Renderable {
         shader.setUniform("projectionViewMatrix", matrix);
         synchronized (Game.getWorld().entities) {
             for (Entity entity : Game.getWorld().entities) {
+                if (!entity.canRender()) continue;
                 glActiveTexture(shader.getNextAvailableTextureIndex());
                 AssetManager.get(entity.getRenderEntity().getTextureIdentifier()).bind();
                 renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());

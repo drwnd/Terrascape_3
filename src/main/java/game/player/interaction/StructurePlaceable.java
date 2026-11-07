@@ -15,6 +15,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import game.server.saving.ChunkSaver;
 import game.settings.IntSettings;
+import game.utils.ServerThread;
 import game.utils.Transformation;
 import game.utils.Utils;
 
@@ -34,6 +35,7 @@ public final class StructurePlaceable extends Placeable {
     }
 
     @Override
+    @ServerThread
     public void attack(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
         interactionHandler.attemptEntityInteraction(info, this, true);
     }

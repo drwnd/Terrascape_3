@@ -28,7 +28,6 @@ public abstract class Entity implements Saver.Savable {
         this.renderEntity = renderEntity;
         this.movement = new Movement(MovementState.load(movementState));
         this.entityType = entityType;
-        renderEntity.synchronizeTransforms();
     }
 
     public Entity(Position position, EntityType entityType, Class<? extends MovementState> movementState) {
@@ -36,7 +35,6 @@ public abstract class Entity implements Saver.Savable {
         this.renderEntity = new RenderEntity(entityType);
         this.movement = new Movement(MovementState.load(movementState));
         this.entityType = entityType;
-        renderEntity.synchronizeTransforms();
     }
 
     public final void save(Saver<?> saver) {
@@ -133,6 +131,10 @@ public abstract class Entity implements Saver.Savable {
             Vector3i hitboxSize = movement.getState().getHitboxSize();
             return new Vector3l(Movement.maxX(position, hitboxSize), Movement.maxY(position, hitboxSize), Movement.maxZ(position, hitboxSize));
         }
+    }
+
+    public boolean canRender() {
+        return renderEntity.canRender();
     }
 
     protected final Movement movement;

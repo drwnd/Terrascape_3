@@ -50,6 +50,7 @@ public class RenderEntity {
         animator.applyAnimation(this, rotation, frameTime, gameTickFraction);
     }
 
+    @MainThread
     public void synchronizeTransforms() {
         model = AssetManager.get(modelIdentifier);
         if (transforms.length != model.parts().length) {
@@ -145,6 +146,10 @@ public class RenderEntity {
 
     public AssetIdentifier<Texture2D> getTextureIdentifier() {
         return textureIdentifier;
+    }
+
+    public boolean canRender() {
+        return model != null;
     }
 
     private final AssetIdentifier<Texture2D> textureIdentifier;

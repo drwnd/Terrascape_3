@@ -1,6 +1,7 @@
 package game.items;
 
 import core.utils.Saver;
+
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.ShapePlaceable;
 import game.player.interaction.StructurePlaceable;
@@ -25,7 +26,8 @@ public enum ItemType {
     CUSTOM_SHAPE((saver) -> ShapePlaceable.load(saver, CustomShape.load(saver))),
     CHUNK_REBUILD_PLACEABLE((_) -> new ChunkRebuildPlaceable()),
     STRUCTURE_PLACEABLE(StructurePlaceable::load),
-    STRUCTURE_SELECTOR((_) -> new StructureSelector());
+    STRUCTURE_SELECTOR((_) -> new StructureSelector()),
+    SPAWN_EGG(SpawnEgg::load);
 
     ItemType(Saver.GenericLoader<Item> loader) {
         this.loader = loader;
@@ -36,5 +38,4 @@ public enum ItemType {
     }
 
     private final Saver.GenericLoader<Item> loader;
-
 }

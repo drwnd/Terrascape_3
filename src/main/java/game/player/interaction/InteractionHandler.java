@@ -38,6 +38,14 @@ public final class InteractionHandler {
         if (action == GLFW_PRESS && button == KeySettings.DECREASE_BREAK_PLACE_ALIGN.keybind()) changeBreakPlaceAlign(-1);
     }
 
+    public static boolean voxelTargetIsCloser(EntityTarget entityTarget, VoxelTarget voxelTarget) {
+        return entityTarget == null || voxelTarget != null && voxelTarget.distanceSquaredToPlayer() < entityTarget.distanceSquaredToPlayer();
+    }
+
+    public static boolean entityTargetIsCloser(VoxelTarget voxelTarget, EntityTarget entityTarget) {
+        return voxelTarget == null || entityTarget != null && entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer();
+    }
+
     @MainThread
     public void handleScroll(double yScroll) {
         int primaryDirection = Game.getPlayer().getCamera().getPrimaryDirection();
@@ -57,8 +65,8 @@ public final class InteractionHandler {
         if (!Input.isKeyPressed(KeySettings.DESTROY)) destroyInfo.update(GLFW_RELEASE);
         if (!Input.isKeyPressed(KeySettings.USE)) useInfo.update(GLFW_RELEASE);
 
-        Game.getPlayer().getHeldItem().use(this, useInfo);
-        Game.getPlayer().getHeldItem().attack(this, destroyInfo);
+        if (canUse(useInfo)) Game.getPlayer().getHeldItem().use(this, useInfo);
+        if (canUse(destroyInfo)) Game.getPlayer().getHeldItem().attack(this, destroyInfo);
     }
 
     public VoxelTarget getStartTarget() {
@@ -79,8 +87,6 @@ public final class InteractionHandler {
     @ServerThread
     public void attemptEntityInteraction(PlaceDestroyInfo info, Item item, boolean isDestroy) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
-        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
-        info.forceAction = false;
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
@@ -91,8 +97,6 @@ public final class InteractionHandler {
     @ServerThread
     public void attemptVoxelInteraction(PlaceDestroyInfo info, Placeable placeable, boolean offsetPosition, boolean isDestroy) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
-        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
-        info.forceAction = false;
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
@@ -103,8 +107,6 @@ public final class InteractionHandler {
     @ServerThread
     public void attemptVoxelAndEntityInteraction(PlaceDestroyInfo info, Item item, boolean offsetPosition, boolean isDestroy) {
         long currentGameTick = Game.getServer().getCurrentGameTick();
-        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return;
-        info.forceAction = false;
 
         VoxelTarget voxelTarget = VoxelTarget.getPlayerTarget();
         EntityTarget entityTarget = EntityTarget.getPlayerTarget();
@@ -112,14 +114,6 @@ public final class InteractionHandler {
             interactWithEntity(info, entityTarget, item, currentGameTick, isDestroy);
         if (voxelTargetIsCloser(entityTarget, voxelTarget))
             interactWithVoxel(info, item, voxelTarget, currentGameTick, offsetPosition, isDestroy);
-    }
-
-    private static boolean voxelTargetIsCloser(EntityTarget entityTarget, VoxelTarget voxelTarget) {
-        return entityTarget == null || voxelTarget != null && voxelTarget.distanceSquaredToPlayer() < entityTarget.distanceSquaredToPlayer();
-    }
-
-    private static boolean entityTargetIsCloser(VoxelTarget voxelTarget, EntityTarget entityTarget) {
-        return voxelTarget == null || entityTarget != null && entityTarget.distanceSquaredToPlayer() < voxelTarget.distanceSquaredToPlayer();
     }
 
     @ServerThread
@@ -168,6 +162,13 @@ public final class InteractionHandler {
             return placeable.allowBreak() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || placeable instanceof ShapePlaceable);
         else
             return placeable.allowPlace() && (OptionSettings.PLACE_MODE.value() != PlaceMode.BREAK_HELD_ONLY || !(placeable instanceof ShapePlaceable));
+    }
+
+    private boolean canUse(PlaceDestroyInfo info) {
+        long currentGameTick = Game.getServer().getCurrentGameTick();
+        if (!info.forceAction && (!info.buttonIsHeld || currentGameTick - info.lastAction < IntSettings.BREAK_PLACE_INTERVALL.value())) return false;
+        info.forceAction = false;
+        return true;
     }
 
     @MainThread

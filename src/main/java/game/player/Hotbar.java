@@ -92,7 +92,9 @@ public final class Hotbar extends UiElement {
         Structure structure = item instanceof ShapePlaceable shapePlaceable ? shapePlaceable.updateBitMap(false).getSmallStructure() : item.getStructure();
         if (structure == null) return;
 
-        displays[slotIndex] = new StructureDisplay(new Vector2f(1.0F / LENGTH, 1.0F), new Vector2f((float) slotIndex / LENGTH, 0.0F), structure);
+        Vector2f sizeToParent = new Vector2f(1.0F / LENGTH, 1.0F);
+        Vector2f offsetToParent = new Vector2f((float) slotIndex / LENGTH, 0.0F);
+        displays[slotIndex] = new StructureDisplay(sizeToParent, offsetToParent, structure, item.rotateStructureDisplay());
         displays[slotIndex].setScaleWithGuiSize(false);
         addRenderable(displays[slotIndex]);
     }

@@ -5,6 +5,7 @@ import core.utils.Saver;
 import game.player.interaction.*;
 import game.player.interaction.placeable_shapes.CubePlaceable;
 import game.server.generation.Structure;
+import game.utils.ServerThread;
 
 import static game.player.interaction.Placeable.getDefaultPlacingState;
 import static game.utils.Constants.*;
@@ -28,12 +29,14 @@ public final class EmptySlot extends Item {
     }
 
     @Override
+    @ServerThread
     public void attack(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
         ShapePlaceable placeable = new CubePlaceable(AIR).setBitMapToFull();
         interactionHandler.attemptVoxelAndEntityInteraction(info, placeable, placeable.offsetOnBreak(), true);
     }
 
     @Override
+    @ServerThread
     public void use(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
         interactionHandler.attemptEntityInteraction(info, this, false);
     }

@@ -5,7 +5,6 @@ import core.language.Language;
 import core.renderables.*;
 
 import core.rendering_api.Debug;
-import core.rendering_api.Input;
 import core.rendering_api.Window;
 import core.sound.Sound;
 import game.language.UiMessages;
@@ -135,8 +134,7 @@ public final class Inventory extends UiElement {
 
 
     @MainThread
-    static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Vector2i lastCursorPos, Renderable tab) {
-        if (!Input.isKeyPressed(GLFW_MOUSE_BUTTON_LEFT | Input.IS_MOUSE_BUTTON)) lastCursorPos.set(pixelCoordinate);
+    static void hoverOverCubeDisplays(Vector2i pixelCoordinate, TextElement itemNameDisplay, ArrayList<CubeDisplay> cubeDisplays, Renderable tab) {
         itemNameDisplay.setVisible(false);
         for (CubeDisplay display : cubeDisplays) {
             StructureDisplay structureDisplay = display.display();

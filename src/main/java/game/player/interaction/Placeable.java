@@ -32,11 +32,13 @@ public abstract class Placeable extends Item {
     }
 
     @Override
+    @ServerThread
     public void use(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
         interactionHandler.attemptVoxelAndEntityInteraction(info, this, offsetOnPlace(), false);
     }
 
     @Override
+    @ServerThread
     public void attack(InteractionHandler interactionHandler, PlaceDestroyInfo info) {
         Placeable placeable;
         if (!allowBreak()) placeable = null;

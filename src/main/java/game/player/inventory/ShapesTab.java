@@ -89,17 +89,14 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     @Override
     @MainThread
     public void hoverOver(Vector2i pixelCoordinate) {
-        Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, lastCursorPos, this);
+        Inventory.hoverOverCubeDisplays(pixelCoordinate, itemNameDisplay, cubeDisplays, this);
     }
 
     @Override
     @MainThread
     public void dragOver(Vector2i pixelCoordinate) {
         super.dragOver(pixelCoordinate);
-        if (shapePreview == null || pixelCoordinate.x > Window.getWidth() * (shapePreview.getPosition().x + shapePreview.getSize().x)) return;
-
-        shapePreview.rotate(new Vector2i(pixelCoordinate).sub(lastCursorPos));
-        lastCursorPos.set(pixelCoordinate);
+       shapePreview.dragOver(pixelCoordinate);
     }
 
     @Override
@@ -221,7 +218,7 @@ public final class ShapesTab extends Renderable implements InventoryTab {
     private final ArrayList<ShapeDisplay> shapeDisplays = new ArrayList<>();
     private final ArrayList<UiBackgroundElement> shapePlaceableSettings = new ArrayList<>();
     private final TextElement itemNameDisplay = new TextElement(new Vector2f());
-    private final Vector2i lastCursorPos = new Vector2i();
+
 
     private ShapeDisplay selectedDisplay;
     private StructureDisplay shapePreview;

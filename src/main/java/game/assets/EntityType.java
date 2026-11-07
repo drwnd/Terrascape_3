@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import core.assets.AssetManager;
 import core.assets.identifiers.AssetIdentifier;
+import core.language.Translatable;
 import core.utils.FileManager;
 import core.utils.MainThread;
 
@@ -14,11 +15,11 @@ import game.utils.Position;
 
 import java.nio.file.Path;
 
-public enum EntityType implements AssetIdentifier<Model> {
-    PLAYER(Mannequin::new),
-    ZOMBIE(Zombie::new),
-    SKELETON(Skeleton::new),
-    MANNEQUIN(Mannequin::new);
+public enum EntityType implements AssetIdentifier<Model>, Translatable {
+    PLAYER(Mannequin::new, "Armor Stand"),
+    ZOMBIE(Zombie::new, "Zombie Head"),
+    SKELETON(Skeleton::new, "Skeleton Head"),
+    MANNEQUIN(Mannequin::new, "Armor Stand");
 
     @Override
     @MainThread
@@ -29,15 +30,26 @@ public enum EntityType implements AssetIdentifier<Model> {
     }
 
 
-    EntityType(EntityBuilder entityBuilder) {
+    EntityType(EntityBuilder entityBuilder, String structureName) {
         this.entityBuilder = entityBuilder;
+        this.structureIdentifier = new StructureIdentifier(structureName);
     }
 
     public Entity getEntity(Position position) {
         return entityBuilder.getEntity(position);
     }
 
+    public StructureIdentifier getStructureIdentifier() {
+        return structureIdentifier;
+    }
+
     private final EntityBuilder entityBuilder;
+    private final StructureIdentifier structureIdentifier;
+
+    @Override
+    public String translationFileName() {
+        return "entities";
+    }
 
     private interface EntityBuilder {
         Entity getEntity(Position position);
