@@ -494,7 +494,7 @@ public final class Renderer extends Renderable {
     private void renderEntities(Position cameraPosition, Matrix4f projectionViewMatrix) {
         Shader shader = AssetManager.get(Shaders.MODEL);
         setupEntityRendering(shader, cameraPosition, projectionViewMatrix);
-        if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON) {
+        if (OptionSettings.PERSPECTIVE.value() == Camera.Perspective.FIRST_PERSON && player.canRender()) {
             MovementState state = player.getMovement().getState();
             Matrix4f[] transforms = player.getRenderEntity().parentedTransforms();
             if (state.hideHeadInFirstPerson()) transforms[PlayerAnimator.HEAD].zero();
