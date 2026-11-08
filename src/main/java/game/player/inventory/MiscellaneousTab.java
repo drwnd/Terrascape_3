@@ -6,8 +6,7 @@ import core.rendering_api.Window;
 import core.utils.MainThread;
 
 import game.assets.EntityType;
-import game.items.Item;
-import game.items.SpawnEgg;
+import game.items.*;
 import game.player.interaction.ChunkRebuildPlaceable;
 import game.player.interaction.StructureSelector;
 
@@ -37,6 +36,8 @@ public final class MiscellaneousTab extends Renderable implements InventoryTab {
         addItem(size, width, height, itemsPerColumn, new ChunkRebuildPlaceable());
         addItem(size, width, height, itemsPerColumn, new StructureSelector());
         for (EntityType entityType : EntityType.values()) addItem(size, width, height, itemsPerColumn, new SpawnEgg(entityType));
+        for (ToolGrade grade : ToolGrade.values())
+            for (ToolType type : ToolType.values()) addItem(size, width, height, itemsPerColumn, new Tool(type, grade));
 
         addRenderable(itemNameDisplay);
     }

@@ -27,7 +27,8 @@ public enum ItemType {
     CHUNK_REBUILD_PLACEABLE((_) -> new ChunkRebuildPlaceable()),
     STRUCTURE_PLACEABLE(StructurePlaceable::load),
     STRUCTURE_SELECTOR((_) -> new StructureSelector()),
-    SPAWN_EGG(SpawnEgg::load);
+    SPAWN_EGG(SpawnEgg::load),
+    TOOL(Tool::new);
 
     ItemType(Saver.GenericLoader<Item> loader) {
         this.loader = loader;
