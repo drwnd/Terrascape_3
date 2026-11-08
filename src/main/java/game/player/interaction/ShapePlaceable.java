@@ -22,6 +22,7 @@ import game.server.generation.Structure;
 import game.server.material.Properties;
 import core.utils.MainThread;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;
@@ -102,6 +103,21 @@ public abstract class ShapePlaceable extends Placeable {
         long[] bitMap = new long[64];
         fillBitMap(bitMap, 16, true);
         return new Structure(4, material, bitMap);
+    }
+
+    @Override
+    @MainThread
+    public Structure getHeldStructure() {
+        return new Structure(2, material, 2, 2, 2);
+    }
+
+    @Override
+    public Matrix4f getModelMatrixWhenHeld(Vector3f handPosition) {
+        return super.getModelMatrixWhenHeld(handPosition)
+                .translate(0, 0, -2)
+                .rotate((float) Math.PI * 0.25F, 1, 0, 0)
+                .rotate((float) Math.PI * 0.25F, 0, 1, 0)
+                .rotate((float) Math.PI * 0.25F, 0, 0, 1);
     }
 
     @Override

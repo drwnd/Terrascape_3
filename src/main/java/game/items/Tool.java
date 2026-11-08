@@ -1,6 +1,7 @@
 package game.items;
 
 import core.assets.AssetManager;
+import core.utils.MainThread;
 import core.utils.Saver;
 import game.assets.StructureIdentifier;
 import game.player.interaction.InteractionHandler;
@@ -9,6 +10,8 @@ import game.player.interaction.PlacingState;
 import game.player.interaction.VoxelTarget;
 import game.server.generation.Structure;
 import game.utils.ServerThread;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public final class Tool extends Item {
 
@@ -42,6 +45,15 @@ public final class Tool extends Item {
     public void saveSelf(Saver<?> saver) {
         saver.saveEnum(type);
         saver.saveEnum(grade);
+    }
+
+    @Override
+    @MainThread
+    public Matrix4f getModelMatrixWhenHeld(Vector3f handPosition) {
+        return super.getModelMatrixWhenHeld(handPosition)
+                .translate(0, 0, type.getHeldOffset())
+                .rotate((float) -Math.PI * 0.5F, 1, 0, 0)
+                .rotate((float) Math.PI, 0, 1, 0);
     }
 
     @Override

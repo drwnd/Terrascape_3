@@ -20,6 +20,10 @@ public record Structure(int sizeX, int sizeY, int sizeZ, int centerX, int center
         this(1 << sizeBits, 1 << sizeBits, 1 << sizeBits, new MaterialsData(sizeBits, material));
     }
 
+    public Structure(int sizeBits, byte material, int centerX, int centerY, int centerZ) {
+        this(1 << sizeBits, 1 << sizeBits, 1 << sizeBits, centerX, centerY, centerZ, new MaterialsData(sizeBits, material));
+    }
+
     public Structure(int sizeBits, byte material, long[] bitMap) {
         this(1 << sizeBits, 1 << sizeBits, 1 << sizeBits,
                 MaterialsData.getCompressedMaterials(sizeBits, bitMap, material));

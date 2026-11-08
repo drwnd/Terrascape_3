@@ -11,9 +11,20 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class Skeleton extends Entity {
+
     public Skeleton(Position position) {
         super(position, EntityType.SKELETON, WanderingMovementState.class);
         getRenderEntity().setAnimator(new SkeletonAnimator(this));
+    }
+
+    @Override
+    public int getArmTransformIndex() {
+        return SkeletonAnimator.RIGHT_ARM;
+    }
+
+    @Override
+    public Vector3f getHandPosition() {
+        return new Vector3f(0, -12, 0);
     }
 
     private record SkeletonAnimator(Skeleton skeleton, float[] wobbleOffsets, float[] wobbleStrengths, float[] wobbleSpeeds) implements Animator {

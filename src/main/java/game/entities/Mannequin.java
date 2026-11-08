@@ -13,6 +13,16 @@ public class Mannequin extends Entity {
         super(position, new RenderEntity(EntityType.PLAYER, Skin.getRandomSkin(), new PlayerAnimator()), MannequinMovementState.class, EntityType.MANNEQUIN);
     }
 
+    @Override
+    public int getArmTransformIndex() {
+        return PlayerAnimator.RIGHT_ARM;
+    }
+
+    @Override
+    public Vector3f getHandPosition() {
+        return new Vector3f(0, -8, 0);
+    }
+
     private static class MannequinMovementState extends EntityMovementState {
 
         @Override

@@ -1,6 +1,7 @@
 package game.player.interaction;
 
 import core.assets.AssetManager;
+import core.utils.MainThread;
 import core.utils.MathUtils;
 import core.utils.Saver;
 import core.utils.Vector3l;
@@ -90,6 +91,12 @@ public final class StructurePlaceable extends Placeable {
     @Override
     public Structure getStructure() {
         return structure;
+    }
+
+    @Override
+    @MainThread
+    public Structure getHeldStructure() {
+        return AssetManager.get(new StructureIdentifier("BluePrint"));
     }
 
     @Override

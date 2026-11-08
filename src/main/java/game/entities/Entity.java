@@ -10,6 +10,8 @@ import game.assets.EntityType;
 import game.entities.model.ModelPart;
 import game.entities.movement.Movement;
 import game.entities.movement.MovementState;
+import game.items.EmptySlot;
+import game.items.Item;
 import game.player.particles.ParticleType;
 import game.server.Game;
 import game.utils.Position;
@@ -95,7 +97,7 @@ public abstract class Entity implements Saver.Savable {
     public void updateFrame(float frameTime, float gameTickFraction) {
         if (health <= 0) return;
         synchronized (this) {
-            renderEntity.updateFrame(frameTime, gameTickFraction, rotation);
+            renderEntity.updateFrame(frameTime, gameTickFraction, rotation, this);
             Vector3f movementThisTick = movement.getRenderVelocity().mul(gameTickFraction - 1.0F);
             toRenderPosition.set(position).add(movementThisTick.x, movementThisTick.y, movementThisTick.z);
         }
@@ -105,6 +107,14 @@ public abstract class Entity implements Saver.Savable {
     public Position getPosition() {
         return position;
     }
+
+    public Item getHeldItem() {
+        return EmptySlot.EMPTY_SLOT;
+    }
+
+    public abstract int getArmTransformIndex();
+
+    public abstract Vector3f getHandPosition();
 
     @MainThread
     public Position getToRenderPosition() {

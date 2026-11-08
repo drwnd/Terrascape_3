@@ -56,7 +56,7 @@ public final class Player extends Entity {
     @Override
     @MainThread
     public void updateFrame(float frameTime, float gameTickFraction) {
-        getRenderEntity().updateFrame(frameTime, gameTickFraction, camera.getRotation());
+        getRenderEntity().updateFrame(frameTime, gameTickFraction, camera.getRotation(), this);
         Sound.setListenerData(camera.getPosition(), camera.getDirection(), movement.getVelocity());
         particleCollector.unloadParticleEffects();
         particleCollector.uploadParticleEffects();
@@ -172,8 +172,19 @@ public final class Player extends Entity {
                 .rotate((float) Math.sin(ticksPassed * Math.PI * 2 / animationLength) * (1 - ticksPassed / animationLength) * 2, 1, 0, 0);
     }
 
+    @Override
     public Item getHeldItem() {
         return hotbar.getSelectedItem();
+    }
+
+    @Override
+    public int getArmTransformIndex() {
+        return PlayerAnimator.RIGHT_ARM;
+    }
+
+    @Override
+    public Vector3f getHandPosition() {
+        return new Vector3f(0, -10, 0);
     }
 
     public MeshCollector getMeshCollector() {

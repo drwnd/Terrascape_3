@@ -19,8 +19,8 @@ import core.utils.Vector3l;
 
 import game.assets.*;
 import game.entities.Entity;
-import game.entities.RenderEntity;
 import game.entities.PlayerAnimator;
+import game.entities.RenderEntity;
 import game.items.Item;
 import game.player.ChatTextField;
 import game.player.Player;
@@ -29,7 +29,6 @@ import game.player.interaction.placeable_shapes.CapsulePlaceable;
 import game.entities.movement.MovementState;
 import game.player.particles.ParticleEffect;
 import game.server.*;
-import game.server.generation.Structure;
 import game.settings.*;
 import game.utils.*;
 
@@ -92,7 +91,7 @@ public final class Renderer extends Renderable {
 
     @MainThread
     public void invalidateHologram() {
-        hologramModelsValid = false;
+        hologramModel.invalidate();
     }
 
     @MainThread
@@ -516,7 +515,7 @@ public final class Renderer extends Renderable {
         synchronized (Game.getWorld().entities) {
             for (Entity entity : Game.getWorld().entities) {
                 if (!entity.canRender()) continue;
-                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+                renderEntity(entity, shader, cameraChunkPosition);
             }
         }
     }
@@ -534,13 +533,15 @@ public final class Renderer extends Renderable {
                 if (!entity.canRender()) continue;
                 glActiveTexture(shader.getNextAvailableTextureIndex());
                 AssetManager.get(entity.getRenderEntity().getTextureIdentifier()).bind();
-                renderEntity(shader, cameraChunkPosition, entity.getToRenderPosition(), entity.getRenderEntity());
+                renderEntity(entity, shader, cameraChunkPosition);
             }
         }
     }
 
     @MainThread
-    private void renderEntity(Shader shader, Vector3l cameraChunkPosition, Position position, RenderEntity renderEntity) {
+    private void renderEntity(Entity entity, Shader shader, Vector3l cameraChunkPosition) {
+        Position position = entity.getToRenderPosition();
+        RenderEntity renderEntity = entity.getRenderEntity();
         shader.setUniform("position",
                 (position.longX - cameraChunkPosition.x) + position.fractionX,
                 (position.longY - cameraChunkPosition.y) + position.fractionY,
@@ -554,6 +555,21 @@ public final class Renderer extends Renderable {
         glEnableVertexAttribArray(2);
 
         glDrawElements(GL_TRIANGLES, renderEntity.guiElement().vertexCount(), GL_UNSIGNED_INT, 0);
+
+        StructureModel heldItemModel = renderEntity.getHeldItemModel();
+        if (!heldItemModel.canRender()) return;
+        Matrix4f modelMatrix = entity.getHeldItem().getModelMatrixWhenHeld(entity.getHandPosition());
+        Matrix4f parentTransform = renderEntity.parentedTransforms()[entity.getArmTransformIndex()];
+        parentTransform.mul(modelMatrix, modelMatrix);
+
+        shader.setUniform("transformations", modelMatrix);
+
+        glBindVertexArray(heldItemModel.getBuffer());
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        glDrawElements(GL_TRIANGLES, heldItemModel.getVertexCount(), GL_UNSIGNED_INT, 0);
     }
 
     @MainThread
@@ -717,7 +733,7 @@ public final class Renderer extends Renderable {
         Vector3l minPosition = Utils.min(startPosition, endPosition);
 
         placeable.setStartEndPositions(startPosition, endPosition);
-        synchronizeHologramModel(placeable);
+        hologramModel.synchronizeModel(placeable.getPreferredSizePowOf2(), placeable.hashCode(), placeable.getStructure());
 
         renderHologram(cameraPosition, projectionViewMatrix, minPosition.sub(placeable.getRadius(), placeable.getRadius(), placeable.getRadius()),
                 new Matrix4f(), new int[]{NORTH, TOP, WEST, SOUTH, BOTTOM, EAST}, material,
@@ -729,11 +745,12 @@ public final class Renderer extends Renderable {
         StructurePlaceable placeable = (StructurePlaceable) player.getHeldItem();
         Vector3l position = target.offsetPosition();
         placeable.offsetPosition(position, target.side());
-        synchronizeHologramModel(placeable);
+        hologramModel.synchronizeModel(placeable.getPreferredSizePowOf2(), placeable.hashCode(), placeable.getStructure());
 
         setupHologramRendering();
         glDisable(GL_CULL_FACE);
 
+        int hologramSize = hologramModel.getSize();
         renderHologram(cameraPosition, projectionViewMatrix, position, placeable.getModelMatrix(), placeable.getSideTransform(), OUT_OF_WORLD,
                 hologramSize, hologramSize, hologramSize, 1, 1, 1);
     }
@@ -757,7 +774,8 @@ public final class Renderer extends Renderable {
         setupHologramRendering();
 
         if (item instanceof ShapePlaceable shapePlaceable) {
-            synchronizeHologramModel(shapePlaceable.updateBitMap(false));
+            shapePlaceable.updateBitMap(false);
+            hologramModel.synchronizeModel(shapePlaceable.getPreferredSizePowOf2(), shapePlaceable.hashCode(), shapePlaceable.getStructure());
 
             int countX = (int) (maxPosition.x - minPosition.x) / shapePlaceable.getLengthX();
             int countY = (int) (maxPosition.y - minPosition.y) / shapePlaceable.getLengthY();
@@ -814,8 +832,8 @@ public final class Renderer extends Renderable {
         shader.setUniform("material", material);
         shader.setTextureUniform("textures", materialsTexture);
 
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, opaqueHologram.bufferOrStart());
-        glDrawArraysInstanced(GL_TRIANGLES, 0, opaqueHologram.vertexCountSum(), countX * countY * countZ);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, hologramModel.getBuffer());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, hologramModel.getVertexCount(), countX * countY * countZ);
     }
 
     @MainThread
@@ -1096,22 +1114,7 @@ public final class Renderer extends Renderable {
         createShadowFrameBuffers();
     }
 
-    @MainThread
-    private void synchronizeHologramModel(Placeable placeable) {
-        int preferredSize = placeable.getPreferredSizePowOf2();
-        int hologramHash = placeable.hashCode();
-        if (!hologramModelsValid || hologramSize != preferredSize || this.hologramHash != hologramHash) {
-            if (opaqueHologram != null) opaqueHologram.delete();
 
-            Structure structure = placeable.getStructure();
-            Mesh mesh = new MeshGenerator().generateMesh(structure);
-            opaqueHologram = ObjectLoader.loadCombinedModel(mesh);
-            hologramSize = preferredSize;
-            this.hologramHash = hologramHash;
-
-            hologramModelsValid = true;
-        }
-    }
 
     @MainThread
     private static int getFlags(Position cameraPosition) {
@@ -1147,9 +1150,7 @@ public final class Renderer extends Renderable {
 
     private Position lastCameraPosition;
     private Matrix4f lastProjectionViewMatrix;
-    private OpaqueModel opaqueHologram;
-    private boolean hologramModelsValid = false;
-    private int hologramSize, hologramHash;
+    private final StructureModel hologramModel = new StructureModel(StructureModel.BufferFormat.STRUCTURE);
 
     private int framebuffer, colorTexture, depthTexture, intPosTexture;
     private int shadowTexture, shadowColorTexture, currentShadowIndex = 0;

@@ -17,6 +17,16 @@ public class Zombie extends Entity {
         getRenderEntity().setAnimator(new ZombieAnimator(this));
     }
 
+    @Override
+    public int getArmTransformIndex() {
+        return ZombieAnimator.RIGHT_ARM;
+    }
+
+    @Override
+    public Vector3f getHandPosition() {
+        return new Vector3f(0, -12, 0);
+    }
+
     private record ZombieAnimator(Zombie zombie) implements Animator {
 
         @Override

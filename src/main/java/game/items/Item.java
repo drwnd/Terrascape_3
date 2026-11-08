@@ -11,6 +11,8 @@ import game.player.interaction.VoxelTarget;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.utils.ServerThread;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public abstract class Item implements Saver.Savable, Translatable {
 
@@ -57,8 +59,17 @@ public abstract class Item implements Saver.Savable, Translatable {
 
     public abstract PlacingState getPlacingState(VoxelTarget currentTarget, boolean isLocked, boolean isRepeat);
 
+    public Matrix4f getModelMatrixWhenHeld(Vector3f handPosition) {
+        return new Matrix4f().translate(handPosition);
+    }
+
     @MainThread
     public abstract Structure getStructure();
+
+    @MainThread
+    public Structure getHeldStructure() {
+        return getStructure();
+    }
 
     private final ItemType itemType;
 }

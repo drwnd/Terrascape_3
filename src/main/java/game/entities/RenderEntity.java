@@ -9,8 +9,10 @@ import core.utils.IntArrayList;
 import core.utils.MainThread;
 
 import game.entities.model.*;
+import game.items.Item;
 import game.player.particles.ParticleCollector;
 import game.player.particles.ParticleType;
+import game.player.rendering.StructureModel;
 import game.server.Game;
 import game.server.generation.Structure;
 import game.server.materials_data.MaterialsData;
@@ -45,8 +47,9 @@ public class RenderEntity {
     }
 
     @MainThread
-    public void updateFrame(float frameTime, float gameTickFraction, Vector3f rotation) {
+    public void updateFrame(float frameTime, float gameTickFraction, Vector3f rotation, Entity entity) {
         synchronizeTransforms();
+        synchronizeHeldItemModel(entity.getHeldItem());
         animator.applyAnimation(this, rotation, frameTime, gameTickFraction);
     }
 
@@ -59,6 +62,12 @@ public class RenderEntity {
             for (int index = 0; index < transforms.length; index++) transforms[index] = new Matrix4f().zero();
             System.arraycopy(transforms, 0, parentedTransforms, 0, model.parts().length);
         }
+    }
+
+    @MainThread
+    public void synchronizeHeldItemModel(Item heldItem) {
+        Structure structure = heldItem.getHeldStructure();
+        heldItemModel.synchronizeModel(0, heldItem.hashCode(), structure);
     }
 
     public void setAnimator(Animator animator) {
@@ -136,6 +145,10 @@ public class RenderEntity {
         return model.guiElement();
     }
 
+    public StructureModel getHeldItemModel() {
+        return heldItemModel;
+    }
+
     public AssetIdentifier<Model> getModelIdentifier() {
         return modelIdentifier;
     }
@@ -152,6 +165,7 @@ public class RenderEntity {
         return model != null;
     }
 
+    private final StructureModel heldItemModel = new StructureModel(StructureModel.BufferFormat.MODEL);
     private final AssetIdentifier<Texture2D> textureIdentifier;
     private Animator animator;
     private Matrix4f[] transforms = new Matrix4f[0], parentedTransforms = new Matrix4f[0];
