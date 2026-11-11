@@ -7,6 +7,7 @@ import core.utils.MainThread;
 
 import game.entities.RenderEntity;
 import game.player.rendering.Camera;
+import game.server.Game;
 import game.server.material.Material;
 import game.settings.FloatSettings;
 import game.settings.KeySettings;
@@ -78,11 +79,12 @@ public final class WalkingState extends MovementState {
         float rotationSpeed = camera.getCurrentRotationSpeed(gameTickFraction).length() * 0.05F;
         float speed = (float) Math.clamp(velocity.length() * 0.2 + rotationSpeed, -Math.PI * 0.5, Math.PI * 0.5);
         float bodyMovement = (float) Math.cos(animationTimer) * Math.min(speed * 0.1F, 0.3F);
+        float rightArmAmplitude = Math.min(1, 8F / Game.getPlayer().getHeldItem().getAnimationLength());
 
         transforms[HEAD].translate(0, bodyMovement, 0).rotate((float) -Math.toRadians(cameraRotation.x), 1, 0, 0);
         transforms[BODY].translate(0, bodyMovement, 0);
         transforms[LEFT_ARM].rotate((float) Math.sin(animationTimer) * speed, 1, 0, 0).rotate(-speed * 0.1F, 0, 0, 1);
-        transforms[RIGHT_ARM].rotate((float) -Math.sin(animationTimer) * speed, 1, 0, 0).rotate(speed * 0.1F, 0, 0, 1);
+        transforms[RIGHT_ARM].rotate((float) -Math.sin(animationTimer) * speed * rightArmAmplitude, 1, 0, 0).rotate(speed * 0.1F, 0, 0, 1);
         transforms[LEFT_LEG].rotate((float) -Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
         transforms[RIGHT_LEG].rotate((float) Math.sin(animationTimer) * speed * 0.5F, 1, 0, 0);
 

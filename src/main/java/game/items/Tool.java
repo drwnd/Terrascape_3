@@ -71,6 +71,21 @@ public final class Tool extends Item {
         return "%s %s".formatted(grade.get(), type.get());
     }
 
+    @Override
+    public int getAnimationLength() {
+        return type.getAttackTime();
+    }
+
+    @Override
+    public int getReach() {
+        return type.getReach();
+    }
+
+    @Override
+    public int getDamage() {
+        return type.getDamage() + grade.getDamage();
+    }
+
     private static StructureIdentifier createStructureIdentifier(ToolGrade grade, ToolType type) {
         return new StructureIdentifier("%s %s".formatted(grade.name(), type.name()));
     }

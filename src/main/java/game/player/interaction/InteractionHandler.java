@@ -152,7 +152,7 @@ public final class InteractionHandler {
     @ServerThread
     private static void interactWithEntity(PlaceDestroyInfo info, EntityTarget entityTarget, Item item, long currentGameTick, boolean isDestroy) {
         Vector3f direction = Game.getPlayer().getCamera().getDirection();
-        entityTarget.entity().hit(direction, isDestroy ? 1 : 0);
+        entityTarget.entity().hit(direction, isDestroy ? item.getDamage() : 0);
         info.setUsed(currentGameTick);
     }
 

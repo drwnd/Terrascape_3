@@ -5,7 +5,6 @@ import core.utils.Vector3l;
 import game.entities.Entity;
 import game.player.Player;
 import game.server.Game;
-import game.settings.IntSettings;
 import game.utils.Position;
 
 import org.joml.Vector3f;
@@ -16,7 +15,7 @@ public record EntityTarget(Vector3l position, Entity entity) implements Target {
         Player player = Game.getPlayer();
         Position origin = player.getEyePosition();
         Vector3f direction = player.getCamera().getDirection();
-        return getTarget(origin, direction, IntSettings.REACH.value());
+        return getTarget(origin, direction, player.getHeldItem().getReach());
     }
 
     public static EntityTarget getTarget(Position origin, Vector3f direction, float maxDistance) {

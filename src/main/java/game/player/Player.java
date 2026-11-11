@@ -161,7 +161,7 @@ public final class Player extends Entity {
 
     @MainThread
     public void applyAnimation(float gameTickFraction) {
-        final int animationLength = 8;
+        int animationLength = getHeldItem().getAnimationLength();
         long currentTick = Game.getServer().getCurrentGameTick();
         if (currentTick > lastInteractionTick + animationLength) return;
 

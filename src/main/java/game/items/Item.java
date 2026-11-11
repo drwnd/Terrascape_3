@@ -10,6 +10,7 @@ import game.player.interaction.PlacingState;
 import game.player.interaction.VoxelTarget;
 import game.server.Game;
 import game.server.generation.Structure;
+import game.settings.IntSettings;
 import game.utils.ServerThread;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -61,6 +62,18 @@ public abstract class Item implements Saver.Savable, Translatable {
 
     public Matrix4f getModelMatrixWhenHeld(Vector3f handPosition) {
         return new Matrix4f().translate(handPosition);
+    }
+
+    public int getReach() {
+        return IntSettings.REACH.value();
+    }
+
+    public int getAnimationLength() {
+        return 8;
+    }
+
+    public int getDamage() {
+        return 1;
     }
 
     @MainThread

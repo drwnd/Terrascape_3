@@ -62,10 +62,12 @@ public final class CrawlingState extends MovementState {
         transforms[BODY].translate(0, -10, 6).rotate((float) -Math.PI * 0.5F, 1, 0, 0);
         transforms[LEFT_ARM]
                 .rotate((float) -Math.abs(Math.sin(animationTimer) * Math.PI), 0, 0, 1)
-                .rotate((float) Math.min(0, -Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0);
+                .rotate((float) Math.min(0, -Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0)
+                .rotate((float) Math.PI * 0.5F, 0, 1, 0);
         transforms[RIGHT_ARM]
                 .rotate((float) Math.abs(Math.cos(animationTimer) * Math.PI), 0, 0, 1)
-                .rotate((float) Math.min(0, Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0);
+                .rotate((float) Math.min(0, Math.sin(animationTimer * 2) * Math.PI * 0.25), 1, 0, 0)
+                .rotate((float) -Math.PI * 0.5F, 0, 1, 0);
         SwimmingState.applyLegAnimation(animationTimer, transforms, amplitude);
 
         playerCharacter.animationTimer += frameTime * amplitude * 0.0025;

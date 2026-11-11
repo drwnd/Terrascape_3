@@ -6,7 +6,6 @@ import game.player.Player;
 import game.server.Game;
 import game.server.material.Material;
 import game.server.material.Properties;
-import game.settings.IntSettings;
 import game.utils.Position;
 import game.utils.Utils;
 
@@ -25,7 +24,7 @@ public record VoxelTarget(Vector3l position, int side, byte material) implements
         Player player = Game.getPlayer();
         Position origin = player.getEyePosition();
         Vector3f direction = player.getCamera().getDirection();
-        return VoxelTarget.getTarget(origin, direction, IntSettings.REACH.value());
+        return VoxelTarget.getTarget(origin, direction, player.getHeldItem().getReach());
     }
 
     public static VoxelTarget getTarget(Position origin, Vector3f direction, float maxDistance) {
